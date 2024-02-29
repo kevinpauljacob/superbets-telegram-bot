@@ -47,7 +47,7 @@ export default function ConnectWallet() {
 
   useEffect(() => {
     if (wallet.connected && status == "unauthenticated") {
-    //   handleSignIn();
+      handleSignIn();
     }
   }, [wallet.connected]);
 

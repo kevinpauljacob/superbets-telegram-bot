@@ -25,7 +25,7 @@ export default async function auth(req: NextApiRequest, res: NextApiResponse) {
           const signinMessage = new SigninMessage(
             JSON.parse(credentials?.message || "{}"),
           );
-          const nextAuthUrl = new URL(process.env.NEXT_PUBLIC_BASE_URL!);
+          const nextAuthUrl = new URL(process.env.NEXTAUTH_URL!);
           if (signinMessage.domain !== nextAuthUrl.host) {
             return null;
           }
