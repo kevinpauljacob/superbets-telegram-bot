@@ -79,7 +79,7 @@ async function handler(req: any, res: any) {
       if (!verifyFrontendTransaction(txn, vTxn))
         return res
           .status(400)
-          .json({ success: false, message: "Transaction verfication failed" });
+          .json({ success: false, message: "Transaction verification failed" });
 
       let txnSignature = await sendAndConfirmRawTransaction(
         connection,

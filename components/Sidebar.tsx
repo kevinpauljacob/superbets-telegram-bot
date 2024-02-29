@@ -34,7 +34,7 @@ export default function Sidebar({ open, setOpen }: Sidebar) {
 
   return (
     <div
-      className={`flex flex-col px-8 pt-5 items-end w-[18rem] min-h-full z-50 bg-[#19011F] transition-all absolute top-0 ${
+      className={`flex sm:hidden flex-col px-8 pt-5 items-end w-[18rem] min-h-full z-50 bg-[#19161C] transition-all absolute top-0 ${
         open ? "right-0" : "-right-[18rem]"
       }`}
     >
@@ -48,17 +48,17 @@ export default function Sidebar({ open, setOpen }: Sidebar) {
 
       <div className="flex w-full flex-col pt-10 gap-5 items-center">
         {/* store & leaderboard */}
-        <button className="w-full flex text-white text-opacity-50 bg-white bg-opacity-5 font-medium rounded-md text-sm px-5 py-3">
+        <button className="w-full flex justify-center text-white text-opacity-50 bg-white bg-opacity-5 font-medium rounded-md text-sm px-5 py-3">
           Store
         </button>
-        <button className="w-full flex text-white text-opacity-50 bg-white bg-opacity-5 font-medium rounded-md text-sm px-5 py-3">
+        <button className="w-full flex justify-center text-white text-opacity-50 bg-white bg-opacity-5 font-medium rounded-md text-sm px-5 py-3">
           Leaderboard
         </button>
         <button
           onClick={() => {
             router.push("stake");
           }}
-          className="w-full flex text-white text-opacity-50 bg-[#9945FF] font-medium rounded-md text-sm px-5 py-3"
+          className="w-full flex justify-center text-white bg-[#9945FF] font-medium rounded-md text-sm px-5 py-3"
         >
           Staking
         </button>

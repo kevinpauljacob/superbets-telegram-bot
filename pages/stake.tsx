@@ -8,8 +8,9 @@ import { useWallet } from "@solana/wallet-adapter-react";
 import { useSession } from "next-auth/react";
 import toast from "react-hot-toast";
 import { connection } from "@/context/transactions";
-import { LAMPORTS_PER_SOL } from "@solana/web3.js";
+import { LAMPORTS_PER_SOL, PublicKey } from "@solana/web3.js";
 import { useGlobalContext } from "@/components/GlobalContext";
+import { getAssociatedTokenAddressSync } from "@solana/spl-token";
 
 export default function Stake() {
   const { data: session, status } = useSession();
@@ -21,7 +22,14 @@ export default function Stake() {
   const getWalletBalance = async () => {
     if (wallet && wallet.publicKey)
       try {
-        
+        let address = new PublicKey(
+          "Cx9oLynYgC3RrgXzin7U417hNY9D6YB1eMGw4ZMbWJgw",
+        );
+        const ata = getAssociatedTokenAddressSync(address, wallet.publicKey);
+        const res = await connection.getTokenAccountBalance(ata);
+        console.log("balance : ", res.value.uiAmount);
+
+        setSolBal(res.value.uiAmount ?? 0);
       } catch (e) {
         toast.error("Unable to fetch balance.");
         console.error(e);
@@ -31,12 +39,21 @@ export default function Stake() {
   const getUserDetails = async () => {
     if (wallet && wallet.publicKey)
       try {
-        let info =
-          (await connection.getBalance(wallet.publicKey)) / LAMPORTS_PER_SOL;
-        console.log("Balance:", info);
-        setSolBal(
-          (await connection.getBalance(wallet.publicKey)) / LAMPORTS_PER_SOL,
-        );
+        const res = await fetch("/api/getInfo", {
+          method: "POST",
+          body: JSON.stringify({
+            option: 1,
+            wallet: wallet.publicKey,
+          }),
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+
+        const { success, message, user } = await res.json();
+        console.log("User: ", user);
+        if (success) setUserData(user);
+        else toast.error(message);
       } catch (e) {
         toast.error("Unable to fetch balance.");
         console.error(e);
@@ -57,7 +74,7 @@ export default function Stake() {
       {/* Navbar  */}
       <div className="w-full flex flex-1 flex-col items-start gap-5 px-5 sm:px-10 lg:px-40 2xl:px-[15%] bg-black pb-10">
         <span className="text-white text-opacity-90 font-semibold text-[2.5rem] mt-[4rem]">
-          You have <span className="text-[#9945FF]">{solBal} $FOMO</span>{" "}
+          You have <span className="text-[#9945FF]">{solBal.toFixed(3)} $FOMO</span>{" "}
           available in your wallet to stake
         </span>
 

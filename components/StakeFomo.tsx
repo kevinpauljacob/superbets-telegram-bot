@@ -22,21 +22,32 @@ export default function StakeFomo() {
     setLoading(true);
     let response: { success: boolean; message: string };
     try {
-      if (stake)
+      if (stake) {
+        if (amount > solBal) {
+          toast.error("Insufficient $FOMO");
+          setLoading(false)
+          return;
+        }
         response = await stakeFOMO(
           wallet,
           amount,
           "Cx9oLynYgC3RrgXzin7U417hNY9D6YB1eMGw4ZMbWJgw",
         );
-      else
+      } else {
+        if (amount > (userData?.stakedAmount ?? 0)) {
+          toast.error("Insufficient $FOMO");
+          setLoading(false)
+          return;
+        }
         response = await unstakeFOMO(
           wallet,
           amount,
           "Cx9oLynYgC3RrgXzin7U417hNY9D6YB1eMGw4ZMbWJgw",
         );
-
-      if (response && response.success) toast.success(response.message);
-      else toast.error(response.message);
+      }
+      console.log(response);
+      // if (response && response.success) toast.success(response.message);
+      // else toast.error(response.message);
       setLoading(false);
     } catch (e) {
       setLoading(false);
@@ -55,7 +66,7 @@ export default function StakeFomo() {
           className={`${
             stake
               ? "text-[#9945FF] border-[#9945FF]"
-              : "text-[#ffffff80] border-transparent"
+              : "text-[#ffffff80] border-transparent hover:text-[#ffffffb5]"
           } p-4 border-b-2 text-base font-medium transition-all`}
           onClick={() => {
             setStake(true);
@@ -67,7 +78,7 @@ export default function StakeFomo() {
           className={`${
             !stake
               ? "text-[#9945FF] border-[#9945FF]"
-              : "text-[#ffffff80] border-transparent"
+              : "text-[#ffffff80] border-transparent hover:text-[#ffffffb5]"
           } p-4 border-b-2 text-base font-medium transition-all`}
           onClick={() => {
             setStake(false);
@@ -91,7 +102,7 @@ export default function StakeFomo() {
       />
 
       <span className="text-[#B1B1B1] text-sm">
-        Available {stake ? solBal : userData?.stakedAmount ?? 0} $SOL
+        Available {stake ? solBal.toFixed(3) : userData?.stakedAmount ?? 0} $FOMO
       </span>
 
       <button
@@ -99,7 +110,7 @@ export default function StakeFomo() {
           handleRequest();
         }}
         disabled={loading}
-        className="w-full p-1.5 mt-4 bg-[#9945FF] text-white text-xl font-semibold rounded-[5px]"
+        className="w-full flex items-center justify-center gap-1 p-1.5 mt-4 bg-[#9945FF] hover:bg-opacity-50 disabled:bg-opacity-20 transition-all text-white text-xl font-semibold rounded-[5px]"
       >
         {loading && <Spinner />}
         {stake ? "Stake" : "Unstake"}

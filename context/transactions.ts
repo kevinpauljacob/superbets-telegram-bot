@@ -84,7 +84,7 @@ export const stakeFOMO = async (
     return { success: true, message: "Wallet not connected" };
   }
 
-  let toastId = toast.loading("Deposit in progress");
+  let toastId = toast.loading("Staking in progress.");
 
   try {
     let transaction = await createDepositTxn(
@@ -148,7 +148,7 @@ export const unstakeFOMO = async (
     return { success: true, message: "Wallet not connected" };
   }
 
-  let toastId = toast.loading("Withdraw in progress");
+  let toastId = toast.loading("Unstaking in progress");
 
   try {
     let transaction = await createWithdrawTxn(
@@ -203,6 +203,7 @@ export const verifyFrontendTransaction = (
   transaction: Transaction,
   verificationTransaction: Transaction,
 ) => {
+  console.log("Verifying frontend transaction",transaction,verificationTransaction)
   const transactionInstructions = JSON.stringify(
     transaction.instructions.filter(
       (i) => !i.programId.equals(ComputeBudgetProgram.programId),

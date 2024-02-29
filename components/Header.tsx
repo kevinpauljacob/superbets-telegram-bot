@@ -35,13 +35,14 @@ export function Header() {
               className=""
             />
           </div>
-          <span className="hidden sm:flex items-center">
-            <Image
-              src={"/assets/exitScam.png"}
-              width={120}
-              height={40}
+          <span className="hidden sm:flex items-center font-medium text-2xl text-white">
+            {/* <Image
+              src={"/assets/FOMO.png"}
+              width={73}
+              height={25}
               alt={"FOMO"}
-            />
+            /> */}
+            FOMO
           </span>
         </div>
 
@@ -136,7 +137,7 @@ export function Header() {
               onClick={() => {
                 router.push("stake");
               }}
-              className="hidden sm:flex text-white text-opacity-50 bg-[#9945FF] font-medium rounded-md text-sm px-5 py-3"
+              className="hidden sm:flex text-white bg-[#9945FF] font-medium rounded-md text-sm px-5 py-3"
             >
               Staking
             </button>
