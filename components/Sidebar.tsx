@@ -58,7 +58,7 @@ export default function Sidebar({ open, setOpen }: Sidebar) {
           onClick={() => {
             router.push("stake");
           }}
-          className="w-full flex justify-center text-white bg-[#9945FF] font-medium rounded-md text-sm px-5 py-3"
+          className="w-full flex justify-center text-white bg-[#9945FF] hover:bg-opacity-50 transition-all font-medium rounded-md text-sm px-5 py-3"
         >
           Staking
         </button>

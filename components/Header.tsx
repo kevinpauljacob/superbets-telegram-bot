@@ -137,7 +137,7 @@ export function Header() {
               onClick={() => {
                 router.push("stake");
               }}
-              className="hidden sm:flex text-white bg-[#9945FF] font-medium rounded-md text-sm px-5 py-3"
+              className="hidden sm:flex text-white bg-[#9945FF] hover:bg-opacity-50 transition-all font-medium rounded-md text-sm px-5 py-3"
             >
               Staking
             </button>

@@ -101,7 +101,7 @@ export default function Stake() {
                 {totalStaked} $FOMO
               </span>
               <span className="text-[#9945FF] text-base font-semibold text-opacity-90">
-                (22.5%)
+                (0.0%)
               </span>
             </div>
           </div>
