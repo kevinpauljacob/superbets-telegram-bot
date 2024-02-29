@@ -20,8 +20,10 @@ export default async function auth(req: NextApiRequest, res: NextApiResponse) {
       },
       async authorize(credentials, req) {
         try {
+          console.log(credentials);
+
           const signinMessage = new SigninMessage(
-            JSON.parse(credentials?.message || "{}")
+            JSON.parse(credentials?.message || "{}"),
           );
           const nextAuthUrl = new URL(process.env.NEXT_PUBLIC_BASE_URL!);
           if (signinMessage.domain !== nextAuthUrl.host) {
@@ -35,7 +37,7 @@ export default async function auth(req: NextApiRequest, res: NextApiResponse) {
           }
 
           const validationResult = await signinMessage.validate(
-            credentials?.signature || ""
+            credentials?.signature || "",
           );
 
           if (!validationResult)
