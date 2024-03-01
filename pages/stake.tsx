@@ -54,7 +54,7 @@ export default function Stake() {
         const { success, message, user } = await res.json();
         console.log("User: ", user);
         if (success) setUserData(user);
-        else toast.error(message);
+        // else toast.error(message);
       } catch (e) {
         toast.error("Unable to fetch balance.");
         console.error(e);

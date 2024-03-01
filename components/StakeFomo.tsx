@@ -65,7 +65,7 @@ export default function StakeFomo() {
         else toast.error(message);
         if (stake) setSolBal(solBal - amount);
         else setSolBal(solBal + amount);
-        getWalletBalance();
+        // getWalletBalance();
       } catch (e) {
         toast.error("Unable to fetch balance.");
         console.error(e);
