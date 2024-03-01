@@ -87,7 +87,7 @@ export const stakeFOMO = async (
   let toastId = toast.loading("Staking in progress.");
 
   try {
-    let transaction = await createDepositTxn(
+    let { transaction, blockhash } = await createDepositTxn(
       wallet.publicKey,
       amount,
       tokenMint,
@@ -103,6 +103,7 @@ export const stakeFOMO = async (
     const res = await fetch(`/api/wallet/stake`, {
       method: "POST",
       body: JSON.stringify({
+        blockhash,
         transactionBase64,
         wallet: wallet.publicKey,
         amount,
@@ -151,7 +152,7 @@ export const unstakeFOMO = async (
   let toastId = toast.loading("Unstaking in progress");
 
   try {
-    let transaction = await createWithdrawTxn(
+    let { transaction, blockhash } = await createWithdrawTxn(
       wallet.publicKey!,
       amount,
       tokenMint,
@@ -171,6 +172,7 @@ export const unstakeFOMO = async (
         wallet: wallet.publicKey,
         amount,
         tokenMint,
+        blockhash,
       }),
       headers: {
         "Content-Type": "application/json",
@@ -199,24 +201,21 @@ export const unstakeFOMO = async (
   }
 };
 
-export const verifyFrontendTransaction = (
+export const verifyTransaction = (
   transaction: Transaction,
-  verificationTransaction: Transaction,
+  vTransaction: Transaction,
 ) => {
-  console.log("Verifying frontend transaction",transaction,verificationTransaction)
   const transactionInstructions = JSON.stringify(
     transaction.instructions.filter(
       (i) => !i.programId.equals(ComputeBudgetProgram.programId),
     ),
   );
 
-  const verificationTransactionInstructions = JSON.stringify(
-    verificationTransaction.instructions,
-  );
+  const vTransactionInstructions = JSON.stringify(vTransaction.instructions);
 
-  console.log(transactionInstructions, verificationTransactionInstructions);
+  console.log(transactionInstructions, vTransactionInstructions);
 
-  return transactionInstructions === verificationTransactionInstructions;
+  return transactionInstructions === vTransactionInstructions;
 };
 
 export const createDepositTxn = async (
@@ -225,41 +224,39 @@ export const createDepositTxn = async (
   tokenMint: string,
 ) => {
   let transaction = new Transaction();
-  try {
-    let tokenName = "FOMO";
-    let decimal = 9;
 
-    transaction.feePayer = wallet;
-    transaction.recentBlockhash = (
-      await connection.getLatestBlockhash()
-    ).blockhash;
+  let tokenName = "FOMO";
+  let decimal = 9;
 
-    if (tokenName === "SOL")
-      transaction.add(
-        SystemProgram.transfer({
-          fromPubkey: wallet,
-          toPubkey: devPublicKey,
-          lamports: Math.floor(amount * Math.pow(10, 9)),
-        }),
-      );
-    else {
-      const tokenId = new PublicKey(tokenMint);
-      const userAta = await getAssociatedTokenAddress(tokenId, wallet);
-      const devAta = await getAssociatedTokenAddress(tokenId, devPublicKey);
-      transaction.add(
-        createTransferInstruction(
-          userAta,
-          devAta,
-          wallet,
-          Math.floor(amount * Math.pow(10, decimal)),
-        ),
-      );
-    }
+  transaction.feePayer = wallet;
+  const blockhash = await connection.getLatestBlockhash();
+  transaction.recentBlockhash = blockhash.blockhash;
 
-    return transaction;
-  } catch (error) {
-    return transaction;
+  if (tokenName === "SOL")
+    transaction.add(
+      SystemProgram.transfer({
+        fromPubkey: wallet,
+        toPubkey: devPublicKey,
+        lamports: Math.floor(amount * Math.pow(10, 9)),
+      }),
+    );
+  else {
+    const tokenId = new PublicKey(tokenMint);
+    const userAta = await getAssociatedTokenAddress(tokenId, wallet);
+    const devAta = await getAssociatedTokenAddress(tokenId, devPublicKey);
+    transaction.add(
+      createTransferInstruction(
+        userAta,
+        devAta,
+        wallet,
+        Math.floor(amount * Math.pow(10, decimal)),
+      ),
+    );
+
+    transaction.instructions[0].keys[2].isWritable = true;
   }
+
+  return { transaction, blockhash };
 };
 
 export const createWithdrawTxn = async (
@@ -268,43 +265,41 @@ export const createWithdrawTxn = async (
   tokenMint: string,
 ) => {
   let transaction = new Transaction();
-  try {
-    let tokenName = "FOMO";
-    let decimal = 9;
 
-    transaction.feePayer = wallet;
-    transaction.recentBlockhash = (
-      await connection.getLatestBlockhash()
-    ).blockhash;
+  let tokenName = "FOMO";
+  let decimal = 9;
 
-    if (tokenName === "SOL") {
-      transaction.add(
-        SystemProgram.transfer({
-          fromPubkey: devPublicKey,
-          toPubkey: wallet,
-          lamports: Math.floor(amount * Math.pow(10, 9)),
-        }),
-      );
-      transaction.instructions[0].keys[1].isSigner = true;
-      transaction.instructions[0].keys[1].isWritable = true;
-    } else {
-      const tokenId = new PublicKey(tokenMint);
-      const userAta = await getAssociatedTokenAddress(tokenId, wallet);
-      const devAta = await getAssociatedTokenAddress(tokenId, devPublicKey);
-      transaction.add(
-        createTransferInstruction(
-          devAta,
-          userAta,
-          devPublicKey,
-          Math.floor(amount * Math.pow(10, decimal)),
-        ),
-      );
-      transaction.instructions[0].keys[2].isSigner = true;
-      transaction.instructions[0].keys[2].isWritable = true;
-    }
+  transaction.feePayer = wallet;
+  const blockhash = await connection.getLatestBlockhash();
+  transaction.recentBlockhash = blockhash.blockhash;
 
-    return transaction;
-  } catch (error) {
-    return transaction;
+  if (tokenName === "SOL") {
+    transaction.add(
+      SystemProgram.transfer({
+        fromPubkey: devPublicKey,
+        toPubkey: wallet,
+        lamports: Math.floor(amount * Math.pow(10, 9)),
+      }),
+    );
+    transaction.instructions[0].keys[1].isSigner = true;
+    transaction.instructions[0].keys[1].isWritable = true;
+  } else {
+    const tokenId = new PublicKey(tokenMint);
+    const userAta = await getAssociatedTokenAddress(tokenId, wallet);
+    const devAta = await getAssociatedTokenAddress(tokenId, devPublicKey);
+
+    transaction.add(
+      createTransferInstruction(
+        devAta,
+        userAta,
+        devPublicKey,
+        Math.floor(amount * Math.pow(10, decimal)),
+      ),
+    );
+
+    transaction.instructions[0].keys[2].isSigner = true;
+    transaction.instructions[0].keys[2].isWritable = true;
   }
+
+  return { transaction, blockhash };
 };

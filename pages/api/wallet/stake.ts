@@ -1,13 +1,8 @@
-import {
-  Connection,
-  PublicKey,
-  Transaction,
-  sendAndConfirmRawTransaction,
-} from "@solana/web3.js";
+import { Connection, PublicKey, Transaction } from "@solana/web3.js";
 import {
   createDepositTxn,
   tiers,
-  verifyFrontendTransaction,
+  verifyTransaction,
 } from "../../../context/transactions";
 import connectDatabase from "../../../utils/database";
 import User from "../../../models/user";
@@ -36,9 +31,8 @@ async function handler(req: any, res: any) {
 
   if (req.method === "POST") {
     try {
-      let { transactionBase64, wallet, amount, tokenMint } = req.body;
-
-      // return res.send("Under Maintainance");
+      let { transactionBase64, wallet, amount, tokenMint, blockhash } =
+        req.body;
 
       const token = await getToken({ req, secret });
 
@@ -54,6 +48,7 @@ async function handler(req: any, res: any) {
         !wallet ||
         !transactionBase64 ||
         !amount ||
+        !blockhash ||
         !tokenMint ||
         tokenMint != "Cx9oLynYgC3RrgXzin7U417hNY9D6YB1eMGw4ZMbWJgw"
       )
@@ -66,7 +61,7 @@ async function handler(req: any, res: any) {
           .status(400)
           .json({ success: false, message: "Invalid deposit amount !" });
 
-      let vTxn = await createDepositTxn(
+      let { transaction: vTxn } = await createDepositTxn(
         new PublicKey(wallet),
         amount,
         tokenMint,
@@ -76,19 +71,32 @@ async function handler(req: any, res: any) {
         Buffer.from(transactionBase64 as string, "base64"),
       );
 
-      if (!verifyFrontendTransaction(txn, vTxn))
+      if (!verifyTransaction(txn, vTxn))
         return res
           .status(400)
           .json({ success: false, message: "Transaction verification failed" });
+      console.log("Transaction verified");
 
-      let txnSignature = await sendAndConfirmRawTransaction(
-        connection,
+      const txnSignature = await connection.sendRawTransaction(
         txn.serialize(),
         {
-          commitment: "confirmed",
           skipPreflight: true,
         },
       );
+
+      const confirmationRes = await connection.confirmTransaction(
+        {
+          signature: txnSignature,
+          ...blockhash,
+        },
+        "confirmed",
+      );
+
+      if (confirmationRes.value.err)
+        return res.status(400).json({
+          success: false,
+          message: "Transaction confirmation failed",
+        });
 
       await TxnSignature.create({ txnSignature });
 
