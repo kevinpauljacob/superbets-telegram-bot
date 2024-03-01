@@ -110,11 +110,11 @@ async function handler(req: any, res: any) {
       const result = await User.findOneAndUpdate(
         {
           wallet,
+          stakedAmount: { $gte: amount },
         },
         {
           $inc: { stakedAmount: -amount },
-          tier: tier,
-          multiplier: multiplier,
+          $set: { tier, multiplier },
         },
         { new: true },
       );

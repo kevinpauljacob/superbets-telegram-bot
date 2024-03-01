@@ -106,36 +106,27 @@ async function handler(req: any, res: any) {
       let checkAmt = user ? user.stakedAmount + amount : amount;
 
       Object.entries(tiers).some(([key, value], index) => {
-        if (amount >= 600000) {
+        if (checkAmt >= 600000) {
           tier = 7;
           multiplier = 2;
           return true;
-        } else if (amount < value.limit) {
+        } else if (checkAmt < value.limit) {
           tier = index;
           multiplier = value.multiplier;
           return true;
         }
       });
 
-      if (!user)
-        await User.create({
+      await User.findOneAndUpdate(
+        {
           wallet,
-          stakedAmount: amount,
-          tier: tier,
-          multiplier: multiplier,
-        });
-      else
-        await User.findOneAndUpdate(
-          {
-            wallet,
-          },
-          {
-            $inc: { stakedAmount: amount },
-            tier: tier,
-            multiplier: multiplier,
-          },
-          { new: true },
-        );
+        },
+        {
+          $inc: { stakedAmount: amount },
+          $set: { tier, multiplier },
+        },
+        { new: true, upsert: true },
+      );
 
       return res.json({
         success: true,

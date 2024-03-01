@@ -213,8 +213,6 @@ export const verifyTransaction = (
 
   const vTransactionInstructions = JSON.stringify(vTransaction.instructions);
 
-  console.log(transactionInstructions, vTransactionInstructions);
-
   return transactionInstructions === vTransactionInstructions;
 };
 
