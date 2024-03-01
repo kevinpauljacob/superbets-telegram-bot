@@ -1,21 +1,22 @@
-import { tiers } from "@/context/transactions";
+import { tiers, translator } from "@/context/transactions";
 import { useGlobalContext } from "./GlobalContext";
+import Image from "next/legacy/image";
 
 export default function StakeStats() {
-  const { userData, solBal } = useGlobalContext();
+  const { userData, solBal, language } = useGlobalContext();
   let stats = [
     {
-      title: "My FOMO staked",
-      icon: "",
+      title: translator("My FOMO staked", language),
+      icon: "/assets/logowhite.svg",
       value: userData?.stakedAmount ?? 0,
     },
     {
-      title: "My FOMO Available",
-      icon: "",
-      value: solBal,
+      title: translator("My FOMO Available", language),
+      icon: "/assets/logowhite.svg",
+      value: solBal.toFixed(3),
     },
     {
-      title: "My Multiplier",
+      title: translator("My Multiplier", language),
       icon: "",
       value: userData?.multiplier ?? 0.5,
     },
@@ -23,23 +24,23 @@ export default function StakeStats() {
   return (
     <div className="w-full flex flex-col items-start gap-2">
       <span className="text-base font-semibold text-white text-opacity-50">
-        My Staking Stats
+        {translator("My Staking Stats", language)}
       </span>
       <div className="px-4 py-2 flex flex-col bg-[#19161C] w-full rounded-[5px]">
         <div className="flex flex-row items-center justify-between">
           <p className="text-xl font-semibold text-white text-opacity-90">
-            My Current tier{" "}
+            {translator("My Current tier", language)}{" "}
             <span className="text-[#9945FF]">T{userData?.tier ?? 0}</span>
           </p>
           <span className="hidden sm:flex text-white text-xs text-opacity-50">
-            Next Tier
+            {translator("Next Tier", language)}
           </span>
         </div>
         {/* next tier data - mob view  */}
         <div className="flex sm:hidden flex-col mt-5 items-start">
           <div className="flex items-center gap-2">
             <span className="flex text-white text-xs text-opacity-50">
-              Next Tier
+              {translator("Next Tier", language)}
             </span>
             <span className="text-base font-semibold text-opacity-75 text-[#9945FF]">
               T{(userData?.tier ?? 0) + 1}
@@ -63,7 +64,7 @@ export default function StakeStats() {
         </div>
         <div className="hidden sm:flex flex-row items-end justify-between">
           <p className="text-white text-sm text-opacity-50 font-medium">
-            Stake{" "}
+            {translator("Stake", language)}{" "}
             {
               //@ts-ignore
               tiers[
@@ -74,7 +75,8 @@ export default function StakeStats() {
                 )
               ].limit - (userData?.stakedAmount ?? 0)
             }{" "}
-            more $FOMO to reach T{(userData?.tier ?? 0) + 1} (
+            {translator("more $FOMO to reach", language)} T
+            {(userData?.tier ?? 0) + 1} (
             <span className="text-[#9945FF] ml-1">
               {userData?.tier === 7
                 ? ""
@@ -82,7 +84,7 @@ export default function StakeStats() {
                   tiers[(userData?.tier ?? 0) + 1].multiplier}
               x
             </span>{" "}
-            multiplier )
+            {translator("multiplier", language)} )
           </p>
           <div className="flex flex-col items-end">
             <span className="text-base font-semibold text-opacity-75 text-[#9945FF]">
@@ -103,7 +105,36 @@ export default function StakeStats() {
             </span>
           </div>
         </div>
-        <div className="flex w-full rounded-full h-9 bg-[#9945FF] bg-opacity-10 mt-2 mb-3"></div>
+        <div className="relative flex transition-width w-full rounded-full overflow-hidden h-9 bg-[#9945FF] bg-opacity-10 mt-2 mb-3">
+          <div
+            style={{
+              width: `${
+                ((userData?.tier ?? 0) * 100) /
+                //@ts-ignore
+                tiers[
+                  parseInt(
+                    Object.keys(tiers).find(
+                      (key) => parseInt(key) === (userData?.tier ?? 0),
+                    ) ?? "0",
+                  )
+                ].limit
+              }%`,
+            }}
+            className="h-full bg-[linear-gradient(91.179deg,#C867F0_0%,#1FCDF0_50.501%,#19EF99_100%)]"
+          />
+          <span className="w-full h-full absolute top-0 left-0 flex items-center justify-center z-10 text-black font-semibold text-sm text-opacity-75">
+            {(((userData?.tier ?? 100) * 0) /
+              //@ts-ignore
+              tiers[
+                parseInt(
+                  Object.keys(tiers).find(
+                    (key) => parseInt(key) === (userData?.tier ?? 0),
+                  ) ?? "0",
+                )
+              ].limit).toFixed(2)}
+            %
+          </span>
+        </div>
       </div>
       <div className="w-full grid grid-cols-1 sm:grid-cols-2 gap-3 mt-2">
         {stats.map((stat, index) => (
@@ -115,10 +146,19 @@ export default function StakeStats() {
               {stat.title}
             </span>
             <span
-              className={`flex flex-row items-center w-full justify-end ${
+              className={`relative flex flex-row items-center w-full justify-end ${
                 index === 2 ? "text-[#9945FF]" : "text-white"
               } text-opacity-75 font-semibold text-2xl`}
             >
+              {stat.icon.length > 0 && (
+                <Image
+                  src={stat.icon}
+                  width={27}
+                  height={27}
+                  alt={"FOMO"}
+                  className=""
+                />
+              )}
               {stat.value} {index === 2 ? "x" : ""}
             </span>
           </div>

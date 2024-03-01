@@ -11,6 +11,7 @@ import { MdOutlineLanguage } from "react-icons/md";
 import { FaChevronDown } from "react-icons/fa6";
 import ConnectWallet from "./ConnectWallet";
 import { useRouter } from "next/router";
+import { translator } from "@/context/transactions";
 
 export function Header() {
   const router = useRouter();
@@ -128,10 +129,10 @@ export function Header() {
           {/* store & leaderboard */}
           <div className="flex items-center gap-4">
             <button className="hidden sm:flex text-white text-opacity-50 bg-white bg-opacity-5 font-medium rounded-md text-sm px-5 py-3">
-              Store
+              {translator("Store", language)}
             </button>
             <button className="hidden sm:flex text-white text-opacity-50 bg-white bg-opacity-5 font-medium rounded-md text-sm px-5 py-3">
-              Leaderboard
+              {translator("Leaderboard", language)}
             </button>
             <button
               onClick={() => {
@@ -139,7 +140,7 @@ export function Header() {
               }}
               className="hidden sm:flex text-white bg-[#9945FF] hover:bg-opacity-50 transition-all font-medium rounded-md text-sm px-5 py-3"
             >
-              Staking
+              {translator("Staking", language)}
             </button>
             <ConnectWallet />
           </div>

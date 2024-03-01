@@ -7,7 +7,7 @@ import { useEffect, useState } from "react";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { useSession } from "next-auth/react";
 import toast from "react-hot-toast";
-import { connection } from "@/context/transactions";
+import { connection, translator } from "@/context/transactions";
 import { LAMPORTS_PER_SOL, PublicKey } from "@solana/web3.js";
 import { useGlobalContext } from "@/components/GlobalContext";
 import { getAssociatedTokenAddressSync } from "@solana/spl-token";
@@ -17,7 +17,8 @@ export default function Stake() {
   const wallet = useWallet();
   const [totalStaked, setTotalStaked] = useState<number>(0.0);
 
-  const { userData, setUserData, solBal, setSolBal } = useGlobalContext();
+  const { userData, setUserData, solBal, setSolBal, language } =
+    useGlobalContext();
 
   const getWalletBalance = async () => {
     if (wallet && wallet.publicKey)
@@ -73,14 +74,14 @@ export default function Stake() {
       <Header />
       {/* Navbar  */}
       <div className="w-full flex flex-1 flex-col items-start gap-5 px-5 sm:px-10 lg:px-40 2xl:px-[15%] bg-black pb-10">
-        <span className="text-white text-opacity-90 font-semibold text-[2.5rem] mt-[4rem]">
-          You have <span className="text-[#9945FF]">{solBal.toFixed(3)} $FOMO</span>{" "}
-          available in your wallet to stake
+        <span className="text-white text-opacity-90 font-semibold text-[2rem] sm:text-[2.5rem] mt-[4rem]">
+          {translator("You have", language)}{" "}
+          <span className="text-[#9945FF]">{solBal.toFixed(3)} $FOMO</span>{" "}
+          {translator("available in your wallet to stake", language)}
         </span>
 
         <span className="text-white text-opacity-50 text-base font-medium">
-          Sake your FOMO tokens to receive multipliers for your points which
-          gets you amazing rewards from our store
+          {translator("Sake your FOMO tokens to receive multipliers for your points which gets you amazing rewards from our store.",language)}
         </span>
 
         <div className="flex sm:hidden w-full">
@@ -89,15 +90,15 @@ export default function Stake() {
 
         {/* Global staking  */}
         <span className="text-white text-opacity-50 text-xl mt-10">
-          Global staking Overview
+          {translator("Global staking Overview",language)}
         </span>
-        <div className="relative p-5 flex w-full sm:w-fit items-center gap-10 bg-[#19161C] bg-opacity-75 -mt-1">
-          <div className="flex flex-col items-start gap-2">
-            <span className="text-white text-opacity-50 text-base">
-              Total FOMO staked
+        <div className="relative p-3 sm:p-5 flex w-full sm:w-fit items-center gap-10 bg-[#19161C] bg-opacity-75 -mt-1">
+          <div className="flex w-full sm:w-fit flex-col items-start gap-2">
+            <span className="text-white text-opacity-50 text-xs sm:text-base">
+              {translator("Total FOMO staked",language)}
             </span>
-            <div className="flex items-end gap-2">
-              <span className="text-white text-opacity-80 text-2xl font-semibold">
+            <div className="flex w-full mt-3 sm:mt-0 justify-end sm:justify-start items-end gap-2">
+              <span className="text-white text-opacity-80 text-xl sm:text-2xl font-semibold">
                 {totalStaked} $FOMO
               </span>
               <span className="text-[#9945FF] text-base font-semibold text-opacity-90">
@@ -105,11 +106,12 @@ export default function Stake() {
               </span>
             </div>
           </div>
-          <div className="absolute sm:static top-5 right-5">
+          <div className="absolute sm:relative top-2 sm:top-auto right-3 sm:right-auto w-[9rem] h-[1.5rem] sm:h-[2rem]">
             <Image
               src={"/assets/graphtotal.png"}
-              width={145}
-              height={30}
+              layout="fill"
+              objectFit="contain"
+              objectPosition="center"
               className="flex sm:hidden"
               alt={"FOMO"}
             />

@@ -49,10 +49,10 @@ export default function Sidebar({ open, setOpen }: Sidebar) {
       <div className="flex w-full flex-col pt-10 gap-5 items-center">
         {/* store & leaderboard */}
         <button className="w-full flex justify-center text-white text-opacity-50 bg-white bg-opacity-5 font-medium rounded-md text-sm px-5 py-3">
-          Store
+          {translator("Store", language)}
         </button>
         <button className="w-full flex justify-center text-white text-opacity-50 bg-white bg-opacity-5 font-medium rounded-md text-sm px-5 py-3">
-          Leaderboard
+          {translator("Leaderboard", language)}
         </button>
         <button
           onClick={() => {
@@ -60,7 +60,7 @@ export default function Sidebar({ open, setOpen }: Sidebar) {
           }}
           className="w-full flex justify-center text-white bg-[#9945FF] hover:bg-opacity-50 transition-all font-medium rounded-md text-sm px-5 py-3"
         >
-          Staking
+          {translator("Staking", language)}
         </button>
         <ConnectWallet />
 

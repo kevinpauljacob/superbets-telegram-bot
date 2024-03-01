@@ -1,6 +1,6 @@
 import { useContext, useState } from "react";
 import { useGlobalContext } from "./GlobalContext";
-import { stakeFOMO, unstakeFOMO } from "@/context/transactions";
+import { stakeFOMO, translator, unstakeFOMO } from "@/context/transactions";
 import { useWallet } from "@solana/wallet-adapter-react";
 import toast from "react-hot-toast";
 import Spinner from "./Spinner";
@@ -16,7 +16,33 @@ export default function StakeFomo() {
     userData,
     loading,
     setLoading,
+    language,
+    setUserData
   } = useGlobalContext();
+
+  const getUserDetails = async () => {
+    if (wallet && wallet.publicKey)
+      try {
+        const res = await fetch("/api/getInfo", {
+          method: "POST",
+          body: JSON.stringify({
+            option: 1,
+            wallet: wallet.publicKey,
+          }),
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+
+        const { success, message, user } = await res.json();
+        console.log("User: ", user);
+        if (success) setUserData(user);
+        else toast.error(message);
+      } catch (e) {
+        toast.error("Unable to fetch balance.");
+        console.error(e);
+      }
+  };
 
   const handleRequest = async () => {
     setLoading(true);
@@ -24,8 +50,8 @@ export default function StakeFomo() {
     try {
       if (stake) {
         if (amount > solBal) {
-          toast.error("Insufficient $FOMO");
-          setLoading(false)
+          toast.error(translator("Insufficient $FOMO", language));
+          setLoading(false);
           return;
         }
         response = await stakeFOMO(
@@ -35,8 +61,8 @@ export default function StakeFomo() {
         );
       } else {
         if (amount > (userData?.stakedAmount ?? 0)) {
-          toast.error("Insufficient $FOMO");
-          setLoading(false)
+          toast.error(translator("Insufficient $FOMO", language));
+          setLoading(false);
           return;
         }
         response = await unstakeFOMO(
@@ -46,6 +72,7 @@ export default function StakeFomo() {
         );
       }
       console.log(response);
+      await getUserDetails()
       // if (response && response.success) toast.success(response.message);
       // else toast.error(response.message);
       setLoading(false);
@@ -59,7 +86,7 @@ export default function StakeFomo() {
   return (
     <div className="w-full p-4 flex flex-col items-start gap-2 bg-[#19161C] bg-opacity-50 rounded-xl">
       <span className="text-white text-opacity-90 font-semibold text-xl">
-        Stake FOMO
+        {translator("Stake", language)} FOMO
       </span>
       <div className="flex w-full items-center border-b border-white border-opacity-10">
         <button
@@ -72,7 +99,7 @@ export default function StakeFomo() {
             setStake(true);
           }}
         >
-          Stake
+          {translator("Stake", language)}
         </button>
         <button
           className={`${
@@ -84,12 +111,14 @@ export default function StakeFomo() {
             setStake(false);
           }}
         >
-          Unstake
+          {translator("Unstake", language)}
         </button>
       </div>
 
       <span className="text-white text-opacity-90 text-sm mt-4">
-        {stake ? "Deposit FOMO" : "Withdraw FOMO"}
+        {stake
+          ? translator("Deposit FOMO", language)
+          : translator("Withdraw FOMO", language)}
       </span>
 
       <input
@@ -102,7 +131,8 @@ export default function StakeFomo() {
       />
 
       <span className="text-[#B1B1B1] text-sm">
-        Available {stake ? solBal.toFixed(3) : userData?.stakedAmount ?? 0} $FOMO
+        {translator("Available", language)}{" "}
+        {stake ? solBal.toFixed(3) : userData?.stakedAmount ?? 0} $FOMO
       </span>
 
       <button
@@ -113,7 +143,9 @@ export default function StakeFomo() {
         className="w-full flex items-center justify-center gap-1 p-1.5 mt-4 bg-[#9945FF] hover:bg-opacity-50 disabled:bg-opacity-20 transition-all text-white text-xl font-semibold rounded-[5px]"
       >
         {loading && <Spinner />}
-        {stake ? "Stake" : "Unstake"}
+        {stake
+          ? translator("Stake", language)
+          : translator("Unstake", language)}
       </button>
     </div>
   );

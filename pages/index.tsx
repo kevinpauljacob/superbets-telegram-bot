@@ -17,6 +17,7 @@ import {
 } from "@bonfida/spl-name-service";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { translationsMap, useGlobalContext } from "@/components/GlobalContext";
+import InfoBar from "@/components/Infobar";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -42,7 +43,9 @@ export default function Home() {
 
   return (
     <div className="flex flex-col items-center w-full min-h-screen flex-1 bg-[#2B0A31] relative overflow-x-hidden">
+      <InfoBar />
       <Header />
+      <div className="flex flex-1 w-full bg-black" />
     </div>
   );
 }
