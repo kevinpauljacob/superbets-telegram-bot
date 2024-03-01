@@ -1,9 +1,16 @@
 import { useContext, useState } from "react";
 import { useGlobalContext } from "./GlobalContext";
-import { stakeFOMO, translator, unstakeFOMO } from "@/context/transactions";
+import {
+  connection,
+  stakeFOMO,
+  translator,
+  unstakeFOMO,
+} from "@/context/transactions";
 import { useWallet } from "@solana/wallet-adapter-react";
 import toast from "react-hot-toast";
 import Spinner from "./Spinner";
+import { PublicKey } from "@solana/web3.js";
+import { getAssociatedTokenAddressSync } from "@solana/spl-token";
 
 export default function StakeFomo() {
   const wallet = useWallet();
@@ -17,8 +24,26 @@ export default function StakeFomo() {
     loading,
     setLoading,
     language,
-    setUserData
+    setUserData,
+    setSolBal,
   } = useGlobalContext();
+
+  const getWalletBalance = async () => {
+    if (wallet && wallet.publicKey)
+      try {
+        let address = new PublicKey(
+          "Cx9oLynYgC3RrgXzin7U417hNY9D6YB1eMGw4ZMbWJgw",
+        );
+        const ata = getAssociatedTokenAddressSync(address, wallet.publicKey);
+        const res = await connection.getTokenAccountBalance(ata);
+        console.log("balance : ", res.value.uiAmount);
+
+        setSolBal(res.value.uiAmount ?? 0);
+      } catch (e) {
+        toast.error("Unable to fetch balance.");
+        console.error(e);
+      }
+  };
 
   const getUserDetails = async () => {
     if (wallet && wallet.publicKey)
@@ -38,6 +63,9 @@ export default function StakeFomo() {
         console.log("User: ", user);
         if (success) setUserData(user);
         else toast.error(message);
+        if (stake) setSolBal(solBal - amount);
+        else setSolBal(solBal + amount);
+        getWalletBalance();
       } catch (e) {
         toast.error("Unable to fetch balance.");
         console.error(e);
@@ -72,7 +100,7 @@ export default function StakeFomo() {
         );
       }
       console.log(response);
-      await getUserDetails()
+      await getUserDetails();
       // if (response && response.success) toast.success(response.message);
       // else toast.error(response.message);
       setLoading(false);

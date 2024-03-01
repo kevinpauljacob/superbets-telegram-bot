@@ -24,7 +24,7 @@ export interface User {
   stakedAmount: number;
   tier: number;
   multiplier: number;
-  points?: number;
+  points: number;
 }
 
 export const tiers = {

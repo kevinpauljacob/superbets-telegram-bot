@@ -109,7 +109,7 @@ export default function StakeStats() {
           <div
             style={{
               width: `${
-                ((userData?.tier ?? 0) * 100) /
+                ((userData?.stakedAmount ?? 0) * 100) /
                 //@ts-ignore
                 tiers[
                   parseInt(
@@ -123,7 +123,7 @@ export default function StakeStats() {
             className="h-full bg-[linear-gradient(91.179deg,#C867F0_0%,#1FCDF0_50.501%,#19EF99_100%)]"
           />
           <span className="w-full h-full absolute top-0 left-0 flex items-center justify-center z-10 text-black font-semibold text-sm text-opacity-75">
-            {(((userData?.tier ?? 100) * 0) /
+            {(((userData?.stakedAmount ?? 0) * 100) /
               //@ts-ignore
               tiers[
                 parseInt(

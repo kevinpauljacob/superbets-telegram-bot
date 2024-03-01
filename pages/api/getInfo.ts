@@ -59,12 +59,7 @@ async function handler(req: any, res: any) {
               message: "Unable to fetch data.",
             });
 
-          usersInfo = usersInfo.map((user) => {
-            return {
-              ...user,
-              points: 1.2*(user.keys ?? 0)*(user.solAmount ?? 0)
-            }
-          }).sort((a, b) =>  a.points - b.points)
+          usersInfo = usersInfo.sort((a, b) =>  a.points - b.points)
 
           return res.json({ success: true, user: usersInfo });
         }

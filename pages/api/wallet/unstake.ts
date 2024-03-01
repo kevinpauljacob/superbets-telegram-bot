@@ -114,7 +114,7 @@ async function handler(req: any, res: any) {
         },
         {
           $inc: { stakedAmount: -amount },
-          $set: { tier, multiplier },
+          $set: { tier, multiplier, points: 0 },
         },
         { new: true },
       );
