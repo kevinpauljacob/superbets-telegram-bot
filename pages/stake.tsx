@@ -37,9 +37,9 @@ export default function Stake() {
         );
         const ata = getAssociatedTokenAddressSync(address, wallet.publicKey);
         const res = await connection.getTokenAccountBalance(ata);
-        console.log("balance : ", res.value.uiAmount);
+        console.log("balance : ", res.value.uiAmount ?? 0);
 
-        setSolBal(res.value.uiAmount ?? 0);
+        res.value.uiAmount ? setSolBal(res.value.uiAmount) : setSolBal(0);
       } catch (e) {
         toast.error("Unable to fetch balance.");
         console.error(e);
@@ -47,7 +47,7 @@ export default function Stake() {
   };
 
   useEffect(() => {
-    if (session?.user && !loading) {
+    if (session?.user) {
       getWalletBalance();
       getUserDetails();
       getGlobalInfo();
@@ -73,17 +73,17 @@ export default function Stake() {
           )}
         </span>
 
-        <div className="flex flex-col sm:flex-row items-start gap-5 flex-1 w-full">
-          <div className="flex w-full basis-full sm:basis-2/3 min-h-[2rem]">
+        <div className="flex flex-col sm:flex-row items-start gap-5 w-full">
+          <div className="flex w-full basis-full sm:basis-2/3">
             <StakeStats />
           </div>
-          <div className="flex w-full basis-full sm:basis-1/3 sm:pt-8">
+          <div className="flex w-full basis-full sm:basis-1/3 sm:pt-8 ">
             <StakeFomo />
           </div>
         </div>
 
         {/* Global staking  */}
-        <span className="text-white text-opacity-50 text-xl mt-10">
+        <span className="text-white text-opacity-50 text-xl mt-5 sm:mt-10">
           {translator("Global staking Overview", language)}
         </span>
         <div className="relative p-3 sm:p-5 flex w-full sm:w-fit items-center gap-10 bg-[#19161C] bg-opacity-75 -mt-1">

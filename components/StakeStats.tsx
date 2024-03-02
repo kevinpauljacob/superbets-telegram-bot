@@ -118,7 +118,7 @@ export default function StakeStats() {
             </span>
           </div>
         </div>
-        <div className="relative flex transition-width w-full rounded-full overflow-hidden h-9 bg-[#9945FF] bg-opacity-10 mt-2 mb-3">
+        <div className="relative flex transition-width duration-1000 w-full rounded-full overflow-hidden h-9 bg-[#9945FF] bg-opacity-10 mt-2 mb-3">
           <div
             style={{
               width: `${

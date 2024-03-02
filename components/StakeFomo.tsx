@@ -11,8 +11,10 @@ import toast from "react-hot-toast";
 import Spinner from "./Spinner";
 import { PublicKey } from "@solana/web3.js";
 import { getAssociatedTokenAddressSync } from "@solana/spl-token";
+import { useSession } from "next-auth/react";
 
 export default function StakeFomo() {
+  const { data: session, status } = useSession();
   const wallet = useWallet();
   const {
     stake,
@@ -127,7 +129,7 @@ export default function StakeFomo() {
         onClick={() => {
           handleRequest();
         }}
-        disabled={loading}
+        disabled={loading || !session?.user}
         className="w-full flex items-center justify-center gap-1 p-1.5 mt-4 bg-[#9945FF] hover:bg-opacity-50 disabled:bg-opacity-20 transition-all text-white text-xl font-semibold rounded-[5px]"
       >
         {loading && <Spinner />}
