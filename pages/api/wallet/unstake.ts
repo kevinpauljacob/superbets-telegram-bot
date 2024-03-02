@@ -125,26 +125,42 @@ async function handler(req: any, res: any) {
 
       txn.partialSign(devWalletKey);
 
-      const txnSignature = await connection.sendRawTransaction(
-        txn.serialize(),
-        {
-          skipPreflight: true,
-        },
-      );
+      let txnSignature = "";
+      try {
+        txnSignature = await connection.sendRawTransaction(txn.serialize());
 
-      const confirmationRes = await connection.confirmTransaction(
-        {
-          signature: txnSignature,
-          ...blockhash,
-        },
-        "confirmed",
-      );
+        const confirmationRes = await connection.confirmTransaction(
+          {
+            signature: txnSignature,
+            ...blockhash,
+          },
+          "confirmed",
+        );
 
-      if (confirmationRes.value.err)
+        if (confirmationRes.value.err)
+          throw new Error(confirmationRes.value.err.toString());
+      } catch (error) {
+        console.log(error);
+
+        await User.findOneAndUpdate(
+          {
+            wallet,
+          },
+          {
+            $inc: { stakedAmount: amount },
+            $set: {
+              tier: user.tier,
+              multiplier: user.multiplier,
+              points: user.points,
+            },
+          },
+        );
+
         return res.status(400).json({
           success: false,
           message: "Transaction confirmation failed",
         });
+      }
 
       await TxnSignature.create({ txnSignature });
 

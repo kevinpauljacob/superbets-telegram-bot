@@ -77,12 +77,7 @@ async function handler(req: any, res: any) {
           .json({ success: false, message: "Transaction verification failed" });
       console.log("Transaction verified");
 
-      const txnSignature = await connection.sendRawTransaction(
-        txn.serialize(),
-        {
-          skipPreflight: true,
-        },
-      );
+      const txnSignature = await connection.sendRawTransaction(txn.serialize());
 
       const confirmationRes = await connection.confirmTransaction(
         {
