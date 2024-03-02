@@ -60,18 +60,22 @@ export default function Stake() {
       <Header />
       {/* Navbar  */}
       <div className="w-full flex flex-1 flex-col items-start gap-5 px-5 sm:px-10 lg:px-40 2xl:px-[15%] bg-black pb-10">
-        <span className="text-white text-opacity-90 font-semibold text-[2rem] sm:text-[2.5rem] mt-[4rem]">
-          {translator("You have", language)}{" "}
-          <span className="text-[#9945FF]">{solBal.toFixed(3)} $FOMO</span>{" "}
-          {translator("available in your wallet to stake", language)}
+        <span className="text-white text-opacity-90 font-semibold text-[1.5rem] sm:text-[2rem] mt-[4rem]">
+          {/* {translator("You have", language)}{" "} */}
+          {/* <span className="text-[#9945FF]">{solBal.toFixed(3)} FOMO</span>{" "} */}
+          {/* {translator("available in your wallet to stake", language)} */}
+          {translator(
+            "Stake your FOMO to boost your leaderboard points and more.",
+            language,
+          )}
         </span>
 
-        <span className="text-white text-opacity-50 text-base font-medium">
+        {/* <span className="text-white text-opacity-50 text-base font-medium">
           {translator(
             "Sake your FOMO tokens to receive multipliers for your points which gets you amazing rewards from our store.",
             language,
           )}
-        </span>
+        </span> */}
 
         <div className="flex flex-col sm:flex-row items-start gap-5 w-full">
           <div className="flex w-full basis-full sm:basis-2/3">
@@ -84,31 +88,33 @@ export default function Stake() {
 
         {/* Global staking  */}
         <span className="text-white text-opacity-50 text-xl mt-5 sm:mt-10">
-          {translator("Global staking Overview", language)}
+          {translator("Global Staking Overview", language)}
         </span>
-        <div className="relative p-3 sm:p-5 flex w-full sm:w-fit items-center gap-10 bg-[#19161C] bg-opacity-75 -mt-1">
-          <div className="flex w-full sm:w-fit flex-col items-start gap-2">
-            <span className="text-white text-opacity-50 text-xs sm:text-base">
-              {translator("Total FOMO staked", language)}
-            </span>
-            <div className="flex w-full mt-3 sm:mt-0 justify-end sm:justify-start items-end gap-2">
-              <span className="text-white text-opacity-80 text-xl sm:text-2xl font-semibold">
-                {globalInfo.stakedTotal} $FOMO
+        <div className="flex w-full sm:w-[64.8%]">
+          <div className="w-full sm:w-[50%] relative p-3 sm:p-5 flex items-center gap-10 bg-[#19161C] bg-opacity-75 -mt-1">
+            <div className="flex w-full sm:w-fit flex-col items-start gap-2">
+              <span className="text-white text-opacity-50 text-xs sm:text-base">
+                {translator("Total FOMO Staked", language)}
               </span>
-              <span className="text-[#9945FF] text-base font-semibold text-opacity-90">
-                (0.0%)
-              </span>
+              <div className="flex w-full mt-3 sm:mt-0 justify-end sm:justify-start items-end gap-2">
+                <span className="text-white text-opacity-80 text-xl sm:text-2xl font-semibold">
+                  {globalInfo.stakedTotal} FOMO
+                </span>
+                <span className="text-[#9945FF] text-base font-semibold text-opacity-90">
+                  (0.0%)
+                </span>
+              </div>
             </div>
-          </div>
-          <div className="absolute sm:relative top-2 sm:top-auto right-3 sm:right-auto w-[9rem] h-[1.5rem] sm:h-[2rem]">
-            <Image
-              src={"/assets/graphtotal.png"}
-              layout="fill"
-              objectFit="contain"
-              objectPosition="center"
-              className="flex sm:hidden"
-              alt={"FOMO"}
-            />
+            {/* <div className="absolute sm:relative top-2 sm:top-auto right-3 sm:right-auto w-[9rem] h-[1.5rem] sm:h-[2rem]">
+              <Image
+                src={"/assets/graphtotal.png"}
+                layout="fill"
+                objectFit="contain"
+                objectPosition="center"
+                className="flex sm:hidden"
+                alt={"FOMO"}
+              />
+            </div> */}
           </div>
         </div>
       </div>

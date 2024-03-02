@@ -39,7 +39,7 @@ export default function StakeFomo() {
     try {
       if (stake) {
         if (amount > solBal) {
-          toast.error(translator("Insufficient $FOMO", language));
+          toast.error(translator("Insufficient FOMO", language));
           setLoading(false);
           return;
         }
@@ -50,7 +50,7 @@ export default function StakeFomo() {
         );
       } else {
         if (amount > (userData?.stakedAmount ?? 0)) {
-          toast.error(translator("Insufficient $FOMO", language));
+          toast.error(translator("Insufficient FOMO", language));
           setLoading(false);
           return;
         }
@@ -114,6 +114,7 @@ export default function StakeFomo() {
       <input
         className="bg-[#1A1A1A] w-full outline-none py-1 px-2 rounded-[5px] text-[#94A3B8]"
         min={0}
+        value={amount}
         onChange={(e) => {
           parseFloat(e.target.value) >= 0 &&
             setAmount(parseFloat(e.target.value));
@@ -122,7 +123,14 @@ export default function StakeFomo() {
 
       <span className="text-[#B1B1B1] text-sm">
         {translator("Available", language)}{" "}
-        {stake ? solBal.toFixed(3) : userData?.stakedAmount ?? 0} $FOMO
+        <span
+          onClick={() => {
+            stake ? setAmount(solBal) : setAmount(userData?.stakedAmount ?? 0);
+          }}
+          className="text-sm font-bold cursor-pointer text-[#B1B1B1] hover:text-opacity-100 text-opacity-50 transition-all"
+        >
+          {stake ? solBal.toFixed(3) : userData?.stakedAmount ?? 0} FOMO
+        </span>
       </span>
 
       <button

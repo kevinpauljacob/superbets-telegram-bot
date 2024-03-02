@@ -6,17 +6,17 @@ export default function StakeStats() {
   const { userData, solBal, language } = useGlobalContext();
   let stats = [
     {
-      title: translator("My FOMO staked", language),
+      title: translator("FOMO Staked", language),
       icon: "/assets/logowhite.svg",
       value: userData?.stakedAmount ?? 0,
     },
     {
-      title: translator("My FOMO Available", language),
+      title: translator("FOMO Available", language),
       icon: "/assets/logowhite.svg",
       value: solBal.toFixed(3),
     },
     {
-      title: translator("My Multiplier", language),
+      title: translator("Multiplier", language),
       icon: "",
       value: userData?.multiplier ?? 0.5,
     },
@@ -24,12 +24,12 @@ export default function StakeStats() {
   return (
     <div className="w-full flex flex-col items-start gap-2">
       <span className="text-base font-semibold text-white text-opacity-50">
-        {translator("My Staking Stats", language)}
+        {translator("Staking Stats", language)}
       </span>
       <div className="px-4 py-2 flex flex-col bg-[#19161C] w-full rounded-[5px]">
         <div className="flex flex-row items-center justify-between">
           <p className="text-xl font-semibold text-white text-opacity-90">
-            {translator("My Current tier", language)}{" "}
+            {translator("Current Tier", language)}{" "}
             <span className="text-[#9945FF]">T{userData?.tier ?? 0}</span>
           </p>
           <span className="hidden sm:flex text-white text-xs text-opacity-50">
@@ -72,7 +72,7 @@ export default function StakeStats() {
                     ) ?? "0",
                   )
                 ].limit}{" "}
-            $FOMO
+            FOMO
           </span>
         </div>
         <div className="hidden sm:flex flex-row items-end justify-between">
@@ -88,7 +88,7 @@ export default function StakeStats() {
                 )
               ].limit - (userData?.stakedAmount ?? 0)
             }{" "}
-            {translator("more $FOMO to reach", language)} T
+            {translator("more FOMO to reach", language)} T
             {(userData?.tier ?? 0) + 1} (
             <span className="text-[#9945FF] ml-1">
               {userData?.tier === 7
@@ -114,7 +114,7 @@ export default function StakeStats() {
                       ) ?? "0",
                     )
                   ].limit}{" "}
-              $FOMO
+              FOMO
             </span>
           </div>
         </div>

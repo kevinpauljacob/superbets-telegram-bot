@@ -116,7 +116,7 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
         globalInfo,
         setGlobalInfo,
         getUserDetails,
-        getGlobalInfo
+        getGlobalInfo,
       }}
     >
       {children}
@@ -198,25 +198,30 @@ export const translationsMap = {
     ko: "스테이킹할 수 있는 지갑 내 잔고",
     ch: "可用于抵押的钱包余额",
   },
+  "Stake your FOMO to boost your leaderboard points and more.": {
+    ru: "Ставьте свой FOMO, чтобы увеличить свои очки лидерства и многое другое.",
+    ko: "리더보드 포인트 및 기타 기능을 높이려면 FOMO를 스테이크하세요.",
+    ch: "抵押您的FOMO以提高您的排行榜积分等。",
+  },
   "Sake your FOMO tokens to receive multipliers for your points which gets you amazing rewards from our store.":
     {
       ru: "Определите ваши токены FOMO, чтобы получить множители для ваших очков, которые позволят вам получить удивительные награды в нашем магазине.",
       ko: "상점에서 멋진 보상을 받을 수 있는 점수에 대한 곱셈기를 받기 위해 FOMO 토큰을 지정하세요.",
       ch: "把你的 FOMO 代币押出，以获得积分的倍增器，从而在我们的商店获得惊人的奖励。",
     },
-  "Global staking Overview": {
+  "Global Staking Overview": {
     ru: "Обзор глобального стейкинга",
     ko: "글로벌 스테이킹 개요",
     ch: "全球质押概览",
   },
-  "Total FOMO staked": {
+  "Total FOMO Staked": {
     ru: "Всего заложено FOMO",
     ko: "총 FOMO 스테이크된 금액",
     ch: "总共 FOMO 抵押",
   },
-  "Insufficient $FOMO": {
-    ru: "Недостаточно $FOMO",
-    ko: "$FOMO가 부족합니다",
+  "Insufficient FOMO": {
+    ru: "Недостаточно FOMO",
+    ko: "FOMO가 부족합니다",
     ch: "FOMO不足",
   },
   Stake: {
@@ -244,40 +249,40 @@ export const translationsMap = {
     ko: "사용 가능",
     ch: "可用",
   },
-  "My Multiplier": {
-    ru: "Мой множитель",
-    ko: "내 배수",
-    ch: "我的倍数",
+  Multiplier: {
+    ru: "Мультипликатор",
+    ko: "곱수",
+    ch: "倍数",
   },
-  "My FOMO Available": {
-    ru: "Мои доступные FOMO",
-    ko: "내 사용 가능한 FOMO",
-    ch: "我的可用 FOMO",
+  "FOMO Available": {
+    ru: "FOMO доступно",
+    ko: "FOMO 사용 가능",
+    ch: "FOMO 可用",
   },
-  "My FOMO staked": {
-    ru: "Мои FOMO вложены",
-    ko: "내 FOMO 스테이크됨",
-    ch: "我的 FOMO 抵押",
+  "FOMO Staked": {
+    ru: "FOMO в стейкинге",
+    ko: "FOMO 스테이크",
+    ch: "FOMO 质押",
   },
-  "My Staking Stats": {
-    ru: "Моя статистика стейкинга",
-    ko: "내 스테이킹 통계",
-    ch: "我的质押统计",
+  "Staking Stats": {
+    ru: "Статистика стейкинга",
+    ko: "스테이킹 통계",
+    ch: "质押统计",
   },
-  "My Current tier": {
-    ru: "Мой текущий уровень",
-    ko: "내 현재 티어",
-    ch: "我的当前层级",
+  "Current Tier": {
+    ru: "Текущий уровень",
+    ko: "현재 등급",
+    ch: "当前层",
   },
   "Next Tier": {
     ru: "Следующий уровень",
     ko: "다음 티어",
     ch: "下一个层级",
   },
-  "more $FOMO to reach": {
-    ru: "Еще $FOMO для достижения",
-    ko: "다음 단계까지 필요한 $FOMO",
-    ch: "还需要更多$FOMO",
+  "more FOMO to reach": {
+    ru: "Еще FOMO для достижения",
+    ko: "다음 단계까지 필요한 FOMO",
+    ch: "还需要更多FOMO",
   },
   multiplier: {
     ru: "Мультипликатор",
