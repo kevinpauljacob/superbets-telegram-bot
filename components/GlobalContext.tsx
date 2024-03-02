@@ -1,5 +1,7 @@
 import { User } from "@/context/transactions";
+import { useWallet } from "@solana/wallet-adapter-react";
 import { createContext, useContext, useState, ReactNode } from "react";
+import toast from "react-hot-toast";
 
 interface GlobalContextProps {
   loading: boolean;
@@ -19,6 +21,12 @@ interface GlobalContextProps {
 
   solBal: number;
   setSolBal: (amount: number) => void;
+
+  globalInfo: { users: number; stakedTotal: number };
+  setGlobalInfo: (amount: { users: number; stakedTotal: number }) => void;
+
+  getUserDetails: () => void;
+  getGlobalInfo: () => void;
 }
 
 const GlobalContext = createContext<GlobalContextProps | undefined>(undefined);
@@ -28,12 +36,67 @@ interface GlobalProviderProps {
 }
 
 export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
+  const wallet = useWallet();
   const [loading, setLoading] = useState(false);
   const [language, setLanguage] = useState<"en" | "ru" | "ko" | "ch">("en");
   const [userData, setUserData] = useState<User | null>(null);
   const [stake, setStake] = useState(true);
   const [amount, setAmount] = useState(0);
   const [solBal, setSolBal] = useState<number>(0.0);
+  const [globalInfo, setGlobalInfo] = useState<{
+    users: number;
+    stakedTotal: number;
+  }>({ users: 0, stakedTotal: 0 });
+
+  const getUserDetails = async () => {
+    if (wallet && wallet.publicKey)
+      try {
+        const res = await fetch("/api/getInfo", {
+          method: "POST",
+          body: JSON.stringify({
+            option: 1,
+            wallet: wallet.publicKey,
+          }),
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+
+        const { success, message, user } = await res.json();
+        console.log("User: ", user);
+        if (success) setUserData(user);
+        else toast.error(message);
+        if (stake) setSolBal(solBal - amount);
+        else setSolBal(solBal + amount);
+        // getWalletBalance();
+      } catch (e) {
+        toast.error("Unable to fetch balance.");
+        console.error(e);
+      }
+  };
+
+  const getGlobalInfo = async () => {
+    try {
+      const res = await fetch("/api/getInfo", {
+        method: "POST",
+        body: JSON.stringify({
+          option: 3,
+          wallet: wallet.publicKey,
+        }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      const { success, message, data } = await res.json();
+      console.log("Data: ", data);
+      if (success) setGlobalInfo(data);
+      // else toast.error(message);
+    } catch (e) {
+      toast.error("Unable to fetch balance.");
+      console.error(e);
+    }
+  };
 
   return (
     <GlobalContext.Provider
@@ -50,6 +113,10 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
         setAmount,
         solBal,
         setSolBal,
+        globalInfo,
+        setGlobalInfo,
+        getUserDetails,
+        getGlobalInfo
       }}
     >
       {children}

@@ -35,6 +35,19 @@ export default function StakeStats() {
           <span className="hidden sm:flex text-white text-xs text-opacity-50">
             {translator("Next Tier", language)}
           </span>
+          <span
+            className={`flex sm:hidden text-xl ${
+              (userData?.tier ?? 0) === 0
+                ? "text-white text-opacity-75"
+                : "text-[#1FCDF0]"
+            }`}
+          >
+            {userData?.tier === 7
+              ? ""
+              : //@ts-ignore
+                tiers[userData?.tier ?? 0].multiplier}
+            x
+          </span>
         </div>
         {/* next tier data - mob view  */}
         <div className="flex sm:hidden flex-col mt-5 items-start">
@@ -46,7 +59,7 @@ export default function StakeStats() {
               T{(userData?.tier ?? 0) + 1}
             </span>
           </div>
-          <span className="text-base -mt-1 text-white text-right text-opacity-75 font-semibold">
+          <span className="text-base -mt-1 text-white text-right text-opacity-50 font-semibold">
             {userData?.tier === 7
               ? ""
               : userData?.tier === 6
@@ -123,7 +136,8 @@ export default function StakeStats() {
             className="h-full bg-[linear-gradient(91.179deg,#C867F0_0%,#1FCDF0_50.501%,#19EF99_100%)]"
           />
           <span className="w-full h-full absolute top-0 left-0 flex items-center justify-center z-10 text-black font-semibold text-sm text-opacity-75">
-            {(((userData?.stakedAmount ?? 0) * 100) /
+            {(
+              ((userData?.stakedAmount ?? 0) * 100) /
               //@ts-ignore
               tiers[
                 parseInt(
@@ -131,7 +145,8 @@ export default function StakeStats() {
                     (key) => parseInt(key) === (userData?.tier ?? 0),
                   ) ?? "0",
                 )
-              ].limit).toFixed(2)}
+              ].limit
+            ).toFixed(2)}
             %
           </span>
         </div>
@@ -140,7 +155,9 @@ export default function StakeStats() {
         {stats.map((stat, index) => (
           <div
             key={index}
-            className="bg-[#19161C] rounded-[5px] p-4 h-24 w-full flex flex-col justify-between"
+            className={`bg-[#19161C] rounded-[5px] p-4 h-24 w-full ${
+              index === 2 ? "hidden sm:flex" : "flex"
+            } flex-col justify-between`}
           >
             <span className="text-white text-opacity-50 font-medium text-xs">
               {stat.title}

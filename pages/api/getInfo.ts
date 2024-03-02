@@ -51,7 +51,7 @@ async function handler(req: any, res: any) {
               .status(400)
               .json({ success: false, message: "Missing paramters" });
 
-          let usersInfo : User[] | null = await user.findOne({});
+          let usersInfo: User[] | null = await user.findOne({});
 
           if (!usersInfo)
             return res.json({
@@ -59,9 +59,32 @@ async function handler(req: any, res: any) {
               message: "Unable to fetch data.",
             });
 
-          usersInfo = usersInfo.sort((a, b) =>  a.points - b.points)
+          usersInfo = usersInfo.sort((a, b) => a.points - b.points);
 
           return res.json({ success: true, user: usersInfo });
+        }
+        //global info
+        case 3: {
+          let usersInfo: User[] | null = await user.find({});
+
+          if (!usersInfo)
+            return res.json({
+              success: false,
+              message: "Unable to fetch data.",
+            });
+
+          let stakedTotal = 0;
+
+          console.log("usersInfo: ", usersInfo)
+
+          usersInfo.forEach((user) => {
+            stakedTotal += user.stakedAmount;
+          });
+
+          return res.json({
+            success: true,
+            data: { users: usersInfo.length, stakedTotal },
+          });
         }
         default:
           return res.json({ success: false, message: "Invalid option" });

@@ -26,51 +26,10 @@ export default function StakeFomo() {
     language,
     setUserData,
     setSolBal,
+    setGlobalInfo,
+    getUserDetails,
+    getGlobalInfo,
   } = useGlobalContext();
-
-  const getWalletBalance = async () => {
-    if (wallet && wallet.publicKey)
-      try {
-        let address = new PublicKey(
-          "Cx9oLynYgC3RrgXzin7U417hNY9D6YB1eMGw4ZMbWJgw",
-        );
-        const ata = getAssociatedTokenAddressSync(address, wallet.publicKey);
-        const res = await connection.getTokenAccountBalance(ata);
-        console.log("balance : ", res.value.uiAmount);
-
-        setSolBal(res.value.uiAmount ?? 0);
-      } catch (e) {
-        toast.error("Unable to fetch balance.");
-        console.error(e);
-      }
-  };
-
-  const getUserDetails = async () => {
-    if (wallet && wallet.publicKey)
-      try {
-        const res = await fetch("/api/getInfo", {
-          method: "POST",
-          body: JSON.stringify({
-            option: 1,
-            wallet: wallet.publicKey,
-          }),
-          headers: {
-            "Content-Type": "application/json",
-          },
-        });
-
-        const { success, message, user } = await res.json();
-        console.log("User: ", user);
-        if (success) setUserData(user);
-        else toast.error(message);
-        if (stake) setSolBal(solBal - amount);
-        else setSolBal(solBal + amount);
-        // getWalletBalance();
-      } catch (e) {
-        toast.error("Unable to fetch balance.");
-        console.error(e);
-      }
-  };
 
   const handleRequest = async () => {
     setLoading(true);
@@ -101,6 +60,7 @@ export default function StakeFomo() {
       }
       console.log(response);
       await getUserDetails();
+      await getGlobalInfo();
       // if (response && response.success) toast.success(response.message);
       // else toast.error(response.message);
       setLoading(false);

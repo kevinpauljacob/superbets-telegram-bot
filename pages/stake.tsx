@@ -15,10 +15,19 @@ import { getAssociatedTokenAddressSync } from "@solana/spl-token";
 export default function Stake() {
   const { data: session, status } = useSession();
   const wallet = useWallet();
-  const [totalStaked, setTotalStaked] = useState<number>(0.0);
 
-  const { userData, setUserData, solBal, setSolBal, language } =
-    useGlobalContext();
+  const {
+    userData,
+    setUserData,
+    solBal,
+    setSolBal,
+    language,
+    loading,
+    globalInfo,
+    setGlobalInfo,
+    getGlobalInfo,
+    getUserDetails,
+  } = useGlobalContext();
 
   const getWalletBalance = async () => {
     if (wallet && wallet.publicKey)
@@ -37,39 +46,16 @@ export default function Stake() {
       }
   };
 
-  const getUserDetails = async () => {
-    if (wallet && wallet.publicKey)
-      try {
-        const res = await fetch("/api/getInfo", {
-          method: "POST",
-          body: JSON.stringify({
-            option: 1,
-            wallet: wallet.publicKey,
-          }),
-          headers: {
-            "Content-Type": "application/json",
-          },
-        });
-
-        const { success, message, user } = await res.json();
-        console.log("User: ", user);
-        if (success) setUserData(user);
-        // else toast.error(message);
-      } catch (e) {
-        toast.error("Unable to fetch balance.");
-        console.error(e);
-      }
-  };
-
   useEffect(() => {
-    if (session?.user) {
+    if (session?.user && !loading) {
       getWalletBalance();
       getUserDetails();
+      getGlobalInfo();
     }
   }, [session?.user]);
 
   return (
-    <div className="flex flex-col items-center w-full min-h-screen flex-1 bg-[#2B0A31] relative overflow-x-hidden">
+    <div className="flex flex-col items-center w-full min-h-screen flex-1 bg-[#2B0A31] relative">
       <InfoBar />
       <Header />
       {/* Navbar  */}
@@ -81,25 +67,33 @@ export default function Stake() {
         </span>
 
         <span className="text-white text-opacity-50 text-base font-medium">
-          {translator("Sake your FOMO tokens to receive multipliers for your points which gets you amazing rewards from our store.",language)}
+          {translator(
+            "Sake your FOMO tokens to receive multipliers for your points which gets you amazing rewards from our store.",
+            language,
+          )}
         </span>
 
-        <div className="flex sm:hidden w-full">
-          <StakeFomo />
+        <div className="flex flex-col sm:flex-row items-start gap-5 flex-1 w-full">
+          <div className="flex w-full basis-full sm:basis-2/3 min-h-[2rem]">
+            <StakeStats />
+          </div>
+          <div className="flex w-full basis-full sm:basis-1/3 sm:pt-8">
+            <StakeFomo />
+          </div>
         </div>
 
         {/* Global staking  */}
         <span className="text-white text-opacity-50 text-xl mt-10">
-          {translator("Global staking Overview",language)}
+          {translator("Global staking Overview", language)}
         </span>
         <div className="relative p-3 sm:p-5 flex w-full sm:w-fit items-center gap-10 bg-[#19161C] bg-opacity-75 -mt-1">
           <div className="flex w-full sm:w-fit flex-col items-start gap-2">
             <span className="text-white text-opacity-50 text-xs sm:text-base">
-              {translator("Total FOMO staked",language)}
+              {translator("Total FOMO staked", language)}
             </span>
             <div className="flex w-full mt-3 sm:mt-0 justify-end sm:justify-start items-end gap-2">
               <span className="text-white text-opacity-80 text-xl sm:text-2xl font-semibold">
-                {totalStaked} $FOMO
+                {globalInfo.stakedTotal} $FOMO
               </span>
               <span className="text-[#9945FF] text-base font-semibold text-opacity-90">
                 (0.0%)
@@ -115,15 +109,6 @@ export default function Stake() {
               className="flex sm:hidden"
               alt={"FOMO"}
             />
-          </div>
-        </div>
-
-        <div className="flex items-start gap-5 flex-1 w-full">
-          <div className="flex basis-full sm:basis-2/3 min-h-[2rem]">
-            <StakeStats />
-          </div>
-          <div className="hidden sm:flex basis-1/3">
-            <StakeFomo />
           </div>
         </div>
       </div>
