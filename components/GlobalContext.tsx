@@ -65,7 +65,7 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
         const { success, message, user } = await res.json();
         console.log("User: ", user);
         if (success) setUserData(user);
-        else toast.error(message);
+        // else toast.error(message);
         if (stake) setSolBal(solBal - amount);
         else setSolBal(solBal + amount);
         // getWalletBalance();
