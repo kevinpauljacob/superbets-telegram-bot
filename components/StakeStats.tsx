@@ -45,7 +45,7 @@ export default function StakeStats() {
             {userData?.tier === 7
               ? ""
               : //@ts-ignore
-                tiers[userData?.tier ?? 0].multiplier}
+                tiers[userData?.tier ?? 0]?.multiplier ?? 0.5}
             x
           </span>
         </div>
@@ -94,7 +94,7 @@ export default function StakeStats() {
               {userData?.tier === 7
                 ? ""
                 : //@ts-ignore
-                  tiers[(userData?.tier ?? 0) + 1].multiplier}
+                  tiers[(userData?.tier ?? 0) + 1]?.multiplier ?? 0.5}
               x
             </span>{" "}
             {translator("multiplier", language)} )
