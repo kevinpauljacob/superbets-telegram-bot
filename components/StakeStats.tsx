@@ -43,7 +43,7 @@ export default function StakeStats() {
             }`}
           >
             {userData?.tier === 7
-              ? ""
+              ? "2"
               : //@ts-ignore
                 tiers[userData?.tier ?? 0]?.multiplier ?? 0.5}
             x
@@ -61,9 +61,7 @@ export default function StakeStats() {
           </div>
           <span className="text-base -mt-1 text-white text-right text-opacity-50 font-semibold">
             {userData?.tier === 7
-              ? ""
-              : userData?.tier === 6
-              ? "2"
+              ? "600000"
               : //@ts-ignore
                 tiers[
                   parseInt(
@@ -92,7 +90,9 @@ export default function StakeStats() {
             {(userData?.tier ?? 0) + 1} (
             <span className="text-[#9945FF] ml-1">
               {userData?.tier === 7
-                ? ""
+                ? 2
+                : userData?.tier === 6
+                ? 2
                 : //@ts-ignore
                   tiers[(userData?.tier ?? 0) + 1]?.multiplier ?? 0.5}
               x
@@ -105,7 +105,7 @@ export default function StakeStats() {
             </span>
             <span className="text-sm text-white text-right text-opacity-75 font-semibold">
               {userData?.tier === 7
-                ? ""
+                ? 600000
                 : //@ts-ignore
                   tiers[
                     parseInt(

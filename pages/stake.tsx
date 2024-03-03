@@ -84,7 +84,12 @@ export default function Stake() {
           {/* <span className="text-[#9945FF]">{solBal.toFixed(3)} FOMO</span>{" "} */}
           {/* {translator("available in your wallet to stake", language)} */}
           {translator(
-            "Stake your FOMO to boost your leaderboard points and more.",
+            "Stake your",
+            language,
+          )}
+          <span className="text-[#9945FF]"> FOMO </span>
+          {translator(
+            "to boost your leaderboard points and more.",
             language,
           )}
         </span>
