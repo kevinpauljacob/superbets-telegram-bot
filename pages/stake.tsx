@@ -27,7 +27,26 @@ export default function Stake() {
     setGlobalInfo,
     getGlobalInfo,
     getUserDetails,
+    setLivePrice,
   } = useGlobalContext();
+
+  useEffect(() => {
+    let intervalId = setInterval(async () => {
+      try {
+        let data = await fetch(
+          "https://hermes.pyth.network/api/latest_price_feeds?ids%5B%5D=0xef0d8b6fda2ceba41da15d4095d1da392a0d2f8ed0c6c7bc0f4cfac8c280b56d",
+        ).then((res) => res.json());
+        let price = data[0].price.price * Math.pow(10, data[0].price.expo);
+        console.log(price)
+        setLivePrice(price);
+      } catch (e) {
+        toast.error("Could not fetch live price.");
+        setLivePrice(0);
+      }
+    }, 60000);
+
+    return () => clearInterval(intervalId);
+  }, []);
 
   const getWalletBalance = async () => {
     if (wallet && wallet.publicKey)

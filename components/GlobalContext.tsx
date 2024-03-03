@@ -22,8 +22,15 @@ interface GlobalContextProps {
   solBal: number;
   setSolBal: (amount: number) => void;
 
-  globalInfo: { users: number; stakedTotal: number };
-  setGlobalInfo: (amount: { users: number; stakedTotal: number }) => void;
+  livePrice: number;
+  setLivePrice: (amount: number) => void;
+
+  globalInfo: { users: number; stakedTotal: number; totalVolume: number };
+  setGlobalInfo: (amount: {
+    users: number;
+    stakedTotal: number;
+    totalVolume: number;
+  }) => void;
 
   getUserDetails: () => void;
   getGlobalInfo: () => void;
@@ -43,10 +50,12 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
   const [stake, setStake] = useState(true);
   const [amount, setAmount] = useState(0);
   const [solBal, setSolBal] = useState<number>(0.0);
+  const [livePrice, setLivePrice] = useState<number>(0.0);
   const [globalInfo, setGlobalInfo] = useState<{
     users: number;
     stakedTotal: number;
-  }>({ users: 0, stakedTotal: 0 });
+    totalVolume: number;
+  }>({ users: 0, stakedTotal: 0, totalVolume: 0 });
 
   const getUserDetails = async () => {
     if (wallet && wallet.publicKey)
@@ -111,6 +120,8 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
         setAmount,
         solBal,
         setSolBal,
+        livePrice,
+        setLivePrice,
         globalInfo,
         setGlobalInfo,
         getUserDetails,

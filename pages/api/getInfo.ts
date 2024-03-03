@@ -65,9 +65,18 @@ async function handler(req: any, res: any) {
         }
         //global info
         case 3: {
-          let usersInfo: User[] | null = await user.find({});
+          let globalInfo = await user.aggregate([
+            {
+              $group: {
+                _id: null,
+                totalVolume: { $sum: "$solAmount" },
+                users: { $sum: 1 },
+                stakedTotal: { $sum: "$stakedAmount" },
+              },
+            },
+          ]);
 
-          if (!usersInfo)
+          if (!globalInfo)
             return res.json({
               success: false,
               message: "Unable to fetch data.",
@@ -75,15 +84,11 @@ async function handler(req: any, res: any) {
 
           let stakedTotal = 0;
 
-          console.log("usersInfo: ", usersInfo)
-
-          usersInfo.forEach((user) => {
-            stakedTotal += user.stakedAmount;
-          });
+          console.log("globalInfo: ", globalInfo);
 
           return res.json({
             success: true,
-            data: { users: usersInfo.length, stakedTotal },
+            data: globalInfo[0],
           });
         }
         default:
