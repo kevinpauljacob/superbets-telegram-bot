@@ -72,7 +72,7 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
         });
 
         const { success, message, user } = await res.json();
-        console.log("User: ", user);
+        // console.log("User: ", user);
         if (success) setUserData(user);
         // else toast.error(message);
         // getWalletBalance();
@@ -96,7 +96,7 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
       });
 
       const { success, message, data } = await res.json();
-      console.log("Data: ", data);
+      // console.log("Data: ", data);
       if (success) setGlobalInfo(data);
       // else toast.error(message);
     } catch (e) {

@@ -20,7 +20,7 @@ export default async function auth(req: NextApiRequest, res: NextApiResponse) {
       },
       async authorize(credentials, req) {
         try {
-          console.log(credentials);
+          // console.log(credentials);
 
           const signinMessage = new SigninMessage(
             JSON.parse(credentials?.message || "{}"),

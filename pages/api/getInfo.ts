@@ -82,9 +82,7 @@ async function handler(req: any, res: any) {
               message: "Unable to fetch data.",
             });
 
-          let stakedTotal = 0;
-
-          console.log("globalInfo: ", globalInfo);
+          // console.log("globalInfo: ", globalInfo);
 
           return res.json({
             success: true,

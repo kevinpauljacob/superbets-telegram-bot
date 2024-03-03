@@ -60,7 +60,7 @@ export default function StakeFomo() {
           "Cx9oLynYgC3RrgXzin7U417hNY9D6YB1eMGw4ZMbWJgw",
         );
       }
-      console.log(response);
+      // console.log(response);
       if (response && response.success) {
         if (stake) setSolBal(solBal - amount);
         else setSolBal(solBal + amount);
