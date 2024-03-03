@@ -66,8 +66,6 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
         console.log("User: ", user);
         if (success) setUserData(user);
         // else toast.error(message);
-        if (stake) setSolBal(solBal - amount);
-        else setSolBal(solBal + amount);
         // getWalletBalance();
       } catch (e) {
         toast.error("Unable to fetch balance.");

@@ -61,10 +61,12 @@ export default function StakeFomo() {
         );
       }
       console.log(response);
-      await getUserDetails();
-      await getGlobalInfo();
-      // if (response && response.success) toast.success(response.message);
-      // else toast.error(response.message);
+      if (response && response.success) {
+        if (stake) setSolBal(solBal - amount);
+        else setSolBal(solBal + amount);
+      }
+      getUserDetails();
+      getGlobalInfo();
       setLoading(false);
     } catch (e) {
       setLoading(false);
