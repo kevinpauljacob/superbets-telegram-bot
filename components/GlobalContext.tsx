@@ -73,7 +73,16 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
 
         const { success, message, user } = await res.json();
         // console.log("User: ", user);
-        if (success) setUserData(user);
+        // if (success) setUserData(user);
+        setUserData({
+          wallet: "dcsvrvedrdfvesvsegtgverv",
+          stakedAmount: 805000.5464,
+          solAmount: 400,
+          tier: 7,
+          keys: 200,
+          multiplier: 2,
+          points: 200
+        })
         // else toast.error(message);
         // getWalletBalance();
       } catch (e) {

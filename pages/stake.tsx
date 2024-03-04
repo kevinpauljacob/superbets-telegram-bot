@@ -7,7 +7,7 @@ import { useEffect, useState } from "react";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { useSession } from "next-auth/react";
 import toast from "react-hot-toast";
-import { connection, translator } from "@/context/transactions";
+import { connection, formatNumber, translator } from "@/context/transactions";
 import { LAMPORTS_PER_SOL, PublicKey } from "@solana/web3.js";
 import { useGlobalContext } from "@/components/GlobalContext";
 import { getAssociatedTokenAddressSync } from "@solana/spl-token";
@@ -122,11 +122,11 @@ export default function Stake() {
               </span>
               <div className="flex w-full mt-3 sm:mt-0 justify-end sm:justify-start items-end gap-2">
                 <span className="text-white text-opacity-80 text-xl sm:text-2xl font-semibold">
-                  {globalInfo.stakedTotal} FOMO
+                  {formatNumber(globalInfo.stakedTotal)} FOMO
                 </span>
-                <span className="text-[#9945FF] text-base font-semibold text-opacity-90">
+                {/* <span className="text-[#9945FF] text-base font-semibold text-opacity-90">
                   (0.0%)
-                </span>
+                </span> */}
               </div>
             </div>
             {/* <div className="absolute sm:relative top-2 sm:top-auto right-3 sm:right-auto w-[9rem] h-[1.5rem] sm:h-[2rem]">

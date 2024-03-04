@@ -2,6 +2,7 @@ import { useContext, useState } from "react";
 import { useGlobalContext } from "./GlobalContext";
 import {
   connection,
+  formatNumber,
   stakeFOMO,
   translator,
   unstakeFOMO,
@@ -131,7 +132,7 @@ export default function StakeFomo() {
           }}
           className="text-sm font-bold cursor-pointer text-[#B1B1B1] hover:text-opacity-100 text-opacity-50 transition-all"
         >
-          {stake ? solBal.toFixed(3) : userData?.stakedAmount ?? 0} FOMO
+          {formatNumber(stake ? solBal : userData?.stakedAmount ?? 0)} FOMO
         </span>
       </span>
 

@@ -27,6 +27,12 @@ export interface User {
   points: number;
 }
 
+export const formatNumber = (number: number, fractions?: number) => {
+  return number.toLocaleString(undefined, {
+    maximumFractionDigits: fractions ?? 3,
+  });
+};
+
 export const tiers = {
   0: { limit: 300, multiplier: 0.5 },
   1: { limit: 3000, multiplier: 1 },
