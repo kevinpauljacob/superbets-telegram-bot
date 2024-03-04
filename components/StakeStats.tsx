@@ -63,20 +63,25 @@ export default function StakeStats() {
               </span>
             </div>
           )}
-          <span className="text-base -mt-1 text-white text-right text-opacity-50 font-semibold">
-            {userData?.tier === 7
-              ? "FOMO is You and You are FOMO"
-              : formatNumber(
-                  //@ts-ignore
-                  tiers[
-                    parseInt(
-                      Object.keys(tiers).find(
-                        (key) => parseInt(key) === (userData?.tier ?? 0),
-                      ) ?? "0",
-                    )
-                  ].limit,
-                )}{" "}
-            FOMO
+          <span className="flex items-center justify-start text-base -mt-1 text-white text-right text-opacity-50 font-semibold">
+            {userData?.tier === 7 ? (
+              <>
+                <span className="text-[#9945FF] mr-1">FOMO</span>
+                {translator("is You and You are", language)}{" "}
+                <span className="text-[#9945FF] ml-1">FOMO</span>
+              </>
+            ) : (
+              formatNumber(
+                //@ts-ignore
+                tiers[
+                  parseInt(
+                    Object.keys(tiers).find(
+                      (key) => parseInt(key) === (userData?.tier ?? 0),
+                    ) ?? "0",
+                  )
+                ].limit,
+              ) + " FOMO"
+            )}
           </span>
         </div>
         <div className="hidden sm:flex flex-row items-end justify-between">
@@ -128,7 +133,9 @@ export default function StakeStats() {
             </>
           ) : (
             <span className="text-white text-sm text-opacity-50 font-medium mt-5">
-              FOMO is You and You are FOMO
+              <span className="text-[#9945FF]">FOMO</span>{" "}
+              {translator("is You and You are", language)}{" "}
+              <span className="text-[#9945FF]">FOMO</span>
             </span>
           )}
         </div>

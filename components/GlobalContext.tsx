@@ -312,4 +312,9 @@ export const translationsMap = {
     ko: "총 거래량",
     ch: "总量",
   },
+  "is You and You are": {
+    ru: "Вы и Вы",
+    ko: "당신과 당신은",
+    ch: "你和你是",
+  },
 };
