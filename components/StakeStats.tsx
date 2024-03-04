@@ -51,6 +51,14 @@ export default function StakeStats() {
             x
           </span>
         </div>
+        {(userData?.tier ?? 0) < 7 && (
+          <span className="text-white text-sm text-opacity-50 font-medium">
+            {
+              //@ts-ignore
+              tiers[(userData?.tier ?? 0)]?.text ?? ''
+            }
+          </span>
+        )}
         {/* next tier data - mob view  */}
         <div className="flex sm:hidden flex-col mt-5 items-start">
           {(userData?.tier ?? 0) < 7 && (
