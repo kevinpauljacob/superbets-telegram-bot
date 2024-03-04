@@ -16,6 +16,7 @@ import {
 import { GlobalProvider } from "@/components/GlobalContext";
 import "@solana/wallet-adapter-react-ui/styles.css";
 import { SessionProvider } from "next-auth/react";
+import InfoBar from "@/components/Infobar";
 
 export default function App({
   Component,
@@ -34,13 +35,15 @@ export default function App({
       <WalletProvider wallets={wallets} autoConnect>
         <WalletModalProvider>
           <SessionProvider session={pageProps.session} refetchInterval={0}>
-            <div
-              className={`w-[100vw] h-[100vh] bg-[#2B0A31] overflow-y-auto nobar unselectable`}
-            >
-              <GlobalProvider>
+            <GlobalProvider>
+              <div
+                className={`w-[100vw] h-[100vh] bg-[#2B0A31] overflow-y-auto nobar unselectable`}
+              >
+                <InfoBar />
                 <Component {...pageProps} />
-              </GlobalProvider>
-            </div>
+              </div>
+            </GlobalProvider>
+
             <Toaster
               position="top-right"
               toastOptions={{

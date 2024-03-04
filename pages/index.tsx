@@ -42,8 +42,7 @@ export default function Home() {
   }, [language]);
 
   return (
-    <div className="flex flex-col items-center w-full min-h-screen flex-1 bg-[#2B0A31] relative overflow-x-hidden">
-      <InfoBar />
+    <div className="flex flex-col items-center w-full overflow-hidden min-h-screen flex-1 bg-[#2B0A31] relative overflow-x-hidden">
       <Header />
       <div className="flex flex-1 w-full bg-black" />
     </div>

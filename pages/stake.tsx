@@ -74,8 +74,7 @@ export default function Stake() {
   }, [session?.user]);
 
   return (
-    <div className="flex flex-col items-center w-full min-h-screen flex-1 bg-[#2B0A31] relative">
-      <InfoBar />
+    <div className="flex flex-col items-center w-full overflow-hidden min-h-screen flex-1 bg-[#2B0A31] relative">
       <Header />
       {/* Navbar  */}
       <div className="w-full flex flex-1 flex-col items-start gap-5 px-5 sm:px-10 lg:px-40 2xl:px-[15%] bg-black pb-10">
