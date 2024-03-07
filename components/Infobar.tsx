@@ -11,7 +11,7 @@ export default function InfoBar() {
       </p>
       <p className="text-center">
         {translator("Total Volume", language)} :{" "}
-        <b>{(globalInfo.totalVolume ?? 0) * livePrice}</b>
+        <b>{(globalInfo?.totalVolume ?? 0) * livePrice}</b>
       </p>
       {/* <p className="text-center">
         {translator("Total Volume", language)} : <b>$435.567</b>
