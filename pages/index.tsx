@@ -66,12 +66,12 @@ export default function Stake() {
   };
 
   useEffect(() => {
-    if (session?.user) {
+    if (session?.user && wallet && wallet.publicKey) {
       getWalletBalance();
       getUserDetails();
-      getGlobalInfo();
     }
-  }, [session?.user]);
+    getGlobalInfo();
+  }, [session?.user, wallet.publicKey]);
 
   return (
     <div className="flex flex-col items-center w-full overflow-hidden min-h-screen flex-1 bg-[#2B0A31] relative">
