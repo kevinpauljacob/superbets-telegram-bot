@@ -55,7 +55,7 @@ export default function StakeStats() {
           <span className="text-white text-sm text-opacity-50 font-medium">
             {
               //@ts-ignore
-              tiers[(userData?.tier ?? 0)]?.text ?? ''
+              tiers[userData?.tier ?? 0]?.text ?? ""
             }
           </span>
         )}
@@ -87,7 +87,7 @@ export default function StakeStats() {
                       (key) => parseInt(key) === (userData?.tier ?? 0),
                     ) ?? "0",
                   )
-                ].limit,
+                ]?.limit,
               ) + " FOMO"
             )}
           </span>
@@ -105,7 +105,7 @@ export default function StakeStats() {
                         (key) => parseInt(key) === (userData?.tier ?? 0),
                       ) ?? "0",
                     )
-                  ].limit - (userData?.stakedAmount ?? 0),
+                  ]?.limit - (userData?.stakedAmount ?? 0),
                 )}{" "}
                 {translator("more FOMO to reach", language)} T
                 {(userData?.tier ?? 0) + 1} (
@@ -133,7 +133,7 @@ export default function StakeStats() {
                           (key) => parseInt(key) === (userData?.tier ?? 0),
                         ) ?? "0",
                       )
-                    ].limit,
+                    ]?.limit,
                   )}{" "}
                   FOMO
                 </span>

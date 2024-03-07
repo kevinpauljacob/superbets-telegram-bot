@@ -28,7 +28,7 @@ export interface User {
 }
 
 export const formatNumber = (number: number, fractions?: number) => {
-  return number.toLocaleString(undefined, {
+  return number?.toLocaleString(undefined, {
     maximumFractionDigits: fractions ?? 3,
   });
 };
@@ -38,9 +38,17 @@ export const tiers = {
   1: { limit: 3000, multiplier: 1, text: "Caught the FOMO bug?" },
   2: { limit: 15000, multiplier: 1.05, text: "FOMO is rising..." },
   3: { limit: 40000, multiplier: 1.15, text: "On your way to FOMOtopia." },
-  4: { limit: 75000, multiplier: 1.3, text: "FOMO Jedi - May the gains be with you." },
+  4: {
+    limit: 75000,
+    multiplier: 1.3,
+    text: "FOMO Jedi - May the gains be with you.",
+  },
   5: { limit: 150000, multiplier: 1.5, text: "FOMO Wizard - Spreading magic." },
-  6: { limit: 600000, multiplier: 1.75, text: "FOMO God – Missing out is for mortals, not you." },
+  6: {
+    limit: 600000,
+    multiplier: 1.75,
+    text: "FOMO God – Missing out is for mortals, not you.",
+  },
 };
 
 export const obfuscatePubKey = (address: string) => {
