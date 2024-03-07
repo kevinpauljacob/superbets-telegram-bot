@@ -55,7 +55,7 @@ export default function Stake() {
           "Cx9oLynYgC3RrgXzin7U417hNY9D6YB1eMGw4ZMbWJgw",
         );
         const ata = getAssociatedTokenAddressSync(address, wallet.publicKey);
-        const res = await connection.getTokenAccountBalance(ata);
+        const res = await connection.getTokenAccountBalance(ata, "recent");
         // console.log("balance : ", res.value.uiAmount ?? 0);
 
         res.value.uiAmount ? setSolBal(res.value.uiAmount) : setSolBal(0);
