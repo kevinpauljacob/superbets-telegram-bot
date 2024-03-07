@@ -128,10 +128,10 @@ export function Header() {
 
           {/* store & leaderboard */}
           <div className="flex items-center gap-4">
-            <button className="hidden sm:flex text-white text-opacity-50 bg-white bg-opacity-5 font-medium rounded-md text-sm px-5 py-3">
+            <button className="hidden cursor-not-allowed sm:flex text-white text-opacity-50 bg-white bg-opacity-5 font-medium rounded-md text-sm px-5 py-3">
               {translator("Store", language)}
             </button>
-            <button className="hidden sm:flex text-white text-opacity-50 bg-white bg-opacity-5 font-medium rounded-md text-sm px-5 py-3">
+            <button className="hidden cursor-not-allowed sm:flex text-white text-opacity-50 bg-white bg-opacity-5 font-medium rounded-md text-sm px-5 py-3">
               {translator("Leaderboard", language)}
             </button>
             <button
