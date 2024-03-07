@@ -77,7 +77,7 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
         // else toast.error(message);
         // getWalletBalance();
       } catch (e) {
-        toast.error("Unable to fetch balance.");
+        // toast.error("Unable to fetch balance.");
         console.error(e);
       }
   };
@@ -100,7 +100,7 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
       if (success) setGlobalInfo(data);
       // else toast.error(message);
     } catch (e) {
-      toast.error("Unable to fetch balance.");
+      // toast.error("Unable to fetch balance.");
       console.error(e);
     }
   };
