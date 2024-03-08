@@ -55,7 +55,7 @@ export default function StakeStats() {
           <span className="text-white text-sm text-opacity-50 font-medium">
             {
               //@ts-ignore
-              tiers[userData?.tier ?? 0]?.text ?? ""
+              translator(tiers[userData?.tier ?? 0]?.text ?? "")
             }
           </span>
         )}

@@ -51,6 +51,15 @@ export const tiers = {
   },
 };
 
+export const pointTiers = [
+  { index: 0, limit: 0, label: "BRONZE", image: "" },
+  { index: 1, limit: 100, label: "SILVER", image: "" },
+  { index: 2, limit: 200, label: "GOLD", image: "" },
+  { index: 3, limit: 300, label: "Platinum", image: "" },
+  { index: 4, limit: 400, label: "Diamond", image: "" },
+  { index: 5, limit: 500, label: "Elite", image: "" },
+];
+
 export const obfuscatePubKey = (address: string) => {
   return (
     address?.substring(0, 4) + "..." + address?.substring(address.length - 4)

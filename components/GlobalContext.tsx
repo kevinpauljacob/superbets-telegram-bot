@@ -317,4 +317,40 @@ export const translationsMap = {
     ko: "당신과 당신은",
     ch: "你和你是",
   },
+
+  "Do you even FOMO bro?": {
+    ru: "Вы вообще чувствуете FOMO, бро?",
+    ko: "당신은 FOMO를 느끼나요?",
+    ch: "你连FOMO都感觉不到吗，兄弟？",
+  },
+  "Caught the FOMO bug?": {
+    ru: "Поймал FOMO?",
+    ko: "FOMO 벌레에 감염되셨나요?",
+    ch: "中招了FOMO吗？",
+  },
+  "FOMO is rising...": {
+    ru: "FOMO растет...",
+    ko: "FOMO가 증가 중입니다...",
+    ch: "FOMO在上升...",
+  },
+  "On your way to FOMOtopia.": {
+    ru: "Вы на пути к FOMOтопии.",
+    ko: "FOMOtopia로 향하고 계신가요?",
+    ch: "你正在前往FOMOtopia的路上。",
+  },
+  "FOMO Jedi - May the gains be with you.": {
+    ru: "FOMO джедай - Пусть выгоды будут с вами.",
+    ko: "FOMO Jedi - 이익이 함께 하시길 바랍니다.",
+    ch: "FOMO绝地 - 愿力量与你同在。",
+  },
+  "FOMO Wizard - Spreading magic.": {
+    ru: "FOMO волшебник - Распространение магии.",
+    ko: "FOMO 마법사 - 마법을 전파합니다.",
+    ch: "FOMO巫师 - 传播魔法。",
+  },
+  "FOMO God – Missing out is for mortals, not you.": {
+    ru: "FOMO Бог - Упускать возможность - это для смертных, а не для вас.",
+    ko: "FOMO 신 - 놓치는 것은 죽었는 사람들을 위한 것입니다, 당신은 아닙니다.",
+    ch: "FOMO之神 - 错过是为凡人，而不是你。",
+  },
 };

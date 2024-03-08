@@ -19,19 +19,9 @@ const config: Config = {
       screens: {
         xs: "400px",
       },
-      // keyframes: {
-      //   "rotate-y": {
-      //     "0%": {
-      //       transform: "rotateY(0deg)",
-      //     },
-      //     "100%": {
-      //       transform: "rotateY(180deg)",
-      //     },
-      //   },
-      // },
-      // animation: {
-      //   'rotate-y': 'rotate-y 1s ease-in-out forwards',
-      // }
+      fontFamily: {
+        changa: ['Changa', 'sans-serif'],
+    },
     },
   },
   plugins: [],

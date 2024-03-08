@@ -131,7 +131,12 @@ export function Header() {
             <button className="hidden cursor-not-allowed sm:flex text-white text-opacity-50 bg-white bg-opacity-5 font-medium rounded-md text-sm px-5 py-3">
               {translator("Store", language)}
             </button>
-            <button className="hidden cursor-not-allowed sm:flex text-white text-opacity-50 bg-white bg-opacity-5 font-medium rounded-md text-sm px-5 py-3">
+            <button
+              onClick={() => {
+                router.push("leaderboard");
+              }}
+              className="hidden sm:flex text-white text-opacity-50 bg-white bg-opacity-5 font-medium rounded-md text-sm px-5 py-3"
+            >
               {translator("Leaderboard", language)}
             </button>
             <button

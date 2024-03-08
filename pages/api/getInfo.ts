@@ -45,13 +45,7 @@ async function handler(req: any, res: any) {
         }
         // 2 - get leaderboard
         case 2: {
-          const { wallet } = req.body;
-          if (!wallet)
-            return res
-              .status(400)
-              .json({ success: false, message: "Missing paramters" });
-
-          let usersInfo: User[] | null = await user.findOne({});
+          let usersInfo: User[] | null = await user.find({});
 
           if (!usersInfo)
             return res.json({
@@ -61,7 +55,7 @@ async function handler(req: any, res: any) {
 
           usersInfo = usersInfo.sort((a, b) => a.points - b.points);
 
-          return res.json({ success: true, user: usersInfo });
+          return res.json({ success: true, users: usersInfo });
         }
         //global info
         case 3: {

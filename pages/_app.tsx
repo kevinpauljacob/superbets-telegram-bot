@@ -37,7 +37,7 @@ export default function App({
           <SessionProvider session={pageProps.session} refetchInterval={0}>
             <GlobalProvider>
               <div
-                className={`w-[100vw] h-[100vh] bg-[#2B0A31] overflow-y-auto nobar unselectable`}
+                className={`w-[100vw] h-[100vh] bg-black overflow-y-auto nobar unselectable`}
               >
                 <InfoBar />
                 <Component {...pageProps} />
