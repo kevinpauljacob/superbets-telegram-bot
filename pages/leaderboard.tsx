@@ -9,27 +9,15 @@ import {
   translator,
 } from "@/context/transactions";
 import { useWallet } from "@solana/wallet-adapter-react";
+import Image from "next/legacy/image";
 import { useRouter } from "next/router";
 import { useContext, useEffect, useState } from "react";
 import { IoMdInformationCircle } from "react-icons/io";
 
-interface PointTier {
-  index: number;
-  limit: number;
-  image: string;
-  label: string;
-}
 export default function Leaderboard() {
   const wallet = useWallet();
   const router = useRouter();
-  const { language, userData } = useGlobalContext();
-
-  const [pointTier, setPointTier] = useState<PointTier>({
-    index: 0,
-    limit: 0,
-    image: "",
-    label: "BRONZE",
-  });
+  const { language, userData, pointTier, setPointTier } = useGlobalContext();
 
   useEffect(() => {
     let points = userData?.points ?? 0;
@@ -64,13 +52,27 @@ export default function Leaderboard() {
       <Header />
       {/* Navbar  */}
       <div className="flex flex-col sm:flex-row w-full items-center bg-[#19161C80] py-7 px-5 sm:px-10 2xl:px-[8%]">
-        <div className="hidden sm:flex relative min-w-[12rem] h-[12rem] border border-red-200"></div>
+        <div className="hidden sm:flex relative min-w-[12rem] h-[12rem]">
+          <Image
+            src={pointTier.image}
+            layout="fill"
+            objectFit="contain"
+            objectPosition="center"
+          />
+        </div>
 
         {/* point bar and info  */}
         <div className="px-4 py-2 flex flex-col w-full rounded-[5px]">
           <div className="flex flex-row items-center justify-between">
             <div className="flex items-center gap-2">
-              <div className="flex sm:hidden relative min-w-[4.5rem] h-[4.5rem] border border-red-200"></div>
+              <div className="flex sm:hidden relative min-w-[4.5rem] h-[4.5rem]">
+                <Image
+                  src={pointTier.image}
+                  layout="fill"
+                  objectFit="contain"
+                  objectPosition="center"
+                />
+              </div>
               <div className="flex flex-col items-start">
                 <span className="text-white font-changa text-2xl">
                   {wallet.publicKey
@@ -130,7 +132,8 @@ export default function Leaderboard() {
             <div
               style={{
                 width: `${
-                  (((pointTier?.index ?? 0) < 5 ? userData?.points ?? 0 : 500) * 100) /
+                  (((pointTier?.index ?? 0) < 5 ? userData?.points ?? 0 : 500) *
+                    100) /
                     pointTiers[pointTier?.index + 1]?.limit ?? 1
                 }%`,
               }}
@@ -138,7 +141,8 @@ export default function Leaderboard() {
             />
             <span className="w-full h-full absolute top-0 left-0 flex items-center justify-center z-10 text-black font-semibold text-sm text-opacity-75">
               {(
-                (((pointTier?.index ?? 0) < 5 ? userData?.points ?? 0 : 500) * 100) /
+                (((pointTier?.index ?? 0) < 5 ? userData?.points ?? 0 : 500) *
+                  100) /
                 (pointTiers[pointTier?.index + 1]?.limit ?? 500)
               ).toFixed(2)}{" "}
               %

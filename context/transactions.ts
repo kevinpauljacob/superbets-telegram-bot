@@ -52,12 +52,12 @@ export const tiers = {
 };
 
 export const pointTiers = [
-  { index: 0, limit: 0, label: "BRONZE", image: "" },
-  { index: 1, limit: 100, label: "SILVER", image: "" },
-  { index: 2, limit: 200, label: "GOLD", image: "" },
-  { index: 3, limit: 300, label: "Platinum", image: "" },
-  { index: 4, limit: 400, label: "Diamond", image: "" },
-  { index: 5, limit: 500, label: "Elite", image: "" },
+  { index: 0, limit: 0, label: "BRONZE", image: "/assets/bronze.png" },
+  { index: 1, limit: 100, label: "SILVER", image: "/assets/gold.png" },
+  { index: 2, limit: 200, label: "GOLD", image: "/assets/silver.png" },
+  { index: 3, limit: 300, label: "Platinum", image: "/assets/bronze.png" },
+  { index: 4, limit: 400, label: "Diamond", image: "/assets/gold.png" },
+  { index: 5, limit: 500, label: "Elite", image: "/assets/silver.png" },
 ];
 
 export const obfuscatePubKey = (address: string) => {

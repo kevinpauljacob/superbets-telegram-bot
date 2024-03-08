@@ -2,13 +2,14 @@ import React, { useState, useEffect } from "react";
 import { useWallet } from "@solana/wallet-adapter-react";
 import toast from "react-hot-toast";
 import Head from "next/head";
-import { User, obfuscatePubKey } from "@/context/transactions";
+import { User, obfuscatePubKey, pointTiers } from "@/context/transactions";
 import { useGlobalContext } from "./GlobalContext";
+import Image from "next/legacy/image";
 
 function Leaderboard() {
   const wallet = useWallet();
 
-  const { language, getUserDetails } = useGlobalContext();
+  const { language, getUserDetails, pointTier } = useGlobalContext();
 
   const [maxPages, setMaxPages] = useState<number>(0);
 
@@ -94,7 +95,14 @@ function Leaderboard() {
                   {myData.rank}
                 </span>
                 <span className="w-[70%] flex items-center gap-2 text-left font-changa text-sm text-[#F0F0F0] text-opacity-75 pl-[15%]">
-                  <div className="w-8 h-8 border border-slate-500" />{" "}
+                  <div className="relative w-8 h-8">
+                    <Image
+                      src={pointTier.image}
+                      layout="fill"
+                      objectFit="contain"
+                      objectPosition="center"
+                    />
+                  </div>
                   {obfuscatePubKey(myData.wallet ?? "")}
                 </span>
                 <span className="w-[15%] text-right font-changa text-sm text-[#F0F0F0] text-opacity-75">
@@ -127,7 +135,23 @@ function Leaderboard() {
                       {data.rank}
                     </span>
                     <span className="w-[70%] flex items-center gap-2 text-left font-changa text-sm text-[#F0F0F0] text-opacity-75 pl-[15%]">
-                      <div className="w-8 h-8 border border-slate-500" />{" "}
+                      <div className="relative w-8 h-8">
+                        <Image
+                          src={
+                            data?.points >= 500
+                              ? "/assets/silver.png"
+                              : pointTiers.find(
+                                  (tier, index) =>
+                                    (data?.points ?? 0) >= tier.limit &&
+                                    (data?.points ?? 0) <
+                                      pointTiers[index + 1].limit,
+                                )?.image ?? "/assets/bronze.png"
+                          }
+                          layout="fill"
+                          objectFit="contain"
+                          objectPosition="center"
+                        />
+                      </div>
                       {obfuscatePubKey(data.wallet ?? "")}
                     </span>
                     <span className="w-[15%] text-right font-changa text-sm text-[#F0F0F0] text-opacity-75">

@@ -3,6 +3,13 @@ import { useWallet } from "@solana/wallet-adapter-react";
 import { createContext, useContext, useState, ReactNode } from "react";
 import toast from "react-hot-toast";
 
+interface PointTier {
+  index: number;
+  limit: number;
+  image: string;
+  label: string;
+}
+
 interface GlobalContextProps {
   loading: boolean;
   setLoading: (stake: boolean) => void;
@@ -32,6 +39,9 @@ interface GlobalContextProps {
     totalVolume: number;
   }) => void;
 
+  pointTier: PointTier;
+  setPointTier: (pointTier: PointTier) => void;
+
   getUserDetails: () => void;
   getGlobalInfo: () => void;
 }
@@ -56,6 +66,12 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
     stakedTotal: number;
     totalVolume: number;
   }>({ users: 0, stakedTotal: 0, totalVolume: 0 });
+  const [pointTier, setPointTier] = useState<PointTier>({
+    index: 0,
+    limit: 0,
+    image: "/assets/bronze.png",
+    label: "BRONZE",
+  });
 
   const getUserDetails = async () => {
     if (wallet && wallet.publicKey)
@@ -124,6 +140,8 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
         setLivePrice,
         globalInfo,
         setGlobalInfo,
+        pointTier,
+        setPointTier,
         getUserDetails,
         getGlobalInfo,
       }}
