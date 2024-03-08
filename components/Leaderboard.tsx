@@ -3,9 +3,12 @@ import { useWallet } from "@solana/wallet-adapter-react";
 import toast from "react-hot-toast";
 import Head from "next/head";
 import { User, obfuscatePubKey } from "@/context/transactions";
+import { useGlobalContext } from "./GlobalContext";
 
 function Leaderboard() {
   const wallet = useWallet();
+
+  const { language, getUserDetails } = useGlobalContext();
 
   const [maxPages, setMaxPages] = useState<number>(0);
 
@@ -59,6 +62,7 @@ function Leaderboard() {
 
   useEffect(() => {
     getLeaderBoard();
+    if (wallet.publicKey) getUserDetails();
   }, [wallet.publicKey]);
 
   const headers = ["Rank", "Wallet", "Points"];
