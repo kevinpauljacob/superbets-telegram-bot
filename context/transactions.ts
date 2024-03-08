@@ -234,7 +234,11 @@ export const verifyTransaction = (
     ),
   );
 
-  const vTransactionInstructions = JSON.stringify(vTransaction.instructions);
+  const vTransactionInstructions = JSON.stringify(
+    vTransaction.instructions.filter(
+      (i) => !i.programId.equals(ComputeBudgetProgram.programId),
+    ),
+  );
 
   return transactionInstructions === vTransactionInstructions;
 };
@@ -255,6 +259,8 @@ export const createDepositTxn = async (
 
   if (tokenName === "SOL")
     transaction.add(
+      ComputeBudgetProgram.setComputeUnitLimit({ units: 100_000 }),
+      ComputeBudgetProgram.setComputeUnitPrice({ microLamports: 400_000 }),
       SystemProgram.transfer({
         fromPubkey: wallet,
         toPubkey: devPublicKey,
@@ -266,6 +272,8 @@ export const createDepositTxn = async (
     const userAta = await getAssociatedTokenAddress(tokenId, wallet);
     const devAta = await getAssociatedTokenAddress(tokenId, devPublicKey);
     transaction.add(
+      ComputeBudgetProgram.setComputeUnitLimit({ units: 100_000 }),
+      ComputeBudgetProgram.setComputeUnitPrice({ microLamports: 400_000 }),
       createTransferInstruction(
         userAta,
         devAta,
@@ -274,7 +282,7 @@ export const createDepositTxn = async (
       ),
     );
 
-    transaction.instructions[0].keys[2].isWritable = true;
+    transaction.instructions[2].keys[2].isWritable = true;
   }
 
   return { transaction, blockhash };
@@ -296,6 +304,8 @@ export const createWithdrawTxn = async (
 
   if (tokenName === "SOL") {
     transaction.add(
+      ComputeBudgetProgram.setComputeUnitLimit({ units: 100_000 }),
+      ComputeBudgetProgram.setComputeUnitPrice({ microLamports: 400_000 }),
       SystemProgram.transfer({
         fromPubkey: devPublicKey,
         toPubkey: wallet,
@@ -310,6 +320,8 @@ export const createWithdrawTxn = async (
     const devAta = await getAssociatedTokenAddress(tokenId, devPublicKey);
 
     transaction.add(
+      ComputeBudgetProgram.setComputeUnitLimit({ units: 100_000 }),
+      ComputeBudgetProgram.setComputeUnitPrice({ microLamports: 400_000 }),
       createTransferInstruction(
         devAta,
         userAta,
@@ -318,8 +330,8 @@ export const createWithdrawTxn = async (
       ),
     );
 
-    transaction.instructions[0].keys[2].isSigner = true;
-    transaction.instructions[0].keys[2].isWritable = true;
+    transaction.instructions[2].keys[2].isSigner = true;
+    transaction.instructions[2].keys[2].isWritable = true;
   }
 
   return { transaction, blockhash };
