@@ -64,7 +64,7 @@ export default function Sidebar({ open, setOpen }: Sidebar) {
         >
           {translator("Staking", language)}
         </button>
-        <ConnectWallet />
+        {/* <ConnectWallet /> */}
 
         <button className="relative flex mt-5 items-center">
           <MdOutlineLanguage className="w-5 h-5 mr-3 text-white text-opacity-50" />

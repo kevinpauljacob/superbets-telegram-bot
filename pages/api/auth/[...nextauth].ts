@@ -1,50 +1,46 @@
+import { validateAuthTx } from "@/utils/signinMessage";
+import { Transaction } from "@solana/web3.js";
 import { NextApiRequest, NextApiResponse } from "next";
 import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { getCsrfToken } from "next-auth/react";
-import { SigninMessage } from "./../../../utils/signinMessage";
 
 export default async function auth(req: NextApiRequest, res: NextApiResponse) {
   const providers = [
     CredentialsProvider({
       name: "Solana",
       credentials: {
-        message: {
-          label: "Message",
+        nonce: {
+          label: "Nonce",
           type: "text",
         },
-        signature: {
-          label: "Signature",
+        txn: {
+          label: "Transaction",
           type: "text",
         },
       },
       async authorize(credentials, req) {
         try {
-          // console.log(credentials);
-
-          const signinMessage = new SigninMessage(
-            JSON.parse(credentials?.message || "{}"),
+          const signedTx = Transaction.from(
+            Buffer.from(credentials?.txn as any, "base64"),
           );
-          const nextAuthUrl = new URL(process.env.NEXTAUTH_URL!);
-          if (signinMessage.domain !== nextAuthUrl.host) {
-            return null;
-          }
 
           const csrfToken = await getCsrfToken({ req: { ...req, body: null } });
 
-          if (signinMessage.nonce !== csrfToken) {
+          if (credentials?.nonce !== csrfToken) {
             return null;
           }
 
-          const validationResult = await signinMessage.validate(
-            credentials?.signature || "",
+          const validationResult = validateAuthTx(
+            signedTx,
+            credentials?.nonce!,
           );
 
           if (!validationResult)
             throw new Error("Could not validate the signed message");
 
           return {
-            id: signinMessage.publicKey,
+            id: signedTx.feePayer as any,
           };
         } catch (e) {
           return null;
@@ -71,6 +67,7 @@ export default async function auth(req: NextApiRequest, res: NextApiResponse) {
       async session({ session, token }) {
         // @ts-ignore
         session.publicKey = token.sub;
+
         if (session.user) {
           session.user.name = token.sub;
           session.user.image = `https://ui-avatars.com/api/?name=${token.sub}&background=random`;
