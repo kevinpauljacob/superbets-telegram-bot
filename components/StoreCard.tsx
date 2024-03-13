@@ -1,7 +1,13 @@
 import Image from "next/image";
 import Card from "/public/assets/Card.png";
 
-export default function StoreCard({ src, name, points }) {
+interface StoreCardProps {
+  src: string;
+  name: string;
+  points: string;
+}
+
+export default function StoreCard({ src, name, points }: StoreCardProps) {
   return (
     <div className="bg-[#171717] rounded-md min-w-[260px] mb-5">
       <div>

@@ -3,7 +3,7 @@ import Banner from "/public/assets/storeBanner.svg";
 
 export default function StoreBanner() {
   return (
-    <div className="relative w-full my-7">
+    <div className="relative w-full">
       <Image
         className="z-0 w-full"
         src={Banner}

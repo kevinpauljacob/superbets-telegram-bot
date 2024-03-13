@@ -1,5 +1,5 @@
 import "@/styles/globals.css";
-
+import Layout from "@/components/layout";
 import { WalletModalProvider } from "@solana/wallet-adapter-react-ui";
 import type { AppProps } from "next/app";
 import { Toaster } from "react-hot-toast";
@@ -39,8 +39,9 @@ export default function App({
               <div
                 className={`w-[100vw] h-[100vh] bg-black overflow-y-auto nobar unselectable`}
               >
-                <InfoBar />
-                <Component {...pageProps} />
+                <Layout>
+                  <Component {...pageProps} />
+                </Layout>
               </div>
             </GlobalProvider>
 

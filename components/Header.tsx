@@ -22,7 +22,7 @@ export function Header() {
   const [langSelect, setLangSelect] = useState(false);
 
   return (
-    <div className="w-full bg-[#19161C] flex flex-col items-center py-4 lg:py-4 px-5 sm:px-10 2xl:px-[8%]">
+    <div className="w-full bg-[#121418] flex flex-col items-center py-4 lg:py-4 px-5 sm:px-10 2xl:px-[8%]">
       <Sidebar open={open} setOpen={setOpen} />
       <div className="w-full flex flex-row items-center justify-between">
         {/* right */}
