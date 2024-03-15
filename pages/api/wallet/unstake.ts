@@ -1,6 +1,7 @@
 import { Connection, Keypair, PublicKey, Transaction } from "@solana/web3.js";
 import {
   createWithdrawTxn,
+  fomoToken,
   tiers,
   verifyTransaction,
 } from "../../../context/transactions";
@@ -52,7 +53,7 @@ async function handler(req: any, res: any) {
         !amount ||
         !blockhash ||
         !tokenMint ||
-        tokenMint != "Cx9oLynYgC3RrgXzin7U417hNY9D6YB1eMGw4ZMbWJgw"
+        tokenMint != fomoToken
       )
         return res
           .status(400)

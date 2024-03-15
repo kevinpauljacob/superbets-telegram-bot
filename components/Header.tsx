@@ -141,7 +141,7 @@ export function Header() {
             </button>
             <button
               onClick={() => {
-                router.push("");
+                router.push("stake");
               }}
               className="hidden sm:flex text-white bg-[#9945FF] hover:bg-opacity-50 transition-all font-medium rounded-md text-sm px-5 py-3"
             >

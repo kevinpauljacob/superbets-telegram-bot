@@ -17,6 +17,8 @@ export const connection = new Connection(process.env.NEXT_PUBLIC_RPC!);
 
 const devPublicKey = new PublicKey(process.env.NEXT_PUBLIC_DEV_PUBLIC_KEY!);
 
+export const fomoToken = "Cx9oLynYgC3RrgXzin7U417hNY9D6YB1eMGw4ZMbWJgw";
+
 export interface User {
   wallet: string;
   solAmount: number;
