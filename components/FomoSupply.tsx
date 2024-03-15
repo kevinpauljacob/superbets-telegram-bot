@@ -64,14 +64,20 @@ export default function FomoSupply() {
             <div className="font-semibold">234,546,654</div>
           </div>
         </div>
-        <div className="bg-[#121112]/50 rounded-xl p-5"></div>
+        <div className="bg-[#121112]/50 rounded-lg p-5"></div>
       </div>
-      <div className="bg-[#1E2220] rounded-lg p-4 mt-4">
-        <div className="bg-gradient-to-r from-blue-[#D129FA] to-purple-[#1EE0AF]">
-          <div></div>
+      <div className="bg-[#1E2220]/75 rounded-lg p-4 mt-4">
+        <div className="bg-gradient-to-r from-[#D129FA] to-[#1EE0AF] rounded-lg py-3 pl-4 pr-3 mb-3">
+          <div className="flex items-start justify-between">
+            <div className="flex items-end">
+              <p className="text-2xl font-bold mr-1">0x</p>
+              <p className="text-xl font-semibold">multiplier</p>
+            </div>
+            <Image src={info} alt="" width={13} height={13} />
+          </div>
           <div>Boost your tier by staking!</div>
         </div>
-        <div className="bg-[#1F2221]/10 text-[#883CE3] font-semibold text-center rounded-xl p-4">
+        <div className="bg-[#1E2220] text-[#883CE3] text-lg font-semibold text-center rounded-lg p-2.5">
           Stake $FOMO
         </div>
       </div>

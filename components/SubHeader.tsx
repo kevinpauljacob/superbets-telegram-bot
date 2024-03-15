@@ -36,7 +36,7 @@ export default function SubHeader() {
   ];
 
   return (
-    <div className="w-full text-white h-[70px] flex items-center justify-between border-y border-[#1E2220] px-4 bg-[#121418]">
+    <div className="w-full text-white h-[70px] flex items-center justify-between border-y border-[#1E2220] pl-4 pr-8 bg-[#121418]">
       <div className="flex items-center">
         {cards.map((card, index) => (
           <div

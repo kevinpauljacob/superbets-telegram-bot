@@ -1,132 +1,198 @@
-import { IoMdCloseCircleOutline, IoMdDocument, IoMdMenu } from "react-icons/io";
-import { FaStopwatch, FaKey, FaParachuteBox, FaLink } from "react-icons/fa";
-import { useGlobalContext } from "./GlobalContext";
-import { useWallet } from "@solana/wallet-adapter-react";
-import { useWalletModal } from "@solana/wallet-adapter-react-ui";
-import Spinner from "./Spinner";
-import { obfuscatePubKey, translator } from "@/context/transactions";
-import { MdOutlineLanguage } from "react-icons/md";
-import { FaChevronDown } from "react-icons/fa6";
 import { useState } from "react";
-import ConnectWallet from "./ConnectWallet";
-import { useRouter } from "next/router";
+import Image from "next/image";
+import Link from "next/link";
 
-interface Sidebar {
-  open: boolean;
-  setOpen: React.Dispatch<React.SetStateAction<boolean>>;
-}
+import userImg from "/public/assets/userImg2.png";
+import dollar from "/public/assets/dollar.png";
+import play from "/public/assets/play.png";
+import search from "/public/assets/search.png";
+import twitter from "/public/assets/twitter.png";
+import telegram from "@/public/assets/telegram.png";
+import ottersec from "@/public/assets/ottersec.png";
+import upArrow from "@/public/assets/upArrow.png";
+import downArrow from "@/public/assets/downArrow.png";
 
-export default function Sidebar({ open, setOpen }: Sidebar) {
-  const { language, setLanguage } = useGlobalContext();
-  const router = useRouter();
-  const wallet = useWallet();
-  const walletModal = useWalletModal();
+export default function Sidebar() {
+  const [showExitTokens, setShowExitTokens] = useState(false);
+  const [showPlayTokens, setShowPlayTokens] = useState(false);
 
-  async function logout() {
-    try {
-      await wallet.disconnect();
-    } catch (e) {
-      console.log(e);
-    }
-  }
-
-  const [langSelect, setLangSelect] = useState(false);
+  const fomoToken = [
+    {
+      src: "/assets/sol.png",
+      token: "SOL",
+      active: true,
+    },
+    {
+      src: "/assets/jup.png",
+      token: "JUP",
+      active: false,
+    },
+    {
+      src: "/assets/usdt.png",
+      token: "USDT",
+      active: false,
+    },
+  ];
 
   return (
     <div
-      className={`flex sm:hidden flex-col px-8 pt-5 items-end w-[18rem] min-h-full z-50 bg-[#19161C] transition-all absolute top-0 ${
-        open ? "right-0" : "-right-[18rem]"
-      }`}
+      className={`block bg-[#121418] text-white sm:flex flex-col justify-between px-3.5 pb-3.5 w-[290px] h-[calc(100vh-104px)]`}
     >
-      <IoMdMenu
-        className="flex cursor-pointer sm:hidden w-10 h-10 text-white"
-        as="button"
-        onClick={() => {
-          setOpen(false);
-        }}
-      />
-
-      <div className="flex w-full flex-col pt-10 gap-5 items-center">
-        {/* store & leaderboard */}
-        <button className="w-full flex justify-center text-white text-opacity-50 bg-white bg-opacity-5 font-medium rounded-md text-sm px-5 py-3">
-          {translator("Store", language)}
-        </button>
-        <button
-          onClick={() => {
-            router.push("leaderboard");
-          }}
-          className="w-full flex justify-center text-white text-opacity-50 bg-white bg-opacity-5 font-medium rounded-md text-sm px-5 py-3"
-        >
-          {translator("Leaderboard", language)}
-        </button>
-        <button
-          onClick={() => {
-            router.push("stake");
-          }}
-          className="w-full flex justify-center text-white bg-[#9945FF] hover:bg-opacity-50 transition-all font-medium rounded-md text-sm px-5 py-3"
-        >
-          {translator("Staking", language)}
-        </button>
-        <ConnectWallet />
-
-        <button className="relative flex mt-5 items-center">
-          <MdOutlineLanguage className="w-5 h-5 mr-3 text-white text-opacity-50" />
-          <span className="text-white text-sm mr-5 text-start text-opacity-50">
-            {language === "en"
-              ? "English"
-              : language === "ru"
-              ? "Русский"
-              : language === "ko"
-              ? "한국인"
-              : "中国人"}
-          </span>
-          <FaChevronDown
-            onClick={() => {
-              setLangSelect(!langSelect);
-            }}
-            className="w-3 h-3 text-white"
-          />
-          {langSelect && (
-            <div className="w-full transition-all absolute top-full mt-2 rounded px-1 py-2 gap-0.5 z-50 flex flex-col bg-black">
-              <span
-                onClick={() => {
-                  setLanguage("en");
-                  setLangSelect(false);
-                }}
-                className="text-white text-sm py-1 text-opacity-50 hover:bg-[#ffffff21] transition-all rounded"
-              >
-                English
-              </span>
-              <span
-                onClick={() => {
-                  setLanguage("ru");
-                  setLangSelect(false);
-                }}
-                className="text-white text-sm py-1 text-opacity-50 hover:bg-[#ffffff21] transition-all rounded"
-              >
-                Русский
-              </span>
-              <span
-                onClick={() => {
-                  setLanguage("ko");
-                  setLangSelect(false);
-                }}
-                className="text-white text-sm py-1 text-opacity-50 hover:bg-[#ffffff21] transition-all rounded"
-              >
-                한국인
-              </span>
-              <span
-                onClick={() => {
-                  setLanguage("ch");
-                  setLangSelect(false);
-                }}
-                className="text-white text-sm py-1 text-opacity-50 hover:bg-[#ffffff21] transition-all rounded"
-              >
-                中国人
-              </span>
+      <div>
+        <div className="flex flex-col bg-[#202329] rounded-md py-3.5 px-1.5">
+          <div className="flex items-center w-full mb-2">
+            <Image src={userImg} alt="" width={60} height={60} />
+            <div className="ml-1">
+              <p className="text-white/75 text-md">XVFG....45FFG</p>
+              <p className="text-white/50 text-sm">BRONZE</p>
             </div>
-          )}
-        </button>
+          </div>
+          <Link
+            href=""
+            className="text-center text-[#9945FF] border border-[#9945FF] rounded-md py-1.5 w-full"
+          >
+            View Dashboard
+          </Link>
+        </div>
+        <div>
+          <div className="mt-4">
+            <div
+              className={`flex items-center justify-between rounded-md p-1 ${
+                showExitTokens ? "bg-[#161519]" : ""
+              }`}
+            >
+              <p className="flex items-center">
+                <Image src={dollar} alt="" width={22} height={22} />
+                <span className="text-md font-semibold text-white/75 ml-2">
+                  FOMO: Exit
+                </span>
+              </p>
+              <button
+                className="bg-[#1D1A21] rounded-md p-3"
+                onClick={() => setShowExitTokens(!showExitTokens)}
+              >
+                <Image
+                  src={showExitTokens ? upArrow : downArrow}
+                  alt=""
+                  width={14}
+                  height={14}
+                  className=""
+                />
+              </button>
+            </div>
+            {showExitTokens && (
+              <ul className="mt-1">
+                {fomoToken.map((token, index) => (
+                  <li key={index} className="flex items-center p-2">
+                    <Image src={token.src} alt="" width={18} height={18} />
+                    <span
+                      className={`ml-3 font-semibold ${
+                        token.active ? "text-[#7839C5]" : "text-white/75"
+                      }`}
+                    >
+                      ${token.token}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+          <div className="mt-4">
+            <div
+              className={`flex items-center justify-between rounded-md p-1 ${
+                showPlayTokens ? "bg-[#161519]" : ""
+              }`}
+            >
+              <p className="flex items-center">
+                <Image src={play} alt="" width={22} height={22} />
+                <span className="text-md font-semibold text-white/75 ml-2">
+                  FOMO: Play
+                </span>
+              </p>
+              <button
+                className="bg-[#1D1A21] rounded-md p-3"
+                onClick={() => setShowPlayTokens(!showPlayTokens)}
+              >
+                <Image
+                  src={showPlayTokens ? upArrow : downArrow}
+                  alt=""
+                  width={14}
+                  height={14}
+                  className=""
+                />
+              </button>
+            </div>
+            {showPlayTokens && (
+              <ul className="mt-1">
+                {fomoToken.map((token, index) => (
+                  <li key={index} className="flex items-center p-2">
+                    <Image src={token.src} alt="" width={18} height={18} />
+                    <span
+                      className={`ml-3 font-semibold ${
+                        token.active ? "text-[#7839C5]" : "text-white/75"
+                      }`}
+                    >
+                      ${token.token}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        </div>
+      </div>
+      <div>
+        <div className="flex flex-col">
+          <Link
+            href="/"
+            className="bg-[#181A1D] rounded-md text-center font-bold text-white/50 py-2 mb-1.5"
+          >
+            DCA
+          </Link>
+          <Link
+            href="/"
+            className="bg-[#181A1D] rounded-md text-center font-bold text-white/50 py-2 mb-1.5"
+          >
+            Roadmap
+          </Link>
+          <Link
+            href="/"
+            className="bg-[#181A1D] rounded-md text-center font-bold text-white/50 py-2 mb-1.5"
+          >
+            Buy $FOMO
+          </Link>
+        </div>
+        <div className="mt-9">
+          <div className="flex justify-center">
+            <Image
+              src={search}
+              alt=""
+              width={14}
+              height={14}
+              className="mx-1.5"
+            />
+            <Image
+              src={twitter}
+              alt=""
+              width={18}
+              height={14}
+              className="mx-1.5"
+            />
+            <Image
+              src={telegram}
+              alt=""
+              width={18}
+              height={15}
+              className="mx-1.5"
+            />
+          </div>
+          <div className="flex items-center justify-center my-3">
+            <Image src={ottersec} alt="" width={17} height={17} />
+            <p className="text-sm font-light text-white/50">
+              Audited by OtterSec
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   );

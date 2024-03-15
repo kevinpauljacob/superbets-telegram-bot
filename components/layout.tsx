@@ -1,7 +1,7 @@
 import React, { ReactNode, useState } from "react";
 import { Header } from "./Header";
 import InfoBar from "./Infobar";
-import Navbar from "./Navbar";
+import Sidebar from "./Sidebar";
 import SubHeader from "./SubHeader";
 
 interface LayoutProps {
@@ -9,15 +9,23 @@ interface LayoutProps {
 }
 
 export default function Layout({ children }: LayoutProps) {
+  const [mobileSidebar, setMobileSidebar] = useState(false);
+
+  const toggleMobileSidebar = () => {
+    setMobileSidebar(!mobileSidebar);
+  };
+
   return (
     <>
       <InfoBar />
-      <Header />
+      <Header sidebar={mobileSidebar} toggleSidebar={toggleMobileSidebar} />
       <section className="flex">
-        <Navbar />
+        <Sidebar />
         <section className="w-full">
           <SubHeader />
-          <main>{children}</main>
+          <main>
+            {mobileSidebar ? <Sidebar /> : <section>{children}</section>}
+          </main>
         </section>
       </section>
     </>
