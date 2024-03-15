@@ -114,7 +114,11 @@ async function handler(req: any, res: any) {
         },
         {
           $inc: { stakedAmount: -amount },
-          $set: { tier, multiplier, points: 0 },
+          $set: {
+            tier,
+            multiplier,
+            //  points: 0
+          },
         },
         { new: true },
       );
@@ -151,7 +155,7 @@ async function handler(req: any, res: any) {
             $set: {
               tier: user.tier,
               multiplier: user.multiplier,
-              points: user.points,
+              // points: user.points,
             },
           },
         );
