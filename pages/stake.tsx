@@ -7,7 +7,7 @@ import { useEffect, useState } from "react";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { useSession } from "next-auth/react";
 import toast from "react-hot-toast";
-import { connection, formatNumber, translator } from "@/context/transactions";
+import { connection, fomoToken, formatNumber, translator } from "@/context/transactions";
 import { LAMPORTS_PER_SOL, PublicKey } from "@solana/web3.js";
 import { useGlobalContext } from "@/components/GlobalContext";
 import { getAssociatedTokenAddressSync } from "@solana/spl-token";
@@ -51,9 +51,7 @@ export default function Stake() {
   const getWalletBalance = async () => {
     if (wallet && wallet.publicKey)
       try {
-        let address = new PublicKey(
-          "Cx9oLynYgC3RrgXzin7U417hNY9D6YB1eMGw4ZMbWJgw",
-        );
+        let address = new PublicKey(fomoToken);
         const ata = getAssociatedTokenAddressSync(address, wallet.publicKey);
         const res = await connection.getTokenAccountBalance(ata, "recent");
         // console.log("balance : ", res.value.uiAmount ?? 0);
