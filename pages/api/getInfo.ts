@@ -1,19 +1,9 @@
 import connectDatabase from "@/utils/database";
 import user from "@/models/user";
 import { User } from "@/context/transactions";
-import { userInfo } from "os";
+import { NextApiRequest, NextApiResponse } from "next";
 
-async function handler(req: any, res: any) {
-  if (req.method === "OPTIONS") {
-    res.setHeader("Access-Control-Allow-Methods", "POST,GET,OPTIONS");
-    res.setHeader("Access-Control-Allow-Origin", "*");
-    res.setHeader(
-      "Access-Control-Allow-Headers",
-      "Content-Type, Authorization",
-    );
-    return res.status(200).end();
-  }
-
+async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === "POST") {
     try {
       const { option } = req.body;
@@ -36,7 +26,7 @@ async function handler(req: any, res: any) {
           const userInfo = await user.findOne({ wallet: wallet });
 
           if (!userInfo)
-            return res.json({
+            return res.status(400).json({
               success: false,
               message: "User not found",
             });
@@ -45,15 +35,13 @@ async function handler(req: any, res: any) {
         }
         // 2 - get leaderboard
         case 2: {
-          let usersInfo: User[] | null = await user.find({});
+          let usersInfo: User[] | null = await user.find().sort({ points: -1 });
 
           if (!usersInfo)
-            return res.json({
+            return res.status(400).json({
               success: false,
               message: "Unable to fetch data.",
             });
-
-          usersInfo = usersInfo.sort((a, b) => a.points - b.points);
 
           return res.json({ success: true, users: usersInfo });
         }
@@ -71,7 +59,7 @@ async function handler(req: any, res: any) {
           ]);
 
           if (!globalInfo)
-            return res.json({
+            return res.status(400).json({
               success: false,
               message: "Unable to fetch data.",
             });
@@ -84,12 +72,18 @@ async function handler(req: any, res: any) {
           });
         }
         default:
-          return res.json({ success: false, message: "Invalid option" });
+          return res
+            .status(400)
+            .json({ success: false, message: "Invalid option" });
       }
     } catch (err: any) {
       console.log(err);
-      return res.json({ success: false, message: err.message });
+      return res.status(500).json({ success: false, message: err.message });
     }
+  } else {
+    return res
+      .status(405)
+      .json({ success: false, message: "Method not allowed" });
   }
 }
 
