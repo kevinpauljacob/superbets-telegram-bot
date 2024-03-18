@@ -7,7 +7,12 @@ import { useEffect, useState } from "react";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { useSession } from "next-auth/react";
 import toast from "react-hot-toast";
-import { connection, fomoToken, formatNumber, translator } from "@/context/transactions";
+import {
+  connection,
+  fomoToken,
+  formatNumber,
+  translator,
+} from "@/context/transactions";
 import { LAMPORTS_PER_SOL, PublicKey } from "@solana/web3.js";
 import { useGlobalContext } from "@/components/GlobalContext";
 import { getAssociatedTokenAddressSync } from "@solana/spl-token";
@@ -31,7 +36,7 @@ export default function Stake() {
   } = useGlobalContext();
 
   useEffect(() => {
-    let intervalId = setInterval(async () => {
+    const fetchData = async () => {
       try {
         let data = await fetch(
           "https://hermes.pyth.network/api/latest_price_feeds?ids%5B%5D=0xef0d8b6fda2ceba41da15d4095d1da392a0d2f8ed0c6c7bc0f4cfac8c280b56d",
@@ -43,7 +48,10 @@ export default function Stake() {
         toast.error("Could not fetch live price.");
         setLivePrice(0);
       }
-    }, 60000);
+    };
+    fetchData();
+
+    const intervalId = setInterval(fetchData, 60000);
 
     return () => clearInterval(intervalId);
   }, []);
