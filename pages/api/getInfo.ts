@@ -64,8 +64,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
               message: "Unable to fetch data.",
             });
 
-          // console.log("globalInfo: ", globalInfo);
-
           return res.json({
             success: true,
             data: globalInfo[0],
