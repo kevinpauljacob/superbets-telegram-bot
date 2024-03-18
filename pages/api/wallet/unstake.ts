@@ -1,6 +1,7 @@
 import { Connection, Keypair, PublicKey, Transaction } from "@solana/web3.js";
 import {
   createWithdrawTxn,
+  fomoToken,
   tiers,
   verifyTransaction,
 } from "../../../context/transactions";
@@ -52,7 +53,7 @@ async function handler(req: any, res: any) {
         !amount ||
         !blockhash ||
         !tokenMint ||
-        tokenMint != "Cx9oLynYgC3RrgXzin7U417hNY9D6YB1eMGw4ZMbWJgw"
+        tokenMint != fomoToken
       )
         return res
           .status(400)
@@ -114,7 +115,11 @@ async function handler(req: any, res: any) {
         },
         {
           $inc: { stakedAmount: -amount },
-          $set: { tier, multiplier, points: 0 },
+          $set: {
+            tier,
+            multiplier,
+            //  points: 0
+          },
         },
         { new: true },
       );
@@ -151,7 +156,7 @@ async function handler(req: any, res: any) {
             $set: {
               tier: user.tier,
               multiplier: user.multiplier,
-              points: user.points,
+              // points: user.points,
             },
           },
         );

@@ -106,7 +106,10 @@ function Leaderboard() {
                   {obfuscatePubKey(myData.wallet ?? "")}
                 </span>
                 <span className="w-[15%] text-right font-changa text-sm text-[#F0F0F0] text-opacity-75">
-                  {myData.points}
+                  {myData.points.toLocaleString("en-US", {
+                    maximumFractionDigits: 2,
+                    minimumFractionDigits: 0,
+                  })}
                 </span>
               </div>
             )}
@@ -155,7 +158,10 @@ function Leaderboard() {
                       {obfuscatePubKey(data.wallet ?? "")}
                     </span>
                     <span className="w-[15%] text-right font-changa text-sm text-[#F0F0F0] text-opacity-75">
-                      {data?.points ?? 0}
+                      {(data?.points ?? 0).toLocaleString("en-US", {
+                        maximumFractionDigits: 2,
+                        minimumFractionDigits: 0,
+                      })}
                     </span>
                   </div>
                 ))

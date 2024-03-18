@@ -1,10 +1,14 @@
 import { useWallet } from "@solana/wallet-adapter-react";
 import { getCsrfToken, signIn, signOut, useSession } from "next-auth/react";
-import { SigninMessage } from "./../utils/signinMessage";
+import { buildAuthTx } from "./../utils/signinMessage";
 import bs58 from "bs58";
 import { useEffect } from "react";
 import { useWalletModal } from "@solana/wallet-adapter-react-ui";
-import { obfuscatePubKey, translator } from "@/context/transactions";
+import {
+  connection,
+  obfuscatePubKey,
+  translator,
+} from "@/context/transactions";
 import { useGlobalContext } from "./GlobalContext";
 
 export default function ConnectWallet() {
@@ -21,26 +25,26 @@ export default function ConnectWallet() {
         walletModal.setVisible(true);
       }
 
-      const csrf = await getCsrfToken();
-      if (!wallet.publicKey || !csrf || !wallet.signMessage) return;
+      if (!wallet.publicKey || !wallet.signTransaction) return;
 
-      const message = new SigninMessage({
-        domain: window.location.host,
-        publicKey: wallet.publicKey?.toBase58(),
-        statement: `Sign message to authenticate with FOMOBET : `,
-        nonce: csrf,
-      });
+      let nonce = await getCsrfToken();
 
-      const data = new TextEncoder().encode(message.prepare());
-      const signature = await wallet.signMessage(data);
-      const serializedSignature = bs58.encode(signature);
+      // Create tx
+      const tx = buildAuthTx(nonce!);
+      tx.feePayer = wallet.publicKey; // not sure if needed but set this properly
+      tx.recentBlockhash = (await connection.getLatestBlockhash()).blockhash; // same as line above
 
-      signIn("credentials", {
-        message: JSON.stringify(message),
+      // Encode and send tx to signer, decode and sign
+      let signedTx = await wallet.signTransaction(tx);
+
+      // Encode, send back, decode and verify signedTx signature
+      await signIn("credentials", {
         redirect: false,
-        signature: serializedSignature,
+        nonce,
+        txn: signedTx.serialize().toString("base64"),
       });
     } catch (error) {
+      wallet.disconnect();
       console.log(error);
     }
   };

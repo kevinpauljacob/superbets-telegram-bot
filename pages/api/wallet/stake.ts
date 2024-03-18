@@ -1,6 +1,7 @@
 import { Connection, PublicKey, Transaction } from "@solana/web3.js";
 import {
   createDepositTxn,
+  fomoToken,
   tiers,
   verifyTransaction,
 } from "../../../context/transactions";
@@ -50,7 +51,7 @@ async function handler(req: any, res: any) {
         !amount ||
         !blockhash ||
         !tokenMint ||
-        tokenMint != "Cx9oLynYgC3RrgXzin7U417hNY9D6YB1eMGw4ZMbWJgw"
+        tokenMint != fomoToken
       )
         return res
           .status(400)
@@ -119,6 +120,11 @@ async function handler(req: any, res: any) {
         {
           $inc: { stakedAmount: amount },
           $set: { tier, multiplier },
+          $setOnInsert: {
+            solAmount: 0,
+            keys: 0,
+            points: 0,
+          },
         },
         { new: true, upsert: true },
       );

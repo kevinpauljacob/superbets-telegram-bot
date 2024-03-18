@@ -36,7 +36,7 @@ export default function Sidebar() {
 
   return (
     <div
-      className={`block bg-[#121418] text-white sm:flex flex-col justify-between px-3.5 pb-3.5 w-[290px] h-[calc(100vh-104px)]`}
+      className={`bg-[#121418] text-white sm:flex flex-col justify-between px-3.5 pb-3.5 w-[290px] h-[calc(100vh-104px)]`}
     >
       <div>
         <div className="flex flex-col bg-[#202329] rounded-md py-3.5 px-1.5">

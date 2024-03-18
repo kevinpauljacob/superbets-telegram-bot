@@ -2,6 +2,7 @@ import { useContext, useState } from "react";
 import { useGlobalContext } from "./GlobalContext";
 import {
   connection,
+  fomoToken,
   formatNumber,
   stakeFOMO,
   translator,
@@ -37,9 +38,7 @@ export default function StakeFomo() {
   const getWalletBalance = async () => {
     if (wallet && wallet.publicKey)
       try {
-        let address = new PublicKey(
-          "Cx9oLynYgC3RrgXzin7U417hNY9D6YB1eMGw4ZMbWJgw",
-        );
+        let address = new PublicKey(fomoToken);
         const ata = getAssociatedTokenAddressSync(address, wallet.publicKey);
         const res = await connection.getTokenAccountBalance(ata, "recent");
         // console.log("balance : ", res.value.uiAmount ?? 0);
@@ -61,22 +60,14 @@ export default function StakeFomo() {
           setLoading(false);
           return;
         }
-        response = await stakeFOMO(
-          wallet,
-          amount,
-          "Cx9oLynYgC3RrgXzin7U417hNY9D6YB1eMGw4ZMbWJgw",
-        );
+        response = await stakeFOMO(wallet, amount, fomoToken);
       } else {
         if (amount > (userData?.stakedAmount ?? 0)) {
           toast.error(translator("Insufficient FOMO", language));
           setLoading(false);
           return;
         }
-        response = await unstakeFOMO(
-          wallet,
-          amount,
-          "Cx9oLynYgC3RrgXzin7U417hNY9D6YB1eMGw4ZMbWJgw",
-        );
+        response = await unstakeFOMO(wallet, amount, fomoToken);
       }
       // console.log(response);
       if (response && response.success) await getWalletBalance();
