@@ -1,4 +1,4 @@
-import { formatNumber, tiers, translator } from "@/context/transactions";
+import { formatNumber, stakingTiers, translator } from "@/context/transactions";
 import { useGlobalContext } from "./GlobalContext";
 import Image from "next/legacy/image";
 
@@ -44,18 +44,14 @@ export default function StakeStats() {
                 : "text-[#1FCDF0]"
             }`}
           >
-            {userData?.tier === 7
-              ? "2"
-              : //@ts-ignore
-                tiers[userData?.tier ?? 0]?.multiplier ?? 0.5}
-            x
+            {stakingTiers[userData?.tier ?? 0]?.multiplier ?? 0.5}x
           </span>
         </div>
         {(userData?.tier ?? 0) < 7 && (
           <span className="text-white text-sm text-opacity-50 font-medium">
             {
               //@ts-ignore
-              translator(tiers[userData?.tier ?? 0]?.text ?? "")
+              translator(stakingTiers[userData?.tier ?? 0]?.text ?? "")
             }
           </span>
         )}
@@ -79,16 +75,7 @@ export default function StakeStats() {
                 <span className="text-[#9945FF] ml-1">FOMO</span>
               </>
             ) : (
-              formatNumber(
-                //@ts-ignore
-                tiers[
-                  parseInt(
-                    Object.keys(tiers).find(
-                      (key) => parseInt(key) === (userData?.tier ?? 0),
-                    ) ?? "0",
-                  )
-                ]?.limit,
-              ) + " FOMO"
+              (stakingTiers[userData?.tier ?? 0]?.limit, +" FOMO")
             )}
           </span>
         </div>
@@ -97,26 +84,12 @@ export default function StakeStats() {
             <>
               <p className="text-white text-sm text-opacity-50 font-medium">
                 {translator("Stake", language)}{" "}
-                {formatNumber(
-                  //@ts-ignore
-                  tiers[
-                    parseInt(
-                      Object.keys(tiers).find(
-                        (key) => parseInt(key) === (userData?.tier ?? 0),
-                      ) ?? "0",
-                    )
-                  ]?.limit - (userData?.stakedAmount ?? 0),
-                )}{" "}
+                {stakingTiers[(userData?.tier ?? 0) + 1]?.limit -
+                  (userData?.stakedAmount ?? 0)}{" "}
                 {translator("more FOMO to reach", language)} T
                 {(userData?.tier ?? 0) + 1} (
                 <span className="text-[#9945FF] ml-1">
-                  {userData?.tier === 7
-                    ? 2
-                    : userData?.tier === 6
-                    ? 2
-                    : //@ts-ignore
-                      tiers[(userData?.tier ?? 0) + 1]?.multiplier ?? 0.5}
-                  x
+                  {stakingTiers[(userData?.tier ?? 0) + 1]?.multiplier ?? 0.5}x
                 </span>{" "}
                 {translator("multiplier", language)} )
               </p>
@@ -125,17 +98,7 @@ export default function StakeStats() {
                   T{(userData?.tier ?? 0) + 1}
                 </span>
                 <span className="text-sm text-white text-right text-opacity-75 font-semibold">
-                  {formatNumber(
-                    //@ts-ignore
-                    tiers[
-                      parseInt(
-                        Object.keys(tiers).find(
-                          (key) => parseInt(key) === (userData?.tier ?? 0),
-                        ) ?? "0",
-                      )
-                    ]?.limit,
-                  )}{" "}
-                  FOMO
+                  {stakingTiers[(userData?.tier ?? 0) + 1].limit} FOMO
                 </span>
               </div>
             </>
@@ -155,32 +118,19 @@ export default function StakeStats() {
                   ? userData?.stakedAmount ?? 0
                   : 600000) *
                   100) /
-                //@ts-ignore
-                tiers[
-                  parseInt(
-                    Object.keys(tiers).find(
-                      (key) => parseInt(key) === (userData?.tier ?? 0),
-                    ) ?? "0",
-                  )
-                ].limit
+                stakingTiers[(userData?.tier ?? 0) + 1].limit
               }%`,
             }}
             className="h-full bg-[linear-gradient(91.179deg,#C867F0_0%,#1FCDF0_50.501%,#19EF99_100%)]"
           />
           <span className="w-full h-full absolute top-0 left-0 flex items-center justify-center z-10 text-black font-semibold text-sm text-opacity-75">
-            {(userData?.tier ?? 0) < 7
-              ? (
-                  ((userData?.stakedAmount ?? 0) * 100) /
-                  //@ts-ignore
-                  tiers[
-                    parseInt(
-                      Object.keys(tiers).find(
-                        (key) => parseInt(key) === (userData?.tier ?? 0),
-                      ) ?? "0",
-                    )
-                  ].limit
-                ).toFixed(2)
-              : 100}
+            {(
+              (((userData?.tier ?? 0) < 7
+                ? userData?.stakedAmount ?? 0
+                : 600000) *
+                100) /
+              stakingTiers[(userData?.tier ?? 0) + 1].limit
+            ).toFixed(2)}
             %
           </span>
         </div>
