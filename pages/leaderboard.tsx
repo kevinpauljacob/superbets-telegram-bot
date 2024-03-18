@@ -28,7 +28,7 @@ export default function Leaderboard() {
     setPointTier({
       index: parseInt(tier[0]),
       limit: tier[1].limit,
-      image: `/assets/T-${tier[0]}.png`,
+      image: `/assets/badges/T-${tier[0]}.png`,
       label: tier[1].label,
     });
   }, [userData]);
