@@ -20,15 +20,15 @@ export default function FomoExit() {
 
   return (
     <div>
-      <div className="flex items-center mb-5">
+      <div className="flex items-center mb-1.5">
         <Image src={Dollar} alt="" width={26} height={26} />
         <span className="font-bold text-xl pl-3">
           FOMO: Exit - A unique DeFi game experience
         </span>
       </div>
-      <div className="flex flex-wrap">
+      <div className="flex flex-wrap justify-center sm:justify-start">
         {games.map((game, index) => (
-          <Link href={game.href} key={index} className="pr-3.5">
+          <Link href={game.href} key={index} className="pr-3.5 mt-3.5">
             <Image src={game.src} alt="" width={295} height={160} />
           </Link>
         ))}

@@ -7,7 +7,7 @@ import { connection, formatNumber, translator } from "@/context/transactions";
 import { LAMPORTS_PER_SOL, PublicKey } from "@solana/web3.js";
 import { useGlobalContext } from "@/components/GlobalContext";
 import { getAssociatedTokenAddressSync } from "@solana/spl-token";
-import StoreBanner from "@/components/StoreBanner";
+import StoreBanner from "@/components/Banner";
 import StoreCard from "@/components/StoreCard";
 
 export default function Store() {

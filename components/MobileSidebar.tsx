@@ -36,10 +36,10 @@ export default function Sidebar() {
 
   return (
     <div
-      className={`hidden bg-[#121418] text-white md:flex flex-col justify-between px-3.5 pb-3.5 min-w-[230px] w-[290px] h-[calc(100vh-104px)]`}
+      className={`md:hidden bg-[#121418] text-white flex flex-col justify-between px-4 sm:px-8 py-3.5 w-full h-[calc(100vh-165px)]`}
     >
       <div>
-        <div className="flex flex-col bg-[#202329] rounded-md py-3.5 px-1.5">
+        <div className="flex flex-col bg-[#202329] rounded-md py-3.5 px-3 sm:px-6">
           <div className="flex items-center w-full mb-2">
             <Image src={userImg} alt="" width={60} height={60} />
             <div className="ml-1">

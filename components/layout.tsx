@@ -2,6 +2,7 @@ import React, { ReactNode, useState } from "react";
 import { Header } from "./Header";
 import InfoBar from "./Infobar";
 import Sidebar from "./Sidebar";
+import MobileSidebar from "./MobileSidebar";
 import SubHeader from "./SubHeader";
 
 interface LayoutProps {
@@ -22,10 +23,16 @@ export default function Layout({ children }: LayoutProps) {
       <section className="flex">
         <Sidebar />
         <section className="w-full">
-          <SubHeader />
-          <main>
-            {mobileSidebar ? <Sidebar /> : <section>{children}</section>}
-          </main>
+          {mobileSidebar ? (
+            <MobileSidebar />
+          ) : (
+            <section>
+              <SubHeader />
+              <main>
+                <section>{children}</section>
+              </main>
+            </section>
+          )}
         </section>
       </section>
     </>

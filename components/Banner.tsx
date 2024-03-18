@@ -1,17 +1,30 @@
 import Image from "next/image";
-import Banner from "/public/assets/storeBanner.svg";
+import BannerLeft from "/public/assets/storeBannerLeft.svg";
+import BannerRight from "/public/assets/storeBannerRight.svg";
 
 export default function StoreBanner() {
   return (
-    <div className="relative w-full">
+    <div className="flex w-full">
       <Image
-        className="z-0 w-full"
-        src={Banner}
+        className="w-full"
+        src={BannerLeft}
         width="100"
         height="100"
         alt="Store Banner"
       />
-      <div className="absolute top-0 left-0 z-10 px-16 py-8 w-[50%]">
+      <Image
+        className="w-max h-[87%]"
+        src={BannerRight}
+        width="100"
+        height="100"
+        alt="Store Banner"
+      />
+    </div>
+  );
+}
+
+{
+  /* <div className="absolute top-0 left-0 z-10 px-16 py-8 w-[50%]">
         <div className="rounded-full bg-[#9945FF] w-min px-10 py-1.5">
           Store
         </div>
@@ -22,7 +35,5 @@ export default function StoreBanner() {
           Sake your FOMO tokens to receive multipliers for your points which
           gets you amazing rewards from our store
         </p>
-      </div>
-    </div>
-  );
+      </div> */
 }

@@ -18,7 +18,7 @@ import {
 import { useWallet } from "@solana/wallet-adapter-react";
 import { translationsMap, useGlobalContext } from "@/components/GlobalContext";
 import Sidebar from "@/components/OldSidebar";
-import StoreBanner from "@/components/StoreBanner";
+import StoreBanner from "@/components/Banner";
 import FomoExit from "@/components/FomoExit";
 import FomoPlay from "@/components/FomoPlay";
 import FomoSupply from "@/components/FomoSupply";
@@ -47,7 +47,7 @@ export default function Home() {
   }, [language]);
 
   return (
-    <div className="flex text-white w-full overflow-hidden min-h-screen flex-1  relative overflow-x-hidden p-6">
+    <div className="flex flex-col xl:flex-row text-white w-full overflow-hidden min-h-screen relative overflow-x-hidden p-6">
       <div>
         <div className="mb-7">
           <StoreBanner />
@@ -59,7 +59,7 @@ export default function Home() {
           <FomoPlay />
         </div>
       </div>
-      <div className="ml-4">
+      <div className="xl:ml-4">
         <FomoSupply />
       </div>
     </div>

@@ -14,7 +14,7 @@ export default function FomoSupply() {
   const { burnt, circulating } = FomoSupply[0];
 
   return (
-    <div className="w-[330px]">
+    <div className="hidden md:block w-max xl:w-[330px]">
       <div className="bg-[#1E2220] rounded-lg p-4 ">
         <div className="flex justify-between items-center w-full">
           <span className="font-semibold text-gray-400">$FOMO SUPPLY</span>

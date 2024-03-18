@@ -154,7 +154,7 @@ export function Header({ sidebar, toggleSidebar }) {
           </div>
         </div>
       </div>
-      <div className="sm:hidden text-white bg-[#121418] border-y border-white/10 py-2">
+      <div className="md:hidden text-white bg-[#121418] border-y border-white/10 py-2">
         <ul className="flex flex-1">
           <li
             className="flex flex-col items-center border-r border-white/10 w-1/5"

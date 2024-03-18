@@ -36,12 +36,12 @@ export default function SubHeader() {
   ];
 
   return (
-    <div className="w-full text-white h-[70px] flex items-center justify-between border-y border-[#1E2220] pl-4 pr-8 bg-[#121418]">
-      <div className="flex items-center">
+    <div className="w-full text-white h-[70px] flex items-center justify-between border-y border-[#1E2220] px-4 lg:pl-4 lg:pr-8 bg-[#121418]">
+      <div className="flex items-center overflow-scroll">
         {cards.map((card, index) => (
           <div
             key={index}
-            className="bg-[#1E2220] flex items-center rounded-md mx-2.5 "
+            className="bg-[#1E2220] flex items-center rounded-md mx-2.5 min-w-[150px]"
           >
             <Image src={card.cardSrc} alt="" width={52} height={52} />
             <div className="pl-2 pr-4 py-1">
@@ -54,7 +54,7 @@ export default function SubHeader() {
           </div>
         ))}
       </div>
-      <div className="flex items-center border-l border-[#1E2220] pl-4 ">
+      <div className="hidden md:flex items-center border-l border-[#1E2220] pl-4 ">
         <div className="mr-2">
           <Image src={coin} alt="" width={23} height={23} />
         </div>
