@@ -6,19 +6,21 @@ export default function StoreBanner() {
   return (
     <div className="flex w-full">
       <Image
-        className="w-full"
+        className="w-[80%]"
         src={BannerLeft}
         width="100"
         height="100"
         alt="Store Banner"
       />
-      <Image
-        className="w-max h-[87%]"
-        src={BannerRight}
-        width="100"
-        height="100"
-        alt="Store Banner"
-      />
+      <div className="w-[20%] h-full">
+        <Image
+          className="w-full h-full object-cover"
+          src={BannerRight}
+          width="100"
+          height="100"
+          alt="Store Banner"
+        />
+      </div>
     </div>
   );
 }
@@ -37,3 +39,22 @@ export default function StoreBanner() {
         </p>
       </div> */
 }
+
+// <div className="grid grid-cols-3 w-full">
+//   <Image
+//     className="w-full col-span-2"
+//     src={BannerLeft}
+//     width="100"
+//     height="100"
+//     alt="Store Banner"
+//   />
+//   <div className="w-full h-full">
+//     <Image
+//       className="w-full h-auto object-cover"
+//       src={BannerRight}
+//       width="100"
+//       height="100"
+//       alt="Store Banner"
+//     />
+//   </div>
+// </div>;

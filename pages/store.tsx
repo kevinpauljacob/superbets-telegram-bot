@@ -1,4 +1,3 @@
-import { Header } from "@/components/Header";
 import { useEffect, useState } from "react";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { useSession } from "next-auth/react";
@@ -63,20 +62,19 @@ export default function Store() {
   ];
 
   return (
-    <div className="flex flex-col items-center w-full overflow-hidden min-h-screen flex-1 relative">
-      <Header />
-      <div className="text-white w-full flex flex-col items-start justify-center px-5 sm:px-10 lg:px-40 2xl:px-[14%] bg-black pb-10">
+    <div className="text-white w-full flex flex-col items-start justify-center p-5 sm:p-5 bg-black pb-10 overflow-hidden min-h-screen">
+      <div className="mb-7">
         <StoreBanner />
-        <div className="grid min-[1890px]:grid-cols-5 2xl:grid-cols-4 xl:grid-cols-3 sm:grid-cols-2 grid-cols-1 gap-5 mx-auto">
-          {cardDetails.map((card, index) => (
-            <StoreCard
-              key={index}
-              src={card.src}
-              name={card.name}
-              points={card.points}
-            />
-          ))}
-        </div>
+      </div>
+      <div className="grid 2xl:grid-cols-5 xl:grid-cols-3 sm:grid-cols-2 grid-cols-1 gap-5 mx-auto">
+        {cardDetails.map((card, index) => (
+          <StoreCard
+            key={index}
+            src={card.src}
+            name={card.name}
+            points={card.points}
+          />
+        ))}
       </div>
     </div>
   );
