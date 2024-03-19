@@ -20,7 +20,11 @@ const config: Config = {
         xs: "400px",
       },
       fontFamily: {
-        changa: ['Changa', 'sans-serif'],
+        koulen: ["Koulen", "sans-serif"],
+        changa: ["Changa", "sans-serif"],
+        bungee: ["Bungee", "cursive"],
+        lilita: ["Lilita One", "sans serif"],
+        goldman: ["Goldman", "sans serif"],
     },
     },
   },

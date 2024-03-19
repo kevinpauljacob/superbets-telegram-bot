@@ -7,7 +7,7 @@ const MONGODB_URI = process.env.DB_URI!;
 
 if (!MONGODB_URI) {
   throw new Error(
-    "Please define the MONGODB_URI environment variable inside .env.local",
+    "Please define the MONGODB_URI environment variable inside .env.local"
   );
 }
 
@@ -22,9 +22,10 @@ async function connectDatabase() {
     return cached.conn;
   }
   if (!cached.promise) {
-    const opts = {};
+    const opts = {
+      bufferCommands: false,
+    };
     cached.promise = mongoose.connect(MONGODB_URI, opts).then((mongoose) => {
-      mongoose.set("debug", true);
       return mongoose;
     });
   }
