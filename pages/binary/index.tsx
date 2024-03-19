@@ -211,7 +211,7 @@ export default function Binary() {
   }, [wallet.publicKey, strikePrice]);
 
   return (
-    <div className="flex h-full w-[100vw] flex-col items-center justify-start">
+    <div className="flex h-full w-full flex-col items-center justify-start">
       <Head>
         <title>Fomobet</title>
       </Head>

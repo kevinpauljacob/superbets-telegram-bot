@@ -1,5 +1,5 @@
 import Image from "next/image";
-import solanalogo from "../public/assets/Solana_logo_1.svg";
+// import solanalogo from "../public/assets/Solana_logo_1.svg";
 import { useState, useEffect } from "react";
 import toast from "react-hot-toast";
 import { useWallet } from "@solana/wallet-adapter-react";
@@ -86,7 +86,7 @@ function Balance() {
 
   return (
     <>
-      <div className="relative flex w-[100vw] flex-col flex-wrap items-center justify-start overflow-y-auto">
+      <div className="relative flex w-full flex-col flex-wrap items-center justify-start overflow-y-auto">
         <div className="flex w-[90%] flex-col items-center pb-4 md:w-[70%]">
           <div className="mb-[3rem] rounded-md py-6 text-center font-changa">
             <h2 className="text-shadow-pink mb-2 text-2xl text-[#F0F0F0] text-opacity-75">
@@ -121,7 +121,7 @@ function Balance() {
                           Coin
                         </span>
                         <div className="flex w-full items-center">
-                          <Image src={solanalogo} width={30} alt="" />
+                          <Image src={'../public/assets/Solana_logo_1.svg'} width={30} alt="" />
                           <span className="ml-2 text-sm text-[#f0f0f0] text-opacity-75">
                             ${coin.tokenMint}
                           </span>

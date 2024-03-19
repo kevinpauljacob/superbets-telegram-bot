@@ -84,7 +84,7 @@ export default function Dice() {
   }, [wallet?.publicKey, refresh]);
 
   return (
-    <div className="flex h-full w-[100vw] flex-col items-center justify-start">
+    <div className="flex h-full w-full flex-col items-center justify-start">
       <div className="flex w-[90%] max-w-[35rem] flex-col items-center rounded-[1.15rem] border-2 border-[#C20FC580] bg-[#C20FC533] px-3 py-5 md:p-7">
         <span className="mb-1 mr-0 font-changa text-xs font-medium text-[#F0F0F0] text-opacity-75">
           sol balance: {user && user.deposit[0].amount.toFixed(4)}
