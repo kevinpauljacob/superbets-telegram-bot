@@ -22,12 +22,12 @@ export default function Leaderboard() {
   useEffect(() => {
     let points = userData?.points ?? 0;
     const tier = Object.entries(pointTiers).reduce((prev, next) => {
-      return points >= next[1].limit ? next : prev;
+      return points >= next[1]?.limit ? next : prev;
     });
 
     setPointTier({
       index: parseInt(tier[0]),
-      limit: tier[1].limit,
+      limit: tier[1]?.limit,
       image: `/assets/badges/T-${tier[0]}.png`,
       label: tier[1].label,
     });
@@ -159,7 +159,7 @@ export default function Leaderboard() {
                       return (
                         <>
                           <span className="border border-white py-1.5 px-3">
-                            {tier.limit}
+                            {tier?.limit}
                             {stakingTiers[index + 1]
                               ? `- ${stakingTiers[index + 1]?.limit - 1}`
                               : "+"}
