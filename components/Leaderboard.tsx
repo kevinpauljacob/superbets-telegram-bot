@@ -33,7 +33,7 @@ function Leaderboard() {
       });
 
       let { success, message, users } = await res.json();
-      console.log("Data: ", users);
+
       if (success && Array.isArray(users)) {
         users = users.map((user, index) => {
           return { ...user, rank: index + 1 };
@@ -140,16 +140,13 @@ function Leaderboard() {
                     <span className="w-[70%] flex items-center gap-2 text-left font-changa text-sm text-[#F0F0F0] text-opacity-75 pl-[15%]">
                       <div className="relative w-8 h-8">
                         <Image
-                          src={
-                            data?.points >= 500
-                              ? "/assets/silver.png"
-                              : pointTiers.find(
-                                  (tier, index) =>
-                                    (data?.points ?? 0) >= tier.limit &&
-                                    (data?.points ?? 0) <
-                                      pointTiers[index + 1].limit,
-                                )?.image ?? "/assets/bronze.png"
-                          }
+                          src={`/assets/badges/T-${Object.entries(
+                            pointTiers,
+                          ).reduce((acc: number, [key, value]) => {
+                            return data?.points >= value.limit
+                              ? parseInt(key)
+                              : acc;
+                          }, 0)}.png`}
                           layout="fill"
                           objectFit="contain"
                           objectPosition="center"
@@ -158,10 +155,7 @@ function Leaderboard() {
                       {obfuscatePubKey(data.wallet ?? "")}
                     </span>
                     <span className="w-[15%] text-right font-changa text-sm text-[#F0F0F0] text-opacity-75">
-                      {(data?.points ?? 0).toLocaleString("en-US", {
-                        maximumFractionDigits: 2,
-                        minimumFractionDigits: 0,
-                      })}
+                      {parseInt(data?.points ?? 0)}
                     </span>
                   </div>
                 ))
@@ -186,7 +180,7 @@ function Leaderboard() {
         </span>
         {[...Array(maxPages)]
           .map((_, i) => ++i)
-          .slice(0, 3)
+          .slice(0, 2)
           .map((i, index) => (
             <span
               key={index}
@@ -200,14 +194,14 @@ function Leaderboard() {
               {i}
             </span>
           ))}
-        {maxPages > 3 && (
+        {maxPages > 2 && (
           <span className="text-[#F0F0F0] cursor-default">. . .</span>
         )}
 
-        {maxPages > 3 &&
+        {maxPages > 2 &&
           [...Array(maxPages)]
             .map((_, i) => ++i)
-            .slice(maxPages - 3, maxPages)
+            .slice(maxPages - 2, maxPages)
             .map((i, index) => (
               <span
                 key={index}

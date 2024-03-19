@@ -35,32 +35,96 @@ export const formatNumber = (number: number, fractions?: number) => {
   });
 };
 
-export const tiers = {
-  0: { limit: 300, multiplier: 0.5, text: "Do you even FOMO bro?" },
-  1: { limit: 3000, multiplier: 1, text: "Caught the FOMO bug?" },
-  2: { limit: 15000, multiplier: 1.05, text: "FOMO is rising..." },
-  3: { limit: 40000, multiplier: 1.15, text: "On your way to FOMOtopia." },
-  4: {
-    limit: 75000,
-    multiplier: 1.3,
-    text: "FOMO Jedi - May the gains be with you.",
+export const stakingTiers: Record<
+  number,
+  {
+    limit: number;
+    multiplier: number;
+  }
+> = {
+  0: {
+    limit: 0,
+    multiplier: 0.5,
   },
-  5: { limit: 150000, multiplier: 1.5, text: "FOMO Wizard - Spreading magic." },
+  1: {
+    limit: 300,
+    multiplier: 1,
+  },
+  2: {
+    limit: 3000,
+    multiplier: 1.05,
+  },
+  3: {
+    limit: 15000,
+    multiplier: 1.15,
+  },
+  4: {
+    limit: 40000,
+    multiplier: 1.3,
+  },
+  5: {
+    limit: 75000,
+    multiplier: 1.5,
+  },
   6: {
-    limit: 600000,
+    limit: 150000,
     multiplier: 1.75,
-    text: "FOMO God – Missing out is for mortals, not you.",
+  },
+  7: {
+    limit: 600000,
+    multiplier: 2,
   },
 };
 
-export const pointTiers = [
-  { index: 0, limit: 0, label: "BRONZE", image: "/assets/bronze.png" },
-  { index: 1, limit: 100, label: "SILVER", image: "/assets/gold.png" },
-  { index: 2, limit: 200, label: "GOLD", image: "/assets/silver.png" },
-  { index: 3, limit: 300, label: "Platinum", image: "/assets/bronze.png" },
-  { index: 4, limit: 400, label: "Diamond", image: "/assets/gold.png" },
-  { index: 5, limit: 500, label: "Elite", image: "/assets/silver.png" },
-];
+export const pointTiers: Record<
+  number,
+  {
+    limit: number;
+    label: string;
+    text: string;
+  }
+> = {
+  0: {
+    limit: 0,
+    label: "BRONZE",
+    text: "Do you even FOMO bro?",
+  },
+  1: {
+    limit: 5_000,
+    label: "SILVER",
+    text: "Caught the FOMO bug?",
+  },
+  2: {
+    limit: 25_000,
+    label: "GOLD",
+    text: "FOMO is rising...",
+  },
+  3: {
+    limit: 100_000,
+    label: "PLATINUM",
+    text: "On your way to FOMOtopia.",
+  },
+  4: {
+    limit: 250_000,
+    label: "ELITE",
+    text: "FOMO Jedi - May the gains be with you.",
+  },
+  5: {
+    limit: 500_000,
+    label: "SUPREME",
+    text: "FOMO Wizard - Spreading magic.",
+  },
+  6: {
+    limit: 750_000,
+    label: "LEGENDARY",
+    text: "FOMO God – Missing out is for mortals, not you.",
+  },
+  7: {
+    limit: 1_000_000,
+    label: "MYTHICAL",
+    text: "FOMO is You and You are FOMO.",
+  },
+};
 
 export const obfuscatePubKey = (address: string) => {
   return (

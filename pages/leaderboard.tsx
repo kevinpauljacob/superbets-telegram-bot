@@ -4,8 +4,8 @@ import LeaderboardTable from "@/components/Leaderboard";
 import {
   formatNumber,
   obfuscatePubKey,
+  stakingTiers,
   pointTiers,
-  tiers,
   translator,
 } from "@/context/transactions";
 import { useWallet } from "@solana/wallet-adapter-react";
@@ -21,31 +21,17 @@ export default function Leaderboard() {
 
   useEffect(() => {
     let points = userData?.points ?? 0;
-    pointTiers.some((tier, index) => {
-      if (points >= pointTiers[5].limit) {
-        setPointTier({
-          index: 5,
-          limit: pointTiers[5].limit,
-          image: pointTiers[5].image,
-          label: pointTiers[5].label,
-        });
-      } else if (
-        points >= pointTiers[index].limit &&
-        points < pointTiers[index + 1].limit
-      ) {
-        setPointTier({
-          index: index,
-          limit: pointTiers[index].limit,
-          image: pointTiers[index].image,
-          label: pointTiers[index].label,
-        });
-      }
+    const tier = Object.entries(pointTiers).reduce((prev, next) => {
+      return points >= next[1].limit ? next : prev;
+    });
+
+    setPointTier({
+      index: parseInt(tier[0]),
+      limit: tier[1].limit,
+      image: `/assets/badges/T-${tier[0]}.png`,
+      label: tier[1].label,
     });
   }, [userData]);
-
-  useEffect(() => {
-    console.log(pointTier);
-  }, [pointTier]);
 
   return (
     <div className="flex flex-col items-center w-full overflow-hidden min-h-screen flex-1 bg-black relative">
@@ -88,7 +74,7 @@ export default function Leaderboard() {
                 </p>
               </div>
             </div>
-            {(pointTier?.index ?? 0) < 5 && (
+            {(pointTier?.index ?? 0) < 7 && (
               <div className="hidden sm:flex sm:flex-col sm:items-end">
                 <span className="text-white text-base text-opacity-50">
                   {translator("Next Tier", language)}
@@ -101,7 +87,7 @@ export default function Leaderboard() {
           </div>
 
           {/* next tier data - mob view  */}
-          {(pointTier?.index ?? 0) < 5 && (
+          {(pointTier?.index ?? 0) < 7 && (
             <div className="flex sm:hidden mt-5 items-center justify-between">
               <div className="flex items-center gap-2">
                 <span className="flex text-white text-xs text-opacity-50">
@@ -120,7 +106,7 @@ export default function Leaderboard() {
           )}
 
           <div className="hidden sm:flex flex-row items-end justify-end px-4">
-            {(pointTier?.index ?? 0) < 5 && (
+            {(pointTier?.index ?? 0) < 7 && (
               <div className="flex flex-col items-end">
                 <span className="text-sm text-white text-right text-opacity-75 font-semibold">
                   {formatNumber(pointTiers[pointTier?.index + 1]?.limit ?? 0) +
@@ -134,8 +120,7 @@ export default function Leaderboard() {
             <div
               style={{
                 width: `${
-                  (((pointTier?.index ?? 0) < 5 ? userData?.points ?? 0 : 500) *
-                    100) /
+                  (Math.min(userData?.points ?? 0, 1_000_000) * 100) /
                     pointTiers[pointTier?.index + 1]?.limit ?? 1
                 }%`,
               }}
@@ -143,9 +128,8 @@ export default function Leaderboard() {
             />
             <span className="w-full h-full absolute top-0 left-0 flex items-center justify-center z-10 text-black font-semibold text-sm text-opacity-75">
               {(
-                (((pointTier?.index ?? 0) < 5 ? userData?.points ?? 0 : 500) *
-                  100) /
-                (pointTiers[pointTier?.index + 1]?.limit ?? 500)
+                (Math.min(userData?.points ?? 0, 1_000_000) * 100) /
+                (pointTiers[pointTier?.index + 1]?.limit ?? 1_000_000)
               ).toFixed(2)}{" "}
               %
             </span>
@@ -156,14 +140,11 @@ export default function Leaderboard() {
         <div className="w-full sm:w-[50%] flex flex-row sm:flex-col items-stretch justify-between gap-2 p-4 bg-[#19161C] rounded-[10px]">
           <div className="w-full flex flex-col items-start bg-[linear-gradient(91.179deg,#C867F0_0%,#1FCDF0_50.501%,#19EF99_100%)] rounded-md text-white p-3">
             <div className="flex items-baseline">
-              <span className="font-changa font-semibold text-2xl sm:text-[2.5rem]">
-                {userData?.multiplier ?? 0.5}
-              </span>
-              <span className="font-bold text-base sm:text-2xl  ml-0.5 mr-3">
-                x
+              <span className="font-changa font-semibold text-4xl sm:text-[2.5rem] mr-2">
+                T{userData?.tier ?? 0}
               </span>
               <span className="font-changa font-semibold text-opacity-90 text-sm sm:text-xl ">
-                Boost
+                {`(${userData?.multiplier ?? 0.5}x multiplier)`}
               </span>
               <span className="ml-1 z-30 group flex relative justify-start">
                 <div className="hidden group-hover:flex max-w-[20rem] -ml-14 bg-[#171515] p-3 rounded-md absolute min-w-max top-full mt-2 items-center justify-center text-left">
@@ -174,11 +155,14 @@ export default function Leaderboard() {
                     <span className="text-[#9945FF] font-bold border border-white py-1.5 px-3">
                       Multiplier
                     </span>
-                    {Object.values(tiers).map((tier) => {
+                    {Object.values(stakingTiers).map((tier, index) => {
                       return (
                         <>
                           <span className="border border-white py-1.5 px-3">
                             {tier.limit}
+                            {stakingTiers[index + 1]
+                              ? `- ${stakingTiers[index + 1]?.limit - 1}`
+                              : "+"}
                           </span>
                           <span className="border border-white py-1.5 px-3">
                             {tier.multiplier}

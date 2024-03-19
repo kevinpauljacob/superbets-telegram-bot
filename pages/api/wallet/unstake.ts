@@ -2,7 +2,7 @@ import { Connection, Keypair, PublicKey, Transaction } from "@solana/web3.js";
 import {
   createWithdrawTxn,
   fomoToken,
-  tiers,
+  stakingTiers,
   verifyTransaction,
 } from "../../../context/transactions";
 import connectDatabase from "../../../utils/database";
@@ -96,15 +96,10 @@ async function handler(req: any, res: any) {
       let multiplier = 0.5;
       let checkAmt = user.stakedAmount - amount;
 
-      Object.entries(tiers).some(([key, value], index) => {
-        if (checkAmt >= 600000) {
-          tier = 7;
-          multiplier = 2;
-          return true;
-        } else if (checkAmt < value.limit) {
-          tier = index;
+      Object.entries(stakingTiers).forEach(([key, value]) => {
+        if (checkAmt >= value.limit) {
+          tier = parseInt(key);
           multiplier = value.multiplier;
-          return true;
         }
       });
 
@@ -118,7 +113,7 @@ async function handler(req: any, res: any) {
           $set: {
             tier,
             multiplier,
-            //  points: 0
+            points: 0,
           },
         },
         { new: true },
@@ -156,7 +151,7 @@ async function handler(req: any, res: any) {
             $set: {
               tier: user.tier,
               multiplier: user.multiplier,
-              // points: user.points,
+              points: user.points,
             },
           },
         );

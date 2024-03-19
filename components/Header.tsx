@@ -137,7 +137,7 @@ export function Header({ sidebar, toggleSidebar }) {
                 onClick={() => {
                   router.push("leaderboard");
                 }}
-                className="hidden sm:flex text-white text-opacity-50 bg-white bg-opacity-5 font-medium rounded-md text-sm px-5 py-3"
+                className="hidden sm:flex text-white bg-[#9945FF] hover:bg-opacity-50 transition-all font-medium rounded-md text-sm px-5 py-3"
               >
                 {translator("Leaderboard", language)}
               </button>
@@ -153,33 +153,38 @@ export function Header({ sidebar, toggleSidebar }) {
             </div>
           </div>
         </div>
-      </div>
-      <div className="md:hidden text-white bg-[#121418] border-y border-white/10 py-2">
-        <ul className="flex flex-1">
-          <li
-            className="flex flex-col items-center border-r border-white/10 w-1/5"
-            onClick={() => toggleSidebar()}
-          >
-            <Image src={Menu} alt="Menu" width={23} height={20} />
-            <p className="text-[10px] text-white/60 mt-1.5">Menu</p>
-          </li>
-          <li className="flex flex-col items-center border-r border-white/10 w-1/5">
-            <Image src={Staking} alt="Staking" width={13} height={20} />
-            <p className="text-[10px] text-white/60 mt-1.5">Staking</p>
-          </li>
-          <li className="flex flex-col items-center border-r border-white/10 w-1/5">
-            <Image src={Leaderboard} alt="Leaderboard" width={25} height={20} />
-            <p className="text-[10px] text-white/60 mt-1.5">Leaderboard</p>
-          </li>
-          <li className="flex flex-col items-center border-r border-white/10 w-1/5">
-            <Image src={Store} alt="Store" width={20} height={20} />
-            <p className="text-[10px] text-white/60 mt-1.5">Store</p>
-          </li>
-          <li className="flex flex-col items-center w-1/5">
-            <Image src={Dashboard} alt="Dashboard" width={18} height={20} />
-            <p className="text-[10px] text-white/60 mt-1.5">Dashboard</p>
-          </li>
-        </ul>
+        <div className="md:hidden text-white bg-[#121418] border-y border-white/10 py-2">
+          <ul className="flex flex-1">
+            <li
+              className="flex flex-col items-center border-r border-white/10 w-1/5"
+              onClick={() => toggleSidebar()}
+            >
+              <Image src={Menu} alt="Menu" width={23} height={20} />
+              <p className="text-[10px] text-white/60 mt-1.5">Menu</p>
+            </li>
+            <li className="flex flex-col items-center border-r border-white/10 w-1/5">
+              <Image src={Staking} alt="Staking" width={13} height={20} />
+              <p className="text-[10px] text-white/60 mt-1.5">Staking</p>
+            </li>
+            <li className="flex flex-col items-center border-r border-white/10 w-1/5">
+              <Image
+                src={Leaderboard}
+                alt="Leaderboard"
+                width={25}
+                height={20}
+              />
+              <p className="text-[10px] text-white/60 mt-1.5">Leaderboard</p>
+            </li>
+            <li className="flex flex-col items-center border-r border-white/10 w-1/5">
+              <Image src={Store} alt="Store" width={20} height={20} />
+              <p className="text-[10px] text-white/60 mt-1.5">Store</p>
+            </li>
+            <li className="flex flex-col items-center w-1/5">
+              <Image src={Dashboard} alt="Dashboard" width={18} height={20} />
+              <p className="text-[10px] text-white/60 mt-1.5">Dashboard</p>
+            </li>
+          </ul>
+        </div>
       </div>
     </>
   );
