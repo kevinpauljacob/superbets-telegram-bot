@@ -49,7 +49,7 @@ export default function Sidebar() {
           </div>
           <Link
             href=""
-            className="text-center text-[#9945FF] border border-[#9945FF] rounded-md py-1.5 w-full"
+            className="text-center hover:bg-[#9945FF] transition duration-300 ease-in-out hover:text-white hover:transition hover:duration-300 hover:ease-in-out text-[#9945FF] border border-[#9945FF] rounded-md py-1.5 w-full"
           >
             View Dashboard
           </Link>
@@ -68,7 +68,9 @@ export default function Sidebar() {
                 </span>
               </p>
               <button
-                className="bg-[#1D1A21] rounded-md p-3"
+                className={`${
+                  showExitTokens ? "bg-white/10" : "bg-[#1D1A21]"
+                } hover:bg-white/10 transition duration-300 ease-in-out hover:transition hover:duration-300 hover:ease-in-out rounded-md p-3`}
                 onClick={() => setShowExitTokens(!showExitTokens)}
               >
                 <Image
@@ -83,7 +85,12 @@ export default function Sidebar() {
             {showExitTokens && (
               <ul className="mt-1">
                 {fomoToken.map((token, index) => (
-                  <li key={index} className="flex items-center p-2">
+                  <li
+                    key={index}
+                    className={`${
+                      token.active ? "bg-white/10" : ""
+                    } flex items-center rounded-md p-2`}
+                  >
                     <Image src={token.src} alt="" width={18} height={18} />
                     <span
                       className={`ml-3 font-semibold ${
@@ -110,7 +117,9 @@ export default function Sidebar() {
                 </span>
               </p>
               <button
-                className="bg-[#1D1A21] rounded-md p-3"
+                className={`${
+                  showPlayTokens ? "bg-white/10" : "bg-[#1D1A21]"
+                } hover:bg-white/10 transition duration-300 ease-in-out hover:transition hover:duration-300 hover:ease-in-out rounded-md p-3`}
                 onClick={() => setShowPlayTokens(!showPlayTokens)}
               >
                 <Image
@@ -125,7 +134,12 @@ export default function Sidebar() {
             {showPlayTokens && (
               <ul className="mt-1">
                 {fomoToken.map((token, index) => (
-                  <li key={index} className="flex items-center p-2">
+                  <li
+                    key={index}
+                    className={`${
+                      token.active ? "bg-white/10" : ""
+                    } flex items-center rounded-md p-2`}
+                  >
                     <Image src={token.src} alt="" width={18} height={18} />
                     <span
                       className={`ml-3 font-semibold ${
@@ -145,19 +159,19 @@ export default function Sidebar() {
         <div className="flex flex-col">
           <Link
             href="/"
-            className="bg-[#181A1D] rounded-md text-center font-bold text-white/50 py-2 mb-1.5"
+            className="hover:bg-white/10 transition duration-300 ease-in-out hover:transition hover:duration-300 hover:ease-in-out bg-[#181A1D] rounded-md text-center font-bold text-white/50 py-2 mb-1.5"
           >
             DCA
           </Link>
           <Link
             href="/"
-            className="bg-[#181A1D] rounded-md text-center font-bold text-white/50 py-2 mb-1.5"
+            className="hover:bg-white/10 transition duration-300 ease-in-out hover:transition hover:duration-300 hover:ease-in-out bg-[#181A1D] rounded-md text-center font-bold text-white/50 py-2 mb-1.5"
           >
             Roadmap
           </Link>
           <Link
             href="/"
-            className="bg-[#181A1D] rounded-md text-center font-bold text-white/50 py-2 mb-1.5"
+            className="hover:bg-white/10 transition duration-300 ease-in-out hover:transition hover:duration-300 hover:ease-in-out bg-[#181A1D] rounded-md text-center font-bold text-white/50 py-2 mb-1.5"
           >
             Buy $FOMO
           </Link>
