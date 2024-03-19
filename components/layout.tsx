@@ -4,6 +4,7 @@ import InfoBar from "./Infobar";
 import Sidebar from "./Sidebar";
 import MobileSidebar from "./MobileSidebar";
 import SubHeader from "./SubHeader";
+import GameHeader from "./GameHeader";
 
 interface LayoutProps {
   children: ReactNode;
@@ -26,6 +27,7 @@ export default function Layout({ children }: LayoutProps) {
           {mobileSidebar && <MobileSidebar />}
           <section>
             <SubHeader />
+            <GameHeader />
             <main>
               <section>{children}</section>
             </main>
