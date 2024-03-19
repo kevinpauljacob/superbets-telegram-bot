@@ -4,13 +4,13 @@ import {
   fomoToken,
   stakingTiers,
   verifyTransaction,
-} from "../../../context/transactions";
-import connectDatabase from "../../../utils/database";
-import User from "../../../models/user";
+} from "../../../../context/transactions";
+import connectDatabase from "../../../../utils/database";
+import User from "../../../../models/staking/user";
 
 import { getToken } from "next-auth/jwt";
 import { bs58 } from "@project-serum/anchor/dist/cjs/utils/bytes";
-import TxnSignature from "../../../models/txnSignature";
+import TxnSignature from "../../../../models/txnSignature";
 
 const secret = process.env.NEXTAUTH_SECRET;
 

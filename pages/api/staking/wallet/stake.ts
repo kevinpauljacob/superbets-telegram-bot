@@ -4,10 +4,10 @@ import {
   fomoToken,
   stakingTiers,
   verifyTransaction,
-} from "../../../context/transactions";
-import connectDatabase from "../../../utils/database";
-import User from "../../../models/user";
-import TxnSignature from "../../../models/txnSignature";
+} from "../../../../context/transactions";
+import connectDatabase from "../../../../utils/database";
+import User from "../../../../models/staking/user";
+import TxnSignature from "../../../../models/txnSignature";
 
 import { getToken } from "next-auth/jwt";
 

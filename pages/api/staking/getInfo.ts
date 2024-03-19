@@ -1,5 +1,5 @@
 import connectDatabase from "@/utils/database";
-import user from "@/models/user";
+import user from "@/models/staking/user";
 import { User } from "@/context/transactions";
 import { NextApiRequest, NextApiResponse } from "next";
 
