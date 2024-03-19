@@ -2,6 +2,7 @@ import Image from "next/image";
 import info from "/public/assets/info.png";
 import fire from "/public/assets/fire.svg";
 import doubleArrow from "/public/assets/doubleArrow.png";
+import { useRouter } from "next/router";
 
 export default function FomoSupply() {
   const FomoSupply = [
@@ -10,6 +11,8 @@ export default function FomoSupply() {
       circulating: "59.99",
     },
   ];
+
+  const router = useRouter();
 
   const { burnt, circulating } = FomoSupply[0];
 
@@ -77,7 +80,9 @@ export default function FomoSupply() {
           </div>
           <div>Boost your tier by staking!</div>
         </div>
-        <div className="bg-[#1E2220] text-[#883CE3] text-lg font-semibold text-center rounded-lg p-2.5">
+        <div  onClick={() => {
+              router.push("stake");
+            }} className="bg-[#1E2220] hover:bg-[#262827] transition-all cursor-pointer text-[#883CE3] text-lg font-semibold text-center rounded-lg p-2.5">
           Stake $FOMO
         </div>
       </div>
