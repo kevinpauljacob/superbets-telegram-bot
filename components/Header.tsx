@@ -12,106 +12,114 @@ import { FaChevronDown } from "react-icons/fa6";
 import ConnectWallet from "./ConnectWallet";
 import { useRouter } from "next/router";
 import { translator } from "@/context/transactions";
+import Menu from "/public/assets/Menu.png";
+import Staking from "/public/assets/Staking.png";
+import Leaderboard from "/public/assets/Leaderboard.png";
+import Store from "/public/assets/Store.png";
+import Dashboard from "/public/assets/Dashboard.png";
 
-export function Header() {
+export function Header({
+  sidebar,
+  toggleSidebar,
+}: {
+  sidebar: boolean;
+  toggleSidebar: () => void;
+}) {
   const router = useRouter();
   const { language, setLanguage } = useGlobalContext();
-
-  const [open, setOpen] = useState(false);
-
   const [langSelect, setLangSelect] = useState(false);
 
   return (
-    <div className="w-full bg-[#19161C] flex flex-col items-center py-4 lg:py-4 px-5 sm:px-10 2xl:px-[8%]">
-      <Sidebar open={open} setOpen={setOpen} />
-      <div className="w-full flex flex-row items-center justify-between">
-        {/* right */}
-        <div className="flex flex-row items-center">
-          <div className="relative flex">
-            <Image
-              src={"/assets/logowhite.svg"}
-              width={60}
-              height={50}
-              alt={"FOMO"}
-              className=""
-            />
-          </div>
-          <span className="hidden sm:flex items-center font-medium text-2xl text-white">
-            {/* <Image
+    <>
+      <div className="w-full bg-[#121418] flex flex-col items-center py-4 lg:py-4 px-6">
+        <div className="w-full flex flex-row items-center justify-between">
+          {/* right */}
+          <div className="flex flex-row items-center">
+            <div className="relative flex">
+              <Image
+                src={"/assets/logowhite.svg"}
+                width={60}
+                height={50}
+                alt={"FOMO"}
+                className=""
+              />
+            </div>
+            <span className="hidden sm:flex items-center font-medium text-2xl text-white">
+              {/* <Image
               src={"/assets/FOMO.png"}
               width={73}
               height={25}
               alt={"FOMO"}
             /> */}
-            FOMO
-          </span>
-        </div>
+              FOMO
+            </span>
+          </div>
 
-        {/* left  */}
-        <div className="flex ml-2 mr-2 sm:items-center items-end sm:flex-row">
-          <div className="flex gap-8 mr-6 items-end">
-            {/* Language selector */}
-            <button className="relative hidden md:flex items-center">
-              <MdOutlineLanguage className="w-5 h-5 mr-3 text-white text-opacity-50" />
-              <span className="text-white text-sm mr-5 text-start text-opacity-50">
-                {language === "en"
-                  ? "English"
-                  : language === "ru"
-                  ? "Русский"
-                  : language === "ko"
-                  ? "한국인"
-                  : language === "ch"
-                  ? "中国人"
-                  : ""}
-              </span>
-              <FaChevronDown
-                onClick={() => {
-                  setLangSelect(!langSelect);
-                }}
-                className="w-3 h-3 text-white"
-              />
-              {langSelect && (
-                <div className="w-full transition-all absolute top-full mt-2 rounded px-1 py-2 gap-0.5 z-50 flex flex-col bg-black">
-                  <span
-                    onClick={() => {
-                      setLanguage("en");
-                      setLangSelect(false);
-                    }}
-                    className="text-white text-sm py-1 text-opacity-50 hover:bg-[#ffffff21] transition-all rounded"
-                  >
-                    English
-                  </span>
-                  <span
-                    onClick={() => {
-                      setLanguage("ru");
-                      setLangSelect(false);
-                    }}
-                    className="text-white text-sm py-1 text-opacity-50 hover:bg-[#ffffff21] transition-all rounded"
-                  >
-                    Русский
-                  </span>
-                  <span
-                    onClick={() => {
-                      setLanguage("ko");
-                      setLangSelect(false);
-                    }}
-                    className="text-white text-sm py-1 text-opacity-50 hover:bg-[#ffffff21] transition-all rounded"
-                  >
-                    한국인
-                  </span>
-                  <span
-                    onClick={() => {
-                      setLanguage("ch");
-                      setLangSelect(false);
-                    }}
-                    className="text-white text-sm py-1 text-opacity-50 hover:bg-[#ffffff21] transition-all rounded"
-                  >
-                    中国人
-                  </span>
-                </div>
-              )}
-            </button>
-            {/* <div className="flex sm:gap-8 flex-col sm:flex-row items-end sm:items-center">
+          {/* left  */}
+          <div className="flex ml-2 mr-2 sm:items-center items-end sm:flex-row">
+            <div className="flex gap-8 mr-6 items-end">
+              {/* Language selector */}
+              <button className="relative hidden md:flex items-center">
+                <MdOutlineLanguage className="w-5 h-5 mr-3 text-white text-opacity-50" />
+                <span className="text-white text-sm mr-5 text-start text-opacity-50">
+                  {language === "en"
+                    ? "English"
+                    : language === "ru"
+                    ? "Русский"
+                    : language === "ko"
+                    ? "한국인"
+                    : language === "ch"
+                    ? "中国人"
+                    : ""}
+                </span>
+                <FaChevronDown
+                  onClick={() => {
+                    setLangSelect(!langSelect);
+                  }}
+                  className="w-3 h-3 text-white"
+                />
+                {langSelect && (
+                  <div className="w-full transition-all absolute top-full mt-2 rounded px-1 py-2 gap-0.5 z-50 flex flex-col bg-black">
+                    <span
+                      onClick={() => {
+                        setLanguage("en");
+                        setLangSelect(false);
+                      }}
+                      className="text-white text-sm py-1 text-opacity-50 hover:bg-[#ffffff21] transition-all rounded"
+                    >
+                      English
+                    </span>
+                    <span
+                      onClick={() => {
+                        setLanguage("ru");
+                        setLangSelect(false);
+                      }}
+                      className="text-white text-sm py-1 text-opacity-50 hover:bg-[#ffffff21] transition-all rounded"
+                    >
+                      Русский
+                    </span>
+                    <span
+                      onClick={() => {
+                        setLanguage("ko");
+                        setLangSelect(false);
+                      }}
+                      className="text-white text-sm py-1 text-opacity-50 hover:bg-[#ffffff21] transition-all rounded"
+                    >
+                      한국인
+                    </span>
+                    <span
+                      onClick={() => {
+                        setLanguage("ch");
+                        setLangSelect(false);
+                      }}
+                      className="text-white text-sm py-1 text-opacity-50 hover:bg-[#ffffff21] transition-all rounded"
+                    >
+                      中国人
+                    </span>
+                  </div>
+                )}
+              </button>
+              {/* <div className="flex sm:gap-8 flex-col sm:flex-row items-end sm:items-center">
               <span className="whitespace-nowrap flex items-center mt-0.5 sm:mt-0 gap-1 text-[#F0F0F0] text-opacity-75 font-medium text-sm sm:text-base">
                 <Key className="text-white text-opacity-50" />
                 {gameInfo?.totalTickets?.toNumber() ?? 0}
@@ -124,41 +132,66 @@ export function Header() {
                 % ({((vaultInfo?.sidepotAmount ?? 0) / 1e9).toFixed(4)} SOL)
               </span>
             </div> */}
-          </div>
+            </div>
 
-          {/* store & leaderboard */}
-          <div className="flex items-center gap-4">
-            <button className="hidden cursor-not-allowed sm:flex text-white text-opacity-50 bg-white bg-opacity-5 font-medium rounded-md text-sm px-5 py-3">
-              {translator("Store", language)}
-            </button>
-            <button
-              onClick={() => {
-                router.push("leaderboard");
-              }}
-              className="hidden sm:flex text-white bg-[#9945FF] hover:bg-opacity-50 transition-all font-medium rounded-md text-sm px-5 py-3"
-            >
-              {translator("Leaderboard", language)}
-            </button>
-            <button
-              onClick={() => {
-                router.push("stake");
-              }}
-              className="hidden sm:flex text-white bg-[#9945FF] hover:bg-opacity-50 transition-all font-medium rounded-md text-sm px-5 py-3"
-            >
-              {translator("Staking", language)}
-            </button>
-            <ConnectWallet />
+            {/* store & leaderboard */}
+            <div className="flex items-center gap-4">
+              <button className="hidden cursor-not-allowed sm:flex text-white text-opacity-50 bg-white bg-opacity-5 font-medium rounded-md text-sm px-5 py-3">
+                {translator("Store", language)}
+              </button>
+              <button
+                onClick={() => {
+                  router.push("leaderboard");
+                }}
+                className="hidden sm:flex text-white bg-[#9945FF] hover:bg-opacity-50 transition-all font-medium rounded-md text-sm px-5 py-3"
+              >
+                {translator("Leaderboard", language)}
+              </button>
+              <button
+                onClick={() => {
+                  router.push("stake");
+                }}
+                className="hidden sm:flex text-white bg-[#9945FF] hover:bg-opacity-50 transition-all font-medium rounded-md text-sm px-5 py-3"
+              >
+                {translator("Staking", language)}
+              </button>
+              <ConnectWallet />
+            </div>
           </div>
-
-          <IoMdMenu
-            className="flex cursor-pointer sm:hidden w-10 h-10 text-white"
-            as="button"
-            onClick={() => {
-              setOpen(true);
-            }}
-          />
+        </div>
+        <div className="md:hidden text-white bg-[#121418] border-y border-white/10 py-2">
+          <ul className="flex flex-1">
+            <li
+              className="flex flex-col items-center border-r border-white/10 w-1/5"
+              onClick={() => toggleSidebar()}
+            >
+              <Image src={Menu} alt="Menu" width={23} height={20} />
+              <p className="text-[10px] text-white/60 mt-1.5">Menu</p>
+            </li>
+            <li className="flex flex-col items-center border-r border-white/10 w-1/5">
+              <Image src={Staking} alt="Staking" width={13} height={20} />
+              <p className="text-[10px] text-white/60 mt-1.5">Staking</p>
+            </li>
+            <li className="flex flex-col items-center border-r border-white/10 w-1/5">
+              <Image
+                src={Leaderboard}
+                alt="Leaderboard"
+                width={25}
+                height={20}
+              />
+              <p className="text-[10px] text-white/60 mt-1.5">Leaderboard</p>
+            </li>
+            <li className="flex flex-col items-center border-r border-white/10 w-1/5">
+              <Image src={Store} alt="Store" width={20} height={20} />
+              <p className="text-[10px] text-white/60 mt-1.5">Store</p>
+            </li>
+            <li className="flex flex-col items-center w-1/5">
+              <Image src={Dashboard} alt="Dashboard" width={18} height={20} />
+              <p className="text-[10px] text-white/60 mt-1.5">Dashboard</p>
+            </li>
+          </ul>
         </div>
       </div>
-    </div>
+    </>
   );
 }

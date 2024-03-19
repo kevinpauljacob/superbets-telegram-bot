@@ -17,7 +17,11 @@ import {
 } from "@bonfida/spl-name-service";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { translationsMap, useGlobalContext } from "@/components/GlobalContext";
-import InfoBar from "@/components/Infobar";
+import Sidebar from "@/components/OldSidebar";
+import StoreBanner from "@/components/Banner";
+import FomoExit from "@/components/FomoExit";
+import FomoPlay from "@/components/FomoPlay";
+import FomoSupply from "@/components/FomoSupply";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -29,6 +33,7 @@ export default function Home() {
   const { language, setLanguage, userData, setUserData } = useGlobalContext();
 
   const [refetch, setRefetch] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
 
   useEffect(() => {}, [wallet?.publicKey, refetch]);
 
@@ -42,9 +47,21 @@ export default function Home() {
   }, [language]);
 
   return (
-    <div className="flex flex-col items-center w-full overflow-hidden min-h-screen flex-1 bg-[#2B0A31] relative overflow-x-hidden">
-      <Header />
-      <div className="flex flex-1 w-full bg-black" />
+    <div className="flex flex-col xl:flex-row text-white w-full overflow-hidden min-h-screen relative overflow-x-hidden p-6">
+      <div className="flex flex-1 flex-col">
+        <div className="mb-7">
+          <StoreBanner />
+        </div>
+        <div className="mb-7">
+          <FomoExit />
+        </div>
+        <div className="mb-7">
+          <FomoPlay />
+        </div>
+      </div>
+      <div className="xl:ml-4">
+        <FomoSupply />
+      </div>
     </div>
   );
 }
