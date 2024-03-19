@@ -18,7 +18,13 @@ import Leaderboard from "/public/assets/Leaderboard.png";
 import Store from "/public/assets/Store.png";
 import Dashboard from "/public/assets/Dashboard.png";
 
-export function Header({ sidebar, toggleSidebar }) {
+export function Header({
+  sidebar,
+  toggleSidebar,
+}: {
+  sidebar: boolean;
+  toggleSidebar: () => void;
+}) {
   const router = useRouter();
   const { language, setLanguage } = useGlobalContext();
   const [langSelect, setLangSelect] = useState(false);

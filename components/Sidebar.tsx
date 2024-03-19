@@ -74,8 +74,8 @@ export default function Sidebar() {
                 <Image
                   src={showExitTokens ? upArrow : downArrow}
                   alt=""
-                  width={14}
-                  height={14}
+                  width={10}
+                  height={10}
                   className=""
                 />
               </button>
@@ -116,8 +116,8 @@ export default function Sidebar() {
                 <Image
                   src={showPlayTokens ? upArrow : downArrow}
                   alt=""
-                  width={14}
-                  height={14}
+                  width={10}
+                  height={10}
                   className=""
                 />
               </button>

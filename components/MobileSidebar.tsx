@@ -36,7 +36,7 @@ export default function Sidebar() {
 
   return (
     <div
-      className={`md:hidden bg-[#121418] text-white flex flex-col justify-between px-4 sm:px-8 py-3.5 w-full h-[calc(100vh-165px)]`}
+      className={`absolute top-0 z-20 md:hidden bg-[#121418] text-white flex flex-col justify-between px-4 sm:px-8 py-3.5 w-full h-[calc(100vh-165px)]`}
     >
       <div>
         <div className="flex flex-col bg-[#202329] rounded-md py-3.5 px-3 sm:px-6">
@@ -74,8 +74,8 @@ export default function Sidebar() {
                 <Image
                   src={showExitTokens ? upArrow : downArrow}
                   alt=""
-                  width={14}
-                  height={14}
+                  width={10}
+                  height={10}
                   className=""
                 />
               </button>
@@ -116,8 +116,8 @@ export default function Sidebar() {
                 <Image
                   src={showPlayTokens ? upArrow : downArrow}
                   alt=""
-                  width={14}
-                  height={14}
+                  width={10}
+                  height={10}
                   className=""
                 />
               </button>

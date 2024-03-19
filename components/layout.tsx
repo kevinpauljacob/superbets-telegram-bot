@@ -22,17 +22,14 @@ export default function Layout({ children }: LayoutProps) {
       <Header sidebar={mobileSidebar} toggleSidebar={toggleMobileSidebar} />
       <section className="flex">
         <Sidebar />
-        <section className="w-full">
-          {mobileSidebar ? (
-            <MobileSidebar />
-          ) : (
-            <section>
-              <SubHeader />
-              <main>
-                <section>{children}</section>
-              </main>
-            </section>
-          )}
+        <section className="w-full relative">
+          {mobileSidebar && <MobileSidebar />}
+          <section>
+            <SubHeader />
+            <main>
+              <section>{children}</section>
+            </main>
+          </section>
         </section>
       </section>
     </>

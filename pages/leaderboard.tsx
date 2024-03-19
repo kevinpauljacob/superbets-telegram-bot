@@ -35,7 +35,6 @@ export default function Leaderboard() {
 
   return (
     <div className="flex flex-col items-center w-full overflow-hidden min-h-screen flex-1 bg-black relative">
-      <Header />
       {/* Navbar  */}
       <div className="flex flex-col sm:flex-row w-full items-center bg-[#19161C80] py-7 px-5 sm:px-10 2xl:px-[8%]">
         <div className="hidden sm:flex relative min-w-[12rem] h-[12rem]">

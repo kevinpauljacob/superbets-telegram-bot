@@ -62,11 +62,11 @@ export default function Store() {
   ];
 
   return (
-    <div className="text-white w-full flex flex-col items-start justify-center p-5 sm:p-5 bg-black pb-10 overflow-hidden min-h-screen">
-      <div className="mb-7">
+    <div className="text-white w-full flex flex-col items-start justify-center p-5 sm:p-5 lg:pr-16 bg-black pb-10 overflow-hidden min-h-screen">
+      <div className="mb-7 w-full">
         <StoreBanner />
       </div>
-      <div className="grid 2xl:grid-cols-5 xl:grid-cols-3 sm:grid-cols-2 grid-cols-1 gap-5 mx-auto">
+      <div className="grid 2xl:grid-cols-5 xl:grid-cols-4 lg:grid-cols-3 sm:grid-cols-3 grid-cols-2 gap-5 xl:gap-10 w-full">
         {cardDetails.map((card, index) => (
           <StoreCard
             key={index}
