@@ -14,7 +14,7 @@ export default function GameHeader() {
   ];
 
   return (
-    <div className="text-white border-y border-[#1E2220] bg-[#121418] px-4 py-2">
+    <div className="hidden sm:block text-white border-y border-[#1E2220] bg-[#121418] px-4 py-2">
       {gameData.map((game, index) => (
         <div key={index} className="flex justify-between">
           <div className="flex">
