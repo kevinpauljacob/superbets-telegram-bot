@@ -98,7 +98,7 @@ export default function StakeStats() {
                   T{(userData?.tier ?? 0) + 1}
                 </span>
                 <span className="text-sm text-white text-right text-opacity-75 font-semibold">
-                  {stakingTiers[(userData?.tier ?? 0) + 1].limit} FOMO
+                  {stakingTiers[(userData?.tier ?? 0) + 1]?.limit} FOMO
                 </span>
               </div>
             </>
@@ -118,7 +118,7 @@ export default function StakeStats() {
                   ? userData?.stakedAmount ?? 0
                   : 600000) *
                   100) /
-                stakingTiers[(userData?.tier ?? 0) + 1].limit
+                stakingTiers[(userData?.tier ?? 0) + 1]?.limit
               }%`,
             }}
             className="h-full bg-[linear-gradient(91.179deg,#C867F0_0%,#1FCDF0_50.501%,#19EF99_100%)]"
@@ -129,7 +129,7 @@ export default function StakeStats() {
                 ? userData?.stakedAmount ?? 0
                 : 600000) *
                 100) /
-              stakingTiers[(userData?.tier ?? 0) + 1].limit
+              stakingTiers[(userData?.tier ?? 0) + 1]?.limit
             ).toFixed(2)}
             %
           </span>

@@ -143,7 +143,7 @@ function Leaderboard() {
                           src={`/assets/badges/T-${Object.entries(
                             pointTiers,
                           ).reduce((acc: number, [key, value]) => {
-                            return data?.points >= value.limit
+                            return data?.points >= value?.limit
                               ? parseInt(key)
                               : acc;
                           }, 0)}.png`}
