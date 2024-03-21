@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { rollDice } from "../../context/gameTransactions";
 import RollDiceTable from "../../components/games/RollDiceTable";
@@ -12,13 +13,28 @@ export default function Dice() {
   const [user, setUser] = useState<any>(null);
   const [betAmt, setBetAmt] = useState(0.1);
   const [selectedFace, setSelectedFace] = useState<number[]>([1]);
-  const [isRolling, setIsRolling] = useState(false);
+  const [isRolling, setIsRolling] = useState(true);
   const [winningPays, setWinningPays] = useState(6);
   const [winningAmount, setWinningAmount] = useState(0.6);
   const [winningProbability, setWinningProbability] = useState(16.67);
   const [refresh, setRefresh] = useState(false);
+  const [selectedFaces, setSelectedFaces] = useState<{
+    [key: number]: boolean;
+  }>({
+    1: true,
+    2: false,
+    3: false,
+    4: false,
+    5: false,
+    6: false,
+  });
+  const [rollType, setRollType] = useState<"manual" | "auto">("manual");
 
   const handleDiceClick = (newFace: number) => {
+    setSelectedFaces((prevState) => ({
+      ...prevState,
+      [newFace]: !prevState[newFace],
+    }));
     if (1 <= newFace && newFace <= 6) {
       if (!selectedFace.includes(newFace)) {
         if (selectedFace.length == 5) {
@@ -84,74 +100,53 @@ export default function Dice() {
   }, [wallet?.publicKey, refresh]);
 
   return (
-    <div className="flex h-full w-full flex-col items-center justify-start">
-      <div className="flex w-[90%] max-w-[35rem] flex-col items-center rounded-[1.15rem] border-2 border-[#C20FC580] bg-[#C20FC533] px-3 py-5 md:p-7">
-        <span className="mb-1 mr-0 font-changa text-xs font-medium text-[#F0F0F0] text-opacity-75">
-          sol balance: {user && user.deposit[0].amount.toFixed(4)}
-        </span>
-        <div className="mb-2 mt-2 flex items-end gap-2">
-          <Image src={"/assets/dice.png"} width={50} height={50} alt="" />
-          <span className="text-shadow-pink font-lilita text-[2.5rem] font-medium leading-10 text-white text-opacity-90">
-            DICE TO WIN
-          </span>
-        </div>
-        <span className="mb-4 mt-4 font-changa text-xl font-medium text-[#FFFFFF] text-opacity-75">
-          Roll a dice
-        </span>
-        <div className="mb-4 flex w-full flex-col rounded-lg bg-[#C20FC5] bg-opacity-10 px-3 pb-4 pt-2 md:px-6">
-          <span className="mb-3 w-full text-center font-changa text-[#F0F0F0] text-opacity-75">
-            Select Amount
-          </span>
-          <div className="mb-3 flex flex-col items-center gap-2.5 md:flex-row">
+    <div className="flex h-full w-full flex-col items-center justify-start p-10">
+      <div className="flex items-center rounded-[1.15rem] bg-[#121418] text-white w-full">
+        <div className="border-r border-white/10 w-[35%] p-14">
+          <div className="flex mb-8">
             <button
-              onClick={() => {
-                setBetAmt(0.001);
-                setWinningAmount((0.1 * 6) / selectedFace.length);
-              }}
-              className={`${
-                betAmt === 0.1
-                  ? "bg-[#F200F2]"
-                  : "bg-transparent hover:bg-[#6C0671]"
-              } w-full rounded-[5px] border-[2px] border-[#F200F280] py-2 text-xs text-white text-opacity-90 transition duration-200`}
+              className={`w-full border-2 rounded-md py-1 mr-1 border-[#d9d9d90d] transition duration-300 ease-in-out ${
+                rollType === "manual" ? "bg-[#d9d9d90d]" : ""
+              }`}
+              onClick={() => setRollType("manual")}
             >
-              0.1 $SOL
+              Manual
             </button>
             <button
-              onClick={() => {
-                setBetAmt(0.25);
-                setWinningAmount((0.25 * 6) / selectedFace.length);
-              }}
-              className={`${
-                betAmt === 0.25
-                  ? "bg-[#F200F2]"
-                  : "bg-transparent hover:bg-[#6C0671]"
-              } w-full rounded-[5px] border-[2px] border-[#F200F280] py-2 text-xs text-white text-opacity-90 transition duration-200`}
+              className={`w-full border-2 rounded-md py-1 ml-1 border-[#d9d9d90d] transition duration-300 ease-in-out ${
+                rollType === "auto" ? "bg-[#d9d9d90d] " : ""
+              }`}
+              onClick={() => setRollType("auto")}
             >
-              0.25 $SOL
-            </button>
-            <button
-              onClick={() => {
-                setBetAmt(0.5);
-                setWinningAmount((0.5 * 6) / selectedFace.length);
-              }}
-              className={`${
-                betAmt === 0.5
-                  ? "bg-[#F200F2]"
-                  : "bg-transparent hover:bg-[#6C0671]"
-              } w-full rounded-[5px] border-[2px] border-[#F200F280] py-2 text-xs text-white text-opacity-90 transition duration-200`}
-            >
-              0.5 $SOL
+              Auto
             </button>
           </div>
-        </div>
-        <div className="mb-4 flex w-full flex-col rounded-lg bg-[#C20FC5] bg-opacity-10 px-3 pb-4 pt-2 md:px-6">
-          <span className="mb-3 w-full text-center font-changa text-[#F0F0F0] text-opacity-75">
-            Choose upto 5 faces
-          </span>
-          <span className="mb-3 w-full text-center font-changa text-[#F0F0F0] text-opacity-75">
-            <span className="mb-3 w-full text-center font-changa text-[#F0F0F0] text-opacity-75">
+
+          <div className="mb-6">
+            <div className="flex justify-between text-xs mb-2">
+              <p className="font-semibold">Bet Amount</p>
+              <p className="font-semibold text-[#94A3B8]">0.00 $SOL</p>
+            </div>
+            <div className="relative">
+              <input
+                className="z-0 w-full bg-[#202329] rounded-md p-2.5"
+                type="text"
+                placeholder="0.0"
+              />
+              <button className="z-10 absolute top-2.5 right-2.5 px-3 py-1 rounded-sm text-xs bg-[#d9d9d90d]">
+                Max
+              </button>
+            </div>
+          </div>
+          <div className="flex flex-col">
+            <p className="text-xs font-semibold mb-2">Choose upto 5 faces</p>
+            <div className="bg-[#0C0F16] rounded-md flex justify-center p-4 mb-4">
               <Image
-                src={"/assets/diceFace1.png"}
+                src={
+                  selectedFaces[1]
+                    ? "/assets/selectedDiceFace1.png"
+                    : "/assets/diceFace1.png"
+                }
                 width={50}
                 height={50}
                 alt=""
@@ -161,7 +156,11 @@ export default function Dice() {
                 onClick={() => handleDiceClick(1)}
               />
               <Image
-                src={"/assets/diceFace2.png"}
+                src={
+                  selectedFaces[2]
+                    ? "/assets/selectedDiceFace2.png"
+                    : "/assets/diceFace2.png"
+                }
                 width={50}
                 height={50}
                 alt=""
@@ -171,7 +170,11 @@ export default function Dice() {
                 onClick={() => handleDiceClick(2)}
               />
               <Image
-                src={"/assets/diceFace3.png"}
+                src={
+                  selectedFaces[3]
+                    ? "/assets/selectedDiceFace3.png"
+                    : "/assets/diceFace3.png"
+                }
                 width={50}
                 height={50}
                 alt=""
@@ -181,7 +184,11 @@ export default function Dice() {
                 onClick={() => handleDiceClick(3)}
               />
               <Image
-                src={"/assets/diceFace4.png"}
+                src={
+                  selectedFaces[4]
+                    ? "/assets/selectedDiceFace4.png"
+                    : "/assets/diceFace4.png"
+                }
                 width={50}
                 height={50}
                 alt=""
@@ -191,7 +198,11 @@ export default function Dice() {
                 onClick={() => handleDiceClick(4)}
               />
               <Image
-                src={"/assets/diceFace5.png"}
+                src={
+                  selectedFaces[5]
+                    ? "/assets/selectedDiceFace5.png"
+                    : "/assets/diceFace5.png"
+                }
                 width={50}
                 height={50}
                 alt=""
@@ -201,7 +212,11 @@ export default function Dice() {
                 onClick={() => handleDiceClick(5)}
               />
               <Image
-                src={"/assets/diceFace6.png"}
+                src={
+                  selectedFaces[6]
+                    ? "/assets/selectedDiceFace6.png"
+                    : "/assets/diceFace6.png"
+                }
                 width={50}
                 height={50}
                 alt=""
@@ -210,92 +225,375 @@ export default function Dice() {
                 }`}
                 onClick={() => handleDiceClick(6)}
               />
+            </div>
+          </div>
+          <p className="bg-black mb-5 rounded-md text-center text-xs py-1.5 text-[#F0F0F0]">
+            Please deposit funds to start playing. View{" "}
+            <span className="underline">WALLET</span>
+          </p>
+          <div>
+            <button
+              disabled={!wallet || selectedFace.length == 0}
+              onClick={() => {
+                if (!isRolling) diceRoll();
+              }}
+              className={`${
+                !user || !wallet || selectedFace.length == 0
+                  ? "cursor-not-allowed opacity-70"
+                  : "hover:opacity-90"
+              } flex w-full flex-col items-center justify-center gap-2 rounded-lg border border-[#F6F6F61A] bg-[#7839C5] py-2.5 font-changa shadow-[0px_4px_15px_0px_rgba(0,0,0,0.25)]`}
+            >
+              {isRolling ? (
+                <div>
+                  <span className="font-changa text-[1.75rem] font-semibold text-white text-opacity-80">
+                    ROLLING...
+                  </span>
+                </div>
+              ) : (
+                <div>
+                  <span className="center font-changa text-[1.75rem] font-semibold text-white text-opacity-80">
+                    BET
+                  </span>
+                </div>
+              )}
+            </button>
+          </div>
+          {/* <span className="mb-1 mr-0 font-changa text-xs font-medium text-[#F0F0F0] text-opacity-75">
+            sol balance: {user && user.deposit[0].amount.toFixed(4)}
+          </span> */}
+          {/* <div className="mb-2 mt-2 flex items-end gap-2">
+            <Image src={"/assets/dice.png"} width={50} height={50} alt="" />
+            <span className="text-shadow-pink font-lilita text-[2.5rem] font-medium leading-10 text-white text-opacity-90">
+              DICE TO WIN
             </span>
-          </span>
+          </div> */}
+          {/* <span className="mb-4 mt-4 font-changa text-xl font-medium text-[#FFFFFF] text-opacity-75">
+            Roll a dice
+          </span> */}
+          {/* <div className="mb-4 flex w-full flex-col rounded-lg bg-[#C20FC5] bg-opacity-10 px-3 pb-4 pt-2 md:px-6">
+            <span className="mb-3 w-full text-center font-changa text-[#F0F0F0] text-opacity-75">
+              Select Amount
+            </span>
+            <div className="mb-3 flex flex-col items-center gap-2.5 md:flex-row">
+              <button
+                onClick={() => {
+                  setBetAmt(0.001);
+                  setWinningAmount((0.1 * 6) / selectedFace.length);
+                }}
+                className={`${
+                  betAmt === 0.1
+                    ? "bg-[#F200F2]"
+                    : "bg-transparent hover:bg-[#6C0671]"
+                } w-full rounded-[5px] border-[2px] border-[#F200F280] py-2 text-xs text-white text-opacity-90 transition duration-200`}
+              >
+                0.1 $SOL
+              </button>
+              <button
+                onClick={() => {
+                  setBetAmt(0.25);
+                  setWinningAmount((0.25 * 6) / selectedFace.length);
+                }}
+                className={`${
+                  betAmt === 0.25
+                    ? "bg-[#F200F2]"
+                    : "bg-transparent hover:bg-[#6C0671]"
+                } w-full rounded-[5px] border-[2px] border-[#F200F280] py-2 text-xs text-white text-opacity-90 transition duration-200`}
+              >
+                0.25 $SOL
+              </button>
+              <button
+                onClick={() => {
+                  setBetAmt(0.5);
+                  setWinningAmount((0.5 * 6) / selectedFace.length);
+                }}
+                className={`${
+                  betAmt === 0.5
+                    ? "bg-[#F200F2]"
+                    : "bg-transparent hover:bg-[#6C0671]"
+                } w-full rounded-[5px] border-[2px] border-[#F200F280] py-2 text-xs text-white text-opacity-90 transition duration-200`}
+              >
+                0.5 $SOL
+              </button>
+            </div>
+          </div> */}
         </div>
-
-        <div className="mb-4 flex w-full flex-col rounded-lg bg-[#C20FC5] bg-opacity-10 px-3 pb-4 pt-4 font-changa md:px-6">
-          <div className="flex justify-between">
-            <span className="text-[#F0F0F0] text-opacity-75">Winning Pays</span>
-            <span className="text-[#F0F0F0] text-opacity-75">
-              {winningPays}x
-            </span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-[#F0F0F0] text-opacity-75">Tax</span>
-            <span className="text-[#F0F0F0] text-opacity-75">
-              {ROLL_TAX * 100}%
-            </span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-[#F0F0F0] text-opacity-75">
-              Winning Amount
-            </span>
-            <span className="text-[#F0F0F0] text-opacity-75">
-              {(winningAmount * (1 - ROLL_TAX)).toFixed(2)} $SOL
-            </span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-[#F0F0F0] text-opacity-75">
-              Winning Probability
-            </span>
-            <span className="text-[#F0F0F0] text-opacity-75">
-              {winningProbability.toFixed(2)}%
-            </span>
-          </div>
-        </div>
-
-        {!user ||
-          (user.deposit[0].amount < 0.1 && (
-            <div className="mb-5 w-full rounded-lg bg-[#C20FC5] bg-opacity-10 px-3 pb-2 pt-4 text-white md:px-6">
-              <div className="-full mb-3 text-center font-changa font-medium text-[#F0F0F0] text-opacity-75">
-                Please deposit funds to start playing. View{" "}
-                <a href="/balance">
-                  <u>WALLET</u>
-                </a>
+        <div className="w-[65%] h-full px-8">
+          <div className="bg-[#0C0F16] flex flex-col justify-between h-[400px] rounded-md p-12">
+            <div className="flex justify-between items-center">
+              <div>
+                {isRolling ? (
+                  <div>
+                    <span className="font-changa text-sm font-semibold text-white text-opacity-80">
+                      Rolling the dice...
+                    </span>
+                  </div>
+                ) : (
+                  ""
+                )}
+              </div>
+              <div className="bg-[#0C0F16] rounded-md flex justify-center p-4 mb-4">
+                <Image
+                  src={
+                    selectedFaces[1]
+                      ? "/assets/activeDiceFace1.png"
+                      : "/assets/diceFace1.png"
+                  }
+                  width={30}
+                  height={30}
+                  alt=""
+                  className={`mr-2 inline-block ${
+                    selectedFace.includes(1) ? "selected-face" : ""
+                  }`}
+                />
+                <Image
+                  src={
+                    selectedFaces[2]
+                      ? "/assets/activeDiceFace2.png"
+                      : "/assets/diceFace2.png"
+                  }
+                  width={30}
+                  height={30}
+                  alt=""
+                  className={`mr-2 inline-block ${
+                    selectedFace.includes(2) ? "selected-face" : ""
+                  }`}
+                />
+                <Image
+                  src={
+                    selectedFaces[3]
+                      ? "/assets/activeDiceFace3.png"
+                      : "/assets/diceFace3.png"
+                  }
+                  width={30}
+                  height={30}
+                  alt=""
+                  className={`mr-2 inline-block ${
+                    selectedFace.includes(3) ? "selected-face" : ""
+                  }`}
+                />
+                <Image
+                  src={
+                    selectedFaces[4]
+                      ? "/assets/activeDiceFace4.png"
+                      : "/assets/diceFace4.png"
+                  }
+                  width={30}
+                  height={30}
+                  alt=""
+                  className={`mr-2 inline-block ${
+                    selectedFace.includes(4) ? "selected-face" : ""
+                  }`}
+                />
+                <Image
+                  src={
+                    selectedFaces[5]
+                      ? "/assets/activeDiceFace5.png"
+                      : "/assets/diceFace5.png"
+                  }
+                  width={30}
+                  height={30}
+                  alt=""
+                  className={`mr-2 inline-block ${
+                    selectedFace.includes(5) ? "selected-face" : ""
+                  }`}
+                />
+                <Image
+                  src={
+                    selectedFaces[6]
+                      ? "/assets/activeDiceFace6.png"
+                      : "/assets/diceFace6.png"
+                  }
+                  width={30}
+                  height={30}
+                  alt=""
+                  className={`mr-2 inline-block ${
+                    selectedFace.includes(6) ? "selected-face" : ""
+                  }`}
+                />
               </div>
             </div>
-          ))}
-        <div className="mb-0 flex w-full flex-col items-center rounded-lg bg-[#C20FC5] bg-opacity-10 px-4 pb-2 pt-2">
-          <button
-            disabled={!wallet || selectedFace.length == 0}
-            onClick={() => {
-              if (!isRolling) diceRoll();
-            }}
-            className={`${
-              !user || !wallet || selectedFace.length == 0
-                ? "cursor-not-allowed opacity-70"
-                : "hover:opacity-90"
-            } flex w-full flex-col items-center justify-center gap-2 rounded-lg border border-[#F6F6F61A] bg-[#F200F2] py-2.5 font-changa shadow-[0px_4px_15px_0px_rgba(0,0,0,0.25)]`}
-          >
-            {isRolling ? (
-              <div>
-                <Image
-                  src={"/assets/rolling_dice.gif"}
-                  width={50}
-                  height={50}
-                  alt=""
-                  className="ml-7 mt-1"
-                />
-                <span className="font-changa text-[1.75rem] font-semibold text-white text-opacity-80">
-                  ROLLING...
+            <div className="relative w-full mb-6">
+              <Image
+                src="/assets/progressBar.png"
+                alt="progress bar"
+                width={900}
+                height={100}
+              />
+              <div className="flex justify-around">
+                <div className="flex flex-col items-center">
+                  <Image
+                    src="/assets/progressTip.png"
+                    alt="progress bar"
+                    width={15}
+                    height={15}
+                    className="absolute top-[4px]"
+                  />
+                  <Image
+                    src={
+                      selectedFaces[1]
+                        ? "/assets/finalDiceFace1.png"
+                        : "/assets/diceFace1.png"
+                    }
+                    width={30}
+                    height={30}
+                    alt=""
+                    className={`inline-block mt-6 ${
+                      selectedFace.includes(1) ? "selected-face" : ""
+                    }`}
+                  />
+                </div>
+                <div className="flex flex-col items-center">
+                  <Image
+                    src="/assets/progressTip.png"
+                    alt="progress bar"
+                    width={15}
+                    height={15}
+                    className="absolute top-[4px]"
+                  />
+                  <Image
+                    src={
+                      selectedFaces[2]
+                        ? "/assets/finalDiceFace2.png"
+                        : "/assets/diceFace2.png"
+                    }
+                    width={30}
+                    height={30}
+                    alt=""
+                    className={`inline-block mt-6 ${
+                      selectedFace.includes(2) ? "selected-face" : ""
+                    }`}
+                  />
+                </div>
+                <div className="flex flex-col items-center">
+                  <Image
+                    src="/assets/progressTip.png"
+                    alt="progress bar"
+                    width={15}
+                    height={15}
+                    className="absolute top-[4px]"
+                  />
+                  <Image
+                    src={
+                      selectedFaces[3]
+                        ? "/assets/finalDiceFace3.png"
+                        : "/assets/diceFace3.png"
+                    }
+                    width={30}
+                    height={30}
+                    alt=""
+                    className={`inline-block mt-6 ${
+                      selectedFace.includes(3) ? "selected-face" : ""
+                    }`}
+                  />
+                </div>
+                <div className="flex flex-col items-center">
+                  <Image
+                    src="/assets/progressTip.png"
+                    alt="progress bar"
+                    width={15}
+                    height={15}
+                    className="absolute top-[4px]"
+                  />
+                  <Image
+                    src={
+                      selectedFaces[4]
+                        ? "/assets/finalDiceFace4.png"
+                        : "/assets/diceFace4.png"
+                    }
+                    width={30}
+                    height={30}
+                    alt=""
+                    className={`inline-block mt-6 ${
+                      selectedFace.includes(4) ? "selected-face" : ""
+                    }`}
+                  />
+                </div>
+                <div className="flex flex-col items-center">
+                  <Image
+                    src="/assets/progressTip.png"
+                    alt="progress bar"
+                    width={15}
+                    height={15}
+                    className="absolute top-[4px]"
+                  />
+                  <Image
+                    src={
+                      selectedFaces[5]
+                        ? "/assets/finalDiceFace5.png"
+                        : "/assets/diceFace5.png"
+                    }
+                    width={30}
+                    height={30}
+                    alt=""
+                    className={`inline-block mt-6 ${
+                      selectedFace.includes(5) ? "selected-face" : ""
+                    }`}
+                  />
+                </div>
+                <div className="flex flex-col items-center">
+                  <Image
+                    src="/assets/progressTip.png"
+                    alt="progress bar"
+                    width={15}
+                    height={15}
+                    className="absolute top-[4px]"
+                  />
+                  <Image
+                    src={
+                      selectedFaces[6]
+                        ? "/assets/finalDiceFace6.png"
+                        : "/assets/diceFace6.png"
+                    }
+                    width={30}
+                    height={30}
+                    alt=""
+                    className={`inline-block mt-6 ${
+                      selectedFace.includes(6) ? "selected-face" : ""
+                    }`}
+                  />
+                </div>
+              </div>
+            </div>
+            <div className="flex w-full justify-between">
+              <div className="flex flex-col w-full">
+                <span className="text-[#F0F0F0] text-xs mb-1">Multiplier</span>
+                <span className="bg-[#202329] rounded-md px-5 py-2">
+                  {winningPays}x
                 </span>
               </div>
-            ) : (
-              <div>
-                <Image
-                  src={"/assets/rolldice.png"}
-                  width={50}
-                  height={50}
-                  alt=""
-                  className="center ml-8 mt-1"
-                />
-                <span className="center font-changa text-[1.75rem] font-semibold text-white text-opacity-80">
-                  ROLL DICE
+              {/* <div className="flex justify-between">
+              <span className="text-[#F0F0F0] text-opacity-75">Tax</span>
+              <span className="text-[#F0F0F0] text-opacity-75">
+                {ROLL_TAX * 100}%
+              </span>
+            </div> */}
+              <div className="flex flex-col w-full mx-8">
+                <span className="text-[#F0F0F0] text-xs mb-1">
+                  Winning Amount
+                </span>
+                <span className="bg-[#202329] rounded-md px-5 py-2">
+                  {(winningAmount * (1 - ROLL_TAX)).toFixed(2)} $SOL
                 </span>
               </div>
-            )}
-          </button>
+              <div className="flex flex-col w-full">
+                <span className="text-[#F0F0F0] text-xs mb-1">Chance</span>
+                <span className="bg-[#202329] rounded-md px-5 py-2">
+                  {winningProbability.toFixed(2)}%
+                </span>
+              </div>
+              {!user ||
+                (user.deposit[0].amount < 0.1 && (
+                  <div className="mb-5 w-full rounded-lg bg-[#C20FC5] bg-opacity-10 px-3 pb-2 pt-4 text-white md:px-6">
+                    <div className="-full mb-3 text-center font-changa font-medium text-[#F0F0F0] text-opacity-75">
+                      Please deposit funds to start playing. View{" "}
+                      <Link href="/balance">
+                        <u>WALLET</u>
+                      </Link>
+                    </div>
+                  </div>
+                ))}
+            </div>
+          </div>
         </div>
       </div>
       <RollDiceTable refresh={refresh} />
