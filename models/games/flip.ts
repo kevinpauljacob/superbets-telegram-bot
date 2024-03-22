@@ -23,8 +23,16 @@ const flipSchema = new mongoose.Schema(
       type: String,
       required: false,
     },
+    amountWon: {
+      type: Number,
+      required: true,
+    },
+    amountLost: {
+      type: Number,
+      required: true,
+    },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 let Flip = mongoose.models.Flip || mongoose.model("Flip", flipSchema);

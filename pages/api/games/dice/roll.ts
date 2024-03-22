@@ -2,8 +2,9 @@ import connectDatabase from "../../../../utils/database";
 import { ROLL_TAX } from "../../../../context/config";
 import User from "../../../../models/games/user";
 import Roll from "../../../../models/games/roll";
-import House from "../../../../models/games/house";
 import { getToken } from "next-auth/jwt";
+import { NextApiRequest, NextApiResponse } from "next";
+import { minGameAmount } from "@/context/gameTransactions";
 
 const secret = process.env.NEXTAUTH_SECRET;
 
@@ -11,17 +12,7 @@ export const config = {
   maxDuration: 60,
 };
 
-async function handler(req: any, res: any) {
-  if (req.method === "OPTIONS") {
-    res.setHeader("Access-Control-Allow-Methods", "POST,GET,OPTIONS");
-    res.setHeader("Access-Control-Allow-Origin", "*");
-    res.setHeader(
-      "Access-Control-Allow-Headers",
-      "Content-Type, Authorization"
-    );
-    return res.status(200).end();
-  }
-
+async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === "POST") {
     try {
       let { wallet, amount, tokenMint, chosenNumbers } = req.body;
@@ -34,7 +25,7 @@ async function handler(req: any, res: any) {
           message: "User wallet not authenticated",
         });
 
-      if (amount != 0.1 && amount != 0.25 && amount != 0.5)
+      if (amount < minGameAmount)
         return res.status(400).json({
           success: false,
           message: "Invalid bet amount",
@@ -54,7 +45,7 @@ async function handler(req: any, res: any) {
           chosenNumbers.length <= 5 &&
           //check if all values are unique whole numbers between 1 and 6
           chosenNumbers.every(
-            (v: any) => Number.isInteger(v) && v >= 1 && v <= 6
+            (v: any) => Number.isInteger(v) && v >= 1 && v <= 6,
           )
         )
       )
@@ -93,7 +84,7 @@ async function handler(req: any, res: any) {
       if (!user.sns) {
         sns = (
           await fetch(
-            `https://sns-api.bonfida.com/owners/${wallet}/domains`
+            `https://sns-api.bonfida.com/owners/${wallet}/domains`,
           ).then((data) => data.json())
         ).result[0];
         if (sns) sns = sns + ".sol";
@@ -112,37 +103,17 @@ async function handler(req: any, res: any) {
         {
           $inc: {
             "deposit.$.amount": -amount + rAmountWon * (1 - ROLL_TAX),
-            rTotalVolume: amount,
-            rAmountWon: -amount + rAmountWon * (1 - ROLL_TAX),
-            rAmountLost,
-            rollsWon: result == "Won" ? 1 : 0,
-            rollsLost: result == "Lost" ? 1 : 0,
           },
           sns,
         },
         {
           new: true,
-        }
+        },
       );
 
       if (!userUpdate) {
         throw new Error("Insufficient balance for bet!");
       }
-
-      await House.findOneAndUpdate(
-        {},
-        {
-          $inc: {
-            TotalVolume: amount,
-            totalRolls: 1,
-            rAmountLost,
-            rAmountWon: -amount + rAmountWon * (1 - ROLL_TAX),
-            rTaxCollected: rAmountWon * ROLL_TAX,
-            rollsWon: result == "Won" ? 1 : 0,
-            rollsLost: result == "Lost" ? 1 : 0,
-          },
-        }
-      );
 
       await Roll.create({
         wallet,
@@ -151,6 +122,8 @@ async function handler(req: any, res: any) {
         strikeNumber,
         result,
         tokenMint,
+        amountWon: rAmountWon,
+        amountLost: rAmountLost,
       });
 
       return res.json({
@@ -171,7 +144,10 @@ async function handler(req: any, res: any) {
       console.log(e);
       return res.status(500).json({ success: false, message: e.message });
     }
-  }
+  } else
+    return res
+      .status(405)
+      .json({ success: false, message: "Method not allowed" });
 }
 
 export default handler;

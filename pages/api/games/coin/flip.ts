@@ -2,8 +2,9 @@ import connectDatabase from "../../../../utils/database";
 import { FLIP_TAX } from "../../../../context/config";
 import User from "../../../../models/games/user";
 import Flip from "../../../../models/games/flip";
-import House from "../../../../models/games/house";
 import { getToken } from "next-auth/jwt";
+import { NextApiRequest, NextApiResponse } from "next";
+import { minGameAmount } from "@/context/gameTransactions";
 
 const secret = process.env.NEXTAUTH_SECRET;
 
@@ -11,17 +12,7 @@ export const config = {
   maxDuration: 60,
 };
 
-async function handler(req: any, res: any) {
-  if (req.method === "OPTIONS") {
-    res.setHeader("Access-Control-Allow-Methods", "POST,GET,OPTIONS");
-    res.setHeader("Access-Control-Allow-Origin", "*");
-    res.setHeader(
-      "Access-Control-Allow-Headers",
-      "Content-Type, Authorization"
-    );
-    return res.status(200).end();
-  }
-
+async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === "POST") {
     try {
       let { wallet, amount, tokenMint, flipType } = req.body;
@@ -34,7 +25,7 @@ async function handler(req: any, res: any) {
           message: "User wallet not authenticated",
         });
 
-      if (amount != 0.2 && amount != 1 && amount != 2)
+      if (amount < minGameAmount)
         return res.status(400).json({
           success: false,
           message: "Invalid bet amount",
@@ -86,7 +77,7 @@ async function handler(req: any, res: any) {
       if (!user.sns) {
         sns = (
           await fetch(
-            `https://sns-api.bonfida.com/owners/${wallet}/domains`
+            `https://sns-api.bonfida.com/owners/${wallet}/domains`,
           ).then((data) => data.json())
         ).result[0];
         if (sns) sns = sns + ".sol";
@@ -105,37 +96,17 @@ async function handler(req: any, res: any) {
         {
           $inc: {
             "deposit.$.amount": -amount + fAmountWon * (1 + (1 - FLIP_TAX)),
-            fTotalVolume: amount,
-            fAmountWon: fAmountWon * (1 - FLIP_TAX),
-            fAmountLost,
-            flipsWon: result == "Won" ? 1 : 0,
-            flipsLost: result == "Lost" ? 1 : 0,
           },
           sns,
         },
         {
           new: true,
-        }
+        },
       );
 
       if (!userUpdate) {
         throw new Error("Insufficient balance for bet!");
       }
-
-      await House.findOneAndUpdate(
-        {},
-        {
-          $inc: {
-            fTotalVolume: amount,
-            totalFlips: 1,
-            fAmountLost,
-            fAmountWon: fAmountWon * (1 - FLIP_TAX),
-            fTaxCollected: fAmountWon * FLIP_TAX,
-            flipsWon: result == "Won" ? 1 : 0,
-            flipsLost: result == "Lost" ? 1 : 0,
-          },
-        }
-      );
 
       await Flip.create({
         wallet,
@@ -144,6 +115,8 @@ async function handler(req: any, res: any) {
         strikeNumber,
         result,
         tokenMint,
+        amountWon: fAmountWon,
+        amountLost: fAmountLost,
       });
 
       return res.json({
@@ -155,7 +128,10 @@ async function handler(req: any, res: any) {
       console.log(e);
       return res.status(500).json({ success: false, message: e.message });
     }
-  }
+  } else
+    return res
+      .status(405)
+      .json({ success: false, message: "Method not allowed" });
 }
 
 export default handler;
