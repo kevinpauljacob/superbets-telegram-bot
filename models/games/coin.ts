@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-const flipSchema = new mongoose.Schema(
+const coinSchema = new mongoose.Schema(
   {
     wallet: {
       type: String,
@@ -11,7 +11,8 @@ const flipSchema = new mongoose.Schema(
       required: true,
     },
     flipType: {
-      type: Boolean, // if true -> heads
+      type: String,
+      enum: ["heads", "tails"],
       required: true,
     },
     strikeNumber: Number,
@@ -47,5 +48,5 @@ const flipSchema = new mongoose.Schema(
   { timestamps: true },
 );
 
-let Flip = mongoose.models.Flip || mongoose.model("Flip", flipSchema);
-export default Flip;
+let Coin = mongoose.models.Coin || mongoose.model("Coin", coinSchema);
+export default Coin;

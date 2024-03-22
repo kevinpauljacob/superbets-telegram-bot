@@ -1,6 +1,6 @@
 import connectDatabase from "../../../../utils/database";
 import { NextApiRequest, NextApiResponse } from "next";
-import Flip from "../../../../models/games/flip";
+import Flip from "../../../../models/games/coin";
 import Roll from "../../../../models/games/dice";
 import Bet from "../../../../models/games/bet";
 import User from "../../../../models/games/user";

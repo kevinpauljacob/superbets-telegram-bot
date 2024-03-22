@@ -24,7 +24,7 @@ const generateGameHash = (
 
 export enum GameType {
   dice = "dice",
-  coinflip = "coinflip",
+  coin = "coin",
   dice2 = "dice2",
   wheel = "wheel",
 }
@@ -41,7 +41,7 @@ export const generateGameResult = (
     case GameType.dice:
     case GameType.dice2:
       return (parseInt(hash.slice(0, 4), 16) % 6) + 1;
-    case GameType.coinflip:
+    case GameType.coin:
     case GameType.wheel:
       return (parseInt(hash.slice(0, 4), 16) % 100) + 1;
     default:

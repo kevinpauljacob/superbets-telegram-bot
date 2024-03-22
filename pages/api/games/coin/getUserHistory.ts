@@ -1,6 +1,6 @@
 import connectDatabase from "../../../../utils/database";
 import { NextRequest } from "next/server";
-import Flip from "../../../../models/games/flip";
+import Flip from "../../../../models/games/coin";
 
 async function handler(req: any, res: any) {
   if (req.method === "GET") {
