@@ -45,6 +45,6 @@ export const generateGameResult = (
     case GameType.wheel:
       return (parseInt(hash.slice(0, 4), 16) % 100) + 1;
     default:
-      return null;
+      throw new Error("Invalid game type!");
   }
 };

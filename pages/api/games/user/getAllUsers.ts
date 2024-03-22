@@ -1,14 +1,14 @@
 import connectDatabase from "../../../../utils/database";
 import { NextApiRequest, NextApiResponse } from "next";
 import Flip from "../../../../models/games/flip";
-import Roll from "../../../../models/games/roll";
+import Roll from "../../../../models/games/dice";
 import Bet from "../../../../models/games/bet";
 import User from "../../../../models/games/user";
 
 async function binaryAggregateData(
   model: any,
   betAmountField: string,
-  resultField: string
+  resultField: string,
 ): Promise<
   { _id: string; total: number; won: number; lost: number; count: number }[]
 > {
@@ -46,7 +46,7 @@ async function binaryAggregateData(
 async function flipAggregateData(
   model: any,
   betAmountField: string,
-  resultField: string
+  resultField: string,
 ): Promise<
   { _id: string; total: number; won: number; lost: number; count: number }[]
 > {
@@ -84,7 +84,7 @@ async function flipAggregateData(
 async function rollAggregateData(
   model: any,
   betAmountField: string,
-  resultField: string
+  resultField: string,
 ): Promise<
   { _id: string; total: number; won: number; lost: number; count: number }[]
 > {

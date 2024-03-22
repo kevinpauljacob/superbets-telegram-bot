@@ -55,7 +55,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
       await connectDatabase();
 
-      if (!wallet || !amount || !tokenMint || !segments || !risk)
+      if (!wallet || !amount || !tokenMint || !segments || !risk || !clientSeed)
         return res
           .status(400)
           .json({ success: false, message: "Missing parameters" });

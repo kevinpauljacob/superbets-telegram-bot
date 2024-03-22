@@ -1,7 +1,7 @@
 import connectDatabase from "../../../../utils/database";
 import { NextApiRequest, NextApiResponse } from "next";
 import Flip from "../../../../models/games/flip";
-import Roll from "../../../../models/games/roll";
+import Roll from "../../../../models/games/dice";
 import Bet from "../../../../models/games/bet";
 import User from "../../../../models/games/user";
 
@@ -9,7 +9,7 @@ async function binaryAggregateData(
   model: any,
   betAmountField: string,
   resultField: string,
-  previousMonday: Date
+  previousMonday: Date,
 ): Promise<
   { _id: string; total: number; won: number; lost: number; count: number }[]
 > {
@@ -53,7 +53,7 @@ async function flipAggregateData(
   model: any,
   betAmountField: string,
   resultField: string,
-  previousMonday: Date
+  previousMonday: Date,
 ): Promise<
   { _id: string; total: number; won: number; lost: number; count: number }[]
 > {
@@ -97,7 +97,7 @@ async function rollAggregateData(
   model: any,
   betAmountField: string,
   resultField: string,
-  previousMonday: Date
+  previousMonday: Date,
 ): Promise<
   { _id: string; total: number; won: number; lost: number; count: number }[]
 > {
@@ -179,19 +179,19 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         Bet,
         "betAmount",
         "result",
-        previousMonday
+        previousMonday,
       );
       const flips = await flipAggregateData(
         Flip,
         "flipAmount",
         "result",
-        previousMonday
+        previousMonday,
       );
       const rolls = await rollAggregateData(
         Roll,
         "rollAmount",
         "result",
-        previousMonday
+        previousMonday,
       );
       const users = await User.find({});
 

@@ -1,10 +1,10 @@
 import connectDatabase from "../../../../utils/database";
 import { ROLL_TAX } from "../../../../context/config";
-import User from "../../../../models/games/user";
-import Roll from "../../../../models/games/roll";
 import { getToken } from "next-auth/jwt";
 import { NextApiRequest, NextApiResponse } from "next";
 import { minGameAmount } from "@/context/gameTransactions";
+import { ServerHash, User, Dice } from "@/models/games";
+import { GameType, generateServerSeed, generateGameResult } from "@/utils/vrf";
 
 const secret = process.env.NEXTAUTH_SECRET;
 
@@ -12,10 +12,19 @@ export const config = {
   maxDuration: 60,
 };
 
+interface InputType {
+  wallet: string;
+  amount: number;
+  tokenMint: string;
+  chosenNumbers: number[];
+  clientSeed: string;
+}
+
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === "POST") {
     try {
-      let { wallet, amount, tokenMint, chosenNumbers } = req.body;
+      let { wallet, amount, tokenMint, chosenNumbers, clientSeed }: InputType =
+        req.body;
 
       const token = await getToken({ req, secret });
 
@@ -33,17 +42,17 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
       await connectDatabase();
 
-      if (!wallet || !amount || tokenMint !== "SOL")
+      if (!wallet || !amount || tokenMint !== "SOL" || !clientSeed)
         return res
           .status(400)
           .json({ success: false, message: "Missing parameters" });
 
+      //check if all values are unique whole numbers between 1 and 6
       if (
         !(
           chosenNumbers &&
           chosenNumbers.length >= 1 &&
           chosenNumbers.length <= 5 &&
-          //check if all values are unique whole numbers between 1 and 6
           chosenNumbers.every(
             (v: any) => Number.isInteger(v) && v >= 1 && v <= 6,
           )
@@ -68,7 +77,43 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           .status(400)
           .json({ success: false, message: "Insufficient balance !" });
 
-      const strikeNumber = Math.floor(Math.random() * 6) + 1;
+      const serverHashInfo = await ServerHash.findOneAndUpdate(
+        {
+          wallet,
+          gameType: GameType.dice,
+          isValid: true,
+        },
+        {
+          $set: {
+            isValid: false,
+          },
+        },
+        { new: true },
+      );
+
+      if (!serverHashInfo) {
+        throw new Error("Server hash not found!");
+      }
+
+      const newServerHash = generateServerSeed();
+
+      await ServerHash.create({
+        wallet,
+        gameType: GameType.dice,
+        serverSeed: newServerHash.serverSeed,
+        nonce: serverHashInfo.nonce + 1,
+        isValid: true,
+      });
+
+      const { serverSeed, nonce } = serverHashInfo;
+
+      const strikeNumber = generateGameResult(
+        serverSeed,
+        clientSeed,
+        nonce,
+        GameType.dice,
+      );
+
       let result = "Lost";
       let rAmountWon = 0;
       let rAmountLost = amount;
@@ -115,7 +160,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         throw new Error("Insufficient balance for bet!");
       }
 
-      await Roll.create({
+      await Dice.create({
         wallet,
         rollAmount: amount,
         chosenNumbers,
@@ -124,6 +169,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         tokenMint,
         amountWon: rAmountWon,
         amountLost: rAmountLost,
+        clientSeed,
+        serverSeed,
+        nonce,
       });
 
       return res.json({

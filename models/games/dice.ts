@@ -1,12 +1,12 @@
 import mongoose from "mongoose";
 
-const rollSchema = new mongoose.Schema(
+const diceSchema = new mongoose.Schema(
   {
     wallet: {
       type: String,
       required: true,
     },
-    rollAmount: {
+    amount: {
       type: Number,
       required: true,
     },
@@ -65,5 +65,5 @@ const rollSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-let Roll = mongoose.models.Roll || mongoose.model("Roll", rollSchema);
-export default Roll;
+let Dice = mongoose.models.Dice || mongoose.model("Dice", diceSchema);
+export default Dice;

@@ -1,5 +1,5 @@
 import connectDatabase from "../../../../utils/database";
-import Roll from "../../../../models/games/roll";
+import Roll from "../../../../models/games/dice";
 
 async function handler(req: any, res: any) {
   if (req.method === "GET") {
