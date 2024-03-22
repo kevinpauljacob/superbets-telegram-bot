@@ -44,6 +44,18 @@ const BetSchema = new Schema(
       type: String,
       required: false,
     },
+    clientSeed: {
+      type: String,
+      required: true,
+    },
+    serverSeed: {
+      type: String,
+      required: true,
+    },
+    nonce: {
+      type: Number,
+      required: true,
+    },
   },
   { timestamps: true }
 );

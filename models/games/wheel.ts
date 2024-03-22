@@ -1,34 +1,35 @@
 import mongoose from "mongoose";
 
-const flipSchema = new mongoose.Schema(
+const wheelSchema = new mongoose.Schema(
   {
     wallet: {
       type: String,
       required: true,
     },
-    flipAmount: {
+    amount: {
       type: Number,
       required: true,
     },
-    flipType: {
-      type: Boolean, // if true -> heads
+    risk: {
+      type: String,
+      enum: ["low", "medium", "high"],
       required: true,
     },
-    strikeNumber: Number,
+    segments: {
+      type: Number,
+      required: true,
+    },
+    strikeNumber: {
+      type: Number,
+      required: true,
+    },
     result: {
       type: String,
       enum: ["Won", "Lost"],
+      required: true,
     },
     tokenMint: {
       type: String,
-      required: false,
-    },
-    amountWon: {
-      type: Number,
-      required: true,
-    },
-    amountLost: {
-      type: Number,
       required: true,
     },
     clientSeed: {
@@ -47,5 +48,5 @@ const flipSchema = new mongoose.Schema(
   { timestamps: true },
 );
 
-let Flip = mongoose.models.Flip || mongoose.model("Flip", flipSchema);
-export default Flip;
+let Wheel = mongoose.models.Wheel || mongoose.model("Wheel", wheelSchema);
+export default Wheel;

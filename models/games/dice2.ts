@@ -1,34 +1,35 @@
 import mongoose from "mongoose";
 
-const flipSchema = new mongoose.Schema(
+const dice2Schema = new mongoose.Schema(
   {
     wallet: {
       type: String,
       required: true,
     },
-    flipAmount: {
+    amount: {
       type: Number,
       required: true,
     },
-    flipType: {
-      type: Boolean, // if true -> heads
+    direction: {
+      type: String,
+      enum: ["over", "under"],
       required: true,
     },
-    strikeNumber: Number,
+    chance: {
+      type: Number,
+      required: true,
+    },
+    strikeNumber: {
+      type: Number,
+      required: true,
+    },
     result: {
       type: String,
       enum: ["Won", "Lost"],
+      required: true,
     },
     tokenMint: {
       type: String,
-      required: false,
-    },
-    amountWon: {
-      type: Number,
-      required: true,
-    },
-    amountLost: {
-      type: Number,
       required: true,
     },
     clientSeed: {
@@ -44,8 +45,8 @@ const flipSchema = new mongoose.Schema(
       required: true,
     },
   },
-  { timestamps: true },
+  { timestamps: true }
 );
 
-let Flip = mongoose.models.Flip || mongoose.model("Flip", flipSchema);
-export default Flip;
+let Dice2 = mongoose.models.Dice2 || mongoose.model("Dice2", dice2Schema);
+export default Dice2;

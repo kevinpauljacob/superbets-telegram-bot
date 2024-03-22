@@ -49,6 +49,18 @@ const rollSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
+    clientSeed: {
+      type: String,
+      required: true,
+    },
+    serverSeed: {
+      type: String,
+      required: true,
+    },
+    nonce: {
+      type: Number,
+      required: true,
+    },
   },
   { timestamps: true }
 );
