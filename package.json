@@ -32,6 +32,7 @@
     "react-hook-form": "^7.51.1",
     "react-hot-toast": "^2.4.1",
     "react-icons": "^4.12.0",
+    "sharp": "^0.33.2",
     "tweetnacl": "^1.0.3",
     "tweetnacl-util": "^0.15.1"
   },

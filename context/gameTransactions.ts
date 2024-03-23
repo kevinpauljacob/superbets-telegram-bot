@@ -115,7 +115,7 @@ export const deposit = async (
   let toastId = toast.loading("Deposit in progress");
 
   try {
-    let transaction = await createDepositTxn(
+    let {transaction, blockhashWithExpiryBlockHeight} = await createDepositTxn(
       wallet.publicKey,
       amount,
       tokenMint,
@@ -135,6 +135,7 @@ export const deposit = async (
         wallet: wallet.publicKey,
         amount,
         tokenMint,
+        blockhashWithExpiryBlockHeight,
       }),
       headers: {
         "Content-Type": "application/json",
@@ -302,42 +303,37 @@ export const createDepositTxn = async (
   tokenMint: string,
 ) => {
   let transaction = new Transaction();
-  try {
-    let { tokenName, decimal } = SPL_TOKENS.find(
-      (data) => data.tokenMint === tokenMint,
-    )!;
+  let { tokenName, decimal } = SPL_TOKENS.find(
+    (data) => data.tokenMint === tokenMint,
+  )!;
 
-    transaction.feePayer = wallet;
-    transaction.recentBlockhash = (
-      await connection.getLatestBlockhash()
-    ).blockhash;
+  const blockhashWithExpiryBlockHeight = await connection.getLatestBlockhash();
+  transaction.feePayer = wallet;
+  transaction.recentBlockhash = blockhashWithExpiryBlockHeight.blockhash;
 
-    if (tokenName === "SOL")
-      transaction.add(
-        SystemProgram.transfer({
-          fromPubkey: wallet,
-          toPubkey: devPublicKey,
-          lamports: Math.floor(amount * Math.pow(10, 9)),
-        }),
-      );
-    else {
-      const tokenId = new PublicKey(tokenMint);
-      const userAta = await getAssociatedTokenAddress(tokenId, wallet);
-      const devAta = await getAssociatedTokenAddress(tokenId, devPublicKey);
-      transaction.add(
-        createTransferInstruction(
-          userAta,
-          devAta,
-          wallet,
-          Math.floor(amount * Math.pow(10, decimal)),
-        ),
-      );
-    }
-
-    return transaction;
-  } catch (error) {
-    return transaction;
+  if (tokenName === "SOL")
+    transaction.add(
+      SystemProgram.transfer({
+        fromPubkey: wallet,
+        toPubkey: devPublicKey,
+        lamports: Math.floor(amount * Math.pow(10, 9)),
+      }),
+    );
+  else {
+    const tokenId = new PublicKey(tokenMint);
+    const userAta = await getAssociatedTokenAddress(tokenId, wallet);
+    const devAta = await getAssociatedTokenAddress(tokenId, devPublicKey);
+    transaction.add(
+      createTransferInstruction(
+        userAta,
+        devAta,
+        wallet,
+        Math.floor(amount * Math.pow(10, decimal)),
+      ),
+    );
   }
+
+  return { transaction, blockhashWithExpiryBlockHeight };
 };
 
 export const createWithdrawTxn = async (
