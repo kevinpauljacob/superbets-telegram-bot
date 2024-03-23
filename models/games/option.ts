@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 const Schema = mongoose.Schema;
 
-const BetSchema = new Schema(
+const OptionSchema = new Schema(
   {
     wallet: {
       type: String,
@@ -15,12 +15,13 @@ const BetSchema = new Schema(
       type: Date,
       required: false,
     },
-    betAmount: {
+    amount: {
       type: Number,
       required: true,
     },
     betType: {
-      type: Boolean, // if true -> betUp else betDown
+      type: String,
+      enum: ["betUp", "betDown"],
       required: true,
     },
     strikePrice: {
@@ -44,22 +45,10 @@ const BetSchema = new Schema(
       type: String,
       required: false,
     },
-    clientSeed: {
-      type: String,
-      required: true,
-    },
-    serverSeed: {
-      type: String,
-      required: true,
-    },
-    nonce: {
-      type: Number,
-      required: true,
-    },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
-let Bet = mongoose.models.Bet || mongoose.model("Bet", BetSchema);
+let Option = mongoose.models.Option || mongoose.model("Option", OptionSchema);
 
-export default Bet;
+export default Option;

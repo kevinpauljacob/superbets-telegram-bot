@@ -1,9 +1,6 @@
+import { Option, Coin, Dice, User } from "../../../../models/games";
 import connectDatabase from "../../../../utils/database";
 import { NextApiRequest, NextApiResponse } from "next";
-import Flip from "../../../../models/games/coin";
-import Roll from "../../../../models/games/dice";
-import Bet from "../../../../models/games/bet";
-import User from "../../../../models/games/user";
 
 async function binaryAggregateData(
   model: any,
@@ -176,19 +173,19 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       previousMonday.setUTCDate(currentDate.getUTCDate() - daysSinceMonday);
 
       const bets = await binaryAggregateData(
-        Bet,
+        Option,
         "betAmount",
         "result",
         previousMonday,
       );
       const flips = await flipAggregateData(
-        Flip,
+        Coin,
         "flipAmount",
         "result",
         previousMonday,
       );
       const rolls = await rollAggregateData(
-        Roll,
+        Dice,
         "rollAmount",
         "result",
         previousMonday,

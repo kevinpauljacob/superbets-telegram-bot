@@ -1,12 +1,13 @@
 import connectDatabase from "../../../../utils/database";
-import Flip from "../../../../models/games/coin";
+import { NextApiRequest, NextApiResponse } from "next";
+import Coin from "../../../../models/games/coin";
 
-async function handler(req: any, res: any) {
+async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === "GET") {
     try {
       await connectDatabase();
 
-      let flips = (await Flip.find({})).reverse().slice(0, 1000);
+      let flips = (await Coin.find({})).reverse().slice(0, 1000);
 
       return res.json({
         success: true,

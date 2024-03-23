@@ -1,6 +1,5 @@
 import connectDatabase from "../../../../utils/database";
-import User from "../../../../models/games/user";
-import Bet from "../../../../models/games/bet";
+import { User, Option } from "../../../../models/games";
 import { getToken } from "next-auth/jwt";
 import { NextApiRequest, NextApiResponse } from "next";
 import { minGameAmount } from "@/context/gameTransactions";
@@ -11,10 +10,19 @@ export const config = {
   maxDuration: 60,
 };
 
+type InputType = {
+  wallet: string;
+  amount: number;
+  tokenMint: string;
+  betType: "betUp" | "betDown";
+  timeFrame: number;
+};
+
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === "POST") {
     try {
-      let { wallet, amount, tokenMint, betType, timeFrame } = req.body;
+      let { wallet, amount, tokenMint, betType, timeFrame }: InputType =
+        req.body;
 
       const token = await getToken({ req, secret });
 
@@ -46,7 +54,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         !tokenMint ||
         betType == null ||
         tokenMint != "SOL" ||
-        (betType != true && betType != false)
+        !(betType === "betUp" || betType === "betDown")
       )
         return res
           .status(400)
@@ -66,7 +74,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         .then((data) => data.price.price * Math.pow(10, data.price.expo));
 
       let user = await User.findOne({ wallet });
-      let bet = await Bet.findOne({ wallet, result: "Pending" });
+      let bet = await Option.findOne({ wallet, result: "Pending" });
 
       if (!user)
         return res
@@ -107,11 +115,11 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
               amount: { $gte: amount },
             },
           },
-          isBetOngoing: false,
+          isOptionOngoing: false,
         },
         {
           $inc: { "deposit.$.amount": -amount, totalVolume: amount },
-          isBetOngoing: true,
+          isOptionOngoing: true,
           sns,
         },
         {
@@ -123,11 +131,11 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         throw new Error("Insufficient balance for bet!");
       }
 
-      await Bet.create({
+      await Option.create({
         wallet,
         betTime,
         betEndTime,
-        betAmount: amount,
+        amount,
         betType,
         strikePrice,
         timeFrame: 60 * timeFrame,

@@ -1,8 +1,7 @@
 import connectDatabase from "../../../../utils/database";
-import User from "../../../../models/games/user";
-import Bet from "../../../../models/games/bet";
-import House from "../../../../models/games/house";
+import { Option, User } from "../../../../models/games";
 import { HOUSE_TAX } from "../../../../context/config";
+import { NextApiRequest, NextApiResponse } from "next";
 import { getToken } from "next-auth/jwt";
 
 const secret = process.env.NEXTAUTH_SECRET;
@@ -11,17 +10,7 @@ export const config = {
   maxDuration: 60,
 };
 
-async function handler(req: any, res: any) {
-  if (req.method === "OPTIONS") {
-    res.setHeader("Access-Control-Allow-Methods", "POST,GET,OPTIONS");
-    res.setHeader("Access-Control-Allow-Origin", "*");
-    res.setHeader(
-      "Access-Control-Allow-Headers",
-      "Content-Type, Authorization"
-    );
-    return res.status(200).end();
-  }
-
+async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === "POST") {
     try {
       let { wallet } = req.body;
@@ -46,7 +35,7 @@ async function handler(req: any, res: any) {
 
       let user = await User.findOne({ wallet });
 
-      let bet = await Bet.findOne({ wallet, result: "Pending" });
+      let bet = await Option.findOne({ wallet, result: "Pending" });
 
       if (!user)
         return res
@@ -63,8 +52,8 @@ async function handler(req: any, res: any) {
 
       let betEndPrice = await fetch(
         `https://hermes.pyth.network/api/get_price_feed?id=0xef0d8b6fda2ceba41da15d4095d1da392a0d2f8ed0c6c7bc0f4cfac8c280b56d&publish_time=${Math.floor(
-          new Date(bet.betEndTime).getTime() / 1000
-        )}`
+          new Date(bet.betEndTime).getTime() / 1000,
+        )}`,
       )
         .then((res) => res.json())
         .then((data) => data.price.price * Math.pow(10, data.price.expo));
@@ -107,7 +96,7 @@ async function handler(req: any, res: any) {
               tokenMint: "SOL",
             },
           },
-          isBetOngoing: true,
+          isOptionOngoing: true,
         },
         {
           $inc: {
@@ -117,35 +106,23 @@ async function handler(req: any, res: any) {
             betsWon: result == "Won" ? 1 : 0,
             betsLost: result == "Lost" ? 1 : 0,
           },
-          isBetOngoing: false,
+          isOptionOngoing: false,
         },
         {
           new: true,
-        }
+        },
       );
 
       if (!status) {
         throw new Error("User could not be updated !");
       }
 
-      await Bet.findOneAndUpdate(
+      await Option.findOneAndUpdate(
         { wallet, result: "Pending" },
         {
           result,
           betEndPrice,
-        }
-      );
-      await House.findOneAndUpdate(
-        {},
-        {
-          $inc: {
-            amountLost,
-            amountWon: amountWon * (1 - HOUSE_TAX),
-            taxCollected: amountWon * HOUSE_TAX,
-            betsWon: result == "Won" ? 1 : 0,
-            betsLost: result == "Lost" ? 1 : 0,
-          },
-        }
+        },
       );
 
       return res.json({
@@ -161,6 +138,10 @@ async function handler(req: any, res: any) {
       console.log(e);
       return res.status(500).json({ success: false, message: e.message });
     }
+  } else {
+    return res
+      .status(405)
+      .json({ success: false, message: "Method not allowed" });
   }
 }
 

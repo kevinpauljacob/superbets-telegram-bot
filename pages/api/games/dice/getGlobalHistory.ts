@@ -1,12 +1,13 @@
 import connectDatabase from "../../../../utils/database";
-import Roll from "../../../../models/games/dice";
+import { NextApiRequest, NextApiResponse } from "next";
+import Dice from "../../../../models/games/dice";
 
-async function handler(req: any, res: any) {
+async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === "GET") {
     try {
       await connectDatabase();
 
-      let rolls = (await Roll.find({})).reverse().slice(0, 1000);
+      let rolls = (await Dice.find({})).reverse().slice(0, 1000);
 
       return res.json({
         success: true,
