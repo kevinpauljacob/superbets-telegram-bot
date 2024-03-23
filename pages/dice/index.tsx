@@ -434,8 +434,8 @@ export default function Dice() {
                         ? "/assets/finalDiceFace1.png"
                         : "/assets/diceFace1.png"
                     }
-                    width={30}
-                    height={30}
+                    width={50}
+                    height={50}
                     alt=""
                     className={`inline-block mt-6 ${
                       selectedFace.includes(1) ? "selected-face" : ""
@@ -456,8 +456,8 @@ export default function Dice() {
                         ? "/assets/finalDiceFace2.png"
                         : "/assets/diceFace2.png"
                     }
-                    width={30}
-                    height={30}
+                    width={50}
+                    height={50}
                     alt=""
                     className={`inline-block mt-6 ${
                       selectedFace.includes(2) ? "selected-face" : ""
@@ -478,8 +478,8 @@ export default function Dice() {
                         ? "/assets/finalDiceFace3.png"
                         : "/assets/diceFace3.png"
                     }
-                    width={30}
-                    height={30}
+                    width={50}
+                    height={50}
                     alt=""
                     className={`inline-block mt-6 ${
                       selectedFace.includes(3) ? "selected-face" : ""
@@ -500,8 +500,8 @@ export default function Dice() {
                         ? "/assets/finalDiceFace4.png"
                         : "/assets/diceFace4.png"
                     }
-                    width={30}
-                    height={30}
+                    width={50}
+                    height={50}
                     alt=""
                     className={`inline-block mt-6 ${
                       selectedFace.includes(4) ? "selected-face" : ""
@@ -522,8 +522,8 @@ export default function Dice() {
                         ? "/assets/finalDiceFace5.png"
                         : "/assets/diceFace5.png"
                     }
-                    width={30}
-                    height={30}
+                    width={50}
+                    height={50}
                     alt=""
                     className={`inline-block mt-6 ${
                       selectedFace.includes(5) ? "selected-face" : ""
@@ -544,8 +544,8 @@ export default function Dice() {
                         ? "/assets/finalDiceFace6.png"
                         : "/assets/diceFace6.png"
                     }
-                    width={30}
-                    height={30}
+                    width={50}
+                    height={50}
                     alt=""
                     className={`inline-block mt-6 ${
                       selectedFace.includes(6) ? "selected-face" : ""

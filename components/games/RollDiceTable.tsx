@@ -8,6 +8,7 @@ interface Flip {
   createdAt: string;
   wallet: string;
   chosenNumbers: number[];
+  resultNumber: number;
   rollAmount: number;
   result: "Won" | "Lost";
   strikeNumber: number;
@@ -20,12 +21,70 @@ export default function RollDiceTable({ refresh }: { refresh: boolean }) {
 
   const [page, setPage] = useState(1);
 
-  const [bets, setBets] = useState<Flip[]>([]);
+  const [bets, setBets] = useState<Flip[]>([
+    {
+      createdAt: "2024-03-23T08:00:00Z",
+      wallet: "wallet1",
+      chosenNumbers: [1, 2, 3],
+      rollAmount: 10,
+      result: "Won",
+      resultNumber: 2, // Added resultNumber
+      strikeNumber: 2,
+      betAmountWon: 20,
+    },
+    {
+      createdAt: "2024-03-23T09:00:00Z",
+      wallet: "wallet2",
+      chosenNumbers: [4, 5, 6],
+      rollAmount: 15,
+      result: "Lost",
+      resultNumber: 4, // Added resultNumber
+      strikeNumber: 5,
+      betAmountWon: 0,
+    },
+    {
+      createdAt: "2024-03-23T10:00:00Z",
+      wallet: "wallet3",
+      chosenNumbers: [1, 5, 6],
+      rollAmount: 20,
+      result: "Won",
+      resultNumber: 6, // Added resultNumber
+      strikeNumber: 1,
+      betAmountWon: 40,
+    },
+    {
+      createdAt: "2024-03-23T11:00:00Z",
+      wallet: "wallet4",
+      chosenNumbers: [2, 4, 3],
+      rollAmount: 25,
+      result: "Lost",
+      resultNumber: 3, // Added resultNumber
+      strikeNumber: 4,
+      betAmountWon: 0,
+    },
+    {
+      createdAt: "2024-03-23T12:00:00Z",
+      wallet: "wallet5",
+      chosenNumbers: [3, 4, 6],
+      rollAmount: 30,
+      result: "Won",
+      resultNumber: 6, // Added resultNumber
+      strikeNumber: 3,
+      betAmountWon: 60,
+    },
+  ]);
   const transactionsPerPage = 10;
   const [maxPages, setMaxPages] = useState(0);
 
-  const headers = ["Time", "Bet Faces", "Bet Amount", "Result"];
-  const allHeaders = ["Time", "Wallet", "Bet Faces", "Bet Amount", "Result"];
+  const headers = ["Time", "Bet Faces", "Bet Amount", "Result", "Amount Won"];
+  const allHeaders = [
+    "Time",
+    "Wallet",
+    "Bet Faces",
+    "Bet Amount",
+    "Result",
+    "Amount Won",
+  ];
 
   useEffect(() => {
     const route = all
@@ -47,17 +106,15 @@ export default function RollDiceTable({ refresh }: { refresh: boolean }) {
 
   return (
     <div className="flex w-full flex-col pb-10">
-      <div className="mt-[7rem] flex w-full items-center justify-center gap-4 px-5 md:justify-start md:px-[10%]">
+      <div className="mt-[7rem] flex w-full items-center justify-center text-white font-semibold gap-4 md:justify-start ">
         <button
           onClick={() => {
             if (wallet.publicKey) setAll(false);
             else toast.error("Wallet not connected");
           }}
           className={`${
-            all
-              ? "border-transparent"
-              : "text-shadow-pink border-[#8A078A] bg-[#8A078A30]"
-          } w-full transform rounded-[5px] border-[2px] px-8 py-2 font-changa text-lg text-white transition duration-200 hover:bg-[#8A078A30] md:w-fit`}
+            all ? "bg-[#202329]" : "bg-[#7839C5]"
+          } rounded-md transition duration-300 ease-in-out px-8 py-1.5`}
         >
           My Bets
         </button>
@@ -66,19 +123,17 @@ export default function RollDiceTable({ refresh }: { refresh: boolean }) {
             setAll(true);
           }}
           className={`${
-            all
-              ? "text-shadow-pink border-[#8A078A] bg-[#8A078A30]"
-              : "border-transparent"
-          } w-full transform rounded-[5px] border-[2px] px-8 py-2 font-changa text-lg text-white transition duration-200 hover:bg-[#8A078A30] md:w-fit`}
+            all ? "bg-[#7839C5]" : "bg-[#202329]"
+          } rounded-md transition duration-300 ease-in-out px-8 py-1.5`}
         >
           All Bets
         </button>
       </div>
-      <div className="mt-10 w-full overflow-x-auto px-5 pb-8 md:px-[10%]">
+      <div className="mt-10 w-full overflow-x-auto pb-8">
         <div className="flex w-full min-w-[50rem] flex-col items-center">
           {/* header  */}
           {bets.length > 0 && (
-            <div className="mb-5 flex w-full flex-row items-center gap-2">
+            <div className="mb-5 flex w-full flex-row items-center bg-[#121418] rounded-md py-1 gap-2">
               {!all
                 ? headers.map((header, index) => (
                     <span
@@ -102,12 +157,12 @@ export default function RollDiceTable({ refresh }: { refresh: boolean }) {
             bets
               .slice(
                 page * transactionsPerPage - transactionsPerPage,
-                page * transactionsPerPage
+                page * transactionsPerPage,
               )
               .map((bet, index) => (
                 <div
                   key={index}
-                  className="mb-2.5 ml-2.5 mr-2.5 flex w-full flex-row items-center gap-2 rounded-[5px] bg-[#45054933] py-3"
+                  className="mb-2.5 ml-2.5 mr-2.5 flex w-full flex-row items-center gap-2 rounded-[5px] bg-[#121418] py-3"
                 >
                   <span className="w-full text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
                     {bet.createdAt
@@ -133,7 +188,7 @@ export default function RollDiceTable({ refresh }: { refresh: boolean }) {
                     {bet.chosenNumbers.map((face, index) => (
                       <span key={index} className="mr-2 mt-2 inline-block">
                         <Image
-                          src={`/assets/diceFace${face}.png`}
+                          src={`/assets/finalDiceFace${face}.png`}
                           width={30}
                           height={30}
                           alt=""
@@ -142,9 +197,9 @@ export default function RollDiceTable({ refresh }: { refresh: boolean }) {
                     ))}
                   </span>
                   <span className="w-full text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
-                    {bet.rollAmount}
+                    {bet.rollAmount} SOL
                   </span>
-                  <span
+                  {/* <span
                     className={`w-full text-center font-changa text-sm text-opacity-75 ${
                       bet.result === "Lost"
                         ? "text-[#CF304A]"
@@ -154,6 +209,19 @@ export default function RollDiceTable({ refresh }: { refresh: boolean }) {
                     }`}
                   >
                     {bet.result}
+                  </span> */}
+                  <span className="w-full text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
+                    <span className="mr-2 mt-2 inline-block">
+                      <Image
+                        src={`/assets/finalDiceFace${bet.resultNumber}.png`}
+                        width={30}
+                        height={30}
+                        alt=""
+                      />
+                    </span>
+                  </span>
+                  <span className="w-full text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
+                    {bet.betAmountWon} SOL
                   </span>
                 </div>
               ))

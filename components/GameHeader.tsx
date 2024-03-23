@@ -1,5 +1,6 @@
 import { useRouter } from "next/router";
 import Image from "next/image";
+import fair from "/public/assets/fair.png";
 
 export default function GameHeader() {
   const router = useRouter();
@@ -58,16 +59,28 @@ export default function GameHeader() {
         </div>
         <div className="flex">
           <div className="flex items-center justify-between bg-[#1E2220] rounded-md mx-1.5 px-2 py-1">
-            <p>Volume :&nbsp;</p>
-            <p className="text-[#7839C5]">{selectedGame.stats.volume}</p>
+            <p className="font-light">Wallet Balance :&nbsp;</p>
+            <p className="text-[#1FCDF0] font-semibold">
+              {selectedGame.stats.balance} $SOL
+            </p>
           </div>
           <div className="flex items-center justify-between bg-[#1E2220] rounded-md mx-1.5 px-2 py-1">
-            <p>Players :&nbsp;</p>
-            <p className="text-[#7839C5]">{selectedGame.stats.players}</p>
+            <p className="font-light">Volume :&nbsp;</p>
+            <p className="text-[#7839C5] font-semibold">
+              {selectedGame.stats.volume}
+            </p>
           </div>
           <div className="flex items-center justify-between bg-[#1E2220] rounded-md mx-1.5 px-2 py-1">
-            <p>Balance :&nbsp;</p>
-            <p className="text-[#1FCDF0]">{selectedGame.stats.balance} $SOL</p>
+            <p className="font-light">Unique Players :&nbsp;</p>
+            <p className="text-[#7839C5] font-semibold">
+              {selectedGame.stats.players}
+            </p>
+          </div>
+          <div className="flex items-center gap-2 mx-1.5">
+            <p className="underline text-[#94A3B8] decoration-[#94A3B8] underline-offset-2">
+              Povabaly Fair
+            </p>
+            <Image src={fair} alt="Fairness" width={20} height={20} />
           </div>
         </div>
       </div>
