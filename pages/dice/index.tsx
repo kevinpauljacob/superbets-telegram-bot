@@ -101,8 +101,8 @@ export default function Dice() {
 
   return (
     <div className="flex h-full w-full flex-col items-center justify-start p-10">
-      <div className="flex items-center rounded-[1.15rem] bg-[#121418] text-white w-full">
-        <div className="border-r border-white/10 w-[35%] p-14">
+      <div className="flex flex-col xl:flex-row items-center rounded-[1.15rem] bg-[#121418] text-white w-full">
+        <div className="xl:border-r border-white/10 xl:w-[35%] w-full p-6 sm:p-8 xl:p-14">
           <div className="flex mb-8">
             <button
               className={`w-full border-2 rounded-md py-1 mr-1 border-[#d9d9d90d] transition duration-300 ease-in-out ${
@@ -141,90 +141,102 @@ export default function Dice() {
           <div className="flex flex-col">
             <p className="text-xs font-semibold mb-2">Choose upto 5 faces</p>
             <div className="bg-[#0C0F16] rounded-md flex justify-center p-4 mb-4">
-              <Image
-                src={
-                  selectedFaces[1]
-                    ? "/assets/selectedDiceFace1.png"
-                    : "/assets/diceFace1.png"
-                }
-                width={50}
-                height={50}
-                alt=""
-                className={`mr-2 inline-block ${
-                  selectedFace.includes(1) ? "selected-face" : ""
-                }`}
-                onClick={() => handleDiceClick(1)}
-              />
-              <Image
-                src={
-                  selectedFaces[2]
-                    ? "/assets/selectedDiceFace2.png"
-                    : "/assets/diceFace2.png"
-                }
-                width={50}
-                height={50}
-                alt=""
-                className={`mr-2 inline-block ${
-                  selectedFace.includes(2) ? "selected-face" : ""
-                }`}
-                onClick={() => handleDiceClick(2)}
-              />
-              <Image
-                src={
-                  selectedFaces[3]
-                    ? "/assets/selectedDiceFace3.png"
-                    : "/assets/diceFace3.png"
-                }
-                width={50}
-                height={50}
-                alt=""
-                className={`mr-2 inline-block ${
-                  selectedFace.includes(3) ? "selected-face" : ""
-                }`}
-                onClick={() => handleDiceClick(3)}
-              />
-              <Image
-                src={
-                  selectedFaces[4]
-                    ? "/assets/selectedDiceFace4.png"
-                    : "/assets/diceFace4.png"
-                }
-                width={50}
-                height={50}
-                alt=""
-                className={`mr-2 inline-block ${
-                  selectedFace.includes(4) ? "selected-face" : ""
-                }`}
-                onClick={() => handleDiceClick(4)}
-              />
-              <Image
-                src={
-                  selectedFaces[5]
-                    ? "/assets/selectedDiceFace5.png"
-                    : "/assets/diceFace5.png"
-                }
-                width={50}
-                height={50}
-                alt=""
-                className={`mr-2 inline-block ${
-                  selectedFace.includes(5) ? "selected-face" : ""
-                }`}
-                onClick={() => handleDiceClick(5)}
-              />
-              <Image
-                src={
-                  selectedFaces[6]
-                    ? "/assets/selectedDiceFace6.png"
-                    : "/assets/diceFace6.png"
-                }
-                width={50}
-                height={50}
-                alt=""
-                className={`mr-2 inline-block ${
-                  selectedFace.includes(6) ? "selected-face" : ""
-                }`}
-                onClick={() => handleDiceClick(6)}
-              />
+              <div className="mr-2">
+                <Image
+                  src={
+                    selectedFaces[1]
+                      ? "/assets/selectedDiceFace1.png"
+                      : "/assets/diceFace1.png"
+                  }
+                  width={45}
+                  height={45}
+                  alt=""
+                  className={`${
+                    selectedFace.includes(1) ? "selected-face" : ""
+                  }`}
+                  onClick={() => handleDiceClick(1)}
+                />
+              </div>
+              <div className="mr-2">
+                <Image
+                  src={
+                    selectedFaces[2]
+                      ? "/assets/selectedDiceFace2.png"
+                      : "/assets/diceFace2.png"
+                  }
+                  width={45}
+                  height={45}
+                  alt=""
+                  className={`${
+                    selectedFace.includes(2) ? "selected-face" : ""
+                  }`}
+                  onClick={() => handleDiceClick(2)}
+                />
+              </div>
+              <div className="mr-2">
+                <Image
+                  src={
+                    selectedFaces[3]
+                      ? "/assets/selectedDiceFace3.png"
+                      : "/assets/diceFace3.png"
+                  }
+                  width={45}
+                  height={45}
+                  alt=""
+                  className={`${
+                    selectedFace.includes(3) ? "selected-face" : ""
+                  }`}
+                  onClick={() => handleDiceClick(3)}
+                />
+              </div>
+              <div className="mr-2">
+                <Image
+                  src={
+                    selectedFaces[4]
+                      ? "/assets/selectedDiceFace4.png"
+                      : "/assets/diceFace4.png"
+                  }
+                  width={45}
+                  height={45}
+                  alt=""
+                  className={`${
+                    selectedFace.includes(4) ? "selected-face" : ""
+                  }`}
+                  onClick={() => handleDiceClick(4)}
+                />
+              </div>
+              <div className="mr-2">
+                <Image
+                  src={
+                    selectedFaces[5]
+                      ? "/assets/selectedDiceFace5.png"
+                      : "/assets/diceFace5.png"
+                  }
+                  width={45}
+                  height={45}
+                  alt=""
+                  className={`${
+                    selectedFace.includes(5) ? "selected-face" : ""
+                  }`}
+                  onClick={() => handleDiceClick(5)}
+                />
+              </div>
+              <div className="">
+                <Image
+                  src={
+                    selectedFaces[6]
+                      ? "/assets/selectedDiceFace6.png"
+                      : "/assets/diceFace6.png"
+                  }
+                  width={45}
+                  height={45}
+                  alt=""
+                  className={`${
+                    selectedFace.includes(6) ? "selected-face" : ""
+                  }`}
+                  onClick={() => handleDiceClick(6)}
+                />
+              </div>
             </div>
           </div>
           <p className="bg-black mb-5 rounded-md text-center text-xs py-1.5 text-[#F0F0F0]">
@@ -317,15 +329,13 @@ export default function Dice() {
             </div>
           </div> */}
         </div>
-        <div className="w-[65%] h-full px-8">
-          <div className="bg-[#0C0F16] flex flex-col justify-between h-[400px] rounded-md p-12">
-            <div className="flex justify-between items-center">
+        <div className="xl:w-[65%] h-full px-6 pb-6 sm:px-8 sm:pb-8 xl:pb-0 xl:px-8">
+          <div className="bg-[#0C0F16] flex flex-col justify-between h-full sm:h-[400px] rounded-md p-4 sm:p-12">
+            <div className="flex flex-col sm:flex-row justify-between items-center">
               <div>
                 {isRolling ? (
-                  <div>
-                    <span className="font-changa text-sm font-semibold text-white text-opacity-80">
-                      Rolling the dice...
-                    </span>
+                  <div className="font-changa text-sm font-semibold text-white text-opacity-80">
+                    Rolling the dice...
                   </div>
                 ) : (
                   ""
@@ -412,20 +422,22 @@ export default function Dice() {
                 />
               </div>
             </div>
-            <div className="relative w-full mb-6">
-              <Image
-                src="/assets/progressBar.png"
-                alt="progress bar"
-                width={900}
-                height={100}
-              />
+            <div className="relative w-full mb-8 xl:mb-6">
+              <div>
+                <Image
+                  src="/assets/progressBar.png"
+                  alt="progress bar"
+                  width={900}
+                  height={100}
+                />
+              </div>
               <div className="flex justify-around">
-                <div className="flex flex-col items-center">
+                <div className="flex flex-col items-center mr-2 sm:mr-0">
                   <Image
                     src="/assets/progressTip.png"
                     alt="progress bar"
-                    width={15}
-                    height={15}
+                    width={13}
+                    height={13}
                     className="absolute top-[4px]"
                   />
                   <Image
@@ -442,12 +454,12 @@ export default function Dice() {
                     }`}
                   />
                 </div>
-                <div className="flex flex-col items-center">
+                <div className="flex flex-col items-center mr-2 sm:mr-0">
                   <Image
                     src="/assets/progressTip.png"
                     alt="progress bar"
-                    width={15}
-                    height={15}
+                    width={13}
+                    height={13}
                     className="absolute top-[4px]"
                   />
                   <Image
@@ -464,12 +476,12 @@ export default function Dice() {
                     }`}
                   />
                 </div>
-                <div className="flex flex-col items-center">
+                <div className="flex flex-col items-center mr-2 sm:mr-0">
                   <Image
                     src="/assets/progressTip.png"
                     alt="progress bar"
-                    width={15}
-                    height={15}
+                    width={13}
+                    height={13}
                     className="absolute top-[4px]"
                   />
                   <Image
@@ -486,12 +498,12 @@ export default function Dice() {
                     }`}
                   />
                 </div>
-                <div className="flex flex-col items-center">
+                <div className="flex flex-col items-center mr-2 sm:mr-0">
                   <Image
                     src="/assets/progressTip.png"
                     alt="progress bar"
-                    width={15}
-                    height={15}
+                    width={13}
+                    height={13}
                     className="absolute top-[4px]"
                   />
                   <Image
@@ -508,12 +520,12 @@ export default function Dice() {
                     }`}
                   />
                 </div>
-                <div className="flex flex-col items-center">
+                <div className="flex flex-col items-center mr-2 sm:mr-0">
                   <Image
                     src="/assets/progressTip.png"
                     alt="progress bar"
-                    width={15}
-                    height={15}
+                    width={13}
+                    height={13}
                     className="absolute top-[4px]"
                   />
                   <Image
@@ -534,8 +546,8 @@ export default function Dice() {
                   <Image
                     src="/assets/progressTip.png"
                     alt="progress bar"
-                    width={15}
-                    height={15}
+                    width={13}
+                    height={13}
                     className="absolute top-[4px]"
                   />
                   <Image
@@ -554,7 +566,7 @@ export default function Dice() {
                 </div>
               </div>
             </div>
-            <div className="flex w-full justify-between">
+            <div className="flex flex-col sm:flex-row w-full justify-between">
               <div className="flex flex-col w-full">
                 <span className="text-[#F0F0F0] text-xs mb-1">Multiplier</span>
                 <span className="bg-[#202329] rounded-md px-5 py-2">
@@ -567,7 +579,7 @@ export default function Dice() {
                 {ROLL_TAX * 100}%
               </span>
             </div> */}
-              <div className="flex flex-col w-full mx-8">
+              <div className="flex flex-col w-full sm:mx-8 my-3 sm:my-0">
                 <span className="text-[#F0F0F0] text-xs mb-1">
                   Winning Amount
                 </span>

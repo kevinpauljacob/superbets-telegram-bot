@@ -44,39 +44,39 @@ export default function GameHeader() {
 
   // If the selected game exists, render its details, otherwise render null
   return selectedGame ? (
-    <div className="hidden sm:block text-white border-y border-[#1E2220] bg-[#121418] px-4 py-2">
-      <div className="flex justify-between">
-        <div className="flex">
+    <div className="text-white border-y border-[#1E2220] bg-[#121418] px-4 py-2">
+      <div className="flex flex-col md:flex-row justify-between">
+        <div className="flex items-center">
           <Image
             src={selectedGame.icon}
             alt={selectedGame.name}
             width={30}
             height={30}
           />
-          <p className="uppercase font-bold text-xl ml-2">
+          <p className="uppercase font-bold text-xl min-w-[150px] ml-2">
             {selectedGame.name}
           </p>
         </div>
-        <div className="flex">
-          <div className="flex items-center justify-between bg-[#1E2220] rounded-md mx-1.5 px-2 py-1">
+        <div className="flex flex-wrap mt-1">
+          <div className="flex items-center justify-between bg-[#1E2220] rounded-md mx-1.5  my-1 px-2 py-1">
             <p className="font-light">Wallet Balance :&nbsp;</p>
             <p className="text-[#1FCDF0] font-semibold">
               {selectedGame.stats.balance} $SOL
             </p>
           </div>
-          <div className="flex items-center justify-between bg-[#1E2220] rounded-md mx-1.5 px-2 py-1">
+          <div className="flex items-center justify-between bg-[#1E2220] rounded-md mx-1.5  my-1 px-2 py-1">
             <p className="font-light">Volume :&nbsp;</p>
             <p className="text-[#7839C5] font-semibold">
               {selectedGame.stats.volume}
             </p>
           </div>
-          <div className="flex items-center justify-between bg-[#1E2220] rounded-md mx-1.5 px-2 py-1">
+          <div className="flex items-center justify-between bg-[#1E2220] rounded-md mx-1.5  my-1 px-2 py-1">
             <p className="font-light">Unique Players :&nbsp;</p>
             <p className="text-[#7839C5] font-semibold">
               {selectedGame.stats.players}
             </p>
           </div>
-          <div className="flex items-center gap-2 mx-1.5">
+          <div className="flex items-center gap-2 mx-1.5 my-1 ">
             <p className="underline text-[#94A3B8] decoration-[#94A3B8] underline-offset-2">
               Povabaly Fair
             </p>
