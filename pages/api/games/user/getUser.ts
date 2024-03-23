@@ -1,8 +1,8 @@
 import connectDatabase from "../../../../utils/database";
-import { NextRequest } from "next/server";
+import { NextApiRequest, NextApiResponse } from "next";
 import User from "../../../../models/games/user";
 
-async function handler(req: any, res: any) {
+async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === "GET") {
     try {
       await connectDatabase();

@@ -1,7 +1,8 @@
 import connectDatabase from "../../../../utils/database";
-import Bet from "../../../../models/games/bet";
+import { NextApiRequest, NextApiResponse } from "next";
+import Option from "../../../../models/games/option";
 
-async function handler(req: any, res: any) {
+async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === "GET") {
     try {
       await connectDatabase();
@@ -11,7 +12,7 @@ async function handler(req: any, res: any) {
 
       const wallet = req.query.wallet;
 
-      let bets = await Bet.findOne({ wallet: wallet, result: "Pending" });
+      let bets = await Option.findOne({ wallet: wallet, result: "Pending" });
 
       return res.json({
         success: true,

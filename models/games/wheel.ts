@@ -1,0 +1,52 @@
+import mongoose from "mongoose";
+
+const wheelSchema = new mongoose.Schema(
+  {
+    wallet: {
+      type: String,
+      required: true,
+    },
+    amount: {
+      type: Number,
+      required: true,
+    },
+    risk: {
+      type: String,
+      enum: ["low", "medium", "high"],
+      required: true,
+    },
+    segments: {
+      type: Number,
+      required: true,
+    },
+    strikeNumber: {
+      type: Number,
+      required: true,
+    },
+    result: {
+      type: String,
+      enum: ["Won", "Lost"],
+      required: true,
+    },
+    tokenMint: {
+      type: String,
+      required: true,
+    },
+    clientSeed: {
+      type: String,
+      required: true,
+    },
+    serverSeed: {
+      type: String,
+      required: true,
+    },
+    nonce: {
+      type: Number,
+      required: true,
+    },
+  },
+  { timestamps: true },
+);
+
+let Wheel = mongoose.models.Wheel || mongoose.model("Wheel", wheelSchema);
+export default Wheel;

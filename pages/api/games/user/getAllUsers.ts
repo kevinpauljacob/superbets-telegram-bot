@@ -1,14 +1,11 @@
 import connectDatabase from "../../../../utils/database";
 import { NextApiRequest, NextApiResponse } from "next";
-import Flip from "../../../../models/games/flip";
-import Roll from "../../../../models/games/roll";
-import Bet from "../../../../models/games/bet";
-import User from "../../../../models/games/user";
+import { Option, Coin, Dice, User } from "../../../../models/games";
 
 async function binaryAggregateData(
   model: any,
   betAmountField: string,
-  resultField: string
+  resultField: string,
 ): Promise<
   { _id: string; total: number; won: number; lost: number; count: number }[]
 > {
@@ -46,7 +43,7 @@ async function binaryAggregateData(
 async function flipAggregateData(
   model: any,
   betAmountField: string,
-  resultField: string
+  resultField: string,
 ): Promise<
   { _id: string; total: number; won: number; lost: number; count: number }[]
 > {
@@ -84,7 +81,7 @@ async function flipAggregateData(
 async function rollAggregateData(
   model: any,
   betAmountField: string,
-  resultField: string
+  resultField: string,
 ): Promise<
   { _id: string; total: number; won: number; lost: number; count: number }[]
 > {
@@ -152,9 +149,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
       // Calculate the previous Monday at 12:00 UTC
 
-      const bets = await binaryAggregateData(Bet, "betAmount", "result");
-      const flips = await flipAggregateData(Flip, "flipAmount", "result");
-      const rolls = await rollAggregateData(Roll, "rollAmount", "result");
+      const bets = await binaryAggregateData(Option, "betAmount", "result");
+      const flips = await flipAggregateData(Coin, "flipAmount", "result");
+      const rolls = await rollAggregateData(Dice, "rollAmount", "result");
       const users = await User.find({});
 
       const result: {

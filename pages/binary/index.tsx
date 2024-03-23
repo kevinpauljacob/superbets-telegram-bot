@@ -7,6 +7,7 @@ import Loader from "../../components/games/Loader";
 import { placeBet } from "../../context/gameTransactions";
 import { checkResult as checkResultAPI } from "../../context/gameTransactions";
 import Head from "next/head";
+import Link from "next/link";
 
 const Timer = dynamic(() => import("../../components/games/Timer"), { ssr: false });
 const Progress = dynamic(() => import("../../components/games/Progressbar"), {
@@ -473,9 +474,9 @@ export default function Binary() {
           <div className="mb-5 w-full rounded-lg bg-[#C20FC5] bg-opacity-10 px-3 pb-2 pt-4 text-white md:px-6">
             <div className="-full mb-3 text-center font-changa font-medium text-[#F0F0F0] text-opacity-75">
               Please deposit funds to start playing. View{" "}
-              <a href="/balance">
+              <Link href="/balance">
                 <u>WALLET</u>
-              </a>
+              </Link>
             </div>
           </div>
         )}

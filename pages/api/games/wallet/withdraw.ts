@@ -1,9 +1,9 @@
 import {
+  BlockhashWithExpiryBlockHeight,
   Connection,
   Keypair,
   PublicKey,
   Transaction,
-  sendAndConfirmRawTransaction,
 } from "@solana/web3.js";
 import {
   createWithdrawTxn,
@@ -17,6 +17,7 @@ import House from "../../../../models/games/house";
 import { getToken } from "next-auth/jwt";
 import { bs58 } from "@project-serum/anchor/dist/cjs/utils/bytes";
 import TxnSignature from "../../../../models/txnSignature";
+import { NextApiRequest, NextApiResponse } from "next";
 
 const secret = process.env.NEXTAUTH_SECRET;
 
@@ -28,20 +29,24 @@ export const config = {
   maxDuration: 60,
 };
 
-async function handler(req: any, res: any) {
-  if (req.method === "OPTIONS") {
-    res.setHeader("Access-Control-Allow-Methods", "POST,GET,OPTIONS");
-    res.setHeader("Access-Control-Allow-Origin", "*");
-    res.setHeader(
-      "Access-Control-Allow-Headers",
-      "Content-Type, Authorization"
-    );
-    return res.status(200).end();
-  }
+type InputType = {
+  transactionBase64: string;
+  wallet: string;
+  amount: number;
+  tokenMint: string;
+  blockhashWithExpiryBlockHeight: BlockhashWithExpiryBlockHeight;
+};
 
+async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === "POST") {
     try {
-      let { transactionBase64, wallet, amount, tokenMint } = req.body;
+      let {
+        transactionBase64,
+        wallet,
+        amount,
+        tokenMint,
+        blockhashWithExpiryBlockHeight,
+      } = req.body;
 
       const token = await getToken({ req, secret });
 
@@ -57,7 +62,8 @@ async function handler(req: any, res: any) {
         !transactionBase64 ||
         !amount ||
         !tokenMint ||
-        tokenMint != "SOL"
+        tokenMint != "SOL" ||
+        !blockhashWithExpiryBlockHeight
       )
         return res
           .status(400)
@@ -86,11 +92,11 @@ async function handler(req: any, res: any) {
       let vTxn = await createWithdrawTxn(
         new PublicKey(wallet),
         amount,
-        tokenMint
+        tokenMint,
       );
 
       const txn = Transaction.from(
-        Buffer.from(transactionBase64 as string, "base64")
+        Buffer.from(transactionBase64 as string, "base64"),
       );
 
       if (!verifyFrontendTransaction(txn, vTxn))
@@ -111,12 +117,12 @@ async function handler(req: any, res: any) {
         {
           $inc: { "deposit.$.amount": -amount },
         },
-        { new: true }
+        { new: true },
       );
 
       if (!result) {
         throw new Error(
-          "Withdraw failed: insufficient funds or user not found"
+          "Withdraw failed: insufficient funds or user not found",
         );
       }
 
@@ -124,19 +130,24 @@ async function handler(req: any, res: any) {
         {},
         {
           $inc: { houseBalance: -amount },
-        }
+        },
       );
 
       txn.partialSign(devWalletKey);
 
-      let txnSignature = await sendAndConfirmRawTransaction(
-        connection,
-        txn.serialize(),
+      const txnSignature = await connection.sendRawTransaction(txn.serialize());
+      const confirmation = await connection.confirmTransaction(
         {
-          commitment: "confirmed",
-          skipPreflight: true,
-        }
+          signature: txnSignature,
+          ...blockhashWithExpiryBlockHeight,
+        },
+        "confirmed",
       );
+
+      if (confirmation.value.err)
+        return res
+          .status(400)
+          .json({ success: false, message: confirmation.value.err.toString() });
 
       await TxnSignature.create({ txnSignature });
 
@@ -156,7 +167,10 @@ async function handler(req: any, res: any) {
       console.log(e);
       return res.status(500).json({ success: false, message: e.message });
     }
-  }
+  } else
+    return res
+      .status(405)
+      .json({ success: false, message: "Method not allowed" });
 }
 
 export default handler;

@@ -1,12 +1,13 @@
 import connectDatabase from "../../../../utils/database";
-import Bet from "../../../../models/games/bet";
+import { NextApiRequest, NextApiResponse } from "next";
+import Option from "../../../../models/games/option";
 
-async function handler(req: any, res: any) {
+async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === "GET") {
     try {
       await connectDatabase();
 
-      let bets = (await Bet.find({})).reverse().slice(0, 1000);
+      let bets = (await Option.find({})).reverse().slice(0, 1000);
 
       return res.json({
         success: true,

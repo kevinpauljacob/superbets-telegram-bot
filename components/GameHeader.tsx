@@ -6,7 +6,18 @@ export default function GameHeader() {
   const router = useRouter();
 
   // Define game data for different games
-  const gameData = {
+  const gameData: Record<
+    string,
+    {
+      icon: string;
+      name: string;
+      stats: {
+        volume: string;
+        players: string;
+        balance: string;
+      };
+    }
+  > = {
     dice: {
       icon: "/assets/dice.png",
       name: "Dice To Win",
