@@ -70,11 +70,11 @@ export default function BalanceModal({
         handleClose();
       }}
       id="modal-bg"
-      className="absolute left-0 top-0 flex h-[100vh] w-[100vw] items-center justify-center bg-black bg-opacity-50 backdrop-blur transition-all"
+      className="absolute left-0 top-0 flex h-full w-full items-center justify-center bg-black bg-opacity-50 backdrop-blur transition-all"
     >
       <div
         id="modal-box"
-        className="flex w-[95%] max-w-[25rem] flex-col rounded-2xl border-2 border-[#C20FC580] bg-[#C20FC533] p-5"
+        className="flex w-[95%] max-w-[25rem] flex-col rounded-2xl border-2 border-[#7839C580] bg-[#7839C533] p-5"
       >
         <span className="mb-4 font-changa font-medium text-[#F0F0F0] text-opacity-75">
           {actionType}
@@ -91,7 +91,7 @@ export default function BalanceModal({
                 Coin
               </label>
 
-              <span className="w-full rounded-lg bg-[#C20FC5] bg-opacity-10 px-4 py-2 text-[#F0F0F0] text-opacity-75">
+              <span className="w-full rounded-lg bg-[#7839C5] bg-opacity-10 px-4 py-2 text-[#F0F0F0] text-opacity-75">
                 {token}
               </span>
             </div>
@@ -101,7 +101,7 @@ export default function BalanceModal({
                 Your current connected wallet
               </label>
 
-              <span className="w-full rounded-lg bg-[#C20FC5] bg-opacity-10 px-4 py-2 text-[#F0F0F0] text-opacity-75">
+              <span className="w-full rounded-lg bg-[#7839C5] bg-opacity-10 px-4 py-2 text-[#F0F0F0] text-opacity-75">
                 {obfuscatePubKey(wallet.publicKey?.toBase58() ?? "")}
               </span>
             </div>
@@ -118,7 +118,7 @@ export default function BalanceModal({
                 </div>
 
                 <div
-                  className={`group flex h-11 w-full cursor-pointer items-center rounded-[8px] border-2 border-[#C20FC5] px-4`}
+                  className={`group flex h-11 w-full cursor-pointer items-center rounded-[8px] border-2 border-[#7839C5] px-4`}
                 >
                   <input
                     id={"amount-input"}
@@ -165,7 +165,7 @@ export default function BalanceModal({
                 </div>
 
                 <div
-                  className={`group flex h-11 w-full cursor-pointer items-center rounded-[8px] border-2 border-[#C20FC5] px-4`}
+                  className={`group flex h-11 w-full cursor-pointer items-center rounded-[8px] border-2 border-[#7839C5] px-4`}
                 >
                   <input
                     id={"amount-input"}
@@ -204,7 +204,7 @@ export default function BalanceModal({
 
             <button
               type="submit"
-              className="rounded-[8px] border border-[#F200F21A] bg-[#F200F2] py-2 font-changa text-base font-medium text-[#F0F0F0] text-opacity-90"
+              className="rounded-[8px] border border-[#F200F21A] bg-[#7839C5] hover:bg-[#884ece] transition-all py-2 font-changa text-base font-medium text-[#F0F0F0] text-opacity-90"
             >
               {loading ? <Loader /> : actionType}
             </button>

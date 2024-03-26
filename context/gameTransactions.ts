@@ -29,7 +29,7 @@ export const placeBet = async (
   // let toastId = toast.loading("betting in progress");
 
   try {
-    const res = await fetch(`/api/options/bet`, {
+    const res = await fetch(`/api/games/options/bet`, {
       method: "POST",
       body: JSON.stringify({
         wallet: wallet.publicKey,
@@ -75,7 +75,7 @@ export const placeFlip = async (
 
     if (flipType == null) throw new Error("Invalid flip type");
 
-    const res = await fetch(`/api/coin/flip`, {
+    const res = await fetch(`/api/games/coin/flip`, {
       method: "POST",
       body: JSON.stringify({
         wallet: wallet.publicKey,
@@ -128,7 +128,7 @@ export const deposit = async (
       })
       .toString("base64");
 
-    const res = await fetch(`/api/wallet/deposit`, {
+    const res = await fetch(`/api/games/wallet/deposit`, {
       method: "POST",
       body: JSON.stringify({
         transactionBase64,
@@ -193,7 +193,7 @@ export const withdraw = async (
       })
       .toString("base64");
 
-    const res = await fetch(`/api/wallet/withdraw`, {
+    const res = await fetch(`/api/games/wallet/withdraw`, {
       method: "POST",
       body: JSON.stringify({
         transactionBase64,
@@ -232,7 +232,7 @@ export const checkResult = async (wallet: WalletContextState) => {
   let toastId = toast.loading("fomobet is processing the result");
 
   try {
-    const res = await fetch(`/api/options/checkResult`, {
+    const res = await fetch(`/api/games/options/checkResult`, {
       method: "POST",
       body: JSON.stringify({
         wallet: wallet.publicKey,
@@ -392,7 +392,7 @@ export const rollDice = async (
   try {
     if (!wallet.publicKey) throw new Error("Wallet not connected");
 
-    const res = await fetch(`/api/dice/roll`, {
+    const res = await fetch(`/api/games/dice/roll`, {
       method: "POST",
       body: JSON.stringify({
         wallet: wallet.publicKey,
