@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-const dice2Schema = new mongoose.Schema(
+const limboSchema = new mongoose.Schema(
   {
     wallet: {
       type: String,
@@ -8,11 +8,6 @@ const dice2Schema = new mongoose.Schema(
     },
     amount: {
       type: Number,
-      required: true,
-    },
-    direction: {
-      type: String,
-      enum: ["over", "under"],
       required: true,
     },
     chance: {
@@ -56,5 +51,5 @@ const dice2Schema = new mongoose.Schema(
   { timestamps: true }
 );
 
-let Dice2 = mongoose.models.Dice2 || mongoose.model("Dice2", dice2Schema);
-export default Dice2;
+let Limbo = mongoose.models.Limbo || mongoose.model("Limbo", limboSchema);
+export default Limbo;

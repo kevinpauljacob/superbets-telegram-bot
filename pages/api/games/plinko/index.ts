@@ -1,7 +1,7 @@
 import connectDatabase from "@/utils/database";
 import { getToken } from "next-auth/jwt";
 import { NextApiRequest, NextApiResponse } from "next";
-import { ServerHash, Wheel, User } from "@/models/games";
+import { ServerHash, Plinko, User } from "@/models/games";
 import { generateGameResult, generateServerSeed, GameType } from "@/utils/vrf";
 
 const secret = process.env.NEXTAUTH_SECRET;
@@ -14,7 +14,7 @@ type InputType = {
   wallet: string;
   amount: number;
   tokenMint: string;
-  segments: number;
+  rows: number;
   clientSeed: string;
   risk: "low" | "medium" | "high";
 };
@@ -42,7 +42,7 @@ const riskToChance: RiskToChance = {
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === "POST") {
     try {
-      let { wallet, amount, tokenMint, segments, risk, clientSeed }: InputType =
+      let { wallet, amount, tokenMint, rows, risk, clientSeed }: InputType =
         req.body;
 
       const token = await getToken({ req, secret });
@@ -55,14 +55,14 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
       await connectDatabase();
 
-      if (!wallet || !amount || !tokenMint || !segments || !risk || !clientSeed)
+      if (!wallet || !amount || !tokenMint || !rows || !risk || !clientSeed)
         return res
           .status(400)
           .json({ success: false, message: "Missing parameters" });
 
       if (
         tokenMint !== "SOL" ||
-        !(10 <= segments && segments <= 50 && segments % 10 === 0) ||
+        !(10 <= rows && rows <= 50 && rows % 10 === 0) ||
         !(risk === "low" || risk === "medium" || risk === "high")
       )
         return res
@@ -87,7 +87,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       const serverHashInfo = await ServerHash.findOneAndUpdate(
         {
           wallet,
-          gameType: GameType.wheel,
+          gameType: GameType.plinko,
           isValid: true,
         },
         {
@@ -106,7 +106,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
       await ServerHash.create({
         wallet,
-        gameType: GameType.wheel,
+        gameType: GameType.plinko,
         serverSeed: newServerHash.serverSeed,
         nonce: serverHashInfo.nonce + 1,
         isValid: true,
@@ -118,7 +118,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         serverSeed,
         clientSeed,
         nonce,
-        GameType.wheel,
+        GameType.plinko,
       );
 
       if (!strikeNumber) throw new Error("Invalid strike number!");
@@ -130,7 +130,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       const chance = riskToChance[risk];
       for (let i = 0; i < 100; ) {
         Object.entries(chance).forEach(([key, value]) => {
-          i += (value * 10) / segments;
+          i += (value * 10) / rows;
           if (i >= strikeNumber) {
             result = "Won";
             amountWon = amount * parseFloat(key);
@@ -175,10 +175,10 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         throw new Error("Insufficient balance for Roll!");
       }
 
-      await Wheel.create({
+      await Plinko.create({
         wallet,
         amount,
-        segments,
+        rows,
         risk,
         strikeNumber,
         result,

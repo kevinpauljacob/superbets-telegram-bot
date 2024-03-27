@@ -10,7 +10,7 @@ export const config = {
   maxDuration: 60,
 };
 
-interface InputType {
+type InputType = {
   wallet: string;
   amount: number;
   tokenMint: string;
@@ -110,16 +110,16 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       if (!strikeNumber) throw new Error("Invalid strike number!");
 
       let result = "Lost";
-      let rAmountWon = 0;
-      let rAmountLost = amount;
+      let amountWon = 0;
+      let amountLost = amount;
 
       if (
         (direction === "over" && strikeNumber > 100 - chance) ||
         (direction === "under" && strikeNumber < chance)
       ) {
         result = "Won";
-        rAmountWon = amount * (100 / chance - 1);
-        rAmountLost = 0;
+        amountWon = amount * (100 / chance - 1);
+        amountLost = 0;
       }
 
       let sns;
@@ -145,7 +145,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         },
         {
           $inc: {
-            "deposit.$.amount": -amount + rAmountWon,
+            "deposit.$.amount": -amount + amountWon,
           },
           sns,
         },
@@ -166,6 +166,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         strikeNumber,
         result,
         tokenMint,
+        amountWon,
+        amountLost,
         clientSeed,
         serverSeed,
         nonce,
@@ -179,8 +181,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
             : "Better luck next time!",
         result,
         strikeNumber,
-        rAmountWon,
-        rAmountLost,
+        amountWon,
+        amountLost,
         serverSeed,
         newserverSeedHash: newServerHash.serverSeedHash,
       });
