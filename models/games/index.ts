@@ -7,4 +7,5 @@ export { default as Coin } from "./coin";
 export { default as Option } from "./option";
 export { default as Plinko } from "./plinko";
 export { default as Limbo } from "./limbo";
+export { default as Keno } from "./keno";
 
