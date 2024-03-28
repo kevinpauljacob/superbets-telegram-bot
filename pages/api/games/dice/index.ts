@@ -12,13 +12,13 @@ export const config = {
   maxDuration: 60,
 };
 
-interface InputType {
+type InputType = {
   wallet: string;
   amount: number;
   tokenMint: string;
   chosenNumbers: number[];
   clientSeed: string;
-}
+};
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === "POST") {
@@ -115,13 +115,13 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       );
 
       let result = "Lost";
-      let rAmountWon = 0;
-      let rAmountLost = amount;
+      let amountWon = 0;
+      let amountLost = amount;
 
       if (chosenNumbers.includes(strikeNumber)) {
         result = "Won";
-        rAmountWon = (amount * 6) / chosenNumbers.length;
-        rAmountLost = 0;
+        amountWon = (amount * 6) / chosenNumbers.length;
+        amountLost = 0;
       }
 
       let sns;
@@ -147,7 +147,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         },
         {
           $inc: {
-            "deposit.$.amount": -amount + rAmountWon * (1 - ROLL_TAX),
+            "deposit.$.amount": -amount + amountWon * (1 - ROLL_TAX),
           },
           sns,
         },
@@ -167,8 +167,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         strikeNumber,
         result,
         tokenMint,
-        amountWon: rAmountWon,
-        amountLost: rAmountLost,
+        amountWon,
+        amountLost,
         clientSeed,
         serverSeed,
         nonce,
@@ -179,13 +179,13 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         data: {
           strikeNumber,
           result,
-          amountWon: rAmountWon,
-          amountLost: rAmountLost,
+          amountWon,
+          amountLost,
         },
         message: `${result} ${
           result == "Won"
-            ? (rAmountWon * (1 - ROLL_TAX)).toFixed(4)
-            : rAmountLost.toFixed(4)
+            ? (amountWon * (1 - ROLL_TAX)).toFixed(4)
+            : amountLost.toFixed(4)
         } SOL!`,
       });
     } catch (e: any) {

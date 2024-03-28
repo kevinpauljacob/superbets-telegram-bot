@@ -1,7 +1,7 @@
 import connectDatabase from "@/utils/database";
 import { getToken } from "next-auth/jwt";
 import { NextApiRequest, NextApiResponse } from "next";
-import { ServerHash, Wheel, User } from "@/models/games";
+import { ServerHash, Limbo, User } from "@/models/games";
 import { generateGameResult, generateServerSeed, GameType } from "@/utils/vrf";
 
 const secret = process.env.NEXTAUTH_SECRET;
@@ -14,35 +14,14 @@ type InputType = {
   wallet: string;
   amount: number;
   tokenMint: string;
-  segments: number;
+  chance: number;
   clientSeed: string;
-  risk: "low" | "medium" | "high";
-};
-
-type RiskToChance = Record<string, Record<number, number>>;
-
-const riskToChance: RiskToChance = {
-  low: {
-    0: 20,
-    1.1: 60,
-    1.7: 20,
-  },
-  medium: {
-    0: 50,
-    1.5: 20,
-    2: 20,
-    3: 10,
-  },
-  high: {
-    0: 90,
-    10: 10,
-  },
 };
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === "POST") {
     try {
-      let { wallet, amount, tokenMint, segments, risk, clientSeed }: InputType =
+      let { wallet, amount, tokenMint, chance, clientSeed }: InputType =
         req.body;
 
       const token = await getToken({ req, secret });
@@ -55,16 +34,12 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
       await connectDatabase();
 
-      if (!wallet || !amount || !tokenMint || !segments || !risk || !clientSeed)
+      if (!wallet || !amount || !tokenMint || !chance)
         return res
           .status(400)
           .json({ success: false, message: "Missing parameters" });
 
-      if (
-        tokenMint !== "SOL" ||
-        !(10 <= segments && segments <= 50 && segments % 10 === 0) ||
-        !(risk === "low" || risk === "medium" || risk === "high")
-      )
+      if (tokenMint !== "SOL" || !(2 <= chance && chance <= 98))
         return res
           .status(400)
           .json({ success: false, message: "Invalid parameters" });
@@ -87,7 +62,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       const serverHashInfo = await ServerHash.findOneAndUpdate(
         {
           wallet,
-          gameType: GameType.wheel,
+          gameType: GameType.limbo,
           isValid: true,
         },
         {
@@ -106,7 +81,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
       await ServerHash.create({
         wallet,
-        gameType: GameType.wheel,
+        gameType: GameType.limbo,
         serverSeed: newServerHash.serverSeed,
         nonce: serverHashInfo.nonce + 1,
         isValid: true,
@@ -118,7 +93,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         serverSeed,
         clientSeed,
         nonce,
-        GameType.wheel,
+        GameType.limbo,
       );
 
       if (!strikeNumber) throw new Error("Invalid strike number!");
@@ -127,16 +102,10 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       let amountWon = 0;
       let amountLost = amount;
 
-      const chance = riskToChance[risk];
-      for (let i = 0; i < 100; ) {
-        Object.entries(chance).forEach(([key, value]) => {
-          i += (value * 10) / segments;
-          if (i >= strikeNumber) {
-            result = "Won";
-            amountWon = amount * parseFloat(key);
-            amountLost = 0;
-          }
-        });
+      if (strikeNumber < chance) {
+        result = "Won";
+        amountWon = amount * (100 / chance - 1);
+        amountLost = 0;
       }
 
       let sns;
@@ -175,14 +144,15 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         throw new Error("Insufficient balance for Roll!");
       }
 
-      await Wheel.create({
+      await Limbo.create({
         wallet,
         amount,
-        segments,
-        risk,
+        chance,
         strikeNumber,
         result,
         tokenMint,
+        amountWon,
+        amountLost,
         clientSeed,
         serverSeed,
         nonce,

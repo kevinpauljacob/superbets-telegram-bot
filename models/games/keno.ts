@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-const dice2Schema = new mongoose.Schema(
+const kenoSchema = new mongoose.Schema(
   {
     wallet: {
       type: String,
@@ -10,22 +10,17 @@ const dice2Schema = new mongoose.Schema(
       type: Number,
       required: true,
     },
-    direction: {
+    risk: {
       type: String,
-      enum: ["over", "under"],
+      enum: ["classic", "low", "medium", "high"],
       required: true,
     },
-    chance: {
-      type: Number,
-      required: true,
+    chosenNumbers: {
+        type: Array<number>,
+        required: true,
     },
     strikeNumber: {
       type: Number,
-      required: true,
-    },
-    result: {
-      type: String,
-      enum: ["Won", "Lost"],
       required: true,
     },
     tokenMint: {
@@ -53,8 +48,8 @@ const dice2Schema = new mongoose.Schema(
       required: true,
     },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
-let Dice2 = mongoose.models.Dice2 || mongoose.model("Dice2", dice2Schema);
-export default Dice2;
+let Keno = mongoose.models.Keno || mongoose.model("Keno", kenoSchema);
+export default Keno;
