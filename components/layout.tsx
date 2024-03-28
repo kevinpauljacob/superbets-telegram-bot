@@ -29,7 +29,7 @@ export default function Layout({ children }: LayoutProps) {
             <SubHeader />
             <GameHeader />
             <main>
-              <section>{children}</section>
+              <section className="flex flex-1">{children}</section>
             </main>
           </section>
         </section>

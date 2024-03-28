@@ -9,10 +9,13 @@ import Loader from "./Loader";
 import { useWalletModal } from "@solana/wallet-adapter-react-ui";
 import { connection } from "../../context/gameTransactions";
 import { LAMPORTS_PER_SOL } from "@solana/web3.js";
+import { useGlobalContext } from "../GlobalContext";
 
 function Balance() {
   const { data: session, status } = useSession();
   const wallet = useWallet();
+
+  const { walletBalance, setWalletBalance, getWalletBalance, getBalance, coinData, setCoinData } = useGlobalContext();
 
   const [loading, setLoading] = useState(false);
 
@@ -21,61 +24,6 @@ function Balance() {
   const [visible, setVisible] = useState(false);
   const [actionType, setActionType] = useState("Deposit");
   const [token, setToken] = useState("");
-  const [walletBalance, setWalletBalance] = useState(0);
-
-  const [coinData, setCoinData] = useState<any[] | null>([
-    {
-      wallet: "",
-      type: true,
-      amount: 0,
-      tokenMint: "SOL",
-    },
-  ]);
-
-  const getWalletBalance = async () => {
-    if (wallet && wallet.publicKey)
-      try {
-        setWalletBalance(
-          (await connection.getBalance(wallet.publicKey)) / LAMPORTS_PER_SOL
-        );
-      } catch (e) {
-        toast.error("Unable to fetch balance.");
-        console.error(e);
-      }
-  };
-
-  const getBalance = async () => {
-    setLoading(true);
-    try {
-      fetch(`/api/games/user/getUser?wallet=${wallet.publicKey?.toBase58()}`)
-        .then((res) => res.json())
-        .then((balance) => {
-          if (balance.success) {
-            balance?.data &&
-            balance?.data.deposit &&
-            balance?.data.deposit.length > 0
-              ? setCoinData(balance.data.deposit)
-              : setCoinData([
-                  {
-                    wallet: "rverdgrehb@iubuyidciuiu",
-                    type: true,
-                    amount: 0,
-                    tokenMint: "SOL",
-                  },
-                ]);
-          } else {
-            toast.error("Could not fetch balance.");
-            setCoinData(null);
-          }
-          setLoading(false);
-        });
-    } catch (e) {
-      toast.error("Could not fetch balance.");
-      setLoading(false);
-      setCoinData(null);
-      console.error(e);
-    }
-  };
 
   useEffect(() => {
     if (session?.user && !visible) {
@@ -121,7 +69,13 @@ function Balance() {
                           Coin
                         </span>
                         <div className="flex w-full items-center">
-                          <Image src={'/assets/Solana_logo_1.svg'} layout="fixed" width={30} height={30} alt="Solana" />
+                          <Image
+                            src={"/assets/Solana_logo_1.svg"}
+                            layout="fixed"
+                            width={30}
+                            height={30}
+                            alt="Solana"
+                          />
                           <span className="ml-2 text-sm text-[#f0f0f0] text-opacity-75">
                             ${coin.tokenMint}
                           </span>

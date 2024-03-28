@@ -41,16 +41,16 @@ body {
 }
 
 .scrollbar::-webkit-scrollbar-track {
-  background: #45054980;
+  background: #7839C580;
 }
 
 .scrollbar::-webkit-scrollbar-thumb {
   border-radius: 10rem;
-  background: #73047acc;
+  background: #7839C5cc;
 }
 
 .scrollbar::-webkit-scrollbar-thumb:hover {
-  background: #73047acc;
+  background: #7839C5cc;
 }
 
 .box-shadow-pink {
@@ -65,6 +65,13 @@ body {
     0 0 5px #e83e8c,
     0 0 10px #e83e8c,
     0 0 16px #e83e8c;
+}
+
+.text-shadow-violet {
+  text-shadow:
+    0 0 5px #7839C5,
+    0 0 10px #7839C5,
+    0 0 16px #7839C5;
 }
 
 .text-shadow-light {

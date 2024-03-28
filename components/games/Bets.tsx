@@ -40,8 +40,8 @@ export default function Bets({ refresh }: { refresh: boolean }) {
   useEffect(() => {
     if (refresh) {
       const route = all
-        ? "/api/options/getGlobalHistory"
-        : `/api/options/getUserHistory?wallet=${wallet.publicKey?.toBase58()}`;
+        ? "/api/games/options/getGlobalHistory"
+        : `/api/games/options/getUserHistory?wallet=${wallet.publicKey?.toBase58()}`;
 
       fetch(`${route}`)
         .then((res) => res.json())
@@ -60,7 +60,7 @@ export default function Bets({ refresh }: { refresh: boolean }) {
   return (
     <div className="flex w-full flex-col pb-10">
       {/* buttons  */}
-      <div className="mt-[7rem] flex w-full items-center justify-center gap-4 px-5 md:justify-start md:px-[10%]">
+      <div className="mt-[7rem] flex w-full items-center justify-center gap-4 md:justify-start">
         <button
           onClick={() => {
             if (wallet.publicKey) setAll(false);
@@ -68,9 +68,9 @@ export default function Bets({ refresh }: { refresh: boolean }) {
           }}
           className={`${
             all
-              ? "border-transparent"
-              : "text-shadow-pink border-[#8A078A] bg-[#8A078A30]"
-          } w-full transform rounded-[5px] border-[2px] px-8 py-2 font-changa text-lg text-white transition duration-200 hover:bg-[#8A078A30] md:w-fit`}
+              ? "text-shadow-violet hover:bg-[#7839C530]"
+              : "bg-[#7839C5]"
+          } w-full transform rounded-[5px] px-8 py-2 font-changa text-lg text-white transition duration-200 md:w-fit`}
         >
           My Bets
         </button>
@@ -80,16 +80,16 @@ export default function Bets({ refresh }: { refresh: boolean }) {
           }}
           className={`${
             all
-              ? "text-shadow-pink border-[#8A078A] bg-[#8A078A30]"
-              : "border-transparent"
-          } w-full transform rounded-[5px] border-[2px] px-8 py-2 font-changa text-lg text-white transition duration-200 hover:bg-[#8A078A30] md:w-fit`}
+              ? "bg-[#7839C5]"
+              : "text-shadow-violet hover:bg-[#7839C530]"
+          } w-full transform rounded-[5px] px-8 py-2 font-changa text-lg text-white transition duration-200 md:w-fit`}
         >
           All Bets
         </button>
       </div>
 
       {/* table  */}
-      <div className="scrollbar mt-10 w-full overflow-x-auto px-5 pb-8 md:px-[10%]">
+      <div className="scrollbar mt-10 w-full overflow-x-auto pb-8">
         <div className="flex w-full min-w-[50rem] flex-col items-center">
           {/* header  */}
           {bets.length > 0 && (
@@ -123,7 +123,7 @@ export default function Bets({ refresh }: { refresh: boolean }) {
               .map((bet, index) => (
                 <div
                   key={index}
-                  className="mb-2.5 flex w-full flex-row items-center gap-2 rounded-[5px] bg-[#45054933] py-3"
+                  className="mb-2.5 flex w-full flex-row items-center gap-2 rounded-[5px] bg-[#7839C533] py-3"
                 >
                   <span className="w-full text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
                     {bet.betTime
@@ -175,7 +175,7 @@ export default function Bets({ refresh }: { refresh: boolean }) {
                 </div>
               ))
           ) : (
-            <span className="ml-4 w-full font-changa text-[#F0F0F080]">
+            <span className="font-changa text-[#F0F0F080]">
               No Bets made.
             </span>
           )}

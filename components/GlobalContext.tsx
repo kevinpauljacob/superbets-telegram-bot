@@ -2,12 +2,21 @@ import { User } from "@/context/transactions";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { createContext, useContext, useState, ReactNode } from "react";
 import toast from "react-hot-toast";
+import { connection } from "../context/gameTransactions";
+import { LAMPORTS_PER_SOL } from "@solana/web3.js";
 
 interface PointTier {
   index: number;
   limit: number;
   image: string;
   label: string;
+}
+
+interface CoinBalance {
+  wallet: string;
+  type: boolean;
+  amount: number;
+  tokenMint: string;
 }
 
 interface GlobalContextProps {
@@ -42,8 +51,16 @@ interface GlobalContextProps {
   pointTier: PointTier;
   setPointTier: (pointTier: PointTier) => void;
 
+  walletBalance: number;
+  setWalletBalance: (walletBalance: number) => void;
+
+  coinData: any[] | null;
+  setCoinData: (coinData: any[] | null) => void;
+
   getUserDetails: () => void;
   getGlobalInfo: () => void;
+  getWalletBalance: () => void;
+  getBalance: () => void;
 }
 
 const GlobalContext = createContext<GlobalContextProps | undefined>(undefined);
@@ -72,6 +89,16 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
     image: "/assets/bronze.png",
     label: "BRONZE",
   });
+
+  const [walletBalance, setWalletBalance] = useState(0);
+  const [coinData, setCoinData] = useState<CoinBalance[] | null>([
+    {
+      wallet: "",
+      type: true,
+      amount: 0,
+      tokenMint: "SOL",
+    },
+  ]);
 
   const getUserDetails = async () => {
     if (wallet && wallet.publicKey)
@@ -121,6 +148,51 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
     }
   };
 
+  const getWalletBalance = async () => {
+    if (wallet && wallet.publicKey)
+      try {
+        setWalletBalance(
+          (await connection.getBalance(wallet.publicKey)) / LAMPORTS_PER_SOL,
+        );
+      } catch (e) {
+        toast.error("Unable to fetch balance.");
+        console.error(e);
+      }
+  };
+
+  const getBalance = async () => {
+    setLoading(true);
+    try {
+      fetch(`/api/games/user/getUser?wallet=${wallet.publicKey?.toBase58()}`)
+        .then((res) => res.json())
+        .then((balance) => {
+          if (balance.success) {
+            balance?.data &&
+            balance?.data.deposit &&
+            balance?.data.deposit.length > 0
+              ? setCoinData(balance.data.deposit)
+              : setCoinData([
+                  {
+                    wallet: "rverdgrehb@iubuyidciuiu",
+                    type: true,
+                    amount: 0,
+                    tokenMint: "SOL",
+                  },
+                ]);
+          } else {
+            toast.error("Could not fetch balance.");
+            setCoinData(null);
+          }
+          setLoading(false);
+        });
+    } catch (e) {
+      toast.error("Could not fetch balance.");
+      setLoading(false);
+      setCoinData(null);
+      console.error(e);
+    }
+  };
+
   return (
     <GlobalContext.Provider
       value={{
@@ -142,8 +214,14 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
         setGlobalInfo,
         pointTier,
         setPointTier,
+        walletBalance,
+        setWalletBalance,
+        coinData,
+        setCoinData,
         getUserDetails,
         getGlobalInfo,
+        getWalletBalance,
+        getBalance,
       }}
     >
       {children}
