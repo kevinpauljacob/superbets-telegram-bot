@@ -94,7 +94,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         clientSeed,
         nonce,
         GameType.limbo,
-      );
+      ) as number;
 
       if (!strikeNumber) throw new Error("Invalid strike number!");
 

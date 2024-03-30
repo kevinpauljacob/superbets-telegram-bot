@@ -119,7 +119,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         clientSeed,
         nonce,
         GameType.wheel,
-      );
+      ) as number;
 
       if (!strikeNumber) throw new Error("Invalid strike number!");
 

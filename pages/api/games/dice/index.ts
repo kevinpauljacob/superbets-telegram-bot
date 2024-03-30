@@ -112,7 +112,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         clientSeed,
         nonce,
         GameType.dice,
-      );
+      ) as number;
 
       let result = "Lost";
       let amountWon = 0;
