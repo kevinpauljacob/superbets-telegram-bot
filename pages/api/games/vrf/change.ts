@@ -71,7 +71,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       await GameSeed.create({
         wallet,
         serverSeed: newServerHash.serverSeed,
-        serverSeedHashed: newServerHash.serverSeedHash,
+        serverSeedHash: newServerHash.serverSeedHash,
       });
 
       return res.status(201).json({

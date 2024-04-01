@@ -49,20 +49,13 @@ const diceSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
-    clientSeed: {
-      type: String,
-      required: true,
-    },
-    serverSeed: {
-      type: String,
-      required: true,
-    },
-    nonce: {
-      type: Number,
+    gameSeedId: {
+      type: mongoose.Schema.ObjectId,
+      ref: "GameSeed",
       required: true,
     },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 let Dice = mongoose.models.Dice || mongoose.model("Dice", diceSchema);
