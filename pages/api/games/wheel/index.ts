@@ -1,8 +1,8 @@
 import connectDatabase from "@/utils/database";
 import { getToken } from "next-auth/jwt";
 import { NextApiRequest, NextApiResponse } from "next";
-import { ServerHash, Wheel, User } from "@/models/games";
-import { generateGameResult, generateServerSeed, GameType } from "@/utils/vrf";
+import { GameSeed, Wheel, User } from "@/models/games";
+import { generateGameResult, GameType, seedStatus } from "@/utils/vrf";
 
 const secret = process.env.NEXTAUTH_SECRET;
 
@@ -15,7 +15,6 @@ type InputType = {
   amount: number;
   tokenMint: string;
   segments: number;
-  clientSeed: string;
   risk: "low" | "medium" | "high";
 };
 
@@ -42,8 +41,7 @@ const riskToChance: RiskToChance = {
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === "POST") {
     try {
-      let { wallet, amount, tokenMint, segments, risk, clientSeed }: InputType =
-        req.body;
+      let { wallet, amount, tokenMint, segments, risk }: InputType = req.body;
 
       const token = await getToken({ req, secret });
 
@@ -55,7 +53,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
       await connectDatabase();
 
-      if (!wallet || !amount || !tokenMint || !segments || !risk || !clientSeed)
+      if (!wallet || !amount || !tokenMint || !segments || !risk)
         return res
           .status(400)
           .json({ success: false, message: "Missing parameters" });
@@ -84,35 +82,24 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           .status(400)
           .json({ success: false, message: "Insufficient balance !" });
 
-      const serverHashInfo = await ServerHash.findOneAndUpdate(
+      const activeGameSeed = await GameSeed.findOneAndUpdate(
         {
           wallet,
-          gameType: GameType.wheel,
-          isValid: true,
+          status: seedStatus.ACTIVE,
         },
         {
-          $set: {
-            isValid: false,
+          $inc: {
+            currentNonce: 1,
           },
         },
         { new: true },
       );
 
-      if (!serverHashInfo) {
+      if (!activeGameSeed) {
         throw new Error("Server hash not found!");
       }
 
-      const newServerHash = generateServerSeed();
-
-      await ServerHash.create({
-        wallet,
-        gameType: GameType.wheel,
-        serverSeed: newServerHash.serverSeed,
-        nonce: serverHashInfo.nonce + 1,
-        isValid: true,
-      });
-
-      const { serverSeed, nonce } = serverHashInfo;
+      const { serverSeed, clientSeed, nonce } = activeGameSeed;
 
       const strikeNumber = generateGameResult(
         serverSeed,
@@ -183,9 +170,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         strikeNumber,
         result,
         tokenMint,
-        clientSeed,
-        serverSeed,
-        nonce,
+        gameSeedId: activeGameSeed._id,
       });
 
       return res.status(201).json({
@@ -198,8 +183,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         strikeNumber,
         amountWon,
         amountLost,
-        serverSeed,
-        newserverSeedHash: newServerHash.serverSeedHash,
       });
     } catch (e: any) {
       console.log(e);

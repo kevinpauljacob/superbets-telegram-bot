@@ -35,7 +35,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           .status(400)
           .json({ success: false, message: "Missing parameters" });
 
-      const serverHashInfo = await GameSeed.findOneAndUpdate(
+      const activeGameSeed = await GameSeed.findOneAndUpdate(
         {
           wallet,
           status: seedStatus.ACTIVE,
@@ -48,7 +48,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         { new: true },
       );
 
-      if (!serverHashInfo) {
+      if (!activeGameSeed) {
         throw new Error("Server hash not found!");
       }
 
