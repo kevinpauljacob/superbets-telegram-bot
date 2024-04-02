@@ -6,6 +6,7 @@ import { rollDice } from "../../context/gameTransactions";
 import RollDiceTable from "../../components/games/RollDiceTable";
 import { toast } from "react-hot-toast";
 import { ROLL_TAX } from "../../context/config";
+import GameFooterInfo from "@/components/games/GameFooterInfo";
 
 export default function Dice() {
   const wallet = useWallet();
@@ -496,6 +497,12 @@ export default function Dice() {
                   </div>
                 ))}
             </div>
+
+            <GameFooterInfo
+              multiplier={winningPays}
+              amount={winningAmount * (1 - ROLL_TAX)}
+              chance={winningProbability}
+            />
           </div>
         </div>
       </div>

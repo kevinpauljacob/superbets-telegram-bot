@@ -93,7 +93,7 @@ export default function Bets({ refresh }: { refresh: boolean }) {
         <div className="flex w-full min-w-[50rem] flex-col items-center">
           {/* header  */}
           {bets.length > 0 && (
-            <div className="mb-5 flex w-full flex-row items-center gap-2">
+            <div className="mb-5 flex w-full flex-row items-center gap-2 bg-[#121418]">
               {!all
                 ? myHeaders.map((header, index) => (
                     <span
@@ -123,7 +123,7 @@ export default function Bets({ refresh }: { refresh: boolean }) {
               .map((bet, index) => (
                 <div
                   key={index}
-                  className="mb-2.5 flex w-full flex-row items-center gap-2 rounded-[5px] bg-[#7839C533] py-3"
+                  className="mb-2.5 flex w-full flex-row items-center gap-2 rounded-[5px] bg-[#121418] py-3"
                 >
                   <span className="w-full text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
                     {bet.betTime
