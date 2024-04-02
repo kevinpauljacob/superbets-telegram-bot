@@ -53,7 +53,7 @@ export const generateGameResult = (
   switch (gameType) {
     case GameType.dice:
     case GameType.dice2:
-      return (parseInt(hash.slice(0, 4), 16) % 6) + 1;
+      return (parseInt(hash, 16) % 6) + 1;
     case GameType.coin:
     case GameType.wheel:
     case GameType.limbo:

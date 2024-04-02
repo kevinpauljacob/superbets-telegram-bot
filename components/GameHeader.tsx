@@ -54,8 +54,10 @@ export default function GameHeader() {
           wallet: walletPubkey,
         }),
       });
+
       let data = await res.json();
-      if (data.success) setModalData(data);
+      const game = router.pathname.split("/")[1];
+      if (data.success) setModalData({ ...data, game });
     };
 
     fetchProvablyFairData(wallet.publicKey.toBase58());
