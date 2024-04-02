@@ -54,8 +54,8 @@ interface GlobalContextProps {
   walletBalance: number;
   setWalletBalance: (walletBalance: number) => void;
 
-  coinData: any[] | null;
-  setCoinData: (coinData: any[] | null) => void;
+  coinData: CoinBalance[] | null;
+  setCoinData: (coinData: CoinBalance[] | null) => void;
 
   getUserDetails: () => void;
   getGlobalInfo: () => void;

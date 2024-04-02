@@ -568,7 +568,7 @@ export default function Dice() {
               </div>
             </div>
             
-            <GameFooterInfo multiplier={winningPays} amount={(winningAmount * (1 - ROLL_TAX)).toFixed(2)} chance={winningProbability.toFixed(2)} />
+            <GameFooterInfo multiplier={winningPays} amount={(winningAmount * (1 - ROLL_TAX))} chance={winningProbability} />
           </div>
         </div>
       </div>
