@@ -35,7 +35,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           .status(400)
           .json({ success: false, message: "Missing parameters" });
 
-      const activeGameSeed = await GameSeed.findOneAndUpdate(
+      const expiredGameSeed = await GameSeed.findOneAndUpdate(
         {
           wallet,
           status: seedStatus.ACTIVE,
@@ -45,14 +45,16 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
             status: seedStatus.EXPIRED,
           },
         },
-        { new: true },
+        {
+          new: true,
+        },
       );
 
-      if (!activeGameSeed) {
+      if (!expiredGameSeed) {
         throw new Error("Server hash not found!");
       }
 
-      await GameSeed.findOneAndUpdate(
+      const activeGameSeed = await GameSeed.findOneAndUpdate(
         {
           wallet,
           status: seedStatus.NEXT,
@@ -63,20 +65,22 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
             status: seedStatus.ACTIVE,
           },
         },
-        { new: true },
+        { projection: { serverSeed: 0 }, new: true },
       );
 
       const newServerHash = generateServerSeed();
 
-      await GameSeed.create({
+      const nextGameSeed = await GameSeed.create({
         wallet,
         serverSeed: newServerHash.serverSeed,
         serverSeedHash: newServerHash.serverSeedHash,
       });
+      delete nextGameSeed.serverSeed;
 
       return res.status(201).json({
         success: true,
-        newserverSeedHash: newServerHash.serverSeedHash,
+        activeGameSeed,
+        nextGameSeed,
       });
     } catch (e: any) {
       console.log(e);
