@@ -20,7 +20,7 @@ interface ModalData {
     status: string;
   };
   totalBets: string;
-  game: string;
+  game: GameType;
 }
 
 interface Props {
@@ -44,11 +44,11 @@ export default function ProvablyFairModal({
   const [verificationState, setVerificationState] = useState<{
     clientSeed: string;
     serverSeed: string;
-    currentNonce: number;
+    currentNonce: string;
   }>({
     clientSeed: "",
     serverSeed: "",
-    currentNonce: 0,
+    currentNonce: "",
   });
 
   //handling coin flip
@@ -81,14 +81,26 @@ export default function ProvablyFairModal({
 
     const { clientSeed, serverSeed, currentNonce } = verificationState;
 
-    setWonDiceFace(
-      generateGameResult(
-        name === "clientSeed" ? value : clientSeed,
-        name === "serverSeed" ? value : serverSeed,
-        name === "currentNonce" ? parseInt(value) : currentNonce,
-        GameType.dice,
-      ) as number,
-    );
+    if (modalData.game === GameType.coin)
+      setWonCoinface(
+        (generateGameResult(
+          name === "clientSeed" ? value : clientSeed,
+          name === "serverSeed" ? value : serverSeed,
+          parseInt(name === "currentNonce" ? value : currentNonce),
+          modalData.game,
+        ) as number) === 1
+          ? "heads"
+          : "tails",
+      );
+    else if (modalData.game === GameType.dice)
+      setWonDiceFace(
+        generateGameResult(
+          name === "clientSeed" ? value : clientSeed,
+          name === "serverSeed" ? value : serverSeed,
+          parseInt(name === "currentNonce" ? value : currentNonce),
+          modalData.game,
+        ) as number,
+      );
   };
 
   const handleSetClientSeed = async () => {
@@ -224,7 +236,7 @@ export default function ProvablyFairModal({
             {state === "verify" && (
               <div className="grid w-full">
                 <div className="grid gap-2">
-                  <div className="border-2 border-opacity-5 border-[#FFFFFF] md:px-8 pt-8">
+                  <div className="border-2 border-opacity-5 border-[#FFFFFF] md:px-8">
                     {modalData.game === GameType.coin ? (
                       <div className="flex justify-center items-center gap-4 md:px-8 py-4">
                         <div
@@ -253,7 +265,7 @@ export default function ProvablyFairModal({
                         </div>
                       </div>
                     ) : modalData.game === GameType.dice ? (
-                      <div className="px-8">
+                      <div className="px-8 pt-10 pb-4">
                         <div className="relative w-full mb-8 xl:mb-6">
                           <div>
                             <Image
@@ -317,11 +329,16 @@ export default function ProvablyFairModal({
                       <select
                         name="game"
                         value={modalData.game}
-                        onChange={handleChange}
+                        onChange={(e) =>
+                          setModalData((prevData) => ({
+                            ...prevData,
+                            game: e.target.value as GameType,
+                          }))
+                        }
                         className="bg-[#202329] mt-1 rounded-md px-4 py-2 mb-4 w-full relative appearance-none"
                       >
-                        <option value="DICE">Dice</option>
-                        <option value="COIN_FLIP">Coin Flip</option>
+                        <option value={GameType.dice}>Dice</option>
+                        <option value={GameType.coin}>Coin Flip</option>
                       </select>
                     </div>
                   </div>

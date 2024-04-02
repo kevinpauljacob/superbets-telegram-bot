@@ -34,7 +34,7 @@ export enum seedStatus {
 
 export enum GameType {
   dice = "dice",
-  coin = "coin",
+  coin = "coinflip",
   dice2 = "dice2",
   wheel = "wheel",
   plinko = "plinko",
@@ -53,8 +53,9 @@ export const generateGameResult = (
   switch (gameType) {
     case GameType.dice:
     case GameType.dice2:
-      return (parseInt(hash, 16) % 6) + 1;
+      return (parseInt(hash.slice(0, 4), 16) % 6) + 1;
     case GameType.coin:
+      return (parseInt(hash.slice(0, 4), 16) % 2) + 1;
     case GameType.wheel:
     case GameType.limbo:
       return (parseInt(hash.slice(0, 4), 16) % 100) + 1;

@@ -4,6 +4,7 @@ import fair from "/public/assets/fair.png";
 import { useEffect, useState } from "react";
 import ProvablyFairModal from "./ProvablyFairModal";
 import { useWallet } from "@solana/wallet-adapter-react";
+import { GameType } from "@/utils/vrf";
 
 export default function GameHeader() {
   const wallet = useWallet();
@@ -38,7 +39,7 @@ export default function GameHeader() {
       status: "",
     },
     totalBets: "",
-    game: "",
+    game: GameType.dice,
   });
 
   useEffect(() => {
