@@ -44,7 +44,7 @@ export default function ProvablyFairModal({
     //handling coin flip
     const [wonCoinFace, setWonCoinface] = useState<"heads" | "tails">("heads")
     const [selectedCoinFace, setSelectedCoinface] = useState<"heads" | "tails">("heads")
-    
+
     //handling dice
     const [selectedFaces, setSelectedFaces] = useState<{
         [key: number]: boolean;
@@ -57,8 +57,7 @@ export default function ProvablyFairModal({
         6: false,
     });
 
-    const [wonFace, setWonFace] = useState<number>(2);
-    const [selectedFace, setSelectedFace] = useState<number[]>([1]);
+    const [wonDiceFace, setWonDiceFace] = useState<number>(2);
 
     const handleToggleState = (newState: "seeds" | "verify") => {
         setState(newState);
@@ -216,11 +215,11 @@ export default function ProvablyFairModal({
                                         {
                                             modalData.game === "COIN_FLIP" ?
                                                 <div className="flex justify-center items-center gap-4 md:px-8 py-4">
-                                                    <div className={`bg-[#202329] py-4 px-4 rounded-md flex gap-2 items-center justify-center min-w-1/3 ${wonCoinFace==="heads"? 'border-2 border-[#7839C5]': 'border-[rgb(192,201,210)]'}`}>
+                                                    <div className={`bg-[#202329] py-4 px-4 rounded-md flex gap-2 items-center justify-center min-w-1/3 ${wonCoinFace === "heads" ? 'border-2 border-[#7839C5]' : 'border-[rgb(192,201,210)]'}`}>
                                                         <div className="w-5 h-5 bg-[rgb(192,201,210)] border border-white rounded-full"></div>
                                                         <div className="font-changa text-xl font-semibold">Heads</div>
                                                     </div>
-                                                    <div className={`bg-[#202329] py-4 px-4 rounded-md flex gap-2 items-center justify-center min-w-1/3  ${wonCoinFace==="tails"? 'border-2 border-[#7839C5]': 'border-[rgb(192,201,210)]'}`}>
+                                                    <div className={`bg-[#202329] py-4 px-4 rounded-md flex gap-2 items-center justify-center min-w-1/3  ${wonCoinFace === "tails" ? 'border-2 border-[#7839C5]' : 'border-[rgb(192,201,210)]'}`}>
                                                         <div className="w-5 h-5 bg-[#FFC20E] rounded-full"></div>
                                                         <div className="font-changa text-xl font-semibold">Tails</div>
                                                     </div>
@@ -239,6 +238,16 @@ export default function ProvablyFairModal({
                                                             </div>
                                                             <div className="flex justify-around md:gap-2">
                                                                 <div className="flex flex-col items-center mr-2 sm:mr-0">
+                                                                    {
+                                                                        selectedFaces[1] && wonDiceFace === 1 &&
+                                                                        <Image
+                                                                            src="/assets/pointer-green.png"
+                                                                            alt="pointer green"
+                                                                            width={13}
+                                                                            height={13}
+                                                                            className="absolute -top-[2px]"
+                                                                        />
+                                                                    }
                                                                     <Image
                                                                         src="/assets/progressTip.png"
                                                                         alt="progress bar"
@@ -248,7 +257,7 @@ export default function ProvablyFairModal({
                                                                     />
                                                                     <Image
                                                                         src={
-                                                                            wonFace === 1 ?
+                                                                            wonDiceFace === 1 ?
                                                                                 "/assets/activeDiceFace1.png"
                                                                                 :
                                                                                 selectedFaces[1]
@@ -258,11 +267,21 @@ export default function ProvablyFairModal({
                                                                         width={50}
                                                                         height={50}
                                                                         alt=""
-                                                                        className={`inline-block mt-6 ${selectedFace.includes(1) ? "selected-face" : ""
+                                                                        className={`inline-block mt-6 ${selectedFaces[1] ? "selected-face" : ""
                                                                             }`}
                                                                     />
                                                                 </div>
                                                                 <div className="flex flex-col items-center mr-2 sm:mr-0">
+                                                                    {
+                                                                        selectedFaces[2] && wonDiceFace === 2 &&
+                                                                        <Image
+                                                                            src="/assets/pointer-green.png"
+                                                                            alt="pointer green"
+                                                                            width={13}
+                                                                            height={13}
+                                                                            className="absolute -top-[20px]"
+                                                                        />
+                                                                    }
                                                                     <Image
                                                                         src="/assets/progressTip.png"
                                                                         alt="progress bar"
@@ -272,7 +291,7 @@ export default function ProvablyFairModal({
                                                                     />
                                                                     <Image
                                                                         src={
-                                                                            wonFace === 2 ?
+                                                                            wonDiceFace === 2 ?
                                                                                 "/assets/activeDiceFace2.png"
                                                                                 :
                                                                                 selectedFaces[2]
@@ -282,11 +301,21 @@ export default function ProvablyFairModal({
                                                                         width={50}
                                                                         height={50}
                                                                         alt=""
-                                                                        className={`inline-block mt-6 ${selectedFace.includes(2) ? "selected-face" : ""
+                                                                        className={`inline-block mt-6 ${selectedFaces[2] ? "selected-face" : ""
                                                                             }`}
                                                                     />
                                                                 </div>
                                                                 <div className="flex flex-col items-center mr-2 sm:mr-0">
+                                                                {
+                                                                        selectedFaces[3] && wonDiceFace === 3 &&
+                                                                        <Image
+                                                                            src="/assets/pointer-green.png"
+                                                                            alt="pointer green"
+                                                                            width={13}
+                                                                            height={13}
+                                                                            className="absolute -top-[20px]"
+                                                                        />
+                                                                    }
                                                                     <Image
                                                                         src="/assets/progressTip.png"
                                                                         alt="progress bar"
@@ -296,7 +325,7 @@ export default function ProvablyFairModal({
                                                                     />
                                                                     <Image
                                                                         src={
-                                                                            wonFace === 3 ?
+                                                                            wonDiceFace === 3 ?
                                                                                 "/assets/activeDiceFace3.png"
                                                                                 :
                                                                                 selectedFaces[3]
@@ -306,11 +335,21 @@ export default function ProvablyFairModal({
                                                                         width={50}
                                                                         height={50}
                                                                         alt=""
-                                                                        className={`inline-block mt-6 ${selectedFace.includes(3) ? "selected-face" : ""
+                                                                        className={`inline-block mt-6 ${selectedFaces[3] ? "selected-face" : ""
                                                                             }`}
                                                                     />
                                                                 </div>
                                                                 <div className="flex flex-col items-center mr-2 sm:mr-0">
+                                                                {
+                                                                        selectedFaces[4] && wonDiceFace === 4 &&
+                                                                        <Image
+                                                                            src="/assets/pointer-green.png"
+                                                                            alt="pointer green"
+                                                                            width={13}
+                                                                            height={13}
+                                                                            className="absolute -top-[20px]"
+                                                                        />
+                                                                    }
                                                                     <Image
                                                                         src="/assets/progressTip.png"
                                                                         alt="progress bar"
@@ -320,7 +359,7 @@ export default function ProvablyFairModal({
                                                                     />
                                                                     <Image
                                                                         src={
-                                                                            wonFace === 4 ?
+                                                                            wonDiceFace === 4 ?
                                                                                 "/assets/activeDiceFace4.png"
                                                                                 :
                                                                                 selectedFaces[4]
@@ -330,11 +369,21 @@ export default function ProvablyFairModal({
                                                                         width={50}
                                                                         height={50}
                                                                         alt=""
-                                                                        className={`inline-block mt-6 ${selectedFace.includes(4) ? "selected-face" : ""
+                                                                        className={`inline-block mt-6 ${selectedFaces[3] ? "selected-face" : ""
                                                                             }`}
                                                                     />
                                                                 </div>
                                                                 <div className="flex flex-col items-center mr-2 sm:mr-0">
+                                                                {
+                                                                        selectedFaces[5] && wonDiceFace === 5 &&
+                                                                        <Image
+                                                                            src="/assets/pointer-green.png"
+                                                                            alt="pointer green"
+                                                                            width={13}
+                                                                            height={13}
+                                                                            className="absolute -top-[20px]"
+                                                                        />
+                                                                    }
                                                                     <Image
                                                                         src="/assets/progressTip.png"
                                                                         alt="progress bar"
@@ -344,7 +393,7 @@ export default function ProvablyFairModal({
                                                                     />
                                                                     <Image
                                                                         src={
-                                                                            wonFace === 5 ?
+                                                                            wonDiceFace === 5 ?
                                                                                 "/assets/activeDiceFace5.png"
                                                                                 :
                                                                                 selectedFaces[5]
@@ -354,11 +403,21 @@ export default function ProvablyFairModal({
                                                                         width={50}
                                                                         height={50}
                                                                         alt=""
-                                                                        className={`inline-block mt-6 ${selectedFace.includes(5) ? "selected-face" : ""
+                                                                        className={`inline-block mt-6 ${selectedFaces[5] ? "selected-face" : ""
                                                                             }`}
                                                                     />
                                                                 </div>
                                                                 <div className="flex flex-col items-center">
+                                                                {
+                                                                        selectedFaces[6] && wonDiceFace === 6 &&
+                                                                        <Image
+                                                                            src="/assets/pointer-green.png"
+                                                                            alt="pointer green"
+                                                                            width={13}
+                                                                            height={13}
+                                                                            className="absolute -top-[20px]"
+                                                                        />
+                                                                    }
                                                                     <Image
                                                                         src="/assets/progressTip.png"
                                                                         alt="progress bar"
@@ -368,7 +427,7 @@ export default function ProvablyFairModal({
                                                                     />
                                                                     <Image
                                                                         src={
-                                                                            wonFace === 6 ?
+                                                                            wonDiceFace === 6 ?
                                                                                 "/assets/activeDiceFace6.png"
                                                                                 :
                                                                                 selectedFaces[6]
@@ -378,7 +437,7 @@ export default function ProvablyFairModal({
                                                                         width={50}
                                                                         height={50}
                                                                         alt=""
-                                                                        className={`inline-block mt-6 ${selectedFace.includes(6) ? "selected-face" : ""
+                                                                        className={`inline-block mt-6 ${selectedFaces[6] ? "selected-face" : ""
                                                                             }`}
                                                                     />
                                                                 </div>
