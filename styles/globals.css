@@ -6,6 +6,28 @@
 
 @tailwind base;
 @tailwind components;
+@layer utilities {
+  .modalscrollbar::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+
+  .modalscrollbar::-webkit-scrollbar-track {
+    border-radius: 100vh;
+    background: #202329;
+  }
+
+  .modalscrollbar::-webkit-scrollbar-thumb {
+    background: #000000;
+    border-radius: 100vh;
+    border: 3px solid #202329;
+  }
+
+  .modalscrollbar::-webkit-scrollbar-thumb:hover {
+    background: #202329;
+  }
+}
+
 @tailwind utilities;
 
 :root {
@@ -41,16 +63,16 @@ body {
 }
 
 .scrollbar::-webkit-scrollbar-track {
-  background: #7839C580;
+  background: #7839c580;
 }
 
 .scrollbar::-webkit-scrollbar-thumb {
   border-radius: 10rem;
-  background: #7839C5cc;
+  background: #7839c5cc;
 }
 
 .scrollbar::-webkit-scrollbar-thumb:hover {
-  background: #7839C5cc;
+  background: #7839c5cc;
 }
 
 .box-shadow-pink {
@@ -69,9 +91,9 @@ body {
 
 .text-shadow-violet {
   text-shadow:
-    0 0 5px #7839C5,
-    0 0 10px #7839C5,
-    0 0 16px #7839C5;
+    0 0 5px #7839c5,
+    0 0 10px #7839c5,
+    0 0 16px #7839c5;
 }
 
 .text-shadow-light {

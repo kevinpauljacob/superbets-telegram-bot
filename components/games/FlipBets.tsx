@@ -16,6 +16,31 @@ export default function FlipBets({ refresh }: { refresh: boolean }) {
   const wallet = useWallet();
   const [all, setAll] = useState(wallet.publicKey ? false : true);
 
+  //My Bet Modal handling
+  const [isOpen, setIsOpen] = useState(false);
+
+  const openModal = () => {
+    setIsOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsOpen(false);
+  };
+
+  const [modalData, setModalData] = useState({
+    game: "",
+    betTime: "",
+    betAmount: 0,
+    multiplier: 0,
+    payout: 0,
+    chance: 0,
+    verificationAttributes: {
+      clientSeed: "",
+      nonce: 0,
+      serverSeed: "",
+    },
+  });
+
   const [page, setPage] = useState(1);
   const [index, setIndex] = useState(0);
   const [pagination, setPagination] = useState(0);
@@ -108,12 +133,43 @@ export default function FlipBets({ refresh }: { refresh: boolean }) {
             bets
               .slice(
                 page * transactionsPerPage - transactionsPerPage,
-                page * transactionsPerPage
+                page * transactionsPerPage,
               )
               .map((bet, index) => (
                 <div
                   key={index}
                   className="mb-2.5 flex w-full flex-row items-center gap-2 rounded-[5px] bg-[#45054933] py-3"
+                  onClick={() => {
+                    //fetch betDetails and verification details here
+                    if (!all) {
+                      const betDetails = {
+                        game: "COIN FLIP",
+                        betTime:
+                          new Date(bet.createdAt).toLocaleDateString("en-GB", {
+                            day: "2-digit",
+                            month: "2-digit",
+                            year: "2-digit",
+                          }) +
+                          " " +
+                          new Date(bet.createdAt).toLocaleTimeString("en-GB", {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          }) +
+                          " UTC",
+                        betAmount: bet.flipAmount,
+                        multiplier: 1.3,
+                        payout: 3,
+                        chance: 30000,
+                        verificationAttributes: {
+                          clientSeed: "dgsg",
+                          nonce: 0,
+                          serverSeed: "jhasfkh",
+                        },
+                      };
+                      setModalData(betDetails);
+                      openModal();
+                    }
+                  }}
                 >
                   <span className="w-full text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
                     {bet.createdAt

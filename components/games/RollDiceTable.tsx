@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import toast from "react-hot-toast";
 import { obfuscatePubKey } from "@/context/transactions";
 import Image from "next/image";
+import VerifyBetModal from "../VerifyBetModal";
 
 interface Flip {
   createdAt: string;
@@ -18,6 +19,31 @@ interface Flip {
 export default function RollDiceTable({ refresh }: { refresh: boolean }) {
   const wallet = useWallet();
   const [all, setAll] = useState(wallet.publicKey ? false : true);
+
+  //My Bet Modal handling
+  const [isOpen, setIsOpen] = useState(false);
+
+  const openModal = () => {
+    setIsOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsOpen(false);
+  };
+
+  const [modalData, setModalData] = useState({
+    game: "",
+    betTime: "",
+    betAmount: 0,
+    multiplier: 0,
+    payout: 0,
+    chance: 0,
+    verificationAttributes: {
+      clientSeed: "",
+      nonce: 0,
+      serverSeed: "",
+    },
+  });
 
   const [page, setPage] = useState(1);
 
@@ -162,7 +188,40 @@ export default function RollDiceTable({ refresh }: { refresh: boolean }) {
               .map((bet, index) => (
                 <div
                   key={index}
-                  className="mb-2.5 ml-2.5 mr-2.5 flex w-full flex-row items-center gap-2 rounded-[5px] bg-[#121418] py-3"
+                  className={`mb-2.5 ml-2.5 mr-2.5 flex w-full flex-row items-center gap-2 rounded-[5px] bg-[#121418] py-3 ${
+                    !all && "cursor-pointer"
+                  }`}
+                  onClick={() => {
+                    //fetch betDetails and verification details here
+                    if (!all) {
+                      const betDetails = {
+                        game: "DICE",
+                        betTime:
+                          new Date(bet.createdAt).toLocaleDateString("en-GB", {
+                            day: "2-digit",
+                            month: "2-digit",
+                            year: "2-digit",
+                          }) +
+                          " " +
+                          new Date(bet.createdAt).toLocaleTimeString("en-GB", {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          }) +
+                          " UTC",
+                        betAmount: bet.rollAmount,
+                        multiplier: 1.3,
+                        payout: bet.betAmountWon,
+                        chance: 30000,
+                        verificationAttributes: {
+                          clientSeed: "dgsg",
+                          nonce: 0,
+                          serverSeed: "jhasfkh",
+                        },
+                      };
+                      setModalData(betDetails);
+                      openModal();
+                    }
+                  }}
                 >
                   <span className="w-full text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
                     {bet.createdAt
@@ -289,6 +348,12 @@ export default function RollDiceTable({ refresh }: { refresh: boolean }) {
           &gt;
         </span>
       </div>
+      <VerifyBetModal
+        isOpen={isOpen}
+        onClose={closeModal}
+        modalData={modalData}
+        setModalData={setModalData}
+      />
     </div>
   );
 }
