@@ -10,6 +10,7 @@ import Head from "next/head";
 import Link from "next/link";
 import { useGlobalContext } from "@/components/GlobalContext";
 import { FormProvider, useForm } from "react-hook-form";
+import GameFooterInfo from "@/components/games/GameFooterInfo";
 
 const Timer = dynamic(() => import("../../components/games/Timer"), {
   ssr: false,
@@ -694,7 +695,7 @@ export default function Binary() {
 
         <div className="bg-white bg-opacity-10 w-[1px]" />
 
-        <div className="flex flex-1 m-5 bg-[#0C0F16] rounded-lg p-4">
+        <div className="flex flex-1 flex-col items-center justify-between m-5 bg-[#0C0F16] rounded-lg p-4">
           {/* time and amt */}
           <div className="flex w-full items-start justify-between">
             <div className="flex flex-col items-start gap-1">
@@ -715,6 +716,17 @@ export default function Binary() {
           </div>
 
           {/* central loader  */}
+          <div className="flex flex-col items-center">
+            <span className="font-change text-sm text-white text-opacity-755 mb-5">
+              $SOL
+            </span>
+            <span className="font-change text-2xl text-white text-opacity-90 mb-2">
+              {livePrice}
+            </span>
+           {strikePrice && <span className={`text-sm ${livePrice-strikePrice > 0 ? "text-[#72F238]" : "text-[#CF304A]"} text-opacity-90 font-changa`}>{Math.abs(livePrice - strikePrice)}</span>}
+          </div>
+
+          <GameFooterInfo multiplier={1.33} amount={4} chance={40} />
           
         </div>
       </div>
