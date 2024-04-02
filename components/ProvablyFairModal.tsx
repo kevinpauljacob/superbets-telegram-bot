@@ -76,7 +76,7 @@ export default function ProvablyFairModal({
 
     setVerificationState((prevData) => ({
       ...prevData,
-      [name]: name === "currentNonce" ? parseInt(value) : value,
+      [name]: value,
     }));
 
     const { clientSeed, serverSeed, currentNonce } = verificationState;
