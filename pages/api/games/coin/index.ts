@@ -96,8 +96,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       let fAmountLost = amount;
 
       if (
-        (flipType === "heads" && strikeNumber > 51) ||
-        (flipType === "tails" && strikeNumber <= 49)
+        (flipType === "heads" && strikeNumber === 1) ||
+        (flipType === "tails" && strikeNumber === 2)
       ) {
         result = "Won";
         fAmountWon = amount;

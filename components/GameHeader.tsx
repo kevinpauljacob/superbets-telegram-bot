@@ -1,9 +1,68 @@
 import { useRouter } from "next/router";
 import Image from "next/image";
 import fair from "/public/assets/fair.png";
+import { useEffect, useState } from "react";
+import ProvablyFairModal from "./ProvablyFairModal";
+import { useWallet } from "@solana/wallet-adapter-react";
+import { GameType } from "@/utils/vrf";
 
 export default function GameHeader() {
+  const wallet = useWallet();
   const router = useRouter();
+
+  //Provably Fair Modal handling
+  const [isOpen, setIsOpen] = useState(false);
+
+  const openModal = () => {
+    setIsOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsOpen(false);
+  };
+
+  const [modalData, setModalData] = useState({
+    activeGameSeed: {
+      wallet: "",
+      clientSeed: "",
+      serverSeed: "",
+      serverSeedHash: "",
+      currentNonce: 0,
+      status: "",
+    },
+    nextGameSeed: {
+      wallet: "",
+      clientSeed: "",
+      serverSeed: "",
+      serverSeedHash: "",
+      currentNonce: 0,
+      status: "",
+    },
+    totalBets: "",
+    game: GameType.dice,
+  });
+
+  useEffect(() => {
+    if (!wallet?.publicKey) return;
+
+    const fetchProvablyFairData = async (walletPubkey: string) => {
+      const res = await fetch(`/api/games/vrf`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          wallet: walletPubkey,
+        }),
+      });
+
+      let data = await res.json();
+      const game = router.pathname.split("/")[1];
+      if (data.success) setModalData({ ...data, game });
+    };
+
+    fetchProvablyFairData(wallet.publicKey.toBase58());
+  }, [wallet.publicKey]);
 
   // Define game data for different games
   const gameData: Record<
@@ -88,13 +147,22 @@ export default function GameHeader() {
             </p>
           </div>
           <div className="flex items-center gap-2 mx-1.5 my-1 ">
-            <p className="underline text-[#94A3B8] decoration-[#94A3B8] underline-offset-2">
+            <p
+              className="underline text-[#94A3B8] decoration-[#94A3B8] underline-offset-2 hover:cursor-pointer"
+              onClick={openModal}
+            >
               Provabaly Fair
             </p>
             <Image src={fair} alt="Fairness" width={20} height={20} />
           </div>
         </div>
       </div>
+      <ProvablyFairModal
+        isOpen={isOpen}
+        onClose={closeModal}
+        modalData={modalData}
+        setModalData={setModalData}
+      />
     </div>
   ) : null;
 }
