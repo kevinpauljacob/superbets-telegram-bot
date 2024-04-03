@@ -177,7 +177,7 @@ export default function BalanceModal({
                     autoComplete="off"
                     onChange={handleChange}
                     placeholder={"Amount"}
-                    value={amount.toFixed(4)}
+                    value={amount}
                     className={`flex w-full min-w-0 bg-transparent text-sm text-white placeholder-white  placeholder-opacity-40 outline-none`}
                   />
                   <span
