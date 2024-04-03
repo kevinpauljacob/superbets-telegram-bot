@@ -8,12 +8,14 @@ import { toast } from "react-hot-toast";
 import { ROLL_TAX } from "../../context/config";
 import GameFooterInfo from "@/components/games/GameFooterInfo";
 import BetSetting from "@/components/BetSetting";
+import { useGlobalContext } from "@/components/GlobalContext";
 
 export default function Dice() {
   const wallet = useWallet();
 
+  const { coinData, getBalance, getWalletBalance } = useGlobalContext();
   const [user, setUser] = useState<any>(null);
-  const [betAmt, setBetAmt] = useState(0.1);
+  const [betAmt, setBetAmt] = useState(0);
   const [selectedFace, setSelectedFace] = useState<number[]>([]);
   const [isRolling, setIsRolling] = useState(false);
   const [winningPays, setWinningPays] = useState(6);
@@ -40,6 +42,7 @@ export default function Dice() {
     { face: 2, isWin: true },
     { face: 6, isWin: false },
   ]);
+  const [strikeFace, setStrikeFace] = useState<number | null>(5);
 
   const handleDiceClick = (newFace: number) => {
     if (selectedFace.length >= 5 && !selectedFace.includes(newFace)) {
@@ -75,65 +78,85 @@ export default function Dice() {
     }
   };
 
+  const handleBetAmountChange = (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    const amount = parseFloat(event.target.value); // Convert input value to float
+    setBetAmt(amount); // Update betAmt state
+  };
+
   const diceRoll = async () => {
     if (wallet.connected) {
-      if (user.deposit[0].amount < betAmt) {
+      if (!wallet.publicKey) {
+        toast.error("Wallet not connected");
+        return;
+      }
+      if (coinData && coinData[0].amount < betAmt) {
         toast.error("Insufficient balance for bet !");
+        return;
+      }
+      if (betAmt === 0) {
+        toast.error("Set Amount.");
         return;
       }
       setIsRolling(true);
       await new Promise((r) => setTimeout(r, 5000));
-      let res;
       try {
-        res = await rollDice(wallet, betAmt, selectedFace);
+        const res = await rollDice(wallet, betAmt, selectedFace);
+        if (res.success) {
+          const { strikeNumber, result } = res.data;
+          const isWin = result === "Won";
+          const newBetResults = [...betResults, { face: strikeNumber, isWin }];
+          setBetResults(newBetResults);
+          setStrikeFace(strikeNumber);
+          // setSelectedFace([0]);
+          // setBetAmt(0.0);
+          setRefresh(!refresh);
+        }
       } catch (e) {
         setIsRolling(false);
-        return;
-      }
-
-      if (res.success) {
-        setSelectedFace([0]);
-        setBetAmt(0.0);
-        setRefresh(!refresh);
+        console.error("Error occurred while rolling the dice:", e);
       }
       setIsRolling(false);
     }
   };
 
   useEffect(() => {
-    if (!wallet?.publicKey) return;
-
-    fetch(`/api/user/getUser?wallet=${wallet.publicKey.toBase58()}`)
-      .then((res) => res.json())
-      .then((res) => {
-        // console.log(res);
-        if (res.success) {
-          //   console.log(res.data);
-          setUser(res.data);
-        }
-      });
+    getWalletBalance();
+    getBalance();
   }, [wallet?.publicKey, refresh]);
 
   return (
     <div className="flex h-full w-full flex-col items-center justify-start p-10">
-      <div className="flex flex-col xl:flex-row items-center rounded-[1.15rem] bg-[#121418] text-white w-full">
+      <div className="flex flex-col xl:flex-row items-start rounded-[1.15rem] bg-[#121418] text-white w-full">
         <div className="xl:border-r border-white/10 xl:w-[35%] w-full p-6 sm:p-8 xl:p-14">
           <BetSetting betSetting={rollType} setBetSetting={setRollType} />
 
           <div className="mb-6">
             <div className="flex justify-between text-xs mb-2">
               <p className="font-semibold">Bet Amount</p>
-              <p className="font-semibold text-[#94A3B8]">0.00 $SOL</p>
+              <p className="font-semibold text-[#94A3B8]">
+                Available : {coinData ? coinData[0]?.amount.toFixed(4) : 0} $SOL
+              </p>
             </div>
-            <div className="relative">
+            <div
+              className={`group flex h-11 w-full cursor-pointer items-center rounded-[8px] bg-[#202329] px-4`}
+            >
               <input
-                className="z-0 w-full bg-[#202329] rounded-md p-2.5"
-                type="text"
-                placeholder="0.0"
+                type={"number"}
+                step={"any"}
+                autoComplete="off"
+                onChange={handleBetAmountChange}
+                placeholder={"Amount"}
+                value={betAmt}
+                className={`flex w-full min-w-0 bg-transparent text-sm text-white placeholder-white  placeholder-opacity-40 outline-none`}
               />
-              <button className="z-10 absolute top-2.5 right-2.5 px-3 py-1 rounded-sm text-xs bg-[#d9d9d90d]">
-                Max
-              </button>
+              <span
+                className="bg-[#D9D9D9] bg-opacity-5 py-1 px-1.5 rounded text-sm text-[#F0F0F0] text-opacity-75"
+                onClick={() => setBetAmt(coinData ? coinData[0]?.amount : 0)}
+              >
+                MAX
+              </span>
             </div>
           </div>
           {rollType === "auto" && (
@@ -171,7 +194,7 @@ export default function Dice() {
                 if (!isRolling) diceRoll();
               }}
               className={`${
-                !user || !wallet || selectedFace.length == 0
+                !wallet || selectedFace.length == 0
                   ? "cursor-not-allowed opacity-70"
                   : "hover:opacity-90"
               } flex w-full flex-col items-center justify-center gap-2 rounded-lg border border-[#F6F6F61A] bg-[#7839C5] py-2.5 font-changa shadow-[0px_4px_15px_0px_rgba(0,0,0,0.25)]`}
@@ -191,64 +214,6 @@ export default function Dice() {
               )}
             </button>
           </div>
-          {/* <span className="mb-1 mr-0 font-changa text-xs font-medium text-[#F0F0F0] text-opacity-75">
-            sol balance: {user && user.deposit[0].amount.toFixed(4)}
-          </span> */}
-          {/* <div className="mb-2 mt-2 flex items-end gap-2">
-            <Image src={"/assets/dice.png"} width={50} height={50} alt="" />
-            <span className="text-shadow-pink font-lilita text-[2.5rem] font-medium leading-10 text-white text-opacity-90">
-              DICE TO WIN
-            </span>
-          </div> */}
-          {/* <span className="mb-4 mt-4 font-changa text-xl font-medium text-[#FFFFFF] text-opacity-75">
-            Roll a dice
-          </span> */}
-          {/* <div className="mb-4 flex w-full flex-col rounded-lg bg-[#C20FC5] bg-opacity-10 px-3 pb-4 pt-2 md:px-6">
-            <span className="mb-3 w-full text-center font-changa text-[#F0F0F0] text-opacity-75">
-              Select Amount
-            </span>
-            <div className="mb-3 flex flex-col items-center gap-2.5 md:flex-row">
-              <button
-                onClick={() => {
-                  setBetAmt(0.001);
-                  setWinningAmount((0.1 * 6) / selectedFace.length);
-                }}
-                className={`${
-                  betAmt === 0.1
-                    ? "bg-[#F200F2]"
-                    : "bg-transparent hover:bg-[#6C0671]"
-                } w-full rounded-[5px] border-[2px] border-[#F200F280] py-2 text-xs text-white text-opacity-90 transition duration-200`}
-              >
-                0.1 $SOL
-              </button>
-              <button
-                onClick={() => {
-                  setBetAmt(0.25);
-                  setWinningAmount((0.25 * 6) / selectedFace.length);
-                }}
-                className={`${
-                  betAmt === 0.25
-                    ? "bg-[#F200F2]"
-                    : "bg-transparent hover:bg-[#6C0671]"
-                } w-full rounded-[5px] border-[2px] border-[#F200F280] py-2 text-xs text-white text-opacity-90 transition duration-200`}
-              >
-                0.25 $SOL
-              </button>
-              <button
-                onClick={() => {
-                  setBetAmt(0.5);
-                  setWinningAmount((0.5 * 6) / selectedFace.length);
-                }}
-                className={`${
-                  betAmt === 0.5
-                    ? "bg-[#F200F2]"
-                    : "bg-transparent hover:bg-[#6C0671]"
-                } w-full rounded-[5px] border-[2px] border-[#F200F280] py-2 text-xs text-white text-opacity-90 transition duration-200`}
-              >
-                0.5 $SOL
-              </button>
-            </div>
-          </div> */}
         </div>
         <div className="xl:border-l border-white/10 xl:w-[65%] h-full px-6 pb-6 sm:px-8 sm:pb-8 xl:p-8">
           <div className="bg-[#0C0F16] flex flex-col justify-between h-full sm:h-[450px] rounded-lg p-4 sm:p-12">
@@ -306,8 +271,12 @@ export default function Dice() {
                   <Image
                     src={
                       selectedFaces[1]
-                        ? "/assets/finalDiceFace1.png"
-                        : "/assets/diceFace1.png"
+                        ? selectedFace.includes(1)
+                          ? strikeFace === 1
+                            ? "/assets/winDiceFace1.png" // Use winning dice face image if strikeFace is 1
+                            : "/assets/finalDiceFace1.png" // Use regular dice face image if face 1 is selected but not strikeFace
+                          : "/assets/lossDiceFace1.png" // Use loss dice face image if face 1 is not selected
+                        : "/assets/diceFace1.png" // Use regular dice face image if face 1 is not selected
                     }
                     width={50}
                     height={50}
@@ -329,8 +298,12 @@ export default function Dice() {
                   <Image
                     src={
                       selectedFaces[2]
-                        ? "/assets/finalDiceFace2.png"
-                        : "/assets/diceFace2.png"
+                        ? selectedFace.includes(2)
+                          ? strikeFace === 2
+                            ? "/assets/winDiceFace2.png" // Use winning dice face image if strikeFace is 1
+                            : "/assets/finalDiceFace2.png" // Use regular dice face image if face 1 is selected but not strikeFace
+                          : "/assets/lossDiceFace2.png" // Use loss dice face image if face 1 is not selected
+                        : "/assets/diceFace2.png" // Use regular dice face image if face 1 is not selected
                     }
                     width={50}
                     height={50}
@@ -352,8 +325,12 @@ export default function Dice() {
                   <Image
                     src={
                       selectedFaces[3]
-                        ? "/assets/finalDiceFace3.png"
-                        : "/assets/diceFace3.png"
+                        ? selectedFace.includes(3)
+                          ? strikeFace === 3
+                            ? "/assets/winDiceFace3.png" // Use winning dice face image if strikeFace is 1
+                            : "/assets/finalDiceFace3.png" // Use regular dice face image if face 1 is selected but not strikeFace
+                          : "/assets/lossDiceFace3.png" // Use loss dice face image if face 1 is not selected
+                        : "/assets/diceFace3.png" // Use regular dice face image if face 1 is not selected
                     }
                     width={50}
                     height={50}
@@ -375,8 +352,12 @@ export default function Dice() {
                   <Image
                     src={
                       selectedFaces[4]
-                        ? "/assets/finalDiceFace4.png"
-                        : "/assets/diceFace4.png"
+                        ? selectedFace.includes(4)
+                          ? strikeFace === 4
+                            ? "/assets/winDiceFace4.png" // Use winning dice face image if strikeFace is 1
+                            : "/assets/finalDiceFace4.png" // Use regular dice face image if face 1 is selected but not strikeFace
+                          : "/assets/lossDiceFace4.png" // Use loss dice face image if face 1 is not selected
+                        : "/assets/diceFace4.png" // Use regular dice face image if face 1 is not selected
                     }
                     width={50}
                     height={50}
@@ -398,8 +379,12 @@ export default function Dice() {
                   <Image
                     src={
                       selectedFaces[5]
-                        ? "/assets/finalDiceFace5.png"
-                        : "/assets/diceFace5.png"
+                        ? selectedFace.includes(5)
+                          ? strikeFace === 5
+                            ? "/assets/winDiceFace5.png" // Use winning dice face image if strikeFace is 1
+                            : "/assets/finalDiceFace5.png" // Use regular dice face image if face 1 is selected but not strikeFace
+                          : "/assets/lossDiceFace5.png" // Use loss dice face image if face 1 is not selected
+                        : "/assets/diceFace5.png" // Use regular dice face image if face 1 is not selected
                     }
                     width={50}
                     height={50}
@@ -421,8 +406,12 @@ export default function Dice() {
                   <Image
                     src={
                       selectedFaces[6]
-                        ? "/assets/finalDiceFace6.png"
-                        : "/assets/diceFace6.png"
+                        ? selectedFace.includes(6)
+                          ? strikeFace === 6
+                            ? "/assets/winDiceFace6.png" // Use winning dice face image if strikeFace is 1
+                            : "/assets/finalDiceFace6.png" // Use regular dice face image if face 1 is selected but not strikeFace
+                          : "/assets/lossDiceFace6.png" // Use loss dice face image if face 1 is not selected
+                        : "/assets/diceFace6.png" // Use regular dice face image if face 1 is not selected
                     }
                     width={50}
                     height={50}
