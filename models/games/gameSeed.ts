@@ -23,7 +23,7 @@ const gameSeedSchema = new mongoose.Schema(
       default: 0,
     },
     status: {
-      type: seedStatus,
+      type: String,
       required: true,
       default: seedStatus.NEXT,
     },
