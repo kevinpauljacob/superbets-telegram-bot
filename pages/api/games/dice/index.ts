@@ -92,12 +92,12 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         throw new Error("Server hash not found!");
       }
 
-      const { serverSeed, clientSeed, nonce } = activeGameSeed;
+      const { serverSeed, clientSeed, currentNonce } = activeGameSeed;
 
       const strikeNumber = generateGameResult(
         serverSeed,
         clientSeed,
-        nonce,
+        currentNonce,
         GameType.dice,
       ) as number;
 
