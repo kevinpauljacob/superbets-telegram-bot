@@ -89,7 +89,7 @@ export default function GameHeader() {
           </div>
           <div className="flex items-center gap-2 mx-1.5 my-1 ">
             <p className="underline text-[#94A3B8] decoration-[#94A3B8] underline-offset-2">
-              Povabaly Fair
+              Provabaly Fair
             </p>
             <Image src={fair} alt="Fairness" width={20} height={20} />
           </div>

@@ -23,7 +23,7 @@ export default function Layout({ children }: LayoutProps) {
       <Header sidebar={mobileSidebar} toggleSidebar={toggleMobileSidebar} />
       <section className="flex">
         <Sidebar />
-        <section className="w-full relative">
+        <section className="w-full relative overflow-hidden">
           {mobileSidebar && <MobileSidebar />}
           <section>
             <SubHeader />

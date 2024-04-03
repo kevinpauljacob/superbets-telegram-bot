@@ -544,11 +544,11 @@ export default function Binary() {
                 <div className="flex w-full flex-col">
                   <button
                     type="submit"
-                    // disabled={
-                    //   !coinData || (coinData && coinData[0].amount < 0.1)
-                    //     ? true
-                    //     : false
-                    // }
+                    disabled={
+                      !coinData || (coinData && coinData[0].amount < 0.1)
+                        ? true
+                        : false
+                    }
                     onClick={onSubmit}
                     className={`${
                       !user || (coinData && coinData[0].amount < 0.1)
@@ -566,7 +566,7 @@ export default function Binary() {
 
         <div className="bg-white bg-opacity-10 w-[1px]" />
 
-        <div className="flex flex-1 flex-col items-center justify-between m-5 bg-[#0C0F16] rounded-lg p-4">
+        <div className="flex flex-1 flex-col items-center justify-between gap-4 m-5 bg-[#0C0F16] rounded-lg p-4">
           {/* time and amt */}
           <div
             className={`${
@@ -592,35 +592,34 @@ export default function Binary() {
 
           {/* central loader  */}
           <div className="flex flex-col items-center relative">
-          <div className="flex flex-col items-center absolute w-[15rem] h-[15rem] justify-center">
-            <span className="font-change text-sm text-[#94A3B8] text-opacity-75 mb-5">
-              $SOL
-            </span>
-            <span className="font-change text-2xl text-white text-opacity-90 mb-2">
-              {livePrice.toFixed(4)}
-            </span>
-            {strikePrice && (
-              <span
-                className={`text-sm ${
-                  livePrice - strikePrice > 0
-                    ? "text-[#72F238]"
-                    : "text-[#CF304A]"
-                } text-opacity-90 font-changa`}
-              >
-                {Math.abs(livePrice - strikePrice)}
+            <div className="flex flex-col items-center absolute w-[15rem] h-[15rem] justify-center">
+              <span className="font-change text-sm text-[#94A3B8] text-opacity-75 mb-5">
+                $SOL
               </span>
-            )}
+              <span className="font-change text-2xl text-white text-opacity-90 mb-2">
+                {livePrice.toFixed(4)}
+              </span>
+              {strikePrice && (
+                <span
+                  className={`text-sm ${
+                    livePrice - strikePrice > 0
+                      ? "text-[#72F238]"
+                      : "text-[#CF304A]"
+                  } text-opacity-90 font-changa`}
+                >
+                  {Math.abs(livePrice - strikePrice)}
+                </span>
+              )}
             </div>
             <div className="w-[15rem] h-[15rem] relative">
-              {[...Array(40)]
-                .map((item, index) => (
-                  <div
-                    className={`w-[7.5rem] h-2 flex justify-end absolute top-[50%] left-[50%] origin-[0_0px] bg-transparent`}
-                    style={{rotate: `${(360 / 40) * index}deg`}}
-                  >
-                    <div className="w-2 h-2 bg-white" />
-                  </div>
-                ))}
+              {[...Array(40)].map((item, index) => (
+                <div
+                  className={`w-[7.5rem] h-2 flex justify-end absolute top-[50%] left-[50%] origin-[0_0px] bg-transparent`}
+                  style={{ rotate: `${(360 / 40) * index}deg` }}
+                >
+                  <div className="w-2 h-2 bg-white" />
+                </div>
+              ))}
             </div>
           </div>
 
