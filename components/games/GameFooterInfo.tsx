@@ -45,8 +45,8 @@ export default function GameFooterInfo({
 
       {!coinData ||
         (coinData[0].amount < 0.1 && (
-          <div className="mb-5 w-full rounded-lg bg-[#d9d9d90d] bg-opacity-10 px-3 pb-2 pt-4 text-white md:px-6">
-            <div className="-full mb-3 text-center font-changa font-medium text-[#F0F0F0] text-opacity-75">
+          <div className="w-full rounded-lg bg-[#d9d9d90d] bg-opacity-10 flex items-center px-3 py-3 text-white md:px-6">
+            <div className="w-full text-center font-changa font-medium text-sm md:text-base text-[#F0F0F0] text-opacity-75">
               Please deposit funds to start playing. View{" "}
               <Link href="/balance">
                 <u>WALLET</u>

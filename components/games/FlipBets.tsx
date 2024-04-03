@@ -50,15 +50,17 @@ export default function FlipBets({ refresh }: { refresh: boolean }) {
   return (
     <div className="flex w-full flex-col">
       {/* buttons  */}
-      <div className="mt-[7rem] flex w-full items-center justify-start gap-4 px-5 md:px-[10%]">
-      <button
+      <div className="mt-[7rem] flex w-full items-center justify-center gap-4 md:justify-start">
+        <button
           onClick={() => {
             if (wallet.publicKey) setAll(false);
             else toast.error("Wallet not connected");
           }}
           className={`${
-            all ? "bg-[#202329]" : "bg-[#7839C5]"
-          } rounded-md transition duration-300 ease-in-out px-8 py-1.5`}
+            all
+              ? "text-shadow-violet hover:bg-[#7839C530]"
+              : "bg-[#7839C5]"
+          } w-full transform rounded-[5px] px-8 py-2 font-changa text-lg text-white transition duration-200 md:w-fit`}
         >
           My Bets
         </button>
@@ -67,15 +69,17 @@ export default function FlipBets({ refresh }: { refresh: boolean }) {
             setAll(true);
           }}
           className={`${
-            all ? "bg-[#7839C5]" : "bg-[#202329]"
-          } rounded-md transition duration-300 ease-in-out px-8 py-1.5`}
+            all
+              ? "bg-[#7839C5]"
+              : "text-shadow-violet hover:bg-[#7839C530]"
+          } w-full transform rounded-[5px] px-8 py-2 font-changa text-lg text-white transition duration-200 md:w-fit`}
         >
           All Bets
         </button>
       </div>
 
       {/* table  */}
-      <div className="scrollbar mt-10 w-full overflow-x-auto px-5 pb-8 md:px-[10%]">
+      <div className="scrollbar mt-10 w-full overflow-x-auto px-5 pb-8">
         <div className="flex w-full min-w-[50rem] flex-col items-center">
           {/* header  */}
           {bets.length > 0 && (

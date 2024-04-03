@@ -71,47 +71,43 @@ export default function Binary() {
         setLoading(false);
         return;
       }
-      placeBet(
+      let res = await placeBet(
         wallet,
         betAmt,
         "SOL",
-        betType === "up" ? true : false,
+        betType === "up" ? "betUp" : "betDown",
         betInterval,
-      ).then((res) => {
-        if (res.success) {
-          // toast.success(res?.message ?? "Got result");
-          setRefresh(true);
-          setStrikePrice(res?.data?.strikePrice);
-          setBetTime(res?.data?.betTime);
-          setTimeout(
-            async () => {
-              setBetInterval(3);
-              setBetEnd(true);
+      );
+      if (res.success) {
+        // toast.success(res?.message ?? "Got result");
+        setRefresh(true);
+        setStrikePrice(res?.data?.strikePrice);
+        setBetTime(res?.data?.betTime);
+        setTimeout(
+          async () => {
+            setBetInterval(3);
+            setBetEnd(true);
 
-              await new Promise((r) => setTimeout(r, 2000));
+            await new Promise((r) => setTimeout(r, 2000));
 
-              let betEndPrice = await fetch(
-                `https://hermes.pyth.network/api/get_price_feed?id=0xef0d8b6fda2ceba41da15d4095d1da392a0d2f8ed0c6c7bc0f4cfac8c280b56d&publish_time=${Math.floor(
-                  (new Date(res?.data?.betTime).getTime() +
-                    betInterval * 60000) /
-                    1000,
-                )}`,
-              )
-                .then((res) => res.json())
-                .then(
-                  (data) => data.price.price * Math.pow(10, data.price.expo),
-                );
-              setBetEndPrice(betEndPrice);
-            },
-            betInterval * 60000 + 400,
-          );
-        } else {
-          setCheckResult(false);
-          setBetEnd(false);
-          res?.message && toast.error(res?.message);
-        }
-        setLoading(false);
-      });
+            let betEndPrice = await fetch(
+              `https://hermes.pyth.network/api/get_price_feed?id=0xef0d8b6fda2ceba41da15d4095d1da392a0d2f8ed0c6c7bc0f4cfac8c280b56d&publish_time=${Math.floor(
+                (new Date(res?.data?.betTime).getTime() + betInterval * 60000) /
+                  1000,
+              )}`,
+            )
+              .then((res) => res.json())
+              .then((data) => data.price.price * Math.pow(10, data.price.expo));
+            setBetEndPrice(betEndPrice);
+          },
+          betInterval * 60000 + 400,
+        );
+      } else {
+        setCheckResult(false);
+        setBetEnd(false);
+        res?.message && toast.error(res?.message);
+      }
+      setLoading(false);
     } catch (e) {
       toast.error("Could not place bet.");
       setBetType(null);
@@ -242,7 +238,7 @@ export default function Binary() {
   };
 
   const onSubmit = async (data: any) => {
-    console.log(data);
+    console.log(betAmt, betType, betInterval);
 
     if (!wallet.publicKey) toast.error("Wallet not connected");
     else {
@@ -258,93 +254,9 @@ export default function Binary() {
       <Head>
         <title>Fomobet</title>
       </Head>
-      <div className="mt-5 w-full items-stretch bg-[#121418] rounded-2xl flex flex-row">
+      <div className="mt-5 w-full items-stretch bg-[#121418] rounded-2xl flex flex-col-reverse md:flex-row">
         {/* bet box  */}
-        <div className="flex w-[35%] flex-col items-center rounded-[1.15rem] px-3 py-5 md:p-7">
-          {/* <span className="mb-1 mr-4 font-changa text-xs font-medium text-[#F0F0F0] text-opacity-75">
-            sol balance: {user && user.deposit[0].amount.toFixed(4)}
-          </span>
-
-          <span className="font-changa text-xl font-medium text-[#F0F0F0] text-opacity-75">
-            Live Price<span className="blink_me mb-[0.15rem] ml-2"></span>
-          </span>
-
-          <div className="group relative inline-block w-[11rem]">
-            <span className="text-shadow-pink  w-20 cursor-pointer font-lilita text-[2.5rem] text-[#FFFFFF] text-opacity-90">
-              {livePrice ? "$" + livePrice.toFixed(4) : "_ _ _ _ _ "}
-            </span>
-            <div className="absolute left-[4rem] top-[3.5rem] hidden w-max rounded-[3px] bg-[#171717] p-2 text-xs font-light tracking-wider text-white group-hover:inline-block">
-              sol price powered by{" "}
-              <u>
-                <a
-                  target="_blank"
-                  className="hover:text-v2-primary h-6 w-6 px-1 py-1.5 text-white/50"
-                  href="https://pyth.network/price-feeds/crypto-sol-usd?cluster=pythnet"
-                  rel="noopener noreferrer"
-                >
-                  PYTH
-                </a>
-              </u>
-            </div>
-
-            {strikePrice != 0 && (
-              <div
-                className={`absolute bottom-3.5 left-full ml-4 font-changa tracking-wider ${
-                  (!betEndPrice && livePrice > strikePrice) ||
-                  (betEndPrice && betEndPrice! > strikePrice)
-                    ? "bg-[#0F8B62]"
-                    : "bg-[#CF304A]"
-                } w-max rounded-[5px] px-2 py-1 text-xs text-white text-opacity-90`}
-              >
-                {betEndPrice && betEndPrice != 0
-                  ? betEndPrice > strikePrice
-                    ? " + " + Math.abs(betEndPrice - strikePrice).toFixed(4)
-                    : " - " + Math.abs(betEndPrice - strikePrice).toFixed(4)
-                  : livePrice > strikePrice
-                  ? " + " + Math.abs(livePrice - strikePrice).toFixed(4)
-                  : " - " + Math.abs(livePrice - strikePrice).toFixed(4)}
-              </div>
-            )}
-          </div>
-          <a
-            target="_blank"
-            className="hover:text-v2-primary mt-2 text-xs text-white/50"
-            href="https://www.tradingview.com/chart/?symbol=PYTH%3ASOLUSD"
-            rel="noopener noreferrer"
-          >
-            <span className="flex">
-              CHART
-              <svg
-                width="10px"
-                height="10px"
-                viewBox="0 0 512 512"
-                version="1.1"
-                xmlns="http://www.w3.org/2000/svg"
-                className="ml-1"
-              >
-                <title>open-external</title>
-                <g
-                  id="Page-1"
-                  stroke="none"
-                  strokeWidth="1"
-                  fill="none"
-                  fillRule="evenodd"
-                >
-                  <g
-                    id="icon"
-                    fill="#FFFFFF"
-                    transform="translate(85.333333, 64.000000)"
-                  >
-                    <path
-                      d="M128,63.999444 L128,106.666444 L42.6666667,106.666667 L42.6666667,320 L256,320 L256,234.666444 L298.666,234.666444 L298.666667,362.666667 L4.26325641e-14,362.666667 L4.26325641e-14,64 L128,63.999444 Z M362.666667,1.42108547e-14 L362.666667,170.666667 L320,170.666667 L320,72.835 L143.084945,249.751611 L112.915055,219.581722 L289.83,42.666 L192,42.6666667 L192,1.42108547e-14 L362.666667,1.42108547e-14 Z"
-                      id="Combined-Shape"
-                    ></path>
-                  </g>
-                </g>
-              </svg>
-            </span>
-          </a> */}
-
+        <div className="flex w-full md:w-[35%] flex-col items-center rounded-[1.15rem] px-3 py-5 md:p-7">
           <FormProvider {...methods}>
             <form
               className="flex w-full flex-col gap-0"
@@ -401,12 +313,13 @@ export default function Binary() {
               </div>
 
               {/* select interval  */}
-              <div className="mb-4 flex w-full flex-col rounded-lg bg-transparent bg-opacity-10 pb-4">
+              <div className="mb-4 flex w-full flex-col rounded-lg bg-transparent bg-opacity-10">
                 <span className="-full mb-3 text-left font-changa font-medium text-[#F0F0F0] text-opacity-75">
                   Select Interval
                 </span>
                 <div className="flex flex-col items-center gap-2.5 md:flex-row bg-[#0C0F16] p-4 rounded-lg">
                   <button
+                    type="button"
                     onClick={() => {
                       !betType && setBetInterval(3);
                     }}
@@ -419,6 +332,7 @@ export default function Binary() {
                     3 Min
                   </button>
                   <button
+                    type="button"
                     onClick={() => {
                       !betType && setBetInterval(4);
                     }}
@@ -431,6 +345,7 @@ export default function Binary() {
                     4 Min
                   </button>
                   <button
+                    type="button"
                     onClick={() => {
                       !betType && setBetInterval(5);
                     }}
@@ -445,10 +360,10 @@ export default function Binary() {
                 </div>
               </div>
 
-              {(!user || (coinData && coinData[0].amount < 0.1)) &&
+              {(!coinData || (coinData && coinData[0].amount < 0.1)) &&
                 strikePrice == 0 && (
-                  <div className="mb-5 w-full rounded-lg bg-[#0C0F16] px-3 pb-2 pt-4 text-white md:px-6">
-                    <div className="-full mb-3 text-center font-changa font-medium text-[#F0F0F0] text-opacity-75">
+                  <div className="mb-5 w-full rounded-lg bg-[#0C0F16] p-2 text-white md:px-6">
+                    <div className="-full text-center font-changa font-medium text-[#F0F0F0] text-opacity-75">
                       Please deposit funds to start playing. View{" "}
                       <Link href="/balance">
                         <u>WALLET</u>
@@ -457,8 +372,36 @@ export default function Binary() {
                   </div>
                 )}
 
+              <div className="flex w-full flex-row mb-4 gap-3">
+                {/* buttons  */}
+                <div
+                  onClick={() => {
+                    setBetType("up");
+                  }}
+                  className={`${
+                    betType === "up"
+                      ? "border-[#7839C5]"
+                      : "border-transparent hover:border-[#7839C580]"
+                  } w-full rounded-lg text-center cursor-pointer border-2 bg-[#202329] py-2.5 font-changa text-xl text-white shadow-[0px_4px_15px_0px_rgba(0,0,0,0.25)]`}
+                >
+                  UP
+                </div>
+                <div
+                  onClick={() => {
+                    setBetType("down");
+                  }}
+                  className={`${
+                    betType === "down"
+                      ? "border-[#7839C5]"
+                      : "border-transparent hover:border-[#7839C580]"
+                  } w-full rounded-lg text-center cursor-pointer border-2 bg-[#202329] py-2.5 font-changa text-xl text-white shadow-[0px_4px_15px_0px_rgba(0,0,0,0.25)] `}
+                >
+                  DOWN
+                </div>
+              </div>
+
               {strikePrice != 0 ? (
-                <div className="mb-0 flex w-full flex-col items-center rounded-lg bg-[#C20FC5] px-6 py-4">
+                <div className="mb-0 flex w-full flex-col items-center rounded-lg bg-[#202329] px-6 py-4">
                   {checkResult ? (
                     loading && !result ? (
                       <div className="flex w-full flex-col items-center">
@@ -580,7 +523,7 @@ export default function Binary() {
                           onClick={async () => {
                             await getResult();
                           }}
-                          className="w-full rounded-[5px] border border-[#F200F21A] bg-[#F200F2] px-5 py-2 font-changa font-semibold text-white text-opacity-90 shadow-[0_5px_10px_rgba(0,0,0,0.3)]"
+                          className="w-full rounded-[5px] border border-[#F200F21A] bg-[#d9d9d90d] px-5 py-2 font-changa font-semibold text-white text-opacity-90 shadow-[0_5px_10px_rgba(0,0,0,0.3)]"
                         >
                           Check Result
                         </button>
@@ -591,7 +534,7 @@ export default function Binary() {
                   )}
                 </div>
               ) : loading && !checkResult ? (
-                <div className="flex gap-2">
+                <div className="flex items-center gap-2 rounded-lg bg-[#202329] p-2">
                   <span className="min-w-[11rem] font-changa text-xl font-medium text-[#F0F0F0] text-opacity-75">
                     Betting in Progress
                   </span>
@@ -599,40 +542,13 @@ export default function Binary() {
                 </div>
               ) : (
                 <div className="flex w-full flex-col">
-                  <div className="flex w-full flex-row mb-4 gap-3">
-                    {/* buttons  */}
-                    <div
-                      onClick={() => {
-                        setBetType("up");
-                      }}
-                      className={`${
-                        betType === "up"
-                          ? "border-[#7839C5]"
-                          : "border-transparent hover:border-[#7839C580]"
-                      } w-full rounded-lg text-center cursor-pointer border-2 bg-[#202329] py-2.5 font-lilita text-xl text-white shadow-[0px_4px_15px_0px_rgba(0,0,0,0.25)]`}
-                    >
-                      BET UP
-                    </div>
-                    <div
-                      onClick={() => {
-                        setBetType("down");
-                      }}
-                      className={`${
-                        betType === "down"
-                          ? "border-[#7839C5]"
-                          : "border-transparent hover:border-[#7839C580]"
-                      } w-full rounded-lg text-center cursor-pointer border-2 bg-[#202329] py-2.5 font-lilita text-xl text-white shadow-[0px_4px_15px_0px_rgba(0,0,0,0.25)] `}
-                    >
-                      BET DOWN
-                    </div>
-                  </div>
                   <button
                     type="submit"
-                    disabled={
-                      !user || (coinData && coinData[0].amount < 0.1)
-                        ? true
-                        : false
-                    }
+                    // disabled={
+                    //   !coinData || (coinData && coinData[0].amount < 0.1)
+                    //     ? true
+                    //     : false
+                    // }
                     onClick={onSubmit}
                     className={`${
                       !user || (coinData && coinData[0].amount < 0.1)
@@ -646,58 +562,13 @@ export default function Binary() {
               )}
             </form>
           </FormProvider>
-
-          {/* select amount  */}
-          {/* <div className="mb-5 flex w-full flex-col rounded-lg bg-[#C20FC5] bg-opacity-10 px-3 pb-4 pt-2 md:px-6">
-            <span className="-full mb-3 text-center font-changa font-medium text-[#F0F0F0] text-opacity-75">
-              Select Amount
-            </span>
-            <div className="flex flex-col items-center gap-2.5 md:flex-row">
-              <button
-                onClick={() => {
-                  !betType && setBetAmt(0.1);
-                }}
-                className={`${
-                  betAmt === 0.1
-                    ? "bg-[#F200F2]"
-                    : "bg-transparent hover:bg-[#6C0671]"
-                } w-full rounded-[5px] border-[2px] border-[#F200F280] py-2 text-xs text-white text-opacity-90 transition duration-200`}
-              >
-                0.1 $SOL
-              </button>
-              <button
-                onClick={() => {
-                  !betType && setBetAmt(2);
-                }}
-                className={`${
-                  betAmt === 2
-                    ? "bg-[#F200F2]"
-                    : "bg-transparent hover:bg-[#6C0671]"
-                } w-full rounded-[5px] border-[2px] border-[#F200F280] py-2 text-xs text-white text-opacity-90 transition duration-200`}
-              >
-                2 $SOL
-              </button>
-              <button
-                onClick={() => {
-                  !betType && setBetAmt(5);
-                }}
-                className={`${
-                  betAmt === 5
-                    ? "bg-[#F200F2]"
-                    : "bg-transparent hover:bg-[#6C0671]"
-                } w-full rounded-[5px] border-[2px] border-[#F200F280] py-2 text-xs text-white text-opacity-90 transition duration-200`}
-              >
-                5 $SOL
-              </button>
-            </div>
-          </div> */}
         </div>
 
         <div className="bg-white bg-opacity-10 w-[1px]" />
 
         <div className="flex flex-1 flex-col items-center justify-between m-5 bg-[#0C0F16] rounded-lg p-4">
           {/* time and amt */}
-          <div className="flex w-full items-start justify-between">
+          <div className={`${strikePrice !== 0 ? "opacity-100" : "opacity-0"} flex w-full items-start justify-between`}>
             <div className="flex flex-col items-start gap-1">
               <Timer minutes={betInterval} betTime={betTime!} />
             </div>
@@ -717,17 +588,26 @@ export default function Binary() {
 
           {/* central loader  */}
           <div className="flex flex-col items-center">
-            <span className="font-change text-sm text-white text-opacity-755 mb-5">
+            <span className="font-change text-sm text-[#94A3B8] text-opacity-75 mb-5">
               $SOL
             </span>
             <span className="font-change text-2xl text-white text-opacity-90 mb-2">
-              {livePrice}
+              {livePrice.toFixed(4)}
             </span>
-           {strikePrice && <span className={`text-sm ${livePrice-strikePrice > 0 ? "text-[#72F238]" : "text-[#CF304A]"} text-opacity-90 font-changa`}>{Math.abs(livePrice - strikePrice)}</span>}
+            {strikePrice && (
+              <span
+                className={`text-sm ${
+                  livePrice - strikePrice > 0
+                    ? "text-[#72F238]"
+                    : "text-[#CF304A]"
+                } text-opacity-90 font-changa`}
+              >
+                {Math.abs(livePrice - strikePrice)}
+              </span>
+            )}
           </div>
 
           <GameFooterInfo multiplier={1.33} amount={4} chance={40} />
-          
         </div>
       </div>
 

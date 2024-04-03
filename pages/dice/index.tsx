@@ -7,6 +7,7 @@ import RollDiceTable from "../../components/games/RollDiceTable";
 import { toast } from "react-hot-toast";
 import { ROLL_TAX } from "../../context/config";
 import GameFooterInfo from "@/components/games/GameFooterInfo";
+import BetSetting from "@/components/BetSetting";
 
 export default function Dice() {
   const wallet = useWallet();
@@ -104,24 +105,7 @@ export default function Dice() {
     <div className="flex h-full w-full flex-col items-center justify-start p-10">
       <div className="flex flex-col xl:flex-row items-center rounded-[1.15rem] bg-[#121418] text-white w-full">
         <div className="xl:border-r border-white/10 xl:w-[35%] w-full p-6 sm:p-8 xl:p-14">
-          <div className="flex mb-8">
-            <button
-              className={`w-full border-2 rounded-md py-1 mr-1 border-[#d9d9d90d] transition duration-300 ease-in-out ${
-                rollType === "manual" ? "bg-[#d9d9d90d]" : ""
-              }`}
-              onClick={() => setRollType("manual")}
-            >
-              Manual
-            </button>
-            <button
-              className={`w-full border-2 rounded-md py-1 ml-1 border-[#d9d9d90d] transition duration-300 ease-in-out ${
-                rollType === "auto" ? "bg-[#d9d9d90d] " : ""
-              }`}
-              onClick={() => setRollType("auto")}
-            >
-              Auto
-            </button>
-          </div>
+          <BetSetting betSetting={rollType} setBetSetting={setRollType} />
 
           <div className="mb-6">
             <div className="flex justify-between text-xs mb-2">
@@ -567,8 +551,12 @@ export default function Dice() {
                 </div>
               </div>
             </div>
-            
-            <GameFooterInfo multiplier={winningPays} amount={(winningAmount * (1 - ROLL_TAX))} chance={winningProbability} />
+
+            <GameFooterInfo
+              multiplier={winningPays}
+              amount={winningAmount * (1 - ROLL_TAX)}
+              chance={winningProbability}
+            />
           </div>
         </div>
       </div>

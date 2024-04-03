@@ -23,13 +23,13 @@ export const placeBet = async (
   wallet: WalletContextState,
   amount: number,
   tokenMint: string,
-  betType: boolean,
+  betType: string,
   timeFrame: number,
 ) => {
   // let toastId = toast.loading("betting in progress");
 
   try {
-    const res = await fetch(`/api/games/options/bet`, {
+    const res = await fetch(`/api/games/options`, {
       method: "POST",
       body: JSON.stringify({
         wallet: wallet.publicKey,
@@ -68,14 +68,14 @@ export const placeBet = async (
 export const placeFlip = async (
   wallet: WalletContextState,
   amount: number,
-  flipType: boolean, // true = heads, false = tails
+  flipType: string, // heads / tails
 ) => {
   try {
     if (!wallet.publicKey) throw new Error("Wallet not connected");
 
     if (flipType == null) throw new Error("Invalid flip type");
 
-    const res = await fetch(`/api/games/coin/flip`, {
+    const res = await fetch(`/api/games/coin`, {
       method: "POST",
       body: JSON.stringify({
         wallet: wallet.publicKey,
