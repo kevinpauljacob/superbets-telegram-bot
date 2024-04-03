@@ -269,7 +269,7 @@ export default function Binary() {
                     Bet amount
                   </label>
                   <span className="text-sm text-[#F0F0F0] text-opacity-75">
-                    Available : {coinData ? coinData[0]?.amount : 0}
+                    Available : {coinData ? coinData[0]?.amount.toFixed(4) : 0}
                   </span>
                 </div>
 
