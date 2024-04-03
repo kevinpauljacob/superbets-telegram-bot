@@ -614,6 +614,7 @@ export default function Binary() {
             <div className="w-[15rem] h-[15rem] relative">
               {[...Array(40)].map((item, index) => (
                 <div
+                  key={index}
                   className={`w-[7.5rem] h-2 flex justify-end absolute top-[50%] left-[50%] origin-[0_0px] bg-transparent`}
                   style={{ rotate: `${(360 / 40) * index}deg` }}
                 >
