@@ -18,7 +18,7 @@ export default function GameFooterInfo({
         <>
           <div className="flex flex-col w-full">
             <span className="text-[#F0F0F0] text-xs mb-1">Multiplier</span>
-            <span className="bg-[#202329] rounded-md px-5 py-2">
+            <span className="bg-[#202329] text-white rounded-md px-5 py-2">
               {multiplier.toFixed(2)}x
             </span>
           </div>
@@ -30,13 +30,13 @@ export default function GameFooterInfo({
             </div> */}
           <div className="flex flex-col w-full sm:mx-8 my-3 sm:my-0">
             <span className="text-[#F0F0F0] text-xs mb-1">Winning Amount</span>
-            <span className="bg-[#202329] rounded-md px-5 py-2">
+            <span className="bg-[#202329] text-white rounded-md px-5 py-2">
               {minGameAmount.toFixed(2)} $SOL
             </span>
           </div>
           <div className="flex flex-col w-full">
             <span className="text-[#F0F0F0] text-xs mb-1">Chance</span>
-            <span className="bg-[#202329] rounded-md px-5 py-2">
+            <span className="bg-[#202329] text-white rounded-md px-5 py-2">
               {chance.toFixed(2)}%
             </span>
           </div>
