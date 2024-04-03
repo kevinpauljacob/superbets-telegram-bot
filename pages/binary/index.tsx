@@ -568,7 +568,11 @@ export default function Binary() {
 
         <div className="flex flex-1 flex-col items-center justify-between m-5 bg-[#0C0F16] rounded-lg p-4">
           {/* time and amt */}
-          <div className={`${strikePrice !== 0 ? "opacity-100" : "opacity-0"} flex w-full items-start justify-between`}>
+          <div
+            className={`${
+              strikePrice !== 0 ? "opacity-100" : "opacity-0"
+            } flex w-full items-start justify-between`}
+          >
             <div className="flex flex-col items-start gap-1">
               <Timer minutes={betInterval} betTime={betTime!} />
             </div>
@@ -587,7 +591,8 @@ export default function Binary() {
           </div>
 
           {/* central loader  */}
-          <div className="flex flex-col items-center">
+          <div className="flex flex-col items-center relative">
+          <div className="flex flex-col items-center absolute w-[15rem] h-[15rem] justify-center">
             <span className="font-change text-sm text-[#94A3B8] text-opacity-75 mb-5">
               $SOL
             </span>
@@ -605,6 +610,18 @@ export default function Binary() {
                 {Math.abs(livePrice - strikePrice)}
               </span>
             )}
+            </div>
+            <div className="w-[15rem] h-[15rem] relative">
+              {[...Array(40)]
+                .map((item, index) => (
+                  <div
+                    className={`w-[7.5rem] h-2 flex justify-end absolute top-[50%] left-[50%] origin-[0_0px] bg-transparent`}
+                    style={{rotate: `${(360 / 40) * index}deg`}}
+                  >
+                    <div className="w-2 h-2 bg-white" />
+                  </div>
+                ))}
+            </div>
           </div>
 
           <GameFooterInfo multiplier={1.33} amount={4} chance={40} />
