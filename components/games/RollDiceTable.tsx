@@ -106,7 +106,7 @@ export default function RollDiceTable({ refresh }: { refresh: boolean }) {
 
   return (
     <div className="flex w-full flex-col pb-10">
-      <div className="mt-[7rem] flex w-full items-center justify-center text-white font-semibold gap-4 md:justify-start ">
+      <div className="mt-[4rem] flex w-full items-center justify-center text-white font-semibold gap-4 md:justify-start ">
         <button
           onClick={() => {
             if (wallet.publicKey) setAll(false);

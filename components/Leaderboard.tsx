@@ -21,7 +21,7 @@ function Leaderboard() {
 
   const getLeaderBoard = async () => {
     try {
-      const res = await fetch("/api/getInfo", {
+      const res = await fetch("/api/staking/getInfo", {
         method: "POST",
         body: JSON.stringify({
           option: 2,

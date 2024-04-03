@@ -1,8 +1,8 @@
 import connectDatabase from "@/utils/database";
 import { getToken } from "next-auth/jwt";
 import { NextApiRequest, NextApiResponse } from "next";
-import { ServerHash, Dice2, User } from "@/models/games";
-import { generateGameResult, generateServerSeed, GameType } from "@/utils/vrf";
+import { GameSeed, Dice2, User } from "@/models/games";
+import { generateGameResult, GameType, seedStatus } from "@/utils/vrf";
 
 const secret = process.env.NEXTAUTH_SECRET;
 
@@ -15,21 +15,14 @@ type InputType = {
   amount: number;
   tokenMint: string;
   chance: number;
-  clientSeed: string;
   direction: "over" | "under";
-}
+};
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === "POST") {
     try {
-      let {
-        wallet,
-        amount,
-        tokenMint,
-        chance,
-        direction,
-        clientSeed,
-      }: InputType = req.body;
+      let { wallet, amount, tokenMint, chance, direction }: InputType =
+        req.body;
 
       const token = await getToken({ req, secret });
 
@@ -70,42 +63,31 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           .status(400)
           .json({ success: false, message: "Insufficient balance !" });
 
-      const serverHashInfo = await ServerHash.findOneAndUpdate(
+      const activeGameSeed = await GameSeed.findOneAndUpdate(
         {
           wallet,
-          gameType: GameType.dice2,
-          isValid: true,
+          status: seedStatus.ACTIVE,
         },
         {
-          $set: {
-            isValid: false,
+          $inc: {
+            currentNonce: 1,
           },
         },
         { new: true },
       );
 
-      if (!serverHashInfo) {
+      if (!activeGameSeed) {
         throw new Error("Server hash not found!");
       }
 
-      const newServerHash = generateServerSeed();
-
-      await ServerHash.create({
-        wallet,
-        gameType: GameType.dice2,
-        serverSeed: newServerHash.serverSeed,
-        nonce: serverHashInfo.nonce + 1,
-        isValid: true,
-      });
-
-      const { serverSeed, nonce } = serverHashInfo;
+      const { serverSeed, clientSeed, nonce } = activeGameSeed;
 
       const strikeNumber = generateGameResult(
         serverSeed,
         clientSeed,
         nonce,
         GameType.dice2,
-      );
+      ) as number;
 
       if (!strikeNumber) throw new Error("Invalid strike number!");
 
@@ -168,9 +150,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         tokenMint,
         amountWon,
         amountLost,
-        clientSeed,
-        serverSeed,
-        nonce,
+        gameSeedId: activeGameSeed._id,
       });
 
       return res.status(201).json({
@@ -183,8 +163,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         strikeNumber,
         amountWon,
         amountLost,
-        serverSeed,
-        newserverSeedHash: newServerHash.serverSeedHash,
       });
     } catch (e: any) {
       console.log(e);

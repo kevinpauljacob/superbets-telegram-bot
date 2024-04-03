@@ -103,7 +103,7 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
   const getUserDetails = async () => {
     if (wallet && wallet.publicKey)
       try {
-        const res = await fetch("/api/getInfo", {
+        const res = await fetch("/api/staking/getInfo", {
           method: "POST",
           body: JSON.stringify({
             option: 1,
@@ -127,7 +127,7 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
 
   const getGlobalInfo = async () => {
     try {
-      const res = await fetch("/api/getInfo", {
+      const res = await fetch("/api/staking/getInfo", {
         method: "POST",
         body: JSON.stringify({
           option: 3,

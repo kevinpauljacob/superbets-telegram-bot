@@ -14,8 +14,8 @@ export default function Dice() {
 
   const [user, setUser] = useState<any>(null);
   const [betAmt, setBetAmt] = useState(0.1);
-  const [selectedFace, setSelectedFace] = useState<number[]>([1]);
-  const [isRolling, setIsRolling] = useState(true);
+  const [selectedFace, setSelectedFace] = useState<number[]>([]);
+  const [isRolling, setIsRolling] = useState(false);
   const [winningPays, setWinningPays] = useState(6);
   const [winningAmount, setWinningAmount] = useState(0.6);
   const [winningProbability, setWinningProbability] = useState(16.67);
@@ -23,7 +23,7 @@ export default function Dice() {
   const [selectedFaces, setSelectedFaces] = useState<{
     [key: number]: boolean;
   }>({
-    1: true,
+    1: false,
     2: false,
     3: false,
     4: false,
@@ -31,32 +31,45 @@ export default function Dice() {
     6: false,
   });
   const [rollType, setRollType] = useState<"manual" | "auto">("manual");
+  const [betResults, setBetResults] = useState<
+    { face: number; isWin: boolean }[]
+  >([
+    { face: 3, isWin: true },
+    { face: 1, isWin: false },
+    { face: 5, isWin: true },
+    { face: 2, isWin: true },
+    { face: 6, isWin: false },
+  ]);
 
   const handleDiceClick = (newFace: number) => {
+    if (selectedFace.length >= 5 && !selectedFace.includes(newFace)) {
+      toast.error("You can only select up to 5 faces");
+      return;
+    }
+
     setSelectedFaces((prevState) => ({
       ...prevState,
       [newFace]: !prevState[newFace],
     }));
+
     if (1 <= newFace && newFace <= 6) {
       if (!selectedFace.includes(newFace)) {
-        if (selectedFace.length == 5) {
-          toast.error("You can only select upto 5 faces");
-          return;
-        }
         setSelectedFace([...selectedFace, newFace]);
-        setWinningPays(6 / (selectedFace.length + 1));
-        setWinningAmount((betAmt * 6) / (selectedFace.length + 1));
-        setWinningProbability(((selectedFace.length + 1) * 100) / 6);
+        const newLength = selectedFace.length + 1;
+        setWinningPays(6 / newLength);
+        setWinningAmount((betAmt * 6) / newLength);
+        setWinningProbability((newLength * 100) / 6);
       } else {
         setSelectedFace(selectedFace.filter((face) => face !== newFace));
-        if (selectedFace.length == 1) {
+        const newLength = selectedFace.length - 1;
+        if (newLength === 0) {
           setWinningPays(6);
           setWinningAmount(betAmt * 6);
-          setWinningProbability((selectedFace.length * 100) / 6);
+          setWinningProbability(0);
         } else {
-          setWinningPays(6 / (selectedFace.length - 1));
-          setWinningAmount((betAmt * 6) / (selectedFace.length - 1));
-          setWinningProbability(((selectedFace.length - 1) * 100) / 6);
+          setWinningPays(6 / newLength);
+          setWinningAmount((betAmt * 6) / newLength);
+          setWinningProbability((newLength * 100) / 6);
         }
       }
     }
@@ -79,8 +92,8 @@ export default function Dice() {
       }
 
       if (res.success) {
-        setSelectedFace([1]);
-        setBetAmt(0.1);
+        setSelectedFace([0]);
+        setBetAmt(0.0);
         setRefresh(!refresh);
       }
       setIsRolling(false);
@@ -123,111 +136,34 @@ export default function Dice() {
               </button>
             </div>
           </div>
-          <div className="flex flex-col">
-            <p className="text-xs font-semibold mb-2">Choose upto 5 faces</p>
-            <div className="bg-[#0C0F16] rounded-md flex justify-center p-4 mb-4">
-              <div className="mr-2">
-                <Image
-                  src={
-                    selectedFaces[1]
-                      ? "/assets/selectedDiceFace1.png"
-                      : "/assets/diceFace1.png"
-                  }
-                  width={45}
-                  height={45}
-                  alt=""
-                  className={`${
-                    selectedFace.includes(1) ? "selected-face" : ""
-                  }`}
-                  onClick={() => handleDiceClick(1)}
-                />
+          {rollType === "auto" && (
+            <div className="mb-6">
+              <div className="flex justify-between text-xs mb-2">
+                <p className="font-semibold">Number of Bets</p>
               </div>
-              <div className="mr-2">
-                <Image
-                  src={
-                    selectedFaces[2]
-                      ? "/assets/selectedDiceFace2.png"
-                      : "/assets/diceFace2.png"
-                  }
-                  width={45}
-                  height={45}
-                  alt=""
-                  className={`${
-                    selectedFace.includes(2) ? "selected-face" : ""
-                  }`}
-                  onClick={() => handleDiceClick(2)}
-                />
-              </div>
-              <div className="mr-2">
-                <Image
-                  src={
-                    selectedFaces[3]
-                      ? "/assets/selectedDiceFace3.png"
-                      : "/assets/diceFace3.png"
-                  }
-                  width={45}
-                  height={45}
-                  alt=""
-                  className={`${
-                    selectedFace.includes(3) ? "selected-face" : ""
-                  }`}
-                  onClick={() => handleDiceClick(3)}
-                />
-              </div>
-              <div className="mr-2">
-                <Image
-                  src={
-                    selectedFaces[4]
-                      ? "/assets/selectedDiceFace4.png"
-                      : "/assets/diceFace4.png"
-                  }
-                  width={45}
-                  height={45}
-                  alt=""
-                  className={`${
-                    selectedFace.includes(4) ? "selected-face" : ""
-                  }`}
-                  onClick={() => handleDiceClick(4)}
-                />
-              </div>
-              <div className="mr-2">
-                <Image
-                  src={
-                    selectedFaces[5]
-                      ? "/assets/selectedDiceFace5.png"
-                      : "/assets/diceFace5.png"
-                  }
-                  width={45}
-                  height={45}
-                  alt=""
-                  className={`${
-                    selectedFace.includes(5) ? "selected-face" : ""
-                  }`}
-                  onClick={() => handleDiceClick(5)}
-                />
-              </div>
-              <div className="">
-                <Image
-                  src={
-                    selectedFaces[6]
-                      ? "/assets/selectedDiceFace6.png"
-                      : "/assets/diceFace6.png"
-                  }
-                  width={45}
-                  height={45}
-                  alt=""
-                  className={`${
-                    selectedFace.includes(6) ? "selected-face" : ""
-                  }`}
-                  onClick={() => handleDiceClick(6)}
-                />
+              <div className="flex justify-between">
+                <div className="relative w-[48%]">
+                  <input
+                    className="z-0 w-full bg-[#202329] rounded-md p-2.5"
+                    type="text"
+                    placeholder="0.0"
+                  />
+                  <button className="z-10 absolute top-2.5 right-2.5 px-3  rounded-sm text-xs bg-[#d9d9d90d]">
+                    <Image
+                      src="/assets/infiniteLogo.png"
+                      alt="Infinite Bet"
+                      width={25}
+                      height={25}
+                    />
+                  </button>
+                </div>
+
+                <button className="border-2 border-white/90 text-white/80 font-semibold rounded-md w-[48%]">
+                  Configure Auto
+                </button>
               </div>
             </div>
-          </div>
-          <p className="bg-black mb-5 rounded-md text-center text-xs py-1.5 text-[#F0F0F0]">
-            Please deposit funds to start playing. View{" "}
-            <span className="underline">WALLET</span>
-          </p>
+          )}
           <div>
             <button
               disabled={!wallet || selectedFace.length == 0}
@@ -314,8 +250,8 @@ export default function Dice() {
             </div>
           </div> */}
         </div>
-        <div className="xl:w-[65%] h-full px-6 pb-6 sm:px-8 sm:pb-8 xl:pb-0 xl:px-8">
-          <div className="bg-[#0C0F16] flex flex-col justify-between h-full sm:h-[400px] rounded-md p-4 sm:p-12">
+        <div className="xl:border-l border-white/10 xl:w-[65%] h-full px-6 pb-6 sm:px-8 sm:pb-8 xl:p-8">
+          <div className="bg-[#0C0F16] flex flex-col justify-between h-full sm:h-[450px] rounded-lg p-4 sm:p-12">
             <div className="flex flex-col sm:flex-row justify-between items-center">
               <div>
                 {isRolling ? (
@@ -323,88 +259,30 @@ export default function Dice() {
                     Rolling the dice...
                   </div>
                 ) : (
-                  ""
+                  <div className="font-changa text-sm font-semibold text-white text-opacity-80">
+                    {selectedFace.length === 0
+                      ? "Choose up to 5 faces"
+                      : `${selectedFace.length
+                          .toString()
+                          .padStart(2, "0")}/05 faces`}
+                  </div>
                 )}
               </div>
-              <div className="bg-[#0C0F16] rounded-md flex justify-center p-4 mb-4">
-                <Image
-                  src={
-                    selectedFaces[1]
-                      ? "/assets/activeDiceFace1.png"
-                      : "/assets/diceFace1.png"
-                  }
-                  width={30}
-                  height={30}
-                  alt=""
-                  className={`mr-2 inline-block ${
-                    selectedFace.includes(1) ? "selected-face" : ""
-                  }`}
-                />
-                <Image
-                  src={
-                    selectedFaces[2]
-                      ? "/assets/activeDiceFace2.png"
-                      : "/assets/diceFace2.png"
-                  }
-                  width={30}
-                  height={30}
-                  alt=""
-                  className={`mr-2 inline-block ${
-                    selectedFace.includes(2) ? "selected-face" : ""
-                  }`}
-                />
-                <Image
-                  src={
-                    selectedFaces[3]
-                      ? "/assets/activeDiceFace3.png"
-                      : "/assets/diceFace3.png"
-                  }
-                  width={30}
-                  height={30}
-                  alt=""
-                  className={`mr-2 inline-block ${
-                    selectedFace.includes(3) ? "selected-face" : ""
-                  }`}
-                />
-                <Image
-                  src={
-                    selectedFaces[4]
-                      ? "/assets/activeDiceFace4.png"
-                      : "/assets/diceFace4.png"
-                  }
-                  width={30}
-                  height={30}
-                  alt=""
-                  className={`mr-2 inline-block ${
-                    selectedFace.includes(4) ? "selected-face" : ""
-                  }`}
-                />
-                <Image
-                  src={
-                    selectedFaces[5]
-                      ? "/assets/activeDiceFace5.png"
-                      : "/assets/diceFace5.png"
-                  }
-                  width={30}
-                  height={30}
-                  alt=""
-                  className={`mr-2 inline-block ${
-                    selectedFace.includes(5) ? "selected-face" : ""
-                  }`}
-                />
-                <Image
-                  src={
-                    selectedFaces[6]
-                      ? "/assets/activeDiceFace6.png"
-                      : "/assets/diceFace6.png"
-                  }
-                  width={30}
-                  height={30}
-                  alt=""
-                  className={`mr-2 inline-block ${
-                    selectedFace.includes(6) ? "selected-face" : ""
-                  }`}
-                />
+              <div>
+                {betResults.map((result, index) => (
+                  <Image
+                    key={index} // Make sure to provide a unique key
+                    src={`/assets/${
+                      result.isWin ? "winDiceFace" : "lossDiceFace"
+                    }${result.face}.png`}
+                    width={30}
+                    height={30}
+                    alt={`Dice face ${result.face}`}
+                    className={`mr-2 inline-block ${
+                      selectedFace.includes(result.face) ? "selected-face" : ""
+                    }`}
+                  />
+                ))}
               </div>
             </div>
             <div className="relative w-full mb-8 xl:mb-6">
@@ -437,6 +315,7 @@ export default function Dice() {
                     className={`inline-block mt-6 ${
                       selectedFace.includes(1) ? "selected-face" : ""
                     }`}
+                    onClick={() => handleDiceClick(1)}
                   />
                 </div>
                 <div className="flex flex-col items-center mr-2 sm:mr-0">
@@ -459,6 +338,7 @@ export default function Dice() {
                     className={`inline-block mt-6 ${
                       selectedFace.includes(2) ? "selected-face" : ""
                     }`}
+                    onClick={() => handleDiceClick(2)}
                   />
                 </div>
                 <div className="flex flex-col items-center mr-2 sm:mr-0">
@@ -481,6 +361,7 @@ export default function Dice() {
                     className={`inline-block mt-6 ${
                       selectedFace.includes(3) ? "selected-face" : ""
                     }`}
+                    onClick={() => handleDiceClick(3)}
                   />
                 </div>
                 <div className="flex flex-col items-center mr-2 sm:mr-0">
@@ -503,6 +384,7 @@ export default function Dice() {
                     className={`inline-block mt-6 ${
                       selectedFace.includes(4) ? "selected-face" : ""
                     }`}
+                    onClick={() => handleDiceClick(4)}
                   />
                 </div>
                 <div className="flex flex-col items-center mr-2 sm:mr-0">
@@ -525,6 +407,7 @@ export default function Dice() {
                     className={`inline-block mt-6 ${
                       selectedFace.includes(5) ? "selected-face" : ""
                     }`}
+                    onClick={() => handleDiceClick(5)}
                   />
                 </div>
                 <div className="flex flex-col items-center">
@@ -547,6 +430,7 @@ export default function Dice() {
                     className={`inline-block mt-6 ${
                       selectedFace.includes(6) ? "selected-face" : ""
                     }`}
+                    onClick={() => handleDiceClick(6)}
                   />
                 </div>
               </div>

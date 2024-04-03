@@ -1,6 +1,10 @@
 import * as crypto from "crypto";
 
 // Before the game round:
+export const generateClientSeed = () => {
+  return crypto.randomBytes(8).toString("hex");
+};
+
 export const generateServerSeed = () => {
   const serverSeed = crypto.randomBytes(32).toString("hex");
   const serverSeedHash = crypto
@@ -21,6 +25,12 @@ const generateGameHash = (
 
   return hash;
 };
+
+export enum seedStatus {
+  EXPIRED = "EXPIRED",
+  ACTIVE = "ACTIVE",
+  NEXT = "NEXT",
+}
 
 export enum GameType {
   dice = "dice",

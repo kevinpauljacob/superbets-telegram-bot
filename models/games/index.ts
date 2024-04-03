@@ -1,4 +1,4 @@
-export { default as ServerHash } from "./serverHash";
+export { default as GameSeed } from "./gameSeed";
 export { default as Dice2 } from "./dice2";
 export { default as Dice } from "./dice";
 export { default as Wheel } from "./wheel";
