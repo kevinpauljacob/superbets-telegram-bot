@@ -15,7 +15,7 @@ export default function Dice() {
 
   const { coinData, getBalance, getWalletBalance } = useGlobalContext();
   const [user, setUser] = useState<any>(null);
-  const [betAmt, setBetAmt] = useState(0.1);
+  const [betAmt, setBetAmt] = useState(0);
   const [selectedFace, setSelectedFace] = useState<number[]>([]);
   const [isRolling, setIsRolling] = useState(false);
   const [winningPays, setWinningPays] = useState(6);
@@ -78,10 +78,25 @@ export default function Dice() {
     }
   };
 
+  const handleBetAmountChange = (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    const amount = parseFloat(event.target.value); // Convert input value to float
+    setBetAmt(amount); // Update betAmt state
+  };
+
   const diceRoll = async () => {
     if (wallet.connected) {
-      if (user.deposit[0].amount < betAmt) {
+      if (!wallet.publicKey) {
+        toast.error("Wallet not connected");
+        return;
+      }
+      if (coinData && coinData[0].amount < betAmt) {
         toast.error("Insufficient balance for bet !");
+        return;
+      }
+      if (betAmt === 0) {
+        toast.error("Set Amount.");
         return;
       }
       setIsRolling(true);
@@ -124,15 +139,24 @@ export default function Dice() {
                 Available : {coinData ? coinData[0]?.amount.toFixed(4) : 0} $SOL
               </p>
             </div>
-            <div className="relative">
+            <div
+              className={`group flex h-11 w-full cursor-pointer items-center rounded-[8px] bg-[#202329] px-4`}
+            >
               <input
-                className="z-0 w-full bg-[#202329] rounded-md p-2.5"
-                type="text"
-                placeholder="0.0"
+                type={"number"}
+                step={"any"}
+                autoComplete="off"
+                onChange={handleBetAmountChange}
+                placeholder={"Amount"}
+                value={betAmt}
+                className={`flex w-full min-w-0 bg-transparent text-sm text-white placeholder-white  placeholder-opacity-40 outline-none`}
               />
-              <button className="z-10 absolute top-2.5 right-2.5 px-3 py-1 rounded-sm text-xs bg-[#d9d9d90d]">
-                Max
-              </button>
+              <span
+                className="bg-[#D9D9D9] bg-opacity-5 py-1 px-1.5 rounded text-sm text-[#F0F0F0] text-opacity-75"
+                onClick={() => setBetAmt(coinData ? coinData[0]?.amount : 0)}
+              >
+                MAX
+              </span>
             </div>
           </div>
           {rollType === "auto" && (
@@ -170,7 +194,7 @@ export default function Dice() {
                 if (!isRolling) diceRoll();
               }}
               className={`${
-                !user || !wallet || selectedFace.length == 0
+                !wallet || selectedFace.length == 0
                   ? "cursor-not-allowed opacity-70"
                   : "hover:opacity-90"
               } flex w-full flex-col items-center justify-center gap-2 rounded-lg border border-[#F6F6F61A] bg-[#7839C5] py-2.5 font-changa shadow-[0px_4px_15px_0px_rgba(0,0,0,0.25)]`}

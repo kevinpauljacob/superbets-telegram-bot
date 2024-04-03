@@ -115,11 +115,8 @@ export const deposit = async (
   let toastId = toast.loading("Deposit in progress");
 
   try {
-    let {transaction, blockhashWithExpiryBlockHeight} = await createDepositTxn(
-      wallet.publicKey,
-      amount,
-      tokenMint,
-    );
+    let { transaction, blockhashWithExpiryBlockHeight } =
+      await createDepositTxn(wallet.publicKey, amount, tokenMint);
 
     transaction = await wallet.signTransaction!(transaction);
     const transactionBase64 = transaction
@@ -392,7 +389,7 @@ export const rollDice = async (
   try {
     if (!wallet.publicKey) throw new Error("Wallet not connected");
 
-    const res = await fetch(`/api/games/dice/roll`, {
+    const res = await fetch(`/api/games/dice`, {
       method: "POST",
       body: JSON.stringify({
         wallet: wallet.publicKey,
