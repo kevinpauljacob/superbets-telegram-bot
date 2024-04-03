@@ -211,7 +211,7 @@ export default function Flip() {
                     </div>
 
                     {/* balance alert  */}
-                    {(!coinData || (coinData && coinData[0].amount < 0.1)) && (
+                    {(!coinData || (coinData && coinData[0].amount < 0.0001)) && (
                       <div className="mb-5 w-full rounded-lg bg-[#0C0F16] px-3 pb-2 pt-4 text-white md:px-6">
                         <div className="-full mb-3 text-center font-changa font-medium text-[#F0F0F0] text-opacity-75">
                           Please deposit funds to start playing. View{" "}
@@ -351,13 +351,13 @@ export default function Flip() {
                       <button
                         type="submit"
                         disabled={
-                          !betType || (coinData && coinData[0].amount < 0.1)
+                          !betType || (coinData && coinData[0].amount < 0.0001)
                             ? true
                             : false
                         }
                         onClick={onSubmit}
                         className={`${
-                          !betType || (coinData && coinData[0].amount < 0.1)
+                          !betType || (coinData && coinData[0].amount < 0.0001)
                             ? "cursor-not-allowed opacity-70"
                             : "hover:opacity-90"
                         } w-full rounded-lg bg-[#7839C5] py-2.5 font-lilita text-xl text-white`}
@@ -611,13 +611,13 @@ export default function Flip() {
                       <button
                         type="submit"
                         disabled={
-                          !betType || (coinData && coinData[0].amount < 0.1)
+                          !betType || (coinData && coinData[0].amount < 0.0001)
                             ? true
                             : false
                         }
                         onClick={onSubmit}
                         className={`${
-                          !betType || (coinData && coinData[0].amount < 0.1)
+                          !betType || (coinData && coinData[0].amount < 0.0001)
                             ? "cursor-not-allowed opacity-70"
                             : "hover:opacity-90"
                         } w-full rounded-lg bg-[#7839C5] py-2.5 font-lilita text-xl text-white`}

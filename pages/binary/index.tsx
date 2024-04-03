@@ -360,7 +360,7 @@ export default function Binary() {
                 </div>
               </div>
 
-              {(!coinData || (coinData && coinData[0].amount < 0.1)) &&
+              {(!coinData || (coinData && coinData[0].amount < 0.0001)) &&
                 strikePrice == 0 && (
                   <div className="mb-5 w-full rounded-lg bg-[#0C0F16] p-2 text-white md:px-6">
                     <div className="-full text-center font-changa font-medium text-[#F0F0F0] text-opacity-75">
@@ -545,13 +545,13 @@ export default function Binary() {
                   <button
                     type="submit"
                     disabled={
-                      !coinData || (coinData && coinData[0].amount < 0.1)
+                      !coinData || (coinData && coinData[0].amount < 0.0001)
                         ? true
                         : false
                     }
                     onClick={onSubmit}
                     className={`${
-                      !user || (coinData && coinData[0].amount < 0.1)
+                      !user || (coinData && coinData[0].amount < 0.0001)
                         ? "cursor-not-allowed opacity-70"
                         : "hover:opacity-90"
                     } w-full rounded-lg bg-[#7839C5] py-2.5 font-lilita text-xl text-white`}

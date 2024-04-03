@@ -14,7 +14,7 @@ export default function GameFooterInfo({
   const { coinData } = useGlobalContext();
   return (
     <div className="flex flex-col sm:flex-row w-full justify-between">
-      {coinData && coinData[0].amount > 0.1 && (
+      {coinData && coinData[0].amount > 0.0001 && (
         <>
           <div className="flex flex-col w-full">
             <span className="text-[#F0F0F0] text-xs mb-1">Multiplier</span>
@@ -44,7 +44,7 @@ export default function GameFooterInfo({
       )}
 
       {!coinData ||
-        (coinData[0].amount < 0.1 && (
+        (coinData[0].amount < 0.0001 && (
           <div className="w-full rounded-lg bg-[#d9d9d90d] bg-opacity-10 flex items-center px-3 py-3 text-white md:px-6">
             <div className="w-full text-center font-changa font-medium text-sm md:text-base text-[#F0F0F0] text-opacity-75">
               Please deposit funds to start playing. View{" "}
