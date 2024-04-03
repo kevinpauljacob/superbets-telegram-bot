@@ -82,7 +82,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         },
         {
           $inc: {
-            currentNonce: 1,
+            nonce: 1,
           },
         },
         { new: true },
@@ -92,12 +92,12 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         throw new Error("Server hash not found!");
       }
 
-      const { serverSeed, clientSeed, currentNonce } = activeGameSeed;
+      const { serverSeed, clientSeed, nonce } = activeGameSeed;
 
       const strikeNumber = generateGameResult(
         serverSeed,
         clientSeed,
-        currentNonce,
+        nonce,
         GameType.dice,
       ) as number;
 

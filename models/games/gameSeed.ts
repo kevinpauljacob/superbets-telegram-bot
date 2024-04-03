@@ -17,7 +17,7 @@ const gameSeedSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    currentNonce: {
+    nonce: {
       type: Number,
       required: true,
       default: 0,

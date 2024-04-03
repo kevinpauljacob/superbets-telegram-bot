@@ -89,7 +89,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         },
         {
           $inc: {
-            currentNonce: 1,
+            nonce: 1,
           },
         },
         { new: true },

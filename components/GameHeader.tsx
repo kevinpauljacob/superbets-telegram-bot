@@ -27,7 +27,7 @@ export default function GameHeader() {
       clientSeed: "",
       serverSeed: "",
       serverSeedHash: "",
-      currentNonce: 0,
+      nonce: 0,
       status: "",
     },
     nextGameSeed: {
@@ -35,7 +35,7 @@ export default function GameHeader() {
       clientSeed: "",
       serverSeed: "",
       serverSeedHash: "",
-      currentNonce: 0,
+      nonce: 0,
       status: "",
     },
     totalBets: "",

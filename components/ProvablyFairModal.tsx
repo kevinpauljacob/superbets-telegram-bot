@@ -8,7 +8,7 @@ interface ModalData {
     clientSeed: string;
     serverSeed: string;
     serverSeedHash: string;
-    currentNonce: number;
+    nonce: number;
     status: string;
   };
   nextGameSeed: {
@@ -16,7 +16,7 @@ interface ModalData {
     clientSeed: string;
     serverSeed: string;
     serverSeedHash: string;
-    currentNonce: number;
+    nonce: number;
     status: string;
   };
   totalBets: string;
@@ -44,11 +44,11 @@ export default function ProvablyFairModal({
   const [verificationState, setVerificationState] = useState<{
     clientSeed: string;
     serverSeed: string;
-    currentNonce: string;
+    nonce: string;
   }>({
     clientSeed: "",
     serverSeed: "",
-    currentNonce: "",
+    nonce: "",
   });
 
   //handling coin flip
@@ -79,14 +79,14 @@ export default function ProvablyFairModal({
       [name]: value,
     }));
 
-    const { clientSeed, serverSeed, currentNonce } = verificationState;
+    const { clientSeed, serverSeed, nonce } = verificationState;
 
     if (modalData.game === GameType.coin)
       setWonCoinface(
         (generateGameResult(
           name === "clientSeed" ? value : clientSeed,
           name === "serverSeed" ? value : serverSeed,
-          parseInt(name === "currentNonce" ? value : currentNonce),
+          parseInt(name === "nonce" ? value : nonce),
           modalData.game,
         ) as number) === 1
           ? "heads"
@@ -97,7 +97,7 @@ export default function ProvablyFairModal({
         generateGameResult(
           name === "clientSeed" ? value : clientSeed,
           name === "serverSeed" ? value : serverSeed,
-          parseInt(name === "currentNonce" ? value : currentNonce),
+          parseInt(name === "nonce" ? value : nonce),
           modalData.game,
         ) as number,
       );
@@ -187,7 +187,7 @@ export default function ProvablyFairModal({
                     <input
                       type="text"
                       name="totalBets"
-                      placeholder={modalData.activeGameSeed.currentNonce.toString()}
+                      placeholder={modalData.activeGameSeed.nonce.toString()}
                       className="bg-[#202329] mt-1 rounded-md px-4 py-2 mb-4 w-full pointer-events-none"
                       readOnly
                     />
@@ -366,8 +366,8 @@ export default function ProvablyFairModal({
                     <label className="text-sm font-semibold">Nonce</label>
                     <input
                       type="text"
-                      name="currentNonce"
-                      value={verificationState.currentNonce}
+                      name="nonce"
+                      value={verificationState.nonce}
                       onChange={handleChange}
                       className="bg-[#202329] mt-1 rounded-md px-4 py-2 mb-4 w-full relative"
                     />
