@@ -126,15 +126,6 @@ export default function Dice() {
     getBalance();
   }, [wallet?.publicKey, refresh]);
 
-  console.log(
-    !selectedFaces[5]
-      ? selectedFace.includes(strikeFace)
-        ? strikeFace === 5
-          ? "/assets/winDiceFace5.png" // Use winning dice face image if strikeFace is 1
-          : "/assets/finalDiceFace5.png" // Use regular dice face image if face 1 is selected but not strikeFace
-        : "/assets/lossDiceFace5.png" // Use loss dice face image if face 1 is not selected
-      : "/assets/diceFace5.png",
-  );
   return (
     <div className="flex h-full w-full flex-col items-center justify-start p-3.5 sm:p-10">
       <div className="flex flex-col-reverse xl:flex-row items-start rounded-md sm:rounded-[1.15rem] bg-[#121418] text-white w-full ">
@@ -252,7 +243,7 @@ export default function Dice() {
                     width={15}
                     height={15}
                     alt={`Dice face ${result.face}`}
-                    className={`mr-2 inline-block ${
+                    className={`mr-2 inline-block w-[15px] h-[15px] sm:w-[20px] sm:h-[20px] md:w-[30px] md:h-[30px] ${
                       selectedFace.includes(result.face) ? "selected-face" : ""
                     }`}
                   />
@@ -283,7 +274,7 @@ export default function Dice() {
                         ? selectedFace.includes(1)
                           ? strikeFace === 1
                             ? "/assets/winDiceFace1.png" // Use winning dice face image if strikeFace is 1
-                            : "/assets/finalDiceFace1.png" // Use selected dice face image if face 1 is selected but not strikeFace
+                            : "/assets/selectedDiceFace1.png" // Use selected dice face image if face 1 is selected but not strikeFace
                           : "/assets/diceFace1.png" // Use regular dice face image if face 1 is not selected
                         : strikeFace === 1
                         ? "/assets/lossDiceFace1.png" // Use losing dice face image if strikeFace is 1 and face 1 is not selected
@@ -312,7 +303,7 @@ export default function Dice() {
                         ? selectedFace.includes(2)
                           ? strikeFace === 2
                             ? "/assets/winDiceFace2.png" // Use winning dice face image if strikeFace is 1
-                            : "/assets/finalDiceFace2.png" // Use selected dice face image if face 1 is selected but not strikeFace
+                            : "/assets/selectedDiceFace2.png" // Use selected dice face image if face 1 is selected but not strikeFace
                           : "/assets/diceFace2.png" // Use regular dice face image if face 1 is not selected
                         : strikeFace === 2
                         ? "/assets/lossDiceFace2.png" // Use losing dice face image if strikeFace is 1 and face 1 is not selected
@@ -341,7 +332,7 @@ export default function Dice() {
                         ? selectedFace.includes(3)
                           ? strikeFace === 3
                             ? "/assets/winDiceFace3.png" // Use winning dice face image if strikeFace is 1
-                            : "/assets/finalDiceFace3.png" // Use selected dice face image if face 1 is selected but not strikeFace
+                            : "/assets/selectedDiceFace3.png" // Use selected dice face image if face 1 is selected but not strikeFace
                           : "/assets/diceFace3.png" // Use regular dice face image if face 1 is not selected
                         : strikeFace === 3
                         ? "/assets/lossDiceFace3.png" // Use losing dice face image if strikeFace is 1 and face 1 is not selected
@@ -370,7 +361,7 @@ export default function Dice() {
                         ? selectedFace.includes(4)
                           ? strikeFace === 4
                             ? "/assets/winDiceFace4.png" // Use winning dice face image if strikeFace is 1
-                            : "/assets/finalDiceFace4.png" // Use selected dice face image if face 1 is selected but not strikeFace
+                            : "/assets/selectedDiceFace4.png" // Use selected dice face image if face 1 is selected but not strikeFace
                           : "/assets/diceFace4.png" // Use regular dice face image if face 1 is not selected
                         : strikeFace === 4
                         ? "/assets/lossDiceFace4.png" // Use losing dice face image if strikeFace is 1 and face 1 is not selected
@@ -399,7 +390,7 @@ export default function Dice() {
                         ? selectedFace.includes(5)
                           ? strikeFace === 5
                             ? "/assets/winDiceFace5.png" // Use winning dice face image if strikeFace is 1
-                            : "/assets/finalDiceFace5.png" // Use selected dice face image if face 1 is selected but not strikeFace
+                            : "/assets/selectedDiceFace5.png" // Use selected dice face image if face 1 is selected but not strikeFace
                           : "/assets/diceFace5.png" // Use regular dice face image if face 1 is not selected
                         : strikeFace === 5
                         ? "/assets/lossDiceFace5.png" // Use losing dice face image if strikeFace is 1 and face 1 is not selected
@@ -428,7 +419,7 @@ export default function Dice() {
                         ? selectedFace.includes(6)
                           ? strikeFace === 6
                             ? "/assets/winDiceFace6.png" // Use winning dice face image if strikeFace is 1
-                            : "/assets/finalDiceFace6.png" // Use selected dice face image if face 1 is selected but not strikeFace
+                            : "/assets/selectedDiceFace6.png" // Use selected dice face image if face 1 is selected but not strikeFace
                           : "/assets/diceFace6.png" // Use regular dice face image if face 1 is not selected
                         : strikeFace === 6
                         ? "/assets/lossDiceFace6.png" // Use losing dice face image if strikeFace is 1 and face 1 is not selected
