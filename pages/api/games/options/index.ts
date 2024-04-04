@@ -118,7 +118,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           isOptionOngoing: false,
         },
         {
-          $inc: { "deposit.$.amount": -amount, totalVolume: amount },
+          $inc: { "deposit.$.amount": -amount },
           isOptionOngoing: true,
           sns,
         },
