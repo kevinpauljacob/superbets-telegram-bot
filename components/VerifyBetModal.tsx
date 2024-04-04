@@ -1,4 +1,4 @@
-import { GameType } from "@/utils/vrf";
+import { GameType, seedStatus } from "@/utils/vrf";
 import Image from "next/image";
 import { useState } from "react";
 import { IoIosArrowDown, IoMdCopy } from "react-icons/io";
@@ -200,10 +200,16 @@ export default function VerifyBetModal({ isOpen, onClose, modalData }: Props) {
                   <div className="flex gap-2 w-full">
                     <div className="w-full">
                       <label className="text-xs text-[#F0F0F0]">
-                        Server Seed (Hashed)
+                        Server Seed{" "}
+                        {bet.gameSeed?.status !== seedStatus.EXPIRED
+                          ? "(Hashed)"
+                          : ""}
                       </label>
                       <div className="bg-[#202329] text-white mt-1 rounded-md px-4 py-2 mb-4 w-full relative flex items-center justify-between">
-                        <div>{bet.gameSeed?.serverSeedHash}</div>
+                        <div>
+                          {bet.gameSeed?.serverSeedHash ??
+                            bet.gameSeed?.serverSeedHash}
+                        </div>
                         <div>
                           <Image
                             src={"/assets/copy.png"}
@@ -216,13 +222,21 @@ export default function VerifyBetModal({ isOpen, onClose, modalData }: Props) {
                     </div>
                   </div>
                   <div className="footer grid gap-1">
-                    <div className="text-xs text-[#94A3B8] text-center">
-                      To verify this bet, you first need to rotate your seed
-                      pair.
-                    </div>
-                    <button className="bg-[#7839C5] rounded-md w-full text-xl text-white text-semibold py-2">
-                      Rotate
-                    </button>
+                    {bet.gameSeed?.status === seedStatus.EXPIRED ? (
+                      <button className="bg-[#7839C5] rounded-md w-full text-xl text-white text-semibold py-2">
+                        Verify
+                      </button>
+                    ) : (
+                      <>
+                        <div className="text-xs text-[#94A3B8] text-center">
+                          To verify this bet, you first need to rotate your seed
+                          pair.
+                        </div>
+                        <button className="bg-[#7839C5] rounded-md w-full text-xl text-white text-semibold py-2">
+                          Rotate
+                        </button>
+                      </>
+                    )}
                   </div>
                 </div>
               )}
