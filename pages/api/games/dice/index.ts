@@ -149,7 +149,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
       await Dice.create({
         wallet,
-        rollAmount: amount,
+        amount,
         chosenNumbers,
         strikeNumber,
         result,
