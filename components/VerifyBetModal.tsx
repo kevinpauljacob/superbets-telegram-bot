@@ -100,7 +100,7 @@ export default function VerifyBetModal({ isOpen, onClose, modalData }: Props) {
                           src={
                             bet.strikeNumber === face
                               ? bet.chosenNumbers.includes(face)
-                                ? `/assets/activeDiceFace${face}.png`
+                                ? `/assets/winDiceFace${face}.png`
                                 : `/assets/lossDiceFace${face}.png`
                               : bet.chosenNumbers.includes(face)
                               ? `/assets/finalDiceFace${face}.png`

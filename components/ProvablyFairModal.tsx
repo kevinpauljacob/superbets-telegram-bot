@@ -301,7 +301,7 @@ export default function ProvablyFairModal({
                                   <Image
                                     src={
                                       wonDiceFace === face
-                                        ? `/assets/activeDiceFace${face}.png`
+                                        ? `/assets/winDiceFace${face}.png`
                                         : `/assets/diceFace${face}.png`
                                     }
                                     width={50}

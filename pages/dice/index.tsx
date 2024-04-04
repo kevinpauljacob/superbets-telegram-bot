@@ -112,7 +112,7 @@ export default function Dice() {
           setStrikeFace(strikeNumber);
           // setSelectedFace([0]);
           // setBetAmt(0.0);
-          setRefresh(!refresh);
+          setRefresh(true);
         }
       } catch (e) {
         setIsRolling(false);
@@ -123,8 +123,11 @@ export default function Dice() {
   };
 
   useEffect(() => {
-    getWalletBalance();
-    getBalance();
+    if (refresh && wallet?.publicKey) {
+      getBalance();
+      getWalletBalance();
+      setRefresh(false);
+    }
   }, [wallet?.publicKey, refresh]);
 
   return (

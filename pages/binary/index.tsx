@@ -49,18 +49,8 @@ export default function Binary() {
   const [betEndPrice, setBetEndPrice] = useState<number>();
 
   const bet = async (betType: string) => {
-    // toast.success("Bet Placed");
-    // setRefresh(true);
-    // setStrikePrice(50);
-    // setLoading(false);
-    // setTimeout(() => {
-    //   setBetEnd(true);
-    //   setBetInterval(0);
-    // }, betInterval * 60000 + 400);
-
     setLoading(true);
     setCheckResult(false);
-    setRefresh(false);
     try {
       // console.log("Placing bet");
 
@@ -121,13 +111,6 @@ export default function Binary() {
   };
 
   const getResult = async () => {
-    // setTimeout(() => {
-    //   toast.success("Got Result");
-    //   setLoading(false);
-    //   setRefresh(true);
-    //   setResult("You Won");
-    // }, 5000);
-    setRefresh(false);
     setLoading(true);
     setCheckResult(true);
     try {
@@ -200,9 +183,12 @@ export default function Binary() {
   };
 
   useEffect(() => {
-    getWalletBalance();
-    getBalance();
-  }, [wallet.publicKey, strikePrice, refresh]);
+    if (refresh && wallet?.publicKey) {
+      getBalance();
+      getWalletBalance();
+      setRefresh(false);
+    }
+  }, [wallet?.publicKey, refresh]);
 
   useEffect(() => {
     getActiveBet();
