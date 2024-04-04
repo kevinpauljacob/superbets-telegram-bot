@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 const Schema = mongoose.Schema;
 
-const userSchema = new Schema(
+const gameUserSchema = new Schema(
   {
     wallet: {
       type: String,
@@ -23,14 +23,14 @@ const userSchema = new Schema(
         },
       },
     ],
-    isBetOngoing: {
+    isOptionOngoing: {
       type: Boolean,
       default: false,
     },
     sns: { type: String },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
-let User = mongoose.models.User || mongoose.model("User", userSchema);
-export default User;
+let GameUser = mongoose.models.GameUser || mongoose.model("GameUser", gameUserSchema);
+export default GameUser;
