@@ -92,16 +92,16 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       ) as number;
 
       let result = "Lost";
-      let fAmountWon = 0;
-      let fAmountLost = amount;
+      let amountWon = 0;
+      let amountLost = amount;
 
       if (
         (flipType === "heads" && strikeNumber === 1) ||
         (flipType === "tails" && strikeNumber === 2)
       ) {
         result = "Won";
-        fAmountWon = amount;
-        fAmountLost = 0;
+        amountWon = amount;
+        amountLost = 0;
       }
 
       let sns;
@@ -127,7 +127,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         },
         {
           $inc: {
-            "deposit.$.amount": -amount + fAmountWon * (1 + (1 - FLIP_TAX)),
+            "deposit.$.amount": -amount + amountWon * (1 + (1 - FLIP_TAX)),
           },
           sns,
         },
@@ -142,13 +142,13 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
       await Coin.create({
         wallet,
-        flipAmount: amount,
+        amount,
         flipType,
         strikeNumber,
         result,
         tokenMint,
-        amountWon: fAmountWon,
-        amountLost: fAmountLost,
+        amountWon,
+        amountLost,
         gameSeedId: activeGameSeed._id,
       });
 

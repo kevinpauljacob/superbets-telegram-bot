@@ -6,7 +6,7 @@ const coinSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    flipAmount: {
+    amount: {
       type: Number,
       required: true,
     },
