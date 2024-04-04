@@ -2,16 +2,18 @@ import { useRouter } from "next/router";
 import Image from "next/image";
 import fair from "/public/assets/fair.png";
 import { useEffect, useState } from "react";
-import ProvablyFairModal from "./ProvablyFairModal";
+import RollDiceProvablyFairModal from "./games/RollDice/RollDiceProvablyFairModal";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { GameType } from "@/utils/vrf";
 import { useGlobalContext } from "./GlobalContext";
+import CoinFlipProvablyFairModal from "./games/CoinFlip/CoinFlipProvablyFairModal";
 
 export default function GameHeader() {
   const wallet = useWallet();
   const router = useRouter();
+  const game = router.pathname.split("/")[1];
 
-  const { coinData } = useGlobalContext();
+  const { coinData, getProvablyFairData } = useGlobalContext();
 
   //Provably Fair Modal handling
   const [isOpen, setIsOpen] = useState(false);
@@ -41,32 +43,15 @@ export default function GameHeader() {
       nonce: 0,
       status: "",
     },
-    totalBets: "",
-    game: GameType.dice,
   });
 
-  // Extract the game name from the route path
-  const game = router.pathname.split("/")[1];
-
   useEffect(() => {
-    if (!wallet?.publicKey) return;
-
-    const fetchProvablyFairData = async (walletPubkey: string) => {
-      const res = await fetch(`/api/games/vrf`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          wallet: walletPubkey,
-        }),
-      });
-
-      let data = await res.json();
-      if (data.success) setModalData({ ...data, game });
-    };
-
-    fetchProvablyFairData(wallet.publicKey.toBase58());
+    (async () => {
+      if (wallet?.publicKey) {
+        const pfData = await getProvablyFairData();
+        if (pfData) setModalData(pfData);
+      }
+    })();
   }, [wallet.publicKey]);
 
   useEffect(() => {
@@ -163,12 +148,21 @@ export default function GameHeader() {
           </div>
         </div>
       </div>
-      <ProvablyFairModal
-        isOpen={isOpen}
-        onClose={closeModal}
-        modalData={modalData}
-        setModalData={setModalData}
-      />
+      {game === "coinflip" ? (
+        <CoinFlipProvablyFairModal
+          isOpen={isOpen}
+          onClose={closeModal}
+          modalData={modalData}
+          setModalData={setModalData}
+        />
+      ) : (
+        <RollDiceProvablyFairModal
+          isOpen={isOpen}
+          onClose={closeModal}
+          modalData={modalData}
+          setModalData={setModalData}
+        />
+      )}
     </div>
   ) : null;
 }

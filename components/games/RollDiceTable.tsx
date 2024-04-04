@@ -3,7 +3,7 @@ import { useState, useEffect, Fragment } from "react";
 import toast from "react-hot-toast";
 import { obfuscatePubKey } from "@/context/transactions";
 import Image from "next/image";
-import VerifyBetModal from "../VerifyBetModal";
+import VerifyBetModal from "./RollDice/VerifyBetModal";
 import { GameType, seedStatus } from "@/utils/vrf";
 
 export interface Bet {
@@ -39,7 +39,7 @@ export default function RollDiceTable({ refresh }: { refresh: boolean }) {
   };
 
   const [page, setPage] = useState(1);
-
+  const [bet, setBet] = useState<Bet>();
   const [bets, setBets] = useState<Bet[]>([]);
   const transactionsPerPage = 10;
   const [maxPages, setMaxPages] = useState(0);
@@ -129,17 +129,15 @@ export default function RollDiceTable({ refresh }: { refresh: boolean }) {
               )
               .map((bet, index) => (
                 <Fragment key={index}>
-                  <VerifyBetModal
-                    isOpen={isOpen}
-                    onClose={closeModal}
-                    modalData={{ game: GameType.dice, bet }}
-                  />
                   <div
                     className={`mb-2.5 ml-2.5 mr-2.5 flex w-full flex-row items-center gap-2 rounded-[5px] bg-[#121418] py-3 ${
                       !all && "cursor-pointer"
                     }`}
                     onClick={() => {
-                      if (!all) openModal();
+                      if (!all) {
+                        setBet(bet);
+                        openModal();
+                      }
                     }}
                   >
                     <span className="w-full text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
@@ -166,7 +164,7 @@ export default function RollDiceTable({ refresh }: { refresh: boolean }) {
                       {bet.chosenNumbers.map((face, index) => (
                         <span key={index} className="mr-2 mt-2 inline-block">
                           <Image
-                            src={`/assets/finalDiceFace${face}.png`}
+                            src={`/assets/selectedDiceFace${face}.png`}
                             width={30}
                             height={30}
                             alt=""
@@ -180,7 +178,7 @@ export default function RollDiceTable({ refresh }: { refresh: boolean }) {
                     <span className="w-full text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
                       <span className="mr-2 mt-2 inline-block">
                         <Image
-                          src={`/assets/finalDiceFace${bet.strikeNumber}.png`}
+                          src={`/assets/selectedDiceFace${bet.strikeNumber}.png`}
                           width={30}
                           height={30}
                           alt=""
@@ -257,6 +255,11 @@ export default function RollDiceTable({ refresh }: { refresh: boolean }) {
           &gt;
         </span>
       </div>
+      <VerifyBetModal
+        isOpen={isOpen}
+        onClose={closeModal}
+        modalData={{ bet: bet! }}
+      />
     </div>
   );
 }

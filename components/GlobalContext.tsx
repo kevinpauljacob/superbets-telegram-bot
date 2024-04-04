@@ -19,6 +19,25 @@ interface CoinBalance {
   tokenMint: string;
 }
 
+interface ProvablyFairData {
+  activeGameSeed: {
+    wallet: string;
+    clientSeed: string;
+    serverSeed: string;
+    serverSeedHash: string;
+    nonce: number;
+    status: string;
+  };
+  nextGameSeed: {
+    wallet: string;
+    clientSeed: string;
+    serverSeed: string;
+    serverSeedHash: string;
+    nonce: number;
+    status: string;
+  };
+}
+
 interface GlobalContextProps {
   loading: boolean;
   setLoading: (stake: boolean) => void;
@@ -61,6 +80,7 @@ interface GlobalContextProps {
   getGlobalInfo: () => Promise<void>;
   getWalletBalance: () => Promise<void>;
   getBalance: () => Promise<void>;
+  getProvablyFairData: () => Promise<ProvablyFairData | null>;
 }
 
 const GlobalContext = createContext<GlobalContextProps | undefined>(undefined);
@@ -187,6 +207,28 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
     }
   };
 
+  const getProvablyFairData = async () => {
+    if (wallet?.publicKey)
+      try {
+        const res = await fetch(`/api/games/vrf`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            wallet: wallet.publicKey.toBase58(),
+          }),
+        });
+
+        let data = await res.json();
+        if (data.success) return data;
+        else return null;
+      } catch (e) {
+        toast.error("Unable to fetch provably fair data.");
+        return null;
+      }
+  };
+
   return (
     <GlobalContext.Provider
       value={{
@@ -216,6 +258,7 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
         getGlobalInfo,
         getWalletBalance,
         getBalance,
+        getProvablyFairData,
       }}
     >
       {children}

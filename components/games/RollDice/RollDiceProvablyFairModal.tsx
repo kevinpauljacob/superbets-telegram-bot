@@ -2,7 +2,7 @@ import { GameType, generateClientSeed, generateGameResult } from "@/utils/vrf";
 import Image from "next/image";
 import { useState } from "react";
 
-interface ModalData {
+export interface PFModalData {
   activeGameSeed: {
     wallet: string;
     clientSeed: string;
@@ -19,24 +19,25 @@ interface ModalData {
     nonce: number;
     status: string;
   };
-  totalBets: string;
-  game: GameType;
+  tab?: "seeds" | "verify";
 }
 
 interface Props {
   isOpen: boolean;
   onClose: () => void;
-  modalData: ModalData;
-  setModalData: React.Dispatch<React.SetStateAction<ModalData>>;
+  modalData: PFModalData;
+  setModalData: React.Dispatch<React.SetStateAction<PFModalData>>;
 }
 
-export default function ProvablyFairModal({
+export default function RollDiceProvablyFairModal({
   isOpen,
   onClose,
   modalData,
   setModalData,
 }: Props) {
-  const [state, setState] = useState<"seeds" | "verify">("seeds");
+  const [state, setState] = useState<"seeds" | "verify">(
+    modalData.tab ? modalData.tab : "seeds",
+  );
   const [newClientSeed, setNewClientSeed] = useState<string>(
     generateClientSeed(),
   );
@@ -50,12 +51,6 @@ export default function ProvablyFairModal({
     serverSeed: "",
     nonce: "",
   });
-
-  //handling coin flip
-  const [wonCoinFace, setWonCoinface] = useState<"heads" | "tails">("heads");
-  const [selectedCoinFace, setSelectedCoinface] = useState<"heads" | "tails">(
-    "heads",
-  );
 
   const [wonDiceFace, setWonDiceFace] = useState<number>(1);
 
@@ -81,26 +76,14 @@ export default function ProvablyFairModal({
 
     const { clientSeed, serverSeed, nonce } = verificationState;
 
-    if (modalData.game === GameType.coin)
-      setWonCoinface(
-        (generateGameResult(
-          name === "clientSeed" ? value : clientSeed,
-          name === "serverSeed" ? value : serverSeed,
-          parseInt(name === "nonce" ? value : nonce),
-          modalData.game,
-        ) as number) === 1
-          ? "heads"
-          : "tails",
-      );
-    else if (modalData.game === GameType.dice)
-      setWonDiceFace(
-        generateGameResult(
-          name === "clientSeed" ? value : clientSeed,
-          name === "serverSeed" ? value : serverSeed,
-          parseInt(name === "nonce" ? value : nonce),
-          modalData.game,
-        ) as number,
-      );
+    setWonDiceFace(
+      generateGameResult(
+        name === "clientSeed" ? value : clientSeed,
+        name === "serverSeed" ? value : serverSeed,
+        parseInt(name === "nonce" ? value : nonce),
+        GameType.dice,
+      ) as number,
+    );
   };
 
   const handleSetClientSeed = async () => {
@@ -156,7 +139,7 @@ export default function ProvablyFairModal({
               </button>
             </div>
             {state === "seeds" && (
-              <div>
+              <div className="text-white">
                 <div className="grid gap-2">
                   <div>
                     <label className="text-sm font-semibold">
@@ -234,101 +217,68 @@ export default function ProvablyFairModal({
               </div>
             )}
             {state === "verify" && (
-              <div className="grid w-full">
+              <div className="grid w-full text-white">
                 <div className="grid gap-2">
                   <div className="border-2 border-opacity-5 border-[#FFFFFF] md:px-8">
-                    {modalData.game === GameType.coin ? (
-                      <div className="flex justify-center items-center gap-4 md:px-8 py-4">
-                        <div
-                          className={`bg-[#202329] py-4 px-4 rounded-md flex gap-2 items-center justify-center min-w-1/3 ${
-                            wonCoinFace === "heads"
-                              ? "border-2 border-[#7839C5]"
-                              : "border-[rgb(192,201,210)]"
-                          }`}
-                        >
-                          <div className="w-5 h-5 bg-[rgb(192,201,210)] border border-white rounded-full"></div>
-                          <div className="font-changa text-xl font-semibold">
-                            Heads
-                          </div>
+                    <div className="px-8 pt-10 pb-4">
+                      <div className="relative w-full mb-8 xl:mb-6">
+                        <div>
+                          <Image
+                            src="/assets/progressBar.png"
+                            alt="progress bar"
+                            width={900}
+                            height={100}
+                          />
                         </div>
-                        <div
-                          className={`bg-[#202329] py-4 px-4 rounded-md flex gap-2 items-center justify-center min-w-1/3  ${
-                            wonCoinFace === "tails"
-                              ? "border-2 border-[#7839C5]"
-                              : "border-[rgb(192,201,210)]"
-                          }`}
-                        >
-                          <div className="w-5 h-5 bg-[#FFC20E] rounded-full"></div>
-                          <div className="font-changa text-xl font-semibold">
-                            Tails
-                          </div>
-                        </div>
-                      </div>
-                    ) : modalData.game === GameType.dice ? (
-                      <div className="px-8 pt-10 pb-4">
-                        <div className="relative w-full mb-8 xl:mb-6">
-                          <div>
-                            <Image
-                              src="/assets/progressBar.png"
-                              alt="progress bar"
-                              width={900}
-                              height={100}
-                            />
-                          </div>
-                          <div className="flex justify-around md:gap-2">
-                            {Array.from({ length: 6 }, (_, i) => i + 1).map(
-                              (face) => (
-                                <div
-                                  key={face}
-                                  className="flex flex-col items-center"
-                                >
-                                  {wonDiceFace === face && (
-                                    <Image
-                                      src="/assets/pointer-green.png"
-                                      alt="pointer green"
-                                      width={13}
-                                      height={13}
-                                      className="absolute -top-[20px]"
-                                    />
-                                  )}
+                        <div className="flex justify-around md:gap-2">
+                          {Array.from({ length: 6 }, (_, i) => i + 1).map(
+                            (face) => (
+                              <div
+                                key={face}
+                                className="flex flex-col items-center"
+                              >
+                                {wonDiceFace === face && (
                                   <Image
-                                    src="/assets/progressTip.png"
-                                    alt="progress bar"
+                                    src="/assets/pointer-green.png"
+                                    alt="pointer green"
                                     width={13}
                                     height={13}
-                                    className="absolute top-[2px]"
+                                    className="absolute -top-[20px]"
                                   />
-                                  <Image
-                                    src={
-                                      wonDiceFace === face
-                                        ? `/assets/winDiceFace${face}.png`
-                                        : `/assets/diceFace${face}.png`
-                                    }
-                                    width={50}
-                                    height={50}
-                                    alt=""
-                                    className={`inline-block mt-6 ${
-                                      wonDiceFace === face
-                                        ? "selected-face"
-                                        : ""
-                                    }`}
-                                  />
-                                </div>
-                              ),
-                            )}
-                          </div>
+                                )}
+                                <Image
+                                  src="/assets/progressTip.png"
+                                  alt="progress bar"
+                                  width={13}
+                                  height={13}
+                                  className="absolute top-[2px]"
+                                />
+                                <Image
+                                  src={
+                                    wonDiceFace === face
+                                      ? `/assets/winDiceFace${face}.png`
+                                      : `/assets/diceFace${face}.png`
+                                  }
+                                  width={50}
+                                  height={50}
+                                  alt=""
+                                  className={`inline-block mt-6 ${
+                                    wonDiceFace === face ? "selected-face" : ""
+                                  }`}
+                                />
+                              </div>
+                            ),
+                          )}
                         </div>
                       </div>
-                    ) : (
-                      <div></div>
-                    )}
+                    </div>
                   </div>
                   <div>
                     <label className="text-sm font-semibold">Game</label>
                     <div className="flex items-center">
                       <select
                         name="game"
-                        value={modalData.game}
+                        value={GameType.dice}
                         onChange={(e) =>
                           setModalData((prevData) => ({
                             ...prevData,
@@ -338,7 +288,6 @@ export default function ProvablyFairModal({
                         className="bg-[#202329] mt-1 rounded-md px-4 py-2 mb-4 w-full relative appearance-none"
                       >
                         <option value={GameType.dice}>Dice</option>
-                        <option value={GameType.coin}>Coin Flip</option>
                       </select>
                     </div>
                   </div>
