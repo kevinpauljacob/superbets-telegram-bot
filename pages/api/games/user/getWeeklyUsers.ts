@@ -180,7 +180,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       );
       const flips = await flipAggregateData(
         Coin,
-        "flipAmount",
+        "amount",
         "result",
         previousMonday,
       );
