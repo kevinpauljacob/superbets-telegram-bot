@@ -3,6 +3,7 @@ import Image from "next/image";
 import { useState } from "react";
 import { IoIosArrowDown, IoMdCopy } from "react-icons/io";
 import { Bet } from "../RollDiceTable";
+import trimStringToLength from "@/utils/trimStringToLength";
 
 interface ModalData {
   game: GameType;
@@ -171,7 +172,7 @@ export default function VerifyBetModal({ isOpen, onClose, modalData }: Props) {
                         Client Seed
                       </label>
                       <div className="bg-[#202329] text-white mt-1 rounded-md px-4 py-2 mb-4 w-full relative flex items-center justify-between">
-                        <div>{bet.gameSeed?.clientSeed}</div>
+                        <div>{trimStringToLength(bet.gameSeed?.clientSeed!, 5)}</div>
                         <div>
                           <Image
                             src={"/assets/copy.png"}
@@ -208,7 +209,7 @@ export default function VerifyBetModal({ isOpen, onClose, modalData }: Props) {
                       <div className="bg-[#202329] text-white mt-1 rounded-md px-4 py-2 mb-4 w-full relative flex items-center justify-between">
                         <div>
                           {bet.gameSeed?.serverSeedHash ??
-                            bet.gameSeed?.serverSeedHash}
+                            trimStringToLength(bet.gameSeed?.serverSeedHash!, 5)}
                         </div>
                         <div>
                           <Image
