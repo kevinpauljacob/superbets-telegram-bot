@@ -5,6 +5,7 @@ import { IoIosArrowDown, IoMdCopy } from "react-icons/io";
 import { Bet } from "../FlipBets";
 import ProvablyFairModal, { PFModalData } from "./CoinFlipProvablyFairModal";
 import trimStringToLength from "@/utils/trimStringToLength";
+import CoinFlipProvablyFairModal from "./CoinFlipProvablyFairModal";
 
 interface ModalData {
   game: GameType;
@@ -285,7 +286,7 @@ export default function VerifyBetModal({ isOpen, onClose, modalData }: Props) {
               )}
             </div>
           </div>
-          <ProvablyFairModal
+          <CoinFlipProvablyFairModal
             isOpen={isPFModalOpen}
             onClose={closePFModal}
             modalData={PFModalData}

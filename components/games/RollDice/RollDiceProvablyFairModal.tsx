@@ -3,7 +3,7 @@ import Image from "next/image";
 import { useState } from "react";
 import trimStringToLength from "@/utils/trimStringToLength";
 
-interface PFModalData {
+export interface PFModalData {
   activeGameSeed: {
     wallet: string;
     clientSeed: string;
