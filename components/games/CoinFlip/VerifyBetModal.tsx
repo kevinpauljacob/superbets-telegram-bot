@@ -3,6 +3,7 @@ import Image from "next/image";
 import { useState } from "react";
 import { IoIosArrowDown, IoMdCopy } from "react-icons/io";
 import { Bet } from "../FlipBets";
+import ProvablyFairModal, { PFModalData } from "./CoinFlipProvablyFairModal";
 
 interface ModalData {
   game: GameType;
@@ -17,6 +18,39 @@ interface Props {
 
 export default function VerifyBetModal({ isOpen, onClose, modalData }: Props) {
   const { game, bet } = modalData;
+
+  //Provably Fair Modal handling
+  const [isPFModalOpen, setIsPFModalOpen] = useState(false);
+
+  const openPFModal = () => {
+    setIsPFModalOpen(true);
+  };
+
+  const closePFModal = () => {
+    setIsPFModalOpen(false);
+  };
+
+  const [PFModalData, setPFModalData] = useState<PFModalData>({
+    activeGameSeed: {
+      wallet: "",
+      clientSeed: "",
+      serverSeed: "",
+      serverSeedHash: "",
+      nonce: 0,
+      status: "",
+    },
+    nextGameSeed: {
+      wallet: "",
+      clientSeed: "",
+      serverSeed: "",
+      serverSeedHash: "",
+      nonce: 0,
+      status: "",
+    },
+    totalBets: "",
+    game: GameType.coin,
+    tab: "seeds",
+  });
 
   //to handle dropodown
   const [openDropDown, setOpenDropDown] = useState<boolean>(false);
@@ -59,9 +93,29 @@ export default function VerifyBetModal({ isOpen, onClose, modalData }: Props) {
             <div className="mt-8 px-8 pt-10 border-2 border-white border-opacity-5 rounded-md">
               <div className="grid place-items-center">
                 {bet.flipType === true ? (
-                  <div className={`w-24 h-24 bg-[#FFC20E] rounded-full grid place-items-center p-2 border-4 ${bet.result === "Won" ? 'border-green-500': 'border-red-500'}`}><span className="text-white text-2xl text-bold font-changa my-auto mx-auto">H</span></div>
+                  <div
+                    className={`w-24 h-24 bg-[#FFC20E] rounded-full grid place-items-center p-2 border-4 ${
+                      bet.result === "Won"
+                        ? "border-green-500"
+                        : "border-red-500"
+                    }`}
+                  >
+                    <span className="text-white text-2xl text-bold font-changa my-auto mx-auto">
+                      H
+                    </span>
+                  </div>
                 ) : (
-                  <div className={`w-24 h-24 bg-[#C0C9D2] rounded-full grid place-items-center p-2 border-4 ${bet.result === "Won" ? 'border-green-500': 'border-red-500'}`}><span className="text-black text-2xl text-bold font-changa my-auto mx-auto">T</span></div>
+                  <div
+                    className={`w-24 h-24 bg-[#C0C9D2] rounded-full grid place-items-center p-2 border-4 ${
+                      bet.result === "Won"
+                        ? "border-green-500"
+                        : "border-red-500"
+                    }`}
+                  >
+                    <span className="text-black text-2xl text-bold font-changa my-auto mx-auto">
+                      T
+                    </span>
+                  </div>
                 )}
               </div>
               <div className="flex gap-4 pt-10">
@@ -70,7 +124,7 @@ export default function VerifyBetModal({ isOpen, onClose, modalData }: Props) {
                   <input
                     type="text"
                     name="multiplier"
-                    value={(2/1).toFixed(2)}
+                    value={(2 / 1).toFixed(2)}
                     className="bg-[#202329] text-white mt-1 rounded-md px-4 py-2 mb-4 w-full relative"
                   />
                 </div>
@@ -79,7 +133,7 @@ export default function VerifyBetModal({ isOpen, onClose, modalData }: Props) {
                   <input
                     type="text"
                     name="chance"
-                    value={((1/2) * 100).toFixed(2)}
+                    value={((1 / 2) * 100).toFixed(2)}
                     className="bg-[#202329] text-white mt-1 rounded-md px-4 py-2 mb-4 w-full relative"
                   />
                 </div>
@@ -159,7 +213,33 @@ export default function VerifyBetModal({ isOpen, onClose, modalData }: Props) {
                   </div>
                   <div className="footer grid gap-1">
                     {bet.gameSeed?.status === seedStatus.EXPIRED ? (
-                      <button className="bg-[#7839C5] rounded-md w-full text-xl text-white text-semibold py-2">
+                      <button
+                        className="bg-[#7839C5] rounded-md w-full text-xl text-white text-semibold py-2"
+                        onClick={() => {
+                          setPFModalData({
+                            activeGameSeed: {
+                              wallet: "",
+                              clientSeed: "",
+                              serverSeed: "",
+                              serverSeedHash: "",
+                              nonce: 0,
+                              status: "",
+                            },
+                            nextGameSeed: {
+                              wallet: "",
+                              clientSeed: "",
+                              serverSeed: "",
+                              serverSeedHash: "",
+                              nonce: 0,
+                              status: "",
+                            },
+                            totalBets: "",
+                            game: GameType.coin,
+                            tab: "verify",
+                          });
+                          openPFModal();
+                        }}
+                      >
                         Verify
                       </button>
                     ) : (
@@ -168,7 +248,33 @@ export default function VerifyBetModal({ isOpen, onClose, modalData }: Props) {
                           To verify this bet, you first need to rotate your seed
                           pair.
                         </div>
-                        <button className="bg-[#7839C5] rounded-md w-full text-xl text-white text-semibold py-2">
+                        <button
+                          className="bg-[#7839C5] rounded-md w-full text-xl text-white text-semibold py-2"
+                          onClick={() => {
+                            setPFModalData({
+                              activeGameSeed: {
+                                wallet: "",
+                                clientSeed: "",
+                                serverSeed: "",
+                                serverSeedHash: "",
+                                nonce: 0,
+                                status: "",
+                              },
+                              nextGameSeed: {
+                                wallet: "",
+                                clientSeed: "",
+                                serverSeed: "",
+                                serverSeedHash: "",
+                                nonce: 0,
+                                status: "",
+                              },
+                              totalBets: "",
+                              game: GameType.coin,
+                              tab: "seeds",
+                            });
+                            openPFModal();
+                          }}
+                        >
                           Rotate
                         </button>
                       </>
@@ -178,6 +284,12 @@ export default function VerifyBetModal({ isOpen, onClose, modalData }: Props) {
               )}
             </div>
           </div>
+          <ProvablyFairModal
+            isOpen={isPFModalOpen}
+            onClose={closePFModal}
+            modalData={PFModalData}
+            setModalData={setPFModalData}
+          />
         </div>
       )}
     </>

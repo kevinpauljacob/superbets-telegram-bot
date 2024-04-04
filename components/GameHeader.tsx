@@ -2,16 +2,18 @@ import { useRouter } from "next/router";
 import Image from "next/image";
 import fair from "/public/assets/fair.png";
 import { useEffect, useState } from "react";
-import ProvablyFairModal from "./ProvablyFairModal";
+import RollDiceProvablyFairModal from "./games/RollDice/RollDiceProvablyFairModal";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { GameType } from "@/utils/vrf";
 import { useGlobalContext } from "./GlobalContext";
+import CoinFlipProvablyFairModal from "./games/CoinFlip/CoinFlipProvablyFairModal";
 
 export default function GameHeader() {
   const wallet = useWallet();
   const router = useRouter();
+  const game = router.pathname.split("/")[1];
 
-  const {coinData} = useGlobalContext()
+  const { coinData } = useGlobalContext();
 
   //Provably Fair Modal handling
   const [isOpen, setIsOpen] = useState(false);
@@ -60,7 +62,6 @@ export default function GameHeader() {
       });
 
       let data = await res.json();
-      const game = router.pathname.split("/")[1];
       if (data.success) setModalData({ ...data, game });
     };
 
@@ -160,12 +161,21 @@ export default function GameHeader() {
           </div>
         </div>
       </div>
-      <ProvablyFairModal
-        isOpen={isOpen}
-        onClose={closeModal}
-        modalData={modalData}
-        setModalData={setModalData}
-      />
+      {game === "coinflip" ? (
+        <CoinFlipProvablyFairModal
+          isOpen={isOpen}
+          onClose={closeModal}
+          modalData={modalData}
+          setModalData={setModalData}
+        />
+      ) : (
+        <RollDiceProvablyFairModal
+          isOpen={isOpen}
+          onClose={closeModal}
+          modalData={modalData}
+          setModalData={setModalData}
+        />
+      )}
     </div>
   ) : null;
 }
