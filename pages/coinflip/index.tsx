@@ -87,7 +87,6 @@ export default function Flip() {
     }
     if (betType) {
       setLoading(true);
-      setRefresh(false);
       setDeposit(false);
       setTimeout(() => {
         setLoading(false);
@@ -123,8 +122,11 @@ export default function Flip() {
   // }, [deposit]);
 
   useEffect(() => {
-    getWalletBalance();
-    getBalance();
+    if (refresh && wallet?.publicKey) {
+      getBalance();
+      getWalletBalance();
+      setRefresh(false);
+    }
   }, [wallet?.publicKey, refresh]);
 
   const handleChange = (

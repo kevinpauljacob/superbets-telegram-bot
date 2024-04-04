@@ -21,7 +21,7 @@ export default function Dice() {
   const [winningPays, setWinningPays] = useState(6);
   const [winningAmount, setWinningAmount] = useState(0.6);
   const [winningProbability, setWinningProbability] = useState(16.67);
-  const [refresh, setRefresh] = useState(false);
+  const [refresh, setRefresh] = useState(true);
   const [selectedFaces, setSelectedFaces] = useState<{
     [key: number]: boolean;
   }>({
@@ -111,7 +111,7 @@ export default function Dice() {
           setStrikeFace(strikeNumber);
           // setSelectedFace([0]);
           // setBetAmt(0.0);
-          setRefresh(!refresh);
+          setRefresh(true);
         }
       } catch (e) {
         setIsRolling(false);
@@ -122,8 +122,11 @@ export default function Dice() {
   };
 
   useEffect(() => {
-    getWalletBalance();
-    getBalance();
+    if (refresh && wallet?.publicKey) {
+      getBalance();
+      getWalletBalance();
+      setRefresh(false);
+    }
   }, [wallet?.publicKey, refresh]);
 
   return (

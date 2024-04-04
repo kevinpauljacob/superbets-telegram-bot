@@ -135,7 +135,6 @@ export default function RollDiceTable({ refresh }: { refresh: boolean }) {
                     modalData={{ game: GameType.dice, bet }}
                   />
                   <div
-                    key={index}
                     className={`mb-2.5 ml-2.5 mr-2.5 flex w-full flex-row items-center gap-2 rounded-[5px] bg-[#121418] py-3 ${
                       !all && "cursor-pointer"
                     }`}
@@ -189,7 +188,7 @@ export default function RollDiceTable({ refresh }: { refresh: boolean }) {
                       </span>
                     </span>
                     <span className="w-full text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
-                      {bet.amountWon} SOL
+                      {bet.amountWon.toFixed(4)} SOL
                     </span>
                   </div>
                 </>

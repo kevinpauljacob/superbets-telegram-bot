@@ -57,10 +57,10 @@ interface GlobalContextProps {
   coinData: CoinBalance[] | null;
   setCoinData: (coinData: CoinBalance[] | null) => void;
 
-  getUserDetails: () => void;
-  getGlobalInfo: () => void;
-  getWalletBalance: () => void;
-  getBalance: () => void;
+  getUserDetails: () => Promise<void>;
+  getGlobalInfo: () => Promise<void>;
+  getWalletBalance: () => Promise<void>;
+  getBalance: () => Promise<void>;
 }
 
 const GlobalContext = createContext<GlobalContextProps | undefined>(undefined);
@@ -161,30 +161,25 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
   };
 
   const getBalance = async () => {
+    console.log("Fetching balance...", wallet?.publicKey?.toBase58());
     setLoading(true);
     try {
-      fetch(`/api/games/user/getUser?wallet=${wallet.publicKey?.toBase58()}`)
-        .then((res) => res.json())
-        .then((balance) => {
-          if (balance.success) {
-            balance?.data &&
-            balance?.data.deposit &&
-            balance?.data.deposit.length > 0
-              ? setCoinData(balance.data.deposit)
-              : setCoinData([
-                  {
-                    wallet: "rverdgrehb@iubuyidciuiu",
-                    type: true,
-                    amount: 0,
-                    tokenMint: "SOL",
-                  },
-                ]);
-          } else {
-            toast.error("Could not fetch balance.");
-            setCoinData(null);
-          }
-          setLoading(false);
-        });
+      if (wallet?.publicKey)
+        fetch(`/api/games/user/getUser?wallet=${wallet.publicKey?.toBase58()}`)
+          .then((res) => res.json())
+          .then((balance) => {
+            if (
+              balance.success &&
+              balance?.data.deposit &&
+              balance?.data.deposit.length > 0
+            ) {
+              setCoinData(balance.data.deposit);
+            } else {
+              toast.error("Could not fetch balance.");
+              setCoinData(null);
+            }
+            setLoading(false);
+          });
     } catch (e) {
       toast.error("Could not fetch balance.");
       setLoading(false);
