@@ -161,7 +161,6 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
   };
 
   const getBalance = async () => {
-    console.log("Fetching balance...", wallet?.publicKey?.toBase58());
     setLoading(true);
     try {
       if (wallet?.publicKey)
