@@ -93,7 +93,7 @@ export default function Bets({ refresh }: { refresh: boolean }) {
         <div className="flex w-full min-w-[50rem] flex-col items-center">
           {/* header  */}
           {bets.length > 0 && (
-            <div className="mb-5 flex w-full flex-row items-center gap-2 bg-[#121418]">
+            <div className="mb-5 flex w-full flex-row items-center gap-2 bg-[#121418] py-1 rounded-[5px]">
               {!all
                 ? myHeaders.map((header, index) => (
                     <span

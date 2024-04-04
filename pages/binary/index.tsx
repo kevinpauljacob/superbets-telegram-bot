@@ -59,7 +59,7 @@ export default function Binary() {
     // }, betInterval * 60000 + 400);
 
     setLoading(true);
-    setCheckResult(false)
+    setCheckResult(false);
     setRefresh(false);
     try {
       // console.log("Placing bet");
@@ -254,7 +254,6 @@ export default function Binary() {
     }
   };
 
-
   return (
     <div className="flex h-full w-full flex-col items-center justify-start px-5">
       <Head>
@@ -327,7 +326,7 @@ export default function Binary() {
                   <button
                     type="button"
                     onClick={() => {
-                      !betType && setBetInterval(3);
+                      !loading && setBetInterval(3);
                     }}
                     className={`${
                       betInterval === 3
@@ -340,7 +339,7 @@ export default function Binary() {
                   <button
                     type="button"
                     onClick={() => {
-                      !betType && setBetInterval(4);
+                      !loading && setBetInterval(4);
                     }}
                     className={`${
                       betInterval === 4
@@ -353,7 +352,7 @@ export default function Binary() {
                   <button
                     type="button"
                     onClick={() => {
-                      !betType && setBetInterval(5);
+                      !loading && setBetInterval(5);
                     }}
                     className={`${
                       betInterval === 5
@@ -540,11 +539,13 @@ export default function Binary() {
                   )}
                 </div>
               ) : loading && !checkResult ? (
-                <div className="flex items-center gap-2 rounded-lg bg-[#202329] p-2">
-                  <span className="font-changa text-xl font-medium text-[#F0F0F0] text-opacity-75">
+                <div className="w-full flex items-center justify-center gap-2 rounded-lg bg-[#202329] p-2">
+                  <span className="font-changa text-xl whitespace-nowrap bg-red-200 font-medium text-[#F0F0F0] text-opacity-75">
                     Betting in Progress
                   </span>
-                  <Loader />
+                  <div className="w-10">
+                    <Loader />
+                  </div>
                 </div>
               ) : (
                 <div className="flex w-full flex-col">
@@ -584,7 +585,7 @@ export default function Binary() {
             </div>
             <div className="flex flex-col items-end">
               <span className="font-changa text-sm text-[#FFFFFF] text-opacity-90">
-                {strikePrice} $SOL
+                {strikePrice.toFixed(4)} $SOL
               </span>
               <span
                 className={`font-changa ${
