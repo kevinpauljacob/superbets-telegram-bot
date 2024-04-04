@@ -144,7 +144,7 @@ export default function Flip() {
   return (
     <div className="flex h-full w-full flex-col items-center justify-start px-5">
       <Head>
-        <title>CoinFlip</title>
+        <title>FOMO - Coin Flip</title>
       </Head>
       <div className="mt-5 w-full items-stretch bg-[#121418] rounded-2xl flex flex-col-reverse lg:flex-row">
         <div className="flex w-full lg:w-[35%] flex-col items-center rounded-[1.15rem] py-0 px-3 md:py-5">

@@ -9,6 +9,7 @@ import { ROLL_TAX } from "../../context/config";
 import GameFooterInfo from "@/components/games/GameFooterInfo";
 import BetSetting from "@/components/BetSetting";
 import { useGlobalContext } from "@/components/GlobalContext";
+import Head from "next/head";
 
 export default function Dice() {
   const wallet = useWallet();
@@ -20,7 +21,7 @@ export default function Dice() {
   const [winningPays, setWinningPays] = useState(6);
   const [winningAmount, setWinningAmount] = useState(0.6);
   const [winningProbability, setWinningProbability] = useState(16.67);
-  const [refresh, setRefresh] = useState(false);
+  const [refresh, setRefresh] = useState(true);
   const [selectedFace, setSelectedFace] = useState<number[]>([]);
   const [selectedFaces, setSelectedFaces] = useState<{
     [key: number]: boolean;
@@ -132,6 +133,9 @@ export default function Dice() {
 
   return (
     <div className="flex h-full w-full flex-col items-center justify-start p-3.5 sm:p-10">
+      <Head>
+        <title>FOMO - Dice</title>
+      </Head>
       <div className="flex flex-col-reverse xl:flex-row items-start rounded-md sm:rounded-[1.15rem] bg-[#121418] text-white w-full ">
         <div className="xl:border-r border-white/10 xl:w-[35%] w-full px-3 pb-6 pt-3 sm:p-8 xl:p-14">
           <BetSetting betSetting={rollType} setBetSetting={setRollType} />

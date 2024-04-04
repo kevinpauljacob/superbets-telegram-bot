@@ -243,7 +243,7 @@ export default function Options() {
   return (
     <div className="flex h-full w-full flex-col items-center justify-start px-5">
       <Head>
-        <title>Fomobet</title>
+        <title>FOMO - Binary Options</title>
       </Head>
       <div className="mt-5 w-full items-stretch bg-[#121418] rounded-2xl flex flex-col-reverse md:flex-row">
         {/* bet box  */}

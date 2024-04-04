@@ -1,5 +1,5 @@
 import { useWallet } from "@solana/wallet-adapter-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, Fragment } from "react";
 import toast from "react-hot-toast";
 import { obfuscatePubKey } from "@/context/transactions";
 import Image from "next/image";
@@ -128,7 +128,7 @@ export default function RollDiceTable({ refresh }: { refresh: boolean }) {
                 page * transactionsPerPage,
               )
               .map((bet, index) => (
-                <>
+                <Fragment key={index}>
                   <VerifyBetModal
                     isOpen={isOpen}
                     onClose={closeModal}
@@ -191,7 +191,7 @@ export default function RollDiceTable({ refresh }: { refresh: boolean }) {
                       {bet.amountWon.toFixed(4)} SOL
                     </span>
                   </div>
-                </>
+                </Fragment>
               ))
           ) : (
             <span className="w-full text-center font-changa text-[#F0F0F080]">
