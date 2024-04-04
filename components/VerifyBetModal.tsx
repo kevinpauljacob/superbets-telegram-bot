@@ -1,47 +1,23 @@
+import { GameType } from "@/utils/vrf";
 import Image from "next/image";
 import { useState } from "react";
 import { IoIosArrowDown, IoMdCopy } from "react-icons/io";
+import { Bet } from "./games/RollDiceTable";
 
 interface ModalData {
-  game: string;
-  betTime: string;
-  betAmount: number;
-  multiplier: number;
-  payout: number;
-  chance: number;
-  verificationAttributes: {
-    clientSeed: string;
-    nonce: number;
-    serverSeed: string;
-  };
+  game: GameType;
+  bet: Bet;
 }
 
 interface Props {
   isOpen: boolean;
   onClose: () => void;
   modalData: ModalData;
-  setModalData: React.Dispatch<React.SetStateAction<ModalData>>;
 }
 
-export default function VerifyBetModal({
-  isOpen,
-  onClose,
-  modalData,
-  setModalData,
-}: Props) {
+export default function VerifyBetModal({ isOpen, onClose, modalData }: Props) {
   //handling dice
-  const [selectedFaces, setSelectedFaces] = useState<{
-    [key: number]: boolean;
-  }>({
-    1: true,
-    2: true,
-    3: false,
-    4: false,
-    5: false,
-    6: false,
-  });
-
-  const [wonDiceFace, setWonDiceFace] = useState<number>(2);
+  const { game, bet } = modalData;
 
   //to handle coin flip
   const [wonCoinFace, setWonCoinFace] = useState<"heads" | "tails">("heads");
@@ -66,26 +42,28 @@ export default function VerifyBetModal({
           <div className="bg-[#121418] max-h-[100vh] modalscrollbar overflow-y-scroll p-8 rounded-lg z-10 w-11/12 md:w-1/3">
             <div className="flex justify-between items-center">
               <div className="font-changa text-[1.75rem] font-semibold text-white">
-                {modalData.game}
+                {game}
               </div>
-              <div className="text-[#F0F0F0] text-md">{modalData.betTime}</div>
+              <div className="text-[#F0F0F0] text-md">{bet.createdAt}</div>
             </div>
             <div className="flex gap-3">
               <button className="px-4 py-2 w-full text-white rounded-md bg-[#D9D9D9] bg-opacity-5 grid">
                 <div className="text-[#94A3B8] text-sm">Bet</div>
-                <div className="text-white">{modalData.betAmount} $SOL</div>
+                <div className="text-white">{bet.amount} $SOL</div>
               </button>
               <button className="px-4 py-2 w-full text-white rounded-md bg-[#D9D9D9] bg-opacity-5 grid">
                 <div className="text-[#94A3B8] text-sm">Multiplier</div>
-                <div className="text-white">{modalData.multiplier} x</div>
+                <div className="text-white">
+                  {(6 / bet.chosenNumbers.length).toFixed(2)} x
+                </div>
               </button>
               <button className="px-4 py-2 w-full text-white rounded-md bg-[#D9D9D9] bg-opacity-5 grid">
                 <div className="text-[#94A3B8] text-sm">Payout</div>
-                <div className="text-white">{modalData.payout} $SOL</div>
+                <div className="text-white">{bet.amountWon} $SOL</div>
               </button>
             </div>
             <div className="mt-8 px-8 pt-10 border-2 border-white border-opacity-5 rounded-md">
-              {modalData.game === "dice" ? (
+              {game === "dice" ? (
                 <div className="relative w-full mb-8 xl:mb-6">
                   <div>
                     <Image
@@ -96,204 +74,49 @@ export default function VerifyBetModal({
                     />
                   </div>
                   <div className="flex justify-around md:gap-2">
-                    <div className="flex flex-col items-center mr-2 sm:mr-0">
-                      {selectedFaces[1] && wonDiceFace === 1 && (
+                    {Array.from({ length: 6 }, (_, i) => i + 1).map((face) => (
+                      <div
+                        key={face}
+                        className="flex flex-col items-center mr-2 sm:mr-0"
+                      >
+                        {bet.chosenNumbers.includes(face) &&
+                          bet.strikeNumber === face && (
+                            <Image
+                              src="/assets/pointer-green.png"
+                              alt="pointer green"
+                              width={13}
+                              height={13}
+                              className="absolute -top-[20px]"
+                            />
+                          )}
                         <Image
-                          src="/assets/pointer-green.png"
-                          alt="pointer green"
+                          src="/assets/progressTip.png"
+                          alt="progress bar"
                           width={13}
                           height={13}
-                          className="absolute -top-[2px]"
+                          className="absolute top-[2px]"
                         />
-                      )}
-                      <Image
-                        src="/assets/progressTip.png"
-                        alt="progress bar"
-                        width={13}
-                        height={13}
-                        className="absolute top-[2px]"
-                      />
-                      <Image
-                        src={
-                          wonDiceFace === 1
-                            ? "/assets/activeDiceFace1.png"
-                            : selectedFaces[1]
-                            ? "/assets/finalDiceFace1.png"
-                            : "/assets/diceFace1.png"
-                        }
-                        width={50}
-                        height={50}
-                        alt=""
-                        className={`inline-block mt-6 ${
-                          selectedFaces[1] ? "selected-face" : ""
-                        }`}
-                      />
-                    </div>
-                    <div className="flex flex-col items-center mr-2 sm:mr-0">
-                      {selectedFaces[2] && wonDiceFace === 2 && (
                         <Image
-                          src="/assets/pointer-green.png"
-                          alt="pointer green"
-                          width={13}
-                          height={13}
-                          className="absolute -top-[20px]"
+                          src={
+                            bet.strikeNumber === face
+                              ? bet.chosenNumbers.includes(face)
+                                ? `/assets/activeDiceFace${face}.png`
+                                : `/assets/lossDiceFace${face}.png`
+                              : bet.chosenNumbers.includes(face)
+                              ? `/assets/finalDiceFace${face}.png`
+                              : `/assets/diceFace${face}.png`
+                          }
+                          width={50}
+                          height={50}
+                          alt=""
+                          className={`inline-block mt-6 ${
+                            bet.chosenNumbers.includes(face)
+                              ? "selected-face"
+                              : ""
+                          }`}
                         />
-                      )}
-                      <Image
-                        src="/assets/progressTip.png"
-                        alt="progress bar"
-                        width={13}
-                        height={13}
-                        className="absolute top-[2px]"
-                      />
-                      <Image
-                        src={
-                          wonDiceFace === 2
-                            ? "/assets/activeDiceFace2.png"
-                            : selectedFaces[2]
-                            ? "/assets/finalDiceFace2.png"
-                            : "/assets/diceFace2.png"
-                        }
-                        width={50}
-                        height={50}
-                        alt=""
-                        className={`inline-block mt-6 ${
-                          selectedFaces[2] ? "selected-face" : ""
-                        }`}
-                      />
-                    </div>
-                    <div className="flex flex-col items-center mr-2 sm:mr-0">
-                      {selectedFaces[3] && wonDiceFace === 3 && (
-                        <Image
-                          src="/assets/pointer-green.png"
-                          alt="pointer green"
-                          width={13}
-                          height={13}
-                          className="absolute -top-[20px]"
-                        />
-                      )}
-                      <Image
-                        src="/assets/progressTip.png"
-                        alt="progress bar"
-                        width={13}
-                        height={13}
-                        className="absolute top-[2px]"
-                      />
-                      <Image
-                        src={
-                          wonDiceFace === 3
-                            ? "/assets/activeDiceFace3.png"
-                            : selectedFaces[3]
-                            ? "/assets/finalDiceFace3.png"
-                            : "/assets/diceFace3.png"
-                        }
-                        width={50}
-                        height={50}
-                        alt=""
-                        className={`inline-block mt-6 ${
-                          selectedFaces[3] ? "selected-face" : ""
-                        }`}
-                      />
-                    </div>
-                    <div className="flex flex-col items-center mr-2 sm:mr-0">
-                      {selectedFaces[4] && wonDiceFace === 4 && (
-                        <Image
-                          src="/assets/pointer-green.png"
-                          alt="pointer green"
-                          width={13}
-                          height={13}
-                          className="absolute -top-[20px]"
-                        />
-                      )}
-                      <Image
-                        src="/assets/progressTip.png"
-                        alt="progress bar"
-                        width={13}
-                        height={13}
-                        className="absolute top-[2px]"
-                      />
-                      <Image
-                        src={
-                          wonDiceFace === 4
-                            ? "/assets/activeDiceFace4.png"
-                            : selectedFaces[4]
-                            ? "/assets/finalDiceFace4.png"
-                            : "/assets/diceFace4.png"
-                        }
-                        width={50}
-                        height={50}
-                        alt=""
-                        className={`inline-block mt-6 ${
-                          selectedFaces[3] ? "selected-face" : ""
-                        }`}
-                      />
-                    </div>
-                    <div className="flex flex-col items-center mr-2 sm:mr-0">
-                      {selectedFaces[5] && wonDiceFace === 5 && (
-                        <Image
-                          src="/assets/pointer-green.png"
-                          alt="pointer green"
-                          width={13}
-                          height={13}
-                          className="absolute -top-[20px]"
-                        />
-                      )}
-                      <Image
-                        src="/assets/progressTip.png"
-                        alt="progress bar"
-                        width={13}
-                        height={13}
-                        className="absolute top-[2px]"
-                      />
-                      <Image
-                        src={
-                          wonDiceFace === 5
-                            ? "/assets/activeDiceFace5.png"
-                            : selectedFaces[5]
-                            ? "/assets/finalDiceFace5.png"
-                            : "/assets/diceFace5.png"
-                        }
-                        width={50}
-                        height={50}
-                        alt=""
-                        className={`inline-block mt-6 ${
-                          selectedFaces[5] ? "selected-face" : ""
-                        }`}
-                      />
-                    </div>
-                    <div className="flex flex-col items-center">
-                      {selectedFaces[6] && wonDiceFace === 6 && (
-                        <Image
-                          src="/assets/pointer-green.png"
-                          alt="pointer green"
-                          width={13}
-                          height={13}
-                          className="absolute -top-[20px]"
-                        />
-                      )}
-                      <Image
-                        src="/assets/progressTip.png"
-                        alt="progress bar"
-                        width={13}
-                        height={13}
-                        className="absolute top-[2px]"
-                      />
-                      <Image
-                        src={
-                          wonDiceFace === 6
-                            ? "/assets/activeDiceFace6.png"
-                            : selectedFaces[6]
-                            ? "/assets/finalDiceFace6.png"
-                            : "/assets/diceFace6.png"
-                        }
-                        width={50}
-                        height={50}
-                        alt=""
-                        className={`inline-block mt-6 ${
-                          selectedFaces[6] ? "selected-face" : ""
-                        }`}
-                      />
-                    </div>
+                      </div>
+                    ))}
                   </div>
                 </div>
               ) : (
@@ -311,7 +134,7 @@ export default function VerifyBetModal({
                   <input
                     type="text"
                     name="multiplier"
-                    value={modalData.multiplier}
+                    value={(6 / bet.chosenNumbers.length).toFixed(2)}
                     className="bg-[#202329] text-white mt-1 rounded-md px-4 py-2 mb-4 w-full relative"
                   />
                 </div>
@@ -320,7 +143,7 @@ export default function VerifyBetModal({
                   <input
                     type="text"
                     name="chance"
-                    value={modalData.chance}
+                    value={((bet.chosenNumbers.length / 6) * 100).toFixed(2)}
                     className="bg-[#202329] text-white mt-1 rounded-md px-4 py-2 mb-4 w-full relative"
                   />
                 </div>
@@ -348,7 +171,7 @@ export default function VerifyBetModal({
                         Client Seed
                       </label>
                       <div className="bg-[#202329] text-white mt-1 rounded-md px-4 py-2 mb-4 w-full relative flex items-center justify-between">
-                        <div>{modalData.verificationAttributes.clientSeed}</div>
+                        <div>{bet.gameSeed?.clientSeed}</div>
                         <div>
                           <Image
                             src={"/assets/copy.png"}
@@ -362,7 +185,7 @@ export default function VerifyBetModal({
                     <div className="w-1/2">
                       <label className="text-xs text-[#F0F0F0]">Nonce</label>
                       <div className="bg-[#202329] text-white mt-1 rounded-md px-4 py-2 mb-4 w-full relative flex items-center justify-between">
-                        <div>{modalData.verificationAttributes.nonce}</div>
+                        <div>{bet.gameSeed?.nonce}</div>
                         <div>
                           <Image
                             src={"/assets/copy.png"}
@@ -380,7 +203,7 @@ export default function VerifyBetModal({
                         Server Seed (Hashed)
                       </label>
                       <div className="bg-[#202329] text-white mt-1 rounded-md px-4 py-2 mb-4 w-full relative flex items-center justify-between">
-                        <div>{modalData.verificationAttributes.serverSeed}</div>
+                        <div>{bet.gameSeed?.serverSeedHash}</div>
                         <div>
                           <Image
                             src={"/assets/copy.png"}

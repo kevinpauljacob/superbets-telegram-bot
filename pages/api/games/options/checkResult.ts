@@ -60,14 +60,14 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
       let result = "Pending";
       let amountWon = 0;
-      let amountLost = bet.betAmount;
+      let amountLost = bet.amount;
 
-      if (bet.betType) {
+      if (bet.betType === "betUp") {
         // if betUp
         if (betEndPrice > bet.strikePrice) {
           // bet won
           result = "Won";
-          amountWon += bet.betAmount;
+          amountWon += bet.amount;
           amountLost = 0;
         } else {
           // bet lost
@@ -79,7 +79,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         if (betEndPrice < bet.strikePrice) {
           // bet won
           result = "Won";
-          amountWon += bet.betAmount;
+          amountWon += bet.amount;
           amountLost = 0;
         } else {
           // bet lost
@@ -87,7 +87,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           amountWon = 0;
         }
       }
-
       const status = await User.findOneAndUpdate(
         {
           wallet,

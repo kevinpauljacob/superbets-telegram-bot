@@ -40,7 +40,7 @@ export function Header({
       <div className="w-full bg-[#121418] flex flex-col items-center py-4 lg:py-4 px-2">
         <div className="w-full flex flex-row items-center justify-between">
           {/* right */}
-          <div className="flex flex-row items-center">
+          <div onClick={() => {router.push('/')}} className="flex flex-row items-center cursor-pointer">
             <div className="relative flex">
               <Image
                 src={"/assets/logowhite.svg"}
@@ -142,7 +142,10 @@ export function Header({
 
             {/* store & leaderboard */}
             <div className="flex items-center gap-4">
-              <button className="hidden cursor-not-allowed sm:flex text-white text-opacity-50 bg-white bg-opacity-5 font-medium rounded-md text-sm px-5 py-3">
+              <button onClick={() => {
+                  router.push("store");
+                }}
+                className="hidden sm:flex text-white bg-[#9945FF] hover:bg-opacity-50 transition-all font-medium rounded-md text-sm px-5 py-3">
                 {translator("Store", language)}
               </button>
               <button

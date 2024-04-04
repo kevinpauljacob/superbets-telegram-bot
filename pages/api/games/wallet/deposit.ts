@@ -10,7 +10,7 @@ import {
 } from "../../../../context/gameTransactions";
 import connectDatabase from "../../../../utils/database";
 import Deposit from "../../../../models/games/deposit";
-import User from "../../../../models/games/user";
+import User from "../../../../models/games/gameUser";
 import House from "../../../../models/games/house";
 import TxnSignature from "../../../../models/txnSignature";
 

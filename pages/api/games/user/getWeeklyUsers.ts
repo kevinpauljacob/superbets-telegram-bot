@@ -174,13 +174,13 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
       const bets = await binaryAggregateData(
         Option,
-        "betAmount",
+        "amount",
         "result",
         previousMonday,
       );
       const flips = await flipAggregateData(
         Coin,
-        "flipAmount",
+        "amount",
         "result",
         previousMonday,
       );

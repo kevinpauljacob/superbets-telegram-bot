@@ -32,7 +32,7 @@ const coinSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
-    gameSeedId: {
+    gameSeed: {
       type: mongoose.Schema.ObjectId,
       ref: "GameSeed",
       required: true,

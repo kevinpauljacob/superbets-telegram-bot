@@ -150,7 +150,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         tokenMint,
         amountWon,
         amountLost,
-        gameSeedId: activeGameSeed._id,
+        gameSeed: activeGameSeed._id,
       });
 
       return res.status(201).json({

@@ -149,8 +149,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
       // Calculate the previous Monday at 12:00 UTC
 
-      const bets = await binaryAggregateData(Option, "betAmount", "result");
-      const flips = await flipAggregateData(Coin, "flipAmount", "result");
+      const bets = await binaryAggregateData(Option, "amount", "result");
+      const flips = await flipAggregateData(Coin, "amount", "result");
       const rolls = await rollAggregateData(Dice, "rollAmount", "result");
       const users = await User.find({});
 
