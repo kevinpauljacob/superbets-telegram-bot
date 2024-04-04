@@ -114,8 +114,8 @@ export default function RollDiceTable({ refresh }: { refresh: boolean }) {
 
   useEffect(() => {
     const route = all
-      ? "/api/dice/getGlobalHistory"
-      : `/api/dice/getUserHistory?wallet=${wallet.publicKey?.toBase58()}`;
+      ? "/api/games/dice/getGlobalHistory"
+      : `/api/games/dice/getUserHistory?wallet=${wallet.publicKey?.toBase58()}`;
 
     fetch(`${route}`)
       .then((res) => res.json())
