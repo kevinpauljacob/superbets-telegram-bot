@@ -1,6 +1,5 @@
 import { GameType, generateClientSeed, generateGameResult } from "@/utils/vrf";
 import { useState } from "react";
-import trimStringToLength from "@/utils/trimStringToLength";
 
 export interface PFModalData {
   activeGameSeed: {
@@ -19,8 +18,6 @@ export interface PFModalData {
     nonce: number;
     status: string;
   };
-  totalBets: string;
-  game: GameType;
   tab?: "seeds" | "verify";
 }
 
@@ -82,17 +79,16 @@ export default function CoinFlipProvablyFairModal({
 
     const { clientSeed, serverSeed, nonce } = verificationState;
 
-    if (modalData.game === GameType.coin)
-      setWonCoinface(
-        (generateGameResult(
-          name === "clientSeed" ? value : clientSeed,
-          name === "serverSeed" ? value : serverSeed,
-          parseInt(name === "nonce" ? value : nonce),
-          modalData.game,
-        ) as number) === 1
-          ? "heads"
-          : "tails",
-      );
+    setWonCoinface(
+      (generateGameResult(
+        name === "clientSeed" ? value : clientSeed,
+        name === "serverSeed" ? value : serverSeed,
+        parseInt(name === "nonce" ? value : nonce),
+        GameType.coin,
+      ) as number) === 1
+        ? "heads"
+        : "tails",
+    );
   };
 
   const handleSetClientSeed = async () => {
@@ -157,10 +153,7 @@ export default function CoinFlipProvablyFairModal({
                     <input
                       type="text"
                       name="activeClientSeed"
-                      placeholder={trimStringToLength(
-                        modalData.activeGameSeed.clientSeed,
-                        5,
-                      )}
+                      placeholder={modalData.activeGameSeed.clientSeed}
                       className="bg-[#202329] mt-1 rounded-md px-4 py-2 mb-4 w-full pointer-events-none"
                       readOnly
                     />
@@ -172,19 +165,16 @@ export default function CoinFlipProvablyFairModal({
                     <input
                       type="text"
                       name="activeServerSeedHash"
-                      placeholder={trimStringToLength(
-                        modalData.activeGameSeed.serverSeedHash,
-                        5,
-                      )}
+                      placeholder={modalData.activeGameSeed.serverSeedHash}
                       className="bg-[#202329] mt-1 rounded-md px-4 py-2 mb-4 w-full pointer-events-none"
                       readOnly
                     />
                   </div>
                   <div>
-                    <label className="text-sm font-semibold">Total Bets</label>
+                    <label className="text-sm font-semibold">Total Flips</label>
                     <input
                       type="text"
-                      name="totalBets"
+                      name="totalFlips"
                       placeholder={modalData.activeGameSeed.nonce.toString()}
                       className="bg-[#202329] mt-1 rounded-md px-4 py-2 mb-4 w-full pointer-events-none"
                       readOnly
@@ -222,10 +212,7 @@ export default function CoinFlipProvablyFairModal({
                       <input
                         type="text"
                         name="nextServerSeedHash"
-                        placeholder={trimStringToLength(
-                          modalData.nextGameSeed.serverSeedHash,
-                          5,
-                        )}
+                        placeholder={modalData.nextGameSeed.serverSeedHash}
                         className="bg-[#202329] mt-1 rounded-md px-4 py-2 mb-4 w-full pointer-events-none"
                         readOnly
                       />
@@ -270,7 +257,7 @@ export default function CoinFlipProvablyFairModal({
                     <div className="flex items-center">
                       <select
                         name="game"
-                        value={modalData.game}
+                        value={GameType.coin}
                         onChange={(e) =>
                           setModalData((prevData) => ({
                             ...prevData,

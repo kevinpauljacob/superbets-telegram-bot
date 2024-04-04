@@ -164,7 +164,7 @@ export default function RollDiceTable({ refresh }: { refresh: boolean }) {
                       {bet.chosenNumbers.map((face, index) => (
                         <span key={index} className="mr-2 mt-2 inline-block">
                           <Image
-                            src={`/assets/finalDiceFace${face}.png`}
+                            src={`/assets/selectedDiceFace${face}.png`}
                             width={30}
                             height={30}
                             alt=""
@@ -178,7 +178,7 @@ export default function RollDiceTable({ refresh }: { refresh: boolean }) {
                     <span className="w-full text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
                       <span className="mr-2 mt-2 inline-block">
                         <Image
-                          src={`/assets/finalDiceFace${bet.strikeNumber}.png`}
+                          src={`/assets/selectedDiceFace${bet.strikeNumber}.png`}
                           width={30}
                           height={30}
                           alt=""
@@ -258,7 +258,7 @@ export default function RollDiceTable({ refresh }: { refresh: boolean }) {
       <VerifyBetModal
         isOpen={isOpen}
         onClose={closeModal}
-        modalData={{ game: GameType.dice, bet: bet! }}
+        modalData={{ bet: bet! }}
       />
     </div>
   );

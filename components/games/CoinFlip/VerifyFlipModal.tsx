@@ -2,14 +2,14 @@ import { GameType, seedStatus } from "@/utils/vrf";
 import Image from "next/image";
 import { useState } from "react";
 import { IoIosArrowDown, IoMdCopy } from "react-icons/io";
-import { Bet } from "../FlipBets";
-import ProvablyFairModal, { PFModalData } from "./CoinFlipProvablyFairModal";
-import trimStringToLength from "@/utils/trimStringToLength";
-import CoinFlipProvablyFairModal from "./CoinFlipProvablyFairModal";
+import { Flip } from "../Flips";
+import CoinFlipProvablyFairModal, {
+  PFModalData,
+} from "./CoinFlipProvablyFairModal";
+import { useGlobalContext } from "@/components/GlobalContext";
 
 interface ModalData {
-  game: GameType;
-  bet: Bet;
+  flip: Flip;
 }
 
 interface Props {
@@ -18,8 +18,9 @@ interface Props {
   modalData: ModalData;
 }
 
-export default function VerifyBetModal({ isOpen, onClose, modalData }: Props) {
-  const { game, bet } = modalData;
+export default function VerifyFlipModal({ isOpen, onClose, modalData }: Props) {
+  const { flip } = modalData;
+  const { getProvablyFairData } = useGlobalContext();
 
   //Provably Fair Modal handling
   const [isPFModalOpen, setIsPFModalOpen] = useState(false);
@@ -49,8 +50,6 @@ export default function VerifyBetModal({ isOpen, onClose, modalData }: Props) {
       nonce: 0,
       status: "",
     },
-    totalBets: "",
-    game: GameType.coin,
     tab: "seeds",
   });
 
@@ -61,6 +60,10 @@ export default function VerifyBetModal({ isOpen, onClose, modalData }: Props) {
     if (e.target === e.currentTarget) {
       onClose();
     }
+  };
+
+  const copyToClipboard = (text?: string) => {
+    if (text) navigator.clipboard.writeText(text);
   };
 
   return (
@@ -74,14 +77,14 @@ export default function VerifyBetModal({ isOpen, onClose, modalData }: Props) {
           <div className="bg-[#121418] max-h-[100vh] modalscrollbar overflow-y-scroll p-8 rounded-lg z-10 w-11/12 md:w-1/3">
             <div className="flex justify-between items-center">
               <div className="font-changa text-[1.75rem] font-semibold text-white">
-                {game}
+                Coin Flip
               </div>
-              <div className="text-[#F0F0F0] text-md">{bet.createdAt}</div>
+              <div className="text-[#F0F0F0] text-md">{flip.createdAt}</div>
             </div>
             <div className="flex gap-3">
               <button className="px-4 py-2 w-full text-white rounded-md bg-[#D9D9D9] bg-opacity-5 grid">
-                <div className="text-[#94A3B8] text-sm">Bet</div>
-                <div className="text-white">{bet.amount} $SOL</div>
+                <div className="text-[#94A3B8] text-sm">Flip</div>
+                <div className="text-white">{flip.amount} $SOL</div>
               </button>
               <button className="px-4 py-2 w-full text-white rounded-md bg-[#D9D9D9] bg-opacity-5 grid">
                 <div className="text-[#94A3B8] text-sm">Multiplier</div>
@@ -89,33 +92,33 @@ export default function VerifyBetModal({ isOpen, onClose, modalData }: Props) {
               </button>
               <button className="px-4 py-2 w-full text-white rounded-md bg-[#D9D9D9] bg-opacity-5 grid">
                 <div className="text-[#94A3B8] text-sm">Payout</div>
-                <div className="text-white">{bet.amountWon} $SOL</div>
+                <div className="text-white">{flip.amountWon} $SOL</div>
               </button>
             </div>
             <div className="mt-8 px-8 pt-10 border-2 border-white border-opacity-5 rounded-md">
               <div className="grid place-items-center">
-                {bet.flipType === true ? (
+                {flip.flipType === "heads" ? (
                   <div
                     className={`w-24 h-24 bg-[#FFC20E] rounded-full grid place-items-center p-2 border-4 ${
-                      bet.result === "Won"
+                      flip.result === "Won"
                         ? "border-green-500"
                         : "border-red-500"
                     }`}
                   >
                     <span className="text-white text-2xl text-bold font-changa my-auto mx-auto">
-                      H
+                      HEADS
                     </span>
                   </div>
                 ) : (
                   <div
                     className={`w-24 h-24 bg-[#C0C9D2] rounded-full grid place-items-center p-2 border-4 ${
-                      bet.result === "Won"
+                      flip.result === "Won"
                         ? "border-green-500"
                         : "border-red-500"
                     }`}
                   >
                     <span className="text-black text-2xl text-bold font-changa my-auto mx-auto">
-                      T
+                      TAILS
                     </span>
                   </div>
                 )}
@@ -163,8 +166,13 @@ export default function VerifyBetModal({ isOpen, onClose, modalData }: Props) {
                         Client Seed
                       </label>
                       <div className="bg-[#202329] text-white mt-1 rounded-md px-4 py-2 mb-4 w-full relative flex items-center justify-between">
-                        <div>{trimStringToLength(bet.gameSeed?.clientSeed!, 5)}</div>
-                        <div>
+                        <div>{flip.gameSeed?.clientSeed}</div>
+                        <div
+                          onClick={() =>
+                            copyToClipboard(flip.gameSeed?.clientSeed)
+                          }
+                          className="cursor-pointer"
+                        >
                           <Image
                             src={"/assets/copy.png"}
                             width={20}
@@ -177,8 +185,13 @@ export default function VerifyBetModal({ isOpen, onClose, modalData }: Props) {
                     <div className="w-1/2">
                       <label className="text-xs text-[#F0F0F0]">Nonce</label>
                       <div className="bg-[#202329] text-white mt-1 rounded-md px-4 py-2 mb-4 w-full relative flex items-center justify-between">
-                        <div>{bet.gameSeed?.nonce}</div>
-                        <div>
+                        <div>{flip.gameSeed?.nonce}</div>
+                        <div
+                          onClick={() =>
+                            copyToClipboard(flip.gameSeed?.nonce.toString())
+                          }
+                          className="cursor-pointer"
+                        >
                           <Image
                             src={"/assets/copy.png"}
                             width={20}
@@ -193,16 +206,24 @@ export default function VerifyBetModal({ isOpen, onClose, modalData }: Props) {
                     <div className="w-full">
                       <label className="text-xs text-[#F0F0F0]">
                         Server Seed{" "}
-                        {bet.gameSeed?.status !== seedStatus.EXPIRED
+                        {flip.gameSeed?.status !== seedStatus.EXPIRED
                           ? "(Hashed)"
                           : ""}
                       </label>
                       <div className="bg-[#202329] text-white mt-1 rounded-md px-4 py-2 mb-4 w-full relative flex items-center justify-between">
                         <div>
-                          {bet.gameSeed?.serverSeedHash ??
-                            trimStringToLength(bet.gameSeed?.serverSeedHash!, 5)}
+                          {flip.gameSeed?.serverSeedHash ??
+                            flip.gameSeed?.serverSeedHash}
                         </div>
-                        <div>
+                        <div
+                          onClick={() =>
+                            copyToClipboard(
+                              flip.gameSeed?.serverSeedHash ??
+                                flip.gameSeed?.serverSeedHash,
+                            )
+                          }
+                          className="cursor-pointer"
+                        >
                           <Image
                             src={"/assets/copy.png"}
                             width={20}
@@ -214,73 +235,25 @@ export default function VerifyBetModal({ isOpen, onClose, modalData }: Props) {
                     </div>
                   </div>
                   <div className="footer grid gap-1">
-                    {bet.gameSeed?.status === seedStatus.EXPIRED ? (
-                      <button
-                        className="bg-[#7839C5] rounded-md w-full text-xl text-white text-semibold py-2"
-                        onClick={() => {
-                          setPFModalData({
-                            activeGameSeed: {
-                              wallet: "",
-                              clientSeed: "",
-                              serverSeed: "",
-                              serverSeedHash: "",
-                              nonce: 0,
-                              status: "",
-                            },
-                            nextGameSeed: {
-                              wallet: "",
-                              clientSeed: "",
-                              serverSeed: "",
-                              serverSeedHash: "",
-                              nonce: 0,
-                              status: "",
-                            },
-                            totalBets: "",
-                            game: GameType.coin,
-                            tab: "verify",
-                          });
-                          openPFModal();
-                        }}
-                      >
-                        Verify
-                      </button>
-                    ) : (
-                      <>
-                        <div className="text-xs text-[#94A3B8] text-center">
-                          To verify this bet, you first need to rotate your seed
-                          pair.
-                        </div>
-                        <button
-                          className="bg-[#7839C5] rounded-md w-full text-xl text-white text-semibold py-2"
-                          onClick={() => {
-                            setPFModalData({
-                              activeGameSeed: {
-                                wallet: "",
-                                clientSeed: "",
-                                serverSeed: "",
-                                serverSeedHash: "",
-                                nonce: 0,
-                                status: "",
-                              },
-                              nextGameSeed: {
-                                wallet: "",
-                                clientSeed: "",
-                                serverSeed: "",
-                                serverSeedHash: "",
-                                nonce: 0,
-                                status: "",
-                              },
-                              totalBets: "",
-                              game: GameType.coin,
-                              tab: "seeds",
-                            });
-                            openPFModal();
-                          }}
-                        >
-                          Rotate
-                        </button>
-                      </>
+                    {flip.gameSeed?.status !== seedStatus.EXPIRED && (
+                      <div className="text-xs text-[#94A3B8] text-center">
+                        To verify this flip, you first need to rotate your seed
+                        pair.
+                      </div>
                     )}
+                    <button
+                      className="bg-[#7839C5] rounded-md w-full text-xl text-white text-semibold py-2"
+                      onClick={async () => {
+                        const fpData = await getProvablyFairData();
+                        if (fpData) setPFModalData(fpData);
+
+                        openPFModal();
+                      }}
+                    >
+                      {flip.gameSeed?.status === seedStatus.EXPIRED
+                        ? "Verify"
+                        : "Rotate"}
+                    </button>
                   </div>
                 </div>
               )}

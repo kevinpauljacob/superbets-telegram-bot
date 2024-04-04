@@ -7,7 +7,7 @@ interface Bet {
   betTime?: string;
   betEndTime?: string;
   amount: number;
-  betType: string; // if true -> betUp else betDown
+  betType: "betUp" | "betDown"; // if true -> betUp else betDown
   strikePrice?: number;
   betEndPrice?: number;
   timeFrame: number;
@@ -67,9 +67,7 @@ export default function Bets({ refresh }: { refresh: boolean }) {
             else toast.error("Wallet not connected");
           }}
           className={`${
-            all
-              ? "text-shadow-violet hover:bg-[#7839C530]"
-              : "bg-[#7839C5]"
+            all ? "text-shadow-violet hover:bg-[#7839C530]" : "bg-[#7839C5]"
           } w-full transform rounded-[5px] px-8 py-2 font-changa text-lg text-white transition duration-200 md:w-fit`}
         >
           My Bets
@@ -79,9 +77,7 @@ export default function Bets({ refresh }: { refresh: boolean }) {
             setAll(true);
           }}
           className={`${
-            all
-              ? "bg-[#7839C5]"
-              : "text-shadow-violet hover:bg-[#7839C530]"
+            all ? "bg-[#7839C5]" : "text-shadow-violet hover:bg-[#7839C530]"
           } w-full transform rounded-[5px] px-8 py-2 font-changa text-lg text-white transition duration-200 md:w-fit`}
         >
           All Bets
@@ -118,7 +114,7 @@ export default function Bets({ refresh }: { refresh: boolean }) {
             bets
               .slice(
                 page * transactionsPerPage - transactionsPerPage,
-                page * transactionsPerPage
+                page * transactionsPerPage,
               )
               .map((bet, index) => (
                 <div
@@ -175,9 +171,7 @@ export default function Bets({ refresh }: { refresh: boolean }) {
                 </div>
               ))
           ) : (
-            <span className="font-changa text-[#F0F0F080]">
-              No Bets made.
-            </span>
+            <span className="font-changa text-[#F0F0F080]">No Bets made.</span>
           )}
         </div>
       </div>

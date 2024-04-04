@@ -13,7 +13,7 @@ export default function GameHeader() {
   const router = useRouter();
   const game = router.pathname.split("/")[1];
 
-  const { coinData } = useGlobalContext();
+  const { coinData, getProvablyFairData } = useGlobalContext();
 
   //Provably Fair Modal handling
   const [isOpen, setIsOpen] = useState(false);
@@ -43,29 +43,15 @@ export default function GameHeader() {
       nonce: 0,
       status: "",
     },
-    totalBets: "",
-    game: GameType.dice,
   });
 
   useEffect(() => {
-    if (!wallet?.publicKey) return;
-
-    const fetchProvablyFairData = async (walletPubkey: string) => {
-      const res = await fetch(`/api/games/vrf`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          wallet: walletPubkey,
-        }),
-      });
-
-      let data = await res.json();
-      if (data.success) setModalData({ ...data, game });
-    };
-
-    fetchProvablyFairData(wallet.publicKey.toBase58());
+    (async () => {
+      if (wallet?.publicKey) {
+        const pfData = await getProvablyFairData();
+        if (pfData) setModalData(pfData);
+      }
+    })();
   }, [wallet.publicKey]);
 
   // Define game data for different games

@@ -1,13 +1,14 @@
-import { GameType, seedStatus } from "@/utils/vrf";
+import { seedStatus } from "@/utils/vrf";
 import Image from "next/image";
 import { useState } from "react";
 import { IoIosArrowDown, IoMdCopy } from "react-icons/io";
 import { Bet } from "../RollDiceTable";
-import trimStringToLength from "@/utils/trimStringToLength";
-import RollDiceProvablyFairModal, { PFModalData } from "./RollDiceProvablyFairModal";
+import RollDiceProvablyFairModal, {
+  PFModalData,
+} from "./RollDiceProvablyFairModal";
+import { useGlobalContext } from "@/components/GlobalContext";
 
 interface ModalData {
-  game: GameType;
   bet: Bet;
 }
 
@@ -19,7 +20,8 @@ interface Props {
 
 export default function VerifyBetModal({ isOpen, onClose, modalData }: Props) {
   //handling dice
-  const { game, bet } = modalData;
+  const { bet } = modalData;
+  const { getProvablyFairData } = useGlobalContext();
 
   //Provably Fair Modal handling
   const [isPFModalOpen, setIsPFModalOpen] = useState(false);
@@ -49,13 +51,8 @@ export default function VerifyBetModal({ isOpen, onClose, modalData }: Props) {
       nonce: 0,
       status: "",
     },
-    totalBets: "",
-    game: GameType.dice,
     tab: "seeds",
   });
-
-  //to handle coin flip
-  const [wonCoinFace, setWonCoinFace] = useState<"heads" | "tails">("heads");
 
   //to handle dropodown
   const [openDropDown, setOpenDropDown] = useState<boolean>(false);
@@ -64,6 +61,10 @@ export default function VerifyBetModal({ isOpen, onClose, modalData }: Props) {
     if (e.target === e.currentTarget) {
       onClose();
     }
+  };
+
+  const copyToClipboard = (text?: string) => {
+    if (text) navigator.clipboard.writeText(text);
   };
 
   return (
@@ -77,7 +78,7 @@ export default function VerifyBetModal({ isOpen, onClose, modalData }: Props) {
           <div className="bg-[#121418] max-h-[100vh] modalscrollbar overflow-y-scroll p-8 rounded-lg z-10 w-11/12 md:w-1/3">
             <div className="flex justify-between items-center">
               <div className="font-changa text-[1.75rem] font-semibold text-white">
-                {game}
+                Dice
               </div>
               <div className="text-[#F0F0F0] text-md">{bet.createdAt}</div>
             </div>
@@ -98,71 +99,61 @@ export default function VerifyBetModal({ isOpen, onClose, modalData }: Props) {
               </button>
             </div>
             <div className="mt-8 px-8 pt-10 border-2 border-white border-opacity-5 rounded-md">
-              {game === "dice" ? (
-                <div className="relative w-full mb-8 xl:mb-6">
-                  <div>
-                    <Image
-                      src="/assets/progressBar.png"
-                      alt="progress bar"
-                      width={900}
-                      height={100}
-                    />
-                  </div>
-                  <div className="flex justify-around md:gap-2">
-                    {Array.from({ length: 6 }, (_, i) => i + 1).map((face) => (
-                      <div
-                        key={face}
-                        className="flex flex-col items-center mr-2 sm:mr-0"
-                      >
-                        {bet.chosenNumbers.includes(face) &&
-                          bet.strikeNumber === face && (
-                            <Image
-                              src="/assets/pointer-green.png"
-                              alt="pointer green"
-                              width={13}
-                              height={13}
-                              className="absolute -top-[20px]"
-                            />
-                          )}
-                        <Image
-                          src="/assets/progressTip.png"
-                          alt="progress bar"
-                          width={13}
-                          height={13}
-                          className="absolute top-[2px]"
-                        />
-                        <Image
-                          src={
-                            bet.strikeNumber === face
-                              ? bet.chosenNumbers.includes(face)
-                                ? `/assets/winDiceFace${face}.png`
-                                : `/assets/lossDiceFace${face}.png`
-                              : bet.chosenNumbers.includes(face)
-                              ? `/assets/finalDiceFace${face}.png`
-                              : `/assets/diceFace${face}.png`
-                          }
-                          width={50}
-                          height={50}
-                          alt=""
-                          className={`inline-block mt-6 ${
-                            bet.chosenNumbers.includes(face)
-                              ? "selected-face"
-                              : ""
-                          }`}
-                        />
-                      </div>
-                    ))}
-                  </div>
+              <div className="relative w-full mb-8 xl:mb-6">
+                <div>
+                  <Image
+                    src="/assets/progressBar.png"
+                    alt="progress bar"
+                    width={900}
+                    height={100}
+                  />
                 </div>
-              ) : (
-                <div className="grid place-items-center">
-                  {wonCoinFace === "heads" ? (
-                    <div className="w-50 h-50 bg-[#FFC20E] rounded-full"></div>
-                  ) : (
-                    <div className="w-50 h-50 bg-[#C0C9D2] rounded-full"></div>
-                  )}
+                <div className="flex justify-around md:gap-2">
+                  {Array.from({ length: 6 }, (_, i) => i + 1).map((face) => (
+                    <div
+                      key={face}
+                      className="flex flex-col items-center mr-2 sm:mr-0"
+                    >
+                      {bet.chosenNumbers.includes(face) &&
+                        bet.strikeNumber === face && (
+                          <Image
+                            src="/assets/pointer-green.png"
+                            alt="pointer green"
+                            width={13}
+                            height={13}
+                            className="absolute -top-[20px]"
+                          />
+                        )}
+                      <Image
+                        src="/assets/progressTip.png"
+                        alt="progress bar"
+                        width={13}
+                        height={13}
+                        className="absolute top-[2px]"
+                      />
+                      <Image
+                        src={
+                          bet.strikeNumber === face
+                            ? bet.chosenNumbers.includes(face)
+                              ? `/assets/winDiceFace${face}.png`
+                              : `/assets/lossDiceFace${face}.png`
+                            : bet.chosenNumbers.includes(face)
+                            ? `/assets/selectedDiceFace${face}.png`
+                            : `/assets/diceFace${face}.png`
+                        }
+                        width={50}
+                        height={50}
+                        alt=""
+                        className={`inline-block mt-6 ${
+                          bet.chosenNumbers.includes(face)
+                            ? "selected-face"
+                            : ""
+                        }`}
+                      />
+                    </div>
+                  ))}
                 </div>
-              )}
+              </div>
               <div className="flex gap-4">
                 <div>
                   <label className="text-sm text-[#F0F0F0]">Multiplier</label>
@@ -207,7 +198,12 @@ export default function VerifyBetModal({ isOpen, onClose, modalData }: Props) {
                       </label>
                       <div className="bg-[#202329] truncate ... text-white mt-1 rounded-md px-4 py-2 mb-4 w-full relative flex items-center justify-between">
                         <div>{bet.gameSeed?.clientSeed}</div>
-                        <div>
+                        <div
+                          onClick={() =>
+                            copyToClipboard(bet.gameSeed?.clientSeed)
+                          }
+                          className="cursor-pointer"
+                        >
                           <Image
                             src={"/assets/copy.png"}
                             width={20}
@@ -221,7 +217,12 @@ export default function VerifyBetModal({ isOpen, onClose, modalData }: Props) {
                       <label className="text-xs text-[#F0F0F0]">Nonce</label>
                       <div className="bg-[#202329] text-white mt-1 rounded-md px-4 py-2 mb-4 w-full relative flex items-center justify-between">
                         <div>{bet.gameSeed?.nonce}</div>
-                        <div>
+                        <div
+                          onClick={() =>
+                            copyToClipboard(bet.gameSeed?.nonce.toString())
+                          }
+                          className="cursor-pointer"
+                        >
                           <Image
                             src={"/assets/copy.png"}
                             width={20}
@@ -242,9 +243,18 @@ export default function VerifyBetModal({ isOpen, onClose, modalData }: Props) {
                       </label>
                       <div className="bg-[#202329] text-white mt-1 rounded-md px-4 py-2 mb-4 w-full relative flex items-center justify-between">
                         <div className="">
-                          {trimStringToLength(bet.gameSeed?.serverSeedHash!, 5)}
+                          {bet.gameSeed?.serverSeed ??
+                            bet.gameSeed?.serverSeedHash}
                         </div>
-                        <div>
+                        <div
+                          onClick={() =>
+                            copyToClipboard(
+                              bet.gameSeed?.serverSeed ??
+                                bet.gameSeed?.serverSeedHash,
+                            )
+                          }
+                          className="cursor-pointer"
+                        >
                           <Image
                             src={"/assets/copy.png"}
                             width={20}
@@ -256,73 +266,25 @@ export default function VerifyBetModal({ isOpen, onClose, modalData }: Props) {
                     </div>
                   </div>
                   <div className="footer grid gap-1">
-                    {bet.gameSeed?.status === seedStatus.EXPIRED ? (
-                      <button
-                        className="bg-[#7839C5] rounded-md w-full text-xl text-white text-semibold py-2"
-                        onClick={() => {
-                          setPFModalData({
-                            activeGameSeed: {
-                              wallet: "",
-                              clientSeed: "",
-                              serverSeed: "",
-                              serverSeedHash: "",
-                              nonce: 0,
-                              status: "",
-                            },
-                            nextGameSeed: {
-                              wallet: "",
-                              clientSeed: "",
-                              serverSeed: "",
-                              serverSeedHash: "",
-                              nonce: 0,
-                              status: "",
-                            },
-                            totalBets: "",
-                            game: GameType.coin,
-                            tab: "verify",
-                          });
-                          openPFModal();
-                        }}
-                      >
-                        Verify
-                      </button>
-                    ) : (
-                      <>
-                        <div className="text-xs text-[#94A3B8] text-center">
-                          To verify this bet, you first need to rotate your seed
-                          pair.
-                        </div>
-                        <button
-                          className="bg-[#7839C5] rounded-md w-full text-xl text-white text-semibold py-2"
-                          onClick={() => {
-                            setPFModalData({
-                              activeGameSeed: {
-                                wallet: "",
-                                clientSeed: "",
-                                serverSeed: "",
-                                serverSeedHash: "",
-                                nonce: 0,
-                                status: "",
-                              },
-                              nextGameSeed: {
-                                wallet: "",
-                                clientSeed: "",
-                                serverSeed: "",
-                                serverSeedHash: "",
-                                nonce: 0,
-                                status: "",
-                              },
-                              totalBets: "",
-                              game: GameType.coin,
-                              tab: "verify",
-                            });
-                            openPFModal();
-                          }}
-                        >
-                          Rotate
-                        </button>
-                      </>
+                    {bet.gameSeed?.status !== seedStatus.EXPIRED && (
+                      <div className="text-xs text-[#94A3B8] text-center">
+                        To verify this bet, you first need to rotate your seed
+                        pair.
+                      </div>
                     )}
+                    <button
+                      className="bg-[#7839C5] rounded-md w-full text-xl text-white text-semibold py-2"
+                      onClick={async () => {
+                        const fpData = await getProvablyFairData();
+                        if (fpData) setPFModalData(fpData);
+
+                        openPFModal();
+                      }}
+                    >
+                      {bet.gameSeed?.status === seedStatus.EXPIRED
+                        ? "Verify"
+                        : "Rotate"}
+                    </button>
                   </div>
                 </div>
               )}

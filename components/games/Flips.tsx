@@ -2,11 +2,11 @@ import { useWallet } from "@solana/wallet-adapter-react";
 import { useState, useEffect } from "react";
 import toast from "react-hot-toast";
 import { obfuscatePubKey } from "@/context/transactions";
-import { GameType, seedStatus } from "@/utils/vrf";
-import VerifyBetModal from "./CoinFlip/VerifyBetModal";
+import { seedStatus } from "@/utils/vrf";
+import VerifyFlipModal from "./CoinFlip/VerifyFlipModal";
 
-export interface Bet {
-  flipType: boolean; // if true -> Heads else Tails
+export interface Flip {
+  flipType: "heads" | "tails";
   createdAt: string;
   wallet: string;
   amount: number;
@@ -21,11 +21,11 @@ export interface Bet {
   };
 }
 
-export default function FlipBets({ refresh }: { refresh: boolean }) {
+export default function FlipFlips({ refresh }: { refresh: boolean }) {
   const wallet = useWallet();
   const [all, setAll] = useState(wallet.publicKey ? false : true);
 
-  //My Bet Modal handling
+  //My Flip Modal handling
   const [isOpen, setIsOpen] = useState(false);
 
   const openModal = () => {
@@ -37,34 +37,30 @@ export default function FlipBets({ refresh }: { refresh: boolean }) {
   };
 
   const [page, setPage] = useState(1);
-  const [index, setIndex] = useState(0);
-  const [pagination, setPagination] = useState(0);
-  const [bet, setBet] = useState<Bet>();
-  const [bets, setBets] = useState<Bet[]>([]);
+  const [flip, setFlip] = useState<Flip>();
+  const [flips, setFlips] = useState<Flip[]>([]);
   const transactionsPerPage = 10;
   const [maxPages, setMaxPages] = useState(0);
 
-  const headers = ["Time", "Bet Type", "Amount", "Result"];
-  const allHeaders = ["Time", "Wallet", "Bet Type", "Amount", "Result"];
+  const headers = ["Time", "Flip Type", "Amount", "Result"];
+  const allHeaders = ["Time", "Wallet", "Flip Type", "Amount", "Result"];
 
   useEffect(() => {
-    if (refresh) {
-      const route = all
-        ? "/api/games/coin/getGlobalHistory"
-        : `/api/games/coin/getUserHistory?wallet=${wallet.publicKey?.toBase58()}`;
+    const route = all
+      ? "/api/games/coin/getGlobalHistory"
+      : `/api/games/coin/getUserHistory?wallet=${wallet.publicKey?.toBase58()}`;
 
-      fetch(`${route}`)
-        .then((res) => res.json())
-        .then((history) => {
-          if (history.success) {
-            setBets(history?.data ?? []);
-            setMaxPages(Math.ceil(history?.data.length / transactionsPerPage));
-          } else {
-            setBets([]);
-            // toast.error("Could not fetch history.");
-          }
-        });
-    }
+    fetch(`${route}`)
+      .then((res) => res.json())
+      .then((history) => {
+        if (history.success) {
+          setFlips(history?.data ?? []);
+          setMaxPages(Math.ceil(history?.data.length / transactionsPerPage));
+        } else {
+          setFlips([]);
+          // toast.error("Could not fetch history.");
+        }
+      });
   }, [all, refresh]);
 
   return (
@@ -80,7 +76,7 @@ export default function FlipBets({ refresh }: { refresh: boolean }) {
             all ? "text-shadow-violet hover:bg-[#7839C530]" : "bg-[#7839C5]"
           } w-full transform rounded-[5px] px-8 py-2 font-changa text-lg text-white transition duration-200 md:w-fit`}
         >
-          My Bets
+          My Flips
         </button>
         <button
           onClick={() => {
@@ -90,7 +86,7 @@ export default function FlipBets({ refresh }: { refresh: boolean }) {
             all ? "bg-[#7839C5]" : "text-shadow-violet hover:bg-[#7839C530]"
           } w-full transform rounded-[5px] px-8 py-2 font-changa text-lg text-white transition duration-200 md:w-fit`}
         >
-          All Bets
+          All Flips
         </button>
       </div>
 
@@ -98,7 +94,7 @@ export default function FlipBets({ refresh }: { refresh: boolean }) {
       <div className="scrollbar mt-10 w-full overflow-x-auto px-5 pb-8">
         <div className="flex w-full min-w-[50rem] flex-col items-center">
           {/* header  */}
-          {bets.length > 0 && (
+          {flips.length > 0 && (
             <div className="mb-5 flex w-full flex-row items-center rounded-[5px] py-1 bg-[#121418] gap-2">
               {!all
                 ? headers.map((header, index) => (
@@ -120,13 +116,13 @@ export default function FlipBets({ refresh }: { refresh: boolean }) {
             </div>
           )}
 
-          {bets.length > 0 ? (
-            bets
+          {flips.length > 0 ? (
+            flips
               .slice(
                 page * transactionsPerPage - transactionsPerPage,
                 page * transactionsPerPage,
               )
-              .map((bet, index) => (
+              .map((flip, index) => (
                 <>
                   <div
                     key={index}
@@ -134,23 +130,23 @@ export default function FlipBets({ refresh }: { refresh: boolean }) {
                       !all && "cursor-pointer"
                     }`}
                     onClick={() => {
-                      //fetch betDetails and verification details here
+                      //fetch flipDetails and verification details here
                       if (!all) {
-                        setBet(bet);
+                        setFlip(flip);
                         openModal();
                       }
                     }}
                   >
                     <span className="w-full text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
-                      {bet.createdAt
-                        ? new Date(bet.createdAt).toLocaleDateString("en-GB", {
+                      {flip.createdAt
+                        ? new Date(flip.createdAt).toLocaleDateString("en-GB", {
                             day: "2-digit",
                             month: "2-digit",
                             year: "2-digit",
                           })
                         : "-"}{" "}
-                      {bet.createdAt
-                        ? new Date(bet.createdAt).toLocaleTimeString("en-GB", {
+                      {flip.createdAt
+                        ? new Date(flip.createdAt).toLocaleTimeString("en-GB", {
                             hour: "2-digit",
                             minute: "2-digit",
                           })
@@ -158,32 +154,32 @@ export default function FlipBets({ refresh }: { refresh: boolean }) {
                     </span>
                     {all && (
                       <span className="w-full text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
-                        {obfuscatePubKey(bet.wallet)}
+                        {obfuscatePubKey(flip.wallet)}
                       </span>
                     )}
                     <span className="w-full text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
-                      {bet.flipType === true ? "HEADS" : "TAILS"}
+                      {flip.flipType.toUpperCase()}
                     </span>
                     <span className="w-full text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
-                      {(bet.amount ?? 0).toFixed(4)}
+                      {(flip.amount ?? 0).toFixed(4)}
                     </span>
                     <span
                       className={`w-full text-center font-changa text-sm text-opacity-75 ${
-                        bet.result === "Lost"
+                        flip.result === "Lost"
                           ? "text-[#CF304A]"
-                          : bet.result === "Won"
+                          : flip.result === "Won"
                           ? "text-[#03A66D]"
                           : "text-[#F0F0F0]"
                       }`}
                     >
-                      {bet.result}
+                      {flip.result}
                     </span>
                   </div>
                 </>
               ))
           ) : (
             <span className="w-full text-center font-changa text-[#F0F0F080]">
-              No Bets made.
+              No Flips made.
             </span>
           )}
         </div>
@@ -198,8 +194,8 @@ export default function FlipBets({ refresh }: { refresh: boolean }) {
         >
           &lt;
         </span>
-        {bets &&
-          bets.length > 0 &&
+        {flips &&
+          flips.length > 0 &&
           [...Array(maxPages)]
             .map((_, i) => ++i)
             .slice(0, 3)
@@ -218,8 +214,8 @@ export default function FlipBets({ refresh }: { refresh: boolean }) {
             ))}
         <span className="text-[#F0F0F0]">. . .</span>
 
-        {bets &&
-          bets.length > 0 &&
+        {flips &&
+          flips.length > 0 &&
           [...Array(maxPages)]
             .map((_, i) => ++i)
             .slice(maxPages - 3, maxPages)
@@ -245,10 +241,10 @@ export default function FlipBets({ refresh }: { refresh: boolean }) {
           &gt;
         </span>
       </div>
-      <VerifyBetModal
+      <VerifyFlipModal
         isOpen={isOpen}
         onClose={closeModal}
-        modalData={{ game: GameType.coin, bet: bet! }}
+        modalData={{ flip: flip! }}
       />
     </div>
   );
