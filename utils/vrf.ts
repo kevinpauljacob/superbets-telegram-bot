@@ -35,6 +35,7 @@ export enum seedStatus {
 export enum GameType {
   dice = "dice",
   coin = "coinflip",
+  options = "options",
   dice2 = "dice2",
   wheel = "wheel",
   plinko = "plinko",

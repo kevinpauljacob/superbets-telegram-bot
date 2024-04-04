@@ -11,7 +11,7 @@ export default function GameHeader() {
   const wallet = useWallet();
   const router = useRouter();
 
-  const {coinData} = useGlobalContext()
+  const { coinData } = useGlobalContext();
 
   //Provably Fair Modal handling
   const [isOpen, setIsOpen] = useState(false);
@@ -45,6 +45,9 @@ export default function GameHeader() {
     game: GameType.dice,
   });
 
+  // Extract the game name from the route path
+  const game = router.pathname.split("/")[1];
+
   useEffect(() => {
     if (!wallet?.publicKey) return;
 
@@ -60,60 +63,60 @@ export default function GameHeader() {
       });
 
       let data = await res.json();
-      const game = router.pathname.split("/")[1];
       if (data.success) setModalData({ ...data, game });
     };
 
     fetchProvablyFairData(wallet.publicKey.toBase58());
   }, [wallet.publicKey]);
 
+  useEffect(() => {
+    const fetchGameData = (game: GameType) => {
+      fetch(`/api/games/getStats?game=${game}`)
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.success)
+            setGameData((prev) => ({
+              ...prev,
+              [game]: {
+                ...prev[game],
+                stats: data.stats,
+              },
+            }));
+        });
+    };
+
+    if (!Object.entries(GameType).some(([_, value]) => value === game)) return;
+
+    fetchGameData(game as GameType);
+  }, []);
+
   // Define game data for different games
-  const gameData: Record<
-    string,
-    {
-      icon: string;
-      name: string;
-      stats: {
-        volume: string;
-        players: string;
-        balance: string;
-      };
-    }
-  > = {
+  const [gameData, setGameData] = useState<
+    Record<
+      string,
+      {
+        icon: string;
+        name: string;
+        stats?: { volume: number; players: number; balance: number };
+      }
+    >
+  >({
     dice: {
       icon: "/assets/dice.png",
       name: "Dice To Win",
-      stats: {
-        volume: "23,567",
-        players: "23,567",
-        balance: "2.3",
-      },
     },
     coinflip: {
       icon: "/assets/coinflip.png",
       name: "Fomo Flip",
-      stats: {
-        volume: "15,432",
-        players: "19,876",
-        balance: "3.7",
-      },
     },
     binary: {
       icon: "/assets/binary.png",
       name: "Binary",
-      stats: {
-        volume: "10,234",
-        players: "14,567",
-        balance: "1.8",
-      },
     },
-  };
-
-  // Extract the game name from the route path
-  const gameName = router.pathname.split("/")[1];
+  });
 
   // Get the game details based on the extracted game name
-  const selectedGame = gameData[gameName];
+  const selectedGame = gameData[game];
 
   // If the selected game exists, render its details, otherwise render null
   return selectedGame ? (
@@ -140,13 +143,13 @@ export default function GameHeader() {
           <div className="flex items-center justify-between bg-[#1E2220] rounded-md mx-1.5  my-1 px-2 py-1">
             <p className="font-light text-xs">Volume :&nbsp;</p>
             <p className="text-[#7839C5] font-semibold text-xs">
-              {selectedGame.stats.volume}
+              {selectedGame.stats?.volume.toFixed(2)}
             </p>
           </div>
           <div className="flex items-center justify-between bg-[#1E2220] rounded-md mx-1.5  my-1 px-2 py-1">
             <p className="font-light text-xs">Unique Players :&nbsp;</p>
             <p className="text-[#7839C5] font-semibold text-xs">
-              {selectedGame.stats.players}
+              {selectedGame.stats?.players}
             </p>
           </div>
           <div className="flex items-center gap-2 mx-1.5 my-1 ">
