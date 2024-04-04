@@ -109,9 +109,9 @@ export default function GameHeader() {
       icon: "/assets/coinflip.png",
       name: "Fomo Flip",
     },
-    binary: {
+    options: {
       icon: "/assets/binary.png",
-      name: "Binary",
+      name: "Binary Options",
     },
   });
 

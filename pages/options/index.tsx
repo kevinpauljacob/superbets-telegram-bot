@@ -19,7 +19,7 @@ const Progress = dynamic(() => import("../../components/games/Progressbar"), {
   ssr: false,
 });
 
-export default function Binary() {
+export default function Options() {
   const wallet = useWallet();
   const methods = useForm();
 
