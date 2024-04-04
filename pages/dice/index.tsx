@@ -42,7 +42,7 @@ export default function Dice() {
     { face: 2, isWin: true },
     { face: 6, isWin: false },
   ]);
-  const [strikeFace, setStrikeFace] = useState<number | null>(5);
+  const [strikeFace, setStrikeFace] = useState<number>(0);
 
   const handleDiceClick = (newFace: number) => {
     if (selectedFace.length >= 5 && !selectedFace.includes(newFace)) {
@@ -126,10 +126,19 @@ export default function Dice() {
     getBalance();
   }, [wallet?.publicKey, refresh]);
 
+  console.log(
+    !selectedFaces[5]
+      ? selectedFace.includes(strikeFace)
+        ? strikeFace === 5
+          ? "/assets/winDiceFace5.png" // Use winning dice face image if strikeFace is 1
+          : "/assets/finalDiceFace5.png" // Use regular dice face image if face 1 is selected but not strikeFace
+        : "/assets/lossDiceFace5.png" // Use loss dice face image if face 1 is not selected
+      : "/assets/diceFace5.png",
+  );
   return (
-    <div className="flex h-full w-full flex-col items-center justify-start p-10">
-      <div className="flex flex-col xl:flex-row items-start rounded-[1.15rem] bg-[#121418] text-white w-full">
-        <div className="xl:border-r border-white/10 xl:w-[35%] w-full p-6 sm:p-8 xl:p-14">
+    <div className="flex h-full w-full flex-col items-center justify-start p-3.5 sm:p-10">
+      <div className="flex flex-col-reverse xl:flex-row items-start rounded-md sm:rounded-[1.15rem] bg-[#121418] text-white w-full ">
+        <div className="xl:border-r border-white/10 xl:w-[35%] w-full px-3 pb-6 pt-3 sm:p-8 xl:p-14">
           <BetSetting betSetting={rollType} setBetSetting={setRollType} />
 
           <div className="mb-6">
@@ -215,16 +224,16 @@ export default function Dice() {
             </button>
           </div>
         </div>
-        <div className="xl:border-l border-white/10 xl:w-[65%] h-full px-6 pb-6 sm:px-8 sm:pb-8 xl:p-8">
+        <div className="xl:border-l border-white/10 xl:w-[65%] h-full px-3 py-3 sm:px-8 sm:pb-8 xl:p-8">
           <div className="bg-[#0C0F16] flex flex-col justify-between h-full sm:h-[450px] rounded-lg p-4 sm:p-12">
-            <div className="flex flex-col sm:flex-row justify-between items-center">
+            <div className="flex justify-between items-center mb-7 sm:mb-0">
               <div>
                 {isRolling ? (
-                  <div className="font-changa text-sm font-semibold text-white text-opacity-80">
+                  <div className="font-changa text-xs font-semibold text-white text-opacity-80">
                     Rolling the dice...
                   </div>
                 ) : (
-                  <div className="font-changa text-sm font-semibold text-white text-opacity-80">
+                  <div className="font-changa text-xs font-semibold text-white text-opacity-80">
                     {selectedFace.length === 0
                       ? "Choose up to 5 faces"
                       : `${selectedFace.length
@@ -240,8 +249,8 @@ export default function Dice() {
                     src={`/assets/${
                       result.isWin ? "winDiceFace" : "lossDiceFace"
                     }${result.face}.png`}
-                    width={30}
-                    height={30}
+                    width={15}
+                    height={15}
                     alt={`Dice face ${result.face}`}
                     className={`mr-2 inline-block ${
                       selectedFace.includes(result.face) ? "selected-face" : ""
@@ -264,9 +273,9 @@ export default function Dice() {
                   <Image
                     src="/assets/progressTip.png"
                     alt="progress bar"
-                    width={13}
-                    height={13}
-                    className="absolute top-[4px]"
+                    width={8}
+                    height={8}
+                    className="absolute top-[0px] w-[8px] h-[8px] sm:w-[10px] sm:h-[10px] md:w-[13px] md:h-[13px] sm:top-[2px] md:top-[4px]"
                   />
                   <Image
                     src={
@@ -274,9 +283,11 @@ export default function Dice() {
                         ? selectedFace.includes(1)
                           ? strikeFace === 1
                             ? "/assets/winDiceFace1.png" // Use winning dice face image if strikeFace is 1
-                            : "/assets/finalDiceFace1.png" // Use regular dice face image if face 1 is selected but not strikeFace
-                          : "/assets/lossDiceFace1.png" // Use loss dice face image if face 1 is not selected
-                        : "/assets/diceFace1.png" // Use regular dice face image if face 1 is not selected
+                            : "/assets/finalDiceFace1.png" // Use selected dice face image if face 1 is selected but not strikeFace
+                          : "/assets/diceFace1.png" // Use regular dice face image if face 1 is not selected
+                        : strikeFace === 1
+                        ? "/assets/lossDiceFace1.png" // Use losing dice face image if strikeFace is 1 and face 1 is not selected
+                        : "/assets/diceFace1.png" // Use regular dice face image if face 1 is not selected and strikeFace is not 1
                     }
                     width={50}
                     height={50}
@@ -293,7 +304,7 @@ export default function Dice() {
                     alt="progress bar"
                     width={13}
                     height={13}
-                    className="absolute top-[4px]"
+                    className="absolute top-[0px] w-[8px] h-[8px] sm:w-[10px] sm:h-[10px] md:w-[13px] md:h-[13px] sm:top-[2px] md:top-[4px]"
                   />
                   <Image
                     src={
@@ -301,9 +312,11 @@ export default function Dice() {
                         ? selectedFace.includes(2)
                           ? strikeFace === 2
                             ? "/assets/winDiceFace2.png" // Use winning dice face image if strikeFace is 1
-                            : "/assets/finalDiceFace2.png" // Use regular dice face image if face 1 is selected but not strikeFace
-                          : "/assets/lossDiceFace2.png" // Use loss dice face image if face 1 is not selected
-                        : "/assets/diceFace2.png" // Use regular dice face image if face 1 is not selected
+                            : "/assets/finalDiceFace2.png" // Use selected dice face image if face 1 is selected but not strikeFace
+                          : "/assets/diceFace2.png" // Use regular dice face image if face 1 is not selected
+                        : strikeFace === 2
+                        ? "/assets/lossDiceFace2.png" // Use losing dice face image if strikeFace is 1 and face 1 is not selected
+                        : "/assets/diceFace2.png" // Use regular dice face image if face 1 is not selected and strikeFace is not 1
                     }
                     width={50}
                     height={50}
@@ -320,7 +333,7 @@ export default function Dice() {
                     alt="progress bar"
                     width={13}
                     height={13}
-                    className="absolute top-[4px]"
+                    className="absolute top-[0px] w-[8px] h-[8px] sm:w-[10px] sm:h-[10px] md:w-[13px] md:h-[13px] sm:top-[2px] md:top-[4px]"
                   />
                   <Image
                     src={
@@ -328,9 +341,11 @@ export default function Dice() {
                         ? selectedFace.includes(3)
                           ? strikeFace === 3
                             ? "/assets/winDiceFace3.png" // Use winning dice face image if strikeFace is 1
-                            : "/assets/finalDiceFace3.png" // Use regular dice face image if face 1 is selected but not strikeFace
-                          : "/assets/lossDiceFace3.png" // Use loss dice face image if face 1 is not selected
-                        : "/assets/diceFace3.png" // Use regular dice face image if face 1 is not selected
+                            : "/assets/finalDiceFace3.png" // Use selected dice face image if face 1 is selected but not strikeFace
+                          : "/assets/diceFace3.png" // Use regular dice face image if face 1 is not selected
+                        : strikeFace === 3
+                        ? "/assets/lossDiceFace3.png" // Use losing dice face image if strikeFace is 1 and face 1 is not selected
+                        : "/assets/diceFace3.png" // Use regular dice face image if face 1 is not selected and strikeFace is not 1
                     }
                     width={50}
                     height={50}
@@ -347,7 +362,7 @@ export default function Dice() {
                     alt="progress bar"
                     width={13}
                     height={13}
-                    className="absolute top-[4px]"
+                    className="absolute top-[0px] w-[8px] h-[8px] sm:w-[10px] sm:h-[10px] md:w-[13px] md:h-[13px] sm:top-[2px] md:top-[4px]"
                   />
                   <Image
                     src={
@@ -355,9 +370,11 @@ export default function Dice() {
                         ? selectedFace.includes(4)
                           ? strikeFace === 4
                             ? "/assets/winDiceFace4.png" // Use winning dice face image if strikeFace is 1
-                            : "/assets/finalDiceFace4.png" // Use regular dice face image if face 1 is selected but not strikeFace
-                          : "/assets/lossDiceFace4.png" // Use loss dice face image if face 1 is not selected
-                        : "/assets/diceFace4.png" // Use regular dice face image if face 1 is not selected
+                            : "/assets/finalDiceFace4.png" // Use selected dice face image if face 1 is selected but not strikeFace
+                          : "/assets/diceFace4.png" // Use regular dice face image if face 1 is not selected
+                        : strikeFace === 4
+                        ? "/assets/lossDiceFace4.png" // Use losing dice face image if strikeFace is 1 and face 1 is not selected
+                        : "/assets/diceFace4.png" // Use regular dice face image if face 1 is not selected and strikeFace is not 1
                     }
                     width={50}
                     height={50}
@@ -374,7 +391,7 @@ export default function Dice() {
                     alt="progress bar"
                     width={13}
                     height={13}
-                    className="absolute top-[4px]"
+                    className="absolute top-[0px] w-[8px] h-[8px] sm:w-[10px] sm:h-[10px] md:w-[13px] md:h-[13px] sm:top-[2px] md:top-[4px]"
                   />
                   <Image
                     src={
@@ -382,9 +399,11 @@ export default function Dice() {
                         ? selectedFace.includes(5)
                           ? strikeFace === 5
                             ? "/assets/winDiceFace5.png" // Use winning dice face image if strikeFace is 1
-                            : "/assets/finalDiceFace5.png" // Use regular dice face image if face 1 is selected but not strikeFace
-                          : "/assets/lossDiceFace5.png" // Use loss dice face image if face 1 is not selected
-                        : "/assets/diceFace5.png" // Use regular dice face image if face 1 is not selected
+                            : "/assets/finalDiceFace5.png" // Use selected dice face image if face 1 is selected but not strikeFace
+                          : "/assets/diceFace5.png" // Use regular dice face image if face 1 is not selected
+                        : strikeFace === 5
+                        ? "/assets/lossDiceFace5.png" // Use losing dice face image if strikeFace is 1 and face 1 is not selected
+                        : "/assets/diceFace5.png" // Use regular dice face image if face 1 is not selected and strikeFace is not 1
                     }
                     width={50}
                     height={50}
@@ -401,7 +420,7 @@ export default function Dice() {
                     alt="progress bar"
                     width={13}
                     height={13}
-                    className="absolute top-[4px]"
+                    className="absolute top-[0px] w-[8px] h-[8px] sm:w-[10px] sm:h-[10px] md:w-[13px] md:h-[13px] sm:top-[2px] md:top-[4px]"
                   />
                   <Image
                     src={
@@ -409,9 +428,11 @@ export default function Dice() {
                         ? selectedFace.includes(6)
                           ? strikeFace === 6
                             ? "/assets/winDiceFace6.png" // Use winning dice face image if strikeFace is 1
-                            : "/assets/finalDiceFace6.png" // Use regular dice face image if face 1 is selected but not strikeFace
-                          : "/assets/lossDiceFace6.png" // Use loss dice face image if face 1 is not selected
-                        : "/assets/diceFace6.png" // Use regular dice face image if face 1 is not selected
+                            : "/assets/finalDiceFace6.png" // Use selected dice face image if face 1 is selected but not strikeFace
+                          : "/assets/diceFace6.png" // Use regular dice face image if face 1 is not selected
+                        : strikeFace === 6
+                        ? "/assets/lossDiceFace6.png" // Use losing dice face image if strikeFace is 1 and face 1 is not selected
+                        : "/assets/diceFace6.png" // Use regular dice face image if face 1 is not selected and strikeFace is not 1
                     }
                     width={50}
                     height={50}
