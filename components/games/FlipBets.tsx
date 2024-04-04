@@ -2,14 +2,23 @@ import { useWallet } from "@solana/wallet-adapter-react";
 import { useState, useEffect } from "react";
 import toast from "react-hot-toast";
 import { obfuscatePubKey } from "@/context/transactions";
+import { GameType, seedStatus } from "@/utils/vrf";
+import VerifyBetModal from "./CoinFlip/VerifyBetModal";
 
-interface Flip {
-  wallet: string;
-  createdAt: string;
+export interface Bet {
   flipType: boolean; // if true -> Heads else Tails
+  createdAt: string;
+  wallet: string;
   amount: number;
-  result: "Pending" | "Won" | "Lost";
-  tokenMint?: string;
+  result: "Won" | "Lost";
+  amountWon: number;
+  gameSeed?: {
+    status: seedStatus;
+    clientSeed: string;
+    nonce: number;
+    serverSeed?: string;
+    serverSeedHash: string;
+  };
 }
 
 export default function FlipBets({ refresh }: { refresh: boolean }) {
@@ -27,25 +36,11 @@ export default function FlipBets({ refresh }: { refresh: boolean }) {
     setIsOpen(false);
   };
 
-  const [modalData, setModalData] = useState({
-    game: "",
-    betTime: "",
-    betAmount: 0,
-    multiplier: 0,
-    payout: 0,
-    chance: 0,
-    verificationAttributes: {
-      clientSeed: "",
-      nonce: 0,
-      serverSeed: "",
-    },
-  });
-
   const [page, setPage] = useState(1);
   const [index, setIndex] = useState(0);
   const [pagination, setPagination] = useState(0);
-
-  const [bets, setBets] = useState<Flip[]>([]);
+  const [bet, setBet] = useState<Bet>();
+  const [bets, setBets] = useState<Bet[]>([]);
   const transactionsPerPage = 10;
   const [maxPages, setMaxPages] = useState(0);
 
@@ -132,79 +127,59 @@ export default function FlipBets({ refresh }: { refresh: boolean }) {
                 page * transactionsPerPage,
               )
               .map((bet, index) => (
-                <div
-                  key={index}
-                  className="mb-2.5 flex w-full flex-row items-center gap-2 rounded-[5px] bg-[#121418] py-3"
-                  onClick={() => {
-                    //fetch betDetails and verification details here
-                    if (!all) {
-                      const betDetails = {
-                        game: "COIN FLIP",
-                        betTime:
-                          new Date(bet.createdAt).toLocaleDateString("en-GB", {
+                <>
+                  <div
+                    key={index}
+                    className={`mb-2.5 ml-2.5 mr-2.5 flex w-full flex-row items-center gap-2 rounded-[5px] bg-[#121418] py-3 ${
+                      !all && "cursor-pointer"
+                    }`}
+                    onClick={() => {
+                      //fetch betDetails and verification details here
+                      if (!all) {
+                        setBet(bet);
+                        openModal();
+                      }
+                    }}
+                  >
+                    <span className="w-full text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
+                      {bet.createdAt
+                        ? new Date(bet.createdAt).toLocaleDateString("en-GB", {
                             day: "2-digit",
                             month: "2-digit",
                             year: "2-digit",
-                          }) +
-                          " " +
-                          new Date(bet.createdAt).toLocaleTimeString("en-GB", {
+                          })
+                        : "-"}{" "}
+                      {bet.createdAt
+                        ? new Date(bet.createdAt).toLocaleTimeString("en-GB", {
                             hour: "2-digit",
                             minute: "2-digit",
-                          }) +
-                          " UTC",
-                        betAmount: bet?.amount,
-                        multiplier: 1.3,
-                        payout: 3,
-                        chance: 30000,
-                        verificationAttributes: {
-                          clientSeed: "dgsg",
-                          nonce: 0,
-                          serverSeed: "jhasfkh",
-                        },
-                      };
-                      setModalData(betDetails);
-                      openModal();
-                    }
-                  }}
-                >
-                  <span className="w-full text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
-                    {bet.createdAt
-                      ? new Date(bet.createdAt).toLocaleDateString("en-GB", {
-                          day: "2-digit",
-                          month: "2-digit",
-                          year: "2-digit",
-                        })
-                      : "-"}{" "}
-                    {bet.createdAt
-                      ? new Date(bet.createdAt).toLocaleTimeString("en-GB", {
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        })
-                      : "-"}
-                  </span>
-                  {all && (
-                    <span className="w-full text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
-                      {obfuscatePubKey(bet.wallet)}
+                          })
+                        : "-"}
                     </span>
-                  )}
-                  <span className="w-full text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
-                    {bet.flipType ? "HEADS" : "TAILS"}
-                  </span>
-                  <span className="w-full text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
-                    {(bet.amount ?? 0).toFixed(4)}
-                  </span>
-                  <span
-                    className={`w-full text-center font-changa text-sm text-opacity-75 ${
-                      bet.result === "Lost"
-                        ? "text-[#CF304A]"
-                        : bet.result === "Won"
-                        ? "text-[#03A66D]"
-                        : "text-[#F0F0F0]"
-                    }`}
-                  >
-                    {bet.result}
-                  </span>
-                </div>
+                    {all && (
+                      <span className="w-full text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
+                        {obfuscatePubKey(bet.wallet)}
+                      </span>
+                    )}
+                    <span className="w-full text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
+                      {bet.flipType === true ? "HEADS" : "TAILS"}
+                    </span>
+                    <span className="w-full text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
+                      {(bet.amount ?? 0).toFixed(4)}
+                    </span>
+                    <span
+                      className={`w-full text-center font-changa text-sm text-opacity-75 ${
+                        bet.result === "Lost"
+                          ? "text-[#CF304A]"
+                          : bet.result === "Won"
+                          ? "text-[#03A66D]"
+                          : "text-[#F0F0F0]"
+                      }`}
+                    >
+                      {bet.result}
+                    </span>
+                  </div>
+                </>
               ))
           ) : (
             <span className="w-full text-center font-changa text-[#F0F0F080]">
@@ -270,6 +245,11 @@ export default function FlipBets({ refresh }: { refresh: boolean }) {
           &gt;
         </span>
       </div>
+      <VerifyBetModal
+        isOpen={isOpen}
+        onClose={closeModal}
+        modalData={{ game: GameType.coin, bet: bet! }}
+      />
     </div>
   );
 }
