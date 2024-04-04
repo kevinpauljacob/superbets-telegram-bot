@@ -165,7 +165,8 @@ export default function Flip() {
                           Bet amount
                         </label>
                         <span className="text-sm text-[#F0F0F0] text-opacity-75">
-                          Available : {coinData ? coinData[0]?.amount.toFixed(4) : 0}
+                          Available :{" "}
+                          {coinData ? coinData[0]?.amount.toFixed(4) : 0}
                         </span>
                       </div>
 
@@ -211,7 +212,8 @@ export default function Flip() {
                     </div>
 
                     {/* balance alert  */}
-                    {(!coinData || (coinData && coinData[0].amount < 0.0001)) && (
+                    {(!coinData ||
+                      (coinData && coinData[0].amount < 0.0001)) && (
                       <div className="mb-5 w-full rounded-lg bg-[#0C0F16] px-3 pb-2 pt-4 text-white md:px-6">
                         <div className="-full mb-3 text-center font-changa font-medium text-[#F0F0F0] text-opacity-75">
                           Please deposit funds to start playing. View{" "}
@@ -258,21 +260,12 @@ export default function Flip() {
                           flipping ? (
                             // while getting flip result
                             <div className="flex w-full flex-col items-center justify-center">
-                              <div className="flex w-full flex-col items-end gap-1">
-                                <span className="font-changa text-xs text-[#FFFFFF] text-opacity-75">
-                                  {betType}
-                                </span>
-                                <span className="font-changa text-xs font-semibold text-white text-opacity-75">
-                                  {betAmt} $SOL
-                                </span>
-                              </div>
-
                               <Image
                                 src={"/assets/coin.png"}
                                 width={50}
                                 height={50}
                                 alt=""
-                                className="rotate -mt-8 mb-2"
+                                className="rotate mb-2"
                               />
                               <span className="font-changa text-xs text-[#FFFFFF] text-opacity-75">
                                 Deposit Confirmed
@@ -284,15 +277,7 @@ export default function Flip() {
                           ) : (
                             // after getting flip result
                             <div className="flex w-full flex-col items-center justify-center">
-                              <div className="flex w-full flex-col items-end gap-1">
-                                <span className="font-changa text-xs text-[#FFFFFF] text-opacity-75">
-                                  {betType}
-                                </span>
-                                <span className="font-changa text-xs font-semibold text-white text-opacity-75">
-                                  {betAmt} $SOL
-                                </span>
-                              </div>
-                              <span className="-mt-8 font-changa text-xs text-[#FFFFFF] text-opacity-75">
+                              <span className="font-changa text-xs text-[#FFFFFF] text-opacity-75">
                                 {result && result === "Won"
                                   ? "yay..."
                                   : "ooops..."}
@@ -321,21 +306,12 @@ export default function Flip() {
                           loading && (
                             // when making bet request
                             <div className="flex w-full flex-col items-center justify-center">
-                              <div className="flex w-full flex-col items-end gap-1">
-                                <span className="font-changa text-xs text-[#FFFFFF] text-opacity-75">
-                                  {betType}
-                                </span>
-                                <span className="font-changa text-xs font-semibold text-white text-opacity-75">
-                                  {betAmt} $SOL
-                                </span>
-                              </div>
-
                               <Image
                                 src={"/assets/coin.png"}
                                 width={50}
                                 height={50}
                                 alt=""
-                                className="rotate -mt-8 mb-2"
+                                className="rotate mb-2"
                               />
                               <span className="font-changa text-xs text-[#FFFFFF] text-opacity-75">
                                 preparing for flip
@@ -382,7 +358,8 @@ export default function Flip() {
                           Bet amount
                         </label>
                         <span className="text-sm text-[#F0F0F0] text-opacity-75">
-                          Available : {coinData ? coinData[0]?.amount.toFixed(4) : 0}
+                          Available :{" "}
+                          {coinData ? coinData[0]?.amount.toFixed(4) : 0}
                         </span>
                       </div>
 
@@ -518,21 +495,12 @@ export default function Flip() {
                           flipping ? (
                             // while getting flip result
                             <div className="flex w-full flex-col items-center justify-center">
-                              <div className="flex w-full flex-col items-end gap-1">
-                                <span className="font-changa text-xs text-[#FFFFFF] text-opacity-75">
-                                  {betType}
-                                </span>
-                                <span className="font-changa text-xs font-semibold text-[#F200F2] text-opacity-75">
-                                  {betAmt} $SOL
-                                </span>
-                              </div>
-
                               <Image
                                 src={"/assets/coin.png"}
                                 width={50}
                                 height={50}
                                 alt=""
-                                className="rotate -mt-8 mb-2"
+                                className="rotate mb-2"
                               />
                               <span className="font-changa text-xs text-[#FFFFFF] text-opacity-75">
                                 Deposit Confirmed
@@ -544,15 +512,7 @@ export default function Flip() {
                           ) : (
                             // after getting flip result
                             <div className="flex w-full flex-col items-center justify-center">
-                              <div className="flex w-full flex-col items-end gap-1">
-                                <span className="font-changa text-xs text-[#FFFFFF] text-opacity-75">
-                                  {betType}
-                                </span>
-                                <span className="font-changa text-xs font-semibold text-[#F200F2] text-opacity-75">
-                                  {betAmt} $SOL
-                                </span>
-                              </div>
-                              <span className="-mt-8 font-changa text-xs text-[#FFFFFF] text-opacity-75">
+                              <span className="font-changa text-xs text-[#FFFFFF] text-opacity-75">
                                 {result && result === "Won"
                                   ? "yay..."
                                   : "ooops..."}
@@ -581,21 +541,12 @@ export default function Flip() {
                           loading && (
                             // when making bet request
                             <div className="flex w-full flex-col items-center justify-center">
-                              <div className="flex w-full flex-col items-end gap-1">
-                                <span className="font-changa text-xs text-[#FFFFFF] text-opacity-75">
-                                  {betType}
-                                </span>
-                                <span className="font-changa text-xs font-semibold text-[#F200F2] text-opacity-75">
-                                  {betAmt} $SOL
-                                </span>
-                              </div>
-
                               <Image
                                 src={"/assets/coin.png"}
                                 width={50}
                                 height={50}
                                 alt=""
-                                className="rotate -mt-8 mb-2"
+                                className="rotate mb-2"
                               />
                               <span className="font-changa text-xs text-[#FFFFFF] text-opacity-75">
                                 preparing for flip
@@ -634,7 +585,7 @@ export default function Flip() {
 
         <div className="bg-white bg-opacity-10 h-[1px] lg:h-[auto] w-full lg:w-[1px]" />
 
-        <div className="flex flex-1 flex-col items-center justify-between gap-4 m-5 bg-[#0C0F16] rounded-lg p-4">
+        <div className="flex flex-1 flex-col items-center justify-between gap-2 m-5 bg-[#0C0F16] rounded-lg p-4">
           <div
             className={`${
               betType && loading ? "opacity-100" : "opacity-0"
@@ -661,25 +612,25 @@ export default function Flip() {
                     : "border-transparent text-white"
                 } text-xs border-2 bg-[#282E3D] rounded`}
               >
-                {1.3}
+                {betAmt}
               </span>
               <span className="text-xs px-4 py-1 bg-[#282E3D] text-white rounded">
-                0.0x
+                1.0x
               </span>
             </div>
           </div>
 
-          <div className="w-20 h-20 md:w-40 md:h-40 relative">
+          <div className="w-20 h-20 md:w-40 md:h-40 relative mb-10">
             <Image
               src={"/assets/coin.png"}
               layout="fill"
               objectFit="contain"
               objectPosition="center"
               alt=""
-              className={`${betType && loading ? "rotate" : ""}`}
+              className={`${betType && loading && !result ? "rotate" : ""}`}
             />
           </div>
-          <GameFooterInfo multiplier={1.4} amount={22} chance={40} />
+          <GameFooterInfo multiplier={1.0} amount={betAmt} chance={50} />
         </div>
       </div>
 

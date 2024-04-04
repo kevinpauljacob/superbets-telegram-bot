@@ -104,7 +104,7 @@ export default function FlipBets({ refresh }: { refresh: boolean }) {
         <div className="flex w-full min-w-[50rem] flex-col items-center">
           {/* header  */}
           {bets.length > 0 && (
-            <div className="mb-5 flex w-full flex-row items-center bg-[#121418] gap-2">
+            <div className="mb-5 flex w-full flex-row items-center rounded-[5px] py-1 bg-[#121418] gap-2">
               {!all
                 ? headers.map((header, index) => (
                     <span
@@ -152,7 +152,7 @@ export default function FlipBets({ refresh }: { refresh: boolean }) {
                             minute: "2-digit",
                           }) +
                           " UTC",
-                        betAmount: bet.amount,
+                        betAmount: bet?.amount,
                         multiplier: 1.3,
                         payout: 3,
                         chance: 30000,
@@ -191,7 +191,7 @@ export default function FlipBets({ refresh }: { refresh: boolean }) {
                     {bet.flipType ? "HEADS" : "TAILS"}
                   </span>
                   <span className="w-full text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
-                    {bet.amount}
+                    {(bet.amount ?? 0).toFixed(4)}
                   </span>
                   <span
                     className={`w-full text-center font-changa text-sm text-opacity-75 ${

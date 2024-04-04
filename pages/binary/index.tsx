@@ -41,7 +41,7 @@ export default function Binary() {
   const [betEnd, setBetEnd] = useState(false);
   const [checkResult, setCheckResult] = useState(false);
   const [result, setResult] = useState<string | null>(null);
-  const [resultAmt, setResultAmt] = useState();
+  const [resultAmt, setResultAmt] = useState<number>();
 
   const [loading, setLoading] = useState(false);
   const [refresh, setRefresh] = useState(true);
@@ -59,6 +59,7 @@ export default function Binary() {
     // }, betInterval * 60000 + 400);
 
     setLoading(true);
+    setCheckResult(false)
     setRefresh(false);
     try {
       // console.log("Placing bet");
@@ -79,14 +80,16 @@ export default function Binary() {
         betInterval,
       );
       if (res.success) {
-        // toast.success(res?.message ?? "Got result");
+        toast.success(res?.message ?? "Bet placed");
         setRefresh(true);
         setStrikePrice(res?.data?.strikePrice);
         setBetTime(res?.data?.betTime);
         setTimeout(
           async () => {
+            // console.log("ending the bet")
             setBetInterval(3);
             setBetEnd(true);
+            setLoading(false);
 
             await new Promise((r) => setTimeout(r, 2000));
 
@@ -105,9 +108,9 @@ export default function Binary() {
       } else {
         setCheckResult(false);
         setBetEnd(false);
+        setLoading(false);
         res?.message && toast.error(res?.message);
       }
-      setLoading(false);
     } catch (e) {
       toast.error("Could not place bet.");
       setBetType(null);
@@ -167,8 +170,8 @@ export default function Binary() {
         .then(async (bets) => {
           let bet = bets.data;
           if (bets.success && bet && bet.result === "Pending") {
-            setBetType(bet.betType ? "up" : "down");
-            setBetAmt(bet.betAmount);
+            setBetType(bet.betType === "betUp" ? "up" : "down");
+            setBetAmt(bet.amount);
             setBetInterval(bet.timeFrame / 60);
             setStrikePrice(bet.strikePrice);
             setBetTime(bet.betTime);
@@ -197,11 +200,13 @@ export default function Binary() {
   };
 
   useEffect(() => {
-    console.log("imdogefather");
     getWalletBalance();
     getBalance();
+  }, [wallet.publicKey, strikePrice, refresh]);
+
+  useEffect(() => {
     getActiveBet();
-  }, [wallet.publicKey, strikePrice]);
+  }, [wallet.publicKey]);
 
   useEffect(() => {
     let intervalId = setInterval(async () => {
@@ -248,6 +253,7 @@ export default function Binary() {
       } else toast.error("Choose amount, interval and type.");
     }
   };
+
 
   return (
     <div className="flex h-full w-full flex-col items-center justify-start px-5">
@@ -400,7 +406,7 @@ export default function Binary() {
                 </div>
               </div>
 
-              {strikePrice != 0 ? (
+              {strikePrice !== 0 ? (
                 <div className="mb-0 flex w-full flex-col items-center rounded-lg bg-[#202329] px-6 py-4">
                   {checkResult ? (
                     loading && !result ? (
@@ -421,7 +427,7 @@ export default function Binary() {
                       <div className="flex w-full flex-col items-center">
                         {/* time and type  */}
                         <div className="flex w-full items-start justify-between">
-                          <div className="flex flex-col items-start gap-1">
+                          <div className="flex flex-col items-start -gap-1">
                             <Timer minutes={betInterval} betTime={betTime!} />
                             <span
                               className={`font-lilita ${
@@ -433,19 +439,19 @@ export default function Binary() {
                               {betType === "up" ? "BET UP" : "BET DOWN"}
                             </span>
                           </div>
-                          <div className="flex flex-col items-end gap-1">
-                            <span className="font-changa text-sm text-[#FFFFFF] text-opacity-75">
+                          <div className="flex flex-col items-end -gap-1">
+                            <span className="font-changa text-sm text-[#FFFFFF] text-opacity-75 mt-1">
                               Price Amount
                             </span>
                             <span className="font-changa text-sm font-semibold text-[#FFFFFF] text-opacity-90">
-                              {resultAmt} $SOL
+                              {resultAmt ? resultAmt!.toFixed(4) : 0} $SOL
                             </span>
                           </div>
                         </div>
 
                         {/* result  */}
                         <span
-                          className={`-mt-10 mb-2.5 font-changa text-[2.2rem] text-[#FFFFFF] text-opacity-90`}
+                          className={`-mt-0 mb-2.5 font-changa text-[2rem] text-[#FFFFFF] text-opacity-90`}
                         >
                           You {result}!
                         </span>
@@ -463,7 +469,7 @@ export default function Binary() {
                             setBetAmt(0.1);
                             setBetEndPrice(0);
                           }}
-                          className="w-full rounded-[5px] border border-[#F200F21A] bg-[#F200F2] px-5 py-2 font-changa font-semibold text-white text-opacity-90 shadow-[0_5px_10px_rgba(0,0,0,0.3)]"
+                          className="w-full rounded-[5px] border border-[#F200F21A] bg-[#7839C5] px-5 py-2 font-changa font-semibold text-white text-opacity-90 shadow-[0_5px_10px_rgba(0,0,0,0.3)]"
                         >
                           Bet Again
                         </button>
@@ -473,7 +479,7 @@ export default function Binary() {
                     <div className="flex w-full flex-col items-center">
                       {/* time and type  */}
                       <div className="flex w-full items-start justify-between">
-                        <div className="flex flex-col items-start gap-1">
+                        <div className="flex flex-col items-start -gap-1">
                           <Timer minutes={betInterval} betTime={betTime!} />
                           <span
                             className={`font-lilita ${
@@ -485,12 +491,12 @@ export default function Binary() {
                             {betType === "up" ? "BET UP" : "BET DOWN"}
                           </span>
                         </div>
-                        <div className="flex flex-col items-end gap-1">
+                        <div className="flex flex-col items-end -gap-1">
                           <span className="font-changa text-sm text-[#FFFFFF] text-opacity-75">
                             Price Amount
                           </span>
                           <span className="font-changa text-sm font-semibold text-[#FFFFFF] text-opacity-90">
-                            {betAmt} $SOL
+                            {betAmt.toFixed(4)} $SOL
                           </span>
                         </div>
                       </div>
@@ -498,7 +504,7 @@ export default function Binary() {
                       {/* price  */}
                       <div
                         className={`flex ${
-                          betEnd ? "flex-row" : "-mt-3 flex-col"
+                          betEnd ? "flex-row" : "-mt-1 flex-col"
                         } mb-3 items-center`}
                       >
                         <span
@@ -535,7 +541,7 @@ export default function Binary() {
                 </div>
               ) : loading && !checkResult ? (
                 <div className="flex items-center gap-2 rounded-lg bg-[#202329] p-2">
-                  <span className="min-w-[11rem] font-changa text-xl font-medium text-[#F0F0F0] text-opacity-75">
+                  <span className="font-changa text-xl font-medium text-[#F0F0F0] text-opacity-75">
                     Betting in Progress
                   </span>
                   <Loader />
@@ -551,7 +557,7 @@ export default function Binary() {
                     }
                     onClick={onSubmit}
                     className={`${
-                      !user || (coinData && coinData[0].amount < 0.0001)
+                      !coinData || (coinData && coinData[0].amount < 0.0001)
                         ? "cursor-not-allowed opacity-70"
                         : "hover:opacity-90"
                     } w-full rounded-lg bg-[#7839C5] py-2.5 font-lilita text-xl text-white`}
@@ -566,7 +572,7 @@ export default function Binary() {
 
         <div className="bg-white bg-opacity-10 w-[1px]" />
 
-        <div className="flex flex-1 flex-col items-center justify-between gap-4 m-5 bg-[#0C0F16] rounded-lg p-4">
+        <div className="flex flex-1 flex-col items-center justify-between gap-2 m-5 bg-[#0C0F16] rounded-lg p-4">
           {/* time and amt */}
           <div
             className={`${
@@ -591,8 +597,8 @@ export default function Binary() {
           </div>
 
           {/* central loader  */}
-          <div className="flex flex-col items-center relative">
-            <div className="flex flex-col items-center absolute w-[15rem] h-[15rem] justify-center">
+          <div className="flex flex-col items-center relative mb-10">
+            <div className="flex flex-col items-center absolute w-[12rem] h-[12rem] justify-center">
               <span className="font-change text-sm text-[#94A3B8] text-opacity-75 mb-5">
                 $SOL
               </span>
@@ -607,24 +613,24 @@ export default function Binary() {
                       : "text-[#CF304A]"
                   } text-opacity-90 font-changa`}
                 >
-                  {Math.abs(livePrice - strikePrice)}
+                  {Math.abs(livePrice - strikePrice).toFixed(4)}
                 </span>
               )}
             </div>
-            <div className="w-[15rem] h-[15rem] relative">
+            <div className="w-[12rem] h-[12rem] relative">
               {[...Array(40)].map((item, index) => (
                 <div
                   key={index}
-                  className={`w-[7.5rem] h-2 flex justify-end absolute top-[50%] left-[50%] origin-[0_0px] bg-transparent`}
+                  className={`w-[6rem] h-2 flex justify-end absolute top-[50%] left-[50%] origin-[0_0px] bg-transparent`}
                   style={{ rotate: `${(360 / 40) * index}deg` }}
                 >
-                  <div className="w-2 h-2 bg-white" />
+                  <div className="w-[8px] h-[5px] bg-white" />
                 </div>
               ))}
             </div>
           </div>
 
-          <GameFooterInfo multiplier={1.33} amount={4} chance={40} />
+          <GameFooterInfo multiplier={1.0} amount={betAmt ?? 0} chance={50} />
         </div>
       </div>
 

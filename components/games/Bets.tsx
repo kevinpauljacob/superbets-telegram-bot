@@ -6,8 +6,8 @@ interface Bet {
   wallet: string;
   betTime?: string;
   betEndTime?: string;
-  betAmount: number;
-  betType: boolean; // if true -> betUp else betDown
+  amount: number;
+  betType: string; // if true -> betUp else betDown
   strikePrice?: number;
   betEndPrice?: number;
   timeFrame: number;
@@ -146,10 +146,10 @@ export default function Bets({ refresh }: { refresh: boolean }) {
                     </span>
                   )}
                   <span className="w-full text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
-                    {bet.betType ? "UP" : "DOWN"}
+                    {bet.betType === "betUp" ? "UP" : "DOWN"}
                   </span>
                   <span className="w-full text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
-                    {bet.betAmount}
+                    {bet.amount.toFixed(4)}
                   </span>
                   {!all && (
                     <span className="w-full text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">

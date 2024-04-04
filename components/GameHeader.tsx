@@ -5,10 +5,13 @@ import { useEffect, useState } from "react";
 import ProvablyFairModal from "./ProvablyFairModal";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { GameType } from "@/utils/vrf";
+import { useGlobalContext } from "./GlobalContext";
 
 export default function GameHeader() {
   const wallet = useWallet();
   const router = useRouter();
+
+  const {coinData} = useGlobalContext()
 
   //Provably Fair Modal handling
   const [isOpen, setIsOpen] = useState(false);
@@ -129,26 +132,26 @@ export default function GameHeader() {
         </div>
         <div className="flex flex-wrap mt-1">
           <div className="flex items-center justify-between bg-[#1E2220] rounded-md mx-1.5  my-1 px-2 py-1">
-            <p className="font-light">Wallet Balance :&nbsp;</p>
-            <p className="text-[#1FCDF0] font-semibold">
-              {selectedGame.stats.balance} $SOL
+            <p className="font-light text-xs">Wallet Balance :&nbsp;</p>
+            <p className="text-[#1FCDF0] font-semibold text-xs">
+              {coinData ? coinData[0].amount.toFixed(4) : 0} $SOL
             </p>
           </div>
           <div className="flex items-center justify-between bg-[#1E2220] rounded-md mx-1.5  my-1 px-2 py-1">
-            <p className="font-light">Volume :&nbsp;</p>
-            <p className="text-[#7839C5] font-semibold">
+            <p className="font-light text-xs">Volume :&nbsp;</p>
+            <p className="text-[#7839C5] font-semibold text-xs">
               {selectedGame.stats.volume}
             </p>
           </div>
           <div className="flex items-center justify-between bg-[#1E2220] rounded-md mx-1.5  my-1 px-2 py-1">
-            <p className="font-light">Unique Players :&nbsp;</p>
-            <p className="text-[#7839C5] font-semibold">
+            <p className="font-light text-xs">Unique Players :&nbsp;</p>
+            <p className="text-[#7839C5] font-semibold text-xs">
               {selectedGame.stats.players}
             </p>
           </div>
           <div className="flex items-center gap-2 mx-1.5 my-1 ">
             <p
-              className="underline text-[#94A3B8] decoration-[#94A3B8] underline-offset-2 hover:cursor-pointer"
+              className="underline text-[#94A3B8] decoration-[#94A3B8] underline-offset-2 hover:cursor-pointer text-xs"
               onClick={openModal}
             >
               Provabaly Fair
