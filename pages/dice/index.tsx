@@ -16,12 +16,12 @@ export default function Dice() {
   const { coinData, getBalance, getWalletBalance } = useGlobalContext();
   const [user, setUser] = useState<any>(null);
   const [betAmt, setBetAmt] = useState(0);
-  const [selectedFace, setSelectedFace] = useState<number[]>([]);
   const [isRolling, setIsRolling] = useState(false);
   const [winningPays, setWinningPays] = useState(6);
   const [winningAmount, setWinningAmount] = useState(0.6);
   const [winningProbability, setWinningProbability] = useState(16.67);
   const [refresh, setRefresh] = useState(false);
+  const [selectedFace, setSelectedFace] = useState<number[]>([]);
   const [selectedFaces, setSelectedFaces] = useState<{
     [key: number]: boolean;
   }>({
@@ -32,19 +32,20 @@ export default function Dice() {
     5: false,
     6: false,
   });
+  const [strikeFace, setStrikeFace] = useState<number>(0);
   const [rollType, setRollType] = useState<"manual" | "auto">("manual");
   const [betResults, setBetResults] = useState<
     { face: number; isWin: boolean }[]
   >([
-    { face: 3, isWin: true },
-    { face: 1, isWin: false },
-    { face: 5, isWin: true },
-    { face: 2, isWin: true },
-    { face: 6, isWin: false },
+    // { face: 3, isWin: true },
+    // { face: 1, isWin: false },
+    // { face: 5, isWin: true },
+    // { face: 2, isWin: true },
+    // { face: 6, isWin: false },
   ]);
-  const [strikeFace, setStrikeFace] = useState<number>(0);
 
   const handleDiceClick = (newFace: number) => {
+    setStrikeFace(0);
     if (selectedFace.length >= 5 && !selectedFace.includes(newFace)) {
       toast.error("You can only select up to 5 faces");
       return;
@@ -261,6 +262,27 @@ export default function Dice() {
               </div>
               <div className="flex justify-around">
                 <div className="flex flex-col items-center mr-2 sm:mr-0">
+                  {selectedFaces[1] ? (
+                    selectedFace.includes(1) ? (
+                      strikeFace === 1 ? (
+                        <Image
+                          src="/assets/winPointer.png"
+                          alt="win pointer"
+                          width={20}
+                          height={20}
+                          className="absolute -top-[30px]"
+                        />
+                      ) : null
+                    ) : null
+                  ) : strikeFace === 1 ? (
+                    <Image
+                      src="/assets/lossPointer.png"
+                      alt="loss pointer"
+                      width={20}
+                      height={20}
+                      className="absolute -top-[30px]"
+                    />
+                  ) : null}
                   <Image
                     src="/assets/progressTip.png"
                     alt="progress bar"
@@ -290,6 +312,27 @@ export default function Dice() {
                   />
                 </div>
                 <div className="flex flex-col items-center mr-2 sm:mr-0">
+                  {selectedFaces[2] ? (
+                    selectedFace.includes(2) ? (
+                      strikeFace === 2 ? (
+                        <Image
+                          src="/assets/winPointer.png"
+                          alt="win pointer"
+                          width={20}
+                          height={20}
+                          className="absolute -top-[30px]"
+                        />
+                      ) : null
+                    ) : null
+                  ) : strikeFace === 2 ? (
+                    <Image
+                      src="/assets/lossPointer.png"
+                      alt="loss pointer"
+                      width={20}
+                      height={20}
+                      className="absolute -top-[30px]"
+                    />
+                  ) : null}
                   <Image
                     src="/assets/progressTip.png"
                     alt="progress bar"
@@ -319,6 +362,27 @@ export default function Dice() {
                   />
                 </div>
                 <div className="flex flex-col items-center mr-2 sm:mr-0">
+                  {selectedFaces[3] ? (
+                    selectedFace.includes(3) ? (
+                      strikeFace === 3 ? (
+                        <Image
+                          src="/assets/winPointer.png"
+                          alt="win pointer"
+                          width={20}
+                          height={20}
+                          className="absolute -top-[30px]"
+                        />
+                      ) : null
+                    ) : null
+                  ) : strikeFace === 3 ? (
+                    <Image
+                      src="/assets/lossPointer.png"
+                      alt="loss pointer"
+                      width={20}
+                      height={20}
+                      className="absolute -top-[30px]"
+                    />
+                  ) : null}
                   <Image
                     src="/assets/progressTip.png"
                     alt="progress bar"
@@ -348,6 +412,27 @@ export default function Dice() {
                   />
                 </div>
                 <div className="flex flex-col items-center mr-2 sm:mr-0">
+                  {selectedFaces[4] ? (
+                    selectedFace.includes(4) ? (
+                      strikeFace === 4 ? (
+                        <Image
+                          src="/assets/winPointer.png"
+                          alt="win pointer"
+                          width={20}
+                          height={20}
+                          className="absolute -top-[30px]"
+                        />
+                      ) : null
+                    ) : null
+                  ) : strikeFace === 4 ? (
+                    <Image
+                      src="/assets/lossPointer.png"
+                      alt="loss pointer"
+                      width={20}
+                      height={20}
+                      className="absolute -top-[30px]"
+                    />
+                  ) : null}
                   <Image
                     src="/assets/progressTip.png"
                     alt="progress bar"
@@ -377,6 +462,27 @@ export default function Dice() {
                   />
                 </div>
                 <div className="flex flex-col items-center mr-2 sm:mr-0">
+                  {selectedFaces[5] ? (
+                    selectedFace.includes(5) ? (
+                      strikeFace === 5 ? (
+                        <Image
+                          src="/assets/winPointer.png"
+                          alt="win pointer"
+                          width={20}
+                          height={20}
+                          className="absolute -top-[30px]"
+                        />
+                      ) : null
+                    ) : null
+                  ) : strikeFace === 5 ? (
+                    <Image
+                      src="/assets/lossPointer.png"
+                      alt="loss pointer"
+                      width={20}
+                      height={20}
+                      className="absolute -top-[30px]"
+                    />
+                  ) : null}
                   <Image
                     src="/assets/progressTip.png"
                     alt="progress bar"
@@ -406,6 +512,27 @@ export default function Dice() {
                   />
                 </div>
                 <div className="flex flex-col items-center">
+                  {selectedFaces[6] ? (
+                    selectedFace.includes(6) ? (
+                      strikeFace === 6 ? (
+                        <Image
+                          src="/assets/winPointer.png"
+                          alt="win pointer"
+                          width={20}
+                          height={20}
+                          className="absolute -top-[30px]"
+                        />
+                      ) : null
+                    ) : null
+                  ) : strikeFace === 6 ? (
+                    <Image
+                      src="/assets/lossPointer.png"
+                      alt="loss pointer"
+                      width={20}
+                      height={20}
+                      className="absolute -top-[30px]"
+                    />
+                  ) : null}
                   <Image
                     src="/assets/progressTip.png"
                     alt="progress bar"
