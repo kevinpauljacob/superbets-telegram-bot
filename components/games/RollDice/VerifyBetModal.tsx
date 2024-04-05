@@ -85,7 +85,7 @@ export default function VerifyBetModal({ isOpen, onClose, modalData }: Props) {
             <div className="flex flex-col sm:flex-row sm:gap-3">
               <button className="px-4 py-1.5 sm:py-2 mb-2 sm:mb-0 w-full text-white rounded-md bg-[#D9D9D9] bg-opacity-5 grid">
                 <div className="text-[#94A3B8] text-sm">Bet</div>
-                <div className="text-white">{bet.amount} $SOL</div>
+                <div className="text-white">{bet.amount.toFixed(4)} $SOL</div>
               </button>
               <button className="px-4 py-1.5 sm:py-2 mb-2 sm:mb-0 w-full text-white rounded-md bg-[#D9D9D9] bg-opacity-5 grid">
                 <div className="text-[#94A3B8] text-sm">Multiplier</div>
@@ -95,7 +95,9 @@ export default function VerifyBetModal({ isOpen, onClose, modalData }: Props) {
               </button>
               <button className="px-4 py-1.5 sm:py-2 mb-2 sm:mb-0 w-full text-white rounded-md bg-[#D9D9D9] bg-opacity-5 grid">
                 <div className="text-[#94A3B8] text-sm">Payout</div>
-                <div className="text-white">{bet.amountWon} $SOL</div>
+                <div className="text-white">
+                  {bet.amountWon.toFixed(4)} $SOL
+                </div>
               </button>
             </div>
             <div className="mt-8 px-8 pt-10 border-2 border-white border-opacity-5 rounded-md">

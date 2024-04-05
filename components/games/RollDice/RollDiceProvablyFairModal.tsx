@@ -2,6 +2,7 @@ import { GameType, generateClientSeed, generateGameResult } from "@/utils/vrf";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { Bet } from "../RollDiceTable";
+import { GiDivergence } from "react-icons/gi";
 
 export interface PFModalData {
   activeGameSeed: {
@@ -119,6 +120,10 @@ export default function RollDiceProvablyFairModal({
     setNewClientSeed(generateClientSeed());
   };
 
+  const copyToClipboard = (text?: string) => {
+    if (text) navigator.clipboard.writeText(text);
+  };
+
   return (
     <>
       {isOpen && (
@@ -160,25 +165,49 @@ export default function RollDiceProvablyFairModal({
                     <label className="text-sm font-semibold">
                       Active Client Seed
                     </label>
-                    <input
-                      type="text"
-                      name="activeClientSeed"
-                      placeholder={modalData.activeGameSeed.clientSeed}
-                      className="bg-[#202329] mt-1 rounded-md px-4 py-2 mb-4 w-full pointer-events-none"
-                      readOnly
-                    />
+                    <div className="flex items-center justify-between bg-[#202329] mt-1 rounded-md px-4 py-2 mb-4 w-full">
+                      <div className="truncate">
+                        {modalData.activeGameSeed.clientSeed}
+                      </div>
+                      <div
+                        onClick={() =>
+                          copyToClipboard(modalData.activeGameSeed.clientSeed)
+                        }
+                        className="cursor-pointer"
+                      >
+                        <Image
+                          src={"/assets/copy.png"}
+                          width={20}
+                          height={20}
+                          alt="copy"
+                        />
+                      </div>
+                    </div>
                   </div>
                   <div>
                     <label className="text-sm font-semibold">
                       Active Server Seed (Hashed)
                     </label>
-                    <input
-                      type="text"
-                      name="activeServerSeedHash"
-                      placeholder={modalData.activeGameSeed.serverSeedHash}
-                      className="bg-[#202329] mt-1 rounded-md px-4 py-2 mb-4 w-full pointer-events-none"
-                      readOnly
-                    />
+                    <div className="flex items-center justify-between bg-[#202329] mt-1 rounded-md px-4 py-2 mb-4 w-full">
+                      <div className="truncate mr-1">
+                        {modalData.activeGameSeed.serverSeedHash}
+                      </div>
+                      <div
+                        onClick={() =>
+                          copyToClipboard(
+                            modalData.activeGameSeed.serverSeedHash,
+                          )
+                        }
+                        className="cursor-pointer"
+                      >
+                        <Image
+                          src={"/assets/copy.png"}
+                          width={20}
+                          height={20}
+                          alt="copy"
+                        />
+                      </div>
+                    </div>
                   </div>
                   <div>
                     <label className="text-sm font-semibold">Total Bets</label>
@@ -205,7 +234,7 @@ export default function RollDiceProvablyFairModal({
                           value={newClientSeed}
                           type="text"
                           onChange={(e) => setNewClientSeed(e.target.value)}
-                          className="bg-[#202329] rounded-md px-4 py-2 w-full"
+                          className="bg-[#202329] rounded-md px-4 py-2 w-full truncate"
                         />
                         <button
                           className="flex items-center justify-center h-full px-4 py-2 my-auto bg-[#7839C5] text-white rounded-md"
@@ -219,13 +248,26 @@ export default function RollDiceProvablyFairModal({
                       <label className="text-sm font-semibold">
                         Next Server Seed
                       </label>
-                      <input
-                        type="text"
-                        name="nextServerSeedHash"
-                        placeholder={modalData.nextGameSeed.serverSeedHash}
-                        className="bg-[#202329] mt-1 rounded-md px-4 py-2 mb-4 w-full pointer-events-none"
-                        readOnly
-                      />
+                      <div className="flex items-center justify-between bg-[#202329] mt-1 rounded-md px-4 py-2 mb-4 w-full">
+                        <div className="truncate mr-1">
+                          {modalData.nextGameSeed.serverSeedHash}
+                        </div>
+                        <div
+                          onClick={() =>
+                            copyToClipboard(
+                              modalData.nextGameSeed.serverSeedHash,
+                            )
+                          }
+                          className="cursor-pointer"
+                        >
+                          <Image
+                            src={"/assets/copy.png"}
+                            width={20}
+                            height={20}
+                            alt="copy"
+                          />
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>

@@ -1,6 +1,7 @@
 import { GameType, generateClientSeed, generateGameResult } from "@/utils/vrf";
 import { useEffect, useState } from "react";
 import { Flip } from "../Flips";
+import Image from "next/image";
 
 export interface PFModalData {
   activeGameSeed: {
@@ -121,6 +122,10 @@ export default function CoinFlipProvablyFairModal({
     setNewClientSeed(generateClientSeed());
   };
 
+  const copyToClipboard = (text?: string) => {
+    if (text) navigator.clipboard.writeText(text);
+  };
+
   return (
     <>
       {isOpen && (
@@ -162,25 +167,49 @@ export default function CoinFlipProvablyFairModal({
                     <label className="text-sm font-semibold">
                       Active Client Seed
                     </label>
-                    <input
-                      type="text"
-                      name="activeClientSeed"
-                      placeholder={modalData.activeGameSeed.clientSeed}
-                      className="bg-[#202329] mt-1 rounded-md px-4 py-2 mb-4 w-full pointer-events-none"
-                      readOnly
-                    />
+                    <div className="flex items-center justify-between bg-[#202329] mt-1 rounded-md px-4 py-2 mb-4 w-full">
+                      <div className="truncate">
+                        {modalData.activeGameSeed.clientSeed}
+                      </div>
+                      <div
+                        onClick={() =>
+                          copyToClipboard(modalData.activeGameSeed.clientSeed)
+                        }
+                        className="cursor-pointer"
+                      >
+                        <Image
+                          src={"/assets/copy.png"}
+                          width={20}
+                          height={20}
+                          alt="copy"
+                        />
+                      </div>
+                    </div>
                   </div>
                   <div>
                     <label className="text-sm font-semibold">
                       Active Server Seed (Hashed)
                     </label>
-                    <input
-                      type="text"
-                      name="activeServerSeedHash"
-                      placeholder={modalData.activeGameSeed.serverSeedHash}
-                      className="bg-[#202329] mt-1 rounded-md px-4 py-2 mb-4 w-full pointer-events-none"
-                      readOnly
-                    />
+                    <div className="flex items-center justify-between bg-[#202329] mt-1 rounded-md px-4 py-2 mb-4 w-full">
+                      <div className="truncate mr-1">
+                        {modalData.activeGameSeed.serverSeedHash}
+                      </div>
+                      <div
+                        onClick={() =>
+                          copyToClipboard(
+                            modalData.activeGameSeed.serverSeedHash,
+                          )
+                        }
+                        className="cursor-pointer"
+                      >
+                        <Image
+                          src={"/assets/copy.png"}
+                          width={20}
+                          height={20}
+                          alt="copy"
+                        />
+                      </div>
+                    </div>
                   </div>
                   <div>
                     <label className="text-sm font-semibold">Total Flips</label>
@@ -221,13 +250,26 @@ export default function CoinFlipProvablyFairModal({
                       <label className="text-sm font-semibold">
                         Next Server Seed
                       </label>
-                      <input
-                        type="text"
-                        name="nextServerSeedHash"
-                        placeholder={modalData.nextGameSeed.serverSeedHash}
-                        className="bg-[#202329] mt-1 rounded-md px-4 py-2 mb-4 w-full pointer-events-none"
-                        readOnly
-                      />
+                      <div className="flex items-center justify-between bg-[#202329] mt-1 rounded-md px-4 py-2 mb-4 w-full">
+                        <div className="truncate mr-1">
+                          {modalData.nextGameSeed.serverSeedHash}
+                        </div>
+                        <div
+                          onClick={() =>
+                            copyToClipboard(
+                              modalData.nextGameSeed.serverSeedHash,
+                            )
+                          }
+                          className="cursor-pointer"
+                        >
+                          <Image
+                            src={"/assets/copy.png"}
+                            width={20}
+                            height={20}
+                            alt="copy"
+                          />
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
