@@ -6,6 +6,7 @@ import {
 } from "@solana/web3.js";
 import {
   createDepositTxn,
+  retryTxn,
   verifyFrontendTransaction,
 } from "../../../../context/gameTransactions";
 import connectDatabase from "../../../../utils/database";

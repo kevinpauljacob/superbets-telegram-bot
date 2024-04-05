@@ -7,6 +7,7 @@ import {
 } from "@solana/web3.js";
 import {
   createWithdrawTxn,
+  retryTxn,
   verifyFrontendTransaction,
 } from "../../../../context/gameTransactions";
 import connectDatabase from "../../../../utils/database";
@@ -46,7 +47,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         amount,
         tokenMint,
         blockhashWithExpiryBlockHeight,
-      } = req.body;
+      }: InputType = req.body;
 
       const token = await getToken({ req, secret });
 
@@ -89,7 +90,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           .status(400)
           .json({ success: false, message: "Insufficient balance !" });
 
-      let vTxn = await createWithdrawTxn(
+      let { transaction: vTxn } = await createWithdrawTxn(
         new PublicKey(wallet),
         amount,
         tokenMint,

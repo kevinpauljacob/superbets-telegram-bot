@@ -78,8 +78,8 @@ export default function RollDiceProvablyFairModal({
 
     setWonDiceFace(
       generateGameResult(
-        name === "clientSeed" ? value : clientSeed,
         name === "serverSeed" ? value : serverSeed,
+        name === "clientSeed" ? value : clientSeed,
         parseInt(name === "nonce" ? value : nonce),
         GameType.dice,
       ) as number,

@@ -81,8 +81,8 @@ export default function CoinFlipProvablyFairModal({
 
     setWonCoinface(
       (generateGameResult(
-        name === "clientSeed" ? value : clientSeed,
         name === "serverSeed" ? value : serverSeed,
+        name === "clientSeed" ? value : clientSeed,
         parseInt(name === "nonce" ? value : nonce),
         GameType.coin,
       ) as number) === 1
@@ -233,7 +233,7 @@ export default function CoinFlipProvablyFairModal({
                             : "border-[rgb(192,201,210)]"
                         }`}
                       >
-                        <div className="w-5 h-5 bg-[rgb(192,201,210)] border border-white rounded-full"></div>
+                        <div className="w-5 h-5 bg-[#FFC20E] rounded-full"></div>
                         <div className="font-changa text-xl font-semibold">
                           Heads
                         </div>
@@ -245,7 +245,7 @@ export default function CoinFlipProvablyFairModal({
                             : "border-[rgb(192,201,210)]"
                         }`}
                       >
-                        <div className="w-5 h-5 bg-[#FFC20E] rounded-full"></div>
+                        <div className="w-5 h-5 bg-[rgb(192,201,210)] border border-white rounded-full"></div>
                         <div className="font-changa text-xl font-semibold">
                           Tails
                         </div>
@@ -267,6 +267,7 @@ export default function CoinFlipProvablyFairModal({
                         className="bg-[#202329] mt-1 rounded-md px-4 py-2 mb-4 w-full relative appearance-none"
                       >
                         <option value={GameType.dice}>Dice</option>
+                        <option value={GameType.coin}>Coin Flip</option>
                       </select>
                     </div>
                   </div>

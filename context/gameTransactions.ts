@@ -177,11 +177,8 @@ export const withdraw = async (
   let toastId = toast.loading("Withdraw in progress");
 
   try {
-    let transaction = await createWithdrawTxn(
-      wallet.publicKey!,
-      amount,
-      tokenMint,
-    );
+    let { transaction, blockhashWithExpiryBlockHeight } =
+      await createWithdrawTxn(wallet.publicKey!, amount, tokenMint);
 
     transaction = await wallet.signTransaction!(transaction);
     const transactionBase64 = transaction
@@ -197,6 +194,7 @@ export const withdraw = async (
         wallet: wallet.publicKey,
         amount,
         tokenMint,
+        blockhashWithExpiryBlockHeight,
       }),
       headers: {
         "Content-Type": "application/json",
@@ -339,47 +337,85 @@ export const createWithdrawTxn = async (
   tokenMint: string,
 ) => {
   let transaction = new Transaction();
-  try {
-    let { tokenName, decimal } = SPL_TOKENS.find(
-      (data) => data.tokenMint === tokenMint,
-    )!;
 
-    transaction.feePayer = wallet;
-    transaction.recentBlockhash = (
-      await connection.getLatestBlockhash()
-    ).blockhash;
+  let { tokenName, decimal } = SPL_TOKENS.find(
+    (data) => data.tokenMint === tokenMint,
+  )!;
 
-    if (tokenName === "SOL") {
-      transaction.add(
-        SystemProgram.transfer({
-          fromPubkey: devPublicKey,
-          toPubkey: wallet,
-          lamports: Math.floor(amount * Math.pow(10, 9)),
-        }),
-      );
-      transaction.instructions[0].keys[1].isSigner = true;
-      transaction.instructions[0].keys[1].isWritable = true;
-    } else {
-      const tokenId = new PublicKey(tokenMint);
-      const userAta = await getAssociatedTokenAddress(tokenId, wallet);
-      const devAta = await getAssociatedTokenAddress(tokenId, devPublicKey);
-      transaction.add(
-        createTransferInstruction(
-          devAta,
-          userAta,
-          devPublicKey,
-          Math.floor(amount * Math.pow(10, decimal)),
-        ),
-      );
-      transaction.instructions[0].keys[2].isSigner = true;
-      transaction.instructions[0].keys[2].isWritable = true;
-    }
+  transaction.feePayer = wallet;
+  const blockhashWithExpiryBlockHeight = await connection.getLatestBlockhash();
+  transaction.recentBlockhash = blockhashWithExpiryBlockHeight.blockhash;
 
-    return transaction;
-  } catch (error) {
-    return transaction;
+  if (tokenName === "SOL") {
+    transaction.add(
+      SystemProgram.transfer({
+        fromPubkey: devPublicKey,
+        toPubkey: wallet,
+        lamports: Math.floor(amount * Math.pow(10, 9)),
+      }),
+    );
+    transaction.instructions[0].keys[1].isSigner = true;
+    transaction.instructions[0].keys[1].isWritable = true;
+  } else {
+    const tokenId = new PublicKey(tokenMint);
+    const userAta = await getAssociatedTokenAddress(tokenId, wallet);
+    const devAta = await getAssociatedTokenAddress(tokenId, devPublicKey);
+    transaction.add(
+      createTransferInstruction(
+        devAta,
+        userAta,
+        devPublicKey,
+        Math.floor(amount * Math.pow(10, decimal)),
+      ),
+    );
+    transaction.instructions[0].keys[2].isSigner = true;
+    transaction.instructions[0].keys[2].isWritable = true;
   }
+
+  return { transaction, blockhashWithExpiryBlockHeight };
 };
+
+export async function retryTxn(transaction: Transaction) {
+  let blockhashContext = (await connection.getLatestBlockhashAndContext())
+    .value;
+  let blockheight = await connection.getBlockHeight();
+
+  let flag = true;
+
+  let finalTxn = "";
+
+  let txn = "";
+
+  let j = 0;
+
+  while (blockheight < blockhashContext.lastValidBlockHeight && flag) {
+    txn = await connection.sendRawTransaction(transaction.serialize(), {
+      skipPreflight: true,
+    });
+    await new Promise((r) => setTimeout(r, 500));
+    console.log("retry count: ", ++j);
+    connection
+      .confirmTransaction({
+        lastValidBlockHeight: blockhashContext.lastValidBlockHeight,
+        blockhash: blockhashContext.blockhash,
+        signature: txn,
+      })
+      .then((data) => {
+        if ((data.value as any).confirmationStatus) {
+          console.log("confirmed txn", data.value, txn);
+          finalTxn = txn;
+          flag = false;
+        }
+      })
+      .catch((e) => {
+        console.log(e);
+      });
+
+    blockheight = await connection.getBlockHeight();
+  }
+
+  return finalTxn;
+}
 
 export const rollDice = async (
   wallet: WalletContextState,
