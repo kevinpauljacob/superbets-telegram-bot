@@ -11,6 +11,7 @@ import Link from "next/link";
 import { useGlobalContext } from "@/components/GlobalContext";
 import { FormProvider, useForm } from "react-hook-form";
 import GameFooterInfo from "@/components/games/GameFooterInfo";
+import GameHeader from "@/components/GameHeader";
 
 const Timer = dynamic(() => import("../../components/games/Timer"), {
   ssr: false,
@@ -526,7 +527,7 @@ export default function Options() {
                 </div>
               ) : loading && !checkResult ? (
                 <div className="w-full flex items-center justify-center gap-2 rounded-lg bg-[#202329] p-2">
-                  <span className="font-changa text-xl whitespace-nowrap bg-red-200 font-medium text-[#F0F0F0] text-opacity-75">
+                  <span className="font-changa text-xl whitespace-nowrap font-medium text-[#F0F0F0] text-opacity-75">
                     Betting in Progress
                   </span>
                   <div className="w-10">
@@ -620,7 +621,9 @@ export default function Options() {
           <GameFooterInfo multiplier={1.0} amount={betAmt ?? 0} chance={50} />
         </div>
       </div>
-
+      <div className="w-full flex md:hidden mt-4 rounded-[5px] overflow-hidden">
+        <GameHeader />
+      </div>
       <Bets refresh={refresh} />
     </div>
   );

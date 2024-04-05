@@ -11,6 +11,7 @@ import { FormProvider, useForm } from "react-hook-form";
 import GameFooterInfo from "@/components/games/GameFooterInfo";
 import { useGlobalContext } from "@/components/GlobalContext";
 import BetSetting from "@/components/BetSetting";
+import GameHeader from "@/components/GameHeader";
 
 const Timer = dynamic(() => import("../../components/games/Timer"), {
   ssr: false,
@@ -635,7 +636,9 @@ export default function Flip() {
           <GameFooterInfo multiplier={1.0} amount={betAmt} chance={50} />
         </div>
       </div>
-
+      <div className="w-full flex md:hidden mt-4 rounded-[5px] overflow-hidden">
+        <GameHeader />
+      </div>
       <FlipBets refresh={refresh} />
     </div>
   );

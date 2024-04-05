@@ -10,6 +10,7 @@ import GameFooterInfo from "@/components/games/GameFooterInfo";
 import BetSetting from "@/components/BetSetting";
 import { useGlobalContext } from "@/components/GlobalContext";
 import Head from "next/head";
+import GameHeader from "@/components/GameHeader";
 
 export default function Dice() {
   const wallet = useWallet();
@@ -578,6 +579,9 @@ export default function Dice() {
             />
           </div>
         </div>
+      </div>
+      <div className="w-full flex md:hidden mt-4 rounded-[5px] overflow-hidden">
+        <GameHeader />
       </div>
       <RollDiceTable refresh={refresh} />
     </div>

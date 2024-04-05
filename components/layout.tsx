@@ -27,7 +27,9 @@ export default function Layout({ children }: LayoutProps) {
           {mobileSidebar && <MobileSidebar />}
           <section>
             <SubHeader />
-            <GameHeader />
+            <div className="w-full hidden md:flex">
+              <GameHeader />
+            </div>
             <main>
               <section className="flex flex-1">{children}</section>
             </main>

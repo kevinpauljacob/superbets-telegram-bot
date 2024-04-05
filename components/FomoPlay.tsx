@@ -5,6 +5,18 @@ import Link from "next/link";
 export default function FomoPlay() {
   const games = [
     {
+      href: "/dice",
+      src: "/assets/dicecard.png",
+    },
+    {
+      href: "/coinflip",
+      src: "/assets/flipcard.png",
+    },
+    {
+      href: "/options",
+      src: "/assets/binarycard.png",
+    },
+    {
       href: "/",
       src: "/assets/mines.png",
     },
@@ -23,12 +35,12 @@ export default function FomoPlay() {
     {
       href: "/",
       src: "/assets/wheel.png",
-    },
+    }
   ];
 
   return (
     <div>
-      <div className="flex items-center mb-1.5">
+      <div className="flex w-full items-center mb-1.5">
         <Image src={Dollar} alt="" width={26} height={26} />
         <span className="font-bold text-xl pl-3">
           FOMO: Play - The best casino games
