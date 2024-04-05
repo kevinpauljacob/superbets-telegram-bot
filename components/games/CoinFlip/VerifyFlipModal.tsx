@@ -74,23 +74,23 @@ export default function VerifyFlipModal({ isOpen, onClose, modalData }: Props) {
             className="absolute inset-0 bg-gray-800 opacity-75"
             onClick={handleClose}
           ></div>
-          <div className="bg-[#121418] max-h-[100vh] modalscrollbar overflow-y-scroll p-8 rounded-lg z-10 w-11/12 md:w-1/3">
-            <div className="flex justify-between items-center">
-              <div className="font-changa text-[1.75rem] font-semibold text-white">
+          <div className="bg-[#121418] max-h-[100vh] modalscrollbar overflow-y-scroll p-8 rounded-lg z-10 w-11/12 sm:w-[600px] ">
+            <div className="flex flex-wrap justify-between items-center mb-4 sm:mb-0">
+              <div className="font-changa text-[1.75rem] font-semibold text-white mr-4">
                 Coin Flip
               </div>
               <div className="text-[#F0F0F0] text-md">{flip.createdAt}</div>
             </div>
-            <div className="flex gap-3">
-              <button className="px-4 py-2 w-full text-white rounded-md bg-[#D9D9D9] bg-opacity-5 grid">
+            <div className="flex flex-col sm:flex-row sm:gap-3">
+              <button className="px-4 py-1.5 sm:py-2 mb-2 sm:mb-0 w-full text-white rounded-md bg-[#D9D9D9] bg-opacity-5 grid">
                 <div className="text-[#94A3B8] text-sm">Flip</div>
                 <div className="text-white">{flip.amount} $SOL</div>
               </button>
-              <button className="px-4 py-2 w-full text-white rounded-md bg-[#D9D9D9] bg-opacity-5 grid">
+              <button className="px-4 py-1.5 sm:py-2 mb-2 sm:mb-0 w-full text-white rounded-md bg-[#D9D9D9] bg-opacity-5 grid">
                 <div className="text-[#94A3B8] text-sm">Multiplier</div>
                 <div className="text-white">{(2 / 1).toFixed(2)} x</div>
               </button>
-              <button className="px-4 py-2 w-full text-white rounded-md bg-[#D9D9D9] bg-opacity-5 grid">
+              <button className="px-4 py-1.5 sm:py-2 mb-2 sm:mb-0 w-full text-white rounded-md bg-[#D9D9D9] bg-opacity-5 grid">
                 <div className="text-[#94A3B8] text-sm">Payout</div>
                 <div className="text-white">{flip.amountWon} $SOL</div>
               </button>
@@ -161,14 +161,16 @@ export default function VerifyFlipModal({ isOpen, onClose, modalData }: Props) {
                 </div>
               </div>
               {openDropDown && (
-                <div className="grid">
-                  <div className="flex gap-2 w-full">
-                    <div className="w-1/2">
+                <div className="">
+                  <div className="flex flex-col sm:flex-row gap-2 w-full">
+                    <div className="sm:w-1/2">
                       <label className="text-xs text-[#F0F0F0]">
                         Client Seed
                       </label>
-                      <div className="bg-[#202329] text-white mt-1 rounded-md px-4 py-2 mb-4 w-full relative flex items-center justify-between">
-                        <div>{flip.gameSeed?.clientSeed}</div>
+                      <div className="bg-[#202329] text-white mt-1 rounded-md px-4 py-2 sm:mb-4 w-full relative flex items-center justify-between">
+                        <div className="truncate">
+                          {flip.gameSeed?.clientSeed}
+                        </div>
                         <div
                           onClick={() =>
                             copyToClipboard(flip.gameSeed?.clientSeed)
@@ -184,7 +186,7 @@ export default function VerifyFlipModal({ isOpen, onClose, modalData }: Props) {
                         </div>
                       </div>
                     </div>
-                    <div className="w-1/2">
+                    <div className="sm:w-1/2">
                       <label className="text-xs text-[#F0F0F0]">Nonce</label>
                       <div className="bg-[#202329] text-white mt-1 rounded-md px-4 py-2 mb-4 w-full relative flex items-center justify-between">
                         <div>{flip.nonce}</div>
@@ -213,7 +215,7 @@ export default function VerifyFlipModal({ isOpen, onClose, modalData }: Props) {
                           : ""}
                       </label>
                       <div className="bg-[#202329] text-white mt-1 rounded-md px-4 py-2 mb-4 w-full relative flex items-center justify-between">
-                        <div>
+                        <div className="truncate mr-1">
                           {flip.gameSeed?.serverSeedHash ??
                             flip.gameSeed?.serverSeedHash}
                         </div>
@@ -239,7 +241,7 @@ export default function VerifyFlipModal({ isOpen, onClose, modalData }: Props) {
                   <div className="footer grid gap-1">
                     {flip.gameSeed?.status !== seedStatus.EXPIRED ? (
                       <>
-                        <div className="text-xs text-[#94A3B8] text-center">
+                        <div className="text-xs text-[#94A3B8] text-center mb-2">
                           To verify this flip, you first need to rotate your
                           seed pair.
                         </div>
