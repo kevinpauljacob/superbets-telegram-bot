@@ -12,6 +12,7 @@ export interface Flip {
   amount: number;
   result: "Won" | "Lost";
   amountWon: number;
+  nonce?: number;
   gameSeed?: {
     status: seedStatus;
     clientSeed: string;

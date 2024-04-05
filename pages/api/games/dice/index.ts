@@ -156,6 +156,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         tokenMint,
         amountWon,
         amountLost,
+        nonce,
         gameSeed: activeGameSeed._id,
       });
 

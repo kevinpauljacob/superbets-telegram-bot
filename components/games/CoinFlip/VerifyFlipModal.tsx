@@ -131,6 +131,7 @@ export default function VerifyFlipModal({ isOpen, onClose, modalData }: Props) {
                     name="multiplier"
                     value={(2 / 1).toFixed(2)}
                     className="bg-[#202329] text-white mt-1 rounded-md px-4 py-2 mb-4 w-full relative"
+                    readOnly
                   />
                 </div>
                 <div>
@@ -140,6 +141,7 @@ export default function VerifyFlipModal({ isOpen, onClose, modalData }: Props) {
                     name="chance"
                     value={((1 / 2) * 100).toFixed(2)}
                     className="bg-[#202329] text-white mt-1 rounded-md px-4 py-2 mb-4 w-full relative"
+                    readOnly
                   />
                 </div>
               </div>
@@ -185,10 +187,10 @@ export default function VerifyFlipModal({ isOpen, onClose, modalData }: Props) {
                     <div className="w-1/2">
                       <label className="text-xs text-[#F0F0F0]">Nonce</label>
                       <div className="bg-[#202329] text-white mt-1 rounded-md px-4 py-2 mb-4 w-full relative flex items-center justify-between">
-                        <div>{flip.gameSeed?.nonce}</div>
+                        <div>{flip.nonce}</div>
                         <div
                           onClick={() =>
-                            copyToClipboard(flip.gameSeed?.nonce.toString())
+                            copyToClipboard(flip.nonce?.toString())
                           }
                           className="cursor-pointer"
                         >
@@ -235,25 +237,39 @@ export default function VerifyFlipModal({ isOpen, onClose, modalData }: Props) {
                     </div>
                   </div>
                   <div className="footer grid gap-1">
-                    {flip.gameSeed?.status !== seedStatus.EXPIRED && (
-                      <div className="text-xs text-[#94A3B8] text-center">
-                        To verify this flip, you first need to rotate your seed
-                        pair.
-                      </div>
-                    )}
-                    <button
-                      className="bg-[#7839C5] rounded-md w-full text-xl text-white text-semibold py-2"
-                      onClick={async () => {
-                        const fpData = await getProvablyFairData();
-                        if (fpData) setPFModalData(fpData);
+                    {flip.gameSeed?.status !== seedStatus.EXPIRED ? (
+                      <>
+                        <div className="text-xs text-[#94A3B8] text-center">
+                          To verify this flip, you first need to rotate your
+                          seed pair.
+                        </div>
+                        <button
+                          className="bg-[#7839C5] rounded-md w-full text-xl text-white text-semibold py-2"
+                          onClick={async () => {
+                            const fpData = await getProvablyFairData();
+                            if (fpData)
+                              setPFModalData({ ...fpData, tab: "seeds" });
 
-                        openPFModal();
-                      }}
-                    >
-                      {flip.gameSeed?.status === seedStatus.EXPIRED
-                        ? "Verify"
-                        : "Rotate"}
-                    </button>
+                            openPFModal();
+                          }}
+                        >
+                          Rotate
+                        </button>
+                      </>
+                    ) : (
+                      <button
+                        className="bg-[#7839C5] rounded-md w-full text-xl text-white text-semibold py-2"
+                        onClick={async () => {
+                          const fpData = await getProvablyFairData();
+                          if (fpData)
+                            setPFModalData({ ...fpData, tab: "verify" });
+
+                          openPFModal();
+                        }}
+                      >
+                        Verify
+                      </button>
+                    )}
                   </div>
                 </div>
               )}
@@ -264,6 +280,7 @@ export default function VerifyFlipModal({ isOpen, onClose, modalData }: Props) {
             onClose={closePFModal}
             modalData={PFModalData}
             setModalData={setPFModalData}
+            flip={flip}
           />
         </div>
       )}

@@ -1,5 +1,6 @@
 import { GameType, generateClientSeed, generateGameResult } from "@/utils/vrf";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { Flip } from "../Flips";
 
 export interface PFModalData {
   activeGameSeed: {
@@ -26,6 +27,7 @@ interface Props {
   onClose: () => void;
   modalData: PFModalData;
   setModalData: React.Dispatch<React.SetStateAction<PFModalData>>;
+  flip?: Flip;
 }
 
 export default function CoinFlipProvablyFairModal({
@@ -33,9 +35,10 @@ export default function CoinFlipProvablyFairModal({
   onClose,
   modalData,
   setModalData,
+  flip,
 }: Props) {
   const [state, setState] = useState<"seeds" | "verify">(
-    modalData.tab ? modalData.tab : "seeds",
+    modalData.tab ?? "seeds",
   );
   const [newClientSeed, setNewClientSeed] = useState<string>(
     generateClientSeed(),
@@ -45,17 +48,22 @@ export default function CoinFlipProvablyFairModal({
     clientSeed: string;
     serverSeed: string;
     nonce: string;
-  }>({
-    clientSeed: "",
-    serverSeed: "",
-    nonce: "",
-  });
+  }>(
+    flip?.gameSeed
+      ? {
+          clientSeed: flip.gameSeed.clientSeed,
+          serverSeed: flip.gameSeed.serverSeed ?? "",
+          nonce: flip.nonce?.toString() ?? "",
+        }
+      : {
+          clientSeed: "",
+          serverSeed: "",
+          nonce: "",
+        },
+  );
 
   //handling coin flip
   const [wonCoinFace, setWonCoinface] = useState<"heads" | "tails">("heads");
-  const [selectedCoinFace, setSelectedCoinface] = useState<"heads" | "tails">(
-    "heads",
-  );
 
   const handleToggleState = (newState: "seeds" | "verify") => {
     setState(newState);
@@ -66,6 +74,10 @@ export default function CoinFlipProvablyFairModal({
       onClose();
     }
   };
+
+  useEffect(() => {
+    if (modalData.tab) handleToggleState(modalData.tab);
+  }, [modalData]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,

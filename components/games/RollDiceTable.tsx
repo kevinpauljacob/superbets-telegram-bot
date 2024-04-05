@@ -14,6 +14,7 @@ export interface Bet {
   result: "Won" | "Lost";
   strikeNumber: number;
   amountWon: number;
+  nonce?: number;
   gameSeed?: {
     status: seedStatus;
     clientSeed: string;

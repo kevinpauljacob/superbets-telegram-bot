@@ -1,6 +1,7 @@
 import { GameType, generateClientSeed, generateGameResult } from "@/utils/vrf";
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { Bet } from "../RollDiceTable";
 
 export interface PFModalData {
   activeGameSeed: {
@@ -27,6 +28,7 @@ interface Props {
   onClose: () => void;
   modalData: PFModalData;
   setModalData: React.Dispatch<React.SetStateAction<PFModalData>>;
+  bet?: Bet;
 }
 
 export default function RollDiceProvablyFairModal({
@@ -34,9 +36,10 @@ export default function RollDiceProvablyFairModal({
   onClose,
   modalData,
   setModalData,
+  bet,
 }: Props) {
   const [state, setState] = useState<"seeds" | "verify">(
-    modalData.tab ? modalData.tab : "seeds",
+    modalData.tab ?? "seeds",
   );
   const [newClientSeed, setNewClientSeed] = useState<string>(
     generateClientSeed(),
@@ -46,11 +49,19 @@ export default function RollDiceProvablyFairModal({
     clientSeed: string;
     serverSeed: string;
     nonce: string;
-  }>({
-    clientSeed: "",
-    serverSeed: "",
-    nonce: "",
-  });
+  }>(
+    bet?.gameSeed
+      ? {
+          clientSeed: bet.gameSeed?.clientSeed,
+          serverSeed: bet.gameSeed?.serverSeed ?? "",
+          nonce: bet.nonce?.toString() ?? "",
+        }
+      : {
+          clientSeed: "",
+          serverSeed: "",
+          nonce: "",
+        },
+  );
 
   const [wonDiceFace, setWonDiceFace] = useState<number>(1);
 
@@ -63,6 +74,10 @@ export default function RollDiceProvablyFairModal({
       onClose();
     }
   };
+
+  useEffect(() => {
+    if (modalData.tab) handleToggleState(modalData.tab);
+  }, [modalData]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,

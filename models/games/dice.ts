@@ -49,6 +49,10 @@ const diceSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
+    nonce: {
+      type: Number,
+      required: true,
+    },
     gameSeed: {
       type: mongoose.Schema.ObjectId,
       ref: "GameSeed",
