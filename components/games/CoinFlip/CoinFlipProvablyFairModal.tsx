@@ -134,7 +134,7 @@ export default function CoinFlipProvablyFairModal({
             className="absolute inset-0 bg-gray-800 opacity-75"
             onClick={handleClose}
           ></div>
-          <div className="bg-[#121418] p-8 rounded-lg z-10 w-11/12 md:w-1/3">
+          <div className="bg-[#121418] p-8 rounded-lg z-10 w-11/12 sm:w-[600px]">
             <div className="font-changa text-[1.75rem] font-semibold text-white">
               Provably Fair
             </div>
@@ -162,7 +162,7 @@ export default function CoinFlipProvablyFairModal({
             </div>
             {state === "seeds" && (
               <div className="text-white">
-                <div className="grid gap-2">
+                <div className="">
                   <div>
                     <label className="text-sm font-semibold">
                       Active Client Seed
@@ -226,7 +226,7 @@ export default function CoinFlipProvablyFairModal({
                   <div className="font-changa text-[1.60rem] font-semibold text-white my-4">
                     Rotate Seed Pair
                   </div>
-                  <div className="grid gap-2">
+                  <div className="">
                     <div>
                       <label className="text-sm font-semibold">
                         New Client Seed *
@@ -246,7 +246,7 @@ export default function CoinFlipProvablyFairModal({
                         </button>
                       </div>
                     </div>
-                    <div>
+                    <div className="mt-5">
                       <label className="text-sm font-semibold">
                         Next Server Seed
                       </label>
