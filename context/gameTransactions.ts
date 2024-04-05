@@ -4,6 +4,7 @@ import {
   Transaction,
   SystemProgram,
   ComputeBudgetProgram,
+  BlockhashWithExpiryBlockHeight,
 } from "@solana/web3.js";
 import {
   getAssociatedTokenAddress,
@@ -13,7 +14,10 @@ import { SPL_TOKENS } from "./config";
 import toast from "react-hot-toast";
 import { WalletContextState } from "@solana/wallet-adapter-react";
 
-export const connection = new Connection(process.env.NEXT_PUBLIC_RPC!);
+export const connection = new Connection(
+  process.env.NEXT_PUBLIC_RPC!,
+  "processed",
+);
 
 const devPublicKey = new PublicKey(process.env.NEXT_PUBLIC_DEV_PUBLIC_KEY!);
 
@@ -375,9 +379,11 @@ export const createWithdrawTxn = async (
   return { transaction, blockhashWithExpiryBlockHeight };
 };
 
-export async function retryTxn(transaction: Transaction) {
-  let blockhashContext = (await connection.getLatestBlockhashAndContext())
-    .value;
+export async function retryTxn(
+  transaction: Transaction,
+  blockhashContext: BlockhashWithExpiryBlockHeight,
+) {
+  const { blockhash, lastValidBlockHeight } = blockhashContext;
   let blockheight = await connection.getBlockHeight();
 
   let flag = true;
@@ -388,16 +394,17 @@ export async function retryTxn(transaction: Transaction) {
 
   let j = 0;
 
-  while (blockheight < blockhashContext.lastValidBlockHeight && flag) {
+  while (blockheight < lastValidBlockHeight && flag) {
     txn = await connection.sendRawTransaction(transaction.serialize(), {
       skipPreflight: true,
+      maxRetries: 0,
     });
-    await new Promise((r) => setTimeout(r, 500));
+    await new Promise((r) => setTimeout(r, 1000));
     console.log("retry count: ", ++j);
     connection
       .confirmTransaction({
-        lastValidBlockHeight: blockhashContext.lastValidBlockHeight,
-        blockhash: blockhashContext.blockhash,
+        lastValidBlockHeight,
+        blockhash,
         signature: txn,
       })
       .then((data) => {

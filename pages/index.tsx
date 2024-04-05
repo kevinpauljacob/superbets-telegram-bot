@@ -27,6 +27,7 @@ const inter = Inter({ subsets: ["latin"] });
 
 export default function Home() {
   const wallet = useWallet();
+  const { getBalance } = useGlobalContext();
 
   const maintenance = false;
 
@@ -35,7 +36,9 @@ export default function Home() {
   const [refetch, setRefetch] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
-  useEffect(() => {}, [wallet?.publicKey, refetch]);
+  useEffect(() => {
+    if (wallet?.publicKey) getBalance();
+  }, [wallet?.publicKey]);
 
   useEffect(() => {
     //@ts-ignore
