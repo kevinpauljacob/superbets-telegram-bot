@@ -15,13 +15,24 @@ import downArrow from "@/public/assets/downArrow.png";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { obfuscatePubKey } from "@/context/transactions";
 
+// Define types for game object
+type Game = {
+  src: string;
+  token: string;
+  link: string;
+  active: boolean;
+};
+
+// Define type for game toggle function
+type ToggleGameToken = (index: number) => void;
+
 export default function Sidebar() {
   const wallet = useWallet();
   const router = useRouter();
-  const [showExitTokens, setShowExitTokens] = useState(false);
-  const [showPlayTokens, setShowPlayTokens] = useState(false);
+  const [showExitTokens, setShowExitTokens] = useState<boolean>(false);
+  const [showPlayTokens, setShowPlayTokens] = useState<boolean>(false);
 
-  const [exitGames, setExitGames] = useState([
+  const [exitGames, setExitGames] = useState<Game[]>([
     {
       src: "/assets/sol.png",
       token: "SOL",
@@ -42,7 +53,7 @@ export default function Sidebar() {
     },
   ]);
 
-  const [casinoGames, setCasinoGames] = useState([
+  const [casinoGames, setCasinoGames] = useState<Game[]>([
     {
       src: "/assets/sol.png",
       token: "Dice To Win",
@@ -63,7 +74,7 @@ export default function Sidebar() {
     },
   ]);
 
-  const toggleExitToken = (index) => {
+  const toggleExitToken: ToggleGameToken = (index) => {
     const updatedExitGames = exitGames.map((token, i) => ({
       ...token,
       active: i === index ? !token.active : false,
@@ -71,7 +82,7 @@ export default function Sidebar() {
     setExitGames(updatedExitGames);
   };
 
-  const toggleCasinoToken = (index) => {
+  const toggleCasinoToken: ToggleGameToken = (index) => {
     const updatedCasinoGames = casinoGames.map((token, i) => ({
       ...token,
       active: i === index ? !token.active : false,
@@ -81,7 +92,7 @@ export default function Sidebar() {
 
   useEffect(() => {
     // Function to update active state based on current path
-    const updateActiveState = (path) => {
+    const updateActiveState = (path: string) => {
       // Update the active state for exit games
       setExitGames((prevExitGames) =>
         prevExitGames.map((game) => ({
@@ -110,7 +121,7 @@ export default function Sidebar() {
 
   useEffect(() => {
     // Function to check if any game link matches the current pathname
-    const isGameActive = (games) => {
+    const isGameActive = (games: Game[]) => {
       return games.some((game) => game.link === router.pathname);
     };
 
