@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/router";
 
 import userImg from "/public/assets/userImg2.png";
 import dollar from "/public/assets/dollar.png";
@@ -15,38 +16,123 @@ import { useWallet } from "@solana/wallet-adapter-react";
 import { obfuscatePubKey } from "@/context/transactions";
 
 export default function Sidebar() {
-  const wallet = useWallet()
+  const wallet = useWallet();
+  const router = useRouter();
   const [showExitTokens, setShowExitTokens] = useState(false);
   const [showPlayTokens, setShowPlayTokens] = useState(false);
 
-  const fomoToken = [
+  const [exitGames, setExitGames] = useState([
     {
       src: "/assets/sol.png",
       token: "SOL",
-      active: true,
+      link: "",
+      active: false,
     },
     {
       src: "/assets/jup.png",
       token: "JUP",
+      link: "",
       active: false,
     },
     {
       src: "/assets/usdt.png",
       token: "USDT",
+      link: "",
       active: false,
     },
-  ];
+  ]);
+
+  const [casinoGames, setCasinoGames] = useState([
+    {
+      src: "/assets/sol.png",
+      token: "Dice To Win",
+      link: "/dice", // Update the links to include "/"
+      active: false,
+    },
+    {
+      src: "/assets/jup.png",
+      token: "Coin Flip",
+      link: "/coinflip", // Update the links to include "/"
+      active: false,
+    },
+    {
+      src: "/assets/usdt.png",
+      token: "Options",
+      link: "/options", // Update the links to include "/"
+      active: false,
+    },
+  ]);
+
+  const toggleExitToken = (index) => {
+    const updatedExitGames = exitGames.map((token, i) => ({
+      ...token,
+      active: i === index ? !token.active : false,
+    }));
+    setExitGames(updatedExitGames);
+  };
+
+  const toggleCasinoToken = (index) => {
+    const updatedCasinoGames = casinoGames.map((token, i) => ({
+      ...token,
+      active: i === index ? !token.active : false,
+    }));
+    setCasinoGames(updatedCasinoGames);
+  };
+
+  useEffect(() => {
+    // Function to update active state based on current path
+    const updateActiveState = (path) => {
+      // Update the active state for exit games
+      setExitGames((prevExitGames) =>
+        prevExitGames.map((game) => ({
+          ...game,
+          active: game.link === path,
+        })),
+      );
+
+      // Update the active state for casino games
+      setCasinoGames((prevCasinoGames) =>
+        prevCasinoGames.map((game) => ({
+          ...game,
+          active: game.link === path,
+        })),
+      );
+    };
+
+    // Call the function initially with the current pathname
+    updateActiveState(router.pathname);
+
+    // Return a cleanup function
+    return () => {
+      // Cleanup code here (if any)
+    };
+  }, [router.pathname]);
+
+  useEffect(() => {
+    // Function to check if any game link matches the current pathname
+    const isGameActive = (games) => {
+      return games.some((game) => game.link === router.pathname);
+    };
+
+    // Update showExitTokens based on exit game links
+    setShowExitTokens(isGameActive(exitGames));
+
+    // Update showPlayTokens based on casino game links
+    setShowPlayTokens(isGameActive(casinoGames));
+  }, [router.pathname, exitGames, casinoGames]);
 
   return (
     <div
-      className={`hidden bg-[#121418] text-white md:flex flex-col justify-between px-3.5 pb-3.5 min-w-[230px] w-[290px] min-h-full`}
+      className={`hidden bg-[#121418] text-white md:flex flex-col justify-between px-3.5 pb-3.5 w-[290px] min-h-full`}
     >
       <div>
-        <div className="flex flex-col bg-[#202329] rounded-md py-3.5 px-1.5">
+        <div className="flex flex-col rounded-md py-3.5 ">
           <div className="flex items-center w-full mb-2">
             <Image src={userImg} alt="" width={60} height={60} />
             <div className="ml-1">
-              <p className="text-white/75 text-md">{obfuscatePubKey(wallet.publicKey?.toBase58() ?? "")}</p>
+              <p className="text-white/75 text-md">
+                {obfuscatePubKey(wallet.publicKey?.toBase58() ?? "")}
+              </p>
               <p className="text-white/50 text-sm">BRONZE</p>
             </div>
           </div>
@@ -66,8 +152,12 @@ export default function Sidebar() {
             >
               <p className="flex items-center">
                 <Image src={dollar} alt="" width={22} height={22} />
-                <span className="text-md font-semibold text-white/75 ml-2">
-                  FOMO: Exit
+                <span
+                  className={`${
+                    showExitTokens ? "text-opacity-75" : "text-opacity-50"
+                  } text-base font-changa text-white ml-2 `}
+                >
+                  Exit Games
                 </span>
               </p>
               <button
@@ -87,9 +177,11 @@ export default function Sidebar() {
             </div>
             {showExitTokens && (
               <ul className="mt-1">
-                {fomoToken.map((token, index) => (
-                  <li
+                {exitGames.map((token, index) => (
+                  <Link
+                    href={token.link}
                     key={index}
+                    onClick={() => toggleExitToken(index)}
                     className={`${
                       token.active ? "bg-white/10" : ""
                     } flex items-center rounded-md p-2`}
@@ -102,7 +194,7 @@ export default function Sidebar() {
                     >
                       ${token.token}
                     </span>
-                  </li>
+                  </Link>
                 ))}
               </ul>
             )}
@@ -115,8 +207,12 @@ export default function Sidebar() {
             >
               <p className="flex items-center">
                 <Image src={play} alt="" width={22} height={22} />
-                <span className="text-md font-semibold text-white/75 ml-2">
-                  FOMO: Play
+                <span
+                  className={`${
+                    showPlayTokens ? "text-opacity-75" : "text-opacity-50"
+                  } text-base font-changa text-white ml-2 `}
+                >
+                  Casino Games
                 </span>
               </p>
               <button
@@ -136,9 +232,11 @@ export default function Sidebar() {
             </div>
             {showPlayTokens && (
               <ul className="mt-1">
-                {fomoToken.map((token, index) => (
-                  <li
+                {casinoGames.map((token, index) => (
+                  <Link
+                    href={token.link}
                     key={index}
+                    onClick={() => toggleCasinoToken(index)}
                     className={`${
                       token.active ? "bg-white/10" : ""
                     } flex items-center rounded-md p-2`}
@@ -149,9 +247,9 @@ export default function Sidebar() {
                         token.active ? "text-[#7839C5]" : "text-white/75"
                       }`}
                     >
-                      ${token.token}
+                      {token.token}
                     </span>
-                  </li>
+                  </Link>
                 ))}
               </ul>
             )}

@@ -81,8 +81,8 @@ export default function SubHeader() {
               href={"/balance"}
               className="flex items-center px-4 py-2 gap-2 bg-[#9945FF] cursor-pointer rounded-[5px]"
             >
-              <Image src={"/assets/sol.png"} alt="" width={20} height={17} />
-              <span className="text-sm font-serif text-white text-opacity-90">
+              <Image src={"/assets/wallet.png"} alt="" width={20} height={20} />
+              <span className="text-sm font-semibold text-white text-opacity-90">
                 Wallet
               </span>
             </Link>
@@ -90,7 +90,7 @@ export default function SubHeader() {
         </div>
       </div>
       <div className="flex md:hidden items-center justify-between my-4 mx-2 rounded-[5px] bg-[#121418] border-l border-[#1E2220] p-2 md:min-w-fit">
-        <Image src={"/assets/sol.png"} alt="" width={13} height={11} />
+        <Image src={"/assets/wallet2.png"} alt="" width={30} height={30} />
         <div className="flex items-center gap-2">
           <div className="flex items-center px-2 py-0.5 gap-2 border-2 border-white border-opacity-5 rounded-[5px]">
             <Image src={"/assets/sol.png"} alt="" width={13} height={11} />
@@ -102,10 +102,8 @@ export default function SubHeader() {
             href={"/balance"}
             className="flex items-center px-2 py-1.5 gap-2 bg-[#9945FF] cursor-pointer rounded-[5px]"
           >
-            <Image src={"/assets/sol.png"} alt="" width={13} height={11} />
-            <span className="text-xs font-changa text-white text-opacity-90">
-              Wallet
-            </span>
+            <Image src={"/assets/wallet.png"} alt="" width={13} height={11} />
+            <span className="text-xs text-white text-opacity-90">Wallet</span>
           </Link>
         </div>
       </div>

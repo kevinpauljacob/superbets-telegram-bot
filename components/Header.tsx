@@ -40,7 +40,12 @@ export function Header({
       <div className="w-full bg-[#121418] flex flex-col items-center py-4 lg:py-4 px-2">
         <div className="w-full flex flex-row items-center justify-between">
           {/* right */}
-          <div onClick={() => {router.push('/')}} className="flex flex-row items-center cursor-pointer">
+          <div
+            onClick={() => {
+              router.push("/");
+            }}
+            className="flex flex-row items-center cursor-pointer"
+          >
             <div className="relative flex">
               <Image
                 src={"/assets/logowhite.svg"}
@@ -142,26 +147,49 @@ export function Header({
 
             {/* store & leaderboard */}
             <div className="flex items-center gap-4">
-              <button onClick={() => {
+              <button
+                onClick={() => {
                   router.push("store");
                 }}
-                className="hidden sm:flex text-white bg-[#9945FF] hover:bg-opacity-50 transition-all font-medium rounded-md text-sm px-5 py-3">
+                className="hidden sm:flex sm:items-center text-white text-opacity-50 hover:text-opacity-100 border-2 border-[rgba(255,255,255,0.05)] hover:border-white/75 transition-all font-medium rounded-md text-sm px-5 py-2"
+              >
+                <Image
+                  src="/assets/cart.png"
+                  alt="store icon"
+                  width={17}
+                  height={17}
+                  className="mr-1"
+                />
                 {translator("Store", language)}
               </button>
               <button
                 onClick={() => {
                   router.push("leaderboard");
                 }}
-                className="hidden sm:flex text-white bg-[#9945FF] hover:bg-opacity-50 transition-all font-medium rounded-md text-sm px-5 py-3"
+                className="hidden sm:flex sm:items-center text-white text-opacity-50 hover:text-opacity-100 border-2 border-[rgba(255,255,255,0.05)] hover:border-white/75 transition-all font-medium rounded-md text-sm px-5 py-2"
               >
+                <Image
+                  src="/assets/cup.png"
+                  alt="leaderboard icon"
+                  width={17}
+                  height={17}
+                  className="mr-1"
+                />
                 {translator("Leaderboard", language)}
               </button>
               <button
                 onClick={() => {
                   router.push("stake");
                 }}
-                className="hidden sm:flex text-white bg-[#9945FF] hover:bg-opacity-50 transition-all font-medium rounded-md text-sm px-5 py-3"
+                className="hidden sm:flex sm:items-center text-white text-opacity-50 hover:text-opacity-100 border-2 border-[rgba(255,255,255,0.05)] hover:border-white/75 transition-all font-medium rounded-md text-sm px-5 py-2"
               >
+                <Image
+                  src="/assets/bolt.png"
+                  alt="staking icon"
+                  width={17}
+                  height={17}
+                  className="mr-1"
+                />
                 {translator("Staking", language)}
               </button>
               <ConnectWallet />

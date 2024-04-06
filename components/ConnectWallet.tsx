@@ -69,7 +69,7 @@ export default function ConnectWallet() {
       {session?.user && (
         <>
           <button
-            className="w-full sm:w-fit flex text-white bg-[#121D28] font-medium rounded-md text-sm px-5 py-3"
+            className="w-full sm:w-fit flex text-white bg-[#121D28] font-medium rounded-md text-sm px-5 py-2.5"
             onClick={async (e) => {
               try {
                 e.preventDefault();
