@@ -30,10 +30,16 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
       await connectDatabase();
 
-      if (!wallet || !clientSeed)
+      if (
+        !wallet ||
+        !clientSeed ||
+        clientSeed.trim() === "" ||
+        !/^[\x00-\x7F]*$/.test(clientSeed)
+      ) {
         return res
           .status(400)
-          .json({ success: false, message: "Missing parameters" });
+          .json({ success: false, message: "Missing or invalid parameters" });
+      }
 
       const expiredGameSeed = await GameSeed.findOneAndUpdate(
         {

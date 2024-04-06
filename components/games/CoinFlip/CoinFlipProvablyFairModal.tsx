@@ -2,6 +2,7 @@ import { GameType, generateClientSeed, generateGameResult } from "@/utils/vrf";
 import { useEffect, useState } from "react";
 import { Flip } from "../Flips";
 import Image from "next/image";
+import toast from "react-hot-toast";
 
 export interface PFModalData {
   activeGameSeed: {
@@ -105,6 +106,9 @@ export default function CoinFlipProvablyFairModal({
   };
 
   const handleSetClientSeed = async () => {
+    if (!/^[\x00-\x7F]*$/.test(newClientSeed) || newClientSeed.trim() === "")
+      return toast.error("Invalid client seed");
+
     let data = await fetch(`/api/games/vrf/change`, {
       method: "POST",
       headers: {

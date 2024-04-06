@@ -6,7 +6,7 @@ function page() {
   return (
     <>
       <Head>
-        <title>Wallet</title>
+        <title>FOMO - Wallet</title>
       </Head>
       <Balance />
     </>
