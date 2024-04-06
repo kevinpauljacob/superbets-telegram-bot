@@ -2,7 +2,7 @@ import connectDatabase from "../../../../utils/database";
 import { FLIP_TAX } from "../../../../context/config";
 import { getToken } from "next-auth/jwt";
 import { NextApiRequest, NextApiResponse } from "next";
-import { minGameAmount } from "@/context/gameTransactions";
+import { RENDER_ENDPOINT, minGameAmount } from "@/context/gameTransactions";
 import { Coin, GameSeed, User } from "@/models/games";
 import { GameType, generateGameResult, seedStatus } from "@/utils/vrf";
 
@@ -152,6 +152,27 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         nonce,
         gameSeed: activeGameSeed._id,
       });
+
+      const socket = new WebSocket(RENDER_ENDPOINT);
+
+      socket.onopen = () => {
+        console.log("WebSocket connection opened");
+        socket.send(
+          JSON.stringify({
+            clientType: "api-client",
+            channel: "fomo-casino_games-channel",
+            authKey: process.env.FOMO_CHANNEL_AUTH_KEY!,
+            payload: {
+              game: GameType.coin,
+              wallet,
+              absAmount: Math.abs(amountWon - amountLost),
+              result,
+            },
+          }),
+        );
+
+        socket.close();
+      };
 
       return res.json({
         success: true,

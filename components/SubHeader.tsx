@@ -3,42 +3,60 @@ import coin from "/public/assets/coin.svg";
 import { useGlobalContext } from "./GlobalContext";
 import { useRouter } from "next/router";
 import Link from "next/link";
+import {
+  RENDER_ENDPOINT,
+  trimStringToLength,
+} from "@/context/gameTransactions";
+import { useEffect, useState } from "react";
+import { GameType } from "@/utils/vrf";
 
 export default function SubHeader() {
-  const cards = [
-    {
-      cardSrc: "/assets/cardImg.png",
-      userSrc: "/assets/userImg.png",
-      address: "xvdg..fhfh",
-      price: "2.54",
-    },
-    {
-      cardSrc: "/assets/cardImg.png",
-      userSrc: "/assets/userImg.png",
-      address: "xvdg..fhfh",
-      price: "2.54",
-    },
-    {
-      cardSrc: "/assets/cardImg.png",
-      userSrc: "/assets/userImg.png",
-      address: "xvdg..fhfh",
-      price: "2.54",
-    },
-    {
-      cardSrc: "/assets/cardImg.png",
-      userSrc: "/assets/userImg.png",
-      address: "xvdg..fhfh",
-      price: "2.54",
-    },
-    {
-      cardSrc: "/assets/cardImg.png",
-      userSrc: "/assets/userImg.png",
-      address: "xvdg..fhfh",
-      price: "2.54",
-    },
-  ];
-
   const { coinData } = useGlobalContext();
+
+  type Card = {
+    game: GameType;
+    wallet: string;
+    absAmount: number;
+    result: "Won" | "Lost";
+  };
+  const [cards, setCards] = useState<Array<Card>>([]);
+
+  useEffect(() => {
+    const socket = new WebSocket(RENDER_ENDPOINT);
+
+    socket.onopen = () => {
+      console.log("WebSocket connection opened");
+      socket.send(
+        JSON.stringify({
+          clientType: "listener-client",
+          channel: "fomo-casino_games-channel",
+        }),
+      );
+    };
+
+    socket.onmessage = async (event) => {
+      const response = JSON.parse(event.data.toString());
+
+      console.log("Received message from server:", response);
+      if (!response.payload) return;
+
+      const payload = response.payload;
+      setCards((prev) => [...prev, payload]);
+    };
+
+    socket.onclose = (event) => {
+      console.log("WebSocket connection closed:", event);
+    };
+
+    socket.onerror = (error) => {
+      console.error("WebSocket error:", error);
+    };
+
+    return () => {
+      console.log("Cleaning up WebSocket connection");
+      socket.close();
+    };
+  }, []);
 
   return (
     <div className="flex flex-col w-full">
@@ -49,27 +67,31 @@ export default function SubHeader() {
               key={index}
               className="bg-[#1E2220] flex items-center rounded-md mx-2.5 min-w-[150px]"
             >
-              <Image src={card.cardSrc} alt="" width={52} height={52} />
+              <Image src="/assets/cardImg.png" alt="" width={52} height={52} />
               <div className="pl-2 pr-4 py-1">
                 <div className="flex items-center">
-                  <Image src={card.userSrc} alt="" width={23} height={23} />
-                  <span className="text-sm">{card.address}</span>
+                  <Image
+                    src="/assets/userImg.png"
+                    alt=""
+                    width={23}
+                    height={23}
+                  />
+                  <span className="text-sm">
+                    {trimStringToLength(card.wallet, 3)}
+                  </span>
                 </div>
-                <p className="text-[#72F238]">+${card.price}</p>
+                <p
+                  className={
+                    card.result === "Won" ? "text-[#72F238]" : "text-[#F23838]"
+                  }
+                >
+                  +${card.absAmount}
+                </p>
               </div>
             </div>
           ))}
         </div>
         <div className="hidden md:flex items-center border-l border-[#1E2220] pl-4 md:min-w-fit">
-          {/* <div className="mr-2">
-          <Image src={coin} alt="" width={23} height={23} />
-        </div>
-        <span
-          className="text-3xl font-semibold bg-gradient-to-r from-[#9945FF] to-[#6F26BB] text-transparent"
-          style={{ WebkitBackgroundClip: "text", backgroundClip: "text" }}
-        >
-          2300
-        </span> */}
           <div className="flex items-center gap-2">
             <div className="flex items-center px-4 py-1 gap-2 border-2 border-white border-opacity-5 rounded-[5px]">
               <Image src={"/assets/sol.png"} alt="" width={20} height={17} />
