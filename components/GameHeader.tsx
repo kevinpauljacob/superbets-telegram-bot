@@ -7,8 +7,11 @@ import { useWallet } from "@solana/wallet-adapter-react";
 import { GameType } from "@/utils/vrf";
 import { useGlobalContext } from "./GlobalContext";
 import CoinFlipProvablyFairModal from "./games/CoinFlip/CoinFlipProvablyFairModal";
+import { useSession } from "next-auth/react";
 
 export default function GameHeader() {
+  const { data: session, status } = useSession();
+
   const wallet = useWallet();
   const router = useRouter();
   const game = router.pathname.split("/")[1];
@@ -47,12 +50,12 @@ export default function GameHeader() {
 
   useEffect(() => {
     (async () => {
-      if (wallet?.publicKey) {
+      if (wallet?.publicKey && session?.user) {
         const pfData = await getProvablyFairData();
         if (pfData) setModalData(pfData);
       }
     })();
-  }, [wallet.publicKey]);
+  }, [wallet.publicKey, session?.user]);
 
   useEffect(() => {
     const fetchGameData = (game: GameType) => {
