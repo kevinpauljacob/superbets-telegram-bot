@@ -7,7 +7,7 @@ import {
   RENDER_ENDPOINT,
   trimStringToLength,
 } from "@/context/gameTransactions";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { GameType } from "@/utils/vrf";
 
 export default function SubHeader() {
@@ -22,41 +22,67 @@ export default function SubHeader() {
   };
   const [cards, setCards] = useState<Array<Card>>([]);
 
+  const endOfListRef = useRef<null | HTMLDivElement>(null);
+
   useEffect(() => {
-    const socket = new WebSocket(RENDER_ENDPOINT);
+    endOfListRef.current?.scrollIntoView({
+      behavior: "smooth",
+      block: "nearest",
+      inline: "nearest",
+    });
+  }, [cards]);
 
-    socket.onopen = () => {
-      console.log("WebSocket connection opened");
-      socket.send(
-        JSON.stringify({
-          clientType: "listener-client",
-          channel: "fomo-casino_games-channel",
-        }),
-      );
-    };
+  useEffect(() => {
+    // const socket = new WebSocket(RENDER_ENDPOINT);
 
-    socket.onmessage = async (event) => {
-      const response = JSON.parse(event.data.toString());
+    // socket.onopen = () => {
+    //   console.log("WebSocket connection opened");
+    //   socket.send(
+    //     JSON.stringify({
+    //       clientType: "listener-client",
+    //       channel: "fomo-casino_games-channel",
+    //     }),
+    //   );
+    // };
 
-      console.log("Received message from server:", response);
-      if (!response.payload) return;
+    // socket.onmessage = async (event) => {
+    //   const response = JSON.parse(event.data.toString());
 
-      const payload = response.payload;
-      setCards((prev) => [...prev, payload]);
-    };
+    //   console.log("Received message from server:", response);
+    //   if (!response.payload) return;
 
-    socket.onclose = (event) => {
-      console.log("WebSocket connection closed:", event);
-    };
+    //   const payload = response.payload;
+    //   setCards((prev) => [...prev, payload]);
+    // };
 
-    socket.onerror = (error) => {
-      console.error("WebSocket error:", error);
-    };
+    // socket.onclose = (event) => {
+    //   console.log("WebSocket connection closed:", event);
+    // };
 
-    return () => {
-      console.log("Cleaning up WebSocket connection");
-      socket.close();
-    };
+    // socket.onerror = (error) => {
+    //   console.error("WebSocket error:", error);
+    // };
+
+    // return () => {
+    //   console.log("Cleaning up WebSocket connection");
+    //   socket.close();
+    // };
+
+    //add a new card every 5 seconds
+    const interval = setInterval(() => {
+      setCards((prev) => [
+        ...prev,
+        {
+          game: GameType.dice,
+          wallet: "7nJFzJmFQ6",
+          absAmount: 3.4,
+          result: "Won",
+          userTier: "1",
+        },
+      ]);
+    }, 2000);
+
+    return () => clearInterval(interval);
   }, []);
 
   return (
@@ -87,13 +113,18 @@ export default function SubHeader() {
                   </span>
                 </div>
                 {card.result === "Won" ? (
-                  <p className="text-[#72F238]">+${card.absAmount}</p>
+                  <p className="text-[#72F238]">
+                    +${card.absAmount.toFixed(2)}
+                  </p>
                 ) : (
-                  <p className="text-[#F23838]">-${card.absAmount}</p>
+                  <p className="text-[#F23838]">
+                    -${card.absAmount.toFixed(2)}
+                  </p>
                 )}
               </div>
             </div>
           ))}
+          <div ref={endOfListRef} />
         </div>
         <div className="hidden md:flex items-center border-l border-[#1E2220] pl-4 md:min-w-fit">
           <div className="flex items-center gap-2">
