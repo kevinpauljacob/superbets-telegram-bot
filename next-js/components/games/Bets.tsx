@@ -37,6 +37,10 @@ export default function Bets({ refresh }: { refresh: boolean }) {
 
   const allHeaders = ["Date", "Wallet", "Bet Type", "Amount", "Result"];
 
+  //headers to be displayed in small screen devices
+  const smallScreenHeaders = ["Time", "Amount Won"];
+  const allSmallScreenHeaders = ["Time", "Amount Won"];
+
   useEffect(() => {
     if (refresh) {
       const route = all
@@ -85,29 +89,50 @@ export default function Bets({ refresh }: { refresh: boolean }) {
       </div>
 
       {/* table  */}
-      <div className="scrollbar mt-10 w-full overflow-x-auto pb-8">
-        <div className="flex w-full min-w-[50rem] flex-col items-center">
+      <div className="scrollbar mt-10 w-full md:overflow-x-auto pb-8">
+        <div className="flex w-full md:min-w-[50rem] flex-col items-center">
           {/* header  */}
           {bets.length > 0 && (
-            <div className="mb-5 flex w-full flex-row items-center gap-2 bg-[#121418] py-1 rounded-[5px]">
-              {!all
-                ? myHeaders.map((header, index) => (
-                    <span
-                      key={index}
-                      className="w-full text-center font-changa text-[#F0F0F080]"
-                    >
-                      {header}
-                    </span>
-                  ))
-                : allHeaders.map((header, index) => (
-                    <span
-                      key={index}
-                      className="w-full text-center font-changa text-[#F0F0F080]"
-                    >
-                      {header}
-                    </span>
-                  ))}
-            </div>
+            <>
+              <div className="mb-5 hidden md:flex w-full flex-row items-center gap-2 bg-[#121418] py-1 rounded-[5px]">
+                {!all
+                  ? myHeaders.map((header, index) => (
+                      <span
+                        key={index}
+                        className="w-full text-center font-changa text-[#F0F0F080]"
+                      >
+                        {header}
+                      </span>
+                    ))
+                  : allHeaders.map((header, index) => (
+                      <span
+                        key={index}
+                        className="w-full text-center font-changa text-[#F0F0F080]"
+                      >
+                        {header}
+                      </span>
+                    ))}
+              </div>
+              <div className="mb-5 flex md:hidden w-full flex-row items-center bg-[#121418] rounded-md py-1 gap-2">
+                {!all
+                  ? smallScreenHeaders.map((header, index) => (
+                      <span
+                        key={index}
+                        className="w-full text-center font-changa text-[#F0F0F080]"
+                      >
+                        {header}
+                      </span>
+                    ))
+                  : allSmallScreenHeaders.map((header, index) => (
+                      <span
+                        key={index}
+                        className="w-full text-center font-changa text-[#F0F0F080]"
+                      >
+                        {header}
+                      </span>
+                    ))}
+              </div>
+            </>
           )}
 
           {bets.length > 0 ? (
@@ -137,28 +162,28 @@ export default function Bets({ refresh }: { refresh: boolean }) {
                       : "-"}
                   </span>
                   {all && (
-                    <span className="w-full text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
+                    <span className="w-full hidden md:block text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
                       {obfuscatePubKey(bet.wallet)}
                     </span>
                   )}
-                  <span className="w-full text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
+                  <span className="w-full hidden md:block text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
                     {bet.betType === "betUp" ? "UP" : "DOWN"}
                   </span>
-                  <span className="w-full text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
+                  <span className="w-full hidden md:block text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
                     {bet.amount.toFixed(4)}
                   </span>
                   {!all && (
-                    <span className="w-full text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
+                    <span className="w-full hidden md:block text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
                       {bet.strikePrice?.toFixed(4)}
                     </span>
                   )}
                   {!all && (
-                    <span className="w-full text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
+                    <span className="w-full hidden md:block text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
                       {bet.timeFrame}
                     </span>
                   )}
                   <span
-                    className={`w-full text-center font-changa text-sm text-opacity-75 ${
+                    className={`w-full hidden md:block text-center font-changa text-sm text-opacity-75 ${
                       bet.result === "Lost"
                         ? "text-[#CF304A]"
                         : bet.result === "Won"
@@ -167,6 +192,15 @@ export default function Bets({ refresh }: { refresh: boolean }) {
                     }`}
                   >
                     {bet.result}
+                  </span>
+                  <span
+                    className={`w-full block md:hidden text-center  font-changa text-sm text-[#F0F0F0] text-opacity-75`}
+                  >
+                    {bet.result === "Lost"
+                      ? 0
+                      : bet.result === "Won"
+                      ? (bet.amount * 2).toFixed(4)
+                      : "-"}
                   </span>
                 </div>
               ))

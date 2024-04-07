@@ -55,6 +55,10 @@ export default function RollDiceTable({ refresh }: { refresh: boolean }) {
     "Amount Won",
   ];
 
+  //headers to be displayed in small screen devices
+  const smallScreenHeaders = ["Time", "Amount Won"];
+  const allSmallScreenHeaders = ["Time", "Amount Won"];
+
   useEffect(() => {
     const route = all
       ? "/api/games/dice/getGlobalHistory"
@@ -98,29 +102,50 @@ export default function RollDiceTable({ refresh }: { refresh: boolean }) {
           All Bets
         </button>
       </div>
-      <div className="mt-10 w-full overflow-x-auto pb-8">
-        <div className="flex w-full min-w-[50rem] flex-col items-center">
+      <div className="mt-10 w-full md:overflow-x-auto pb-8">
+        <div className="flex w-full md:min-w-[50rem] flex-col items-center">
           {/* header  */}
           {bets.length > 0 && (
-            <div className="mb-5 flex w-full flex-row items-center bg-[#121418] rounded-md py-1 gap-2">
-              {!all
-                ? headers.map((header, index) => (
-                    <span
-                      key={index}
-                      className="w-full text-center font-changa text-[#F0F0F080]"
-                    >
-                      {header}
-                    </span>
-                  ))
-                : allHeaders.map((header, index) => (
-                    <span
-                      key={index}
-                      className="w-full text-center font-changa text-[#F0F0F080]"
-                    >
-                      {header}
-                    </span>
-                  ))}
-            </div>
+            <>
+              <div className="mb-5 hidden md:flex w-full flex-row items-center bg-[#121418] rounded-md py-1 gap-2">
+                {!all
+                  ? headers.map((header, index) => (
+                      <span
+                        key={index}
+                        className="w-full text-center font-changa text-[#F0F0F080]"
+                      >
+                        {header}
+                      </span>
+                    ))
+                  : allHeaders.map((header, index) => (
+                      <span
+                        key={index}
+                        className="w-full text-center font-changa text-[#F0F0F080]"
+                      >
+                        {header}
+                      </span>
+                    ))}
+              </div>
+              <div className="mb-5 flex md:hidden w-full flex-row items-center bg-[#121418] rounded-md py-1 gap-2">
+                {!all
+                  ? smallScreenHeaders.map((header, index) => (
+                      <span
+                        key={index}
+                        className="w-full text-center font-changa text-[#F0F0F080]"
+                      >
+                        {header}
+                      </span>
+                    ))
+                  : allSmallScreenHeaders.map((header, index) => (
+                      <span
+                        key={index}
+                        className="w-full text-center font-changa text-[#F0F0F080]"
+                      >
+                        {header}
+                      </span>
+                    ))}
+              </div>
+            </>
           )}
           {bets.length > 0 ? (
             bets
@@ -157,11 +182,11 @@ export default function RollDiceTable({ refresh }: { refresh: boolean }) {
                         : "-"}
                     </span>
                     {all && (
-                      <span className="w-full text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
+                      <span className="w-full hidden md:block text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
                         {obfuscatePubKey(bet.wallet)}
                       </span>
                     )}
-                    <span className="w-full text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
+                    <span className="w-full hidden md:block text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
                       {bet.chosenNumbers.map((face, index) => (
                         <span key={index} className="mr-2 mt-2 inline-block">
                           <Image
@@ -173,10 +198,10 @@ export default function RollDiceTable({ refresh }: { refresh: boolean }) {
                         </span>
                       ))}
                     </span>
-                    <span className="w-full text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
+                    <span className="w-full hidden md:block text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
                       {bet.amount} SOL
                     </span>
-                    <span className="w-full text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
+                    <span className="w-full hidden md:block text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
                       <span className="mr-2 mt-2 inline-block">
                         <Image
                           src={`/assets/selectedDiceFace${bet.strikeNumber}.png`}
