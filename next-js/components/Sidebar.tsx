@@ -3,7 +3,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/router";
 
-import userImg from "/public/assets/userImg2.png";
 import dollar from "/public/assets/dollar.png";
 import play from "/public/assets/play.png";
 import search from "/public/assets/search.png";
@@ -13,7 +12,8 @@ import ottersec from "@/public/assets/ottersec.png";
 import upArrow from "@/public/assets/upArrow.png";
 import downArrow from "@/public/assets/downArrow.png";
 import { useWallet } from "@solana/wallet-adapter-react";
-import { obfuscatePubKey } from "@/context/transactions";
+import { obfuscatePubKey, pointTiers } from "@/context/transactions";
+import { useGlobalContext } from "./GlobalContext";
 
 // Define types for game object
 type Game = {
@@ -31,6 +31,8 @@ export default function Sidebar() {
   const router = useRouter();
   const [showExitTokens, setShowExitTokens] = useState<boolean>(false);
   const [showPlayTokens, setShowPlayTokens] = useState<boolean>(false);
+
+  const { userData } = useGlobalContext();
 
   const [exitGames, setExitGames] = useState<Game[]>([
     {
@@ -138,14 +140,22 @@ export default function Sidebar() {
     >
       <div>
         <div className="flex flex-col rounded-md py-3.5 ">
-          <div className="flex items-center w-full mb-2">
-            <Image src={userImg} alt="" width={60} height={60} />
+          <div className="flex items-center w-full mb-2 justify-around">
+            <Image
+              src={`/assets/badges/T-${userData?.tier ?? 0}.png`}
+              alt="userBadge"
+              width={55}
+              height={55}
+            />
             <div className="ml-1">
               <p className="text-white/75 font-changa text-xl">
                 {obfuscatePubKey(wallet.publicKey?.toBase58() ?? "")}
               </p>
               <p className="text-white/50 font-chakra font-bold text-sm">
-                BRONZE
+                {userData?.points &&
+                  Object.entries(pointTiers).reduce((prev, next) => {
+                    return userData.points >= next[1]?.limit ? next : prev;
+                  })[1].label}
               </p>
             </div>
           </div>
