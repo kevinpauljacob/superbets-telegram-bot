@@ -19,6 +19,8 @@ export const connection = new Connection(
   "processed",
 );
 
+export const wsEndpoint = process.env.NEXT_PUBLIC_WS_ENDPOINT!;
+
 const devPublicKey = new PublicKey(process.env.NEXT_PUBLIC_DEV_PUBLIC_KEY!);
 
 export const minGameAmount = 1e-6;
@@ -463,3 +465,11 @@ export const rollDice = async (
     return { success: false, message: "Unexpected error", data: null };
   }
 };
+
+export function trimStringToLength(str: string, desiredLength: number): string {
+  return (
+    str.substring(0, desiredLength) +
+    "..." +
+    str.substring(str.length - desiredLength, str.length)
+  );
+}

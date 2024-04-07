@@ -354,3 +354,14 @@ button.dark-bg {
   filter: drop-shadow(0px 0px 4px #F200F2) brightness(1.5) opacity(1);
   mix-blend-mode: plus-lighter;
 } */
+
+/* Hide scrollbar for Chrome, Safari, and Opera */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Hide scrollbar for IE, Edge, and Firefox */
+.no-scrollbar {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}

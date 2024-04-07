@@ -1,79 +1,116 @@
 import Image from "next/image";
-import coin from "/public/assets/coin.svg";
 import { useGlobalContext } from "./GlobalContext";
-import { useRouter } from "next/router";
 import Link from "next/link";
+import { wsEndpoint, trimStringToLength } from "@/context/gameTransactions";
+import { useEffect, useRef, useState } from "react";
+import { GameType } from "@/utils/vrf";
 
 export default function SubHeader() {
-  const cards = [
-    {
-      cardSrc: "/assets/cardImg.png",
-      userSrc: "/assets/userImg.png",
-      address: "xvdg..fhfh",
-      price: "2.54",
-    },
-    {
-      cardSrc: "/assets/cardImg.png",
-      userSrc: "/assets/userImg.png",
-      address: "xvdg..fhfh",
-      price: "2.54",
-    },
-    {
-      cardSrc: "/assets/cardImg.png",
-      userSrc: "/assets/userImg.png",
-      address: "xvdg..fhfh",
-      price: "2.54",
-    },
-    {
-      cardSrc: "/assets/cardImg.png",
-      userSrc: "/assets/userImg.png",
-      address: "xvdg..fhfh",
-      price: "2.54",
-    },
-    {
-      cardSrc: "/assets/cardImg.png",
-      userSrc: "/assets/userImg.png",
-      address: "xvdg..fhfh",
-      price: "2.54",
-    },
-  ];
-
   const { coinData } = useGlobalContext();
+
+  type Card = {
+    game: GameType;
+    wallet: string;
+    absAmount: number;
+    result: "Won" | "Lost";
+    userTier: string;
+  };
+  const [cards, setCards] = useState<Array<Card>>([]);
+
+  const endOfListRef = useRef<null | HTMLDivElement>(null);
+
+  useEffect(() => {
+    endOfListRef.current?.scrollIntoView({
+      behavior: "smooth",
+      block: "nearest",
+      inline: "nearest",
+    });
+  }, [cards]);
+
+  useEffect(() => {
+    const socket = new WebSocket(wsEndpoint);
+
+    socket.onopen = () => {
+      console.log("WebSocket connection opened");
+      socket.send(
+        JSON.stringify({
+          clientType: "listener-client",
+          channel: "fomo-casino_games-channel",
+        }),
+      );
+    };
+
+    socket.onmessage = async (event) => {
+      const response = JSON.parse(event.data.toString());
+
+      console.log("Received message from server:", response);
+      if (!response.payload) return;
+
+      const payload = response.payload;
+      setCards((prev) => {
+        const newCards = [payload, ...prev];
+        return newCards.slice(0, 15);
+      });
+    };
+
+    socket.onclose = (event) => {
+      console.log("WebSocket connection closed:", event);
+    };
+
+    socket.onerror = (error) => {
+      console.error("WebSocket error:", error);
+    };
+
+    return () => {
+      console.log("Cleaning up WebSocket connection");
+      socket.close();
+    };
+  }, []);
 
   return (
     <div className="flex flex-col w-full">
       <div className="w-full text-white h-[70px] flex items-center border-y border-[#1E2220] px-4 lg:pl-4 lg:pr-4 bg-[#121418]">
-        <div className="flex w-full items-center overflow-x-auto">
+        <div className="flex w-full items-center overflow-x-auto no-scrollbar">
+          <div ref={endOfListRef} />
           {cards.map((card, index) => (
-            <div
+            <Link
               key={index}
-              className="bg-[#1E2220] flex items-center rounded-md mx-2.5 min-w-[150px]"
+              className="bg-[#1E2220] flex items-center rounded-md mr-2 min-w-[180px] justify-around"
+              href={`/${card.game}`}
             >
-              <Image src={card.cardSrc} alt="" width={52} height={52} />
-              <div className="pl-2 pr-4 py-1">
-                <div className="flex items-center">
-                  <Image src={card.userSrc} alt="" width={19} height={17} />
-                  <span className="text-xs font-changa font-medium">
-                    {card.address}
+              <Image
+                src={`/assets/games/${card.game}.png`}
+                alt="gameBadge"
+                width={52}
+                height={52}
+                className="rounded-md ml-2"
+              />
+              <div className="pl-2 pr-2 py-1">
+                <div className="flex items-center gap-1">
+                  <Image
+                    src={`/assets/badges/T-${card.userTier[0]}.png`}
+                    alt="userBadge"
+                    width={23}
+                    height={23}
+                  />
+                  <span className="text-sm">
+                    {trimStringToLength(card.wallet, 4)}
                   </span>
                 </div>
-                <p className="text-[#72F238] font-changa text-sm">
-                  +${card.price}
-                </p>
+                {card.result === "Won" ? (
+                  <p className="text-[#72F238]">
+                    +${card.absAmount.toFixed(2)}
+                  </p>
+                ) : (
+                  <p className="text-[#F23838]">
+                    -${card.absAmount.toFixed(2)}
+                  </p>
+                )}
               </div>
-            </div>
+            </Link>
           ))}
         </div>
         <div className="hidden md:flex items-center border-l border-[#1E2220] pl-4 md:min-w-fit">
-          {/* <div className="mr-2">
-          <Image src={coin} alt="" width={23} height={23} />
-        </div>
-        <span
-          className="text-3xl font-semibold bg-gradient-to-r from-[#9945FF] to-[#6F26BB] text-transparent"
-          style={{ WebkitBackgroundClip: "text", backgroundClip: "text" }}
-        >
-          2300
-        </span> */}
           <div className="flex items-center gap-2">
             <div className="flex items-center px-4 py-1 gap-2 border-2 border-white border-opacity-5 rounded-[5px]">
               <Image src={"/assets/sol.png"} alt="" width={20} height={17} />

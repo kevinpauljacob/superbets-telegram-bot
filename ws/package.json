@@ -1,0 +1,25 @@
+{
+  "name": "dawg-ws",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^20.10.5",
+    "@types/ws": "^8.5.10",
+    "nodemon": "^3.0.2",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.3.3"
+  },
+  "scripts": {
+    "start": "ts-node wsServer.ts",
+    "test": "nodemon --exec ts-node wsServer.ts"
+  },
+  "dependencies": {
+    "@coral-xyz/anchor": "^0.29.0",
+    "@solana/spl-token": "^0.3.9",
+    "@solana/web3.js": "^1.87.6",
+    "dotenv": "^16.3.1",
+    "mongoose": "^8.0.3",
+    "ws": "^8.16.0"
+  }
+}
