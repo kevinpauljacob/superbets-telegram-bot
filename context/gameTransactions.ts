@@ -380,6 +380,7 @@ export const createWithdrawTxn = async (
 };
 
 export async function retryTxn(
+  connection: Connection,
   transaction: Transaction,
   blockhashContext: BlockhashWithExpiryBlockHeight,
 ) {
@@ -397,7 +398,6 @@ export async function retryTxn(
   while (blockheight < lastValidBlockHeight && flag) {
     txn = await connection.sendRawTransaction(transaction.serialize(), {
       skipPreflight: true,
-      maxRetries: 0,
     });
     await new Promise((r) => setTimeout(r, 1000));
     console.log("retry count: ", ++j);
@@ -415,13 +415,16 @@ export async function retryTxn(
         }
       })
       .catch((e) => {
+        finalTxn = "";
+        flag = false;
         console.log(e);
       });
 
     blockheight = await connection.getBlockHeight();
   }
 
-  return finalTxn;
+  if (finalTxn) return finalTxn;
+  else throw new Error("Transaction could not be confirmed !");
 }
 
 export const rollDice = async (

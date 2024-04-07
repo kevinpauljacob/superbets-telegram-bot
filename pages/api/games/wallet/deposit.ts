@@ -87,7 +87,11 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           .status(400)
           .json({ success: false, message: "Transaction verfication failed" });
 
-      const txnSignature = await retryTxn(txn, blockhashWithExpiryBlockHeight);
+      const txnSignature = await retryTxn(
+        connection,
+        txn,
+        blockhashWithExpiryBlockHeight,
+      );
 
       await TxnSignature.create({ txnSignature });
 

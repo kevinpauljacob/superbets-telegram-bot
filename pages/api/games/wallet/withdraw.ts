@@ -136,7 +136,11 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
       txn.partialSign(devWalletKey);
 
-      const txnSignature = await retryTxn(txn, blockhashWithExpiryBlockHeight);
+      const txnSignature = await retryTxn(
+        connection,
+        txn,
+        blockhashWithExpiryBlockHeight,
+      );
 
       await TxnSignature.create({ txnSignature });
 
