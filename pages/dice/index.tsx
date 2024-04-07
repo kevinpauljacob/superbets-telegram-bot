@@ -142,9 +142,11 @@ export default function Dice() {
           <BetSetting betSetting={rollType} setBetSetting={setRollType} />
 
           <div className="mb-6">
-            <div className="flex justify-between text-xs mb-2">
-              <p className="font-semibold">Bet Amount</p>
-              <p className="font-semibold text-[#94A3B8]">
+            <div className="flex justify-between text-sm mb-2">
+              <p className="font-medium font-changa text-[#F0F0F0] text-opacity-90">
+                Bet Amount
+              </p>
+              <p className="font-medium font-changa text-[#94A3B8] text-opacity-90">
                 Available : {coinData ? coinData[0]?.amount.toFixed(4) : 0} $SOL
               </p>
             </div>
@@ -158,10 +160,10 @@ export default function Dice() {
                 onChange={handleBetAmountChange}
                 placeholder={"Amount"}
                 value={betAmt}
-                className={`flex w-full min-w-0 bg-transparent text-sm text-white placeholder-white  placeholder-opacity-40 outline-none`}
+                className={`flex w-full min-w-0 bg-transparent text-base font-chakra text-white placeholder-white  placeholder-opacity-40 outline-none`}
               />
               <span
-                className="bg-[#D9D9D9] bg-opacity-5 py-1 px-1.5 rounded text-sm text-[#F0F0F0] text-opacity-75"
+                className="bg-[#D9D9D9] bg-opacity-5 py-1 px-1.5 rounded text-xs font-semibold text-[#F0F0F0] text-opacity-50"
                 onClick={() => setBetAmt(coinData ? coinData[0]?.amount : 0)}
               >
                 MAX
@@ -229,11 +231,11 @@ export default function Dice() {
             <div className="flex justify-between items-center mb-7 sm:mb-0">
               <div>
                 {isRolling ? (
-                  <div className="font-changa text-xs font-semibold text-white text-opacity-80">
+                  <div className="font-chakra text-sm font-medium text-white text-opacity-75">
                     Rolling the dice...
                   </div>
                 ) : (
-                  <div className="font-changa text-xs font-semibold text-white text-opacity-80">
+                  <div className="font-chakra text-sm font-medium text-white text-opacity-75">
                     {selectedFace.length === 0
                       ? "Choose up to 5 faces"
                       : `${selectedFace.length

@@ -22,7 +22,7 @@ export default function FomoExit() {
     <div>
       <div className="flex items-center mb-1.5">
         <Image src={Dollar} alt="" width={26} height={26} />
-        <span className="font-bold text-xl pl-3">
+        <span className="font-semibold font-changa text-xl text-opacity-90 pl-3">
           FOMO: Exit - A unique DeFi game experience
         </span>
       </div>

@@ -256,11 +256,11 @@ export default function Options() {
               onSubmit={methods.handleSubmit(onSubmit)}
             >
               <div className="mb-0 flex w-full flex-col">
-                <div className="mb-1 flex w-full items-center justify-between">
-                  <label className="text-xs text-[#F0F0F0] text-opacity-75">
+                <div className="mb-1 flex w-full items-center justify-between text-sm font-changa text-opacity-90">
+                  <label className="text-[#F0F0F0] text-opacity-75">
                     Bet amount
                   </label>
-                  <span className="text-sm text-[#F0F0F0] text-opacity-75">
+                  <span className="text-[#94A3B8] text-opacity-75">
                     Available : {coinData ? coinData[0]?.amount.toFixed(4) : 0}
                   </span>
                 </div>
@@ -279,10 +279,10 @@ export default function Options() {
                     onChange={handleChange}
                     placeholder={"Amount"}
                     value={betAmt}
-                    className={`flex w-full min-w-0 bg-transparent text-sm text-white placeholder-white  placeholder-opacity-40 outline-none`}
+                    className={`flex w-full min-w-0 bg-transparent text-base text-white placeholder-white  font-changa placeholder-opacity-40 outline-none`}
                   />
                   <span
-                    className="bg-[#D9D9D9] bg-opacity-5 py-1 px-1.5 rounded text-sm text-[#F0F0F0] text-opacity-75"
+                    className="bg-[#D9D9D9] bg-opacity-5 py-1 px-1.5 rounded text-xs font-semibold text-[#F0F0F0] text-opacity-50"
                     onClick={() =>
                       setBetAmt(coinData ? coinData[0]?.amount : 0)
                     }
@@ -306,7 +306,7 @@ export default function Options() {
 
               {/* select interval  */}
               <div className="mb-4 flex w-full flex-col rounded-lg bg-transparent bg-opacity-10">
-                <span className="-full mb-3 text-left font-changa font-medium text-[#F0F0F0] text-opacity-75">
+                <span className="-full mb-3 text-left text-sm font-changa font-medium text-[#F0F0F0] text-opacity-75">
                   Select Interval
                 </span>
                 <div className="flex flex-col items-center gap-2.5 md:flex-row bg-[#0C0F16] p-4 rounded-lg">
@@ -319,7 +319,7 @@ export default function Options() {
                       betInterval === 3
                         ? "border-[#7839C5]"
                         : "border-transparent hover:border-[#7839C580]"
-                    } w-full rounded-[5px] border-[2px] bg-[#202329] py-2 text-xs text-white text-opacity-90 transition duration-200`}
+                    } w-full rounded-[5px] border-[2px] bg-[#202329] py-2 text-xs font-chakra text-white text-opacity-90 transition duration-200`}
                   >
                     3 Min
                   </button>
@@ -332,7 +332,7 @@ export default function Options() {
                       betInterval === 4
                         ? "border-[#7839C5]"
                         : "border-transparent hover:border-[#7839C580]"
-                    } w-full rounded-[5px] border-[2px] bg-[#202329] py-2 text-xs text-white text-opacity-90 transition duration-200`}
+                    } w-full rounded-[5px] border-[2px] bg-[#202329] py-2 text-xs font-chakra text-white text-opacity-90 transition duration-200`}
                   >
                     4 Min
                   </button>
@@ -345,7 +345,7 @@ export default function Options() {
                       betInterval === 5
                         ? "border-[#7839C5]"
                         : "border-transparent hover:border-[#7839C580]"
-                    } w-full rounded-[5px] border-[2px] bg-[#202329] py-2 text-xs text-white text-opacity-90 transition duration-200`}
+                    } w-full rounded-[5px] border-[2px] bg-[#202329] py-2 text-xs font-chakra -white text-opacity-90 transition duration-200`}
                   >
                     5 Min
                   </button>

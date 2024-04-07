@@ -37,7 +37,11 @@ export function Header({
 
   return (
     <>
-      <div className="w-full bg-[#121418] flex flex-col items-center py-4 lg:py-4 px-2">
+      <div
+        className={`${
+          sidebar ? "fixed z-20 top-[24px]" : ""
+        } w-full bg-[#121418] flex flex-col items-center py-4 lg:py-4 px-2`}
+      >
         <div className="w-full flex flex-row items-center justify-between">
           {/* right */}
           <div
@@ -197,7 +201,11 @@ export function Header({
           </div>
         </div>
       </div>
-      <div className="md:hidden text-white bg-[#121418] border-y border-white/10 py-2">
+      <div
+        className={`${
+          sidebar ? "fixed z-20 top-[112px]" : ""
+        } md:hidden text-white bg-[#121418] border-y border-white/10 py-2 w-full`}
+      >
         <ul className="flex flex-1">
           <button
             className="flex flex-col items-center justify-center border-r border-white/10 w-1/5"

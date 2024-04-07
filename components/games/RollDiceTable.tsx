@@ -83,7 +83,7 @@ export default function RollDiceTable({ refresh }: { refresh: boolean }) {
           }}
           className={`${
             all ? "bg-[#202329]" : "bg-[#7839C5]"
-          } rounded-md transition duration-300 ease-in-out px-8 py-1.5`}
+          } rounded-md transition font-changa duration-300 ease-in-out px-8 py-1.5`}
         >
           My Bets
         </button>
@@ -93,7 +93,7 @@ export default function RollDiceTable({ refresh }: { refresh: boolean }) {
           }}
           className={`${
             all ? "bg-[#7839C5]" : "bg-[#202329]"
-          } rounded-md transition duration-300 ease-in-out px-8 py-1.5`}
+          } rounded-md transition font-changa duration-300 ease-in-out px-8 py-1.5`}
         >
           All Bets
         </button>

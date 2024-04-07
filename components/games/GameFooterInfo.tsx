@@ -17,7 +17,9 @@ export default function GameFooterInfo({
       {coinData && coinData[0].amount > 0.0001 && (
         <>
           <div className="flex flex-col w-full">
-            <span className="text-[#F0F0F0] text-opacity-75 text-xs mb-1">Multiplier</span>
+            <span className="text-[#F0F0F0] font-changa text-opacity-75 text-xs mb-1">
+              Multiplier
+            </span>
             <span className="bg-[#202329] text-xs text-white rounded-md px-5 py-2">
               {multiplier.toFixed(2)}x
             </span>
@@ -29,13 +31,17 @@ export default function GameFooterInfo({
               </span>
             </div> */}
           <div className="flex flex-col w-full sm:mx-8 my-3 sm:my-0">
-            <span className="text-[#F0F0F0] text-opacity-75 text-xs mb-1">Winning Amount</span>
+            <span className="text-[#F0F0F0] font-changa text-opacity-75 text-xs mb-1">
+              Winning Amount
+            </span>
             <span className="bg-[#202329] text-xs text-white rounded-md px-5 py-2">
               {amount.toFixed(5)} $SOL
             </span>
           </div>
           <div className="flex flex-col w-full">
-            <span className="text-[#F0F0F0] text-opacity-75 text-xs mb-1">Chance</span>
+            <span className="text-[#F0F0F0] font-changa text-opacity-75 text-xs mb-1">
+              Chance
+            </span>
             <span className="bg-[#202329] text-xs text-white rounded-md px-5 py-2">
               {chance.toFixed(2)}%
             </span>

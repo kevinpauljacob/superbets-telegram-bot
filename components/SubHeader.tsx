@@ -52,10 +52,14 @@ export default function SubHeader() {
               <Image src={card.cardSrc} alt="" width={52} height={52} />
               <div className="pl-2 pr-4 py-1">
                 <div className="flex items-center">
-                  <Image src={card.userSrc} alt="" width={23} height={23} />
-                  <span className="text-sm">{card.address}</span>
+                  <Image src={card.userSrc} alt="" width={19} height={17} />
+                  <span className="text-xs font-changa font-medium">
+                    {card.address}
+                  </span>
                 </div>
-                <p className="text-[#72F238]">+${card.price}</p>
+                <p className="text-[#72F238] font-changa text-sm">
+                  +${card.price}
+                </p>
               </div>
             </div>
           ))}
@@ -73,7 +77,7 @@ export default function SubHeader() {
           <div className="flex items-center gap-2">
             <div className="flex items-center px-4 py-1 gap-2 border-2 border-white border-opacity-5 rounded-[5px]">
               <Image src={"/assets/sol.png"} alt="" width={20} height={17} />
-              <span className="font-changa text-2xl">
+              <span className="font-chakra text-2xl">
                 {(coinData ? coinData[0].amount : 0).toFixed(4)}
               </span>
             </div>

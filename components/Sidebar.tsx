@@ -141,15 +141,17 @@ export default function Sidebar() {
           <div className="flex items-center w-full mb-2">
             <Image src={userImg} alt="" width={60} height={60} />
             <div className="ml-1">
-              <p className="text-white/75 text-md">
+              <p className="text-white/75 font-changa text-xl">
                 {obfuscatePubKey(wallet.publicKey?.toBase58() ?? "")}
               </p>
-              <p className="text-white/50 text-sm">BRONZE</p>
+              <p className="text-white/50 font-chakra font-bold text-sm">
+                BRONZE
+              </p>
             </div>
           </div>
           <Link
             href=""
-            className="text-center hover:bg-[#9945FF] transition duration-300 ease-in-out hover:text-white hover:transition hover:duration-300 hover:ease-in-out text-[#9945FF] border border-[#9945FF] rounded-md py-1.5 w-full"
+            className="text-center font-chakra text-base font-medium hover:bg-[#9945FF] transition duration-300 ease-in-out hover:text-white hover:transition hover:duration-300 hover:ease-in-out text-[#9945FF] border border-[#9945FF] rounded-md py-1.5 w-full"
           >
             View Dashboard
           </Link>
@@ -199,8 +201,8 @@ export default function Sidebar() {
                   >
                     <Image src={token.src} alt="" width={18} height={18} />
                     <span
-                      className={`ml-3 font-semibold ${
-                        token.active ? "text-[#7839C5]" : "text-white/75"
+                      className={`ml-3 font-changa ${
+                        token.active ? "text-[#7839C5]" : "text-white/50"
                       }`}
                     >
                       ${token.token}
@@ -254,8 +256,8 @@ export default function Sidebar() {
                   >
                     <Image src={token.src} alt="" width={18} height={18} />
                     <span
-                      className={`ml-3 font-semibold ${
-                        token.active ? "text-[#7839C5]" : "text-white/75"
+                      className={`ml-3 font-changa ${
+                        token.active ? "text-[#7839C5]" : "text-white/50"
                       }`}
                     >
                       {token.token}
@@ -314,7 +316,7 @@ export default function Sidebar() {
           </div>
           <div className="flex items-center justify-center my-3">
             <Image src={ottersec} alt="" width={17} height={17} />
-            <p className="text-sm font-light text-white/50">
+            <p className="text-xs font-light text-white/50">
               Audited by OtterSec
             </p>
           </div>

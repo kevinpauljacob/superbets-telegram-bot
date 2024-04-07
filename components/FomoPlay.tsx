@@ -35,14 +35,14 @@ export default function FomoPlay() {
     {
       href: "/",
       src: "/assets/wheel.png",
-    }
+    },
   ];
 
   return (
     <div>
       <div className="flex w-full items-center mb-1.5">
         <Image src={Dollar} alt="" width={26} height={26} />
-        <span className="font-bold text-xl pl-3">
+        <span className="font-semibold font-changa text-xl text-opacity-90 pl-3">
           FOMO: Play - The best casino games
         </span>
       </div>

@@ -15,7 +15,7 @@ import { useWallet } from "@solana/wallet-adapter-react";
 import { obfuscatePubKey } from "@/context/transactions";
 
 export default function Sidebar() {
-  const wallet = useWallet()
+  const wallet = useWallet();
   const [showExitTokens, setShowExitTokens] = useState(false);
   const [showPlayTokens, setShowPlayTokens] = useState(false);
 
@@ -39,14 +39,16 @@ export default function Sidebar() {
 
   return (
     <div
-      className={`absolute top-0 z-20 md:hidden bg-[#121418] text-white flex flex-col justify-between px-4 sm:px-8 py-3.5 w-full min-h-full`}
+      className={`fixed top-[187px] z-20 md:hidden bg-[#121418] text-white flex flex-col justify-between px-4 sm:px-8 py-3.5 w-full h-[calc(100vh-187px)]`}
     >
       <div>
-        <div className="flex flex-col bg-[#202329] rounded-md py-3.5 px-3 sm:px-6">
+        <div className="flex flex-col rounded-md py-3.5 px-3 sm:px-6">
           <div className="flex items-center w-full mb-2">
             <Image src={userImg} alt="" width={60} height={60} />
             <div className="ml-1">
-              <p className="text-white/75 text-md">{obfuscatePubKey(wallet?.publicKey?.toBase58() ?? "")}</p>
+              <p className="text-white/75 text-md">
+                {obfuscatePubKey(wallet?.publicKey?.toBase58() ?? "")}
+              </p>
               <p className="text-white/50 text-sm">BRONZE</p>
             </div>
           </div>

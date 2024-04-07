@@ -117,7 +117,7 @@ export default function GameHeader() {
             width={30}
             height={30}
           />
-          <p className="uppercase font-bold text-xl min-w-[150px] ml-2">
+          <p className="uppercase font-changa font-bold text-opacity-90 text-3xl min-w-[150px] ml-2">
             {selectedGame.name}
           </p>
         </div>
@@ -142,7 +142,7 @@ export default function GameHeader() {
           </div>
           <div className="flex items-center gap-2 mx-1.5 my-1 ">
             <p
-              className="underline text-[#94A3B8] decoration-[#94A3B8] underline-offset-2 hover:cursor-pointer text-xs"
+              className="underline text-[#94A3B8] decoration-[#94A3B8] underline-offset-2 hover:cursor-pointer text-xs font-medium"
               onClick={openModal}
             >
               Provabaly Fair
