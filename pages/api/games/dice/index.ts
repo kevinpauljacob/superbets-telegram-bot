@@ -5,6 +5,8 @@ import { NextApiRequest, NextApiResponse } from "next";
 import { RENDER_ENDPOINT, minGameAmount } from "@/context/gameTransactions";
 import { GameSeed, User, Dice } from "@/models/games";
 import { GameType, generateGameResult, seedStatus } from "@/utils/vrf";
+import StakingUser from "@/models/staking/user";
+import { pointTiers } from "@/context/transactions";
 
 const secret = process.env.NEXTAUTH_SECRET;
 
@@ -160,6 +162,12 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         gameSeed: activeGameSeed._id,
       });
 
+      const userData = await StakingUser.findOne({ wallet });
+      let points = userData?.points ?? 0;
+      const userTier = Object.entries(pointTiers).reduce((prev, next) => {
+        return points >= next[1]?.limit ? next : prev;
+      });
+
       const socket = new WebSocket(RENDER_ENDPOINT);
 
       socket.onopen = () => {
@@ -174,6 +182,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
               wallet,
               absAmount: Math.abs(amountWon - amountLost),
               result,
+              userTier,
             },
           }),
         );

@@ -18,6 +18,7 @@ export default function SubHeader() {
     wallet: string;
     absAmount: number;
     result: "Won" | "Lost";
+    userTier: string;
   };
   const [cards, setCards] = useState<Array<Card>>([]);
 
@@ -67,26 +68,29 @@ export default function SubHeader() {
               key={index}
               className="bg-[#1E2220] flex items-center rounded-md mx-2.5 min-w-[150px]"
             >
-              <Image src="/assets/cardImg.png" alt="" width={52} height={52} />
+              <Image
+                src={`/assets/games/${card.game}.png`}
+                alt="gameBadge"
+                width={52}
+                height={52}
+              />
               <div className="pl-2 pr-4 py-1">
                 <div className="flex items-center">
                   <Image
-                    src="/assets/userImg.png"
-                    alt=""
+                    src={`/assets/badges/T-${card.userTier[0]}.png`}
+                    alt="userBadge"
                     width={23}
                     height={23}
                   />
                   <span className="text-sm">
-                    {trimStringToLength(card.wallet, 3)}
+                    {trimStringToLength(card.wallet, 4)}
                   </span>
                 </div>
-                <p
-                  className={
-                    card.result === "Won" ? "text-[#72F238]" : "text-[#F23838]"
-                  }
-                >
-                  +${card.absAmount}
-                </p>
+                {card.result === "Won" ? (
+                  <p className="text-[#72F238]">+${card.absAmount}</p>
+                ) : (
+                  <p className="text-[#F23838]">-${card.absAmount}</p>
+                )}
               </div>
             </div>
           ))}
