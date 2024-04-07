@@ -88,7 +88,7 @@ export default function SubHeader() {
               <div className="pl-2 pr-2 py-1">
                 <div className="flex items-center gap-1">
                   <Image
-                    src={`/assets/badges/T-${card.userTier[0]}.png`}
+                    src={`/assets/badges/T-${card.userTier}.png`}
                     alt="userBadge"
                     width={23}
                     height={23}

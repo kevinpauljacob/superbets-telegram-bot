@@ -159,7 +159,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       let points = userData?.points ?? 0;
       const userTier = Object.entries(pointTiers).reduce((prev, next) => {
         return points >= next[1]?.limit ? next : prev;
-      });
+      })[0];
 
       const socket = new WebSocket(wsEndpoint);
 
