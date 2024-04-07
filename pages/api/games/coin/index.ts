@@ -2,9 +2,11 @@ import connectDatabase from "../../../../utils/database";
 import { FLIP_TAX } from "../../../../context/config";
 import { getToken } from "next-auth/jwt";
 import { NextApiRequest, NextApiResponse } from "next";
-import { minGameAmount } from "@/context/gameTransactions";
+import { wsEndpoint, minGameAmount } from "@/context/gameTransactions";
 import { Coin, GameSeed, User } from "@/models/games";
 import { GameType, generateGameResult, seedStatus } from "@/utils/vrf";
+import StakingUser from "@/models/staking/user";
+import { pointTiers } from "@/context/transactions";
 
 const secret = process.env.NEXTAUTH_SECRET;
 
@@ -152,6 +154,34 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         nonce,
         gameSeed: activeGameSeed._id,
       });
+
+      const userData = await StakingUser.findOne({ wallet });
+      let points = userData?.points ?? 0;
+      const userTier = Object.entries(pointTiers).reduce((prev, next) => {
+        return points >= next[1]?.limit ? next : prev;
+      });
+
+      const socket = new WebSocket(wsEndpoint);
+
+      socket.onopen = () => {
+        console.log("WebSocket connection opened");
+        socket.send(
+          JSON.stringify({
+            clientType: "api-client",
+            channel: "fomo-casino_games-channel",
+            authKey: process.env.FOMO_CHANNEL_AUTH_KEY!,
+            payload: {
+              game: GameType.dice,
+              wallet,
+              absAmount: Math.abs(amountWon - amountLost),
+              result,
+              userTier,
+            },
+          }),
+        );
+
+        socket.close();
+      };
 
       return res.json({
         success: true,
