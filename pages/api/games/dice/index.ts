@@ -2,7 +2,7 @@ import connectDatabase from "../../../../utils/database";
 import { ROLL_TAX } from "../../../../context/config";
 import { getToken } from "next-auth/jwt";
 import { NextApiRequest, NextApiResponse } from "next";
-import { RENDER_ENDPOINT, minGameAmount } from "@/context/gameTransactions";
+import { wsEndpoint, minGameAmount } from "@/context/gameTransactions";
 import { GameSeed, User, Dice } from "@/models/games";
 import { GameType, generateGameResult, seedStatus } from "@/utils/vrf";
 import StakingUser from "@/models/staking/user";
@@ -168,7 +168,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         return points >= next[1]?.limit ? next : prev;
       });
 
-      const socket = new WebSocket(RENDER_ENDPOINT);
+      const socket = new WebSocket(wsEndpoint);
 
       socket.onopen = () => {
         console.log("WebSocket connection opened");

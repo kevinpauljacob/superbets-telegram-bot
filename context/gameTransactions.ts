@@ -19,7 +19,7 @@ export const connection = new Connection(
   "processed",
 );
 
-export const RENDER_ENDPOINT = "wss://dawgonsol-ws.onrender.com";
+export const wsEndpoint = process.env.NEXT_PUBLIC_WS_ENDPOINT!;
 
 const devPublicKey = new PublicKey(process.env.NEXT_PUBLIC_DEV_PUBLIC_KEY!);
 

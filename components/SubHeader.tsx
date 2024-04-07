@@ -1,12 +1,7 @@
 import Image from "next/image";
-import coin from "/public/assets/coin.svg";
 import { useGlobalContext } from "./GlobalContext";
-import { useRouter } from "next/router";
 import Link from "next/link";
-import {
-  RENDER_ENDPOINT,
-  trimStringToLength,
-} from "@/context/gameTransactions";
+import { wsEndpoint, trimStringToLength } from "@/context/gameTransactions";
 import { useEffect, useRef, useState } from "react";
 import { GameType } from "@/utils/vrf";
 
@@ -33,75 +28,65 @@ export default function SubHeader() {
   }, [cards]);
 
   useEffect(() => {
-    // const socket = new WebSocket(RENDER_ENDPOINT);
+    const socket = new WebSocket(wsEndpoint);
 
-    // socket.onopen = () => {
-    //   console.log("WebSocket connection opened");
-    //   socket.send(
-    //     JSON.stringify({
-    //       clientType: "listener-client",
-    //       channel: "fomo-casino_games-channel",
-    //     }),
-    //   );
-    // };
+    socket.onopen = () => {
+      console.log("WebSocket connection opened");
+      socket.send(
+        JSON.stringify({
+          clientType: "listener-client",
+          channel: "fomo-casino_games-channel",
+        }),
+      );
+    };
 
-    // socket.onmessage = async (event) => {
-    //   const response = JSON.parse(event.data.toString());
+    socket.onmessage = async (event) => {
+      const response = JSON.parse(event.data.toString());
 
-    //   console.log("Received message from server:", response);
-    //   if (!response.payload) return;
+      console.log("Received message from server:", response);
+      if (!response.payload) return;
 
-    //   const payload = response.payload;
-    //   setCards((prev) => [...prev, payload]);
-    // };
+      const payload = response.payload;
+      setCards((prev) => {
+        const newCards = [payload, ...prev];
+        return newCards.slice(0, 15);
+      });
+    };
 
-    // socket.onclose = (event) => {
-    //   console.log("WebSocket connection closed:", event);
-    // };
+    socket.onclose = (event) => {
+      console.log("WebSocket connection closed:", event);
+    };
 
-    // socket.onerror = (error) => {
-    //   console.error("WebSocket error:", error);
-    // };
+    socket.onerror = (error) => {
+      console.error("WebSocket error:", error);
+    };
 
-    // return () => {
-    //   console.log("Cleaning up WebSocket connection");
-    //   socket.close();
-    // };
-
-    //add a new card every 5 seconds
-    const interval = setInterval(() => {
-      setCards((prev) => [
-        ...prev,
-        {
-          game: GameType.dice,
-          wallet: "7nJFzJmFQ6",
-          absAmount: 3.4,
-          result: "Won",
-          userTier: "1",
-        },
-      ]);
-    }, 2000);
-
-    return () => clearInterval(interval);
+    return () => {
+      console.log("Cleaning up WebSocket connection");
+      socket.close();
+    };
   }, []);
 
   return (
     <div className="flex flex-col w-full">
       <div className="w-full text-white h-[70px] flex items-center border-y border-[#1E2220] px-4 lg:pl-4 lg:pr-4 bg-[#121418]">
-        <div className="flex w-full items-center overflow-x-auto">
+        <div className="flex w-full items-center overflow-x-auto no-scrollbar">
+          <div ref={endOfListRef} />
           {cards.map((card, index) => (
-            <div
+            <Link
               key={index}
-              className="bg-[#1E2220] flex items-center rounded-md mx-2.5 min-w-[150px]"
+              className="bg-[#1E2220] flex items-center rounded-md mr-2 min-w-[180px] justify-around"
+              href={`/${card.game}`}
             >
               <Image
                 src={`/assets/games/${card.game}.png`}
                 alt="gameBadge"
                 width={52}
                 height={52}
+                className="rounded-md ml-2"
               />
-              <div className="pl-2 pr-4 py-1">
-                <div className="flex items-center">
+              <div className="pl-2 pr-2 py-1">
+                <div className="flex items-center gap-1">
                   <Image
                     src={`/assets/badges/T-${card.userTier[0]}.png`}
                     alt="userBadge"
@@ -122,9 +107,8 @@ export default function SubHeader() {
                   </p>
                 )}
               </div>
-            </div>
+            </Link>
           ))}
-          <div ref={endOfListRef} />
         </div>
         <div className="hidden md:flex items-center border-l border-[#1E2220] pl-4 md:min-w-fit">
           <div className="flex items-center gap-2">
