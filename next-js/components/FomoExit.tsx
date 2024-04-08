@@ -35,7 +35,7 @@ export default function FomoExit() {
 
   return (
     <div className="mt-5">
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex justify-between items-center">
         <div className="flex items-center">
           <Image src={Dollar} alt="" width={26} height={26} />
           <span className="font-semibold font-changa text-xl text-opacity-90 pl-3">
@@ -72,7 +72,7 @@ export default function FomoExit() {
           </button>
         </div>
       </div>
-      <div className="relative min-h-[160px] overflow-hidden">
+      <div className="relative min-h-[185px] overflow-hidden">
         {games.map((game, index) => (
           <div
             key={index}

@@ -54,7 +54,7 @@ export default function FomoPlay() {
   };
 
   return (
-    <div>
+    <div className="mt-5">
       <div className="flex justify-between items-center mb-6">
         <div className="flex items-center">
           <Image src={Dollar} alt="" width={26} height={26} />
