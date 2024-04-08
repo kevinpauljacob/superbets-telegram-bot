@@ -46,6 +46,10 @@ export default function FlipFlips({ refresh }: { refresh: boolean }) {
   const headers = ["Time", "Flip Type", "Amount", "Result"];
   const allHeaders = ["Time", "Wallet", "Flip Type", "Amount", "Result"];
 
+  //headers to be displayed in small screen devices
+  const smallScreenHeaders = ["Time", "Amount Won"];
+  const allSmallScreenHeaders = ["Time", "Amount Won"];
+
   useEffect(() => {
     const route = all
       ? "/api/games/coin/getGlobalHistory"
@@ -92,29 +96,50 @@ export default function FlipFlips({ refresh }: { refresh: boolean }) {
       </div>
 
       {/* table  */}
-      <div className="scrollbar mt-10 w-full overflow-x-auto px-5 pb-8">
-        <div className="flex w-full min-w-[50rem] flex-col items-center">
+      <div className="scrollbar mt-10 w-full md:overflow-x-auto px-5 pb-8">
+        <div className="flex w-full md:min-w-[50rem] flex-col items-center">
           {/* header  */}
           {flips.length > 0 && (
-            <div className="mb-5 flex w-full flex-row items-center rounded-[5px] py-1 bg-[#121418] gap-2">
-              {!all
-                ? headers.map((header, index) => (
-                    <span
-                      key={index}
-                      className="w-full text-center font-changa text-[#F0F0F080]"
-                    >
-                      {header}
-                    </span>
-                  ))
-                : allHeaders.map((header, index) => (
-                    <span
-                      key={index}
-                      className="w-full text-center font-changa text-[#F0F0F080]"
-                    >
-                      {header}
-                    </span>
-                  ))}
-            </div>
+            <>
+              <div className="mb-5 hidden md:flex w-full flex-row items-center rounded-[5px] py-1 bg-[#121418] gap-2">
+                {!all
+                  ? headers.map((header, index) => (
+                      <span
+                        key={index}
+                        className="w-full text-center font-changa text-[#F0F0F080]"
+                      >
+                        {header}
+                      </span>
+                    ))
+                  : allHeaders.map((header, index) => (
+                      <span
+                        key={index}
+                        className="w-full text-center font-changa text-[#F0F0F080]"
+                      >
+                        {header}
+                      </span>
+                    ))}
+              </div>
+              <div className="mb-5 flex md:hidden w-full flex-row items-center rounded-[5px] py-1 bg-[#121418] gap-2">
+                {!all
+                  ? smallScreenHeaders.map((header, index) => (
+                      <span
+                        key={index}
+                        className="w-full text-center font-changa text-[#F0F0F080]"
+                      >
+                        {header}
+                      </span>
+                    ))
+                  : allSmallScreenHeaders.map((header, index) => (
+                      <span
+                        key={index}
+                        className="w-full text-center font-changa text-[#F0F0F080]"
+                      >
+                        {header}
+                      </span>
+                    ))}
+              </div>
+            </>
           )}
 
           {flips.length > 0 ? (
@@ -154,18 +179,18 @@ export default function FlipFlips({ refresh }: { refresh: boolean }) {
                         : "-"}
                     </span>
                     {all && (
-                      <span className="w-full text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
+                      <span className="w-full hidden md:block text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
                         {obfuscatePubKey(flip.wallet)}
                       </span>
                     )}
-                    <span className="w-full text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
+                    <span className="w-full hidden md:block text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
                       {flip.flipType.toUpperCase()}
                     </span>
-                    <span className="w-full text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
+                    <span className="w-full hidden md:block text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
                       {(flip.amount ?? 0).toFixed(4)}
                     </span>
                     <span
-                      className={`w-full text-center font-changa text-sm text-opacity-75 ${
+                      className={`w-full hidden md:block text-center font-changa text-sm text-opacity-75 ${
                         flip.result === "Lost"
                           ? "text-[#CF304A]"
                           : flip.result === "Won"
@@ -174,6 +199,15 @@ export default function FlipFlips({ refresh }: { refresh: boolean }) {
                       }`}
                     >
                       {flip.result}
+                    </span>
+                    <span
+                      className={`w-full block md:hidden text-center  font-changa text-sm text-[#F0F0F0] text-opacity-75`}
+                    >
+                      {flip.result === "Lost"
+                        ? 0
+                        : flip.result === "Won"
+                        ? (flip.amount * 2).toFixed(4)
+                        : "-"}
                     </span>
                   </div>
                 </>
