@@ -9,3 +9,4 @@ export { default as Plinko } from "./plinko";
 export { default as Limbo } from "./limbo";
 export { default as Keno } from "./keno";
 export { default as Roulette1} from "./roulette1";
+export { default as Roulette2} from "./roulette2";
