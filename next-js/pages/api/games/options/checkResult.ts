@@ -3,6 +3,10 @@ import { Option, User } from "../../../../models/games";
 import { HOUSE_TAX } from "../../../../context/config";
 import { NextApiRequest, NextApiResponse } from "next";
 import { getToken } from "next-auth/jwt";
+import StakingUser from "@/models/staking/user";
+import { pointTiers } from "@/context/transactions";
+import { GameType } from "@/utils/vrf";
+import { wsEndpoint } from "@/context/gameTransactions";
 
 const secret = process.env.NEXTAUTH_SECRET;
 
@@ -123,6 +127,34 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           betEndPrice,
         },
       );
+
+      const userData = await StakingUser.findOne({ wallet });
+      let points = userData?.points ?? 0;
+      const userTier = Object.entries(pointTiers).reduce((prev, next) => {
+        return points >= next[1]?.limit ? next : prev;
+      })[0];
+
+      const socket = new WebSocket(wsEndpoint);
+
+      socket.onopen = () => {
+        console.log("WebSocket connection opened");
+        socket.send(
+          JSON.stringify({
+            clientType: "api-client",
+            channel: "fomo-casino_games-channel",
+            authKey: process.env.FOMO_CHANNEL_AUTH_KEY!,
+            payload: {
+              game: GameType.options,
+              wallet,
+              absAmount: Math.abs(amountWon - amountLost),
+              result,
+              userTier,
+            },
+          }),
+        );
+
+        socket.close();
+      };
 
       return res.json({
         success: true,

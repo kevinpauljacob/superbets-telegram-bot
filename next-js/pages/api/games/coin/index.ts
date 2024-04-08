@@ -1,9 +1,9 @@
 import connectDatabase from "../../../../utils/database";
-import { ROLL_TAX } from "../../../../context/config";
+import { FLIP_TAX } from "../../../../context/config";
 import { getToken } from "next-auth/jwt";
 import { NextApiRequest, NextApiResponse } from "next";
 import { wsEndpoint, minGameAmount } from "@/context/gameTransactions";
-import { GameSeed, User, Dice } from "@/models/games";
+import { Coin, GameSeed, User } from "@/models/games";
 import { GameType, generateGameResult, seedStatus } from "@/utils/vrf";
 import StakingUser from "@/models/staking/user";
 import { pointTiers } from "@/context/transactions";
@@ -18,13 +18,13 @@ type InputType = {
   wallet: string;
   amount: number;
   tokenMint: string;
-  chosenNumbers: number[];
+  flipType: "heads" | "tails";
 };
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === "POST") {
     try {
-      let { wallet, amount, tokenMint, chosenNumbers }: InputType = req.body;
+      let { wallet, amount, tokenMint, flipType }: InputType = req.body;
 
       const token = await getToken({ req, secret });
 
@@ -42,25 +42,15 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
       await connectDatabase();
 
-      if (!wallet || !amount || tokenMint !== "SOL")
-        return res
-          .status(400)
-          .json({ success: false, message: "Missing parameters" });
-
-      //check if all values are unique whole numbers between 1 and 6
       if (
-        !(
-          chosenNumbers &&
-          chosenNumbers.length >= 1 &&
-          chosenNumbers.length <= 5 &&
-          chosenNumbers.every(
-            (v: any) => Number.isInteger(v) && v >= 1 && v <= 6,
-          )
-        )
+        !wallet ||
+        !amount ||
+        tokenMint !== "SOL" ||
+        !(flipType === "heads" || flipType === "tails")
       )
         return res
           .status(400)
-          .json({ success: false, message: "Invalid chosen numbers" });
+          .json({ success: false, message: "Missing parameters" });
 
       let user = await User.findOne({ wallet });
 
@@ -100,16 +90,19 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         serverSeed,
         clientSeed,
         nonce,
-        GameType.dice,
+        GameType.coin,
       ) as number;
 
       let result = "Lost";
       let amountWon = 0;
       let amountLost = amount;
 
-      if (chosenNumbers.includes(strikeNumber)) {
+      if (
+        (flipType === "heads" && strikeNumber === 1) ||
+        (flipType === "tails" && strikeNumber === 2)
+      ) {
         result = "Won";
-        amountWon = (amount * 6) / chosenNumbers.length;
+        amountWon = amount;
         amountLost = 0;
       }
 
@@ -136,7 +129,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         },
         {
           $inc: {
-            "deposit.$.amount": -amount + amountWon * (1 - ROLL_TAX),
+            "deposit.$.amount": -amount + amountWon * (1 + (1 - FLIP_TAX)),
           },
           sns,
         },
@@ -149,10 +142,10 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         throw new Error("Insufficient balance for bet!");
       }
 
-      await Dice.create({
+      await Coin.create({
         wallet,
         amount,
-        chosenNumbers,
+        flipType,
         strikeNumber,
         result,
         tokenMint,
@@ -166,7 +159,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       let points = userData?.points ?? 0;
       const userTier = Object.entries(pointTiers).reduce((prev, next) => {
         return points >= next[1]?.limit ? next : prev;
-      });
+      })[0];
 
       const socket = new WebSocket(wsEndpoint);
 
@@ -192,17 +185,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
       return res.json({
         success: true,
-        data: {
-          strikeNumber,
-          result,
-          amountWon,
-          amountLost,
-        },
-        message: `${result} ${
-          result == "Won"
-            ? (amountWon * (1 - ROLL_TAX)).toFixed(4)
-            : amountLost.toFixed(4)
-        } SOL!`,
+        data: { strikeNumber, result },
+        message: result == "Won" ? "You won !" : "You lost !",
       });
     } catch (e: any) {
       console.log(e);

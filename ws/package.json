@@ -11,7 +11,7 @@
     "typescript": "^5.3.3"
   },
   "scripts": {
-    "start": "ts-node wsServer.ts",
+    "start": "npx ts-node wsServer.ts",
     "test": "nodemon --exec ts-node wsServer.ts"
   },
   "dependencies": {
