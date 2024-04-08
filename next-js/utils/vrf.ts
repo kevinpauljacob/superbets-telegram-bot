@@ -41,6 +41,8 @@ export enum GameType {
   plinko = "plinko",
   limbo = "limbo",
   keno = "keno",
+  roulette1 = "roulette1",
+  roulette2 = "roulette2",
 }
 
 export const generateGameResult = (
@@ -72,6 +74,10 @@ export const generateGameResult = (
         start++;
       }
       return Array.from(generatedNumbers);
+    case GameType.roulette1:
+      return parseInt(hash.slice(0, 4), 16) % 37;
+    case GameType.roulette2:
+      return (parseInt(hash.slice(0, 4), 16) % 38) - 1;
     default:
       throw new Error("Invalid game type!");
   }
