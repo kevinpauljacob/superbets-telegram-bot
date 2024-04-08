@@ -1,6 +1,6 @@
 import { GameType, generateClientSeed, generateGameResult } from "@/utils/vrf";
 import { useEffect, useState } from "react";
-import { Flip } from "../Flips";
+import { Flip } from "./HistoryTable";
 import Image from "next/image";
 import toast from "react-hot-toast";
 

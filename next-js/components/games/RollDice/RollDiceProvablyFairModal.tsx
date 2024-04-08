@@ -1,7 +1,7 @@
 import { GameType, generateClientSeed, generateGameResult } from "@/utils/vrf";
 import Image from "next/image";
 import { useEffect, useState } from "react";
-import { Bet } from "../RollDiceTable";
+import { Bet } from "./HistoryTable";
 import { GiDivergence } from "react-icons/gi";
 import toast from "react-hot-toast";
 

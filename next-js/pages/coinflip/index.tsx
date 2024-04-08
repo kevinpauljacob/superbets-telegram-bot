@@ -3,7 +3,7 @@ import dynamic from "next/dynamic";
 import { useWallet } from "@solana/wallet-adapter-react";
 import toast from "react-hot-toast";
 import { placeFlip } from "../../context/gameTransactions";
-import FlipBets from "../../components/games/Flips";
+import HistoryTable from "../../components/games/CoinFlip/HistoryTable";
 import Image from "next/image";
 import Link from "next/link";
 import Head from "next/head";
@@ -639,7 +639,7 @@ export default function Flip() {
       <div className="w-full flex md:hidden mt-4 rounded-[5px] overflow-hidden">
         <GameHeader />
       </div>
-      <FlipBets refresh={refresh} />
+      <HistoryTable refresh={refresh} />
     </div>
   );
 }

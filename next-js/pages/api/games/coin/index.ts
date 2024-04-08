@@ -171,7 +171,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
             channel: "fomo-casino_games-channel",
             authKey: process.env.FOMO_CHANNEL_AUTH_KEY!,
             payload: {
-              game: GameType.dice,
+              game: GameType.coin,
               wallet,
               absAmount: Math.abs(amountWon - amountLost),
               result,

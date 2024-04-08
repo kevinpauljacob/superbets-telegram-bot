@@ -194,13 +194,17 @@ export default function Bets({ refresh }: { refresh: boolean }) {
                     {bet.result}
                   </span>
                   <span
-                    className={`w-full block md:hidden text-center  font-changa text-sm text-[#F0F0F0] text-opacity-75`}
+                    className={`w-full block md:hidden text-center  font-changa text-sm text-opacity-75 ${
+                      bet.result === "Lost"
+                        ? "text-[#CF304A]"
+                        : bet.result === "Won"
+                        ? "text-[#03A66D]"
+                        : "text-[#F0F0F0]"
+                    }`}
                   >
-                    {bet.result === "Lost"
-                      ? 0
-                      : bet.result === "Won"
-                      ? (bet.amount * 2).toFixed(4)
-                      : "-"}
+                    {bet.result === "Pending"
+                      ? "-"
+                      : (bet.result === "Lost" ? 0 : bet.amount).toFixed(4)}
                   </span>
                 </div>
               ))

@@ -1,16 +1,18 @@
 import { useWallet } from "@solana/wallet-adapter-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, Fragment } from "react";
 import toast from "react-hot-toast";
 import { obfuscatePubKey } from "@/context/transactions";
-import { seedStatus } from "@/utils/vrf";
-import VerifyFlipModal from "./CoinFlip/VerifyFlipModal";
+import Image from "next/image";
+import VerifyBetModal from "./VerifyBetModal";
+import { GameType, seedStatus } from "@/utils/vrf";
 
-export interface Flip {
-  flipType: "heads" | "tails";
+export interface Bet {
   createdAt: string;
   wallet: string;
+  chosenNumbers: number[];
   amount: number;
   result: "Won" | "Lost";
+  strikeNumber: number;
   amountWon: number;
   nonce?: number;
   gameSeed?: {
@@ -22,11 +24,11 @@ export interface Flip {
   };
 }
 
-export default function FlipFlips({ refresh }: { refresh: boolean }) {
+export default function HistoryTable({ refresh }: { refresh: boolean }) {
   const wallet = useWallet();
   const [all, setAll] = useState(wallet.publicKey ? false : true);
 
-  //My Flip Modal handling
+  //My Bet Modal handling
   const [isOpen, setIsOpen] = useState(false);
 
   const openModal = () => {
@@ -38,13 +40,20 @@ export default function FlipFlips({ refresh }: { refresh: boolean }) {
   };
 
   const [page, setPage] = useState(1);
-  const [flip, setFlip] = useState<Flip>();
-  const [flips, setFlips] = useState<Flip[]>([]);
+  const [bet, setBet] = useState<Bet>();
+  const [bets, setBets] = useState<Bet[]>([]);
   const transactionsPerPage = 10;
   const [maxPages, setMaxPages] = useState(0);
 
-  const headers = ["Time", "Flip Type", "Amount", "Result"];
-  const allHeaders = ["Time", "Wallet", "Flip Type", "Amount", "Result"];
+  const headers = ["Time", "Bet Faces", "Bet Amount", "Result", "Amount Won"];
+  const allHeaders = [
+    "Time",
+    "Wallet",
+    "Bet Faces",
+    "Bet Amount",
+    "Result",
+    "Amount Won",
+  ];
 
   //headers to be displayed in small screen devices
   const smallScreenHeaders = ["Time", "Amount Won"];
@@ -52,56 +61,53 @@ export default function FlipFlips({ refresh }: { refresh: boolean }) {
 
   useEffect(() => {
     const route = all
-      ? "/api/games/coin/getGlobalHistory"
-      : `/api/games/coin/getUserHistory?wallet=${wallet.publicKey?.toBase58()}`;
+      ? "/api/games/dice/getGlobalHistory"
+      : `/api/games/dice/getUserHistory?wallet=${wallet.publicKey?.toBase58()}`;
 
     fetch(`${route}`)
       .then((res) => res.json())
       .then((history) => {
         if (history.success) {
-          setFlips(history?.data ?? []);
+          setBets(history?.data ?? []);
           setMaxPages(Math.ceil(history?.data.length / transactionsPerPage));
         } else {
-          setFlips([]);
+          setBets([]);
           // toast.error("Could not fetch history.");
         }
       });
   }, [all, refresh]);
 
   return (
-    <div className="flex w-full flex-col">
-      {/* buttons  */}
-      <div className="mt-[7rem] flex w-full items-center justify-center gap-4 md:justify-start">
+    <div className="flex w-full flex-col pb-10">
+      <div className="mt-[4rem] flex w-full items-center justify-center text-white font-semibold gap-4 md:justify-start ">
         <button
           onClick={() => {
             if (wallet.publicKey) setAll(false);
             else toast.error("Wallet not connected");
           }}
           className={`${
-            all ? "text-shadow-violet hover:bg-[#7839C530]" : "bg-[#7839C5]"
-          } w-full transform rounded-[5px] px-8 py-2 font-changa text-lg text-white transition duration-200 md:w-fit`}
+            all ? "bg-[#202329]" : "bg-[#7839C5]"
+          } rounded-md transition font-changa duration-300 ease-in-out px-8 py-1.5`}
         >
-          My Flips
+          My Bets
         </button>
         <button
           onClick={() => {
             setAll(true);
           }}
           className={`${
-            all ? "bg-[#7839C5]" : "text-shadow-violet hover:bg-[#7839C530]"
-          } w-full transform rounded-[5px] px-8 py-2 font-changa text-lg text-white transition duration-200 md:w-fit`}
+            all ? "bg-[#7839C5]" : "bg-[#202329]"
+          } rounded-md transition font-changa duration-300 ease-in-out px-8 py-1.5`}
         >
-          All Flips
+          All Bets
         </button>
       </div>
-
-      {/* table  */}
-      <div className="scrollbar mt-10 w-full md:overflow-x-auto px-5 pb-8">
+      <div className="mt-10 w-full md:overflow-x-auto pb-8">
         <div className="flex w-full md:min-w-[50rem] flex-col items-center">
           {/* header  */}
-          {flips.length > 0 && (
+          {bets.length > 0 && (
             <>
-              <div className="mb-5 hidden md:flex w-full flex-row items-center rounded-[5px] py-1 bg-[#121418] gap-2">
+              <div className="mb-5 hidden md:flex w-full flex-row items-center bg-[#121418] rounded-md py-1 gap-2">
                 {!all
                   ? headers.map((header, index) => (
                       <span
@@ -120,7 +126,7 @@ export default function FlipFlips({ refresh }: { refresh: boolean }) {
                       </span>
                     ))}
               </div>
-              <div className="mb-5 flex md:hidden w-full flex-row items-center rounded-[5px] py-1 bg-[#121418] gap-2">
+              <div className="mb-5 flex md:hidden w-full flex-row items-center bg-[#121418] rounded-md py-1 gap-2">
                 {!all
                   ? smallScreenHeaders.map((header, index) => (
                       <span
@@ -141,38 +147,35 @@ export default function FlipFlips({ refresh }: { refresh: boolean }) {
               </div>
             </>
           )}
-
-          {flips.length > 0 ? (
-            flips
+          {bets.length > 0 ? (
+            bets
               .slice(
                 page * transactionsPerPage - transactionsPerPage,
                 page * transactionsPerPage,
               )
-              .map((flip, index) => (
-                <>
+              .map((bet, index) => (
+                <Fragment key={index}>
                   <div
-                    key={index}
                     className={`mb-2.5 ml-2.5 mr-2.5 flex w-full flex-row items-center gap-2 rounded-[5px] bg-[#121418] py-3 ${
                       !all && "cursor-pointer"
                     }`}
                     onClick={() => {
-                      //fetch flipDetails and verification details here
                       if (!all) {
-                        setFlip(flip);
+                        setBet(bet);
                         openModal();
                       }
                     }}
                   >
                     <span className="w-full text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
-                      {flip.createdAt
-                        ? new Date(flip.createdAt).toLocaleDateString("en-GB", {
+                      {bet.createdAt
+                        ? new Date(bet.createdAt).toLocaleDateString("en-GB", {
                             day: "2-digit",
                             month: "2-digit",
                             year: "2-digit",
                           })
                         : "-"}{" "}
-                      {flip.createdAt
-                        ? new Date(flip.createdAt).toLocaleTimeString("en-GB", {
+                      {bet.createdAt
+                        ? new Date(bet.createdAt).toLocaleTimeString("en-GB", {
                             hour: "2-digit",
                             minute: "2-digit",
                           })
@@ -180,41 +183,51 @@ export default function FlipFlips({ refresh }: { refresh: boolean }) {
                     </span>
                     {all && (
                       <span className="w-full hidden md:block text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
-                        {obfuscatePubKey(flip.wallet)}
+                        {obfuscatePubKey(bet.wallet)}
                       </span>
                     )}
                     <span className="w-full hidden md:block text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
-                      {flip.flipType.toUpperCase()}
+                      {bet.chosenNumbers.map((face, index) => (
+                        <span key={index} className="mr-2 mt-2 inline-block">
+                          <Image
+                            src={`/assets/selectedDiceFace${face}.png`}
+                            width={30}
+                            height={30}
+                            alt=""
+                          />
+                        </span>
+                      ))}
                     </span>
                     <span className="w-full hidden md:block text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
-                      {(flip.amount ?? 0).toFixed(4)}
+                      {bet.amount} SOL
+                    </span>
+                    <span className="w-full hidden md:block text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
+                      <span className="mr-2 mt-2 inline-block">
+                        <Image
+                          src={`/assets/selectedDiceFace${bet.strikeNumber}.png`}
+                          width={30}
+                          height={30}
+                          alt=""
+                        />
+                      </span>
                     </span>
                     <span
-                      className={`w-full hidden md:block text-center font-changa text-sm text-opacity-75 ${
-                        flip.result === "Lost"
+                      className={`w-full text-center font-changa text-sm text-opacity-75 ${
+                        bet.result === "Lost"
                           ? "text-[#CF304A]"
-                          : flip.result === "Won"
+                          : bet.result === "Won"
                           ? "text-[#03A66D]"
                           : "text-[#F0F0F0]"
                       }`}
                     >
-                      {flip.result}
-                    </span>
-                    <span
-                      className={`w-full block md:hidden text-center  font-changa text-sm text-[#F0F0F0] text-opacity-75`}
-                    >
-                      {flip.result === "Lost"
-                        ? 0
-                        : flip.result === "Won"
-                        ? (flip.amount * 2).toFixed(4)
-                        : "-"}
+                      {bet.amountWon.toFixed(4)} SOL
                     </span>
                   </div>
-                </>
+                </Fragment>
               ))
           ) : (
             <span className="w-full text-center font-changa text-[#F0F0F080]">
-              No Flips made.
+              No Bets made.
             </span>
           )}
         </div>
@@ -229,8 +242,8 @@ export default function FlipFlips({ refresh }: { refresh: boolean }) {
         >
           &lt;
         </span>
-        {flips &&
-          flips.length > 0 &&
+        {bets &&
+          bets.length > 0 &&
           [...Array(maxPages)]
             .map((_, i) => ++i)
             .slice(0, 3)
@@ -249,8 +262,8 @@ export default function FlipFlips({ refresh }: { refresh: boolean }) {
             ))}
         <span className="text-[#F0F0F0]">. . .</span>
 
-        {flips &&
-          flips.length > 0 &&
+        {bets &&
+          bets.length > 0 &&
           [...Array(maxPages)]
             .map((_, i) => ++i)
             .slice(maxPages - 3, maxPages)
@@ -276,10 +289,10 @@ export default function FlipFlips({ refresh }: { refresh: boolean }) {
           &gt;
         </span>
       </div>
-      <VerifyFlipModal
+      <VerifyBetModal
         isOpen={isOpen}
         onClose={closeModal}
-        modalData={{ flip: flip! }}
+        modalData={{ bet: bet! }}
       />
     </div>
   );

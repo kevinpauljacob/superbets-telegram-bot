@@ -3,7 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { rollDice } from "../../context/gameTransactions";
-import RollDiceTable from "../../components/games/RollDiceTable";
+import HistoryTable from "../../components/games/RollDice/HistoryTable";
 import { toast } from "react-hot-toast";
 import { ROLL_TAX } from "../../context/config";
 import GameFooterInfo from "@/components/games/GameFooterInfo";
@@ -585,7 +585,7 @@ export default function Dice() {
       <div className="w-full flex md:hidden mt-4 rounded-[5px] overflow-hidden">
         <GameHeader />
       </div>
-      <RollDiceTable refresh={refresh} />
+      <HistoryTable refresh={refresh} />
     </div>
   );
 }

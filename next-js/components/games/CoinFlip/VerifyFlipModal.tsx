@@ -2,7 +2,7 @@ import { GameType, seedStatus } from "@/utils/vrf";
 import Image from "next/image";
 import { useState } from "react";
 import { IoIosArrowDown, IoMdCopy } from "react-icons/io";
-import { Flip } from "../Flips";
+import { Flip } from "./HistoryTable";
 import CoinFlipProvablyFairModal, {
   PFModalData,
 } from "./CoinFlipProvablyFairModal";

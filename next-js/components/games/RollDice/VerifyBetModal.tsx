@@ -2,7 +2,7 @@ import { seedStatus } from "@/utils/vrf";
 import Image from "next/image";
 import { useState } from "react";
 import { IoIosArrowDown, IoMdCopy } from "react-icons/io";
-import { Bet } from "../RollDiceTable";
+import { Bet } from "./HistoryTable";
 import RollDiceProvablyFairModal, {
   PFModalData,
 } from "./RollDiceProvablyFairModal";
