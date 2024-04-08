@@ -136,7 +136,7 @@ export default function Sidebar() {
 
   return (
     <div
-      className={`hidden bg-[#121418] text-white md:flex flex-col justify-between px-3.5 pb-3.5 w-[290px] h-[calc(100vh-118px)]`}
+      className={`hidden bg-[#121418] text-white md:flex flex-col justify-between px-3.5 pb-3.5 w-[290px] min-h-[calc(100vh-118px)] max-h-full`}
     >
       <div>
         <div className="flex flex-col rounded-md py-3.5 ">
