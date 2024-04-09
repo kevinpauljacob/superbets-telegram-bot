@@ -4,26 +4,21 @@ import { useForm, FormProvider } from "react-hook-form";
 import { obfuscatePubKey } from "@/context/transactions";
 import { deposit, withdraw } from "../../context/gameTransactions";
 import Loader from "./Loader";
-interface ModalProps {
-  visible: boolean;
-  setVisible: React.Dispatch<React.SetStateAction<boolean>>;
-  actionType: string;
-  token: string;
-  balance: number;
-}
+import { useGlobalContext } from "../GlobalContext";
+import { IoClose } from "react-icons/io5";
 
-export default function BalanceModal({
-  visible,
-  setVisible,
-  actionType,
-  token,
-  balance,
-}: ModalProps) {
+export default function BalanceModal() {
   const methods = useForm();
   const wallet = useWallet();
 
+  const token = "SOL";
+
+  const { showWalletModal, setShowWalletModal, walletBalance, coinData } =
+    useGlobalContext();
+
   const [loading, setLoading] = useState(false);
   const [amount, setAmount] = useState(0);
+  const [actionType, setActionType] = useState("Deposit");
 
   const onSubmit = async (data: any) => {
     if (!loading) {
@@ -37,7 +32,7 @@ export default function BalanceModal({
         else response = await withdraw(wallet, amount, token);
 
         if (response && response.success) {
-          setVisible(false);
+          setShowWalletModal(false);
         } else {
           //   toast.error(response.message);
         }
@@ -50,7 +45,7 @@ export default function BalanceModal({
   };
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
     setAmount(parseFloat(e.target.value));
   };
@@ -60,7 +55,7 @@ export default function BalanceModal({
     document.addEventListener("click", function (event) {
       //@ts-ignore
       var targetId = event.target.id;
-      if (targetId && targetId === "modal-bg") setVisible(false);
+      if (targetId && targetId === "modal-bg") setShowWalletModal(false);
     });
   };
 
@@ -70,15 +65,45 @@ export default function BalanceModal({
         handleClose();
       }}
       id="modal-bg"
-      className="absolute left-0 top-0 flex h-full w-full items-center justify-center bg-black bg-opacity-50 backdrop-blur transition-all"
+      className="absolute left-0 top-0 flex h-full w-full items-start pt-[11rem] justify-center bg-black bg-opacity-50 backdrop-blur transition-all"
     >
       <div
         id="modal-box"
-        className="flex w-[95%] max-w-[25rem] flex-col rounded-2xl border-2 border-[#7839C580] bg-[#7839C533] p-5"
+        className="relative flex w-[95%] max-w-[25rem] flex-col rounded-md bg-[#121418] p-5"
       >
-        <span className="mb-4 font-changa font-medium text-[#F0F0F0] text-opacity-75">
+        <span className="mb-4 text-2xl w-full text-center font-changa font-black text-[#F0F0F0] text-opacity-75">
           {actionType}
         </span>
+
+        <IoClose
+          onClick={() => {
+            setShowWalletModal(false);
+          }}
+          className="w-6 h-6 cursor-pointer text-white absolute top-0 right-0 m-3"
+        />
+
+        <div className="w-full flex mb-8">
+          <button
+            className={`w-full border-2 rounded-md py-1 mr-1 text-white transition duration-300 ease-in-out ${
+              actionType === "Deposit"
+                ? "bg-[#d9d9d90d] border-transparent text-opacity-90"
+                : "border-[#d9d9d90d] hover:bg-[#9361d1] focus:bg-[#602E9E] text-opacity-50 hover:text-opacity-90"
+            }`}
+            onClick={() => setActionType("Deposit")}
+          >
+            Deposit
+          </button>
+          <button
+            className={`w-full border-2 rounded-md py-1 ml-1 text-white transition-all duration-300 ease-in-out ${
+              actionType === "Withdraw"
+                ? "bg-[#d9d9d90d] border-transparent text-opacity-90"
+                : "border-[#d9d9d90d] hover:bg-[#9361d1] focus:bg-[#602E9E] text-opacity-50 hover:text-opacity-90"
+            }`}
+            onClick={() => setActionType("Withdraw")}
+          >
+            Withdraw
+          </button>
+        </div>
 
         <FormProvider {...methods}>
           <form
@@ -87,21 +112,21 @@ export default function BalanceModal({
             onSubmit={methods.handleSubmit(onSubmit)}
           >
             <div className="mb-0 flex w-full flex-col">
-              <label className="mb-1 text-xs text-[#F0F0F0] text-opacity-75">
+              <label className="mb-1 font-changa font-medium text-xs text-[#F0F0F0] text-opacity-75">
                 Coin
               </label>
 
-              <span className="w-full rounded-lg bg-[#7839C5] bg-opacity-10 px-4 py-2 text-[#F0F0F0] text-opacity-75">
+              <span className="w-full rounded-lg bg-[#202329] px-4 py-2 text-[#F0F0F0] text-opacity-75">
                 {token}
               </span>
             </div>
 
             <div className="mb-0 flex w-full flex-col">
-              <label className="mb-1 text-xs text-[#F0F0F0] text-opacity-75">
+              <label className="mb-1 font-changa font-medium text-xs text-[#F0F0F0] text-opacity-75">
                 Your current connected wallet
               </label>
 
-              <span className="w-full rounded-lg bg-[#7839C5] bg-opacity-10 px-4 py-2 text-[#F0F0F0] text-opacity-75">
+              <span className="w-full rounded-lg bg-[#202329] px-4 py-2 text-[#F0F0F0] text-opacity-75">
                 {obfuscatePubKey(wallet.publicKey?.toBase58() ?? "")}
               </span>
             </div>
@@ -109,16 +134,17 @@ export default function BalanceModal({
             {actionType == "Withdraw" ? (
               <div className="mb-0 flex w-full flex-col">
                 <div className="mb-1 flex w-full items-center justify-between">
-                  <label className="text-xs text-[#F0F0F0] text-opacity-75">
+                  <label className="font-changa font-medium text-xs text-[#F0F0F0] text-opacity-75">
                     Enter {actionType.toLocaleLowerCase()} amount
                   </label>
-                  <span className="text-sm text-[#F0F0F0] text-opacity-75">
-                    Available : {balance.toFixed(4)}
+                  <span className="font-changa font-medium text-sm text-[#F0F0F0] text-opacity-75">
+                    Available :{" "}
+                    {(coinData ? coinData[0]?.amount : 0).toFixed(4)}
                   </span>
                 </div>
 
                 <div
-                  className={`group flex h-11 w-full cursor-pointer items-center rounded-[8px] border-2 border-[#7839C5] px-4`}
+                  className={`group flex h-11 w-full cursor-pointer items-center rounded-[8px] bg-[#202329] px-4`}
                 >
                   <input
                     id={"amount-input"}
@@ -134,8 +160,10 @@ export default function BalanceModal({
                     className={`flex w-full min-w-0 bg-transparent text-sm text-white placeholder-white  placeholder-opacity-40 outline-none`}
                   />
                   <span
-                    className="text-sm text-[#F0F0F0] text-opacity-75"
-                    onClick={() => setAmount(balance)}
+                    className="text-sm text-[#F0F0F0] text-opacity-75 bg-[#D9D9D9] bg-opacity-5"
+                    onClick={() =>
+                      setAmount(coinData ? coinData[0]?.amount : 0)
+                    }
                   >
                     MAX
                   </span>
@@ -156,16 +184,16 @@ export default function BalanceModal({
             ) : (
               <div className="mb-0 flex w-full flex-col">
                 <div className="mb-1 flex w-full items-center justify-between">
-                  <label className="text-xs text-[#F0F0F0] text-opacity-75">
+                  <label className="font-changa font-medium text-xs text-[#F0F0F0] text-opacity-75">
                     Enter {actionType.toLocaleLowerCase()} amount
                   </label>
-                  <span className="text-sm text-[#F0F0F0] text-opacity-75">
-                    Available : {balance.toFixed(4)}
+                  <span className="font-changa font-medium text-sm text-[#F0F0F0] text-opacity-75">
+                    Available : {(walletBalance ?? 0).toFixed(4)}
                   </span>
                 </div>
 
                 <div
-                  className={`group flex h-11 w-full cursor-pointer items-center rounded-[8px] border-2 border-[#7839C5] px-4`}
+                  className={`group flex h-11 w-full cursor-pointer items-center rounded-[8px] bg-[#202329] px-4`}
                 >
                   <input
                     id={"amount-input"}
@@ -181,8 +209,8 @@ export default function BalanceModal({
                     className={`flex w-full min-w-0 bg-transparent text-sm text-white placeholder-white  placeholder-opacity-40 outline-none`}
                   />
                   <span
-                    className="text-sm text-[#F0F0F0] text-opacity-75"
-                    onClick={() => setAmount(balance - 0.01)}
+                    className="text-sm text-[#F0F0F0] text-opacity-75 bg-[#D9D9D9] bg-opacity-5"
+                    onClick={() => setAmount((walletBalance ?? 0) - 0.01)}
                   >
                     MAX
                   </span>
@@ -204,7 +232,7 @@ export default function BalanceModal({
 
             <button
               type="submit"
-              className="rounded-[8px] border border-[#F200F21A] bg-[#7839C5] hover:bg-[#884ece] transition-all py-2 font-changa text-base font-medium text-[#F0F0F0] text-opacity-90"
+              className="rounded-[8px] border border-[#F200F21A] bg-[#7839C5] hover:bg-[#9361d1] focus:bg-[#602E9E] transition-all py-2 font-changa text-base font-medium text-[#F0F0F0] text-opacity-90"
             >
               {loading ? <Loader /> : actionType}
             </button>

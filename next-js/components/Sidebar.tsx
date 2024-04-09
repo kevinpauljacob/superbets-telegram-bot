@@ -3,14 +3,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/router";
 
-import dollar from "/public/assets/dollar.png";
-import play from "/public/assets/play.png";
-import search from "/public/assets/search.png";
-import twitter from "/public/assets/twitter.png";
-import telegram from "@/public/assets/telegram.png";
-import ottersec from "@/public/assets/ottersec.png";
-import upArrow from "@/public/assets/upArrow.png";
-import downArrow from "@/public/assets/downArrow.png";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { obfuscatePubKey, pointTiers } from "@/context/transactions";
 import { useGlobalContext } from "./GlobalContext";
@@ -26,7 +18,7 @@ type Game = {
 // Define type for game toggle function
 type ToggleGameToken = (index: number) => void;
 
-export default function Sidebar() {
+export default function Sidebar({ sidebar }: { sidebar: boolean }) {
   const wallet = useWallet();
   const router = useRouter();
   const [showExitTokens, setShowExitTokens] = useState<boolean>(false);
@@ -136,10 +128,16 @@ export default function Sidebar() {
 
   return (
     <div
-      className={`hidden bg-[#121418] text-white md:flex flex-col justify-between px-3.5 pb-3.5 w-[290px] min-h-[calc(100vh-118px)] max-h-full`}
+      className={`${
+        sidebar ? "left-0 relative" : "-left-[290px] absolute"
+      } z-50 transition-all hidden bg-[#121418] text-white md:flex flex-col justify-between px-3.5 pb-3.5 min-w-[230px] w-[290px] h-[calc(100vh-100px)]`}
     >
       <div>
-        <div className="flex flex-col rounded-md py-3.5 ">
+        <div
+          className={`${
+            sidebar ? "fadeInUp" : "fadeOutDown"
+          } flex flex-col rounded-md py-3.5 `}
+        >
           <div className="flex items-center w-full mb-2 justify-around">
             <Image
               src={`/assets/badges/T-${userData?.tier ?? 0}.png`}
@@ -167,14 +165,19 @@ export default function Sidebar() {
           </Link>
         </div>
         <div>
-          <div className="mt-4">
+          <div className={`${sidebar ? "fadeInUp" : "fadeOutDown"} mt-4`}>
             <div
               className={`flex items-center justify-between rounded-md p-1 ${
                 showExitTokens ? "bg-[#161519]" : ""
               }`}
             >
               <p className="flex items-center">
-                <Image src={dollar} alt="" width={22} height={22} />
+                <Image
+                  src={"/assets/dollar.png"}
+                  alt=""
+                  width={22}
+                  height={22}
+                />
                 <span
                   className={`${
                     showExitTokens ? "text-opacity-75" : "text-opacity-50"
@@ -190,7 +193,11 @@ export default function Sidebar() {
                 onClick={() => setShowExitTokens(!showExitTokens)}
               >
                 <Image
-                  src={showExitTokens ? upArrow : downArrow}
+                  src={
+                    showExitTokens
+                      ? "/assets/upArrow.png"
+                      : "/assets/downArrow.png"
+                  }
                   alt=""
                   width={10}
                   height={10}
@@ -222,14 +229,14 @@ export default function Sidebar() {
               </ul>
             )}
           </div>
-          <div className="mt-4">
+          <div className={`${sidebar ? "fadeInUp" : "fadeOutDown"} mt-4`}>
             <div
               className={`flex items-center justify-between rounded-md p-1 ${
                 showPlayTokens ? "bg-[#161519]" : ""
               }`}
             >
               <p className="flex items-center">
-                <Image src={play} alt="" width={22} height={22} />
+                <Image src={"/assets/play.png"} alt="" width={22} height={22} />
                 <span
                   className={`${
                     showPlayTokens ? "text-opacity-75" : "text-opacity-50"
@@ -245,7 +252,11 @@ export default function Sidebar() {
                 onClick={() => setShowPlayTokens(!showPlayTokens)}
               >
                 <Image
-                  src={showPlayTokens ? upArrow : downArrow}
+                  src={
+                    showPlayTokens
+                      ? "/assets/upArrow.png"
+                      : "/assets/downArrow.png"
+                  }
                   alt=""
                   width={10}
                   height={10}
@@ -280,7 +291,10 @@ export default function Sidebar() {
         </div>
       </div>
       <div>
-        <div className="flex flex-col">
+        <div
+          className={`${sidebar ? "fadeInUp" : "fadeOutDown"}
+          flex flex-col`}
+        >
           <Link
             href="/"
             className="hover:bg-white/10 transition duration-300 ease-in-out hover:transition hover:duration-300 hover:ease-in-out bg-[#181A1D] rounded-md text-center font-bold text-white/50 py-2 mb-1.5"
@@ -303,21 +317,21 @@ export default function Sidebar() {
         <div className="mt-9">
           <div className="flex justify-center">
             <Image
-              src={search}
+              src={"/assets/search.png"}
               alt=""
               width={14}
               height={14}
               className="mx-1.5"
             />
             <Image
-              src={twitter}
+              src={"/assets/twitter.png"}
               alt=""
               width={18}
               height={14}
               className="mx-1.5"
             />
             <Image
-              src={telegram}
+              src={"/assets/telegram.png"}
               alt=""
               width={18}
               height={15}
@@ -325,7 +339,7 @@ export default function Sidebar() {
             />
           </div>
           <div className="flex items-center justify-center my-3">
-            <Image src={ottersec} alt="" width={17} height={17} />
+            <Image src={"/assets/ottersec.png"} alt="" width={17} height={17} />
             <p className="text-xs font-light text-white/50">
               Audited by OtterSec
             </p>

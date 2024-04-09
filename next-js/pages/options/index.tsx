@@ -10,8 +10,14 @@ import Head from "next/head";
 import Link from "next/link";
 import { useGlobalContext } from "@/components/GlobalContext";
 import { FormProvider, useForm } from "react-hook-form";
-import GameFooterInfo from "@/components/games/GameFooterInfo";
 import GameHeader from "@/components/GameHeader";
+import {
+  GameDisplay,
+  GameLayout,
+  GameOptions,
+  GameFooterInfo,
+  GameTable,
+} from "@/components/GameLayout";
 
 const Timer = dynamic(() => import("../../components/games/Timer"), {
   ssr: false,
@@ -49,6 +55,12 @@ export default function Options() {
   const [betTime, setBetTime] = useState();
   const [betEndPrice, setBetEndPrice] = useState<number>();
 
+  const [timeLeft, setTimeLeft] = useState(
+    betTime
+      ? new Date(betTime).getTime() + betInterval * 60000 - Date.now()
+      : 0,
+  );
+
   const bet = async (betType: string) => {
     setLoading(true);
     setCheckResult(false);
@@ -75,27 +87,29 @@ export default function Options() {
         setRefresh(true);
         setStrikePrice(res?.data?.strikePrice);
         setBetTime(res?.data?.betTime);
-        setTimeout(
-          async () => {
-            // console.log("ending the bet")
-            setBetInterval(3);
-            setBetEnd(true);
-            setLoading(false);
-
-            await new Promise((r) => setTimeout(r, 2000));
-
-            let betEndPrice = await fetch(
-              `https://hermes.pyth.network/api/get_price_feed?id=0xef0d8b6fda2ceba41da15d4095d1da392a0d2f8ed0c6c7bc0f4cfac8c280b56d&publish_time=${Math.floor(
-                (new Date(res?.data?.betTime).getTime() + betInterval * 60000) /
-                  1000,
-              )}`,
-            )
-              .then((res) => res.json())
-              .then((data) => data.price.price * Math.pow(10, data.price.expo));
-            setBetEndPrice(betEndPrice);
-          },
-          betInterval * 60000 + 400,
+        setTimeLeft(
+          new Date(res?.data?.betTime).getTime() +
+            betInterval * 60000 -
+            Date.now(),
         );
+        setTimeout(async () => {
+          // console.log("ending the bet")
+          setBetInterval(3);
+          setBetEnd(true);
+          setLoading(false);
+
+          await new Promise((r) => setTimeout(r, 2000));
+
+          let betEndPrice = await fetch(
+            `https://hermes.pyth.network/api/get_price_feed?id=0xef0d8b6fda2ceba41da15d4095d1da392a0d2f8ed0c6c7bc0f4cfac8c280b56d&publish_time=${Math.floor(
+              (new Date(res?.data?.betTime).getTime() + betInterval * 60000) /
+                1000,
+            )}`,
+          )
+            .then((res) => res.json())
+            .then((data) => data.price.price * Math.pow(10, data.price.expo));
+          setBetEndPrice(betEndPrice);
+        }, betInterval * 60000);
       } else {
         setCheckResult(false);
         setBetEnd(false);
@@ -154,11 +168,16 @@ export default function Options() {
         .then(async (bets) => {
           let bet = bets.data;
           if (bets.success && bet && bet.result === "Pending") {
-            setBetType(bet.betType === "betUp" ? "up" : "down");
-            setBetAmt(bet.amount);
-            setBetInterval(bet.timeFrame / 60);
-            setStrikePrice(bet.strikePrice);
-            setBetTime(bet.betTime);
+            setBetType(bet?.betType === "betUp" ? "up" : "down");
+            setBetAmt(bet?.amount);
+            setBetInterval(bet?.timeFrame / 60);
+            setStrikePrice(bet?.strikePrice);
+            setBetTime(bet?.betTime);
+            setTimeLeft(
+              new Date(bet?.betTime).getTime() +
+                betInterval * 60000 -
+                Date.now(),
+            );
             if (new Date(bet.betEndTime!).getTime() < Date.now()) {
               await new Promise((r) => setTimeout(r, 2000));
 
@@ -241,226 +260,184 @@ export default function Options() {
     }
   };
 
+  // for circle loader
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const remaining = timeLeft - 1000;
+      setTimeLeft((prev) => prev - 1000);
+
+      // console.log(remaining);
+      if (remaining <= 0 && (betEnd || (!betEnd && betTime !== undefined))) {
+        setTimeLeft(0);
+        clearInterval(interval);
+      }
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [betTime]);
+
   return (
-    <div className="flex h-full w-full flex-col items-center justify-start px-5">
-      <Head>
-        <title>FOMO - Binary Options</title>
-      </Head>
-      <div className="mt-5 w-full items-stretch bg-[#121418] rounded-2xl flex flex-col-reverse md:flex-row">
-        {/* bet box  */}
-        <div className="flex w-full md:w-[35%] flex-col items-center rounded-[1.15rem] px-3 py-5 md:p-7">
-          <FormProvider {...methods}>
-            <form
-              className="flex w-full flex-col gap-0"
-              autoComplete="off"
-              onSubmit={methods.handleSubmit(onSubmit)}
-            >
-              <div className="mb-0 flex w-full flex-col">
-                <div className="mb-1 flex w-full items-center justify-between text-sm font-changa text-opacity-90">
-                  <label className="text-[#F0F0F0] text-opacity-75">
-                    Bet amount
-                  </label>
-                  <span className="text-[#94A3B8] text-opacity-75">
-                    Available : {coinData ? coinData[0]?.amount.toFixed(4) : 0}
-                  </span>
-                </div>
+    <GameLayout title="FOMO - Binary Options">
+      <GameOptions>
+        <FormProvider {...methods}>
+          <form
+            className="flex w-full flex-col gap-0"
+            autoComplete="off"
+            onSubmit={methods.handleSubmit(onSubmit)}
+          >
+            <div className="mb-0 flex w-full flex-col">
+              <div className="mb-1 flex w-full items-center justify-between text-sm font-changa text-opacity-90">
+                <label className="text-[#F0F0F0] text-opacity-75">
+                  Bet amount
+                </label>
+                <span className="text-[#94A3B8] text-opacity-75">
+                  Available : {coinData ? coinData[0]?.amount.toFixed(4) : 0}
+                </span>
+              </div>
 
-                <div
-                  className={`group flex h-11 w-full cursor-pointer items-center rounded-[8px] bg-[#202329] px-4`}
-                >
-                  <input
-                    id={"amount-input"}
-                    {...methods.register("amount", {
-                      required: "Amount is required",
-                    })}
-                    type={"number"}
-                    step={"any"}
-                    autoComplete="off"
-                    onChange={handleChange}
-                    placeholder={"Amount"}
-                    value={betAmt}
-                    className={`flex w-full min-w-0 bg-transparent text-base text-white placeholder-white  font-changa placeholder-opacity-40 outline-none`}
-                  />
-                  <span
-                    className="bg-[#D9D9D9] bg-opacity-5 py-1 px-1.5 rounded text-xs font-semibold text-[#F0F0F0] text-opacity-50"
-                    onClick={() =>
-                      setBetAmt(coinData ? coinData[0]?.amount : 0)
-                    }
-                  >
-                    MAX
-                  </span>
-                </div>
-
+              <div
+                className={`group flex h-11 w-full cursor-pointer items-center rounded-[8px] bg-[#202329] px-4`}
+              >
+                <input
+                  id={"amount-input"}
+                  {...methods.register("amount", {
+                    required: "Amount is required",
+                  })}
+                  type={"number"}
+                  step={"any"}
+                  autoComplete="off"
+                  onChange={handleChange}
+                  placeholder={"Amount"}
+                  value={betAmt}
+                  className={`flex w-full min-w-0 bg-transparent text-base text-white placeholder-white  font-changa placeholder-opacity-40 outline-none`}
+                />
                 <span
-                  className={`${
-                    methods.formState.errors["amount"]
-                      ? "opacity-100"
-                      : "opacity-0"
-                  } mt-1.5 flex items-center gap-1 text-xs text-[#D92828]`}
+                  className="bg-[#D9D9D9] bg-opacity-5 py-1 px-1.5 rounded text-xs font-semibold text-[#F0F0F0] text-opacity-50"
+                  onClick={() => setBetAmt(coinData ? coinData[0]?.amount : 0)}
                 >
-                  {methods.formState.errors["amount"]
-                    ? methods.formState.errors["amount"]!.message!.toString()
-                    : "NONE"}
+                  MAX
                 </span>
               </div>
 
-              {/* select interval  */}
-              <div className="mb-4 flex w-full flex-col rounded-lg bg-transparent bg-opacity-10">
-                <span className="-full mb-3 text-left text-sm font-changa font-medium text-[#F0F0F0] text-opacity-75">
-                  Select Interval
-                </span>
-                <div className="flex flex-col items-center gap-2.5 md:flex-row bg-[#0C0F16] p-4 rounded-lg">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      !loading && setBetInterval(3);
-                    }}
-                    className={`${
-                      betInterval === 3
-                        ? "border-[#7839C5]"
-                        : "border-transparent hover:border-[#7839C580]"
-                    } w-full rounded-[5px] border-[2px] bg-[#202329] py-2 text-xs font-chakra text-white text-opacity-90 transition duration-200`}
-                  >
-                    3 Min
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      !loading && setBetInterval(4);
-                    }}
-                    className={`${
-                      betInterval === 4
-                        ? "border-[#7839C5]"
-                        : "border-transparent hover:border-[#7839C580]"
-                    } w-full rounded-[5px] border-[2px] bg-[#202329] py-2 text-xs font-chakra text-white text-opacity-90 transition duration-200`}
-                  >
-                    4 Min
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      !loading && setBetInterval(5);
-                    }}
-                    className={`${
-                      betInterval === 5
-                        ? "border-[#7839C5]"
-                        : "border-transparent hover:border-[#7839C580]"
-                    } w-full rounded-[5px] border-[2px] bg-[#202329] py-2 text-xs font-chakra -white text-opacity-90 transition duration-200`}
-                  >
-                    5 Min
-                  </button>
-                </div>
-              </div>
+              <span
+                className={`${
+                  methods.formState.errors["amount"]
+                    ? "opacity-100"
+                    : "opacity-0"
+                } mt-1.5 flex items-center gap-1 text-xs text-[#D92828]`}
+              >
+                {methods.formState.errors["amount"]
+                  ? methods.formState.errors["amount"]!.message!.toString()
+                  : "NONE"}
+              </span>
+            </div>
 
-              {(!coinData || (coinData && coinData[0].amount < 0.0001)) &&
-                strikePrice == 0 && (
-                  <div className="mb-5 w-full rounded-lg bg-[#0C0F16] p-2 text-white md:px-6">
-                    <div className="-full text-center font-changa font-medium text-[#F0F0F0] text-opacity-75">
-                      Please deposit funds to start playing. View{" "}
-                      <Link href="/balance">
-                        <u>WALLET</u>
-                      </Link>
-                    </div>
+            {/* select interval  */}
+            <div className="mb-4 flex w-full flex-col rounded-lg bg-transparent bg-opacity-10">
+              <span className="-full mb-3 text-left text-sm font-changa font-medium text-[#F0F0F0] text-opacity-75">
+                Select Interval
+              </span>
+              <div className="flex flex-col items-center gap-2.5 md:flex-row bg-[#0C0F16] p-4 rounded-lg">
+                <button
+                  type="button"
+                  onClick={() => {
+                    !loading && setBetInterval(3);
+                  }}
+                  className={`${
+                    betInterval === 3
+                      ? "border-[#7839C5]"
+                      : "border-transparent hover:border-[#7839C580]"
+                  } w-full rounded-[5px] border-[2px] bg-[#202329] py-2 text-xs font-chakra text-white text-opacity-90 transition duration-200`}
+                >
+                  3 Min
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    !loading && setBetInterval(4);
+                  }}
+                  className={`${
+                    betInterval === 4
+                      ? "border-[#7839C5]"
+                      : "border-transparent hover:border-[#7839C580]"
+                  } w-full rounded-[5px] border-[2px] bg-[#202329] py-2 text-xs font-chakra text-white text-opacity-90 transition duration-200`}
+                >
+                  4 Min
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    !loading && setBetInterval(5);
+                  }}
+                  className={`${
+                    betInterval === 5
+                      ? "border-[#7839C5]"
+                      : "border-transparent hover:border-[#7839C580]"
+                  } w-full rounded-[5px] border-[2px] bg-[#202329] py-2 text-xs font-chakra -white text-opacity-90 transition duration-200`}
+                >
+                  5 Min
+                </button>
+              </div>
+            </div>
+
+            {(!coinData || (coinData && coinData[0].amount < 0.0001)) &&
+              strikePrice == 0 && (
+                <div className="mb-5 w-full rounded-lg bg-[#0C0F16] p-2 text-white md:px-6">
+                  <div className="-full text-center font-changa font-medium text-[#F0F0F0] text-opacity-75">
+                    Please deposit funds to start playing. View{" "}
+                    <Link href="/balance">
+                      <u>WALLET</u>
+                    </Link>
                   </div>
-                )}
+                </div>
+              )}
 
-              <div className="flex w-full flex-row mb-4 gap-3">
-                {/* buttons  */}
-                <div
-                  onClick={() => {
-                    setBetType("up");
-                  }}
-                  className={`${
-                    betType === "up"
-                      ? "border-[#7839C5]"
-                      : "border-transparent hover:border-[#7839C580]"
-                  } w-full rounded-lg text-center cursor-pointer border-2 bg-[#202329] py-2.5 font-changa text-xl text-white shadow-[0px_4px_15px_0px_rgba(0,0,0,0.25)]`}
-                >
-                  UP
-                </div>
-                <div
-                  onClick={() => {
-                    setBetType("down");
-                  }}
-                  className={`${
-                    betType === "down"
-                      ? "border-[#7839C5]"
-                      : "border-transparent hover:border-[#7839C580]"
-                  } w-full rounded-lg text-center cursor-pointer border-2 bg-[#202329] py-2.5 font-changa text-xl text-white shadow-[0px_4px_15px_0px_rgba(0,0,0,0.25)] `}
-                >
-                  DOWN
-                </div>
+            <div className="flex w-full flex-row mb-4 gap-3">
+              {/* buttons  */}
+              <div
+                onClick={() => {
+                  setBetType("up");
+                }}
+                className={`${
+                  betType === "up"
+                    ? "border-[#7839C5]"
+                    : "border-transparent hover:border-[#7839C580]"
+                } w-full rounded-lg text-center cursor-pointer border-2 bg-[#202329] py-2.5 font-changa text-xl text-white shadow-[0px_4px_15px_0px_rgba(0,0,0,0.25)]`}
+              >
+                UP
               </div>
+              <div
+                onClick={() => {
+                  setBetType("down");
+                }}
+                className={`${
+                  betType === "down"
+                    ? "border-[#7839C5]"
+                    : "border-transparent hover:border-[#7839C580]"
+                } w-full rounded-lg text-center cursor-pointer border-2 bg-[#202329] py-2.5 font-changa text-xl text-white shadow-[0px_4px_15px_0px_rgba(0,0,0,0.25)] `}
+              >
+                DOWN
+              </div>
+            </div>
 
-              {strikePrice !== 0 ? (
-                <div className="mb-0 flex w-full flex-col items-center rounded-lg bg-[#202329] px-6 py-4">
-                  {checkResult ? (
-                    loading && !result ? (
-                      <div className="flex w-full flex-col items-center">
-                        <span
-                          className={`mb-4 font-changa text-xl text-[#FFFFFF] text-opacity-90`}
-                        >
-                          Calculating.....
-                        </span>
-                        <span
-                          className={`mb-1 w-[90%] max-w-[22rem] text-center font-changa text-sm text-[#F0F0F0] text-opacity-50`}
-                        >
-                          This round’s closing transaction has been submitted to
-                          the blockchain, and is awaiting confirmation.
-                        </span>
-                      </div>
-                    ) : (
-                      <div className="flex w-full flex-col items-center">
-                        {/* time and type  */}
-                        <div className="flex w-full items-start justify-between">
-                          <div className="flex flex-col items-start -gap-1">
-                            <Timer minutes={betInterval} betTime={betTime!} />
-                            <span
-                              className={`font-lilita ${
-                                betType === "up"
-                                  ? "text-[#0F8B62]"
-                                  : "text-[#CF304A]"
-                              } text-sm`}
-                            >
-                              {betType === "up" ? "BET UP" : "BET DOWN"}
-                            </span>
-                          </div>
-                          <div className="flex flex-col items-end -gap-1">
-                            <span className="font-changa text-sm text-[#FFFFFF] text-opacity-75 mt-1">
-                              Price Amount
-                            </span>
-                            <span className="font-changa text-sm font-semibold text-[#FFFFFF] text-opacity-90">
-                              {resultAmt ? resultAmt!.toFixed(4) : 0} $SOL
-                            </span>
-                          </div>
-                        </div>
-
-                        {/* result  */}
-                        <span
-                          className={`-mt-0 mb-2.5 font-changa text-[2rem] text-[#FFFFFF] text-opacity-90`}
-                        >
-                          You {result}!
-                        </span>
-
-                        {/* bet Again */}
-                        <button
-                          onClick={() => {
-                            setBetType(null);
-                            setCheckResult(false);
-                            setLoading(false);
-                            setResult(null);
-                            setBetEnd(false);
-                            setBetInterval(3);
-                            setStrikePrice(0);
-                            setBetAmt(0.1);
-                            setBetEndPrice(0);
-                          }}
-                          className="w-full rounded-[5px] border border-[#F200F21A] bg-[#7839C5] px-5 py-2 font-changa font-semibold text-white text-opacity-90 shadow-[0_5px_10px_rgba(0,0,0,0.3)]"
-                        >
-                          Bet Again
-                        </button>
-                      </div>
-                    )
+            {strikePrice !== 0 ? (
+              <div className="mb-0 flex w-full flex-col items-center rounded-lg bg-[#202329] px-6 py-4">
+                {checkResult ? (
+                  loading && !result ? (
+                    <div className="flex w-full flex-col items-center">
+                      <span
+                        className={`mb-4 font-changa text-xl text-[#FFFFFF] text-opacity-90`}
+                      >
+                        Calculating.....
+                      </span>
+                      <span
+                        className={`mb-1 w-[90%] max-w-[22rem] text-center font-changa text-sm text-[#F0F0F0] text-opacity-50`}
+                      >
+                        This round’s closing transaction has been submitted to
+                        the blockchain, and is awaiting confirmation.
+                      </span>
+                    </div>
                   ) : (
                     <div className="flex w-full flex-col items-center">
                       {/* time and type  */}
@@ -478,89 +455,139 @@ export default function Options() {
                           </span>
                         </div>
                         <div className="flex flex-col items-end -gap-1">
-                          <span className="font-changa text-sm text-[#FFFFFF] text-opacity-75">
+                          <span className="font-changa text-sm text-[#FFFFFF] text-opacity-75 mt-1">
                             Price Amount
                           </span>
                           <span className="font-changa text-sm font-semibold text-[#FFFFFF] text-opacity-90">
-                            {betAmt.toFixed(4)} $SOL
+                            {resultAmt ? resultAmt!.toFixed(4) : 0} $SOL
                           </span>
                         </div>
                       </div>
 
-                      {/* price  */}
-                      <div
-                        className={`flex ${
-                          betEnd ? "flex-row" : "-mt-1 flex-col"
-                        } mb-3 items-center`}
+                      {/* result  */}
+                      <span
+                        className={`-mt-0 mb-2.5 font-changa text-[2rem] text-[#FFFFFF] text-opacity-90`}
                       >
+                        You {result}!
+                      </span>
+
+                      {/* bet Again */}
+                      <button
+                        onClick={() => {
+                          setBetType(null);
+                          setCheckResult(false);
+                          setLoading(false);
+                          setResult(null);
+                          setBetEnd(false);
+                          setBetInterval(3);
+                          setStrikePrice(0);
+                          setBetAmt(0.1);
+                          setBetEndPrice(0);
+                        }}
+                        className="w-full rounded-[5px] border border-[#F200F21A] bg-[#7839C5] hover:bg-[#9361d1] focus:bg-[#602E9E] px-5 py-2 font-changa font-semibold text-white text-opacity-90 shadow-[0_5px_10px_rgba(0,0,0,0.3)]"
+                      >
+                        Bet Again
+                      </button>
+                    </div>
+                  )
+                ) : (
+                  <div className="flex w-full flex-col items-center">
+                    {/* time and type  */}
+                    <div className="flex w-full items-start justify-between">
+                      <div className="flex flex-col items-start -gap-1">
+                        <Timer minutes={betInterval} betTime={betTime!} />
                         <span
-                          className={`font-changa ${
-                            betEnd ? "text-sm" : "text-xl"
-                          } font-medium text-[#F0F0F0] text-opacity-75`}
+                          className={`font-lilita ${
+                            betType === "up"
+                              ? "text-[#0F8B62]"
+                              : "text-[#CF304A]"
+                          } text-sm`}
                         >
-                          Strike Price
-                        </span>
-                        <span
-                          className={`font-changa ${
-                            betEnd ? "ml-1 text-sm" : "text-[2rem]"
-                          } text-[#FFFFFF] text-opacity-90`}
-                        >
-                          ${strikePrice.toFixed(4)}
+                          {betType === "up" ? "BET UP" : "BET DOWN"}
                         </span>
                       </div>
-
-                      {/* timer bar / check result */}
-                      {betEnd ? (
-                        <button
-                          onClick={async () => {
-                            await getResult();
-                          }}
-                          className="w-full rounded-[5px] border border-[#F200F21A] bg-[#d9d9d90d] px-5 py-2 font-changa font-semibold text-white text-opacity-90 shadow-[0_5px_10px_rgba(0,0,0,0.3)]"
-                        >
-                          Check Result
-                        </button>
-                      ) : (
-                        <Progress minutes={betInterval} betTime={betTime!} />
-                      )}
+                      <div className="flex flex-col items-end -gap-1">
+                        <span className="font-changa text-sm text-[#FFFFFF] text-opacity-75">
+                          Price Amount
+                        </span>
+                        <span className="font-changa text-sm font-semibold text-[#FFFFFF] text-opacity-90">
+                          {betAmt.toFixed(4)} $SOL
+                        </span>
+                      </div>
                     </div>
-                  )}
-                </div>
-              ) : loading && !checkResult ? (
-                <div className="w-full flex items-center justify-center gap-2 rounded-lg bg-[#202329] p-2">
-                  <span className="font-changa text-xl whitespace-nowrap font-medium text-[#F0F0F0] text-opacity-75">
-                    Betting in Progress
-                  </span>
-                  <div className="w-10">
-                    <Loader />
+
+                    {/* price  */}
+                    <div
+                      className={`flex ${
+                        betEnd ? "flex-row" : "-mt-1 flex-col"
+                      } mb-3 items-center`}
+                    >
+                      <span
+                        className={`font-changa ${
+                          betEnd ? "text-sm" : "text-xl"
+                        } font-medium text-[#F0F0F0] text-opacity-75`}
+                      >
+                        Strike Price
+                      </span>
+                      <span
+                        className={`font-changa ${
+                          betEnd ? "ml-1 text-sm" : "text-[2rem]"
+                        } text-[#FFFFFF] text-opacity-90`}
+                      >
+                        ${strikePrice.toFixed(4)}
+                      </span>
+                    </div>
+
+                    {/* timer bar / check result */}
+                    {betEnd ? (
+                      <button
+                        onClick={async () => {
+                          await getResult();
+                        }}
+                        className="w-full rounded-[5px] border border-[#F200F21A] bg-[#d9d9d90d] px-5 py-2 font-changa font-semibold text-white text-opacity-90 shadow-[0_5px_10px_rgba(0,0,0,0.3)]"
+                      >
+                        Check Result
+                      </button>
+                    ) : (
+                      <Progress minutes={betInterval} betTime={betTime!} />
+                    )}
                   </div>
+                )}
+              </div>
+            ) : loading && !checkResult ? (
+              <div className="w-full flex items-center justify-center gap-2 rounded-lg bg-[#202329] p-2">
+                <span className="font-changa text-xl whitespace-nowrap font-medium text-[#F0F0F0] text-opacity-75">
+                  Betting in Progress
+                </span>
+                <div className="w-10">
+                  <Loader />
                 </div>
-              ) : (
-                <div className="flex w-full flex-col">
-                  <button
-                    type="submit"
-                    disabled={
-                      !coinData || (coinData && coinData[0].amount < 0.0001)
-                        ? true
-                        : false
-                    }
-                    onClick={onSubmit}
-                    className={`${
-                      !coinData || (coinData && coinData[0].amount < 0.0001)
-                        ? "cursor-not-allowed opacity-70"
-                        : "hover:opacity-90"
-                    } w-full rounded-lg bg-[#7839C5] py-2.5 font-lilita text-xl text-white`}
-                  >
-                    BET
-                  </button>
-                </div>
-              )}
-            </form>
-          </FormProvider>
-        </div>
-
-        <div className="bg-white bg-opacity-10 w-[1px]" />
-
-        <div className="flex flex-1 flex-col items-center justify-between gap-2 m-5 bg-[#0C0F16] rounded-lg p-4">
+              </div>
+            ) : (
+              <div className="flex w-full flex-col">
+                <button
+                  type="submit"
+                  disabled={
+                    !coinData || (coinData && coinData[0].amount < 0.0001)
+                      ? true
+                      : false
+                  }
+                  onClick={onSubmit}
+                  className={`${
+                    !coinData || (coinData && coinData[0].amount < 0.0001)
+                      ? "cursor-not-allowed opacity-70"
+                      : "hover:opacity-90"
+                  } w-full rounded-lg bg-[#7839C5] hover:bg-[#9361d1] focus:bg-[#602E9E] py-2.5 font-lilita text-xl text-white`}
+                >
+                  BET
+                </button>
+              </div>
+            )}
+          </form>
+        </FormProvider>
+      </GameOptions>
+      <GameDisplay>
+        <>
           {/* time and amt */}
           <div
             className={`${
@@ -612,19 +639,23 @@ export default function Options() {
                   className={`w-[6rem] h-2 flex justify-end absolute top-[50%] left-[50%] origin-[0_0px] bg-transparent`}
                   style={{ rotate: `${(360 / 40) * index}deg` }}
                 >
-                  <div className="w-[8px] h-[5px] bg-white" />
+                  <div
+                    className={`w-[8px] h-[5px] ${
+                      index >= (timeLeft * 40) / (betInterval * 60000)
+                        ? "bg-[#282E3D]"
+                        : "bg-[#D9D9D9]"
+                    }`}
+                  />
                 </div>
               ))}
             </div>
           </div>
-
           <GameFooterInfo multiplier={1.0} amount={betAmt ?? 0} chance={50} />
-        </div>
-      </div>
-      <div className="w-full flex md:hidden mt-4 rounded-[5px] overflow-hidden">
-        <GameHeader />
-      </div>
-      <Bets refresh={refresh} />
-    </div>
+        </>
+      </GameDisplay>
+      <GameTable>
+        <Bets refresh={refresh} />
+      </GameTable>
+    </GameLayout>
   );
 }

@@ -55,7 +55,7 @@ export default function FomoPlay() {
 
   return (
     <div className="mt-5">
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex justify-between items-center mb-1">
         <div className="flex items-center">
           <Image src={Dollar} alt="" width={26} height={26} />
           <span className="font-semibold font-changa text-xl text-opacity-90 pl-3">
@@ -67,7 +67,7 @@ export default function FomoPlay() {
         </div>
         <div className="">
           <button
-            className="bg-[#1D1A21] hover:bg-gray-500/30 text-white font-bold py-4 px-5 rounded focus:outline-none focus:shadow-outline mr-3"
+            className="bg-[#1D1A21] hover:bg-[#333037] focus:bg-[#333037] text-white font-bold py-4 px-5 rounded border-2 border-transparent focus:border-[#7839C5] focus:shadow-outline mr-3"
             onClick={prevSlide}
           >
             <Image
@@ -79,7 +79,7 @@ export default function FomoPlay() {
             />
           </button>
           <button
-            className="bg-[#1D1A21] hover:bg-gray-500/30 text-white font-bold py-4 px-5 rounded focus:outline-none focus:shadow-outline"
+            className="bg-[#1D1A21] hover:bg-[#333037] focus:bg-[#333037] text-white font-bold py-4 px-5 rounded border-2 border-transparent focus:border-[#7839C5] focus:shadow-outline"
             onClick={nextSlide}
           >
             <Image
@@ -92,21 +92,25 @@ export default function FomoPlay() {
           </button>
         </div>
       </div>
-      <div className="relative min-h-[295px] overflow-hidden">
+      <div className="flex items-end relative min-h-[15rem] overflow-x-auto no-scrollbar">
         {games.map((game, index) => (
           <div
             key={index}
-            className="absolute top-0 left-0 w-max h-full transform transition-transform duration-300"
+            className="absolute flex items-end top-0 left-0 w-max h-full transform transition-transform duration-300"
             style={{
               transform: `translateX(${index * 100 - currentSlide * 100}%)`,
             }}
           >
-            <Link href={game.href} key={index} className="pr-3.5 mt-3.5">
+            <Link
+              href={game.href}
+              key={index}
+              className="mt-3.5 flex items-end transition-transform z-20 hover:-translate-y-4"
+            >
               <Image
                 src={game.src}
                 alt=""
-                width={210}
-                height={294}
+                width={154}
+                height={216}
                 className="mr-3.5"
               />
             </Link>

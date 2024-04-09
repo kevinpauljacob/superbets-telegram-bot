@@ -15,26 +15,25 @@ function Balance() {
   const { data: session, status } = useSession();
   const wallet = useWallet();
 
-  const { walletBalance, setWalletBalance, getWalletBalance, getBalance, coinData, setCoinData } = useGlobalContext();
+  const { walletBalance, setWalletBalance, getWalletBalance, getBalance, coinData, setCoinData, showWalletModal, setShowWalletModal } = useGlobalContext();
 
   const [loading, setLoading] = useState(false);
 
   const walletModal = useWalletModal();
 
-  const [visible, setVisible] = useState(false);
   const [actionType, setActionType] = useState("Deposit");
   const [token, setToken] = useState("");
 
   useEffect(() => {
-    if (session?.user && !visible) {
+    if (session?.user && !showWalletModal) {
       getBalance();
       getWalletBalance();
     }
-  }, [session?.user, visible]);
+  }, [session?.user, showWalletModal]);
 
   return (
     <>
-      <div className="relative flex w-full flex-col flex-wrap items-center justify-start overflow-y-auto">
+      {/* <div className="relative flex w-full flex-col flex-wrap items-center justify-start overflow-y-auto">
         <div className="flex w-[90%] flex-col items-center pb-4 md:w-[70%]">
           <div className="my-[3rem] rounded-md py-6 text-center font-changa">
             <h2 className="mb-2 text-2xl text-[#7839C5] text-opacity-75">
@@ -96,7 +95,7 @@ function Balance() {
                           setToken(coin.tokenMint);
                           setActionType("Withdraw");
                           // console.log("click");
-                          setVisible(true);
+                          setShowWalletModal(true);
                         }}
                         className="w-full rounded-[5px] border border-[#F200F21A] bg-[#7839C5] px-5 py-1.5 shadow-[0_5px_10px_rgba(0,0,0,0.3)] md:w-fit md:py-0.5"
                       >
@@ -107,7 +106,7 @@ function Balance() {
                           setToken(coin.tokenMint);
                           setActionType("Deposit");
                           // console.log("click");
-                          setVisible(true);
+                          setShowWalletModal(true);
                         }}
                         className="w-full rounded-[5px] border-2 border-[#7839C566] bg-transparent px-5 py-1.5 shadow-[0_5px_10px_rgba(0,0,0,0.3)] md:w-fit md:py-0.5"
                       >
@@ -124,23 +123,23 @@ function Balance() {
             )
           ) : (
             <button
-              onClick={() => walletModal.setVisible(true)}
+              onClick={() => walletModal.setShowWalletModal(true)}
               className="transform rounded-[5px] bg-[#7839C5] px-8 py-2 text-xs text-white transition duration-200 hover:bg-[#884ece]"
             >
               Connect Wallet
             </button>
           )}
         </div>
-      </div>
-      {coinData && visible && (
+      </div> */}
+      {/* {coinData && showWalletModal && (
         <BalanceModal
-          visible={visible}
-          setVisible={setVisible}
+          visible={showWalletModal}
+          setVisible={setShowWalletModal}
           actionType={actionType}
           token={token}
           balance={actionType == "Deposit" ? walletBalance : coinData[0].amount}
         />
-      )}
+      )} */}
     </>
   );
 }

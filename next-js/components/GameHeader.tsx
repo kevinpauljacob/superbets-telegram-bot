@@ -1,6 +1,5 @@
 import { useRouter } from "next/router";
 import Image from "next/image";
-import fair from "/public/assets/fair.png";
 import { useEffect, useState } from "react";
 import RollDiceProvablyFairModal from "./games/RollDice/RollDiceProvablyFairModal";
 import { useWallet } from "@solana/wallet-adapter-react";
@@ -108,7 +107,7 @@ export default function GameHeader() {
 
   // If the selected game exists, render its details, otherwise render null
   return selectedGame ? (
-    <div className="w-full text-white border-y border-[#1E2220] bg-[#121418] px-4 py-2">
+    <div className="w-full text-white border-y sm:border-b border-[#1E2220] bg-[#121418] px-4 py-2">
       <div className="flex flex-row items-center justify-between">
         <div className="flex items-center">
           <Image
@@ -122,12 +121,12 @@ export default function GameHeader() {
           </p>
         </div>
         <div className="flex flex-wrap mt-1 justify-end">
-          <div className="hidden md:flex items-center justify-between bg-[#1E2220] rounded-md mx-1.5  my-1 px-2 py-1">
+          {/* <div className="hidden md:flex items-center justify-between bg-[#1E2220] rounded-md mx-1.5  my-1 px-2 py-1">
             <p className="font-light text-xs">Wallet Balance :&nbsp;</p>
             <p className="text-[#1FCDF0] font-semibold text-xs">
               {coinData ? coinData[0].amount.toFixed(4) : 0} $SOL
             </p>
-          </div>
+          </div> */}
           <div className="hidden md:flex items-center justify-between bg-[#1E2220] rounded-md mx-1.5  my-1 px-2 py-1">
             <p className="font-light text-xs">Volume :&nbsp;</p>
             <p className="text-[#7839C5] font-semibold text-xs">
@@ -147,7 +146,7 @@ export default function GameHeader() {
             >
               Provabaly Fair
             </p>
-            <Image src={fair} alt="Fairness" width={20} height={20} />
+            <Image src={'/assets/fair.png'} alt="Fairness" width={20} height={20} />
           </div>
         </div>
       </div>

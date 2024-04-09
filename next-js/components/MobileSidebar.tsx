@@ -2,19 +2,10 @@ import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 
-import userImg from "/public/assets/userImg2.png";
-import dollar from "/public/assets/dollar.png";
-import play from "/public/assets/play.png";
-import search from "/public/assets/search.png";
-import twitter from "/public/assets/twitter.png";
-import telegram from "@/public/assets/telegram.png";
-import ottersec from "@/public/assets/ottersec.png";
-import upArrow from "@/public/assets/upArrow.png";
-import downArrow from "@/public/assets/downArrow.png";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { obfuscatePubKey } from "@/context/transactions";
 
-export default function Sidebar() {
+export default function Sidebar({ mobileSidebar }: { mobileSidebar: boolean }) {
   const wallet = useWallet();
   const [showExitTokens, setShowExitTokens] = useState(false);
   const [showPlayTokens, setShowPlayTokens] = useState(false);
@@ -39,12 +30,12 @@ export default function Sidebar() {
 
   return (
     <div
-      className={`fixed top-[187px] z-20 md:hidden bg-[#121418] text-white flex flex-col justify-between px-4 sm:px-8 py-3.5 w-full h-[calc(100vh-187px)]`}
+      className={`${mobileSidebar ? "fadeIn fixed" : "fadeOutDown hidden"} top-[12rem] z-20 md:hidden bg-[#121418] no-scrollbar overflow-y-auto text-white flex flex-col justify-between px-4 sm:px-8 py-3.5 w-full h-[calc(100vh-195px)]`}
     >
       <div>
-        <div className="flex flex-col rounded-md py-3.5 px-3 sm:px-6">
+        <div className="fadeInUp flex flex-col rounded-md py-3.5 px-3 sm:px-6">
           <div className="flex items-center w-full mb-2">
-            <Image src={userImg} alt="" width={60} height={60} />
+            <Image src={"/assets/userImg2.png"} alt="" width={60} height={60} />
             <div className="ml-1">
               <p className="text-white/75 text-md">
                 {obfuscatePubKey(wallet?.publicKey?.toBase58() ?? "")}
@@ -60,14 +51,19 @@ export default function Sidebar() {
           </Link>
         </div>
         <div>
-          <div className="mt-4">
+          <div className="mt-4 fadeInUp">
             <div
               className={`flex items-center justify-between rounded-md p-1 ${
                 showExitTokens ? "bg-[#161519]" : ""
               }`}
             >
               <p className="flex items-center">
-                <Image src={dollar} alt="" width={22} height={22} />
+                <Image
+                  src={"/assets/dollar.png"}
+                  alt=""
+                  width={22}
+                  height={22}
+                />
                 <span className="text-md font-semibold text-white/75 ml-2">
                   FOMO: Exit
                 </span>
@@ -77,7 +73,11 @@ export default function Sidebar() {
                 onClick={() => setShowExitTokens(!showExitTokens)}
               >
                 <Image
-                  src={showExitTokens ? upArrow : downArrow}
+                  src={
+                    showExitTokens
+                      ? "/assets/upArrow.png"
+                      : "/assets/downArrow.png"
+                  }
                   alt=""
                   width={10}
                   height={10}
@@ -102,14 +102,14 @@ export default function Sidebar() {
               </ul>
             )}
           </div>
-          <div className="mt-4">
+          <div className="mt-4 fadeInUp">
             <div
               className={`flex items-center justify-between rounded-md p-1 ${
                 showPlayTokens ? "bg-[#161519]" : ""
               }`}
             >
               <p className="flex items-center">
-                <Image src={play} alt="" width={22} height={22} />
+                <Image src={"/assets/play.png"} alt="" width={22} height={22} />
                 <span className="text-md font-semibold text-white/75 ml-2">
                   FOMO: Play
                 </span>
@@ -119,7 +119,11 @@ export default function Sidebar() {
                 onClick={() => setShowPlayTokens(!showPlayTokens)}
               >
                 <Image
-                  src={showPlayTokens ? upArrow : downArrow}
+                  src={
+                    showPlayTokens
+                      ? "/assets/upArrow.png"
+                      : "/assets/downArrow.png"
+                  }
                   alt=""
                   width={10}
                   height={10}
@@ -147,22 +151,22 @@ export default function Sidebar() {
         </div>
       </div>
       <div>
-        <div className="flex flex-col">
+        <div className="fadeInUp flex flex-col">
           <Link
             href="/"
-            className="bg-[#181A1D] rounded-md text-center font-bold text-white/50 py-2 mb-1.5"
+            className="bg-[#181A1D] hover:bg-[#47484a] focus:bg-[#47484a] rounded-md text-center font-bold text-white/50 py-2 mb-1.5"
           >
             DCA
           </Link>
           <Link
             href="/"
-            className="bg-[#181A1D] rounded-md text-center font-bold text-white/50 py-2 mb-1.5"
+            className="bg-[#181A1D] hover:bg-[#47484a] focus:bg-[#47484a] rounded-md text-center font-bold text-white/50 py-2 mb-1.5"
           >
             Roadmap
           </Link>
           <Link
             href="/"
-            className="bg-[#181A1D] rounded-md text-center font-bold text-white/50 py-2 mb-1.5"
+            className="bg-[#181A1D] hover:bg-[#47484a] focus:bg-[#47484a] rounded-md text-center font-bold text-white/50 py-2 mb-1.5"
           >
             Buy $FOMO
           </Link>
@@ -170,21 +174,21 @@ export default function Sidebar() {
         <div className="mt-9">
           <div className="flex justify-center">
             <Image
-              src={search}
+              src={"/assets/search.png"}
               alt=""
               width={14}
               height={14}
               className="mx-1.5"
             />
             <Image
-              src={twitter}
+              src={"/assets/twitter.png"}
               alt=""
               width={18}
               height={14}
               className="mx-1.5"
             />
             <Image
-              src={telegram}
+              src={"/assets/telegram.png"}
               alt=""
               width={18}
               height={15}
@@ -192,7 +196,7 @@ export default function Sidebar() {
             />
           </div>
           <div className="flex items-center justify-center my-3">
-            <Image src={ottersec} alt="" width={17} height={17} />
+            <Image src={"/assets/ottersec.png"} alt="" width={17} height={17} />
             <p className="text-sm font-light text-white/50">
               Audited by OtterSec
             </p>

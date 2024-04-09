@@ -59,15 +59,15 @@ export default function Home() {
           <StoreBanner />
         </div>
         <div className="mb-7">
-          <FomoExit />
-        </div>
-        <div className="mb-7">
           <FomoPlay />
         </div>
+        <div className="mb-7">
+          <FomoExit />
+        </div>
       </div>
-      <div className="lg:ml-4">
+      {/* <div className="lg:ml-4">
         <FomoSupply />
-      </div>
+      </div> */}
     </div>
   );
 }

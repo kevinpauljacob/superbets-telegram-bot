@@ -76,6 +76,9 @@ interface GlobalContextProps {
   coinData: CoinBalance[] | null;
   setCoinData: (coinData: CoinBalance[] | null) => void;
 
+  showWalletModal: boolean ;
+  setShowWalletModal: React.Dispatch<React.SetStateAction<boolean>>;
+
   getUserDetails: () => Promise<void>;
   getGlobalInfo: () => Promise<void>;
   getWalletBalance: () => Promise<void>;
@@ -119,6 +122,8 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
       tokenMint: "SOL",
     },
   ]);
+
+  const [showWalletModal, setShowWalletModal] = useState<boolean>(false);
 
   const getUserDetails = async () => {
     if (wallet && wallet.publicKey)
@@ -189,7 +194,7 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
           .then((balance) => {
             if (
               balance.success &&
-              balance?.data.deposit &&
+              balance?.data?.deposit &&
               balance?.data.deposit.length > 0
             ) {
               setCoinData(balance.data.deposit);
@@ -253,6 +258,8 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
         walletBalance,
         setWalletBalance,
         coinData,
+        showWalletModal,
+        setShowWalletModal,
         setCoinData,
         getUserDetails,
         getGlobalInfo,

@@ -1,15 +1,14 @@
 import React, { useState } from "react";
-import { IoMdMenu } from "react-icons/io";
-import { IoMdDocument } from "react-icons/io";
+import { IoCartSharp } from "react-icons/io5";
 import Sidebar from "./Sidebar";
 import { useGlobalContext } from "./GlobalContext";
 import Spinner from "./Spinner";
 import Image from "next/image";
 import Link from "next/link";
 import Key from "@/public/assets/Key";
-import { GiLockedChest, GiChest } from "react-icons/gi";
-import { MdOutlineLanguage } from "react-icons/md";
-import { FaChevronDown } from "react-icons/fa6";
+import { RiMenuLine } from "react-icons/ri";
+import { MdMenu, MdOutlineLanguage } from "react-icons/md";
+import { FaChevronDown, FaTrophy } from "react-icons/fa6";
 import ConnectWallet from "./ConnectWallet";
 import { useRouter } from "next/router";
 import { translator } from "@/context/transactions";
@@ -23,6 +22,7 @@ import Store from "/public/assets/store.svg";
 import ActiveStore from "/public/assets/activeStore.svg";
 import Dashboard from "/public/assets/dashboard.svg";
 import ActiveDashboard from "/public/assets/activeDashboard.svg";
+import { BsFillLightningFill } from "react-icons/bs";
 
 export function Header({
   sidebar,
@@ -36,36 +36,39 @@ export function Header({
   const [langSelect, setLangSelect] = useState(false);
 
   return (
-    <>
+    <div className={`${sidebar ? "z-20 " : ""} w-full flex flex-col`}>
       <div
         className={`${
-          sidebar ? "fixed z-20 top-[24px]" : ""
-        } w-full bg-[#121418] flex flex-col items-center py-4 lg:py-4 px-2`}
+          sidebar ? "z-20" : ""
+        } w-full bg-[#121418] flex flex-col items-center py-4 px-4 border-b border-[#1E2220]`}
       >
         <div className="w-full flex flex-row items-center justify-between">
           {/* right */}
-          <div
-            onClick={() => {
-              router.push("/");
-            }}
-            className="flex flex-row items-center cursor-pointer"
-          >
-            <div className="relative flex">
+          <div className="flex flex-row items-center cursor-pointer gap-2">
+            <div
+              onClick={() => {
+                router.push("/");
+              }}
+              className="flex sm:hidden relative"
+            >
               <Image
                 src={"/assets/logowhite.svg"}
-                width={60}
-                height={50}
+                width={40}
+                height={30}
                 alt={"FOMO"}
                 className=""
               />
             </div>
-            <span className="hidden sm:flex items-center font-medium text-2xl text-white">
-              {/* <Image
-              src={"/assets/FOMO.png"}
-              width={73}
-              height={25}
-              alt={"FOMO"}
-            /> */}
+            <RiMenuLine
+              onClick={() => toggleSidebar()}
+              className="hidden sm:flex text-white w-7 h-7"
+            />
+            <span
+              onClick={() => {
+                router.push("/");
+              }}
+              className="hidden sm:flex items-center font-medium text-[1.6rem] text-white"
+            >
               FOMO
             </span>
           </div>
@@ -155,46 +158,25 @@ export function Header({
                 onClick={() => {
                   router.push("store");
                 }}
-                className="hidden sm:flex sm:items-center text-white text-opacity-50 hover:text-opacity-100 border-2 border-[rgba(255,255,255,0.05)] hover:border-white/75 transition-all font-medium rounded-md text-sm px-5 py-2"
+                className="hidden sm:flex items-center text-white text-opacity-50 hover:text-opacity-100 rounded-full border-2 border-[rgba(255,255,255,0.05)] hover:bg-[#D9D9D933] focus:bg-[#7839C5] transition-all font-medium text-sm p-2"
               >
-                <Image
-                  src="/assets/cart.png"
-                  alt="store icon"
-                  width={17}
-                  height={17}
-                  className="mr-1"
-                />
-                {translator("Store", language)}
+                <IoCartSharp className="w-4 h-4" />
               </button>
               <button
                 onClick={() => {
                   router.push("leaderboard");
                 }}
-                className="hidden sm:flex sm:items-center text-white text-opacity-50 hover:text-opacity-100 border-2 border-[rgba(255,255,255,0.05)] hover:border-white/75 transition-all font-medium rounded-md text-sm px-5 py-2"
+                className="hidden sm:flex sm:items-center text-white text-opacity-50 hover:text-opacity-100 border-2 border-[rgba(255,255,255,0.05)] hover:bg-[#D9D9D933] focus:bg-[#7839C5] transition-all font-medium rounded-full text-sm p-2"
               >
-                <Image
-                  src="/assets/cup.png"
-                  alt="leaderboard icon"
-                  width={17}
-                  height={17}
-                  className="mr-1"
-                />
-                {translator("Leaderboard", language)}
+                <FaTrophy className="w-4 h-4" />
               </button>
               <button
                 onClick={() => {
                   router.push("stake");
                 }}
-                className="hidden sm:flex sm:items-center text-white text-opacity-50 hover:text-opacity-100 border-2 border-[rgba(255,255,255,0.05)] hover:border-white/75 transition-all font-medium rounded-md text-sm px-5 py-2"
+                className="hidden sm:flex sm:items-center text-white text-opacity-50 hover:text-opacity-100 border-2 border-[rgba(255,255,255,0.05)] hover:bg-[#D9D9D933] focus:bg-[#7839C5] transition-all font-medium rounded-full text-sm p-2"
               >
-                <Image
-                  src="/assets/bolt.png"
-                  alt="staking icon"
-                  width={17}
-                  height={17}
-                  className="mr-1"
-                />
-                {translator("Staking", language)}
+                <BsFillLightningFill className="w-4 h-4" />
               </button>
               <ConnectWallet />
             </div>
@@ -203,8 +185,8 @@ export function Header({
       </div>
       <div
         className={`${
-          sidebar ? "fixed z-20 top-[112px]" : ""
-        } md:hidden text-white bg-[#121418] border-y border-white/10 py-2 w-full`}
+          sidebar ? "z-20 " : ""
+        } md:hidden text-white bg-[#121418] border-b border-white/10 py-2 w-full`}
       >
         <ul className="flex flex-1">
           <button
@@ -339,6 +321,6 @@ export function Header({
           </Link>
         </ul>
       </div>
-    </>
+    </div>
   );
 }

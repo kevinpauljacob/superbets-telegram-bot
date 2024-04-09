@@ -6,7 +6,7 @@ import { useEffect, useRef, useState } from "react";
 import { GameType } from "@/utils/vrf";
 
 export default function SubHeader() {
-  const { coinData } = useGlobalContext();
+  const { coinData, showWalletModal, setShowWalletModal } = useGlobalContext();
 
   type Card = {
     game: GameType;
@@ -69,7 +69,7 @@ export default function SubHeader() {
 
   return (
     <div className="flex flex-col w-full">
-      <div className="w-full text-white h-[70px] flex items-center border-y border-[#1E2220] px-4 lg:pl-4 lg:pr-4 bg-[#121418]">
+      <div className="w-full text-white h-[70px] flex items-center border-b border-[#1E2220] px-4 lg:pl-4 lg:pr-4 bg-[#121418]">
         <div className="flex w-full items-center overflow-x-auto no-scrollbar">
           <div ref={endOfListRef} />
           {cards.map((card, index) => (
@@ -118,15 +118,17 @@ export default function SubHeader() {
                 {(coinData ? coinData[0].amount : 0).toFixed(4)}
               </span>
             </div>
-            <Link
-              href={"/balance"}
-              className="flex items-center px-4 py-2 gap-2 bg-[#9945FF] cursor-pointer rounded-[5px]"
+            <div
+              onClick={() => {
+                setShowWalletModal(true);
+              }}
+              className="flex items-center px-4 py-2 gap-2 bg-[#7839C5] hover:bg-[#9361d1] focus:bg-[#602E9E] transition-all cursor-pointer rounded-[5px]"
             >
               <Image src={"/assets/wallet.png"} alt="" width={20} height={20} />
               <span className="text-sm font-semibold text-white text-opacity-90">
                 Wallet
               </span>
-            </Link>
+            </div>
           </div>
         </div>
       </div>
@@ -139,13 +141,15 @@ export default function SubHeader() {
               {(coinData ? coinData[0].amount : 0).toFixed(4)}
             </span>
           </div>
-          <Link
-            href={"/balance"}
-            className="flex items-center px-2 py-1.5 gap-2 bg-[#9945FF] cursor-pointer rounded-[5px]"
+          <div
+            onClick={() => {
+              setShowWalletModal(true);
+            }}
+            className="flex items-center px-2 py-1.5 gap-2 bg-[#7839C5] hover:bg-[#9361d1] focus:bg-[#602E9E] transition-all cursor-pointer rounded-[5px]"
           >
             <Image src={"/assets/wallet.png"} alt="" width={13} height={11} />
             <span className="text-xs text-white text-opacity-90">Wallet</span>
-          </Link>
+          </div>
         </div>
       </div>
     </div>
