@@ -2,7 +2,7 @@ import { useWallet } from "@solana/wallet-adapter-react";
 import { useState, useEffect } from "react";
 import toast from "react-hot-toast";
 import { obfuscatePubKey } from "@/context/transactions";
-import { seedStatus } from "@/utils/vrf";
+import { GameType, seedStatus } from "@/utils/vrf";
 import VerifyFlipModal from "./VerifyFlipModal";
 
 export interface Flip {
@@ -52,8 +52,10 @@ export default function StatsHistory({ refresh }: { refresh: boolean }) {
 
   useEffect(() => {
     const route = all
-      ? "/api/games/coin/getGlobalHistory"
-      : `/api/games/coin/getUserHistory?wallet=${wallet.publicKey?.toBase58()}`;
+      ? `/api/games/global/getHistory?game=${GameType.coin}`
+      : `/api/games/global/getUserHistory?game=${
+          GameType.coin
+        }&wallet=${wallet.publicKey?.toBase58()}`;
 
     fetch(`${route}`)
       .then((res) => res.json())

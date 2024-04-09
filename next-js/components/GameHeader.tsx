@@ -59,7 +59,7 @@ export default function GameHeader() {
 
   useEffect(() => {
     const fetchGameData = (game: GameType) => {
-      fetch(`/api/games/getStats?game=${game}`)
+      fetch(`/api/games/global/getStats?game=${game}`)
         .then((res) => res.json())
         .then((data) => {
           if (data.success)

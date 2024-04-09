@@ -2,6 +2,7 @@ import { useWallet } from "@solana/wallet-adapter-react";
 import { useState, useEffect } from "react";
 import toast from "react-hot-toast";
 import { obfuscatePubKey } from "@/context/transactions";
+import { GameType } from "@/utils/vrf";
 interface Bet {
   wallet: string;
   betTime?: string;
@@ -44,8 +45,10 @@ export default function Bets({ refresh }: { refresh: boolean }) {
   useEffect(() => {
     if (refresh) {
       const route = all
-        ? "/api/games/options/getGlobalHistory"
-        : `/api/games/options/getUserHistory?wallet=${wallet.publicKey?.toBase58()}`;
+        ? `/api/games/global/getHistory?game=${GameType.options}`
+        : `/api/games/global/getUserHistory?game=${
+            GameType.options
+          }&wallet=${wallet.publicKey?.toBase58()}`;
 
       fetch(`${route}`)
         .then((res) => res.json())

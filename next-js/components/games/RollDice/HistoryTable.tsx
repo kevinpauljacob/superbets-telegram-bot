@@ -61,8 +61,10 @@ export default function HistoryTable({ refresh }: { refresh: boolean }) {
 
   useEffect(() => {
     const route = all
-      ? "/api/games/dice/getGlobalHistory"
-      : `/api/games/dice/getUserHistory?wallet=${wallet.publicKey?.toBase58()}`;
+      ? `/api/games/global/getHistory?game=${GameType.dice}`
+      : `/api/games/global/getUserHistory?game=${
+          GameType.dice
+        }&wallet=${wallet.publicKey?.toBase58()}`;
 
     fetch(`${route}`)
       .then((res) => res.json())
