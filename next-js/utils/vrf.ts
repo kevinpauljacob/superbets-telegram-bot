@@ -60,6 +60,7 @@ export const generateGameResult = (
       const temp = (parseInt(hash.slice(0, 4), 16) % 100) + 1;
       return temp % 2 === 0 ? 1 : 2;
     case GameType.dice2:
+      return ((parseInt(hash.slice(0, 4), 16) % 10000) + 1) / 100;
     case GameType.wheel:
     case GameType.limbo:
       return (parseInt(hash.slice(0, 4), 16) % 100) + 1;
