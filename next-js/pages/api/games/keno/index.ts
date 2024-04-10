@@ -211,6 +211,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         risk,
         strikeNumber,
         tokenMint,
+        nonce,
         gameSeed: activeGameSeed._id,
       });
 
