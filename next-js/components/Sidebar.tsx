@@ -130,7 +130,7 @@ export default function Sidebar({ sidebar }: { sidebar: boolean }) {
     <div
       className={`${
         sidebar ? "left-0 relative" : "-left-[290px] absolute"
-      } z-50 transition-all hidden bg-[#121418] text-white md:flex flex-col justify-between px-3.5 pb-3.5 min-w-[230px] w-[290px] h-[calc(100vh-100px)]`}
+      } z-50 transition-all hidden bg-[#121418] text-white md:flex flex-col justify-between px-3.5 pb-3.5 min-w-[230px] w-[290px] h-[calc(100vh-6.25rem)]`}
     >
       <div>
         <div

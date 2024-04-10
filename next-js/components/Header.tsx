@@ -77,7 +77,12 @@ export function Header({
           <div className="flex ml-2 mr-2 sm:items-center items-end sm:flex-row">
             <div className="flex gap-8 mr-6 items-end">
               {/* Language selector */}
-              <button className="relative hidden md:flex items-center">
+              <button
+                onClick={() => {
+                  setLangSelect(!langSelect);
+                }}
+                className="relative hidden md:flex items-center hover:bg-[#0000009f] transition-all p-1.5 rounded-md"
+              >
                 <MdOutlineLanguage className="w-5 h-5 mr-3 text-white text-opacity-50" />
                 <span className="text-white text-sm mr-5 text-start text-opacity-50">
                   {language === "en"
@@ -90,12 +95,7 @@ export function Header({
                     ? "中国人"
                     : ""}
                 </span>
-                <FaChevronDown
-                  onClick={() => {
-                    setLangSelect(!langSelect);
-                  }}
-                  className="w-3 h-3 text-white"
-                />
+                <FaChevronDown className="w-3 h-3 text-white" />
                 {langSelect && (
                   <div className="w-full transition-all absolute top-full mt-2 rounded px-1 py-2 gap-0.5 z-50 flex flex-col bg-black">
                     <span
@@ -158,7 +158,7 @@ export function Header({
                 onClick={() => {
                   router.push("store");
                 }}
-                className="hidden sm:flex items-center text-white text-opacity-50 hover:text-opacity-100 rounded-full border-2 border-[rgba(255,255,255,0.05)] hover:bg-[#D9D9D933] focus:bg-[#7839C5] transition-all font-medium text-sm p-2"
+                className={`hidden sm:flex items-center text-white text-opacity-50 hover:text-opacity-90 focus:text-opacity-90 rounded-full border-2 border-[rgba(255,255,255,0.05)] focus:bg-[#D9D9D933] focus:bg-[#7839C5] transition-all font-medium text-sm p-2`}
               >
                 <IoCartSharp className="w-4 h-4" />
               </button>
@@ -166,7 +166,7 @@ export function Header({
                 onClick={() => {
                   router.push("leaderboard");
                 }}
-                className="hidden sm:flex sm:items-center text-white text-opacity-50 hover:text-opacity-100 border-2 border-[rgba(255,255,255,0.05)] hover:bg-[#D9D9D933] focus:bg-[#7839C5] transition-all font-medium rounded-full text-sm p-2"
+                className={`hidden sm:flex items-center text-white text-opacity-50 hover:text-opacity-90 focus:text-opacity-90 rounded-full border-2 border-[rgba(255,255,255,0.05)] focus:bg-[#D9D9D933] focus:bg-[#7839C5] transition-all font-medium text-sm p-2`}
               >
                 <FaTrophy className="w-4 h-4" />
               </button>
@@ -174,7 +174,7 @@ export function Header({
                 onClick={() => {
                   router.push("stake");
                 }}
-                className="hidden sm:flex sm:items-center text-white text-opacity-50 hover:text-opacity-100 border-2 border-[rgba(255,255,255,0.05)] hover:bg-[#D9D9D933] focus:bg-[#7839C5] transition-all font-medium rounded-full text-sm p-2"
+                className={`hidden sm:flex items-center text-white text-opacity-50 hover:text-opacity-90 focus:text-opacity-90 rounded-full border-2 border-[rgba(255,255,255,0.05)] focus:bg-[#D9D9D933] focus:bg-[#7839C5] transition-all font-medium text-sm p-2`}
               >
                 <BsFillLightningFill className="w-4 h-4" />
               </button>

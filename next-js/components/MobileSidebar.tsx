@@ -30,7 +30,7 @@ export default function Sidebar({ mobileSidebar }: { mobileSidebar: boolean }) {
 
   return (
     <div
-      className={`${mobileSidebar ? "fadeIn fixed" : "fadeOutDown hidden"} top-[12rem] z-20 md:hidden bg-[#121418] no-scrollbar overflow-y-auto text-white flex flex-col justify-between px-4 sm:px-8 py-3.5 w-full h-[calc(100vh-195px)]`}
+      className={`${mobileSidebar ? "fadeIn fixed" : "fadeOutDown hidden"} top-[12rem] z-20 md:hidden bg-[#121418] no-scrollbar overflow-y-auto text-white flex flex-col justify-between px-4 sm:px-8 py-3.5 w-full h-[calc(100vh-12rem)]`}
     >
       <div>
         <div className="fadeInUp flex flex-col rounded-md py-3.5 px-3 sm:px-6">

@@ -41,7 +41,7 @@ export default function Layout({ children }: LayoutProps) {
     <>
       <InfoBar />
       <Header sidebar={sidebar} toggleSidebar={toggleSidebar} />
-      <section className="relative flex flex-1">
+      <section className="relative flex flex-1 max-h-[calc(100vh-6.25rem)]">
         <Sidebar sidebar={sidebar} />
         <section className="w-full relative overflow-hidden">
           <MobileSidebar mobileSidebar={sidebar} />
@@ -50,13 +50,13 @@ export default function Layout({ children }: LayoutProps) {
             <div className="w-full hidden md:flex">
               <GameHeader />
             </div>
-            <main className="w-full h-full">
-              <section className="w-full h-full">{children}</section>
-              {coinData && showWalletModal && <BalanceModal />}
+            <main className="w-full h-full max-h-[calc(100vh-20rem)] md:max-h-[calc(100vh-11rem)]">
+              <section className="w-full h-full overflow-y-auto">{children}</section>
             </main>
           </section>
         </section>
       </section>
+      {coinData && showWalletModal && <BalanceModal />}
     </>
   );
 }

@@ -6,6 +6,7 @@ import { deposit, withdraw } from "../../context/gameTransactions";
 import Loader from "./Loader";
 import { useGlobalContext } from "../GlobalContext";
 import { IoClose } from "react-icons/io5";
+import Image from "next/image";
 
 export default function BalanceModal() {
   const methods = useForm();
@@ -65,15 +66,20 @@ export default function BalanceModal() {
         handleClose();
       }}
       id="modal-bg"
-      className="absolute left-0 top-0 flex h-full w-full items-start pt-[11rem] justify-center bg-black bg-opacity-50 backdrop-blur transition-all"
+      className="absolute z-[150] left-0 top-0 flex h-full w-full items-start pt-[11rem] justify-center bg-black bg-opacity-50 backdrop-blur transition-all"
     >
       <div
         id="modal-box"
         className="relative flex w-[95%] max-w-[25rem] flex-col rounded-md bg-[#121418] p-5"
       >
-        <span className="mb-4 text-2xl w-full text-center font-changa font-black text-[#F0F0F0] text-opacity-75">
-          {actionType}
-        </span>
+        <div
+          className="flex items-center w-full mb-4 gap-2"
+        >
+          <Image src={"/assets/wallet_color.png"} alt="" width={24} height={24} />
+          <span className=" text-[1.5rem] leading-5  mt-0.5 font-changa font-black text-[#e7e7e7]">
+            Wallet
+          </span>
+        </div>
 
         <IoClose
           onClick={() => {
