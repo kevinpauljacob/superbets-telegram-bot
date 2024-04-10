@@ -24,7 +24,7 @@ export default function Sidebar({ sidebar }: { sidebar: boolean }) {
   const [showExitTokens, setShowExitTokens] = useState<boolean>(false);
   const [showPlayTokens, setShowPlayTokens] = useState<boolean>(false);
 
-  const { userData } = useGlobalContext();
+  const { userData, getUserDetails } = useGlobalContext();
 
   const [exitGames, setExitGames] = useState<Game[]>([
     {
@@ -125,6 +125,10 @@ export default function Sidebar({ sidebar }: { sidebar: boolean }) {
     // Update showPlayTokens based on casino game links
     setShowPlayTokens(isGameActive(casinoGames));
   }, [router.pathname, exitGames, casinoGames]);
+
+  useEffect(() => {
+    if (!userData && wallet?.publicKey) getUserDetails();
+  }, [wallet.publicKey]);
 
   return (
     <div

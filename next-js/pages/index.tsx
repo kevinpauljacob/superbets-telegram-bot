@@ -27,7 +27,7 @@ const inter = Inter({ subsets: ["latin"] });
 
 export default function Home() {
   const wallet = useWallet();
-  const { getBalance, getUserDetails } = useGlobalContext();
+  const { getBalance } = useGlobalContext();
 
   const maintenance = false;
 
@@ -39,7 +39,6 @@ export default function Home() {
   useEffect(() => {
     if (wallet?.publicKey) {
       getBalance();
-      getUserDetails();
     }
   }, [wallet?.publicKey]);
 
