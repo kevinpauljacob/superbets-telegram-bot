@@ -16,8 +16,8 @@ const kenoSchema = new mongoose.Schema(
       required: true,
     },
     chosenNumbers: {
-        type: Array<number>,
-        required: true,
+      type: Array<number>,
+      required: true,
     },
     strikeNumber: {
       type: Number,
@@ -35,16 +35,13 @@ const kenoSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
-    clientSeed: {
-      type: String,
-      required: true,
-    },
-    serverSeed: {
-      type: String,
-      required: true,
-    },
     nonce: {
       type: Number,
+      required: true,
+    },
+    gameSeed: {
+      type: mongoose.Schema.ObjectId,
+      ref: "GameSeed",
       required: true,
     },
   },
