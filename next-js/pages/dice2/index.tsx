@@ -22,15 +22,14 @@ export default function Dice2() {
   const { coinData, getBalance, getWalletBalance } = useGlobalContext();
   const [betAmt, setBetAmt] = useState(0);
   const [isRolling, setIsRolling] = useState(false);
-  const [winningPays, setWinningPays] = useState(0);
-  const [winningAmount, setWinningAmount] = useState(0);
-  const [winningProbability, setWinningProbability] = useState(0);
+  const [multiplier, setMultiplier] = useState(0);
+  const [chance, setChance] = useState(0);
   const [refresh, setRefresh] = useState(true);
   const [betType, setBetType] = useState<"manual" | "auto">("manual");
   const [rollType, setRollType] = useState<"over" | "under">("over");
   const [strikeNumber, setStrikeNumber] = useState<number>(0);
   const [result, setResult] = useState<boolean>(false);
-  const [chance, setChance] = useState<number>(50);
+  const [choice, setChoice] = useState<number>(50);
   const [betResults, setBetResults] = useState<
     { result: number; isWin: boolean }[]
   >([
@@ -63,7 +62,6 @@ export default function Dice2() {
         return;
       }
       setIsRolling(true);
-      await new Promise((r) => setTimeout(r, 5000));
       try {
         const response = await fetch(`/api/games/dice2`, {
           method: "POST",
@@ -84,61 +82,56 @@ export default function Dice2() {
 
         if (success !== true) {
           toast.error(message);
-          setIsRolling(false);
           throw new Error(message);
         }
 
         if (result === "Won") toast.success(message, { duration: 2000 });
         else toast.error(message, { duration: 2000 });
+
         const isWin = result === "Won";
-        const newBetResults = [...betResults, { result: strikeNumber, isWin }];
-        setBetResults(newBetResults);
+        const newBetResult = { result: strikeNumber, isWin };
+
+        setBetResults((prevResults) => {
+          const newResults = [...prevResults, newBetResult];
+          if (newResults.length > 5) {
+            newResults.shift();
+          }
+          return newResults;
+        });
+
         setStrikeNumber(strikeNumber);
         setResult(isWin);
         setRefresh(true);
       } catch (error) {
+        console.error("Error occurred while betting:", error);
+      } finally {
         setIsRolling(false);
-        console.error("Error occurred while rolling the dice:", error);
       }
-      setIsRolling(false);
     }
   };
 
   useEffect(() => {
-    // Calculate winningPays based on chance
-    const calculateWinningPays = () => {
-      const minMultiplier = 1.0102;
-      const maxMultiplier = 49.5;
-
-      // Calculate the choice range
-      const minChoice = 2;
-      const maxChoice = 98;
-
-      // Calculate the multiplier for the given choice
-      let multiplier =
-        minMultiplier +
-        ((maxMultiplier - minMultiplier) / (maxChoice - minChoice)) *
-          (chance - minChoice);
-
-      // Round the multiplier to 4 decimal places
-      multiplier = Math.round(multiplier * 10000) / 10000;
-      setWinningPays(multiplier);
-      console.log("winningPays", multiplier);
+    const calculateMultiplier = () => {
+      if (rollType === "over") {
+        const calculatedMultiplier = 98 / (100 - choice);
+        setMultiplier(calculatedMultiplier);
+      } else if (rollType === "under") {
+        const calculatedMultiplier = 98 / choice;
+        setMultiplier(calculatedMultiplier);
+      }
     };
 
-    const calculateWinningAmount = () => {
-      setWinningAmount(chance);
+    const calculateChance = () => {
+      if (rollType === "over") {
+        setChance(100 - choice);
+      } else if (rollType === "under") {
+        setChance(choice);
+      }
     };
 
-    const calculateWinningProbability = () => {
-      const winningProbability = 100 - chance;
-      setWinningProbability(winningProbability);
-    };
-
-    calculateWinningPays();
-    calculateWinningAmount();
-    calculateWinningProbability();
-  }, [chance]);
+    calculateMultiplier();
+    calculateChance();
+  }, [choice, rollType]);
 
   useEffect(() => {
     if (refresh && wallet?.publicKey) {
@@ -225,7 +218,7 @@ export default function Dice2() {
               {isRolling ? (
                 <div>
                   <span className="font-changa text-[1.75rem] font-semibold text-white text-opacity-80">
-                    ROLLING...
+                    BETTING...
                   </span>
                 </div>
               ) : (
@@ -244,7 +237,7 @@ export default function Dice2() {
           <div>
             {isRolling ? (
               <div className="font-chakra text-sm font-medium text-white text-opacity-75">
-                Rolling the dice...
+                Betting ...
               </div>
             ) : null}
           </div>
@@ -263,8 +256,8 @@ export default function Dice2() {
         </div>
         <div className="w-full">
           <DraggableBar
-            chance={chance}
-            setChance={setChance}
+            choice={choice}
+            setChoice={setChoice}
             strikeNumber={strikeNumber}
             result={result}
             rollType={rollType}
@@ -278,7 +271,7 @@ export default function Dice2() {
                   Multiplier
                 </span>
                 <span className="bg-[#202329] text-xs text-white rounded-md px-1.5 md:px-5 py-2">
-                  {winningPays.toFixed(1)}x
+                  {multiplier.toFixed(4)}x
                 </span>
               </div>
 
@@ -298,7 +291,7 @@ export default function Dice2() {
                   </span>
                 )}
                 <span className="flex justify-between items-center bg-[#202329] text-xs text-white rounded-md px-1.5 md:px-5 py-2">
-                  {winningAmount.toFixed(2)}
+                  {choice.toFixed(0)}.00
                   <Image
                     src="/assets/sync.svg"
                     alt="roll type"
@@ -308,13 +301,13 @@ export default function Dice2() {
                 </span>
               </div>
 
-              {chance && (
+              {choice && (
                 <div className="flex flex-col w-full">
                   <span className="text-[#F0F0F0] font-changa text-opacity-75 text-xs mb-1">
                     Chance
                   </span>
                   <span className="bg-[#202329] text-xs text-white rounded-md px-1.5 md:px-5 py-2">
-                    {winningProbability.toFixed(2)}%
+                    {chance.toFixed(2)}%
                   </span>
                 </div>
               )}
