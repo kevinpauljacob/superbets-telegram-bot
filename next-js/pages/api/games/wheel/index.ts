@@ -173,37 +173,41 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         strikeNumber,
         result,
         tokenMint,
+        amountWon,
+        amountLost,
         nonce,
         gameSeed: activeGameSeed._id,
       });
 
-      const userData = await StakingUser.findOne({ wallet });
-      let points = userData?.points ?? 0;
-      const userTier = Object.entries(pointTiers).reduce((prev, next) => {
-        return points >= next[1]?.limit ? next : prev;
-      })[0];
+      if (result === "Won") {
+        const userData = await StakingUser.findOne({ wallet });
+        let points = userData?.points ?? 0;
+        const userTier = Object.entries(pointTiers).reduce((prev, next) => {
+          return points >= next[1]?.limit ? next : prev;
+        })[0];
 
-      const socket = new WebSocket(wsEndpoint);
+        const socket = new WebSocket(wsEndpoint);
 
-      socket.onopen = () => {
-        console.log("WebSocket connection opened");
-        socket.send(
-          JSON.stringify({
-            clientType: "api-client",
-            channel: "fomo-casino_games-channel",
-            authKey: process.env.FOMO_CHANNEL_AUTH_KEY!,
-            payload: {
-              game: GameType.wheel,
-              wallet,
-              absAmount: Math.abs(amountWon - amountLost),
-              result,
-              userTier,
-            },
-          }),
-        );
+        socket.onopen = () => {
+          console.log("WebSocket connection opened");
+          socket.send(
+            JSON.stringify({
+              clientType: "api-client",
+              channel: "fomo-casino_games-channel",
+              authKey: process.env.FOMO_CHANNEL_AUTH_KEY!,
+              payload: {
+                game: GameType.wheel,
+                wallet,
+                absAmount: Math.abs(amountWon - amountLost),
+                result,
+                userTier,
+              },
+            }),
+          );
 
-        socket.close();
-      };
+          socket.close();
+        };
+      }
 
       return res.status(201).json({
         success: true,

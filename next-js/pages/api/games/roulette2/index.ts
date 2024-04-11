@@ -33,7 +33,7 @@ const WagerMapping: Record<WagerType, Array<number> | Record<string, number>> =
   {
     red: [1, 3, 5, 7, 12, 14, 16, 18, 19, 21, 23, 25, 27, 30, 32, 34, 36],
     black: [2, 4, 6, 8, 10, 11, 13, 15, 17, 20, 22, 24, 26, 28, 29, 31, 33, 35],
-    green: [-1,0],
+    green: [-1, 0],
     odd: [1, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23, 25, 27, 29, 31, 33, 35],
     even: [2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 34, 36],
     low: [...Array(18).keys()].map((x) => x + 1),
@@ -187,7 +187,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
       Object.entries(wager).forEach(([key, value]) => {
         if (key === "straight") {
-          if ((value as Record<string, number>)[strikeNumber.toString()] != null) {
+          if (
+            (value as Record<string, number>)[strikeNumber.toString()] != null
+          ) {
             amountWon += amount * WagerPayout[key];
             result = "Won";
           }
@@ -252,33 +254,35 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         gameSeed: activeGameSeed._id,
       });
 
-      const userData = await StakingUser.findOne({ wallet });
-      let points = userData?.points ?? 0;
-      const userTier = Object.entries(pointTiers).reduce((prev, next) => {
-        return points >= next[1]?.limit ? next : prev;
-      })[0];
+      if (result === "Won") {
+        const userData = await StakingUser.findOne({ wallet });
+        let points = userData?.points ?? 0;
+        const userTier = Object.entries(pointTiers).reduce((prev, next) => {
+          return points >= next[1]?.limit ? next : prev;
+        })[0];
 
-      const socket = new WebSocket(wsEndpoint);
+        const socket = new WebSocket(wsEndpoint);
 
-      socket.onopen = () => {
-        console.log("WebSocket connection opened");
-        socket.send(
-          JSON.stringify({
-            clientType: "api-client",
-            channel: "fomo-casino_games-channel",
-            authKey: process.env.FOMO_CHANNEL_AUTH_KEY!,
-            payload: {
-              game: GameType.roulette2,
-              wallet,
-              absAmount: Math.abs(amountWon - amountLost),
-              result,
-              userTier,
-            },
-          }),
-        );
+        socket.onopen = () => {
+          console.log("WebSocket connection opened");
+          socket.send(
+            JSON.stringify({
+              clientType: "api-client",
+              channel: "fomo-casino_games-channel",
+              authKey: process.env.FOMO_CHANNEL_AUTH_KEY!,
+              payload: {
+                game: GameType.roulette2,
+                wallet,
+                absAmount: Math.abs(amountWon - amountLost),
+                result,
+                userTier,
+              },
+            }),
+          );
 
-        socket.close();
-      };
+          socket.close();
+        };
+      }
 
       return res.status(201).json({
         success: true,

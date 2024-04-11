@@ -187,34 +187,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         throw new Error("Insufficient balance for action!!");
       }
 
-      const userData = await StakingUser.findOne({ wallet });
-      let points = userData?.points ?? 0;
-      const userTier = Object.entries(pointTiers).reduce((prev, next) => {
-        return points >= next[1]?.limit ? next : prev;
-      })[0];
-
-      const socket = new WebSocket(wsEndpoint);
-
-      socket.onopen = () => {
-        console.log("WebSocket connection opened");
-        socket.send(
-          JSON.stringify({
-            clientType: "api-client",
-            channel: "fomo-casino_games-channel",
-            authKey: process.env.FOMO_CHANNEL_AUTH_KEY!,
-            payload: {
-              game: GameType.plinko,
-              wallet,
-              absAmount: Math.abs(amountWon - amountLost),
-              result: amountWon > amountLost ? "Won" : "Lost",
-              userTier,
-            },
-          }),
-        );
-
-        socket.close();
-      };
-
+      const result = amountWon > amount ? "Won" : "Lost";
       await Plinko.create({
         wallet,
         amount,
@@ -222,9 +195,42 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         risk,
         strikeNumber,
         tokenMint,
+        result,
+        amountWon,
+        amountLost,
         nonce,
         GameSeedId: activeGameSeed._id,
       });
+
+      if (result === "Won") {
+        const userData = await StakingUser.findOne({ wallet });
+        let points = userData?.points ?? 0;
+        const userTier = Object.entries(pointTiers).reduce((prev, next) => {
+          return points >= next[1]?.limit ? next : prev;
+        })[0];
+
+        const socket = new WebSocket(wsEndpoint);
+
+        socket.onopen = () => {
+          console.log("WebSocket connection opened");
+          socket.send(
+            JSON.stringify({
+              clientType: "api-client",
+              channel: "fomo-casino_games-channel",
+              authKey: process.env.FOMO_CHANNEL_AUTH_KEY!,
+              payload: {
+                game: GameType.plinko,
+                wallet,
+                absAmount: Math.abs(amountWon - amountLost),
+                result: amountWon > amountLost ? "Won" : "Lost",
+                userTier,
+              },
+            }),
+          );
+
+          socket.close();
+        };
+      }
 
       return res.status(201).json({
         success: true,

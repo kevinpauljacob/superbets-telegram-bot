@@ -21,30 +21,28 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     try {
       await connectDatabase();
 
-      const dice = (await Dice.find({}).sort({ createdAt: -1 }).limit(10)).map(
-        (record) => ({
-          game: GameType.dice,
-          wallet: record.wallet,
-          absAmount: Math.abs(record.amountWon - record.amountLost),
-          result: record.result,
-          createdAt: record.createdAt,
-        }),
-      );
+      const dice = (
+        await Dice.find({ result: "Won" }).sort({ createdAt: -1 }).limit(10)
+      ).map((record) => ({
+        game: GameType.dice,
+        wallet: record.wallet,
+        absAmount: Math.abs(record.amountWon - record.amountLost),
+        result: record.result,
+        createdAt: record.createdAt,
+      }));
 
-      const coin = (await Coin.find({}).sort({ createdAt: -1 }).limit(10)).map(
-        (record) => ({
-          game: GameType.coin,
-          wallet: record.wallet,
-          absAmount: Math.abs(record.amountWon - record.amountLost),
-          result: record.result,
-          createdAt: record.createdAt,
-        }),
-      );
+      const coin = (
+        await Coin.find({ result: "Won" }).sort({ createdAt: -1 }).limit(10)
+      ).map((record) => ({
+        game: GameType.coin,
+        wallet: record.wallet,
+        absAmount: Math.abs(record.amountWon - record.amountLost),
+        result: record.result,
+        createdAt: record.createdAt,
+      }));
 
       const option = (
-        await Option.find({ result: { $ne: "Pending" } })
-          .sort({ createdAt: -1 })
-          .limit(10)
+        await Option.find({ result: "Won" }).sort({ createdAt: -1 }).limit(10)
       ).map((record) => ({
         game: GameType.options,
         wallet: record.wallet,
@@ -54,72 +52,76 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       }));
 
       const dice2 = (
-        await Dice2.find({}).sort({ createdAt: -1 }).limit(10)
+        await Dice2.find({ result: "Won" }).sort({ createdAt: -1 }).limit(10)
       ).map((record) => ({
         game: GameType.dice2,
         wallet: record.wallet,
         absAmount: Math.abs(record.amountWon - record.amountLost),
-        result: record.amountWon > record.amount ? "Won" : "Lost",
+        result: record.result,
         createdAt: record.createdAt,
       }));
 
-      const keno = (await Keno.find({}).sort({ createdAt: -1 }).limit(10)).map(
-        (record) => ({
-          game: GameType.keno,
-          wallet: record.wallet,
-          absAmount: Math.abs(record.amountWon - record.amountLost),
-          result: record.amountWon > record.amount ? "Won" : "Lost",
-          createdAt: record.createdAt,
-        }),
-      );
+      const keno = (
+        await Keno.find({ result: "Won" }).sort({ createdAt: -1 }).limit(10)
+      ).map((record) => ({
+        game: GameType.keno,
+        wallet: record.wallet,
+        absAmount: Math.abs(record.amountWon - record.amountLost),
+        result: record.result,
+        createdAt: record.createdAt,
+      }));
 
       const limbo = (
-        await Limbo.find({}).sort({ createdAt: -1 }).limit(10)
+        await Limbo.find({ result: "Won" }).sort({ createdAt: -1 }).limit(10)
       ).map((record) => ({
         game: GameType.limbo,
         wallet: record.wallet,
         absAmount: Math.abs(record.amountWon - record.amountLost),
-        result: record.amountWon > record.amount ? "Won" : "Lost",
+        result: record.result,
         createdAt: record.createdAt,
       }));
 
       const plinko = (
-        await Plinko.find({}).sort({ createdAt: -1 }).limit(10)
+        await Plinko.find({ result: "Won" }).sort({ createdAt: -1 }).limit(10)
       ).map((record) => ({
         game: GameType.plinko,
         wallet: record.wallet,
         absAmount: Math.abs(record.amountWon - record.amountLost),
-        result: record.amountWon > record.amount ? "Won" : "Lost",
+        result: record.result,
         createdAt: record.createdAt,
       }));
 
       const roulette1 = (
-        await Roulette1.find({}).sort({ createdAt: -1 }).limit(10)
+        await Roulette1.find({ result: "Won" })
+          .sort({ createdAt: -1 })
+          .limit(10)
       ).map((record) => ({
         game: GameType.roulette1,
         wallet: record.wallet,
         absAmount: Math.abs(record.amountWon - record.amountLost),
-        result: record.amountWon > record.amount ? "Won" : "Lost",
+        result: record.result,
         createdAt: record.createdAt,
       }));
 
       const roulette2 = (
-        await Roulette2.find({}).sort({ createdAt: -1 }).limit(10)
+        await Roulette2.find({ result: "Won" })
+          .sort({ createdAt: -1 })
+          .limit(10)
       ).map((record) => ({
         game: GameType.roulette2,
         wallet: record.wallet,
         absAmount: Math.abs(record.amountWon - record.amountLost),
-        result: record.amountWon > record.amount ? "Won" : "Lost",
+        result: record.result,
         createdAt: record.createdAt,
       }));
 
       const wheel = (
-        await Wheel.find({}).sort({ createdAt: -1 }).limit(10)
+        await Wheel.find({ result: "Won" }).sort({ createdAt: -1 }).limit(10)
       ).map((record) => ({
         game: GameType.wheel,
         wallet: record.wallet,
         absAmount: Math.abs(Math.abs(record.amountWon - record.amountLost)),
-        result: record.amountWon > record.amount ? "Won" : "Lost",
+        result: record.result,
         createdAt: record.createdAt,
       }));
 
