@@ -1,6 +1,32 @@
 import React, { useState, useEffect, useRef, RefObject } from "react";
 
-const ProgressBar = ({ chance, setChance, strikeNumber, result, rollType }) => {
+type ProgressBarProps = {
+  choice: number;
+  setChoice: (choice: number) => void;
+  strikeNumber: number;
+  result: boolean;
+  rollType: "over" | "under";
+};
+
+type ProgressBarStyles = {
+  progressBar: React.CSSProperties;
+  rangeInput: React.CSSProperties;
+  fill: React.CSSProperties;
+  cursor: React.CSSProperties;
+};
+
+type IndicatorStyles = {
+  container: React.CSSProperties;
+  svg: React.CSSProperties;
+};
+
+const ProgressBar: React.FC<ProgressBarProps> = ({
+  choice,
+  setChoice,
+  strikeNumber,
+  result,
+  rollType,
+}) => {
   const [isDragging, setIsDragging] = useState(false);
 
   const progressBarRef: RefObject<HTMLDivElement> =
@@ -28,7 +54,7 @@ const ProgressBar = ({ chance, setChance, strikeNumber, result, rollType }) => {
         window.removeEventListener("resize", () => {});
       }
     };
-  }, [chance]);
+  }, [choice]);
 
   const alignIndicators = () => {
     if (indicatorsRef.current) {
@@ -44,10 +70,10 @@ const ProgressBar = ({ chance, setChance, strikeNumber, result, rollType }) => {
     }
   };
 
-  const handleChange = (e) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     let newValue = parseFloat(e.target.value);
     newValue = Math.max(2, Math.min(newValue, 98));
-    setChance(newValue);
+    setChoice(newValue);
   };
 
   const handleDragStart = () => {
@@ -58,24 +84,24 @@ const ProgressBar = ({ chance, setChance, strikeNumber, result, rollType }) => {
     setIsDragging(false);
   };
 
-  const handleDrag = (e) => {
+  const handleDrag = (e: any) => {
     if (isDragging) {
       const rect = e.target.getBoundingClientRect();
       const offsetX = e.clientX - rect.left;
-      let newChance = (offsetX / rect.width) * 100;
+      let newChoice = (offsetX / rect.width) * 100;
 
-      if (newChance < 2) {
-        newChance = 2;
-      } else if (newChance > 98) {
-        newChance = 98;
+      if (newChoice < 2) {
+        newChoice = 2;
+      } else if (newChoice > 98) {
+        newChoice = 98;
       }
-      setChance(newChance);
+      setChoice(newChoice);
     }
   };
 
   const indicators = [0, 25, 50, 75, 100];
 
-  const progressBarStyles = {
+  const progressBarStyles: ProgressBarStyles = {
     progressBar: {
       position: "relative",
       width: "100%",
@@ -91,7 +117,7 @@ const ProgressBar = ({ chance, setChance, strikeNumber, result, rollType }) => {
     },
     fill: {
       height: "10px",
-      width: chance <= 2 ? `2%` : `${chance}%`,
+      width: choice <= 2 ? `2%` : `${choice}%`,
       background: rollType === "over" ? "#F1323E" : "#72F238",
     },
     cursor: {
@@ -103,16 +129,16 @@ const ProgressBar = ({ chance, setChance, strikeNumber, result, rollType }) => {
       height: "26px",
       borderRadius: "7px",
       left:
-        chance <= 2
+        choice <= 2
           ? `8.5px`
-          : chance >= 98
-          ? `calc(${chance}% - 17px)`
-          : `calc(${chance}% - 8.5px)`,
+          : choice >= 98
+          ? `calc(${choice}% - 8.5px)`
+          : `calc(${choice}% - 8.5px)`,
       cursor: "pointer",
     },
   };
 
-  const indicatorStyles = {
+  const indicatorStyles: IndicatorStyles = {
     container: {
       display: "flex",
       justifyContent: "space-between",
@@ -144,7 +170,7 @@ const ProgressBar = ({ chance, setChance, strikeNumber, result, rollType }) => {
               min="0"
               max="100"
               step="10"
-              value={chance}
+              value={choice}
               onChange={handleChange}
               onMouseMove={handleDrag}
               onTouchMove={handleDrag}
@@ -164,8 +190,8 @@ const ProgressBar = ({ chance, setChance, strikeNumber, result, rollType }) => {
               onMouseUp={handleDragEnd} // Stop dragging when mouse button is released
             ></div>
             <div
-              className="absolute -top-16 -translate-x-1/2 -translate-y-1/2"
-              style={{ left: `${strikeNumber}%` }}
+              className="absolute -top-16 -translate-x-1/2 -translate-y-1/2 transition-all duration-300"
+              style={{ marginLeft: `${strikeNumber}%` }}
             >
               {strikeNumber !== 0 && (
                 <div
@@ -200,11 +226,7 @@ const ProgressBar = ({ chance, setChance, strikeNumber, result, rollType }) => {
       </div>
       <div ref={indicatorsRef} style={indicatorStyles.container}>
         {indicators.map((indicator) => (
-          <div
-            key={indicator}
-            style={indicatorStyles.indicator}
-            className="relative"
-          >
+          <div key={indicator} className="relative">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               viewBox="0 0 11 10"
