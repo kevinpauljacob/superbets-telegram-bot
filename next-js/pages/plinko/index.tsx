@@ -61,6 +61,7 @@ type MultiplierValues =
   | 2.1
   | 2
   | 1.6
+  | 1.4
   | 1.5
   | 1.1
   | 1
@@ -83,6 +84,7 @@ const multiplierSounds = {
   2.1: "/sounds/multiplier-regular.wav",
   2: "/sounds/multiplier-regular.wav",
   1.6: "/sounds/multiplier-regular.wav",
+  1.4: "/sounds/multiplier-regular.wav",
   1.5: "/sounds/multiplier-regular.wav",
   1.1: "/sounds/multiplier-regular.wav",
   1: "/sounds/multiplier-regular.wav",
@@ -117,6 +119,11 @@ const multipliers = {
     sound: "/sounds/multiplier-best.wav",
     img: "/assets/multipliers/multiplier110.png",
   },
+  8.9: {
+    label: "block-8.9",
+    sound: "/sounds/multiplier-best.wav",
+    img: "/assets/multipliers/multiplier8_9.png",
+  },
   18: {
     label: "block-18",
     sound: "/sounds/multiplier-good.wav",
@@ -145,7 +152,7 @@ const multipliers = {
   3: {
     label: "block-3",
     sound: "/sounds/multiplier-regular.wav",
-    img: "/assets/multipliers/multiplier110.png",
+    img: "/assets/multipliers/multiplier3_0.png",
   },
   2.1: {
     label: "block-2.1",
@@ -161,6 +168,11 @@ const multipliers = {
     label: "block-1.6",
     sound: "/sounds/multiplier-regular.wav",
     img: "/assets/multipliers/multiplier1_6.png",
+  },
+  1.4: {
+    label: "block-1.4",
+    sound: "/sounds/multiplier-regular.wav",
+    img: "/assets/multipliers/multiplier1_4.png",
   },
   1.5: {
     label: "block-1.5",
@@ -301,17 +313,17 @@ const multiplyBlocks11Lines = [
   getMultiplier(25),
 ];
 const multiplyBlocks10Lines = [
-  getMultiplier(25),
-  getMultiplier(5),
-  getMultiplier(2.1),
-  getMultiplier(1.5),
+  getMultiplier(8.9),
+  getMultiplier(3),
+  getMultiplier(1.4),
+  getMultiplier(1.1),
+  getMultiplier(1),
   getMultiplier(0.5),
-  getMultiplier(0.3),
-  getMultiplier(0.5),
-  getMultiplier(1.5),
-  getMultiplier(2.1),
-  getMultiplier(5),
-  getMultiplier(25),
+  getMultiplier(1),
+  getMultiplier(1.1),
+  getMultiplier(1.4),
+  getMultiplier(3),
+  getMultiplier(8.9),
 ];
 const multiplyBlocks9Lines = [
   getMultiplier(5.6),
