@@ -34,7 +34,7 @@ export const GameFooterInfo: React.FC<GameFooterProps> = ({
   amount,
   chance,
 }) => {
-  const { coinData } = useGlobalContext();
+  const { coinData, setShowWalletModal } = useGlobalContext();
   return (
     <div className="flex px-0 xl:px-4 mb-0 px:mb-6 gap-4 flex-row w-full justify-between">
       {coinData && coinData[0].amount > 0.0001 && (
@@ -77,9 +77,13 @@ export const GameFooterInfo: React.FC<GameFooterProps> = ({
           <div className="w-full rounded-lg bg-[#d9d9d90d] bg-opacity-10 flex items-center px-3 py-3 text-white md:px-6">
             <div className="w-full text-center font-changa font-medium text-sm md:text-base text-[#F0F0F0] text-opacity-75">
               Please deposit funds to start playing. View{" "}
-              <Link href="/balance">
-                <u>WALLET</u>
-              </Link>
+              <u
+                onClick={() => {
+                  setShowWalletModal(true);
+                }}
+              >
+                WALLET
+              </u>
             </div>
           </div>
         ))}

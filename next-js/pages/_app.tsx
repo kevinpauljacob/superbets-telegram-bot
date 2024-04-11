@@ -37,7 +37,7 @@ export default function App({
           <SessionProvider session={pageProps.session} refetchInterval={0}>
             <GlobalProvider>
               <div
-                className={`w-[100vw] h-[100vh] flex flex-1 flex-col bg-black overflow-y-hidden nobar unselectable`}
+                className={`w-[100vw] h-[100vh] flex flex-1 flex-col bg-[#0F0F0F] overflow-hidden nobar unselectable`}
               >
                 <Layout>
                   <Component {...pageProps} />

@@ -30,7 +30,7 @@ export default function Flip() {
   const wallet = useWallet();
   const methods = useForm();
 
-  const { coinData, getBalance, getWalletBalance } = useGlobalContext();
+  const { coinData, getBalance, getWalletBalance, setShowWalletModal } = useGlobalContext();
 
   const [user, setUser] = useState<any>(null);
   const [betAmt, setBetAmt] = useState(0.2);
@@ -220,9 +220,13 @@ export default function Flip() {
                     <div className="mb-5 w-full rounded-lg bg-[#0C0F16] px-3 pb-2 pt-4 text-white md:px-6">
                       <div className="-full mb-3 text-center font-changa font-medium text-[#F0F0F0] text-opacity-75">
                         Please deposit funds to start playing. View{" "}
-                        <Link href="/balance">
-                          <u>WALLET</u>
-                        </Link>
+                        <u
+                          onClick={() => {
+                            setShowWalletModal(true);
+                          }}
+                        >
+                          WALLET
+                        </u>
                       </div>
                     </div>
                   )}

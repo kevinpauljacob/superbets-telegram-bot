@@ -158,7 +158,7 @@ export function Header({
                 onClick={() => {
                   router.push("store");
                 }}
-                className={`hidden sm:flex items-center text-white text-opacity-50 hover:text-opacity-90 focus:text-opacity-90 rounded-full border-2 border-[rgba(255,255,255,0.05)] focus:bg-[#D9D9D933] focus:bg-[#7839C5] transition-all font-medium text-sm p-2`}
+                className={`hidden sm:flex items-center text-white text-opacity-50 hover:text-opacity-90 focus:text-opacity-90 rounded-full border-2 border-[rgba(255,255,255,0.05)] ${router.pathname.includes('store') ? "bg-[#7839C5]" : ""} hover:bg-[#555555] focus:bg-[#7839C5] transition-all font-medium text-sm p-2`}
               >
                 <IoCartSharp className="w-4 h-4" />
               </button>
@@ -166,7 +166,7 @@ export function Header({
                 onClick={() => {
                   router.push("leaderboard");
                 }}
-                className={`hidden sm:flex items-center text-white text-opacity-50 hover:text-opacity-90 focus:text-opacity-90 rounded-full border-2 border-[rgba(255,255,255,0.05)] focus:bg-[#D9D9D933] focus:bg-[#7839C5] transition-all font-medium text-sm p-2`}
+                className={`hidden sm:flex items-center text-white text-opacity-50 hover:text-opacity-90 focus:text-opacity-90 rounded-full border-2 border-[rgba(255,255,255,0.05)] ${router.pathname.includes('leaderboard') ? "bg-[#7839C5]" : ""} hover:bg-[#555555] focus:bg-[#7839C5] transition-all font-medium text-sm p-2`}
               >
                 <FaTrophy className="w-4 h-4" />
               </button>
@@ -174,7 +174,7 @@ export function Header({
                 onClick={() => {
                   router.push("stake");
                 }}
-                className={`hidden sm:flex items-center text-white text-opacity-50 hover:text-opacity-90 focus:text-opacity-90 rounded-full border-2 border-[rgba(255,255,255,0.05)] focus:bg-[#D9D9D933] focus:bg-[#7839C5] transition-all font-medium text-sm p-2`}
+                className={`hidden sm:flex items-center text-white text-opacity-50 hover:text-opacity-90 focus:text-opacity-90 rounded-full border-2 border-[rgba(255,255,255,0.05)] ${router.pathname.includes('stake') ? "bg-[#7839C5]" : ""} hover:bg-[#555555] focus:bg-[#7839C5] transition-all font-medium text-sm p-2`}
               >
                 <BsFillLightningFill className="w-4 h-4" />
               </button>

@@ -51,7 +51,7 @@ export default function Layout({ children }: LayoutProps) {
               <GameHeader />
             </div>
             <main className="w-full h-full max-h-[calc(100vh-20rem)] md:max-h-[calc(100vh-11rem)]">
-              <section className="w-full h-full overflow-y-auto">{children}</section>
+              <section className="w-full h-full overflow-y-auto no-scrollbar">{children}</section>
             </main>
           </section>
         </section>

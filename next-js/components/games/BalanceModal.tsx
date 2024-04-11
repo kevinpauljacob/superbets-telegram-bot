@@ -70,13 +70,13 @@ export default function BalanceModal() {
     >
       <div
         id="modal-box"
-        className="relative flex w-[95%] max-w-[25rem] flex-col rounded-md bg-[#121418] p-5"
+        className="relative flex w-[95%] max-w-[32rem] flex-col rounded-md bg-[#121418] p-11"
       >
         <div
-          className="flex items-center w-full mb-4 gap-2"
+          className="flex items-center w-full mb-7 gap-2"
         >
           <Image src={"/assets/wallet_color.png"} alt="" width={24} height={24} />
-          <span className=" text-[1.5rem] leading-5  mt-0.5 font-changa font-black text-[#e7e7e7]">
+          <span className=" text-[1.5rem] leading-5 mt-1 font-changa font-black text-[#e7e7e7]">
             Wallet
           </span>
         </div>
@@ -113,26 +113,26 @@ export default function BalanceModal() {
 
         <FormProvider {...methods}>
           <form
-            className="flex w-full flex-col gap-3"
+            className="flex w-full flex-col gap-5"
             autoComplete="off"
             onSubmit={methods.handleSubmit(onSubmit)}
           >
             <div className="mb-0 flex w-full flex-col">
-              <label className="mb-1 font-changa font-medium text-xs text-[#F0F0F0] text-opacity-75">
+              <label className="mb-1 font-changa font-medium text-xs text-white text-opacity-90">
                 Coin
               </label>
 
-              <span className="w-full rounded-lg bg-[#202329] px-4 py-2 text-[#F0F0F0] text-opacity-75">
+              <span className="w-full rounded-md h-11 flex items-center bg-[#202329] px-4 py-2 text-[#94A3B8] text-base font-chakra">
                 {token}
               </span>
             </div>
 
             <div className="mb-0 flex w-full flex-col">
-              <label className="mb-1 font-changa font-medium text-xs text-[#F0F0F0] text-opacity-75">
-                Your current connected wallet
+              <label className="mb-1 font-changa font-medium text-xs text-white text-opacity-90">
+                Current Wallet
               </label>
 
-              <span className="w-full rounded-lg bg-[#202329] px-4 py-2 text-[#F0F0F0] text-opacity-75">
+              <span className="w-full rounded-md h-11 flex items-center bg-[#202329] px-4 py-2 text-[#94A3B8] text-sm font-chakra">
                 {obfuscatePubKey(wallet.publicKey?.toBase58() ?? "")}
               </span>
             </div>
@@ -140,17 +140,16 @@ export default function BalanceModal() {
             {actionType == "Withdraw" ? (
               <div className="mb-0 flex w-full flex-col">
                 <div className="mb-1 flex w-full items-center justify-between">
-                  <label className="font-changa font-medium text-xs text-[#F0F0F0] text-opacity-75">
-                    Enter {actionType.toLocaleLowerCase()} amount
+                  <label className="mb-1 font-changa font-medium text-xs text-white text-opacity-90">
+                    {actionType} amount
                   </label>
-                  <span className="font-changa font-medium text-sm text-[#F0F0F0] text-opacity-75">
-                    Available :{" "}
-                    {(coinData ? coinData[0]?.amount : 0).toFixed(4)}
+                  <span className="font-changa font-medium text-sm text-[#94A3B8] text-opacity-90">
+                  {(coinData ? coinData[0]?.amount : 0).toFixed(3)} $SOL
                   </span>
                 </div>
 
                 <div
-                  className={`group flex h-11 w-full cursor-pointer items-center rounded-[8px] bg-[#202329] px-4`}
+                  className={`group flex h-11 w-full cursor-pointer items-center rounded-[8px] bg-[#202329] pl-4 pr-2.5`}
                 >
                   <input
                     id={"amount-input"}
@@ -163,10 +162,18 @@ export default function BalanceModal() {
                     onChange={handleChange}
                     placeholder={"Amount"}
                     value={amount}
-                    className={`flex w-full min-w-0 bg-transparent text-sm text-white placeholder-white  placeholder-opacity-40 outline-none`}
+                    className={`flex w-full min-w-0 bg-transparent text-sm text-[#94A3B8] placeholder-[#94A3B8]  placeholder-opacity-40 outline-none`}
                   />
+                    <span
+                    className="text-xs font-medium text-white text-opacity-50 bg-[#292C32] hover:bg-[#555555] focus:bg-[#555555] transition-all rounded-[5px] mr-2 py-1.5 px-4"
+                    onClick={() =>
+                      setAmount(coinData ? coinData[0]?.amount / 2 : 0)
+                    }
+                  >
+                    Half
+                  </span>
                   <span
-                    className="text-sm text-[#F0F0F0] text-opacity-75 bg-[#D9D9D9] bg-opacity-5"
+                    className="text-xs font-medium text-white text-opacity-50 bg-[#292C32] hover:bg-[#555555] focus:bg-[#555555] transition-all rounded-[5px] py-1.5 px-4"
                     onClick={() =>
                       setAmount(coinData ? coinData[0]?.amount : 0)
                     }
@@ -190,16 +197,16 @@ export default function BalanceModal() {
             ) : (
               <div className="mb-0 flex w-full flex-col">
                 <div className="mb-1 flex w-full items-center justify-between">
-                  <label className="font-changa font-medium text-xs text-[#F0F0F0] text-opacity-75">
-                    Enter {actionType.toLocaleLowerCase()} amount
+                  <label className="mb-1 font-changa font-medium text-xs text-white text-opacity-90">
+                    {actionType} amount
                   </label>
-                  <span className="font-changa font-medium text-sm text-[#F0F0F0] text-opacity-75">
-                    Available : {(walletBalance ?? 0).toFixed(4)}
+                  <span className="font-changa font-medium text-sm text-[#94A3B8] text-opacity-90">
+                    {(walletBalance ?? 0).toFixed(3)} $SOL
                   </span>
                 </div>
 
                 <div
-                  className={`group flex h-11 w-full cursor-pointer items-center rounded-[8px] bg-[#202329] px-4`}
+                  className={`group flex h-11 w-full cursor-pointer items-center rounded-[8px] bg-[#202329] pl-4 pr-2.5`}
                 >
                   <input
                     id={"amount-input"}
@@ -212,13 +219,13 @@ export default function BalanceModal() {
                     onChange={handleChange}
                     placeholder={"Amount"}
                     value={amount}
-                    className={`flex w-full min-w-0 bg-transparent text-sm text-white placeholder-white  placeholder-opacity-40 outline-none`}
+                    className={`flex w-full min-w-0 bg-transparent text-sm text-[#94A3B8] placeholder-[#94A3B8]  placeholder-opacity-40 outline-none`}
                   />
                   <span
-                    className="text-sm text-[#F0F0F0] text-opacity-75 bg-[#D9D9D9] bg-opacity-5"
+                    className="text-xs font-medium text-white text-opacity-50 bg-[#292C32] hover:bg-[#555555] focus:bg-[#555555] transition-all rounded-[5px] py-1.5 px-4"
                     onClick={() => setAmount((walletBalance ?? 0) - 0.01)}
                   >
-                    MAX
+                    Max
                   </span>
                 </div>
 
@@ -238,7 +245,7 @@ export default function BalanceModal() {
 
             <button
               type="submit"
-              className="rounded-[8px] border border-[#F200F21A] bg-[#7839C5] hover:bg-[#9361d1] focus:bg-[#602E9E] transition-all py-2 font-changa text-base font-medium text-[#F0F0F0] text-opacity-90"
+              className="rounded-[5px] -mt-3 border border-[#F200F21A] bg-[#7839C5] hover:bg-[#9361d1] focus:bg-[#602E9E] transition-all py-2 font-changa text-base font-medium text-[#F0F0F0] text-opacity-90"
             >
               {loading ? <Loader /> : actionType}
             </button>

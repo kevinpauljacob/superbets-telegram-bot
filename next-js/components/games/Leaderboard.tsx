@@ -105,7 +105,7 @@ function Leaderboard() {
         <title>Leaderboard</title>
       </Head>
       <div className="relative mb-20 mt-10 flex h-full w-full flex-col flex-wrap items-center justify-center pl-2 pr-2">
-        <h2 className="text-shadow-pink mb-10 flex w-[95%] max-w-[65rem] justify-between rounded-[5px] bg-[#45054980] p-8 py-4 text-center text-2xl text-[#F0F0F0] text-opacity-75">
+        <h2 className="text-shadow-pink mb-10 flex w-[95%] max-w-[65rem] justify-between rounded-[5px] bg-[#0f0f0f] p-8 py-4 text-center text-2xl text-[#F0F0F0] text-opacity-75">
           {isWeekly ? <>Weekly Leaderboard</> : <>All Time Leaderboard</>}
           <button
             type="button"

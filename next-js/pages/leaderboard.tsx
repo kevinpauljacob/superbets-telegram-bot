@@ -34,7 +34,7 @@ export default function Leaderboard() {
   }, [userData]);
 
   return (
-    <div className="flex flex-col items-center w-full overflow-hidden min-h-screen flex-1 bg-black relative">
+    <div className="flex flex-col items-center w-full overflow-hidden min-h-screen flex-1 relative">
       {/* Navbar  */}
       <div className="flex flex-col sm:flex-row w-full items-center bg-[#19161C80] py-7 px-5 sm:px-10 2xl:px-[8%]">
         <div className="hidden sm:flex relative min-w-[12rem] h-[12rem]">
@@ -188,7 +188,7 @@ export default function Leaderboard() {
           </button>
         </div>
       </div>
-      <div className="w-full flex flex-1 flex-col items-start gap-5 px-5 sm:px-10 2xl:px-[8%] bg-black pb-10">
+      <div className="w-full flex flex-1 flex-col items-start gap-5 px-5 sm:px-10 2xl:px-[8%] pb-10">
         <LeaderboardTable />
       </div>
     </div>

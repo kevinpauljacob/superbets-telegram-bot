@@ -36,6 +36,7 @@ export default function Options() {
     getWalletBalance,
     getBalance,
     coinData,
+    setShowWalletModal
   } = useGlobalContext();
 
   const [livePrice, setLivePrice] = useState(0);
@@ -386,9 +387,13 @@ export default function Options() {
                 <div className="mb-5 w-full rounded-lg bg-[#0C0F16] p-2 text-white md:px-6">
                   <div className="-full text-center font-changa font-medium text-[#F0F0F0] text-opacity-75">
                     Please deposit funds to start playing. View{" "}
-                    <Link href="/balance">
-                      <u>WALLET</u>
-                    </Link>
+                    <u
+                      onClick={() => {
+                        setShowWalletModal(true);
+                      }}
+                    >
+                      WALLET
+                    </u>
                   </div>
                 </div>
               )}
