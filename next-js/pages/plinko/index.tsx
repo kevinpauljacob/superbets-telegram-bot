@@ -12,6 +12,8 @@ import {
 import { useCallback, useEffect, useState } from "react";
 import { BetActions } from "@/components/games/Plinko/BetActions";
 import { MultiplierHistory } from "@/components/games/Plinko/MultiplierHistory";
+import { useWallet } from "@solana/wallet-adapter-react";
+import { useGlobalContext } from "@/components/GlobalContext";
 
 export type LinesType = 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15 | 16;
 
@@ -389,10 +391,14 @@ const configPlinko = {
 };
 
 export default function Game() {
+  const wallet = useWallet();
+  const { getBalance, getWalletBalance } = useGlobalContext();
+
   const engine = Engine.create();
   const [lines, setLines] = useState<LinesType>(8);
   const [risks, setRisks] = useState<RisksType>("Low");
   const [lastMultipliers, setLastMultipliers] = useState<number[]>([]);
+  const [refresh, setRefresh] = useState(true);
   const [gamesRunning, setGamesRunning] = useState(0);
   const [inGameBallsCount, setInGameBallsCount] = useState(gamesRunning);
   const incrementInGameBallsCount = () => {
@@ -667,6 +673,14 @@ export default function Game() {
   }
 
   Events.on(engine, "collisionActive", onBodyCollision);
+
+  useEffect(() => {
+    if (refresh && wallet?.publicKey) {
+      getBalance();
+      getWalletBalance();
+      setRefresh(false);
+    }
+  }, [wallet?.publicKey, refresh]);
 
   return (
     <div className="grid grid-cols-3 w-full">
