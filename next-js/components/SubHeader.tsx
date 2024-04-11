@@ -28,6 +28,13 @@ export default function SubHeader() {
   }, [cards]);
 
   useEffect(() => {
+    fetch(`/api/games/global/getRecentHistory`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (!data.success) return console.error(data.message);
+        setCards(data.data);
+      });
+
     const socket = new WebSocket(wsEndpoint);
 
     socket.onopen = () => {
@@ -80,7 +87,7 @@ export default function SubHeader() {
             >
               <Image
                 src={`/assets/games/${card.game}.png`}
-                alt="gameBadge"
+                alt="badge"
                 width={52}
                 height={52}
                 className="rounded-md ml-2"
@@ -94,16 +101,16 @@ export default function SubHeader() {
                     height={23}
                   />
                   <span className="text-sm">
-                    {trimStringToLength(card.wallet, 4)}
+                    {trimStringToLength(card.wallet, 3)}
                   </span>
                 </div>
                 {card.result === "Won" ? (
                   <p className="text-[#72F238]">
-                    +${card.absAmount.toFixed(2)}
+                    +${(card.absAmount ?? 0).toFixed(2)}
                   </p>
                 ) : (
                   <p className="text-[#F23838]">
-                    -${card.absAmount.toFixed(2)}
+                    -${(card.absAmount ?? 0).toFixed(2)}
                   </p>
                 )}
               </div>

@@ -76,7 +76,7 @@ interface GlobalContextProps {
   coinData: CoinBalance[] | null;
   setCoinData: (coinData: CoinBalance[] | null) => void;
 
-  showWalletModal: boolean ;
+  showWalletModal: boolean;
   setShowWalletModal: React.Dispatch<React.SetStateAction<boolean>>;
 
   getUserDetails: () => Promise<void>;
@@ -199,13 +199,13 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
             ) {
               setCoinData(balance.data.deposit);
             } else {
-              toast.error("Could not fetch balance.");
+              console.log("Could not fetch balance.");
               setCoinData(null);
             }
             setLoading(false);
           });
     } catch (e) {
-      toast.error("Could not fetch balance.");
+      console.log("Could not fetch balance.");
       setLoading(false);
       setCoinData(null);
       console.error(e);
