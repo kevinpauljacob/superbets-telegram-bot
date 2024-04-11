@@ -8,6 +8,7 @@ import GameHeader from "./GameHeader";
 import { useGlobalContext } from "./GlobalContext";
 import BalanceModal from "./games/BalanceModal";
 import { useSession } from "next-auth/react";
+import MobileNavbar from "./MobileNavbar";
 
 interface LayoutProps {
   children: ReactNode;
@@ -42,7 +43,7 @@ export default function Layout({ children }: LayoutProps) {
       <InfoBar />
       <Header sidebar={sidebar} toggleSidebar={toggleSidebar} />
       <section className="relative flex flex-1 max-h-[calc(100vh-6.25rem)]">
-        <Sidebar sidebar={sidebar} />
+        <Sidebar sidebar={sidebar} setSidebar={setSidebar}/>
         <section className="w-full relative overflow-hidden">
           <MobileSidebar mobileSidebar={sidebar} />
           <section className="w-full h-full">
@@ -56,6 +57,9 @@ export default function Layout({ children }: LayoutProps) {
           </section>
         </section>
       </section>
+      <div className="w-full fixed bottom-0 flex md:hidden">
+        <MobileNavbar sidebar={sidebar} toggleSidebar={toggleSidebar} />
+      </div>
       {coinData && showWalletModal && <BalanceModal />}
     </>
   );

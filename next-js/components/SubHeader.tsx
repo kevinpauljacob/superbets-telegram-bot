@@ -69,7 +69,7 @@ export default function SubHeader() {
 
   return (
     <div className="flex flex-col w-full">
-      <div className="w-full text-white h-[70px] flex items-center border-b border-[#1E2220] px-4 lg:pl-4 lg:pr-4 bg-[#121418]">
+      <div className="w-full text-white h-[4.4rem] flex items-center border-b border-[#1E2220] px-4 lg:pl-4 lg:pr-4 bg-[#121418]">
         <div className="flex w-full items-center overflow-x-auto no-scrollbar">
           <div ref={endOfListRef} />
           {cards.map((card, index) => (
