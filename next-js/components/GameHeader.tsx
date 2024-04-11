@@ -100,6 +100,14 @@ export default function GameHeader() {
       icon: "/assets/binary.png",
       name: "Binary Options",
     },
+    dice2: {
+      icon: "/assets/dice.png",
+      name: "Dice To Win",
+    },
+    wheel: {
+      icon: "/assets/dice.png",
+      name: "Wheel",
+    },
   });
 
   // Get the game details based on the extracted game name
@@ -146,7 +154,12 @@ export default function GameHeader() {
             >
               Provabaly Fair
             </p>
-            <Image src={'/assets/fair.png'} alt="Fairness" width={20} height={20} />
+            <Image
+              src={"/assets/fair.png"}
+              alt="Fairness"
+              width={20}
+              height={20}
+            />
           </div>
         </div>
       </div>
