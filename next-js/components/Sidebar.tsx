@@ -43,19 +43,19 @@ export default function Sidebar({
 
   const [exitGames, setExitGames] = useState<Game[]>([
     {
-      src: "/assets/sol.png",
+      src: "",
       token: "SOL",
       link: "",
       active: false,
     },
     {
-      src: "/assets/jup.png",
+      src: "",
       token: "JUP",
       link: "",
       active: false,
     },
     {
-      src: "/assets/usdt.png",
+      src: "",
       token: "USDT",
       link: "",
       active: false,
@@ -64,19 +64,19 @@ export default function Sidebar({
 
   const [casinoGames, setCasinoGames] = useState<Game[]>([
     {
-      src: "/assets/sol.png",
+      src: "",
       token: "Dice To Win",
       link: "/dice", // Update the links to include "/"
       active: false,
     },
     {
-      src: "/assets/jup.png",
+      src: "",
       token: "Coin Flip",
       link: "/coinflip", // Update the links to include "/"
       active: false,
     },
     {
-      src: "/assets/usdt.png",
+      src: "",
       token: "Options",
       link: "/options", // Update the links to include "/"
       active: false,
@@ -202,7 +202,7 @@ export default function Sidebar({
                 <div className="w-full transition-all cursor-pointer rounded-md flex items-center justify-between gap-2 pl-4 pr-2 py-2 bg-transparent hover:bg-[#1f2024] focus:bg-[#1f2024] group">
                   <div className="flex items-center gap-2">
                     <FomoExitIcon className="min-w-[1rem] min-h-[1rem] transition-all text-[#ababac] group-hover:text-[#9945FF] group-focus:text-[#9945FF]" />
-                    <span className="mt-0.5 transition-all text-base font-changa text-[#c4c4c5] group-hover:text-white group-focus:text-white">
+                    <span className="mt-0.5 transition-all text-base font-changa font-light text-white text-opacity-75 group-hover:text-opacity-100 group-focus:text-opacity-100">
                       FOMO: Exit
                     </span>
                   </div>
@@ -254,8 +254,8 @@ export default function Sidebar({
                 <div className="w-full transition-all cursor-pointer rounded-md flex items-center justify-between gap-2 pl-4 pr-2 py-2 bg-transparent hover:bg-[#1f2024] focus:bg-[#1f2024] group">
                   <div className="flex items-center gap-2">
                     <FomoPlayIcon className="min-w-[1rem] min-h-[1rem] transition-all text-[#ababac] group-hover:text-[#9945FF] group-focus:text-[#9945FF]" />
-                    <span className="mt-0.5 transition-all text-base font-changa text-[#c4c4c5] group-hover:text-white group-focus:text-white">
-                      FOMO: Exit
+                    <span className="mt-0.5 transition-all text-base font-changa font-light text-white text-opacity-75 group-hover:text-opacity-100 group-focus:text-opacity-100">
+                      FOMO: Play
                     </span>
                   </div>
                   <button
@@ -419,7 +419,7 @@ export const SidebarOpenElement = ({
   return (
     <div className="w-full transition-all cursor-pointer rounded-md flex items-center gap-2 pl-4 py-2 bg-transparent hover:bg-[#1f2024] focus:bg-[#1f2024] group">
       <Icon className="w-4 h-4 transition-all text-[#ababac] group-hover:text-[#9945FF] group-focus:text-[#9945FF]" />
-      <span className="transition-all text-base font-changa text-[#c4c4c5] group-hover:text-white group-focus:text-white">
+      <span className="transition-all text-base font-changa font-light text-white text-opacity-75 group-hover:text-opacity-100 group-focus:text-opacity-100">
         {text}
       </span>
     </div>

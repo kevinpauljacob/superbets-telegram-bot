@@ -17,7 +17,7 @@ interface LayoutProps {
 export default function Layout({ children }: LayoutProps) {
   const { data: session, status } = useSession();
 
-  const [sidebar, setSidebar] = useState(true);
+  const [sidebar, setSidebar] = useState(false);
   const {
     coinData,
     showWalletModal,
@@ -51,10 +51,8 @@ export default function Layout({ children }: LayoutProps) {
             <div className="w-full hidden md:flex">
               <GameHeader />
             </div>
-            <main className="w-full h-full max-h-[calc(100vh-20rem)] md:max-h-[calc(100vh-11rem)]">
-              <section className="w-full h-full overflow-y-auto no-scrollbar">
-                {children}
-              </section>
+            <main className="w-full h-full md:px-[2.5%] max-h-[calc(100vh-16.6rem)] md:max-h-[calc(100vh-11rem)]">
+              <section className="w-full h-full overflow-y-auto no-scrollbar">{children}</section>
             </main>
           </section>
         </section>

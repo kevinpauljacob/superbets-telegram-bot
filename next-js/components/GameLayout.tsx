@@ -36,7 +36,7 @@ export const GameFooterInfo: React.FC<GameFooterProps> = ({
 }) => {
   const { coinData, setShowWalletModal } = useGlobalContext();
   return (
-    <div className="flex px-0 xl:px-4 mb-0 px:mb-6 gap-4 flex-row w-full justify-between">
+    <div className="flex px-0 mb-0 md:mb-5 gap-4 flex-row w-full justify-between">
       {coinData && coinData[0].amount > 0.0001 && (
         <>
           {multiplier && (
@@ -44,7 +44,7 @@ export const GameFooterInfo: React.FC<GameFooterProps> = ({
               <span className="text-[#F0F0F0] font-changa text-opacity-75 text-xs mb-1">
                 Multiplier
               </span>
-              <span className="bg-[#202329] text-xs text-white rounded-md px-1.5 md:px-5 py-2">
+              <span className="bg-[#202329] font-chakra text-xs text-white rounded-md px-1.5 md:px-5 py-2">
                 {multiplier.toFixed(2)}x
               </span>
             </div>
@@ -52,10 +52,10 @@ export const GameFooterInfo: React.FC<GameFooterProps> = ({
 
           <div className="flex flex-col w-full">
             <span className="text-[#F0F0F0] font-changa text-opacity-75 text-xs mb-1">
-              Winning Amount
+              Winning
             </span>
-            <span className="bg-[#202329] text-xs text-white rounded-md px-1.5 md:px-5 py-2">
-              {amount.toFixed(5)} $SOL
+            <span className="bg-[#202329] font-chakra text-xs text-white rounded-md px-1.5 md:px-5 py-2">
+              {amount.toFixed(3)} $SOL
             </span>
           </div>
 
@@ -64,7 +64,7 @@ export const GameFooterInfo: React.FC<GameFooterProps> = ({
               <span className="text-[#F0F0F0] font-changa text-opacity-75 text-xs mb-1">
                 Chance
               </span>
-              <span className="bg-[#202329] text-xs text-white rounded-md px-1.5 md:px-5 py-2">
+              <span className="bg-[#202329] font-chakra text-xs text-white rounded-md px-1.5 md:px-5 py-2">
                 {chance.toFixed(2)}%
               </span>
             </div>
@@ -93,20 +93,20 @@ export const GameFooterInfo: React.FC<GameFooterProps> = ({
 
 const GameLayout: React.FC<LayoutProps> = ({ children, title }) => {
   return (
-    <div className="flex flex-1 h-full w-full flex-col items-center justify-start px-6">
+    <div className="flex flex-1 h-full w-full flex-col items-center justify-start px-3 md:px-6">
       <Head>
         <title>{title}</title>
       </Head>
-      <div className="fadeInUp mt-6 w-full min-h-[calc(100vh-16.8rem)] items-stretch bg-[#121418] rounded-2xl flex flex-col-reverse md:flex-row">
-        <div className="fadeInUp flex w-full md:w-[35%] flex-col items-center rounded-[1.15rem] px-3 py-5 md:p-7">
+      <div className="fadeInUp mt-0 md:mt-6 w-full min-h-fit md:min-h-[calc(100vh-17.5rem)] items-stretch bg-[#121418] rounded-2xl flex flex-col-reverse md:flex-row">
+        <div className="fadeInUp flex w-full min-h-fit md:w-[35%] flex-col items-center rounded-[1.15rem] px-3 py-5 md:p-9">
           {React.Children.map(children, (child) => {
             if (React.isValidElement(child) && child.type === GameOptions) {
               return child;
             }
           })}
         </div>
-        <div className="bg-white bg-opacity-10 w-[1px]" />
-        <div className="fadeInUp flex flex-1 flex-col items-center justify-between gap-2 m-3 md:m-6 bg-[#0C0F16] rounded-lg p-3 md:p-10">
+        <div className="bg-white bg-opacity-10 h-[1px] md:h-full w-full md:w-[1px]" />
+        <div className="fadeInUp flex flex-1 flex-col items-center justify-between gap-0 m-3 md:m-9 bg-[#0C0F16] rounded-lg p-3 md:px-10 md:pt-6 md:pb-10">
           {React.Children.map(children, (child) => {
             if (React.isValidElement(child) && child.type === GameDisplay) {
               return child;

@@ -21,7 +21,7 @@ function CountdownTimer({
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [minutes]);
+  }, [minutes, betTime]);
 
   function calculateTimeLeft(targetTimestamp: number) {
     const now = Date.now();
@@ -39,7 +39,7 @@ function CountdownTimer({
 
     const days = Math.floor(difference / (1000 * 60 * 60 * 24));
     const hours = Math.floor(
-      (difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
+      (difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60),
     );
     const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
     const seconds = Math.floor((difference % (1000 * 60)) / 1000);
@@ -57,14 +57,14 @@ function CountdownTimer({
     <div>
       {timeLeft.total > 0 ? (
         <div className="flex gap-2">
-          <span className="font-changa text-sm text-[#F0F0F0] text-opacity-75">
+          <span className="font-changa text-xs md:text-sm text-[#F0F0F0] text-opacity-75">
             {timeLeft.minutes.toString().padStart(2, "0")}:
             {timeLeft.seconds.toString().padStart(2, "0")}
           </span>
         </div>
       ) : (
-        <span className="font-changa text-sm text-[#F0F0F0] text-opacity-75">
-          ENDED
+        <span className="font-changa text-xs md:text-sm text-[#F0F0F0] text-opacity-75">
+          {betTime ? "ENDED" : "00:00"}
         </span>
       )}
     </div>

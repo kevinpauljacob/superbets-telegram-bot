@@ -4,8 +4,10 @@ import Link from "next/link";
 import { wsEndpoint, trimStringToLength } from "@/context/gameTransactions";
 import { useEffect, useRef, useState } from "react";
 import { GameType } from "@/utils/vrf";
+import { useRouter } from "next/router";
 
 export default function SubHeader() {
+  const router = useRouter();
   const { coinData, showWalletModal, setShowWalletModal } = useGlobalContext();
 
   type Card = {
@@ -76,7 +78,11 @@ export default function SubHeader() {
 
   return (
     <div className="flex flex-col w-full">
-      <div className="w-full text-white h-[4.4rem] flex items-center border-b border-[#1E2220] px-4 lg:pl-4 lg:pr-4 bg-[#121418]">
+      <div
+        className={`${
+          router.pathname === "/" ? "flex" : "hidden md:flex"
+        } w-full text-white h-[4.4rem] flex items-center border-b border-[#1E2220] px-4 lg:pl-4 lg:pr-4 bg-[#121418]`}
+      >
         <div className="flex w-full items-center overflow-x-auto no-scrollbar">
           <div ref={endOfListRef} />
           {cards.map((card, index) => (
@@ -139,23 +145,29 @@ export default function SubHeader() {
           </div>
         </div>
       </div>
-      <div className="flex md:hidden items-center justify-between my-4 mx-2 rounded-[5px] bg-[#121418] border-l border-[#1E2220] p-2 md:min-w-fit">
+      <div
+        className={`${
+          router.pathname === "/" ? "hidden" : "flex"
+        } md:hidden items-center justify-between my-4 mx-2 rounded-[5px] bg-[#121418] py-3 px-4 md:min-w-fit`}
+      >
         <Image src={"/assets/wallet2.png"} alt="" width={30} height={30} />
         <div className="flex items-center gap-2">
-          <div className="flex items-center h-7 px-2 py-0.5 gap-1.5 border-2 border-white border-opacity-5 rounded-[5px]">
-            <Image src={"/assets/sol.png"} alt="" width={20} height={20} />
-            <span className="text-base text-[#94A3B8]">
-              {(coinData ? coinData[0].amount : 0).toFixed(4)}
+          <div className="flex items-center h-[2.3rem] px-4 gap-1.5 border-2 border-white border-opacity-5 rounded-[5px]">
+            <Image src={"/assets/sol.png"} alt="" width={14} height={14} />
+            <span className="text-base font-chakra leading-3 mt-0.5 text-[#94A3B8]">
+              {(coinData ? coinData[0].amount : 0).toFixed(3)}
             </span>
           </div>
           <div
             onClick={() => {
               setShowWalletModal(true);
             }}
-            className="flex items-center h-7 px-2 py-1.5 gap-1 bg-[#7839C5] hover:bg-[#9361d1] focus:bg-[#602E9E] transition-all cursor-pointer rounded-[5px]"
+            className="flex items-center h-[2.3rem] px-5 gap-1 bg-[#7839C5] hover:bg-[#9361d1] focus:bg-[#602E9E] transition-all cursor-pointer rounded-[5px]"
           >
-            <Image src={"/assets/wallet.png"} alt="" width={13} height={11} />
-            <span className="text-xs mt-0.5 text-white text-opacity-90">Wallet</span>
+            <Image src={"/assets/wallet.png"} alt="" width={15} height={15} />
+            <span className="text-xs mt-0.5 text-white text-opacity-90">
+              Wallet
+            </span>
           </div>
         </div>
       </div>
