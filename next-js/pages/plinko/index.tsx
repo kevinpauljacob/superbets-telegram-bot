@@ -18,6 +18,33 @@ export type LinesType = 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15 | 16;
 export type RisksType = "Low" | "Medium" | "High";
 
 type MultiplierValues =
+  // | 5.6
+  // | 2.1
+  // | 1.1
+  // | 1
+  // | 0.5
+  // | 2
+  // | 1.6
+  // | 0.7
+  // | 8.9
+  // | 3
+  // | 1.4
+  // | 8.4
+  // | 1.9
+  // | 1.3
+  // | 10
+  // | 8.1
+  // | 4
+  // | 1.2
+  // | 0.9
+  // | 7.1
+  // | 15
+  // | 8
+  // | 1.5
+  // | 16
+  // | 9
+
+
   | 110
   | 88
   | 41
@@ -31,18 +58,13 @@ type MultiplierValues =
   | 3
   | 2.1
   | 2
+  | 1.6
   | 1.5
   | 1.1
   | 1
+  | 0.7
   | 0.5
   | 0.3;
-
-type MultiplierLabelType = `block-${MultiplierValues}`;
-
-type MultiplierType = {
-  label: MultiplierLabelType;
-  img: string;
-};
 
 const multiplierSounds = {
   110: "/sounds/multiplier-best.wav",
@@ -58,9 +80,11 @@ const multiplierSounds = {
   3: "/sounds/multiplier-regular.wav",
   2.1: "/sounds/multiplier-regular.wav",
   2: "/sounds/multiplier-regular.wav",
+  1.6: "/sounds/multiplier-regular.wav",
   1.5: "/sounds/multiplier-regular.wav",
   1.1: "/sounds/multiplier-regular.wav",
   1: "/sounds/multiplier-regular.wav",
+  0.7: "/sounds/multiplier-low.wav",
   0.5: "/sounds/multiplier-low.wav",
   0.3: "/sounds/multiplier-low.wav",
 } as const;
@@ -126,6 +150,16 @@ const multipliers = {
     sound: "/sounds/multiplier-regular.wav",
     img: "/assets/multipliers/multiplier2_1.png",
   },
+  2: {
+    label: "block-2.0",
+    sound: "/sounds/multiplier-regular.wav",
+    img: "/assets/multipliers/multiplier2_0.png",
+  },
+  1.6: {
+    label: "block-1.6",
+    sound: "/sounds/multiplier-regular.wav",
+    img: "/assets/multipliers/multiplier1_6.png",
+  },
   1.5: {
     label: "block-1.5",
     sound: "/sounds/multiplier-regular.wav",
@@ -140,6 +174,11 @@ const multipliers = {
     label: "block-1",
     sound: "/sounds/multiplier-regular.wav",
     img: "/assets/multipliers/multiplier1.png",
+  },
+  0.7: {
+    label: "block-0.7",
+    sound: "/sounds/multiplier-low.wav",
+    img: "/assets/multipliers/multiplier0_7.png",
   },
   0.5: {
     label: "block-0.5",
@@ -273,16 +312,16 @@ const multiplyBlocks10Lines = [
   getMultiplier(25),
 ];
 const multiplyBlocks9Lines = [
-  getMultiplier(10),
-  getMultiplier(5),
-  getMultiplier(2.1),
-  getMultiplier(1.5),
-  getMultiplier(0.3),
-  getMultiplier(0.3),
-  getMultiplier(1.5),
-  getMultiplier(2.1),
-  getMultiplier(5),
-  getMultiplier(10),
+  getMultiplier(5.6),
+  getMultiplier(2),
+  getMultiplier(1.6),
+  getMultiplier(1),
+  getMultiplier(0.7),
+  getMultiplier(0.7),
+  getMultiplier(1),
+  getMultiplier(1.6),
+  getMultiplier(2),
+  getMultiplier(5.6),
 ];
 const multiplyBlocks8Lines = [
   getMultiplier(5.6),
@@ -318,7 +357,7 @@ function getMultiplierSound(value: MultiplierValues): string {
 
 const pins = {
   startPins: 3,
-  pinSize: 3.6,
+  pinSize: 4,
   pinGap: 30,
 };
 
@@ -500,6 +539,7 @@ export default function Game() {
         pinsConfig.pinGap +
         pinsConfig.pinGap / 2;
 
+      // const pos = Math.random()
       const pos = mapResult[8].find((item) => item.multiplierPos === 0)?.ballX; // fall position
       const ballX = pos! * (maxBallX - minBallX) + minBallX;
       console.log(">>>>>>", pos);
