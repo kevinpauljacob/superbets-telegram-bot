@@ -7,6 +7,7 @@ import { GameType } from "@/utils/vrf";
 import { useGlobalContext } from "./GlobalContext";
 import CoinFlipProvablyFairModal from "./games/CoinFlip/CoinFlipProvablyFairModal";
 import { useSession } from "next-auth/react";
+import LimboProvablyFairModal from "./games/Limbo/LimboProvablyFairModal";
 
 export default function GameHeader() {
   const { data: session, status } = useSession();
@@ -146,7 +147,12 @@ export default function GameHeader() {
             >
               Provabaly Fair
             </p>
-            <Image src={'/assets/fair.png'} alt="Fairness" width={20} height={20} />
+            <Image
+              src={"/assets/fair.png"}
+              alt="Fairness"
+              width={20}
+              height={20}
+            />
           </div>
         </div>
       </div>
@@ -157,8 +163,15 @@ export default function GameHeader() {
           modalData={modalData}
           setModalData={setModalData}
         />
-      ) : (
+      ) : game === "dice" ? (
         <RollDiceProvablyFairModal
+          isOpen={isOpen}
+          onClose={closeModal}
+          modalData={modalData}
+          setModalData={setModalData}
+        />
+      ) : (
+        <LimboProvablyFairModal
           isOpen={isOpen}
           onClose={closeModal}
           modalData={modalData}
