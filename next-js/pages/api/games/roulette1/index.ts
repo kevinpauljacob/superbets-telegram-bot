@@ -187,7 +187,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
       Object.entries(wager).forEach(([key, value]) => {
         if (key === "straight") {
-          if ((value as Record<string, number>)[strikeNumber.toString()] != null) {
+          if (
+            (value as Record<string, number>)[strikeNumber.toString()] != null
+          ) {
             amountWon += amount * WagerPayout[key];
             result = "Won";
           }
@@ -252,33 +254,35 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         gameSeed: activeGameSeed._id,
       });
 
-      const userData = await StakingUser.findOne({ wallet });
-      let points = userData?.points ?? 0;
-      const userTier = Object.entries(pointTiers).reduce((prev, next) => {
-        return points >= next[1]?.limit ? next : prev;
-      })[0];
+      if (result === "Won") {
+        const userData = await StakingUser.findOne({ wallet });
+        let points = userData?.points ?? 0;
+        const userTier = Object.entries(pointTiers).reduce((prev, next) => {
+          return points >= next[1]?.limit ? next : prev;
+        })[0];
 
-      const socket = new WebSocket(wsEndpoint);
+        const socket = new WebSocket(wsEndpoint);
 
-      socket.onopen = () => {
-        console.log("WebSocket connection opened");
-        socket.send(
-          JSON.stringify({
-            clientType: "api-client",
-            channel: "fomo-casino_games-channel",
-            authKey: process.env.FOMO_CHANNEL_AUTH_KEY!,
-            payload: {
-              game: GameType.roulette1,
-              wallet,
-              absAmount: Math.abs(amountWon - amountLost),
-              result,
-              userTier,
-            },
-          }),
-        );
+        socket.onopen = () => {
+          console.log("WebSocket connection opened");
+          socket.send(
+            JSON.stringify({
+              clientType: "api-client",
+              channel: "fomo-casino_games-channel",
+              authKey: process.env.FOMO_CHANNEL_AUTH_KEY!,
+              payload: {
+                game: GameType.roulette1,
+                wallet,
+                absAmount: Math.abs(amountWon - amountLost),
+                result,
+                userTier,
+              },
+            }),
+          );
 
-        socket.close();
-      };
+          socket.close();
+        };
+      }
 
       return res.status(201).json({
         success: true,

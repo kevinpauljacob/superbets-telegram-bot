@@ -17,26 +17,6 @@ export default function FomoPlay() {
       href: "/options",
       src: "/assets/binarycard.png",
     },
-    {
-      href: "/",
-      src: "/assets/mines.png",
-    },
-    {
-      href: "/",
-      src: "/assets/blackjack.png",
-    },
-    {
-      href: "/",
-      src: "/assets/keno.png",
-    },
-    {
-      href: "/",
-      src: "/assets/plinko.png",
-    },
-    {
-      href: "/",
-      src: "/assets/wheel.png",
-    },
   ];
 
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -67,7 +47,7 @@ export default function FomoPlay() {
         </div>
         <div className="">
           <button
-            className="bg-[#1D1A21] hover:bg-[#333037] focus:bg-[#333037] text-white font-bold py-4 px-5 rounded border-2 border-transparent focus:border-[#7839C5] focus:shadow-outline mr-3"
+            className="bg-[#1D1A21] hover:bg-[#333037] focus:bg-[#333037] transition-all text-white font-bold py-3 px-3 md:py-3.5 md:px-6 rounded focus:outline-none focus:shadow-outline mr-3"
             onClick={prevSlide}
           >
             <Image
@@ -79,7 +59,7 @@ export default function FomoPlay() {
             />
           </button>
           <button
-            className="bg-[#1D1A21] hover:bg-[#333037] focus:bg-[#333037] text-white font-bold py-4 px-5 rounded border-2 border-transparent focus:border-[#7839C5] focus:shadow-outline"
+            className="bg-[#1D1A21] hover:bg-[#333037] focus:bg-[#333037] transition-all text-white font-bold py-3 px-3 md:py-3.5 md:px-6 rounded focus:outline-none focus:shadow-outline mr-3"
             onClick={nextSlide}
           >
             <Image

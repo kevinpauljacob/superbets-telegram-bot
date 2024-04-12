@@ -5,7 +5,7 @@ import { obfuscatePubKey } from "@/context/transactions";
 import { deposit, withdraw } from "../../context/gameTransactions";
 import Loader from "./Loader";
 import { useGlobalContext } from "../GlobalContext";
-import { IoClose } from "react-icons/io5";
+import { IoClose, IoCloseOutline } from "react-icons/io5";
 import Image from "next/image";
 
 export default function BalanceModal() {
@@ -70,10 +70,10 @@ export default function BalanceModal() {
     >
       <div
         id="modal-box"
-        className="relative flex w-[95%] max-w-[32rem] flex-col rounded-md bg-[#121418] p-11"
+        className="relative flex w-[95%] max-w-[30rem] flex-col rounded-md bg-[#121418] p-7"
       >
         <div
-          className="flex items-center w-full mb-7 gap-2"
+          className="flex items-center w-full mb-7 gap-2 mt-2"
         >
           <Image src={"/assets/wallet_color.png"} alt="" width={24} height={24} />
           <span className=" text-[1.5rem] leading-5 mt-1 font-changa font-black text-[#e7e7e7]">
@@ -81,16 +81,16 @@ export default function BalanceModal() {
           </span>
         </div>
 
-        <IoClose
+        <IoCloseOutline
           onClick={() => {
             setShowWalletModal(false);
           }}
-          className="w-6 h-6 cursor-pointer text-white absolute top-0 right-0 m-3"
+          className="w-9 h-9 cursor-pointer text-[#fcfcfc] absolute top-0 right-0 mt-3 mr-5 hover:bg-[#26282c] transition-all p-1.5 rounded-full"
         />
 
-        <div className="w-full flex mb-8">
+        <div className="w-full flex mb-8 mt-2">
           <button
-            className={`w-full border-2 rounded-md py-1 mr-1 text-white transition duration-300 ease-in-out ${
+            className={`w-full border-2 rounded-md py-2 mr-1 text-white font-semibold text-sm transition duration-300 ease-in-out ${
               actionType === "Deposit"
                 ? "bg-[#d9d9d90d] border-transparent text-opacity-90"
                 : "border-[#d9d9d90d] hover:bg-[#9361d1] focus:bg-[#602E9E] text-opacity-50 hover:text-opacity-90"
@@ -100,7 +100,7 @@ export default function BalanceModal() {
             Deposit
           </button>
           <button
-            className={`w-full border-2 rounded-md py-1 ml-1 text-white transition-all duration-300 ease-in-out ${
+            className={`w-full border-2 rounded-md py-2 ml-1 text-white font-semibold text-sm transition-all duration-300 ease-in-out ${
               actionType === "Withdraw"
                 ? "bg-[#d9d9d90d] border-transparent text-opacity-90"
                 : "border-[#d9d9d90d] hover:bg-[#9361d1] focus:bg-[#602E9E] text-opacity-50 hover:text-opacity-90"
@@ -113,7 +113,7 @@ export default function BalanceModal() {
 
         <FormProvider {...methods}>
           <form
-            className="flex w-full flex-col gap-5"
+            className="flex w-full flex-col gap-6"
             autoComplete="off"
             onSubmit={methods.handleSubmit(onSubmit)}
           >
@@ -178,7 +178,7 @@ export default function BalanceModal() {
                       setAmount(coinData ? coinData[0]?.amount : 0)
                     }
                   >
-                    MAX
+                    Max
                   </span>
                 </div>
 
@@ -245,7 +245,7 @@ export default function BalanceModal() {
 
             <button
               type="submit"
-              className="rounded-[5px] -mt-3 border border-[#F200F21A] bg-[#7839C5] hover:bg-[#9361d1] focus:bg-[#602E9E] transition-all py-2 font-changa text-base font-medium text-[#F0F0F0] text-opacity-90"
+              className="rounded-[5px] -mt-1 mb-4 border border-[#F200F21A] bg-[#7839C5] hover:bg-[#9361d1] focus:bg-[#602E9E] transition-all py-2.5 font-changa text-base font-medium text-[#F0F0F0] text-opacity-90"
             >
               {loading ? <Loader /> : actionType}
             </button>

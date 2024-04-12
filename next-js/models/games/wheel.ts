@@ -32,6 +32,14 @@ const wheelSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    amountWon: {
+      type: Number,
+      required: true,
+    },
+    amountLost: {
+      type: Number,
+      required: true,
+    },
     nonce: {
       type: Number,
       required: true,

@@ -136,13 +136,13 @@ export default function GameHeader() {
             </p>
           </div> */}
           <div className="hidden md:flex items-center justify-between bg-[#1E2220] rounded-md mx-1.5  my-1 px-2 py-1">
-            <p className="font-light text-xs">Volume :&nbsp;</p>
+            <p className="font-thin text-xs">Volume :&nbsp;</p>
             <p className="text-[#7839C5] font-semibold text-xs">
               {selectedGame.stats?.volume.toFixed(2)}
             </p>
           </div>
           <div className="hidden md:flex items-center justify-between bg-[#1E2220] rounded-md mx-1.5  my-1 px-2 py-1">
-            <p className="font-light text-xs">Unique Players :&nbsp;</p>
+            <p className="font-thin text-xs">Unique Players :&nbsp;</p>
             <p className="text-[#7839C5] font-semibold text-xs">
               {selectedGame.stats?.players}
             </p>

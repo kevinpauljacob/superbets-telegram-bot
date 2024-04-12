@@ -27,6 +27,11 @@ const kenoSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    result: {
+      type: String,
+      enum: ["Won", "Lost"],
+      required: true,
+    },
     amountWon: {
       type: Number,
       required: true,

@@ -36,7 +36,7 @@ export function Header({
   const [langSelect, setLangSelect] = useState(false);
 
   return (
-    <div className={`${sidebar ? "z-20 " : ""} w-full flex flex-col`}>
+    <div className={`${sidebar ? "" : ""} z-[100] sticky top-0 w-full flex flex-col`}>
       <div
         className={`${
           sidebar ? "z-20" : ""
@@ -97,7 +97,7 @@ export function Header({
                 </span>
                 <FaChevronDown className="w-3 h-3 text-white" />
                 {langSelect && (
-                  <div className="w-full transition-all absolute top-full mt-2 rounded px-1 py-2 gap-0.5 z-50 flex flex-col bg-black">
+                  <div className="w-full transition-all absolute top-full mt-2 rounded px-1 py-2 gap-0.5 z-[100] flex flex-col bg-black">
                     <span
                       onClick={() => {
                         setLanguage("en");

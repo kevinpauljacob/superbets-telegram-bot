@@ -43,19 +43,19 @@ export default function Sidebar({ mobileSidebar }: { mobileSidebar: boolean }) {
 
   const [casinoGames, setCasinoGames] = useState<Game[]>([
     {
-      src: "/assets/sol.png",
+      src: "",
       token: "Dice To Win",
       link: "/dice", // Update the links to include "/"
       active: false,
     },
     {
-      src: "/assets/jup.png",
+      src: "",
       token: "Coin Flip",
       link: "/coinflip", // Update the links to include "/"
       active: false,
     },
     {
-      src: "/assets/usdt.png",
+      src: "",
       token: "Options",
       link: "/options", // Update the links to include "/"
       active: false,
@@ -199,7 +199,7 @@ export default function Sidebar({ mobileSidebar }: { mobileSidebar: boolean }) {
               <div className="flex items-center gap-2">
                 <FomoPlayIcon className="min-w-[1rem] min-h-[1rem] transition-all text-[#ababac] group-hover:text-[#9945FF] group-focus:text-[#9945FF]" />
                 <span className="mt-0.5 transition-all text-base font-changa text-[#c4c4c5] group-hover:text-white group-focus:text-white">
-                  FOMO: Exit
+                  FOMO: Play
                 </span>
               </div>
               <button
