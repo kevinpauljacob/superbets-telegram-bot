@@ -127,9 +127,9 @@ export default function Options() {
         );
         setTimeout(async () => {
           // console.log("ending the bet")
-          setBetInterval(3);
+          // setBetInterval(3);
           setBetEnd(true);
-          setLoading(false);
+          setCheckResult(true);
 
           // await new Promise((r) => setTimeout(r, 2000));
 
@@ -159,6 +159,10 @@ export default function Options() {
     }
   };
 
+  useEffect(() => {
+    console.log(betEnd, checkResult, loading);
+  }, [betEnd, checkResult, loading]);
+
   const getActiveBet = async () => {
     if (!wallet || !wallet.publicKey) return;
     setLoading(true);
@@ -182,6 +186,9 @@ export default function Options() {
             );
             if (new Date(bet.betEndTime!).getTime() < Date.now()) {
               // await new Promise((r) => setTimeout(r, 2000));
+
+              setBetEnd(true);
+              setCheckResult(true);
 
               let betEndPrice = await fetch(
                 `https://hermes.pyth.network/api/get_price_feed?id=0xef0d8b6fda2ceba41da15d4095d1da392a0d2f8ed0c6c7bc0f4cfac8c280b56d&publish_time=${Math.floor(
@@ -342,7 +349,7 @@ export default function Options() {
               </div>
 
               <div
-                className={`group flex h-11 w-full cursor-pointer items-center rounded-[8px] bg-[#202329] px-4`}
+                className={`group flex h-11 w-full cursor-pointer items-center rounded-[8px] bg-[#202329] pl-4 pr-2.5`}
               >
                 <input
                   id={"amount-input"}
@@ -357,6 +364,22 @@ export default function Options() {
                   value={betAmt}
                   className={`flex w-full min-w-0 bg-transparent text-base text-[#94A3B8] placeholder-[#94A3B8]  font-chakra placeholder-opacity-40 outline-none`}
                 />
+                <span
+                  className="text-xs font-medium text-white text-opacity-50 bg-[#292C32] hover:bg-[#555555] focus:bg-[#555555] transition-all rounded-[5px] py-1.5 px-4"
+                  onClick={() =>
+                    setBetAmt(coinData ? coinData[0]?.amount / 4 : 0)
+                  }
+                >
+                  1/4
+                </span>
+                <span
+                  className="text-xs mx-2 font-medium text-white text-opacity-50 bg-[#292C32] hover:bg-[#555555] focus:bg-[#555555] transition-all rounded-[5px] py-1.5 px-4"
+                  onClick={() =>
+                    setBetAmt(coinData ? coinData[0]?.amount / 2 : 0)
+                  }
+                >
+                  Half
+                </span>
                 <span
                   className="text-xs font-medium text-white text-opacity-50 bg-[#292C32] hover:bg-[#555555] focus:bg-[#555555] transition-all rounded-[5px] py-1.5 px-4"
                   onClick={() => setBetAmt(coinData ? coinData[0]?.amount : 0)}
@@ -504,15 +527,9 @@ export default function Options() {
       <GameDisplay>
         <>
           {/* time and amt */}
-          <div className={`flex w-full items-start justify-between`}>
+          <div className={`flex w-full items-start justify-between h-11`}>
             <div
-              className={`flex flex-col items-start text-xs md:text-sm font-chakra font-medium ${
-                result
-                  ? result === "Won"
-                    ? "text-[#72F238]"
-                    : "text-[#CF304A]"
-                  : "text-[#f0f0f0] test-opacity-75"
-              }`}
+              className={`flex flex-col items-start text-xs md:text-sm font-chakra font-medium text-[#f0f0f0] test-opacity-75`}
             >
               <Timer minutes={betInterval} betTime={betTime!} />
               {strikePrice === 0
@@ -522,13 +539,13 @@ export default function Options() {
                 : checkResult
                 ? loading && !result
                   ? "Checking result..."
-                  : result === "Won"
-                  ? "You won!"
-                  : "You lost!"
+                  : ""
+                : (timeLeft * 50) / (betInterval * 60000) <= 0
+                ? "Checking result..."
                 : ""}
             </div>
             <div className="flex flex-col items-end">
-              <span className="font-chakra font-medium text-[0.65rem] md:text-sm text-[#F0F0F0] text-opacity-75">
+              <span className="font-chakra font-medium text-xs md:text-sm text-[#F0F0F0] text-opacity-75">
                 ${strikePrice.toFixed(3)}
               </span>
               <span
@@ -536,57 +553,70 @@ export default function Options() {
                   betType === "up" ? "text-[#72F238]" : "text-[#CF304A]"
                 } text-xs md:text-base font-bold`}
               >
-                {betType ? betType === "up" ? "BET UP" : "BET DOWN" : ""}
+                {betType ? (betType === "up" ? "BET UP" : "BET DOWN") : ""}
               </span>
             </div>
           </div>
 
           {/* central loader  */}
           <div className="flex flex-1 flex-col items-center relative -mt-4 md:mt-10 mb-6 md:mb-0">
-            <div className="flex flex-col items-center absolute w-[6.5rem] h-[6.5rem] md:w-[14rem] md:h-[14rem] justify-start pt-5 md:pt-12">
-              <span className="font-chakra text-[0.65rem] md:text-sm text-[#94A3B8] text-opacity-75 mb-2 md:mb-5">
+            <div className="flex flex-col items-center absolute w-[14rem] h-[14rem] justify-start pt-14">
+              <span className="font-chakra text-sm text-[#94A3B8] text-opacity-75 mb-5">
                 $SOL
               </span>
-              <span className="font-chakra text-sm md:text-2xl text-white font-medium md:font-semibold text-opacity-90 md:mb-2">
+              <span className="font-chakra text-2xl text-white font-semibold text-opacity-90 mb-2">
                 ${livePrice.toFixed(3)}
               </span>
               {strikePrice && !result ? (
                 <span
-                  className={`text-[0.65rem] md:text-sm ${
+                  className={`text-sm ${
                     livePrice - strikePrice > 0
                       ? "text-[#72F238]"
                       : "text-[#CF304A]"
                   } text-opacity-90 font-chakra`}
                 >
+                  {livePrice - strikePrice > 0 ? "+" : "-"}
                   {Math.abs(livePrice - strikePrice).toFixed(4)}
                 </span>
               ) : (
-                <></>
+                <span
+                  className={`flex text-sm font-chakra font-medium ${
+                    result
+                      ? result === "Won"
+                        ? "text-[#72F238]"
+                        : "text-[#CF304A]"
+                      : "text-[#f0f0f0] test-opacity-75"
+                  }`}
+                >
+                  {result ? (result === "Won" ? "You Won!" : "You Lost!") : ""}
+                </span>
               )}
             </div>
-            <div className="w-[6.5rem] h-[6.5rem] md:w-[14rem] md:h-[14rem] relative transform -rotate-90">
+            <div className="w-[14rem] h-[14rem] relative transform -rotate-90">
               {[...Array(50)].map((item, index) => (
                 <div
                   key={index}
-                  className={`w-[3.25rem] md:w-[6.5rem] h-2 flex justify-end absolute top-[50%] left-[50%] origin-[0_0px] bg-transparent`}
+                  className={`w-[6.5rem] h-2 flex justify-end absolute top-[50%] left-[50%] origin-[0_0px] bg-transparent`}
                   style={{ rotate: `${(360 / 50) * index}deg` }}
                 >
                   <div
-                    className={`w-[5px] h-[3px] md:w-[9px] md:h-[6px] ${
+                    className={`w-[9px] h-[6px] ${
                       strikePrice === 0
                         ? loading && !checkResult
-                          ? "blink_1 bg-[#282E3D]"
+                          ? "blink_1_50 bg-white"
                           : "blink_3 bg-[#282E3D]"
                         : checkResult
                         ? loading && !result
-                          ? "bg-[#282E3D] blink_1"
+                          ? "blink_1_50 bg-white"
                           : result === "Won"
                           ? "bg-[#72F238] bg-opacity-20 blink_3"
                           : "bg-[#CF304A] bg-opacity-20 blink_3"
                         : betEnd
-                        ? "bg-[#282E3D] blink_1"
+                        ? "blink_1_50 bg-white"
                         : index >= (timeLeft * 50) / (betInterval * 60000)
-                        ? "bg-[#282E3D]"
+                        ? (timeLeft * 50) / (betInterval * 60000) <= 0
+                          ? "blink_1_50 bg-white"
+                          : "bg-[#282E3D]"
                         : timeLeft / (betInterval * 60000) < 0.25
                         ? `bg-[#CF304A] blink_1 ${
                             index >= (timeLeft * 50) / (betInterval * 60000) - 1

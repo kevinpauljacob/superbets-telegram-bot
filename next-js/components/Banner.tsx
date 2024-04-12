@@ -7,15 +7,15 @@ export default function StoreBanner() {
   const games = [
     {
       href: "/",
-      src: "/assets/f1game.png",
+      src: "/assets/f1game.webp",
     },
     {
       href: "/",
-      src: "/assets/clrgame.png",
+      src: "/assets/clrgame.webp",
     },
     {
       href: "/",
-      src: "/assets/odrgame.png",
+      src: "/assets/odrgame.webp",
     },
   ];
   return (
@@ -31,6 +31,7 @@ export default function StoreBanner() {
               alt=""
               width="100"
               height="100"
+              unoptimized
               className="w-[95%] mr-3.5"
             />
           </Link>

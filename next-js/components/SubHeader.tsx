@@ -88,7 +88,7 @@ export default function SubHeader() {
           {cards.map((card, index) => (
             <Link
               key={index}
-              className="bg-[#1E2220] flex items-center rounded-md mr-2 min-w-[180px] justify-around"
+              className="bg-[#1E2220] flex items-center rounded-md mr-2.5 min-w-[8.8rem]"
               href={`/${card.game}`}
             >
               <Image
@@ -96,26 +96,26 @@ export default function SubHeader() {
                 alt="badge"
                 width={52}
                 height={52}
-                className="rounded-md ml-2"
+                className="rounded-md"
               />
-              <div className="pl-2 pr-2 py-1">
+              <div className="pl-2 pr-2">
                 <div className="flex items-center gap-1">
                   <Image
                     src={`/assets/badges/T-${card.userTier}.png`}
                     alt="userBadge"
-                    width={23}
-                    height={23}
+                    width={13}
+                    height={13}
                   />
-                  <span className="text-sm">
+                  <span className="text-xs font-changa font-medium text-white">
                     {trimStringToLength(card.wallet, 3)}
                   </span>
                 </div>
                 {card.result === "Won" ? (
-                  <p className="text-[#72F238]">
+                  <p className="text-[#72F238] font-changa text-sm mt-1">
                     +${(card.absAmount ?? 0).toFixed(2)}
                   </p>
                 ) : (
-                  <p className="text-[#F23838]">
+                  <p className="text-[#F23838] font-change text-sm mt-1">
                     -${(card.absAmount ?? 0).toFixed(2)}
                   </p>
                 )}
