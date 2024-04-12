@@ -43,6 +43,7 @@ export enum GameType {
   keno = "keno",
   roulette1 = "roulette1",
   roulette2 = "roulette2",
+  mines = "mines",
 }
 
 export const generateGameResult = (
@@ -66,7 +67,7 @@ export const generateGameResult = (
       return (parseInt(hash.slice(0, 4), 16) % 100) + 1;
     case GameType.plinko:
       return parseInt(hash.slice(0, 4), 16);
-    case GameType.keno:
+    case GameType.keno: {
       let generatedNumbers = new Set<number>();
       let start = 0;
       while (generatedNumbers.size < 10) {
@@ -75,10 +76,26 @@ export const generateGameResult = (
         start++;
       }
       return Array.from(generatedNumbers);
+    }
     case GameType.roulette1:
       return parseInt(hash.slice(0, 4), 16) % 37;
     case GameType.roulette2:
       return (parseInt(hash.slice(0, 4), 16) % 38) - 1;
+    case GameType.mines: {
+      let x = 5;
+      // in a 5x5 grid, fill 25 cells with 0s and 1s, there should be x number of 1s
+      let mineGrid = new Array(25).fill(0);
+      for (let i = 0; i < x; i++) {
+        mineGrid[i] = 1;
+      }
+      // shuffle the array
+      for (let i = mineGrid.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [mineGrid[i], mineGrid[j]] = [mineGrid[j], mineGrid[i]];
+      }
+      return mineGrid;
+      
+    }
     default:
       throw new Error("Invalid game type!");
   }
