@@ -66,8 +66,9 @@ export default function StatsHistory({ refresh }: { refresh: boolean }) {
 
     fetch(`${route}`)
       .then((res) => res.json())
-      .then((history) => {
+      .then((history: any) => {
         if (history.success) {
+          console.log("data", history?.data)
           setFlips(history?.data ?? []);
           setMaxPages(Math.ceil(history?.data.length / transactionsPerPage));
         } else {
@@ -193,10 +194,10 @@ export default function StatsHistory({ refresh }: { refresh: boolean }) {
                       </span>
                     )}
                     <span className="w-full hidden md:block text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
-                      {flip.chance}
+                      {(100/flip.chance).toFixed(2)}
                     </span>
                     <span className="w-full hidden md:block text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
-                      {(flip.amount ?? 0).toFixed(4)}
+                      {(flip.amount).toFixed(4)}
                     </span>
                     <span
                       className={`w-full hidden md:block text-center font-changa text-sm text-opacity-75 ${
@@ -219,6 +220,9 @@ export default function StatsHistory({ refresh }: { refresh: boolean }) {
                       }`}
                     >
                       {flip.amountWon.toFixed(4)} SOL
+                    </span>
+                    <span className="w-full hidden md:block text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
+                      {flip.amountWon>0?(flip.amountWon).toFixed(4):'-'}
                     </span>
                   </div>
                 </>

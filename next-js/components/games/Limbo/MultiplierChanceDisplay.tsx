@@ -25,9 +25,9 @@ export const MultiplierChanceDisplay = ({
             <input
               type="number"
               step=".01"
-              min={1.0}
+              min={1.01}
               className="bg-[#202329] text-xs text-white rounded-md px-1.5 md:px-5 py-2"
-              placeholder={"1.00"}
+              value={multiplier}
               onChange={handleInputChange}
             />
           </div>

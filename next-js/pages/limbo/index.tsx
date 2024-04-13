@@ -37,7 +37,7 @@ export default function Limbo() {
 
   const [betSetting, setBetSetting] = useState<"manual" | "auto">("manual");
 
-  const [multiplier, setMultiplier] = useState(1.0);
+  const [multiplier, setMultiplier] = useState(1.01);
   const [lastMultipliers, setLastMultipliers] = useState<number[]>([]);
   const [targetMultiplier, setTargetMultiplier] = useState(1.0);
   const duration = 500;
@@ -57,13 +57,14 @@ export default function Limbo() {
     }, 16);
 
     return () => clearInterval(timer);
-  }, [duration, targetMultiplier]);
+  }, [duration, targetMultiplier, multiplier]);
 
   const bet = async () => {
+    setMultiplier(1.0);
+    setTargetMultiplier(1.0);
     try {
       console.log("Placing Flip");
-
-      // function to place bet here
+      // function to place bet
       const response = await limboBet(
         wallet,
         betAmt,
@@ -103,14 +104,16 @@ export default function Limbo() {
       toast.error("Set Amount.");
       return;
     }
+    if (inputMultiplier < 1.01) {
+      toast.error("Input multiplier should be atleast 1.01");
+      return;
+    }
 
     setLoading(true);
     setDeposit(false);
     setTimeout(() => {
-      setLoading(false);
-      setDeposit(true);
       bet();
-    }, 2000);
+    }, 300);
   };
 
   useEffect(() => {
@@ -249,18 +252,12 @@ export default function Limbo() {
                         flipping ? (
                           // while getting flip result
                           <div className="flex w-full flex-col items-center justify-center">
-                            <Image
-                              src={"/assets/coin.png"}
-                              width={50}
-                              height={50}
-                              alt=""
-                              className="rotate mb-2"
-                            />
+                            <Spinner color="white" />
                             <span className="font-changa text-xs text-[#FFFFFF] text-opacity-75">
                               Deposit Confirmed
                             </span>
                             <span className="font-changa text-xl text-[#FFFFFF] text-opacity-90">
-                              Flipping the coin...
+                              ...
                             </span>
                           </div>
                         ) : (
@@ -278,6 +275,7 @@ export default function Limbo() {
                             </span>
                             <button
                               onClick={() => {
+                                setMultiplier(1.0);
                                 setLoading(false);
                                 setResult(null);
                                 setDeposit(false);
@@ -524,7 +522,9 @@ export default function Limbo() {
                 <span
                   className={`${
                     result
-                      ? multiplier >= inputMultiplier
+                      ? multiplier === 1.0
+                        ? "text-white"
+                        : multiplier >= inputMultiplier
                         ? "text-[#72F238]"
                         : "text-[#F1323E]"
                       : "text-white"
@@ -539,7 +539,10 @@ export default function Limbo() {
             multiplier={inputMultiplier}
             setMultiplier={setInputMultiplier}
           />
-          <MultiplierHistory multiplierHistory={lastMultipliers} />
+          <MultiplierHistory
+            multiplierHistory={lastMultipliers}
+            inputMultiplier={inputMultiplier}
+          />
         </>
       </GameDisplay>
       <GameTable>
