@@ -3,11 +3,9 @@ import Image from "next/image";
 import { useState } from "react";
 import { IoIosArrowDown, IoMdCopy } from "react-icons/io";
 import { Bet } from "./HistoryTable";
-import RollDiceProvablyFairModal, {
-  PFModalData,
-} from "./RollDiceProvablyFairModal";
+import RollDiceProvablyFairModal, { PFModalData } from "./ProvablyFairModal";
 import { useGlobalContext } from "@/components/GlobalContext";
-
+import DraggableBar from "./DraggableBar";
 interface ModalData {
   bet: Bet;
 }
@@ -25,6 +23,9 @@ export default function VerifyBetModal({ isOpen, onClose, modalData }: Props) {
 
   //Provably Fair Modal handling
   const [isPFModalOpen, setIsPFModalOpen] = useState(false);
+  const [choice, setChoice] = useState<number>(
+    bet?.direction === "over" ? 100 - bet?.chance : bet?.chance,
+  );
 
   const openPFModal = () => {
     setIsPFModalOpen(true);
@@ -90,7 +91,10 @@ export default function VerifyBetModal({ isOpen, onClose, modalData }: Props) {
               <button className="px-4 py-1.5 sm:py-2 mb-2 sm:mb-0 w-full text-white rounded-md bg-[#D9D9D9] bg-opacity-5 grid">
                 <div className="text-[#94A3B8] text-sm">Multiplier</div>
                 <div className="text-white">
-                  {(6 / bet.chosenNumbers.length).toFixed(2)} x
+                  {bet.direction === "over"
+                    ? (98 / (100 - (100 - bet.chance))).toFixed(2)
+                    : (98 / (100 - bet.chance)).toFixed(2)}{" "}
+                  x
                 </div>
               </button>
               <button className="px-4 py-1.5 sm:py-2 mb-2 sm:mb-0 w-full text-white rounded-md bg-[#D9D9D9] bg-opacity-5 grid">
@@ -101,60 +105,14 @@ export default function VerifyBetModal({ isOpen, onClose, modalData }: Props) {
               </button>
             </div>
             <div className="mt-8 px-8 pt-10 border-2 border-white border-opacity-5 rounded-md">
-              <div className="relative w-full mb-8 xl:mb-6">
-                <div>
-                  <Image
-                    src="/assets/progressBar.png"
-                    alt="progress bar"
-                    width={900}
-                    height={100}
-                  />
-                </div>
-                <div className="flex justify-around md:gap-2">
-                  {Array.from({ length: 6 }, (_, i) => i + 1).map((face) => (
-                    <div
-                      key={face}
-                      className="flex flex-col items-center mr-2 sm:mr-0"
-                    >
-                      {bet.chosenNumbers.includes(face) &&
-                        bet.strikeNumber === face && (
-                          <Image
-                            src="/assets/pointer-green.png"
-                            alt="pointer green"
-                            width={13}
-                            height={13}
-                            className="absolute -top-[20px]"
-                          />
-                        )}
-                      <Image
-                        src="/assets/progressTip.png"
-                        alt="progress bar"
-                        width={13}
-                        height={13}
-                        className="absolute top-[2px]"
-                      />
-                      <Image
-                        src={
-                          bet.strikeNumber === face
-                            ? bet.chosenNumbers.includes(face)
-                              ? `/assets/winDiceFace${face}.png`
-                              : `/assets/lossDiceFace${face}.png`
-                            : bet.chosenNumbers.includes(face)
-                            ? `/assets/selectedDiceFace${face}.png`
-                            : `/assets/diceFace${face}.png`
-                        }
-                        width={50}
-                        height={50}
-                        alt=""
-                        className={`inline-block mt-6 ${
-                          bet.chosenNumbers.includes(face)
-                            ? "selected-face"
-                            : ""
-                        }`}
-                      />
-                    </div>
-                  ))}
-                </div>
+              <div className="relative w-full mb-8 xl:mb-6 pb-5 pt-10">
+                <DraggableBar
+                  choice={choice}
+                  setChoice={setChoice}
+                  strikeNumber={bet.strikeNumber}
+                  result={bet.result === "Won" ? true : false}
+                  rollType={bet.direction}
+                />
               </div>
               <div className="flex gap-4">
                 <div>
@@ -162,7 +120,25 @@ export default function VerifyBetModal({ isOpen, onClose, modalData }: Props) {
                   <input
                     type="text"
                     name="multiplier"
-                    value={(6 / bet.chosenNumbers.length).toFixed(2)}
+                    value={
+                      bet.direction === "over"
+                        ? (98 / (100 - (100 - bet.chance))).toFixed(2)
+                        : (98 / (100 - bet.chance)).toFixed(2)
+                    }
+                    className="bg-[#202329] text-white mt-1 rounded-md px-4 py-2 mb-4 w-full relative"
+                    readOnly
+                  />
+                </div>
+                <div>
+                  <label className="text-sm text-[#F0F0F0]">
+                    {bet.direction === "over" ? "Roll Over" : "Roll Under"}
+                  </label>
+                  <input
+                    type="text"
+                    name="choice"
+                    value={
+                      bet.direction === "over" ? 100 - bet.chance : bet.chance
+                    }
                     className="bg-[#202329] text-white mt-1 rounded-md px-4 py-2 mb-4 w-full relative"
                     readOnly
                   />
@@ -172,7 +148,7 @@ export default function VerifyBetModal({ isOpen, onClose, modalData }: Props) {
                   <input
                     type="text"
                     name="chance"
-                    value={((bet.chosenNumbers.length / 6) * 100).toFixed(2)}
+                    value={bet.chance}
                     className="bg-[#202329] text-white mt-1 rounded-md px-4 py-2 mb-4 w-full relative"
                     readOnly
                   />

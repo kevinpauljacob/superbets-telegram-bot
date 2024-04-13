@@ -10,10 +10,12 @@ export interface Bet {
   createdAt: string;
   wallet: string;
   rollOver: number;
+  direction: string;
   amount: number;
-  result: number;
+  result: string;
   strikeNumber: number;
   amountWon: number;
+  chance: number;
   nonce?: number;
   gameSeed?: {
     status: seedStatus;
@@ -45,11 +47,11 @@ export default function HistoryTable({ refresh }: { refresh: boolean }) {
   const transactionsPerPage = 10;
   const [maxPages, setMaxPages] = useState(0);
 
-  const headers = ["Time", "Roll Over", "Bet Amount", "Result", "Amount Won"];
+  const headers = ["Time", "Roll Type", "Bet Amount", "Result", "Amount Won"];
   const allHeaders = [
     "Time",
     "Wallet",
-    "Roll Over",
+    "Roll Type",
     "Bet Amount",
     "Result",
     "Amount Won",
@@ -77,6 +79,8 @@ export default function HistoryTable({ refresh }: { refresh: boolean }) {
           // toast.error("Could not fetch history.");
         }
       });
+
+    console.log("bets", bets);
   }, [all, refresh]);
 
   return (
@@ -168,7 +172,7 @@ export default function HistoryTable({ refresh }: { refresh: boolean }) {
                       }
                     }}
                   >
-                    <span className="w-full text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
+                    <span className="w-full text-center font-changa text-sm text-[#F0F0F0]">
                       {bet.createdAt
                         ? new Date(bet.createdAt).toLocaleDateString("en-GB", {
                             day: "2-digit",
@@ -184,21 +188,25 @@ export default function HistoryTable({ refresh }: { refresh: boolean }) {
                         : "-"}
                     </span>
                     {all && (
-                      <span className="w-full hidden md:block text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
+                      <span className="w-full hidden md:block text-center font-changa text-sm text-[#F0F0F0]">
                         {obfuscatePubKey(bet.wallet)}
                       </span>
                     )}
-                    <span className="w-full hidden md:block text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
-                      {bet.rollOver}
+                    <span className="w-full hidden md:block capitalize text-center font-changa text-sm text-[#F0F0F0] ">
+                      {bet.direction}
                     </span>
-                    <span className="w-full hidden md:block text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
+                    <span className="w-full hidden md:block text-center font-changa text-sm text-[#F0F0F0]">
                       {bet.amount} SOL
                     </span>
-                    <span className="w-full hidden md:block text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
+                    <span className="w-full hidden md:block text-center font-changa text-sm text-[#F0F0F0]">
                       {bet.strikeNumber}
                     </span>
                     <span
-                      className={`w-full text-center font-changa text-sm text-opacity-75}`}
+                      className={`w-full text-center font-changa text-sm ${
+                        bet.result === "Won"
+                          ? "text-[#72F238]"
+                          : "text-[#F1323E]"
+                      }`}
                     >
                       {bet.amountWon.toFixed(4)} SOL
                     </span>
