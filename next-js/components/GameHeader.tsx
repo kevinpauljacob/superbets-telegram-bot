@@ -164,14 +164,14 @@ export default function GameHeader() {
           </div>
         </div>
       </div>
-      {game === "coinflip" ? (
+      {game === GameType.coin ? (
         <CoinFlipProvablyFairModal
           isOpen={isOpen}
           onClose={closeModal}
           modalData={modalData}
           setModalData={setModalData}
         />
-      ) : game === "dice2" ? (
+      ) : game === GameType.dice2 ? (
         <Dice2ProvablyFairModal
           isOpen={isOpen}
           onClose={closeModal}

@@ -23,6 +23,9 @@ export default function VerifyBetModal({ isOpen, onClose, modalData }: Props) {
 
   //Provably Fair Modal handling
   const [isPFModalOpen, setIsPFModalOpen] = useState(false);
+  const [choice, setChoice] = useState<number>(
+    bet?.direction === "over" ? 100 - bet?.chance : bet?.chance,
+  );
 
   const openPFModal = () => {
     setIsPFModalOpen(true);
@@ -104,12 +107,12 @@ export default function VerifyBetModal({ isOpen, onClose, modalData }: Props) {
             <div className="mt-8 px-8 pt-10 border-2 border-white border-opacity-5 rounded-md">
               <div className="relative w-full mb-8 xl:mb-6 pb-5 pt-10">
                 <DraggableBar
-                  choice={
-                    bet?.direction === "over" ? 100 - bet?.chance : bet?.chance
-                  }
+                  choice={choice}
+                  setChoice={setChoice}
                   strikeNumber={bet.strikeNumber}
                   result={bet.result === "Won" ? true : false}
                   rollType={bet.direction}
+                  draggable={false}
                 />
               </div>
               <div className="flex gap-4">

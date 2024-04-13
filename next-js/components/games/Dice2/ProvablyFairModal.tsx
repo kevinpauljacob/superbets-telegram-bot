@@ -48,7 +48,7 @@ export default function RollDiceProvablyFairModal({
   const [newClientSeed, setNewClientSeed] = useState<string>(
     generateClientSeed(),
   );
-  const [strikeNumber, setStrikeNumber] = useState<number>();
+  const [strikeNumber, setStrikeNumber] = useState<number>(50.0);
 
   const [verificationState, setVerificationState] = useState<{
     clientSeed: string;
@@ -95,12 +95,16 @@ export default function RollDiceProvablyFairModal({
     const { clientSeed, serverSeed, nonce } = verificationState;
 
     setStrikeNumber(
-      generateGameResult(
-        name === "serverSeed" ? value : serverSeed,
-        name === "clientSeed" ? value : clientSeed,
-        parseInt(name === "nonce" ? value : nonce),
-        GameType.dice2,
-      ) as number,
+      parseFloat(
+        (
+          generateGameResult(
+            name === "serverSeed" ? value : serverSeed,
+            name === "clientSeed" ? value : clientSeed,
+            parseInt(name === "nonce" ? value : nonce),
+            GameType.dice2,
+          ) as number
+        ).toFixed(2),
+      ),
     );
   };
 
@@ -285,10 +289,12 @@ export default function RollDiceProvablyFairModal({
                     <div className="px-8 pt-16 pb-8">
                       <div className="w-full">
                         <DraggableBar
-                          choice={44.8}
-                          strikeNumber={strikeNumber || 0}
+                          choice={strikeNumber}
+                          setChoice={setStrikeNumber}
+                          strikeNumber={strikeNumber}
                           result={false}
                           rollType={"over"}
+                          draggable={false}
                         />
                       </div>
                     </div>
@@ -298,7 +304,7 @@ export default function RollDiceProvablyFairModal({
                     <div className="flex items-center">
                       <select
                         name="game"
-                        value={GameType.dice}
+                        value={GameType.dice2}
                         onChange={(e) =>
                           setModalData((prevData) => ({
                             ...prevData,
@@ -307,7 +313,7 @@ export default function RollDiceProvablyFairModal({
                         }
                         className="bg-[#202329] mt-1 rounded-md px-4 py-2 mb-4 w-full relative appearance-none"
                       >
-                        <option value={GameType.dice}>Dice</option>
+                        <option value={GameType.dice2}>Dice</option>
                       </select>
                     </div>
                   </div>

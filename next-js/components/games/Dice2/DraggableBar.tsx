@@ -2,9 +2,11 @@ import React, { useState, useEffect, useRef, RefObject } from "react";
 
 type ProgressBarProps = {
   choice: number;
+  setChoice: (choice: number) => void;
   strikeNumber: number;
   result: boolean;
   rollType: string;
+  draggable?: boolean;
 };
 
 type ProgressBarStyles = {
@@ -21,12 +23,14 @@ type IndicatorStyles = {
 
 const ProgressBar: React.FC<ProgressBarProps> = ({
   choice,
+  setChoice,
   strikeNumber,
   result,
   rollType,
+  draggable = true,
 }) => {
   const [isDragging, setIsDragging] = useState(false);
-  console.log("choice", choice);
+
   const progressBarRef: RefObject<HTMLDivElement> =
     useRef<HTMLDivElement>(null);
   const indicatorsRef: RefObject<HTMLDivElement> = useRef<HTMLDivElement>(null);
@@ -68,6 +72,35 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
     }
   };
 
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let newValue = parseFloat(e.target.value);
+    newValue = Math.max(2, Math.min(newValue, 98));
+    setChoice(newValue);
+  };
+
+  const handleDragStart = () => {
+    setIsDragging(true);
+  };
+
+  const handleDragEnd = () => {
+    setIsDragging(false);
+  };
+
+  const handleDrag = (e: any) => {
+    if (isDragging) {
+      const rect = e.target.getBoundingClientRect();
+      const offsetX = e.clientX - rect.left;
+      let newChoice = (offsetX / rect.width) * 100;
+
+      if (newChoice < 2) {
+        newChoice = 2;
+      } else if (newChoice > 98) {
+        newChoice = 98;
+      }
+      setChoice(newChoice);
+    }
+  };
+
   const indicators = [0, 25, 50, 75, 100];
 
   const progressBarStyles: ProgressBarStyles = {
@@ -103,7 +136,7 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
           : choice >= 98
           ? `calc(${choice}% - 8.5px)`
           : `calc(${choice}% - 8.5px)`,
-      cursor: "pointer",
+      cursor: draggable ? "pointer" : "default",
     },
   };
 
@@ -140,13 +173,28 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
               max="100"
               step="10"
               value={choice}
+              {...(draggable && {
+                onChange: handleChange,
+                onMouseMove: handleDrag,
+                onTouchMove: handleDrag,
+                onMouseDown: handleDragStart,
+                onMouseUp: handleDragEnd,
+                onTouchStart: handleDragStart,
+                onTouchEnd: handleDragEnd,
+              })}
               style={progressBarStyles.rangeInput}
             />
             <div
               className="progress-bar-fill rounded-full"
               style={progressBarStyles.fill}
             ></div>
-            <div style={progressBarStyles.cursor}></div>
+            <div
+              style={progressBarStyles.cursor}
+              {...(draggable && {
+                onMouseDown: handleDragStart,
+                onMouseUp: handleDragEnd,
+              })}
+            />
             <div
               className="absolute -top-16 -translate-x-1/2 -translate-y-1/2 transition-all duration-300"
               style={{ marginLeft: `${strikeNumber}%` }}
