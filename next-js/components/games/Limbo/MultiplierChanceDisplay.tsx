@@ -1,17 +1,17 @@
 import { useGlobalContext } from "@/components/GlobalContext";
-import { setUncaughtExceptionCaptureCallback } from "process";
-import { useState } from "react";
+import { Dispatch, SetStateAction, useState } from "react";
 
-export const MultiplierChanceDisplay = () => {
-  const [chance, setChance] = useState<number>(99.0);
+export const MultiplierChanceDisplay = ({
+  multiplier,
+  setMultiplier,
+}: {
+  multiplier: number;
+  setMultiplier: Dispatch<SetStateAction<number>>;
+}) => {
   const { coinData, setShowWalletModal } = useGlobalContext();
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (parseFloat(event.target.value) < 1.0) setChance(0);
-    else {
-      const newValue = 99 / parseFloat(event.target.value);
-      setChance(newValue);
-    }
+    setMultiplier(parseFloat(event.target.value));
   };
 
   return (
@@ -36,7 +36,7 @@ export const MultiplierChanceDisplay = () => {
               Chance
             </span>
             <span className="bg-[#202329] text-xs text-white rounded-md px-1.5 md:px-5 py-2">
-              {chance.toFixed(2)}%
+              {(100 / multiplier).toFixed(8)}%
             </span>
           </div>
         </>

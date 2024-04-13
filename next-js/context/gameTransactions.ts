@@ -466,6 +466,35 @@ export const rollDice = async (
   }
 };
 
+export const limboBet = async (
+  wallet: WalletContextState,
+  amount: number,
+  chance: number,
+) => {
+  try {
+    if (!wallet.publicKey) throw new Error("Wallet not connected");
+
+    const res = await fetch(`/api/games/limbo`, {
+      method: "POST",
+      body: JSON.stringify({
+        wallet: wallet.publicKey,
+        amount: amount,
+        tokenMint: "SOL",
+        chance,
+      }),
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    const data = await res.json();
+
+    return data;
+  } catch (error: any) {
+    return { success: false, message: error.message, data: null };
+  }
+};
+
 export function trimStringToLength(str: string, desiredLength: number): string {
   return (
     str.substring(0, desiredLength) +

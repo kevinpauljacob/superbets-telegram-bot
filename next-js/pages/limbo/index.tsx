@@ -15,6 +15,7 @@ import {
 import { MultiplierChanceDisplay } from "@/components/games/Limbo/MultiplierChanceDisplay";
 import Spinner from "@/components/Spinner";
 import { MultiplierHistory } from "@/components/games/Limbo/MultiplierHistory";
+import { limboBet } from "@/context/gameTransactions";
 
 export default function Limbo() {
   const wallet = useWallet();
@@ -41,31 +42,48 @@ export default function Limbo() {
   const [targetMultiplier, setTargetMultiplier] = useState(1.0);
   const duration = 500;
 
+  const [inputMultiplier, setInputMultiplier] = useState(2.0);
+
   useEffect(() => {
     const increment = (targetMultiplier - multiplier) / (duration / 16); // 16ms is about 60fps
     const timer = setInterval(() => {
       setMultiplier((prevNumber) => {
         const nextNumber = prevNumber + increment;
-        return nextNumber >= targetMultiplier ? targetMultiplier : nextNumber;
+        if (increment > 0)
+          return nextNumber >= targetMultiplier ? targetMultiplier : nextNumber;
+        else
+          return nextNumber <= targetMultiplier ? targetMultiplier : nextNumber;
       });
     }, 16);
 
     return () => clearInterval(timer);
-  }, [multiplier, duration, targetMultiplier]);
+  }, [duration, targetMultiplier]);
 
   const bet = async () => {
     try {
-      setMultiplier(1.0);
       console.log("Placing Flip");
-      const result = Math.random() * 10;
-      setLastMultipliers((prev) => [result, prev[0], prev[1], prev[2]]);
 
       // function to place bet here
+      const response = await limboBet(
+        wallet,
+        betAmt,
+        parseFloat((100 / inputMultiplier).toFixed(8)),
+      );
+      if (!response.success) throw response.message;
+
+      const winningMultiplier = parseFloat(
+        (100 / response.strikeNumber).toFixed(2),
+      );
+      setLastMultipliers((prev) => {
+        const newValues = [winningMultiplier, ...prev];
+        return newValues.slice(0, 4);
+      });
 
       setDeposit(false);
       setFlipping(false);
       setLoading(false);
-      setTargetMultiplier(result);
+      setTargetMultiplier(winningMultiplier);
+      setResult(response.result);
     } catch (e) {
       toast.error("Could not make Flip.");
 
@@ -77,7 +95,6 @@ export default function Limbo() {
   };
 
   const onSubmit = async (data: any) => {
-    console.log(data);
     if (!wallet.publicKey) {
       toast.error("Wallet not connected");
       return;
@@ -506,19 +523,22 @@ export default function Limbo() {
               <div className="bg-[#1E2024] md:w-1/4 md:h-1/4 place-content-center text-center rounded-md">
                 <span
                   className={`${
-                    multiplier >= 2
-                      ? "text-[#72F238]"
-                      : multiplier > 1
-                      ? "text-[#F1323E]"
+                    result
+                      ? multiplier >= inputMultiplier
+                        ? "text-[#72F238]"
+                        : "text-[#F1323E]"
                       : "text-white"
                   } font-changa inline-block transition-transform duration-200 ease-out md:text-6xl`}
                 >
-                  {multiplier.toFixed(2)}
+                  {multiplier.toFixed(2)}x
                 </span>
               </div>
             </div>
           </div>
-          <MultiplierChanceDisplay />
+          <MultiplierChanceDisplay
+            multiplier={inputMultiplier}
+            setMultiplier={setInputMultiplier}
+          />
           <MultiplierHistory multiplierHistory={lastMultipliers} />
         </>
       </GameDisplay>
