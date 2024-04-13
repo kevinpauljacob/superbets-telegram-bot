@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef, RefObject } from "react";
 
 type ProgressBarProps = {
   choice: number;
-  setChoice: (choice: number) => void;
   strikeNumber: number;
   result: boolean;
   rollType: string;
@@ -22,13 +21,12 @@ type IndicatorStyles = {
 
 const ProgressBar: React.FC<ProgressBarProps> = ({
   choice,
-  setChoice,
   strikeNumber,
   result,
   rollType,
 }) => {
   const [isDragging, setIsDragging] = useState(false);
-
+  console.log("choice", choice);
   const progressBarRef: RefObject<HTMLDivElement> =
     useRef<HTMLDivElement>(null);
   const indicatorsRef: RefObject<HTMLDivElement> = useRef<HTMLDivElement>(null);
@@ -67,35 +65,6 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
           offset + (rangeRect.width - indicatorsRect.width) / 2;
         indicatorsRef.current.style.transform = `translateX(${adjustedOffset}px)`;
       }
-    }
-  };
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    let newValue = parseFloat(e.target.value);
-    newValue = Math.max(2, Math.min(newValue, 98));
-    setChoice(newValue);
-  };
-
-  const handleDragStart = () => {
-    setIsDragging(true);
-  };
-
-  const handleDragEnd = () => {
-    setIsDragging(false);
-  };
-
-  const handleDrag = (e: any) => {
-    if (isDragging) {
-      const rect = e.target.getBoundingClientRect();
-      const offsetX = e.clientX - rect.left;
-      let newChoice = (offsetX / rect.width) * 100;
-
-      if (newChoice < 2) {
-        newChoice = 2;
-      } else if (newChoice > 98) {
-        newChoice = 98;
-      }
-      setChoice(newChoice);
     }
   };
 
@@ -171,24 +140,13 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
               max="100"
               step="10"
               value={choice}
-              onChange={handleChange}
-              onMouseMove={handleDrag}
-              onTouchMove={handleDrag}
-              onMouseDown={handleDragStart}
-              onMouseUp={handleDragEnd}
-              onTouchStart={handleDragStart}
-              onTouchEnd={handleDragEnd}
               style={progressBarStyles.rangeInput}
             />
             <div
               className="progress-bar-fill rounded-full"
               style={progressBarStyles.fill}
             ></div>
-            <div
-              style={progressBarStyles.cursor}
-              onMouseDown={handleDragStart} // Start dragging when cursor is clicked
-              onMouseUp={handleDragEnd} // Stop dragging when mouse button is released
-            ></div>
+            <div style={progressBarStyles.cursor}></div>
             <div
               className="absolute -top-16 -translate-x-1/2 -translate-y-1/2 transition-all duration-300"
               style={{ marginLeft: `${strikeNumber}%` }}
