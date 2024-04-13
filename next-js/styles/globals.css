@@ -154,6 +154,22 @@ text-shadow-gold {
   animation: blink 1s ease-in-out infinite;
 }
 
+@keyframes blink50 {
+  0% {
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 0.2;
+  }
+  100% {
+    opacity: 0.5;
+  }
+}
+
+.blink_1_50 {
+  animation: blink50 1s ease-in-out infinite;
+}
+
 .box-shadow-green {
   box-shadow:
     0 0 7px #00e372,
