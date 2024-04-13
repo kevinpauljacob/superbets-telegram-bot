@@ -145,7 +145,7 @@ export default function GameHeader() {
               className="underline text-[#94A3B8] decoration-[#94A3B8] underline-offset-2 hover:cursor-pointer text-xs font-medium"
               onClick={openModal}
             >
-              Provabaly Fair
+              Provably Fair
             </p>
             <Image
               src={"/assets/fair.png"}
@@ -156,14 +156,14 @@ export default function GameHeader() {
           </div>
         </div>
       </div>
-      {game === "coinflip" ? (
+      {game === GameType.coin ? (
         <CoinFlipProvablyFairModal
           isOpen={isOpen}
           onClose={closeModal}
           modalData={modalData}
           setModalData={setModalData}
         />
-      ) : game === "dice" ? (
+      ) : game === GameType.dice ? (
         <RollDiceProvablyFairModal
           isOpen={isOpen}
           onClose={closeModal}

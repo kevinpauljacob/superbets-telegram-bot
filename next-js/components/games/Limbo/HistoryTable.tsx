@@ -6,7 +6,7 @@ import { GameType, seedStatus } from "@/utils/vrf";
 import VerifyFlipModal from "./VerifyFlipModal";
 
 export interface Flip {
-  flipType: "heads" | "tails";
+  chance: number;
   createdAt: string;
   wallet: string;
   amount: number;
@@ -44,7 +44,14 @@ export default function StatsHistory({ refresh }: { refresh: boolean }) {
   const [maxPages, setMaxPages] = useState(0);
 
   const headers = ["Time", "Multiplier", "Bet Amount", "Result", "Amount Won"];
-  const allHeaders = ["Time", "Wallet", "Multiplier", "Bet Amount", "Result", "Amount Won"];
+  const allHeaders = [
+    "Time",
+    "Wallet",
+    "Multiplier",
+    "Bet Amount",
+    "Result",
+    "Amount Won",
+  ];
 
   //headers to be displayed in small screen devices
   const smallScreenHeaders = ["Time", "Amount Won"];
@@ -52,9 +59,9 @@ export default function StatsHistory({ refresh }: { refresh: boolean }) {
 
   useEffect(() => {
     const route = all
-      ? `/api/games/global/getHistory?game=${GameType.coin}`
+      ? `/api/games/global/getHistory?game=${GameType.limbo}`
       : `/api/games/global/getUserHistory?game=${
-          GameType.coin
+          GameType.limbo
         }&wallet=${wallet.publicKey?.toBase58()}`;
 
     fetch(`${route}`)
@@ -186,7 +193,7 @@ export default function StatsHistory({ refresh }: { refresh: boolean }) {
                       </span>
                     )}
                     <span className="w-full hidden md:block text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
-                      {flip.flipType.toUpperCase()}
+                      {flip.chance}
                     </span>
                     <span className="w-full hidden md:block text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
                       {(flip.amount ?? 0).toFixed(4)}

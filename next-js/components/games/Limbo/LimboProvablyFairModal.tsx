@@ -45,6 +45,7 @@ export default function LimboProvablyFairModal({
   const [newClientSeed, setNewClientSeed] = useState<string>(
     generateClientSeed(),
   );
+  const [multiplier, setMultiplier] = useState<string>("1.00");
 
   const [verificationState, setVerificationState] = useState<{
     clientSeed: string;
@@ -89,6 +90,18 @@ export default function LimboProvablyFairModal({
     }));
 
     const { clientSeed, serverSeed, nonce } = verificationState;
+
+    setMultiplier(
+      (
+        100 /
+        (generateGameResult(
+          name === "serverSeed" ? value : serverSeed,
+          name === "clientSeed" ? value : clientSeed,
+          parseInt(name === "nonce" ? value : nonce),
+          GameType.limbo,
+        ) as number)
+      ).toFixed(2),
+    );
   };
 
   const handleSetClientSeed = async () => {
@@ -270,7 +283,7 @@ export default function LimboProvablyFairModal({
                 <div className="grid gap-2">
                   <div className="border-2 border-opacity-5 border-[#FFFFFF] md:px-8">
                     <div className="flex justify-center items-center gap-4 md:px-8 py-4 md:text-6xl font-changa">
-                      2.21x
+                      {multiplier}x
                     </div>
                   </div>
                 </div>

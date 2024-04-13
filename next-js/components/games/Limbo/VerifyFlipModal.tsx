@@ -88,11 +88,15 @@ export default function VerifyFlipModal({ isOpen, onClose, modalData }: Props) {
               </button>
               <button className="px-4 py-1.5 sm:py-2 mb-2 sm:mb-0 w-full text-white rounded-md bg-[#D9D9D9] bg-opacity-5 grid">
                 <div className="text-[#94A3B8] text-sm">Multiplier</div>
-                <div className="text-white">{(2 / 1).toFixed(2)} x</div>
+                <div className="text-white">
+                  {(100 / flip.chance).toFixed(2)} x
+                </div>
               </button>
               <button className="px-4 py-1.5 sm:py-2 mb-2 sm:mb-0 w-full text-white rounded-md bg-[#D9D9D9] bg-opacity-5 grid">
                 <div className="text-[#94A3B8] text-sm">Payout</div>
-                <div className="text-white">{flip.amountWon} $SOL</div>
+                <div className="text-white">
+                  {flip.amountWon - flip.amount} $SOL
+                </div>
               </button>
             </div>
             <div className="mt-8 px-8 pt-10 border-2 border-white border-opacity-5 rounded-md">
@@ -117,7 +121,7 @@ export default function VerifyFlipModal({ isOpen, onClose, modalData }: Props) {
                   <input
                     type="text"
                     name="chance"
-                    value={((99 / 2)).toFixed(2)}
+                    value={(99 / 2).toFixed(2)}
                     className="bg-[#202329] text-white mt-1 rounded-md px-4 py-2 mb-4 w-full relative"
                     readOnly
                   />
