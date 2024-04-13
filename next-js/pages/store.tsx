@@ -62,7 +62,7 @@ export default function Store() {
   ];
 
   return (
-    <div className="text-white w-full flex flex-col items-start justify-center p-5 sm:p-5 lg:pr-16 bg-black pb-10 overflow-hidden min-h-screen">
+    <div className="text-white w-full flex flex-col items-start justify-center p-5 sm:p-5 lg:pr-16 pb-10 overflow-hidden min-h-screen">
       <div className="mb-7 w-full">
         <StoreBanner />
       </div>

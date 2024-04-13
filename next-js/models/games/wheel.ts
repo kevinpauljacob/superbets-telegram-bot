@@ -32,16 +32,13 @@ const wheelSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    clientSeed: {
-      type: String,
-      required: true,
-    },
-    serverSeed: {
-      type: String,
-      required: true,
-    },
     nonce: {
       type: Number,
+      required: true,
+    },
+    gameSeed: {
+      type: mongoose.Schema.ObjectId,
+      ref: "GameSeed",
       required: true,
     },
   },

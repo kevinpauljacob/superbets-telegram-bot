@@ -11,7 +11,7 @@ export default function BetSetting({
         className={`w-full border-2 rounded-md py-1 mr-1 text-white text-opacity-90 transition duration-300 ease-in-out ${
           betSetting === "manual"
             ? "bg-[#d9d9d90d] border-transparent"
-            : "border-[#d9d9d90d]"
+            : "border-[#d9d9d90d] hover:bg-[#9361d1] focus:bg-[#602E9E]"
         }`}
         onClick={() => setBetSetting("manual")}
       >
@@ -21,7 +21,7 @@ export default function BetSetting({
         className={`w-full border-2 rounded-md py-1 ml-1 text-white text-opacity-90 transition duration-300 ease-in-out ${
           betSetting === "auto"
             ? "bg-[#d9d9d90d] border-transparent"
-            : "border-[#d9d9d90d]"
+            : "border-[#d9d9d90d] hover:bg-[#9361d1] focus:bg-[#602E9E]"
         }`}
         onClick={() => setBetSetting("auto")}
       >

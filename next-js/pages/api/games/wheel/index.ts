@@ -173,6 +173,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         strikeNumber,
         result,
         tokenMint,
+        nonce,
         gameSeed: activeGameSeed._id,
       });
 

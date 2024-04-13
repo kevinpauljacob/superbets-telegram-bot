@@ -47,7 +47,7 @@ export default function FomoExit() {
         </div>
         <div className="">
           <button
-            className="bg-[#1D1A21] hover:bg-gray-500/30 text-white font-bold py-4 px-5 rounded focus:outline-none focus:shadow-outline mr-3"
+            className="bg-[#1D1A21] hover:bg-[#333037] focus:bg-[#333037] transition-all text-white font-bold py-4 px-5 rounded focus:outline-none focus:shadow-outline mr-3"
             onClick={prevSlide}
           >
             <Image
@@ -59,7 +59,7 @@ export default function FomoExit() {
             />
           </button>
           <button
-            className="bg-[#1D1A21] hover:bg-gray-500/30 text-white font-bold py-4 px-5 rounded focus:outline-none focus:shadow-outline"
+            className="bg-[#1D1A21] hover:bg-[#333037] focus:bg-[#333037] transition-all text-white font-bold py-4 px-5 rounded focus:outline-none focus:shadow-outline"
             onClick={nextSlide}
           >
             <Image

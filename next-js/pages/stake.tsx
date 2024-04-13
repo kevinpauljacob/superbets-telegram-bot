@@ -80,8 +80,8 @@ export default function Stake() {
   }, [session?.user, wallet.publicKey]);
 
   return (
-    <div className="flex flex-col items-center w-full overflow-hidden min-h-screen flex-1 bg-[#2B0A31] relative">
-      <div className="w-full flex flex-1 flex-col items-start gap-5 px-5 sm:px-10 lg:px-40 2xl:px-[15%] bg-black pb-10">
+    <div className="flex flex-col items-center w-full overflow-hidden min-h-screen flex-1 relative">
+      <div className="w-full flex flex-1 flex-col items-start gap-5 px-5 sm:px-10 lg:px-40 2xl:px-[15%] pb-10">
         <span className="text-white text-opacity-90 font-semibold text-[1.5rem] sm:text-[2rem] mt-[4rem]">
           {/* {translator("You have", language)}{" "} */}
           {/* <span className="text-[#9945FF]">{solBal.toFixed(3)} FOMO</span>{" "} */}
