@@ -48,7 +48,6 @@ export default function RollDiceProvablyFairModal({
   const [newClientSeed, setNewClientSeed] = useState<string>(
     generateClientSeed(),
   );
-  const [choice, setChoice] = useState<number>(44.8);
   const [strikeNumber, setStrikeNumber] = useState<number>();
 
   const [verificationState, setVerificationState] = useState<{
@@ -286,8 +285,7 @@ export default function RollDiceProvablyFairModal({
                     <div className="px-8 pt-16 pb-8">
                       <div className="w-full">
                         <DraggableBar
-                          choice={choice}
-                          setChoice={setChoice}
+                          choice={44.8}
                           strikeNumber={strikeNumber || 0}
                           result={false}
                           rollType={"over"}
