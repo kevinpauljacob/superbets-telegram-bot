@@ -22,29 +22,84 @@ export default function Dice2() {
   const { coinData, getBalance, getWalletBalance } = useGlobalContext();
   const [betAmt, setBetAmt] = useState(0);
   const [isRolling, setIsRolling] = useState(false);
-  const [multiplier, setMultiplier] = useState(0);
-  const [chance, setChance] = useState(0);
   const [refresh, setRefresh] = useState(true);
   const [betType, setBetType] = useState<"manual" | "auto">("manual");
   const [rollType, setRollType] = useState<"over" | "under">("over");
   const [strikeNumber, setStrikeNumber] = useState<number>(0);
   const [result, setResult] = useState<boolean>(false);
   const [choice, setChoice] = useState<number>(50);
+  const [multiplier, setMultiplier] = useState(0);
+  const [chance, setChance] = useState(0);
   const [betResults, setBetResults] = useState<
     { result: number; isWin: boolean }[]
-  >([
-    // { result: 33.2, isWin: true },
-    // { result: 16.4, isWin: false },
-    // { result: 45.6, isWin: true },
-    // { result: 72.3, isWin: true },
-    // { result: 64.1, isWin: false },
-  ]);
+  >([]);
 
   const handleBetAmountChange = (
     event: React.ChangeEvent<HTMLInputElement>,
   ) => {
-    const amount = parseFloat(event.target.value); // Convert input value to float
-    setBetAmt(amount); // Update betAmt state
+    const amount = parseFloat(event.target.value);
+    setBetAmt(amount);
+  };
+
+  const adjustPrecision = (value: string, maxDecimalPlaces: number) => {
+    const floatValue = parseFloat(value);
+    if (!isNaN(floatValue)) {
+      return floatValue.toFixed(
+        Math.min(maxDecimalPlaces, (value.split(".")[1] || "").length),
+      );
+    }
+    return value;
+  };
+
+  const handleMultiplierInput = (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    let inputValue = event.target.value.trim();
+    inputValue = adjustPrecision(inputValue, 4);
+
+    const floatValue = parseFloat(inputValue);
+    if (!isNaN(floatValue) && floatValue >= 0.1 && floatValue <= 98.0) {
+      event.target.value = inputValue;
+      setMultiplier(floatValue);
+
+      const calculatedChoice =
+        rollType === "over" ? 100 - 98 / floatValue : 98 / floatValue;
+
+      const roundedChoice = parseFloat(calculatedChoice.toFixed(2));
+      setChoice(roundedChoice);
+
+      const calculatedChance =
+        rollType === "over" ? 100 - roundedChoice : roundedChoice;
+      setChance(calculatedChance);
+    }
+  };
+
+  const handleChanceInput = (event: React.ChangeEvent<HTMLInputElement>) => {
+    let inputValue = event.target.value.trim();
+    inputValue = adjustPrecision(inputValue, 4);
+
+    const floatValue = parseFloat(inputValue);
+    const minValue = 2.0;
+    const maxValue = 9900.0;
+
+    if (
+      !isNaN(floatValue) &&
+      floatValue >= minValue &&
+      floatValue <= maxValue
+    ) {
+      event.target.value = inputValue;
+
+      setChance(floatValue);
+
+      const calculatedMultiplier =
+        rollType === "over" ? 98 / (100 - floatValue) : 98 / floatValue;
+      const roundedMultiplier = parseFloat(calculatedMultiplier.toFixed(4));
+      setMultiplier(roundedMultiplier);
+
+      const calculatedChoice =
+        rollType === "over" ? 100 - floatValue : floatValue;
+      setChoice(calculatedChoice);
+    }
   };
 
   const handleBet = async () => {
@@ -113,19 +168,21 @@ export default function Dice2() {
   useEffect(() => {
     const calculateMultiplier = () => {
       if (rollType === "over") {
-        const calculatedMultiplier = 98 / (100 - choice);
-        setMultiplier(calculatedMultiplier);
+        const calculatedMultiplier = (98 / (100 - choice)).toPrecision(4);
+        setMultiplier(parseFloat(calculatedMultiplier));
       } else if (rollType === "under") {
-        const calculatedMultiplier = 98 / choice;
-        setMultiplier(calculatedMultiplier);
+        const calculatedMultiplier = (98 / choice).toPrecision(4);
+        setMultiplier(parseFloat(calculatedMultiplier));
       }
     };
 
     const calculateChance = () => {
       if (rollType === "over") {
-        setChance(100 - choice);
+        const calculatedChance = (100 - choice).toPrecision(4);
+        setChance(parseFloat(calculatedChance));
       } else if (rollType === "under") {
-        setChance(choice);
+        const calculatedChance = choice.toPrecision(4);
+        setChance(parseFloat(calculatedChance));
       }
     };
 
@@ -267,12 +324,19 @@ export default function Dice2() {
           {coinData && coinData[0].amount > 0.0001 && (
             <>
               <div className="flex flex-col w-full">
-                <span className="text-[#F0F0F0] font-changa text-opacity-75 text-xs mb-1">
+                <span className="text-[#F0F0F0] font-chakra font-semibold text-xs mb-1">
                   Multiplier
                 </span>
-                <span className="bg-[#202329] text-xs text-white rounded-md px-1.5 md:px-5 py-2">
-                  {multiplier.toFixed(4)}x
-                </span>
+                <input
+                  className="bg-[#202329] text-xs text-white rounded-md px-1.5 md:px-5 py-3"
+                  value={multiplier}
+                  type="number"
+                  maxLength={1}
+                  step={1}
+                  min={1.0}
+                  max={9900.0}
+                  onChange={(e) => handleMultiplierInput(e)}
+                />
               </div>
 
               <div
@@ -282,15 +346,15 @@ export default function Dice2() {
                 }
               >
                 {rollType === "over" ? (
-                  <span className="text-[#F0F0F0] font-changa text-opacity-75 text-xs mb-1">
+                  <span className="text-[#F0F0F0] text-xs font-chakra font-semibold mb-1">
                     Roll Over
                   </span>
                 ) : (
-                  <span className="text-[#F0F0F0] font-changa text-opacity-75 text-xs mb-1">
+                  <span className="text-[#F0F0F0] text-xs font-chakra font-semibold mb-1">
                     Roll Under
                   </span>
                 )}
-                <span className="flex justify-between items-center bg-[#202329] text-xs text-white rounded-md px-1.5 md:px-5 py-2">
+                <span className="flex justify-between items-center bg-[#202329] text-xs text-white rounded-md px-1.5 md:px-5 py-3">
                   {choice.toFixed(0)}.00
                   <Image
                     src="/assets/sync.svg"
@@ -303,12 +367,19 @@ export default function Dice2() {
 
               {choice && (
                 <div className="flex flex-col w-full">
-                  <span className="text-[#F0F0F0] font-changa text-opacity-75 text-xs mb-1">
+                  <span className="text-[#F0F0F0] font-chakra font-semibold text-xs mb-1">
                     Chance
                   </span>
-                  <span className="bg-[#202329] text-xs text-white rounded-md px-1.5 md:px-5 py-2">
-                    {chance.toFixed(2)}%
-                  </span>
+                  <input
+                    className="bg-[#202329] text-xs text-white rounded-md px-1.5 md:px-5 py-3"
+                    value={chance.toPrecision(4)}
+                    type="number"
+                    maxLength={1}
+                    step={1}
+                    min={0}
+                    max={98.0}
+                    onChange={(e) => handleChanceInput(e)}
+                  />
                 </div>
               )}
             </>
