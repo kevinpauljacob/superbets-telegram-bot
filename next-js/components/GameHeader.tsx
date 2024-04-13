@@ -2,6 +2,7 @@ import { useRouter } from "next/router";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import RollDiceProvablyFairModal from "./games/RollDice/RollDiceProvablyFairModal";
+import Dice2ProvablyFairModal from "./games/Dice2/ProvablyFairModal";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { GameType } from "@/utils/vrf";
 import { useGlobalContext } from "./GlobalContext";
@@ -102,7 +103,7 @@ export default function GameHeader() {
     },
     dice2: {
       icon: "/assets/dice.png",
-      name: "Dice To Win",
+      name: "Dice 2",
     },
     wheel: {
       icon: "/assets/dice.png",
@@ -165,6 +166,13 @@ export default function GameHeader() {
       </div>
       {game === "coinflip" ? (
         <CoinFlipProvablyFairModal
+          isOpen={isOpen}
+          onClose={closeModal}
+          modalData={modalData}
+          setModalData={setModalData}
+        />
+      ) : game === "dice2" ? (
+        <Dice2ProvablyFairModal
           isOpen={isOpen}
           onClose={closeModal}
           modalData={modalData}

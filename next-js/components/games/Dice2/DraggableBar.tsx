@@ -5,7 +5,7 @@ type ProgressBarProps = {
   setChoice: (choice: number) => void;
   strikeNumber: number;
   result: boolean;
-  rollType: "over" | "under";
+  rollType: string;
 };
 
 type ProgressBarStyles = {
