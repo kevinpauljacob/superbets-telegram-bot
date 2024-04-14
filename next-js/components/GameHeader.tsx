@@ -2,6 +2,7 @@ import { useRouter } from "next/router";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import RollDiceProvablyFairModal from "./games/RollDice/RollDiceProvablyFairModal";
+import Dice2ProvablyFairModal from "./games/Dice2/ProvablyFairModal";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { GameType } from "@/utils/vrf";
 import { useGlobalContext } from "./GlobalContext";
@@ -105,6 +106,14 @@ export default function GameHeader() {
       icon: "/assets/binary.png",
       name: "Limbo",
     },
+    dice2: {
+      icon: "/assets/dice.png",
+      name: "Dice 2",
+    },
+    wheel: {
+      icon: "/assets/dice.png",
+      name: "Wheel",
+    },
   });
 
   // Get the game details based on the extracted game name
@@ -169,6 +178,13 @@ export default function GameHeader() {
         />
       ) : game === GameType.dice ? (
         <RollDiceProvablyFairModal
+          isOpen={isOpen}
+          onClose={closeModal}
+          modalData={modalData}
+          setModalData={setModalData}
+        />
+      ) : game === GameType.dice2 ? (
+        <Dice2ProvablyFairModal
           isOpen={isOpen}
           onClose={closeModal}
           modalData={modalData}
