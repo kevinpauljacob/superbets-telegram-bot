@@ -7,15 +7,43 @@ export default function FomoPlay() {
   const games = [
     {
       href: "/dice",
-      src: "/assets/dicecard.png",
+      src: "/assets/game-cards/dice.png",
     },
     {
       href: "/coinflip",
-      src: "/assets/flipcard.png",
+      src: "/assets/game-cards/coinflip.png",
     },
     {
       href: "/options",
-      src: "/assets/binarycard.png",
+      src: "/assets/game-cards/options.png",
+    },
+    {
+      href: "/limbo",
+      src: "/assets/game-cards/limbo.png",
+    },
+    {
+      href: "/dice2",
+      src: "/assets/game-cards/dice2.png",
+    },
+    {
+      href: "/mines",
+      src: "/assets/game-cards/mines.png",
+    },
+    {
+      href: "/blackjack",
+      src: "/assets/game-cards/blackjack.png",
+    },
+    {
+      href: "/keno",
+      src: "/assets/game-cards/keno.png",
+    },
+    {
+      href: "/plinko",
+      src: "/assets/game-cards/plinko.png",
+    },
+    {
+      href: "/wheel",
+      src: "/assets/game-cards/wheel.png",
     },
   ];
 

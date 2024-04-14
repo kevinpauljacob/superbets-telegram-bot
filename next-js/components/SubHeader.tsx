@@ -92,7 +92,7 @@ export default function SubHeader() {
               href={`/${card.game}`}
             >
               <Image
-                src={`/assets/games/${card.game}.png`}
+                src={`/assets/live-win-cards/${card.game}.png`}
                 alt="badge"
                 width={52}
                 height={52}

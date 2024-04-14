@@ -7,6 +7,7 @@ import { GameType } from "@/utils/vrf";
 import { useGlobalContext } from "./GlobalContext";
 import CoinFlipProvablyFairModal from "./games/CoinFlip/CoinFlipProvablyFairModal";
 import { useSession } from "next-auth/react";
+import LimboProvablyFairModal from "./games/Limbo/LimboProvablyFairModal";
 
 export default function GameHeader() {
   const { data: session, status } = useSession();
@@ -100,6 +101,10 @@ export default function GameHeader() {
       icon: "/assets/binary.png",
       name: "Binary Options",
     },
+    limbo: {
+      icon: "/assets/binary.png",
+      name: "Limbo",
+    },
   });
 
   // Get the game details based on the extracted game name
@@ -144,21 +149,33 @@ export default function GameHeader() {
               className="underline text-[#94A3B8] decoration-[#94A3B8] underline-offset-2 hover:cursor-pointer text-xs font-medium"
               onClick={openModal}
             >
-              Provabaly Fair
+              Provably Fair
             </p>
-            <Image src={'/assets/fair.png'} alt="Fairness" width={20} height={20} />
+            <Image
+              src={"/assets/fair.png"}
+              alt="Fairness"
+              width={20}
+              height={20}
+            />
           </div>
         </div>
       </div>
-      {game === "coinflip" ? (
+      {game === GameType.coin ? (
         <CoinFlipProvablyFairModal
           isOpen={isOpen}
           onClose={closeModal}
           modalData={modalData}
           setModalData={setModalData}
         />
-      ) : (
+      ) : game === GameType.dice ? (
         <RollDiceProvablyFairModal
+          isOpen={isOpen}
+          onClose={closeModal}
+          modalData={modalData}
+          setModalData={setModalData}
+        />
+      ) : (
+        <LimboProvablyFairModal
           isOpen={isOpen}
           onClose={closeModal}
           modalData={modalData}

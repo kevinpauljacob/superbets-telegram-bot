@@ -92,7 +92,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       let amountWon = 0;
       let amountLost = amount;
 
-      if (strikeNumber < chance) {
+      if (strikeNumber <= chance) {
         result = "Won";
         amountWon = amount * (100 / chance - 1);
         amountLost = 0;
