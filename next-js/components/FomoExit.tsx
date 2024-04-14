@@ -7,23 +7,23 @@ export default function FomoExit() {
   const games = [
     {
       href: "/",
-      src: "/assets/mines.png",
+      src: "/assets/game-cards/mines.png",
     },
     {
       href: "/",
-      src: "/assets/blackjack.png",
+      src: "/assets/game-cards/blackjack.png",
     },
     {
       href: "/",
-      src: "/assets/keno.png",
+      src: "/assets/game-cards/keno.png",
     },
     {
       href: "/",
-      src: "/assets/plinko.png",
+      src: "/assets/game-cards/plinko.png",
     },
     {
       href: "/",
-      src: "/assets/wheel.png",
+      src: "/assets/game-cards/wheel.png",
     },
   ];
 
