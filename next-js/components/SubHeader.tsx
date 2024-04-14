@@ -86,7 +86,7 @@ export default function SubHeader() {
               href={`/${card.game}`}
             >
               <Image
-                src={`/assets/games/${card.game}.png`}
+                src={`/assets/live-win-cards/${card.game}.png`}
                 alt="badge"
                 width={52}
                 height={52}
@@ -155,7 +155,9 @@ export default function SubHeader() {
             className="flex items-center h-7 px-2 py-1.5 gap-1 bg-[#7839C5] hover:bg-[#9361d1] focus:bg-[#602E9E] transition-all cursor-pointer rounded-[5px]"
           >
             <Image src={"/assets/wallet.png"} alt="" width={13} height={11} />
-            <span className="text-xs mt-0.5 text-white text-opacity-90">Wallet</span>
+            <span className="text-xs mt-0.5 text-white text-opacity-90">
+              Wallet
+            </span>
           </div>
         </div>
       </div>
