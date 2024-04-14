@@ -48,7 +48,9 @@ export default function Limbo() {
     const increment = (targetMultiplier - multiplier) / (duration / 16); // 16ms is about 60fps
     const timer = setInterval(() => {
       setMultiplier((prevNumber) => {
-        const nextNumber = prevNumber + increment;
+        let nextNumber = prevNumber + increment;
+        nextNumber = parseFloat(nextNumber.toFixed(2));
+
         if (increment > 0)
           return nextNumber >= targetMultiplier ? targetMultiplier : nextNumber;
         else
@@ -57,7 +59,7 @@ export default function Limbo() {
     }, 16);
 
     return () => clearInterval(timer);
-  }, [duration, targetMultiplier, multiplier]);
+  }, [targetMultiplier, multiplier]);
 
   const bet = async () => {
     setMultiplier(1.0);

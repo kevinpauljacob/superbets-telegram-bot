@@ -11,6 +11,7 @@ export interface Flip {
   wallet: string;
   amount: number;
   result: "Won" | "Lost";
+  strikeNumber: number;
   amountWon: number;
   nonce?: number;
   gameSeed?: {
@@ -68,7 +69,6 @@ export default function StatsHistory({ refresh }: { refresh: boolean }) {
       .then((res) => res.json())
       .then((history: any) => {
         if (history.success) {
-          console.log("data", history?.data)
           setFlips(history?.data ?? []);
           setMaxPages(Math.ceil(history?.data.length / transactionsPerPage));
         } else {
@@ -159,73 +159,71 @@ export default function StatsHistory({ refresh }: { refresh: boolean }) {
                 page * transactionsPerPage,
               )
               .map((flip, index) => (
-                <>
-                  <div
-                    key={index}
-                    className={`mb-2.5 ml-2.5 mr-2.5 flex w-full flex-row items-center gap-2 rounded-[5px] bg-[#121418] py-3 ${
-                      !all && "cursor-pointer"
+                <div
+                  key={index}
+                  className={`mb-2.5 ml-2.5 mr-2.5 flex w-full flex-row items-center gap-2 rounded-[5px] bg-[#121418] py-3 ${
+                    !all && "cursor-pointer"
+                  }`}
+                  onClick={() => {
+                    //fetch flipDetails and verification details here
+                    if (!all) {
+                      setFlip(flip);
+                      openModal();
+                    }
+                  }}
+                >
+                  <span className="w-full text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
+                    {flip.createdAt
+                      ? new Date(flip.createdAt).toLocaleDateString("en-GB", {
+                          day: "2-digit",
+                          month: "2-digit",
+                          year: "2-digit",
+                        })
+                      : "-"}{" "}
+                    {flip.createdAt
+                      ? new Date(flip.createdAt).toLocaleTimeString("en-GB", {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })
+                      : "-"}
+                  </span>
+                  {all && (
+                    <span className="w-full hidden md:block text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
+                      {obfuscatePubKey(flip.wallet)}
+                    </span>
+                  )}
+                  <span className="w-full hidden md:block text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
+                    {(100 / flip.chance).toFixed(2)}
+                  </span>
+                  <span className="w-full hidden md:block text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
+                    {flip.amount.toFixed(4)}
+                  </span>
+                  <span
+                    className={`w-full hidden md:block text-center font-changa text-sm text-opacity-75 ${
+                      flip.result === "Lost"
+                        ? "text-[#CF304A]"
+                        : flip.result === "Won"
+                        ? "text-[#03A66D]"
+                        : "text-[#F0F0F0]"
                     }`}
-                    onClick={() => {
-                      //fetch flipDetails and verification details here
-                      if (!all) {
-                        setFlip(flip);
-                        openModal();
-                      }
-                    }}
                   >
-                    <span className="w-full text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
-                      {flip.createdAt
-                        ? new Date(flip.createdAt).toLocaleDateString("en-GB", {
-                            day: "2-digit",
-                            month: "2-digit",
-                            year: "2-digit",
-                          })
-                        : "-"}{" "}
-                      {flip.createdAt
-                        ? new Date(flip.createdAt).toLocaleTimeString("en-GB", {
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          })
-                        : "-"}
-                    </span>
-                    {all && (
-                      <span className="w-full hidden md:block text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
-                        {obfuscatePubKey(flip.wallet)}
-                      </span>
-                    )}
-                    <span className="w-full hidden md:block text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
-                      {(100/flip.chance).toFixed(2)}
-                    </span>
-                    <span className="w-full hidden md:block text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
-                      {(flip.amount).toFixed(4)}
-                    </span>
-                    <span
-                      className={`w-full hidden md:block text-center font-changa text-sm text-opacity-75 ${
-                        flip.result === "Lost"
-                          ? "text-[#CF304A]"
-                          : flip.result === "Won"
-                          ? "text-[#03A66D]"
-                          : "text-[#F0F0F0]"
-                      }`}
-                    >
-                      {flip.result}
-                    </span>
-                    <span
-                      className={`w-full block md:hidden text-center  font-changa text-sm text-opacity-75 ${
-                        flip.result === "Lost"
-                          ? "text-[#CF304A]"
-                          : flip.result === "Won"
-                          ? "text-[#03A66D]"
-                          : "text-[#F0F0F0]"
-                      }`}
-                    >
-                      {flip.amountWon.toFixed(4)} SOL
-                    </span>
-                    <span className="w-full hidden md:block text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
-                      {flip.amountWon>0?(flip.amountWon).toFixed(4):'-'}
-                    </span>
-                  </div>
-                </>
+                    {flip.result}
+                  </span>
+                  <span
+                    className={`w-full block md:hidden text-center  font-changa text-sm text-opacity-75 ${
+                      flip.result === "Lost"
+                        ? "text-[#CF304A]"
+                        : flip.result === "Won"
+                        ? "text-[#03A66D]"
+                        : "text-[#F0F0F0]"
+                    }`}
+                  >
+                    {flip.amountWon.toFixed(4)} SOL
+                  </span>
+                  <span className="w-full hidden md:block text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
+                    {flip.amountWon > 0 ? flip.amountWon.toFixed(4) : "-"}
+                  </span>
+                </div>
               ))
           ) : (
             <span className="w-full text-center font-changa text-[#F0F0F080]">

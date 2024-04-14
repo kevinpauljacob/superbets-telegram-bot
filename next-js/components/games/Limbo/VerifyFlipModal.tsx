@@ -101,17 +101,25 @@ export default function VerifyFlipModal({ isOpen, onClose, modalData }: Props) {
             </div>
             <div className="mt-8 px-8 pt-10 border-2 border-white border-opacity-5 rounded-md">
               <div className="grid place-items-center">
-                <div className="flex justify-center items-center gap-4 md:px-8 py-4 md:text-6xl font-changa">
-                  2.21x
+                <div
+                  className={`flex justify-center items-center gap-4 md:px-8 py-4 md:text-6xl font-changa ${
+                    flip.strikeNumber <= flip.chance
+                      ? "text-[#72F238]"
+                      : "text-[#F1323E]"
+                  }`}
+                >
+                  {(100 / flip.strikeNumber).toFixed(2)}x
                 </div>
               </div>
               <div className="flex gap-4 pt-10">
                 <div>
-                  <label className="text-sm text-[#F0F0F0]">Multiplier</label>
+                  <label className="text-sm text-[#F0F0F0]">
+                    Target Multiplier
+                  </label>
                   <input
                     type="text"
                     name="multiplier"
-                    value={(2 / 1).toFixed(2)}
+                    value={(100 / flip.chance).toFixed(2)}
                     className="bg-[#202329] text-white mt-1 rounded-md px-4 py-2 mb-4 w-full relative"
                     readOnly
                   />
@@ -121,7 +129,7 @@ export default function VerifyFlipModal({ isOpen, onClose, modalData }: Props) {
                   <input
                     type="text"
                     name="chance"
-                    value={(99 / 2).toFixed(2)}
+                    value={flip.chance.toFixed(8)}
                     className="bg-[#202329] text-white mt-1 rounded-md px-4 py-2 mb-4 w-full relative"
                     readOnly
                   />

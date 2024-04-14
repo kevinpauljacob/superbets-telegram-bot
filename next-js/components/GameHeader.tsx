@@ -101,6 +101,10 @@ export default function GameHeader() {
       icon: "/assets/binary.png",
       name: "Binary Options",
     },
+    limbo: {
+      icon: "/assets/binary.png",
+      name: "Limbo",
+    },
   });
 
   // Get the game details based on the extracted game name
