@@ -118,7 +118,6 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
       opacity: 0,
     },
     fill: {
-      height: "10px",
       width: choice <= 2 ? `2%` : `${choice}%`,
       background: rollType === "over" ? "#F1323E" : "#72F238",
     },
@@ -160,7 +159,7 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
 
   return (
     <div>
-      <div className="border-8 border-[#282E3D] bg-[#282E3D] rounded-lg">
+      <div className="border-[6px] sm:border-8 border-[#282E3D] bg-[#282E3D] rounded-lg">
         <div className="bg-[#0C0F16] rounded-md p-4">
           <div
             ref={progressBarRef}
@@ -183,9 +182,10 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
                 onTouchEnd: handleDragEnd,
               })}
               style={progressBarStyles.rangeInput}
+              className=""
             />
             <div
-              className="progress-bar-fill rounded-full"
+              className="progress-bar-fill rounded-full h-[7px] sm:h-[10px]"
               style={progressBarStyles.fill}
             ></div>
             <div
@@ -206,8 +206,10 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
                 >
                   <div
                     className={`${
-                      result ? "border-[#72F238]" : "border-[#F1323E]"
-                    } z-10 font-chakra text-sm font-semibold border-2 bg-[#282E3D] w-max text-white text-opacity-75 rounded-md px-4 py-1.5`}
+                      result
+                        ? "border-[#72F238] text-[#72F238]"
+                        : "border-[#F1323E] text-white"
+                    } z-10 font-chakra text-sm font-semibold border-2 bg-[#282E3D] w-max text-opacity-75 rounded-md px-4 py-1.5`}
                   >
                     {strikeNumber}
                   </div>
@@ -243,7 +245,7 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
                 fill="#282E3D"
               />
             </svg>
-            <span className="absolute -bottom-5 left-1/2 -translate-x-1/2">
+            <span className="absolute -bottom-3 sm:-bottom-5 left-1/2 -translate-x-1/2 text-xs sm:text-base font-chakra font-semibold">
               {indicator}
             </span>
           </div>

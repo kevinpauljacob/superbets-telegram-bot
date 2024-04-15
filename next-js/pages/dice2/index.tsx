@@ -293,7 +293,7 @@ export default function Dice2() {
         <div className="w-full flex justify-between items-center mb-7 sm:mb-0">
           <div>
             {isRolling ? (
-              <div className="font-chakra text-sm font-medium text-white text-opacity-75">
+              <div className="font-chakra text-xs sm:text-sm font-medium text-white text-opacity-75">
                 Betting ...
               </div>
             ) : null}
@@ -303,15 +303,17 @@ export default function Dice2() {
               <div
                 key={index}
                 className={`${
-                  result.isWin ? "border-[#72F238]" : "border-[#282E3D]"
-                } font-chakra text-sm font-semibold border bg-[#282E3D] text-white text-opacity-75 rounded-md px-4 py-1.5 ml-2`}
+                  result.isWin
+                    ? "border-[#72F238] text-[#72F238]"
+                    : "border-[#282E3D] text-white"
+                } font-chakra text-xs sm:text-sm font-semibold border bg-[#282E3D] text-opacity-75 rounded-md transition-all duration-300 px-1 sm:px-4 py-1 sm:py-1.5 ml-1 sm:ml-2`}
               >
                 {result.result}
               </div>
             ))}
           </div>
         </div>
-        <div className="w-full">
+        <div className="w-full my-16 sm:my-20 md:my-0">
           <DraggableBar
             choice={choice}
             setChoice={setChoice}
@@ -328,7 +330,7 @@ export default function Dice2() {
                   Multiplier
                 </span>
                 <input
-                  className="bg-[#202329] text-xs text-white rounded-md px-1.5 md:px-5 py-3"
+                  className="bg-[#202329] text-xs text-white font-chakra rounded-md px-2 md:px-5 py-3"
                   value={multiplier}
                   type="number"
                   maxLength={1}
@@ -354,7 +356,7 @@ export default function Dice2() {
                     Roll Under
                   </span>
                 )}
-                <span className="flex justify-between items-center bg-[#202329] text-xs text-white rounded-md px-1.5 md:px-5 py-3">
+                <span className="flex justify-between items-center bg-[#202329] text-xs font-chakra text-white rounded-md px-2 md:px-5 py-3">
                   {choice.toFixed(0)}.00
                   <Image
                     src="/assets/sync.svg"
@@ -371,7 +373,7 @@ export default function Dice2() {
                     Chance
                   </span>
                   <input
-                    className="bg-[#202329] text-xs text-white rounded-md px-1.5 md:px-5 py-3"
+                    className="bg-[#202329] text-xs text-white font-chakra rounded-md px-2 md:px-5 py-3"
                     value={chance.toPrecision(4)}
                     type="number"
                     maxLength={1}
