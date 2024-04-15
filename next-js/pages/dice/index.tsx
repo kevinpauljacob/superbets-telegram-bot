@@ -172,13 +172,13 @@ export default function Dice() {
           <BetSetting betSetting={rollType} setBetSetting={setRollType} />
 
           <div className="mb-6 w-full">
-            <div className="flex justify-between text-sm mb-2">
-              <p className="font-medium font-changa text-[#F0F0F0] text-opacity-90">
+            <div className="mb-1 flex w-full items-center justify-between text-sm font-changa text-opacity-90">
+              <label className="text-white/90 font-medium font-changa">
                 Bet Amount
-              </p>
-              <p className="font-medium font-changa text-[#94A3B8] text-opacity-90">
-                Available : {coinData ? coinData[0]?.amount.toFixed(4) : 0} $SOL
-              </p>
+              </label>
+              <span className="text-[#94A3B8] text-opacity-90 font-changa font-medium text-sm">
+                {coinData ? coinData[0]?.amount.toFixed(4) : 0} $SOL
+              </span>
             </div>
             <div
               className={`group flex h-11 w-full cursor-pointer items-center rounded-[8px] bg-[#202329] px-4`}
@@ -190,20 +190,22 @@ export default function Dice() {
                 onChange={handleBetAmountChange}
                 placeholder={"Amount"}
                 value={betAmt}
-                className={`flex w-full min-w-0 bg-transparent text-base font-chakra text-white placeholder-white  placeholder-opacity-40 outline-none`}
+                className={`flex w-full min-w-0 bg-transparent text-base text-[#94A3B8] placeholder-[#94A3B8]  font-chakra placeholder-opacity-40 outline-none`}
               />
               <span
-                className="bg-[#D9D9D9] bg-opacity-5 py-1 px-1.5 rounded text-xs font-semibold text-[#F0F0F0] text-opacity-50"
+                className="text-xs font-medium text-white text-opacity-50 bg-[#292C32] hover:bg-[#47484A] focus:bg-[#47484A] transition-all rounded-[5px] py-1.5 px-4"
                 onClick={() => setBetAmt(coinData ? coinData[0]?.amount : 0)}
               >
-                MAX
+                Max
               </span>
             </div>
           </div>
           {rollType === "auto" && (
             <div className="mb-6">
               <div className="flex justify-between text-xs mb-2">
-                <p className="font-medium font-changa text-[#F0F0F0] text-opacity-90">Number of Bets</p>
+                <p className="font-medium font-changa text-[#F0F0F0] text-opacity-90">
+                  Number of Bets
+                </p>
               </div>
               <div className="flex justify-between">
                 <div className="relative w-[48%]">
@@ -292,6 +294,8 @@ export default function Dice() {
               ))}
             </div>
           </div>
+
+          
           <div className="relative w-full mb-8 xl:mb-6">
             <div
               className="transition-width h-4 bg-transparent flex justify-end"
@@ -345,7 +349,7 @@ export default function Dice() {
                   alt="progress bar"
                   width={8}
                   height={8}
-                  className="absolute top-[0px] w-[8px] h-[8px] sm:w-[10px] sm:h-[10px] md:w-[13px] md:h-[13px] sm:top-[2px] md:top-[4px]"
+                  className="absolute top-[0px] w-[8px] h-[8px] sm:w-[10px] sm:h-[10px] md:w-[13px] md:h-[13px] sm:top-[2px] md:top-[1rem]"
                 />
                 <Image
                   src={

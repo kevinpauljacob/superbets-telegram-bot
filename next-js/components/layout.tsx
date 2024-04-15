@@ -9,6 +9,9 @@ import { useGlobalContext } from "./GlobalContext";
 import BalanceModal from "./games/BalanceModal";
 import { useSession } from "next-auth/react";
 import MobileNavbar from "./MobileNavbar";
+import VerifyFlipModal from "./games/CoinFlip/VerifyFlipModal";
+import { Flip } from "./games/CoinFlip/HistoryTable";
+import ConfigureAutoModal from "./games/ConfigureAutoModal";
 
 interface LayoutProps {
   children: ReactNode;
@@ -25,6 +28,11 @@ export default function Layout({ children }: LayoutProps) {
     walletBalance,
     getBalance,
     getWalletBalance,
+    isVerifyModalOpen,
+    setIsVerifyModalOpen,
+    openVerifyModal,
+    closeVerifyModal,
+    verifyModalData
   } = useGlobalContext();
 
   const toggleSidebar = () => {
@@ -52,7 +60,9 @@ export default function Layout({ children }: LayoutProps) {
               <GameHeader />
             </div>
             <main className="w-full h-full md:px-[2.5%] max-h-[calc(100vh-16.6rem)] md:max-h-[calc(100vh-11rem)]">
-              <section className="w-full h-full overflow-y-auto no-scrollbar">{children}</section>
+              <section className="w-full h-full overflow-y-auto no-scrollbar">
+                {children}
+              </section>
             </main>
           </section>
         </section>
@@ -61,6 +71,12 @@ export default function Layout({ children }: LayoutProps) {
         <MobileNavbar sidebar={sidebar} toggleSidebar={toggleSidebar} />
       </div>
       {showWalletModal && <BalanceModal />}
+      <VerifyFlipModal
+        isOpen={isVerifyModalOpen}
+        onClose={closeVerifyModal}
+        modalData={{ flip: (verifyModalData as Flip)! }}
+      />
+      <ConfigureAutoModal />
     </>
   );
 }

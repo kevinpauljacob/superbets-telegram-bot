@@ -367,7 +367,30 @@ button.dark-bg {
 }
 
 .rotate {
-  animation: rotate 1s ease-in-out 0s infinite normal forwards;
+  animation: rotate 1s linear 0s infinite normal forwards;
+  perspective: 1000px;
+}
+
+@keyframes translateZ {
+  0% {
+    z-index: 1;
+  }
+  49.99% {
+    z-index: 1;
+  }
+  50% {
+    z-index: 50;
+  }
+  99.99% {
+    z-index: 50;
+  }
+  100% {
+    z-index: 1;
+  }
+}
+
+.translateZ1 {
+  animation: translateZ 1s linear 0.25s infinite normal forwards;
 }
 
 /* .selected-face {
@@ -399,6 +422,21 @@ button.dark-bg {
 
 .fadeInUp {
   animation: fadeInUp 0.8s ease forwards;
+}
+
+@keyframes fadeInDown {
+  0% {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0px);
+  }
+}
+
+.fadeInDown {
+  animation: fadeInDown 0.8s ease forwards;
 }
 
 @keyframes fadeOutDown {
@@ -434,4 +472,17 @@ button.dark-bg {
   background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
+}
+
+/* hide arrow sin number input  */
+/* Chrome, Safari, Edge, Opera */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Firefox */
+input[type="number"] {
+  -moz-appearance: textfield;
 }

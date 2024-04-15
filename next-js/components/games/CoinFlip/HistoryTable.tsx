@@ -4,6 +4,7 @@ import toast from "react-hot-toast";
 import { obfuscatePubKey } from "@/context/transactions";
 import { GameType, seedStatus } from "@/utils/vrf";
 import VerifyFlipModal from "./VerifyFlipModal";
+import { useGlobalContext } from "@/components/GlobalContext";
 
 export interface Flip {
   flipType: "heads" | "tails";
@@ -25,20 +26,15 @@ export interface Flip {
 export default function StatsHistory({ refresh }: { refresh: boolean }) {
   const wallet = useWallet();
   const [all, setAll] = useState(wallet.publicKey ? false : true);
-
-  //My Flip Modal handling
-  const [isOpen, setIsOpen] = useState(false);
-
-  const openModal = () => {
-    setIsOpen(true);
-  };
-
-  const closeModal = () => {
-    setIsOpen(false);
-  };
+  const {
+    isVerifyModalOpen: isOpen,
+    setIsVerifyModalOpen: setIsOpen,
+    openVerifyModal: openModal,
+    closeVerifyModal: closeModal,
+    verifyModalData,setVerifyModalData
+  } = useGlobalContext();
 
   const [page, setPage] = useState(1);
-  const [flip, setFlip] = useState<Flip>();
   const [flips, setFlips] = useState<Flip[]>([]);
   const transactionsPerPage = 10;
   const [maxPages, setMaxPages] = useState(0);
@@ -160,7 +156,7 @@ export default function StatsHistory({ refresh }: { refresh: boolean }) {
                     onClick={() => {
                       //fetch flipDetails and verification details here
                       if (!all) {
-                        setFlip(flip);
+                        setVerifyModalData(flip);
                         openModal();
                       }
                     }}
@@ -280,11 +276,6 @@ export default function StatsHistory({ refresh }: { refresh: boolean }) {
           &gt;
         </span>
       </div>
-      <VerifyFlipModal
-        isOpen={isOpen}
-        onClose={closeModal}
-        modalData={{ flip: flip! }}
-      />
     </div>
   );
 }
