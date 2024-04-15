@@ -94,8 +94,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
       if (strikeNumber <= chance) {
         result = "Won";
-        amountWon = amount * (100 / chance - 1);
-        amountLost = 0;
+        amountWon = amount * (100 / chance);
+        amountLost = Math.max(amount - amountWon, 0);
       }
 
       let sns;
