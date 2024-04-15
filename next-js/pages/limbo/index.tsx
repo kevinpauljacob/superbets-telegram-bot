@@ -87,6 +87,7 @@ export default function Limbo() {
       setLoading(false);
       setTargetMultiplier(winningMultiplier);
       setResult(response.result);
+      setRefresh(true);
     } catch (e) {
       toast.error("Could not make Flip.");
 
