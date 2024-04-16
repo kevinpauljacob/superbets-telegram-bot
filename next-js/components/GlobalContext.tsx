@@ -85,6 +85,9 @@ interface GlobalContextProps {
   verifyModalData: any;
   setVerifyModalData: (verifyModalData: any) => void;
 
+  sidebar: boolean;
+  setSidebar: React.Dispatch<React.SetStateAction<boolean>>;
+
   //configure auto
   showAutoModal: boolean;
   setShowAutoModal: React.Dispatch<React.SetStateAction<boolean>>;
@@ -150,6 +153,8 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
   const [showWalletModal, setShowWalletModal] = useState<boolean>(false);
   const [isVerifyModalOpen, setIsVerifyModalOpen] = useState(false);
   const [verifyModalData, setVerifyModalData] = useState({});
+
+  const [sidebar, setSidebar] = useState<boolean>(false);
 
   // configure auto
   const [showAutoModal, setShowAutoModal] = useState<boolean>(false);
@@ -306,6 +311,8 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
         setIsVerifyModalOpen,
         verifyModalData,
         setVerifyModalData,
+        sidebar,
+        setSidebar,
         showAutoModal,
         setShowAutoModal,
         autoWinChange,

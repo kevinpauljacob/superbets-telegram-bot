@@ -61,15 +61,13 @@ export default function Flip() {
         betType === "Heads" ? "heads" : "tails",
       );
       if (response.success) {
-        setTimeout(() => {
-          response?.data?.result == "Won"
-            ? toast.success(response?.message)
-            : toast.error(response?.message);
-          setResult(response?.data?.result ?? "Lost");
-          setRefresh(true);
-          setLoading(false);
-          setFlipping(false);
-        }, 4000);
+        response?.data?.result == "Won"
+          ? toast.success(response?.message)
+          : toast.error(response?.message);
+        setResult(response?.data?.result ?? "Lost");
+        setRefresh(true);
+        setLoading(false);
+        setFlipping(false);
       } else {
         setBetType(null);
         setLoading(false);
@@ -285,78 +283,73 @@ export default function Flip() {
                     </div>
                   </div>
                 )}
-              </form>
-              {/* choosing bet options  */}
-              <div className="flex flex-col w-full gap-4">
-                <div className="flex w-full flex-row gap-3">
-                  {/* buttons  */}
-                  <div
-                    onClick={() => {
-                      setBetType("Heads");
-                    }}
-                    className={`${
-                      betType === "Heads"
-                        ? "border-[#7839C5] text-opacity-100"
-                        : "border-transparent hover:border-[#7839C580] text-opacity-80"
-                    } w-full flex items-center justify-center gap-1 rounded-lg text-center cursor-pointer border-2 bg-[#202329] py-2.5 font-changa text-xl text-white font-semibold`}
-                  >
-                    <Image
-                      src={"/assets/coin.png"}
-                      width={23}
-                      height={23}
-                      alt=""
+                
+                {/* choosing bet options  */}
+                <div className="flex flex-col w-full gap-4">
+                  <div className="flex w-full flex-row gap-3">
+                    {/* buttons  */}
+                    <div
+                      onClick={() => {
+                        setBetType("Heads");
+                      }}
                       className={`${
-                        betType && loading && !result ? "rotate" : ""
-                      }`}
-                    />
-                    <span className="mt-0.5">Heads</span>
-                  </div>
-                  <div
-                    onClick={() => {
-                      setBetType("Tails");
-                    }}
-                    className={`${
-                      betType === "Tails"
-                        ? "border-[#7839C5] text-opacity-100"
-                        : "border-transparent hover:border-[#7839C580] text-opacity-80"
-                    } w-full flex items-center justify-center gap-1 rounded-lg text-center cursor-pointer border-2 bg-[#202329] py-2.5 font-changa text-xl text-white font-semibold`}
-                  >
-                    <Image
-                      src={"/assets/tails.png"}
-                      width={23}
-                      height={23}
-                      alt=""
+                        betType === "Heads"
+                          ? "border-[#7839C5] text-opacity-100"
+                          : "border-transparent hover:border-[#7839C580] text-opacity-80"
+                      } w-full flex items-center justify-center gap-1 rounded-lg text-center cursor-pointer border-2 bg-[#202329] py-2.5 font-changa text-xl text-white font-semibold`}
+                    >
+                      <Image
+                        src={"/assets/coin.png"}
+                        width={23}
+                        height={23}
+                        alt=""
+                        className={`${
+                          betType && loading && !result ? "rotate" : ""
+                        }`}
+                      />
+                      <span className="mt-0.5">Heads</span>
+                    </div>
+                    <div
+                      onClick={() => {
+                        setBetType("Tails");
+                      }}
                       className={`${
-                        betType && loading && !result ? "rotate" : ""
-                      }`}
-                    />
-                    <span className="mt-0.5">Tails</span>
+                        betType === "Tails"
+                          ? "border-[#7839C5] text-opacity-100"
+                          : "border-transparent hover:border-[#7839C580] text-opacity-80"
+                      } w-full flex items-center justify-center gap-1 rounded-lg text-center cursor-pointer border-2 bg-[#202329] py-2.5 font-changa text-xl text-white font-semibold`}
+                    >
+                      <Image
+                        src={"/assets/tails.png"}
+                        width={23}
+                        height={23}
+                        alt=""
+                        className={`${
+                          betType && loading && !result ? "rotate" : ""
+                        }`}
+                      />
+                      <span className="mt-0.5">Tails</span>
+                    </div>
                   </div>
-                </div>
 
-                <div className="hidden md:flex w-full flex-col mt-2">
-                  <button
-                    type="submit"
-                    disabled={
-                      !betType ||
-                      loading ||
-                      (coinData && coinData[0].amount < 0.0001)
-                        ? true
-                        : false
-                    }
-                    onClick={onSubmit}
-                    className={`${
-                      !betType ||
-                      !coinData ||
-                      (coinData && coinData[0].amount < 0.0001)
-                        ? "cursor-not-allowed opacity-70"
-                        : "hover:opacity-90"
-                    } w-full h-[3.75rem] rounded-lg transition-all bg-[#7839C5] disabled:bg-[#4b2876] hover:bg-[#9361d1] focus:bg-[#602E9E] flex items-center justify-center font-changa font-semibold text-[1.75rem] text-white`}
-                  >
-                    {loading ? <Loader /> : result ? "BET AGAIN" : "BET"}
-                  </button>
+                  <div className="hidden md:flex w-full flex-col mt-2">
+                    <button
+                      type="submit"
+                      disabled={
+                        !betType ||
+                        loading ||
+                        (coinData && coinData[0].amount < 0.0001)
+                          ? true
+                          : false
+                      }
+                      onClick={onSubmit}
+                      className={`disabled:cursor-not-allowed disabled:opacity-70 hover:opacity-90 w-full h-[3.75rem] rounded-lg transition-all bg-[#7839C5] disabled:bg-[#4b2876] hover:bg-[#9361d1] focus:bg-[#602E9E] flex items-center justify-center font-changa font-semibold text-[1.75rem] text-white`}
+                    >
+                      {loading ? <Loader /> : result ? "BET AGAIN" : "BET"}
+                    </button>
+                  </div>
                 </div>
-              </div>
+              </form>
             </FormProvider>
           </div>
         </>
@@ -394,7 +387,7 @@ export default function Flip() {
           </div>
 
           <div
-            className={`w-[14rem] h-[14rem] relative mb-10 ${
+            className={`w-[11rem] h-[11rem] relative mb-10 ${
               betType && loading && !result ? "rotate" : ""
             }`}
           >
@@ -407,9 +400,9 @@ export default function Flip() {
               className={`absolute ${
                 betType && loading && !result
                   ? "translateZ1"
-                  : result && result === "Won" && betType === "Tails"
+                  : result === "Won" && betType === "Tails"
                   ? "z-[100]"
-                  : "z-[1]"
+                  : "z-[10]"
               }`}
             />
             <Image
@@ -419,9 +412,11 @@ export default function Flip() {
               objectPosition="center"
               alt=""
               className={`absolute ${
-                betType && loading && !result ? "" : result && result === "Won" && betType === "Heads"
-                ? "z-[100]"
-                : "z-[10]"
+                betType && loading && !result
+                  ? "z-[10]"
+                  : result === "Won" && betType === "Heads"
+                  ? "z-[100]"
+                  : "z-[1]"
               }`}
             />
           </div>

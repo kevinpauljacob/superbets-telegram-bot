@@ -59,7 +59,7 @@ export const GameFooterInfo: React.FC<GameFooterProps> = ({
             </span>
           </div>
 
-          {chance && (
+          {chance !== undefined && (
             <div className="flex flex-col w-full">
               <span className="text-[#F0F0F0] font-changa text-opacity-75 text-xs mb-1">
                 Chance
@@ -98,7 +98,7 @@ const GameLayout: React.FC<LayoutProps> = ({ children, title }) => {
         <title>{title}</title>
       </Head>
       <div className="fadeInUp mt-0 md:mt-6 w-full min-h-fit md:min-h-[calc(100vh-17.5rem)] items-stretch bg-[#121418] rounded-2xl flex flex-col-reverse md:flex-row">
-        <div className="fadeInUp flex w-full min-h-fit md:w-[35%] flex-col items-center rounded-[1.15rem] px-3 py-5 md:p-9 xl:p-14">
+        <div className="fadeInUp flex w-full min-h-fit md:w-[35%] flex-col items-center rounded-[1.15rem] px-3 py-5 md:p-9 2xl:p-14">
           {React.Children.map(children, (child) => {
             if (React.isValidElement(child) && child.type === GameOptions) {
               return child;

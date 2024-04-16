@@ -50,7 +50,7 @@ export default function ConfigureAutoModal() {
         handleClose();
       }}
       id="modal-bg"
-      className="absolute z-[150] left-0 top-0 flex h-full w-full items-start pt-[11rem] justify-center bg-black bg-opacity-50 backdrop-blur transition-all"
+      className="absolute z-[150] left-0 top-0 flex h-full w-full items-center justify-center bg-black bg-opacity-50 backdrop-blur transition-all"
     >
       <div
         id="modal-box"

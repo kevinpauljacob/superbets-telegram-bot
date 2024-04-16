@@ -20,7 +20,6 @@ interface LayoutProps {
 export default function Layout({ children }: LayoutProps) {
   const { data: session, status } = useSession();
 
-  const [sidebar, setSidebar] = useState(false);
   const {
     coinData,
     showWalletModal,
@@ -32,7 +31,9 @@ export default function Layout({ children }: LayoutProps) {
     setIsVerifyModalOpen,
     openVerifyModal,
     closeVerifyModal,
-    verifyModalData
+    verifyModalData,
+    sidebar,
+    setSidebar
   } = useGlobalContext();
 
   const toggleSidebar = () => {
