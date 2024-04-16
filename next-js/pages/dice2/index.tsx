@@ -205,12 +205,13 @@ export default function Dice2() {
           <BetSetting betSetting={betType} setBetSetting={setBetType} />
 
           <div className="mb-6 w-full">
-            <div className="flex justify-between text-sm mb-2">
+            <div className="flex justify-between text-sm md:text-xs lg:text-sm mb-2">
               <p className="font-medium font-changa text-[#F0F0F0] text-opacity-90">
                 Bet Amount
               </p>
               <p className="font-medium font-changa text-[#94A3B8] text-opacity-90">
-                Available : {coinData ? coinData[0]?.amount.toFixed(4) : 0} $SOL
+                <span className="md:hidden lg:block">Available :&nbsp;</span>
+                {coinData ? coinData[0]?.amount.toFixed(4) : 0} $SOL
               </p>
             </div>
             <div
@@ -270,17 +271,17 @@ export default function Dice2() {
               }}
               className={`${
                 !wallet ? "cursor-not-allowed opacity-70" : "hover:opacity-90"
-              } flex w-full flex-col items-center justify-center gap-2 rounded-lg border border-[#F6F6F61A] bg-[#7839C5] hover:bg-[#9361d1] focus:bg-[#602E9E] py-2.5 font-changa shadow-[0px_4px_15px_0px_rgba(0,0,0,0.25)]`}
+              } flex w-full flex-col items-center justify-center gap-2 rounded-lg border border-[#F6F6F61A] bg-[#7839C5] hover:bg-[#9361d1] focus:bg-[#602E9E] py-2.5 md:py-1 lg:py-2.5 font-changa shadow-[0px_4px_15px_0px_rgba(0,0,0,0.25)]`}
             >
               {isRolling ? (
                 <div>
-                  <span className="font-changa text-[1.75rem] font-semibold text-white text-opacity-80">
+                  <span className="font-changa text-[1.75rem] md:text-xl lg:text-[1.75rem] font-semibold text-white text-opacity-80">
                     BETTING...
                   </span>
                 </div>
               ) : (
                 <div>
-                  <span className="center font-changa text-[1.75rem] font-semibold text-white text-opacity-80">
+                  <span className="center font-changa text-[1.75rem] md:text-xl lg:text-[1.75rem] font-semibold text-white text-opacity-80">
                     BET
                   </span>
                 </div>
@@ -306,14 +307,14 @@ export default function Dice2() {
                   result.isWin
                     ? "border-[#72F238] text-[#72F238]"
                     : "border-[#282E3D] text-white"
-                } font-chakra text-xs sm:text-sm font-semibold border bg-[#282E3D] text-opacity-75 rounded-md transition-all duration-300 px-1 sm:px-4 py-1 sm:py-1.5 ml-1 sm:ml-2`}
+                } font-chakra text-xs sm:text-sm font-semibold border bg-[#282E3D] text-opacity-75 rounded-md transition-all duration-300 px-2 sm:px-4 py-1.5 ml-1 sm:ml-2`}
               >
                 {result.result}
               </div>
             ))}
           </div>
         </div>
-        <div className="w-full my-16 sm:my-20 md:my-0">
+        <div className="w-full my-16 lg:my-20 md:my-0">
           <DraggableBar
             choice={choice}
             setChoice={setChoice}

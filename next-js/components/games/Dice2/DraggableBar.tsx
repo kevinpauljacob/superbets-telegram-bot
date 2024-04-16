@@ -125,9 +125,7 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
       position: "absolute",
       top: "50%",
       transform: "translateY(-50%)",
-      backgroundColor: "#7839C5",
-      width: "17px",
-      height: "26px",
+      backgroundColor: "#9945FF",
       borderRadius: "7px",
       left:
         choice <= 2
@@ -159,7 +157,7 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
 
   return (
     <div>
-      <div className="border-[6px] sm:border-8 border-[#282E3D] bg-[#282E3D] rounded-lg">
+      <div className="border-4 sm:border-[6px] border-[#282E3D] bg-[#282E3D] rounded-lg">
         <div className="bg-[#0C0F16] rounded-md p-4">
           <div
             ref={progressBarRef}
@@ -185,7 +183,7 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
               className=""
             />
             <div
-              className="progress-bar-fill rounded-full h-[7px] sm:h-[10px]"
+              className="progress-bar-fill rounded-full h-[4px] sm:h-[8px]"
               style={progressBarStyles.fill}
             ></div>
             <div
@@ -194,6 +192,7 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
                 onMouseDown: handleDragStart,
                 onMouseUp: handleDragEnd,
               })}
+              className="w-[13px] h-[23px] sm:w-[17px] sm:h-[26px]"
             />
             <div
               className="absolute -top-16 -translate-x-1/2 -translate-y-1/2 transition-all duration-300"
@@ -237,8 +236,11 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
           <div key={indicator} className="relative">
             <svg
               xmlns="http://www.w3.org/2000/svg"
+              width="12px"
+              height="12px"
               viewBox="0 0 11 10"
               style={indicatorStyles.svg}
+              className="w-[12px] h-[12px]"
             >
               <path
                 d="M8.0572 7.83135C6.8865 9.73978 4.1135 9.73978 2.9428 7.83134L0.941367 4.56867C-0.284844 2.56975 1.15351 0 3.49857 0L7.50144 0C9.8465 0 11.2848 2.56975 10.0586 4.56867L8.0572 7.83135Z"

@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
-import Link from "next/link";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { rollDice } from "../../context/gameTransactions";
 import HistoryTable from "../../components/games/RollDice/HistoryTable";
@@ -8,8 +7,6 @@ import { toast } from "react-hot-toast";
 import { ROLL_TAX } from "../../context/config";
 import BetSetting from "@/components/BetSetting";
 import { useGlobalContext } from "@/components/GlobalContext";
-import Head from "next/head";
-import GameHeader from "@/components/GameHeader";
 import {
   GameDisplay,
   GameFooterInfo,
@@ -22,7 +19,6 @@ export default function Dice() {
   const wallet = useWallet();
 
   const { coinData, getBalance, getWalletBalance } = useGlobalContext();
-  const [user, setUser] = useState<any>(null);
   const [betAmt, setBetAmt] = useState(0);
   const [isRolling, setIsRolling] = useState(false);
   const [winningPays, setWinningPays] = useState(6);
@@ -44,13 +40,9 @@ export default function Dice() {
   const [rollType, setRollType] = useState<"manual" | "auto">("manual");
   const [betResults, setBetResults] = useState<
     { face: number; isWin: boolean }[]
-  >([
-    // { face: 3, isWin: true },
-    // { face: 1, isWin: false },
-    // { face: 5, isWin: true },
-    // { face: 2, isWin: true },
-    // { face: 6, isWin: false },
-  ]);
+  >([]);
+  const [rollingWidth, setRollingWidth] = useState(0);
+  const [direction, setDirection] = useState(true);
 
   const handleDiceClick = (newFace: number) => {
     setStrikeFace(0);
@@ -90,8 +82,8 @@ export default function Dice() {
   const handleBetAmountChange = (
     event: React.ChangeEvent<HTMLInputElement>,
   ) => {
-    const amount = parseFloat(event.target.value); // Convert input value to float
-    setBetAmt(amount); // Update betAmt state
+    const amount = parseFloat(event.target.value);
+    setBetAmt(amount);
   };
 
   const diceRoll = async () => {
@@ -118,8 +110,7 @@ export default function Dice() {
           const newBetResults = [...betResults, { face: strikeNumber, isWin }];
           setBetResults(newBetResults);
           setStrikeFace(strikeNumber);
-          // setSelectedFace([0]);
-          // setBetAmt(0.0);
+          setBetAmt(0.0);
           setRefresh(true);
         }
       } catch (e) {
@@ -137,9 +128,6 @@ export default function Dice() {
       setRefresh(false);
     }
   }, [wallet?.publicKey, refresh]);
-
-  const [rollingWidth, setRollingWidth] = useState(0);
-  const [direction, setDirection] = useState(true);
 
   useEffect(() => {
     let intervalId: NodeJS.Timeout;
@@ -203,7 +191,9 @@ export default function Dice() {
           {rollType === "auto" && (
             <div className="mb-6">
               <div className="flex justify-between text-xs mb-2">
-                <p className="font-medium font-changa text-[#F0F0F0] text-opacity-90">Number of Bets</p>
+                <p className="font-medium font-changa text-[#F0F0F0] text-opacity-90">
+                  Number of Bets
+                </p>
               </div>
               <div className="flex justify-between">
                 <div className="relative w-[48%]">
@@ -278,7 +268,7 @@ export default function Dice() {
             <div>
               {betResults.map((result, index) => (
                 <Image
-                  key={index} // Make sure to provide a unique key
+                  key={index}
                   src={`/assets/${
                     result.isWin ? "winDiceFace" : "lossDiceFace"
                   }${result.face}.png`}
