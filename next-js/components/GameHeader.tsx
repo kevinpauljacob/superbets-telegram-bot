@@ -1,7 +1,7 @@
 import { useRouter } from "next/router";
 import Image from "next/image";
 import { useEffect, useState } from "react";
-import RollDiceProvablyFairModal from "./games/RollDice/RollDiceProvablyFairModal";
+import RollDiceProvablyFairModal from "./games/Dice/RollDiceProvablyFairModal";
 import Dice2ProvablyFairModal from "./games/Dice2/ProvablyFairModal";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { GameType } from "@/utils/vrf";

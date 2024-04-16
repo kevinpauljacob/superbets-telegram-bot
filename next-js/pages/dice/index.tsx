@@ -1,15 +1,12 @@
 import React, { useState, useEffect, useRef } from "react";
 import Image from "next/image";
-import Link from "next/link";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { rollDice } from "../../context/gameTransactions";
-import HistoryTable from "../../components/games/RollDice/HistoryTable";
+import HistoryTable from "../../components/games/Dice/HistoryTable";
 import { toast } from "react-hot-toast";
 import { ROLL_TAX } from "../../context/config";
 import BetSetting from "@/components/BetSetting";
 import { useGlobalContext } from "@/components/GlobalContext";
-import Head from "next/head";
-import GameHeader from "@/components/GameHeader";
 import {
   GameDisplay,
   GameFooterInfo,
@@ -58,13 +55,7 @@ export default function Dice() {
   const [rollType, setRollType] = useState<"manual" | "auto">("manual");
   const [betResults, setBetResults] = useState<
     { face: number; isWin: boolean }[]
-  >([
-    // { face: 3, isWin: true },
-    // { face: 1, isWin: false },
-    // { face: 5, isWin: true },
-    // { face: 2, isWin: true },
-    // { face: 6, isWin: false },
-  ]);
+  >([]);
 
   const handleDiceClick = (newFace: number) => {
     setStrikeFace(0);
@@ -104,8 +95,8 @@ export default function Dice() {
   const handleBetAmountChange = (
     event: React.ChangeEvent<HTMLInputElement>,
   ) => {
-    const amount = parseFloat(event.target.value); // Convert input value to float
-    setBetAmt(amount); // Update betAmt state
+    const amount = parseFloat(event.target.value);
+    setBetAmt(amount);
   };
 
   const handleCountChange = (
@@ -135,13 +126,13 @@ export default function Dice() {
           const { strikeNumber, result } = res.data;
           const isWin = result === "Won";
           const newBetResults = [
-            ...(betResults.length <= 4 ? betResults : betResults.slice(-4)),
+            // ...(betResults.length <= 4 ? betResults : betResults.slice(-4)),
+            ...betResults,
             { face: strikeNumber, isWin },
           ];
           setBetResults(newBetResults);
           setStrikeFace(strikeNumber);
-          // setSelectedFace([0]);
-          // setBetAmt(0.0);
+          setBetAmt(0.0);
           setRefresh(true);
         }
       } catch (e) {
@@ -351,25 +342,32 @@ export default function Dice() {
                 </div>
               )}
             </div>
-            <div>
+            <div className="flex">
               {betResults.map((result, index) => (
-                <Image
-                  key={index} // Make sure to provide a unique key
-                  src={`/assets/${
-                    result.isWin ? "winDiceFace" : "lossDiceFace"
-                  }${result.face}.png`}
-                  width={15}
-                  height={15}
-                  alt={`Dice face ${result.face}`}
-                  className={`mr-2 inline-block w-[15px] h-[15px] sm:w-[20px] sm:h-[20px] md:w-[30px] md:h-[30px] ${
-                    selectedFace.includes(result.face) ? "selected-face" : ""
-                  }`}
-                />
+                <div
+                  key={index}
+                  className={`${
+                    betResults.length <= 5 ? "slideInFadeIn" : ""
+                  } ${index === 5 ? "slideOutFadeOut" : ""}
+                  ${index >= 6 ? "hiddenResults" : ""}`}
+                >
+                  <Image
+                    src={`/assets/${
+                      result.isWin ? "winDiceFace" : "lossDiceFace"
+                    }${result.face}.png`}
+                    width={15}
+                    height={15}
+                    alt={`Dice face ${result.face}`}
+                    className={`mr-2 inline-block w-[15px] h-[15px] sm:w-[20px] sm:h-[20px] md:w-[30px] md:h-[30px] ${
+                      selectedFace.includes(result.face) ? "selected-face" : ""
+                    }`}
+                  />
+                </div>
               ))}
             </div>
           </div>
 
-          <div className="relative w-full mb-8 xl:mb-6 mt-5">
+          <div className="relative w-full my-16 md:my-20">
             {/* win pointer  */}
             <div
               className={`${
@@ -407,7 +405,10 @@ export default function Dice() {
 
             <div className="w-full bg-[#282E3D] rounded-full h-2 flex items-end justify-around">
               {[1, 2, 3, 4, 5, 6].map((num) => (
-                <DicePointer key={num} className="relative top-1.5 text-[#282E3D]" />
+                <DicePointer
+                  key={num}
+                  className="relative top-1.5 text-[#282E3D]"
+                />
               ))}
             </div>
             <div className="w-full flex items-end justify-around mt-5">

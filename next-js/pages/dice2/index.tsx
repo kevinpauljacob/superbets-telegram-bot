@@ -3,7 +3,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { toast } from "react-hot-toast";
-import { ROLL_TAX } from "../../context/config";
 import BetSetting from "@/components/BetSetting";
 import DraggableBar from "@/components/games/Dice2/DraggableBar";
 import { useGlobalContext } from "@/components/GlobalContext";
@@ -15,12 +14,17 @@ import {
   GameTable,
 } from "@/components/GameLayout";
 import HistoryTable from "@/components/games/Dice2/HistoryTable";
-import { WalletContextState } from "@solana/wallet-adapter-react";
+import { FormProvider, useForm } from "react-hook-form";
+import { BsInfinity } from "react-icons/bs";
+import Loader from "@/components/games/Loader";
 
 export default function Dice2() {
   const wallet = useWallet();
-  const { coinData, getBalance, getWalletBalance } = useGlobalContext();
+  const methods = useForm();
+  const { coinData, getBalance, getWalletBalance, setShowAutoModal } =
+    useGlobalContext();
   const [betAmt, setBetAmt] = useState(0);
+  const [betCount, setBetCount] = useState(0);
   const [isRolling, setIsRolling] = useState(false);
   const [refresh, setRefresh] = useState(true);
   const [betType, setBetType] = useState<"manual" | "auto">("manual");
@@ -39,6 +43,12 @@ export default function Dice2() {
   ) => {
     const amount = parseFloat(event.target.value);
     setBetAmt(amount);
+  };
+
+  const handleCountChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) => {
+    setBetCount(parseFloat(e.target.value));
   };
 
   const adjustPrecision = (value: string, maxDecimalPlaces: number) => {
@@ -203,89 +213,141 @@ export default function Dice2() {
       <GameOptions>
         <>
           <BetSetting betSetting={betType} setBetSetting={setBetType} />
-
-          <div className="mb-6 w-full">
-            <div className="flex justify-between text-sm mb-2">
-              <p className="font-medium font-changa text-[#F0F0F0] text-opacity-90">
-                Bet Amount
-              </p>
-              <p className="font-medium font-changa text-[#94A3B8] text-opacity-90">
-                Available : {coinData ? coinData[0]?.amount.toFixed(4) : 0} $SOL
-              </p>
-            </div>
-            <div
-              className={`group flex h-11 w-full cursor-pointer items-center rounded-[8px] bg-[#202329] px-4`}
-            >
-              <input
-                type={"number"}
-                step={"any"}
+          <div className="w-full flex flex-col">
+            <FormProvider {...methods}>
+              <form
+                className="flex w-full flex-col gap-0"
                 autoComplete="off"
-                onChange={handleBetAmountChange}
-                placeholder={"Amount"}
-                value={betAmt}
-                className={`flex w-full min-w-0 bg-transparent text-base font-chakra text-white placeholder-white  placeholder-opacity-40 outline-none`}
-              />
-              <span
-                className="text-xs font-medium text-white text-opacity-50 bg-[#292C32] hover:bg-[#47484A] focus:bg-[#47484A] transition-all rounded-[5px] py-1.5 px-4"
-                onClick={() => setBetAmt(coinData ? coinData[0]?.amount : 0)}
+                onSubmit={methods.handleSubmit(handleBet)}
               >
-                MAX
-              </span>
-            </div>
-          </div>
-          {betType === "auto" && (
-            <div className="mb-6">
-              <div className="flex justify-between text-xs mb-2">
-                <p className="font-medium font-changa text-[#F0F0F0] text-opacity-90">
-                  Number of Bets
-                </p>
-              </div>
-              <div className="flex justify-between">
-                <div className="relative w-[48%]">
-                  <input
-                    className="z-0 w-full bg-[#202329] rounded-md p-2.5"
-                    type="text"
-                    placeholder="0.0"
-                  />
-                  <button className="z-10 absolute top-2.5 right-2.5 px-3  rounded-sm text-xs bg-[#d9d9d90d]">
-                    <Image
-                      src="/assets/infiniteLogo.png"
-                      alt="Infinite Bet"
-                      width={25}
-                      height={25}
+                {/* amt input  */}
+                <div className="mb-0 flex w-full flex-col">
+                  <div className="mb-1 flex w-full items-center justify-between text-sm font-changa text-opacity-90">
+                    <label className="text-white/90 font-medium font-changa">
+                      Bet Amount
+                    </label>
+                    <span className="text-[#94A3B8] text-opacity-90 font-changa font-medium text-sm">
+                      {coinData ? coinData[0]?.amount.toFixed(4) : 0} $SOL
+                    </span>
+                  </div>
+
+                  <div
+                    className={`group flex h-11 w-full cursor-pointer items-center rounded-[8px] bg-[#202329] px-4`}
+                  >
+                    <input
+                      id={"amount-input"}
+                      {...methods.register("amount", {
+                        required: "Amount is required",
+                      })}
+                      type={"number"}
+                      step={"any"}
+                      autoComplete="off"
+                      onChange={handleBetAmountChange}
+                      placeholder={"Amount"}
+                      value={betAmt}
+                      className={`flex w-full min-w-0 bg-transparent text-base text-[#94A3B8] placeholder-[#94A3B8]  font-chakra placeholder-opacity-40 outline-none`}
                     />
+                    <span
+                      className="text-xs font-medium text-white text-opacity-50 bg-[#292C32] hover:bg-[#47484A] focus:bg-[#47484A] transition-all rounded-[5px] py-1.5 px-4"
+                      onClick={() =>
+                        setBetAmt(coinData ? coinData[0]?.amount : 0)
+                      }
+                    >
+                      MAX
+                    </span>
+                  </div>
+
+                  <span
+                    className={`${
+                      methods.formState.errors["amount"]
+                        ? "opacity-100"
+                        : "opacity-0"
+                    } mt-1.5 flex items-center gap-1 text-xs text-[#D92828]`}
+                  >
+                    {methods.formState.errors["amount"]
+                      ? methods.formState.errors["amount"]!.message!.toString()
+                      : "NONE"}
+                  </span>
+                </div>
+                {betType === "manual" ? (
+                  <></>
+                ) : (
+                  <div className="w-full flex flex-row items-end gap-3">
+                    <div className="mb-0 flex w-full flex-col">
+                      <div className="mb-1 flex w-full items-center justify-between text-sm font-changa text-opacity-90">
+                        <label className="text-white/90 font-medium font-changa">
+                          Number of Bets
+                        </label>
+                      </div>
+
+                      <div
+                        className={`group flex h-11 w-full cursor-pointer items-center rounded-[8px] bg-[#202329] px-4`}
+                      >
+                        <input
+                          id={"count-input"}
+                          {...methods.register("betCount", {
+                            required: "Bet count is required",
+                          })}
+                          type={"number"}
+                          step={"any"}
+                          autoComplete="off"
+                          onChange={handleCountChange}
+                          placeholder={"00"}
+                          value={betCount}
+                          className={`flex w-full min-w-0 bg-transparent text-base text-[#94A3B8] placeholder-[#94A3B8]  font-chakra placeholder-opacity-40 outline-none`}
+                        />
+                        <span
+                          className="text-2xl font-medium text-white text-opacity-50 bg-[#292C32] hover:bg-[#47484A] focus:bg-[#47484A] transition-all rounded-[5px] py-0.5 px-3"
+                          onClick={() =>
+                            setBetCount(coinData ? coinData[0]?.amount : 0)
+                          }
+                        >
+                          <BsInfinity />
+                        </span>
+                      </div>
+
+                      <span
+                        className={`${
+                          methods.formState.errors["amount"]
+                            ? "opacity-100"
+                            : "opacity-0"
+                        } mt-1.5 flex items-center gap-1 text-xs text-[#D92828]`}
+                      >
+                        {methods.formState.errors["amount"]
+                          ? methods.formState.errors[
+                              "amount"
+                            ]!.message!.toString()
+                          : "NONE"}
+                      </span>
+                    </div>
+                    <div
+                      onClick={() => {
+                        setShowAutoModal(true);
+                      }}
+                      className="mb-[1.4rem] rounded-md w-full h-11 flex items-center justify-center opacity-75 cursor-pointer text-white text-opacity-90 border-2 border-white bg-white bg-opacity-0 hover:bg-opacity-5"
+                    >
+                      Configure Auto
+                    </div>
+                  </div>
+                )}
+                <div className="hidden md:flex w-full flex-col mt-2">
+                  <button
+                    type="submit"
+                    disabled={
+                      !wallet ||
+                      isRolling ||
+                      (coinData && coinData[0].amount < 0.0001)
+                        ? true
+                        : false
+                    }
+                    onClick={handleBet}
+                    className={`disabled:cursor-default disabled:opacity-70 hover:opacity-90 w-full h-[3.75rem] rounded-lg transition-all bg-[#7839C5] disabled:bg-[#4b2876] hover:bg-[#9361d1] focus:bg-[#602E9E] flex items-center justify-center font-changa font-semibold text-[1.75rem] text-white`}
+                  >
+                    {isRolling ? <Loader /> : "BET"}
                   </button>
                 </div>
-
-                <button className="border-2 border-white/90 text-white/80 font-semibold rounded-md w-[48%]">
-                  Configure Auto
-                </button>
-              </div>
-            </div>
-          )}
-          <div className="w-full">
-            <button
-              onClick={() => {
-                if (!isRolling) handleBet();
-              }}
-              className={`${
-                !wallet ? "cursor-not-allowed opacity-70" : "hover:opacity-90"
-              } flex w-full flex-col items-center justify-center gap-2 rounded-lg border border-[#F6F6F61A] bg-[#7839C5] hover:bg-[#9361d1] focus:bg-[#602E9E] py-2.5 font-changa shadow-[0px_4px_15px_0px_rgba(0,0,0,0.25)]`}
-            >
-              {isRolling ? (
-                <div>
-                  <span className="font-changa text-[1.75rem] font-semibold text-white text-opacity-80">
-                    BETTING...
-                  </span>
-                </div>
-              ) : (
-                <div>
-                  <span className="center font-changa text-[1.75rem] font-semibold text-white text-opacity-80">
-                    BET
-                  </span>
-                </div>
-              )}
-            </button>
+              </form>
+            </FormProvider>
           </div>
         </>
       </GameOptions>
@@ -293,7 +355,7 @@ export default function Dice2() {
         <div className="w-full flex justify-between items-center mb-7 sm:mb-0">
           <div>
             {isRolling ? (
-              <div className="font-chakra text-sm font-medium text-white text-opacity-75">
+              <div className="font-chakra text-xs sm:text-sm font-medium text-white text-opacity-75">
                 Betting ...
               </div>
             ) : null}
@@ -303,15 +365,17 @@ export default function Dice2() {
               <div
                 key={index}
                 className={`${
-                  result.isWin ? "border-[#72F238]" : "border-[#282E3D]"
-                } font-chakra text-sm font-semibold border bg-[#282E3D] text-white text-opacity-75 rounded-md px-4 py-1.5 ml-2`}
+                  result.isWin
+                    ? "border-[#72F238] text-[#72F238]"
+                    : "border-[#282E3D] text-white"
+                } font-chakra text-xs sm:text-sm font-semibold border bg-[#282E3D] text-opacity-75 rounded-md transition-all duration-300 px-2 sm:px-4 py-1.5 ml-1 sm:ml-2`}
               >
                 {result.result}
               </div>
             ))}
           </div>
         </div>
-        <div className="w-full">
+        <div className="w-full my-16 md:my-20">
           <DraggableBar
             choice={choice}
             setChoice={setChoice}
@@ -320,15 +384,15 @@ export default function Dice2() {
             rollType={rollType}
           />
         </div>
-        <div className="flex px-0 xl:px-4 mb-0 px:mb-6 gap-4 flex-row w-full justify-between">
+        <div className="flex px-0 xl:px-4 mb-0 md:mb-5 gap-4 flex-row w-full justify-between">
           {coinData && coinData[0].amount > 0.0001 && (
             <>
               <div className="flex flex-col w-full">
-                <span className="text-[#F0F0F0] font-chakra font-semibold text-xs mb-1">
+                <span className="text-[#F0F0F0] font-changa font-semibold text-xs mb-1">
                   Multiplier
                 </span>
                 <input
-                  className="bg-[#202329] text-xs text-white rounded-md px-1.5 md:px-5 py-3"
+                  className="bg-[#202329] text-xs text-white font-chakra rounded-md px-2 md:px-5 py-3"
                   value={multiplier}
                   type="number"
                   maxLength={1}
@@ -346,7 +410,7 @@ export default function Dice2() {
                 }
               >
                 {rollType === "over" ? (
-                  <span className="text-[#F0F0F0] text-xs font-chakra font-semibold mb-1">
+                  <span className="text-[#F0F0F0] text-xs font-changa font-semibold mb-1">
                     Roll Over
                   </span>
                 ) : (
@@ -354,7 +418,7 @@ export default function Dice2() {
                     Roll Under
                   </span>
                 )}
-                <span className="flex justify-between items-center bg-[#202329] text-xs text-white rounded-md px-1.5 md:px-5 py-3">
+                <span className="flex justify-between items-center bg-[#202329] text-xs font-chakra text-white rounded-md px-2 md:px-5 py-3">
                   {choice.toFixed(0)}.00
                   <Image
                     src="/assets/sync.svg"
@@ -371,7 +435,7 @@ export default function Dice2() {
                     Chance
                   </span>
                   <input
-                    className="bg-[#202329] text-xs text-white rounded-md px-1.5 md:px-5 py-3"
+                    className="bg-[#202329] text-xs text-white font-chakra rounded-md px-2 md:px-5 py-3"
                     value={chance.toPrecision(4)}
                     type="number"
                     maxLength={1}

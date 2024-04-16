@@ -175,7 +175,7 @@ text-shadow-gold {
     color: #202329;
   }
   50% {
-    color: #47484A;
+    color: #47484a;
   }
   100% {
     opacity: #202329;
@@ -480,6 +480,48 @@ button.dark-bg {
 
 .fadeIn {
   animation: fadeIn 0.8s ease forwards;
+}
+
+@keyframes slideInFadeIn {
+  0% {
+    transform: translateX(20px);
+  }
+  100% {
+    transform: translateX(0);
+  }
+}
+
+.slideInFadeIn {
+  animation: slideInFadeIn 1s ease forwards;
+}
+
+@keyframes slideOutFadeOut {
+  0% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+}
+
+.slideOutFadeOut {
+  animation: slideOutFadeOut 2s ease forwards;
+}
+
+@keyframes hideAnimation {
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    display: none;
+  }
+}
+
+.hiddenResults {
+  animation: hideAnimation;
 }
 
 .connect-wallet {
