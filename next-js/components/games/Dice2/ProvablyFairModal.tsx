@@ -1,11 +1,9 @@
 import { GameType, generateClientSeed, generateGameResult } from "@/utils/vrf";
 import Image from "next/image";
 import { useEffect, useState } from "react";
-import { Bet } from "./HistoryTable";
-import { GiDivergence } from "react-icons/gi";
+import { Dice2 } from "./HistoryTable";
 import toast from "react-hot-toast";
 import DraggableBar from "@/components/games/Dice2/DraggableBar";
-import { set } from "mongoose";
 
 export interface PFModalData {
   activeGameSeed: {
@@ -32,7 +30,7 @@ interface Props {
   onClose: () => void;
   modalData: PFModalData;
   setModalData: React.Dispatch<React.SetStateAction<PFModalData>>;
-  bet?: Bet;
+  bet?: Dice2;
 }
 
 export default function RollDiceProvablyFairModal({

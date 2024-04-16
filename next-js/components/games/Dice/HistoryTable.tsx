@@ -1,16 +1,18 @@
 import { useWallet } from "@solana/wallet-adapter-react";
 import { useState, useEffect } from "react";
 import { obfuscatePubKey } from "@/context/transactions";
-import { GameType, seedStatus } from "@/utils/vrf";
+import Image from "next/image";
 import { useGlobalContext } from "@/components/GlobalContext";
+import { GameType, seedStatus } from "@/utils/vrf";
 import { Table } from "@/components/table/Table";
 
-export interface Flip {
-  flipType: "heads" | "tails";
+export interface Dice {
   createdAt: string;
   wallet: string;
+  chosenNumbers: number[];
   amount: number;
   result: "Won" | "Lost";
+  strikeNumber: number;
   amountWon: number;
   nonce?: number;
   gameSeed?: {
@@ -22,9 +24,10 @@ export interface Flip {
   };
 }
 
-export default function StatsHistory({ refresh }: { refresh: boolean }) {
+export default function HistoryTable({ refresh }: { refresh: boolean }) {
   const wallet = useWallet();
   const [all, setAll] = useState(wallet.publicKey ? false : true);
+
   const {
     isVerifyModalOpen: isOpen,
     setIsVerifyModalOpen: setIsOpen,
@@ -34,12 +37,19 @@ export default function StatsHistory({ refresh }: { refresh: boolean }) {
   } = useGlobalContext();
 
   const [page, setPage] = useState(1);
-  const [flips, setFlips] = useState<Flip[]>([]);
+  const [bets, setBets] = useState<Dice[]>([]);
   const transactionsPerPage = 10;
   const [maxPages, setMaxPages] = useState(0);
 
-  const headers = ["Time", "Flip Type", "Amount", "Result"];
-  const allHeaders = ["Time", "Wallet", "Flip Type", "Amount", "Result"];
+  const headers = ["Time", "Bet Faces", "Bet Amount", "Result", "Amount Won"];
+  const allHeaders = [
+    "Time",
+    "Wallet",
+    "Bet Faces",
+    "Bet Amount",
+    "Result",
+    "Amount Won",
+  ];
 
   //headers to be displayed in small screen devices
   const smallScreenHeaders = ["Time", "Amount Won"];
@@ -47,19 +57,19 @@ export default function StatsHistory({ refresh }: { refresh: boolean }) {
 
   useEffect(() => {
     const route = all
-      ? `/api/games/global/getHistory?game=${GameType.coin}`
+      ? `/api/games/global/getHistory?game=${GameType.dice}`
       : `/api/games/global/getUserHistory?game=${
-          GameType.coin
+          GameType.dice
         }&wallet=${wallet.publicKey?.toBase58()}`;
 
     fetch(`${route}`)
       .then((res) => res.json())
       .then((history) => {
         if (history.success) {
-          setFlips(history?.data ?? []);
+          setBets(history?.data ?? []);
           setMaxPages(Math.ceil(history?.data.length / transactionsPerPage));
         } else {
-          setFlips([]);
+          setBets([]);
           // toast.error("Could not fetch history.");
         }
       });
@@ -76,15 +86,15 @@ export default function StatsHistory({ refresh }: { refresh: boolean }) {
       page={page}
       setPage={setPage}
       maxPages={maxPages}
-      bets={flips}
+      bets={bets}
     >
-      {flips.length > 0 ? (
-        flips
+      {bets.length > 0 ? (
+        bets
           .slice(
             page * transactionsPerPage - transactionsPerPage,
             page * transactionsPerPage,
           )
-          .map((flip, index) => (
+          .map((bet, index) => (
             <>
               <div
                 key={index}
@@ -94,21 +104,21 @@ export default function StatsHistory({ refresh }: { refresh: boolean }) {
                 onClick={() => {
                   //fetch flipDetails and verification details here
                   if (!all) {
-                    setVerifyModalData(flip);
+                    setVerifyModalData(bet);
                     openModal();
                   }
                 }}
               >
                 <span className="w-full text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
-                  {flip.createdAt
-                    ? new Date(flip.createdAt).toLocaleDateString("en-GB", {
+                  {bet.createdAt
+                    ? new Date(bet.createdAt).toLocaleDateString("en-GB", {
                         day: "2-digit",
                         month: "2-digit",
                         year: "2-digit",
                       })
                     : "-"}{" "}
-                  {flip.createdAt
-                    ? new Date(flip.createdAt).toLocaleTimeString("en-GB", {
+                  {bet.createdAt
+                    ? new Date(bet.createdAt).toLocaleTimeString("en-GB", {
                         hour: "2-digit",
                         minute: "2-digit",
                       })
@@ -116,36 +126,44 @@ export default function StatsHistory({ refresh }: { refresh: boolean }) {
                 </span>
                 {all && (
                   <span className="w-full hidden md:block text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
-                    {obfuscatePubKey(flip.wallet)}
+                    {obfuscatePubKey(bet.wallet)}
                   </span>
                 )}
                 <span className="w-full hidden md:block text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
-                  {flip.flipType.toUpperCase()}
+                  {bet.chosenNumbers.map((face, index) => (
+                    <span key={index} className="mr-2 mt-2 inline-block">
+                      <Image
+                        src={`/assets/selectedDiceFace${face}.png`}
+                        width={30}
+                        height={30}
+                        alt=""
+                      />
+                    </span>
+                  ))}
                 </span>
                 <span className="w-full hidden md:block text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
-                  {(flip.amount ?? 0).toFixed(4)}
+                  {(bet.amount ?? 0).toFixed(4)}
+                </span>
+                <span className="w-full hidden md:block text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
+                  <span className="mr-2 mt-2 inline-block">
+                    <Image
+                      src={`/assets/selectedDiceFace${bet.strikeNumber}.png`}
+                      width={30}
+                      height={30}
+                      alt=""
+                    />
+                  </span>
                 </span>
                 <span
-                  className={`w-full hidden md:block text-center font-changa text-sm text-opacity-75 ${
-                    flip.result === "Lost"
+                  className={`w-full text-center font-changa text-sm text-opacity-75 ${
+                    bet.result === "Lost"
                       ? "text-[#CF304A]"
-                      : flip.result === "Won"
+                      : bet.result === "Won"
                       ? "text-[#03A66D]"
                       : "text-[#F0F0F0]"
                   }`}
                 >
-                  {flip.result}
-                </span>
-                <span
-                  className={`w-full block md:hidden text-center  font-changa text-sm text-opacity-75 ${
-                    flip.result === "Lost"
-                      ? "text-[#CF304A]"
-                      : flip.result === "Won"
-                      ? "text-[#03A66D]"
-                      : "text-[#F0F0F0]"
-                  }`}
-                >
-                  {flip.amountWon.toFixed(4)} SOL
+                  {bet.amountWon.toFixed(4)} SOL
                 </span>
               </div>
             </>

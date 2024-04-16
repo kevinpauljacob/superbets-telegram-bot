@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { rollDice } from "../../context/gameTransactions";
-import HistoryTable from "../../components/games/RollDice/HistoryTable";
+import HistoryTable from "../../components/games/Dice/HistoryTable";
 import { toast } from "react-hot-toast";
 import { ROLL_TAX } from "../../context/config";
 import BetSetting from "@/components/BetSetting";
@@ -56,8 +56,6 @@ export default function Dice() {
   const [betResults, setBetResults] = useState<
     { face: number; isWin: boolean }[]
   >([]);
-  const [rollingWidth, setRollingWidth] = useState(0);
-  const [direction, setDirection] = useState(true);
 
   const handleDiceClick = (newFace: number) => {
     setStrikeFace(0);
@@ -128,7 +126,8 @@ export default function Dice() {
           const { strikeNumber, result } = res.data;
           const isWin = result === "Won";
           const newBetResults = [
-            ...(betResults.length <= 4 ? betResults : betResults.slice(-4)),
+            // ...(betResults.length <= 4 ? betResults : betResults.slice(-4)),
+            ...betResults,
             { face: strikeNumber, isWin },
           ];
           setBetResults(newBetResults);
@@ -343,25 +342,32 @@ export default function Dice() {
                 </div>
               )}
             </div>
-            <div>
+            <div className="flex">
               {betResults.map((result, index) => (
-                <Image
+                <div
                   key={index}
-                  src={`/assets/${
-                    result.isWin ? "winDiceFace" : "lossDiceFace"
-                  }${result.face}.png`}
-                  width={15}
-                  height={15}
-                  alt={`Dice face ${result.face}`}
-                  className={`mr-2 inline-block w-[15px] h-[15px] sm:w-[20px] sm:h-[20px] md:w-[30px] md:h-[30px] ${
-                    selectedFace.includes(result.face) ? "selected-face" : ""
-                  }`}
-                />
+                  className={`${
+                    betResults.length <= 5 ? "slideInFadeIn" : ""
+                  } ${index === 5 ? "slideOutFadeOut" : ""}
+                  ${index >= 6 ? "hiddenResults" : ""}`}
+                >
+                  <Image
+                    src={`/assets/${
+                      result.isWin ? "winDiceFace" : "lossDiceFace"
+                    }${result.face}.png`}
+                    width={15}
+                    height={15}
+                    alt={`Dice face ${result.face}`}
+                    className={`mr-2 inline-block w-[15px] h-[15px] sm:w-[20px] sm:h-[20px] md:w-[30px] md:h-[30px] ${
+                      selectedFace.includes(result.face) ? "selected-face" : ""
+                    }`}
+                  />
+                </div>
               ))}
             </div>
           </div>
 
-          <div className="relative w-full mb-8 xl:mb-6 mt-5">
+          <div className="relative w-full my-16 md:my-20">
             {/* win pointer  */}
             <div
               className={`${

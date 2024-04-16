@@ -1,4 +1,5 @@
 import React, { ReactNode, useEffect, useState } from "react";
+import { useRouter } from "next/router";
 import { Header } from "./Header";
 import InfoBar from "./Infobar";
 import Sidebar from "./Sidebar";
@@ -10,7 +11,14 @@ import BalanceModal from "./games/BalanceModal";
 import { useSession } from "next-auth/react";
 import MobileNavbar from "./MobileNavbar";
 import VerifyFlipModal from "./games/CoinFlip/VerifyFlipModal";
+import VerifyDiceModal from "./games/Dice/VerifyDiceModal";
+import VerifyDice2Modal from "./games/Dice2/VerifyDice2Modal";
+import VerifyLimboModal from "./games/Limbo/VerifyLimboModal";
 import { Flip } from "./games/CoinFlip/HistoryTable";
+import { Dice2 } from "./games/Dice2/HistoryTable";
+import { Dice } from "./games/Dice/HistoryTable";
+import { Limbo } from "./games/Limbo/HistoryTable";
+import { GameType } from "@/utils/vrf";
 import ConfigureAutoModal from "./games/ConfigureAutoModal";
 
 interface LayoutProps {
@@ -18,6 +26,8 @@ interface LayoutProps {
 }
 
 export default function Layout({ children }: LayoutProps) {
+  const router = useRouter();
+  const game = router.pathname.split("/")[1];
   const { data: session, status } = useSession();
 
   const {
@@ -72,11 +82,32 @@ export default function Layout({ children }: LayoutProps) {
         <MobileNavbar sidebar={sidebar} toggleSidebar={toggleSidebar} />
       </div>
       {showWalletModal && <BalanceModal />}
-      <VerifyFlipModal
-        isOpen={isVerifyModalOpen}
-        onClose={closeVerifyModal}
-        modalData={{ flip: (verifyModalData as Flip)! }}
-      />
+
+      {game === GameType.coin ? (
+        <VerifyFlipModal
+          isOpen={isVerifyModalOpen}
+          onClose={closeVerifyModal}
+          modalData={{ flip: (verifyModalData as Flip)! }}
+        />
+      ) : game === GameType.dice ? (
+        <VerifyDiceModal
+          isOpen={isVerifyModalOpen}
+          onClose={closeVerifyModal}
+          modalData={{ bet: (verifyModalData as Dice)! }}
+        />
+      ) : game === GameType.dice2 ? (
+        <VerifyDice2Modal
+          isOpen={isVerifyModalOpen}
+          onClose={closeVerifyModal}
+          modalData={{ bet: (verifyModalData as Dice2)! }}
+        />
+      ) : (
+        <VerifyLimboModal
+          isOpen={isVerifyModalOpen}
+          onClose={closeVerifyModal}
+          modalData={{ flip: (verifyModalData as Limbo)! }}
+        />
+      )}
       <ConfigureAutoModal />
     </>
   );

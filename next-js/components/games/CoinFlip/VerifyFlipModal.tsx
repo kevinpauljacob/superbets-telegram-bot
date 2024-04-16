@@ -91,7 +91,7 @@ export default function VerifyFlipModal({ isOpen, onClose, modalData }: Props) {
           id="modal-bg"
           className="absolute z-[150] left-0 top-0 flex h-full w-full items-center justify-center bg-black bg-opacity-50 backdrop-blur transition-all"
         >
-          <div className="bg-[#121418] max-h-[80vh] no-scrollbar overflow-y-auto p-4 md:p-11 rounded-lg z-10 w-11/12 sm:w-[600px] ">
+          <div className="bg-[#121418] max-h-[100vh] modalscrollbar overflow-y-scroll p-8 rounded-lg z-10 w-11/12 sm:w-[600px] ">
             <div className="flex flex-wrap justify-between items-center mb-4 sm:mb-5">
               <div className="font-changa text-2xl font-semibold text-white mr-4 text-opacity-90">
                 Coin Flip
