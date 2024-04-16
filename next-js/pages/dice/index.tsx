@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { rollDice } from "../../context/gameTransactions";
@@ -14,16 +14,31 @@ import {
   GameOptions,
   GameTable,
 } from "@/components/GameLayout";
+import { FormProvider, useForm } from "react-hook-form";
+import { BsInfinity } from "react-icons/bs";
+import Loader from "@/components/games/Loader";
+import WinPointer from "@/public/assets/WinPointer";
+import DicePointer from "@/public/assets/DicePointer";
+import Dice1 from "@/public/assets/Dice1";
+import Dice2 from "@/public/assets/Dice2";
+import Dice3 from "@/public/assets/Dice3";
+import Dice4 from "@/public/assets/Dice4";
+import Dice5 from "@/public/assets/Dice5";
+import Dice6 from "@/public/assets/Dice6";
 
 export default function Dice() {
   const wallet = useWallet();
+  const methods = useForm();
 
-  const { coinData, getBalance, getWalletBalance } = useGlobalContext();
+  const { coinData, getBalance, getWalletBalance, setShowAutoModal, sidebar } =
+    useGlobalContext();
+  const [user, setUser] = useState<any>(null);
   const [betAmt, setBetAmt] = useState(0);
+  const [betCount, setBetCount] = useState(0);
   const [isRolling, setIsRolling] = useState(false);
   const [winningPays, setWinningPays] = useState(6);
   const [winningAmount, setWinningAmount] = useState(0.6);
-  const [winningProbability, setWinningProbability] = useState(16.67);
+  const [winningProbability, setWinningProbability] = useState(0.0);
   const [refresh, setRefresh] = useState(true);
   const [selectedFace, setSelectedFace] = useState<number[]>([]);
   const [selectedFaces, setSelectedFaces] = useState<{
@@ -86,6 +101,12 @@ export default function Dice() {
     setBetAmt(amount);
   };
 
+  const handleCountChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) => {
+    setBetCount(parseFloat(e.target.value));
+  };
+
   const diceRoll = async () => {
     if (wallet.connected) {
       if (!wallet.publicKey) {
@@ -101,13 +122,15 @@ export default function Dice() {
         return;
       }
       setIsRolling(true);
-      await new Promise((r) => setTimeout(r, 5000));
       try {
         const res = await rollDice(wallet, betAmt, selectedFace);
         if (res.success) {
           const { strikeNumber, result } = res.data;
           const isWin = result === "Won";
-          const newBetResults = [...betResults, { face: strikeNumber, isWin }];
+          const newBetResults = [
+            ...(betResults.length <= 4 ? betResults : betResults.slice(-4)),
+            { face: strikeNumber, isWin },
+          ];
           setBetResults(newBetResults);
           setStrikeFace(strikeNumber);
           setBetAmt(0.0);
@@ -129,127 +152,182 @@ export default function Dice() {
     }
   }, [wallet?.publicKey, refresh]);
 
+  const topWinPointerRef = useRef<HTMLDivElement | null>(null);
+  const ghostWinPointerRefs = useRef<(HTMLDivElement | null)[]>([]);
+
+  const setPointerPosition = () => {
+    const topWinPointerElement = topWinPointerRef.current;
+    const ghostWinPointerElement = ghostWinPointerRefs.current[strikeFace - 1];
+
+    if (topWinPointerElement && ghostWinPointerElement) {
+      topWinPointerElement.style.left = `${ghostWinPointerElement.offsetLeft}px`;
+    } else if (topWinPointerElement) topWinPointerElement.style.left = "0px";
+  };
+
   useEffect(() => {
-    let intervalId: NodeJS.Timeout;
+    setPointerPosition();
+  }, [strikeFace, sidebar]);
 
-    if (isRolling) {
-      intervalId = setInterval(() => {
-        if (rollingWidth >= 100) {
-          setDirection(false);
-        } else if (rollingWidth <= 0) {
-          setDirection(true);
-        }
+  useEffect(() => {
+    console.log("from fhvdfnvhdf");
+    setPointerPosition();
 
-        setRollingWidth((prevValue) =>
-          direction ? prevValue + 30 : prevValue - 30,
-        );
-      }, 50);
+    if (typeof window !== "undefined") {
+      window.addEventListener("resize", setPointerPosition);
+
+      return () => {
+        window.removeEventListener("resize", setPointerPosition);
+      };
     }
-
-    return () => clearInterval(intervalId);
-  }, [isRolling, rollingWidth, direction]);
-
-  useEffect(() => {
-    console.log(rollingWidth);
-  }, [rollingWidth]);
+  }, [setPointerPosition]);
 
   return (
     <GameLayout title="FOMO - Dice">
       <GameOptions>
         <>
           <BetSetting betSetting={rollType} setBetSetting={setRollType} />
-
-          <div className="mb-6 w-full">
-            <div className="flex justify-between text-sm mb-2">
-              <p className="font-medium font-changa text-[#F0F0F0] text-opacity-90">
-                Bet Amount
-              </p>
-              <p className="font-medium font-changa text-[#94A3B8] text-opacity-90">
-                Available : {coinData ? coinData[0]?.amount.toFixed(4) : 0} $SOL
-              </p>
-            </div>
-            <div
-              className={`group flex h-11 w-full cursor-pointer items-center rounded-[8px] bg-[#202329] px-4`}
-            >
-              <input
-                type={"number"}
-                step={"any"}
+          <div className="w-full flex flex-col">
+            <FormProvider {...methods}>
+              <form
+                className="flex w-full flex-col gap-0"
                 autoComplete="off"
-                onChange={handleBetAmountChange}
-                placeholder={"Amount"}
-                value={betAmt}
-                className={`flex w-full min-w-0 bg-transparent text-base font-chakra text-white placeholder-white  placeholder-opacity-40 outline-none`}
-              />
-              <span
-                className="bg-[#D9D9D9] bg-opacity-5 py-1 px-1.5 rounded text-xs font-semibold text-[#F0F0F0] text-opacity-50"
-                onClick={() => setBetAmt(coinData ? coinData[0]?.amount : 0)}
+                onSubmit={methods.handleSubmit(diceRoll)}
               >
-                MAX
-              </span>
-            </div>
-          </div>
-          {rollType === "auto" && (
-            <div className="mb-6">
-              <div className="flex justify-between text-xs mb-2">
-                <p className="font-medium font-changa text-[#F0F0F0] text-opacity-90">
-                  Number of Bets
-                </p>
-              </div>
-              <div className="flex justify-between">
-                <div className="relative w-[48%]">
-                  <input
-                    className="z-0 w-full bg-[#202329] rounded-md p-2.5"
-                    type="text"
-                    placeholder="0.0"
-                  />
-                  <button className="z-10 absolute top-2.5 right-2.5 px-3  rounded-sm text-xs bg-[#d9d9d90d]">
-                    <Image
-                      src="/assets/infiniteLogo.png"
-                      alt="Infinite Bet"
-                      width={25}
-                      height={25}
+                {/* amt input  */}
+                <div className="mb-0 flex w-full flex-col">
+                  <div className="mb-1 flex w-full items-center justify-between text-sm font-changa text-opacity-90">
+                    <label className="text-white/90 font-medium font-changa">
+                      Bet Amount
+                    </label>
+                    <span className="text-[#94A3B8] text-opacity-90 font-changa font-medium text-sm">
+                      {coinData ? coinData[0]?.amount.toFixed(4) : 0} $SOL
+                    </span>
+                  </div>
+
+                  <div
+                    className={`group flex h-11 w-full cursor-pointer items-center rounded-[8px] bg-[#202329] px-4`}
+                  >
+                    <input
+                      id={"amount-input"}
+                      {...methods.register("amount", {
+                        required: "Amount is required",
+                      })}
+                      type={"number"}
+                      step={"any"}
+                      autoComplete="off"
+                      onChange={handleBetAmountChange}
+                      placeholder={"Amount"}
+                      value={betAmt}
+                      className={`flex w-full min-w-0 bg-transparent text-base text-[#94A3B8] placeholder-[#94A3B8]  font-chakra placeholder-opacity-40 outline-none`}
                     />
+                    <span
+                      className="text-xs font-medium text-white text-opacity-50 bg-[#292C32] hover:bg-[#47484A] focus:bg-[#47484A] transition-all rounded-[5px] py-1.5 px-4"
+                      onClick={() =>
+                        setBetAmt(coinData ? coinData[0]?.amount : 0)
+                      }
+                    >
+                      MAX
+                    </span>
+                  </div>
+
+                  <span
+                    className={`${
+                      methods.formState.errors["amount"]
+                        ? "opacity-100"
+                        : "opacity-0"
+                    } mt-1.5 flex items-center gap-1 text-xs text-[#D92828]`}
+                  >
+                    {methods.formState.errors["amount"]
+                      ? methods.formState.errors["amount"]!.message!.toString()
+                      : "NONE"}
+                  </span>
+                </div>
+                {rollType === "manual" ? (
+                  <></>
+                ) : (
+                  <div className="w-full flex flex-row items-end gap-3">
+                    <div className="mb-0 flex w-full flex-col">
+                      <div className="mb-1 flex w-full items-center justify-between text-sm font-changa text-opacity-90">
+                        <label className="text-white/90 font-medium font-changa">
+                          Number of Bets
+                        </label>
+                      </div>
+
+                      <div
+                        className={`group flex h-11 w-full cursor-pointer items-center rounded-[8px] bg-[#202329] px-4`}
+                      >
+                        <input
+                          id={"count-input"}
+                          {...methods.register("betCount", {
+                            required: "Bet count is required",
+                          })}
+                          type={"number"}
+                          step={"any"}
+                          autoComplete="off"
+                          onChange={handleCountChange}
+                          placeholder={"00"}
+                          value={betCount}
+                          className={`flex w-full min-w-0 bg-transparent text-base text-[#94A3B8] placeholder-[#94A3B8]  font-chakra placeholder-opacity-40 outline-none`}
+                        />
+                        <span
+                          className="text-2xl font-medium text-white text-opacity-50 bg-[#292C32] hover:bg-[#47484A] focus:bg-[#47484A] transition-all rounded-[5px] py-0.5 px-3"
+                          onClick={() =>
+                            setBetCount(coinData ? coinData[0]?.amount : 0)
+                          }
+                        >
+                          <BsInfinity />
+                        </span>
+                      </div>
+
+                      <span
+                        className={`${
+                          methods.formState.errors["amount"]
+                            ? "opacity-100"
+                            : "opacity-0"
+                        } mt-1.5 flex items-center gap-1 text-xs text-[#D92828]`}
+                      >
+                        {methods.formState.errors["amount"]
+                          ? methods.formState.errors[
+                              "amount"
+                            ]!.message!.toString()
+                          : "NONE"}
+                      </span>
+                    </div>
+                    <div
+                      onClick={() => {
+                        setShowAutoModal(true);
+                      }}
+                      className="mb-[1.4rem] rounded-md w-full h-11 flex items-center justify-center opacity-75 cursor-pointer text-white text-opacity-90 border-2 border-white bg-white bg-opacity-0 hover:bg-opacity-5"
+                    >
+                      Configure Auto
+                    </div>
+                  </div>
+                )}
+                <div className="hidden md:flex w-full flex-col mt-2">
+                  <button
+                    type="submit"
+                    disabled={
+                      !wallet ||
+                      selectedFace.length == 0 ||
+                      isRolling ||
+                      (coinData && coinData[0].amount < 0.0001)
+                        ? true
+                        : false
+                    }
+                    onClick={diceRoll}
+                    className={`disabled:cursor-default disabled:opacity-70 hover:opacity-90 w-full h-[3.75rem] rounded-lg transition-all bg-[#7839C5] disabled:bg-[#4b2876] hover:bg-[#9361d1] focus:bg-[#602E9E] flex items-center justify-center font-changa font-semibold text-[1.75rem] text-white`}
+                  >
+                    {isRolling ? <Loader /> : "BET"}
                   </button>
                 </div>
-
-                <button className="border-2 border-white/90 text-white/80 font-semibold rounded-md w-[48%]">
-                  Configure Auto
-                </button>
-              </div>
-            </div>
-          )}
-          <div className="w-full">
-            <button
-              disabled={!wallet || selectedFace.length == 0}
-              onClick={() => {
-                if (!isRolling) diceRoll();
-              }}
-              className={`${
-                !wallet || selectedFace.length == 0
-                  ? "cursor-not-allowed opacity-70"
-                  : "hover:opacity-90"
-              } flex w-full flex-col items-center justify-center gap-2 rounded-lg border border-[#F6F6F61A] bg-[#7839C5] hover:bg-[#9361d1] focus:bg-[#602E9E] py-2.5 font-changa shadow-[0px_4px_15px_0px_rgba(0,0,0,0.25)]`}
-            >
-              {isRolling ? (
-                <div>
-                  <span className="font-changa text-[1.75rem] font-semibold text-white text-opacity-80">
-                    ROLLING...
-                  </span>
-                </div>
-              ) : (
-                <div>
-                  <span className="center font-changa text-[1.75rem] font-semibold text-white text-opacity-80">
-                    BET
-                  </span>
-                </div>
-              )}
-            </button>
+              </form>
+            </FormProvider>
           </div>
         </>
       </GameOptions>
       <GameDisplay>
         <>
-          <div className="w-full flex justify-between items-center mb-7 sm:mb-0">
+          <div className="w-full flex justify-between items-center">
             <div>
               {isRolling ? (
                 <div className="font-chakra text-sm font-medium text-white text-opacity-75">
@@ -282,32 +360,110 @@ export default function Dice() {
               ))}
             </div>
           </div>
-          <div className="relative w-full mb-8 xl:mb-6">
+
+          <div className="relative w-full mb-8 xl:mb-6 mt-5">
+            {/* win pointer  */}
             <div
-              className="transition-width h-4 bg-transparent flex justify-end"
-              style={{
-                width: `${
-                  isRolling ? rollingWidth : 9.5 + (strikeFace - 1) * 16.5
-                }%`,
-              }}
+              className={`${
+                betResults.length > 0 ? "opacity-100" : "opacity-0"
+              } transition-width duration-300 h-4 bg-transparent flex w-full`}
             >
-              <Image
-                src="/assets/winPointer.png"
-                alt="win pointer"
-                width={20}
-                height={20}
-                className="absolute -top-[30px]"
+              <div
+                ref={topWinPointerRef}
+                className="absolute -top-[1rem] z-[10] transition-all"
+              >
+                <WinPointer
+                  className={`relative ${
+                    selectedFace.includes(strikeFace)
+                      ? "text-[#72F238]"
+                      : "text-[#A0293D]"
+                  }`}
+                />
+              </div>
+            </div>
+
+            {/* ghost pointers  */}
+            <div className="w-full flex items-center justify-around absolute -top-[1rem] opacity-0">
+              {[1, 2, 3, 4, 5, 6].map((num) => (
+                <div
+                  key={num}
+                  id={`ghost-win-pointer-${num}`}
+                  ref={(el) =>
+                    (ghostWinPointerRefs.current[num - 1] = el || null)
+                  }
+                >
+                  <WinPointer className="relative text-[#282E3D]" />
+                </div>
+              ))}
+            </div>
+
+            <div className="w-full bg-[#282E3D] rounded-full h-2 flex items-end justify-around">
+              {[1, 2, 3, 4, 5, 6].map((num, index) => (
+                <DicePointer
+                  key={index}
+                  className="relative top-1.5 text-[#282E3D]"
+                />
+              ))}
+            </div>
+            <div className="w-full flex items-end justify-around mt-5">
+              <DiceFace
+                selectedFace={selectedFace}
+                selectedFaces={selectedFaces}
+                diceNumber={1}
+                Icon={Dice1}
+                strikeFace={strikeFace}
+                handleClick={handleDiceClick}
+              />
+              <DiceFace
+                selectedFace={selectedFace}
+                selectedFaces={selectedFaces}
+                diceNumber={2}
+                Icon={Dice2}
+                strikeFace={strikeFace}
+                handleClick={handleDiceClick}
+              />
+              <DiceFace
+                selectedFace={selectedFace}
+                selectedFaces={selectedFaces}
+                diceNumber={3}
+                Icon={Dice3}
+                strikeFace={strikeFace}
+                handleClick={handleDiceClick}
+              />
+              <DiceFace
+                selectedFace={selectedFace}
+                selectedFaces={selectedFaces}
+                diceNumber={4}
+                Icon={Dice4}
+                strikeFace={strikeFace}
+                handleClick={handleDiceClick}
+              />
+              <DiceFace
+                selectedFace={selectedFace}
+                selectedFaces={selectedFaces}
+                diceNumber={5}
+                Icon={Dice5}
+                strikeFace={strikeFace}
+                handleClick={handleDiceClick}
+              />
+              <DiceFace
+                selectedFace={selectedFace}
+                selectedFaces={selectedFaces}
+                diceNumber={6}
+                Icon={Dice6}
+                strikeFace={strikeFace}
+                handleClick={handleDiceClick}
               />
             </div>
-            <div className="">
+            {/* <div className="">
               <Image
                 src="/assets/progressBar.png"
                 alt="progress bar"
                 width={900}
                 height={100}
               />
-            </div>
-            <div className="flex justify-around">
+            </div> */}
+            {/* <div className="flex justify-around">
               <div className="flex flex-col items-center mr-2 sm:mr-0">
                 {selectedFaces[1] ? (
                   selectedFace.includes(1) ? (
@@ -335,7 +491,7 @@ export default function Dice() {
                   alt="progress bar"
                   width={8}
                   height={8}
-                  className="absolute top-[0px] w-[8px] h-[8px] sm:w-[10px] sm:h-[10px] md:w-[13px] md:h-[13px] sm:top-[2px] md:top-[4px]"
+                  className="absolute top-[0px] w-[8px] h-[8px] sm:w-[10px] sm:h-[10px] md:w-[13px] md:h-[13px] sm:top-[2px] md:top-[1rem]"
                 />
                 <Image
                   src={
@@ -608,7 +764,7 @@ export default function Dice() {
                   onClick={() => handleDiceClick(6)}
                 />
               </div>
-            </div>
+            </div> */}
           </div>
 
           <GameFooterInfo
@@ -622,5 +778,41 @@ export default function Dice() {
         <HistoryTable refresh={refresh} />
       </GameTable>
     </GameLayout>
+  );
+}
+
+function DiceFace({
+  selectedFaces,
+  selectedFace,
+  strikeFace,
+  diceNumber,
+  handleClick,
+  Icon,
+}: {
+  selectedFaces: {
+    [key: number]: boolean;
+  };
+  selectedFace: number[];
+  strikeFace: number;
+  diceNumber: number;
+  handleClick: (number: number) => void;
+  Icon: any;
+}) {
+  return (
+    <div onClick={() => handleClick(diceNumber)}>
+      <Icon
+        className={`${
+          selectedFaces[diceNumber]
+            ? selectedFace.includes(diceNumber)
+              ? strikeFace === diceNumber
+                ? "text-[#72F238]" // Use winning dice face image if strikeFace is 1
+                : "text-[#94A3B8]" // Use selected dice face image if face 1 is selected but not strikeFace
+              : "text-[#202329] hover:text-[#47484A]" // Use regular dice face image if face 1 is not selected
+            : strikeFace === diceNumber
+            ? "text-[#A0293D]" // Use losing dice face image if strikeFace is 1 and face 1 is not selected
+            : "text-[#202329] hover:text-[#47484A]" // Use regular dice face image if face 1 is not selected and strikeFace is not 1
+        } cursor-pointer w-12 h-12 transition-all blink_dice`}
+      />
+    </div>
   );
 }

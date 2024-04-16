@@ -82,15 +82,15 @@ interface TableButtonProps {
 export const TableButtons: React.FC<TableButtonProps> = ({ all, setAll }) => {
   const wallet = useWallet();
   return (
-    <div className="mt-[7rem] flex w-full items-center justify-center gap-4 md:justify-start">
+    <div className="mt-[3.5rem] flex w-full items-center justify-center gap-4 md:justify-start">
       <button
         onClick={() => {
           if (wallet.publicKey) setAll(false);
           else toast.error("Wallet not connected");
         }}
         className={`${
-          all ? "text-shadow-violet hover:bg-[#7839C530]" : "bg-[#7839C5]"
-        } w-full transform rounded-[5px] px-8 py-2 font-changa text-lg text-white transition duration-200 md:w-fit`}
+          all ? "bg-[#202329] hover:bg-[#47484A]" : "bg-[#7839C5]"
+        } w-full transform rounded-[5px] px-8 py-2 font-changa text-xl text-white transition duration-200 md:w-fit`}
       >
         My Bets
       </button>
@@ -99,8 +99,8 @@ export const TableButtons: React.FC<TableButtonProps> = ({ all, setAll }) => {
           setAll(true);
         }}
         className={`${
-          all ? "bg-[#7839C5]" : "text-shadow-violet hover:bg-[#7839C530]"
-        } w-full transform rounded-[5px] px-8 py-2 font-changa text-lg text-white transition duration-200 md:w-fit`}
+          all ? "bg-[#7839C5]" : "bg-[#202329] hover:bg-[#47484A]"
+        } w-full transform rounded-[5px] px-8 py-2 font-changa text-xl text-white transition duration-200 md:w-fit`}
       >
         All Bets
       </button>
@@ -198,7 +198,7 @@ export const Table: React.FC<TableProps> = ({
   return (
     <div className="flex w-full flex-col pb-10">
       <TableButtons all={all} setAll={setAll} />
-      <div className="scrollbar mt-10 w-full md:overflow-x-auto pb-8">
+      <div className="scrollbar mt-8 w-full md:overflow-x-auto pb-8">
         <div className="flex w-full md:min-w-[50rem] flex-col items-center">
           <TableHeader
             all={all}
