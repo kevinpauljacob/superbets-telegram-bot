@@ -33,7 +33,7 @@ export default function Layout({ children }: LayoutProps) {
     closeVerifyModal,
     verifyModalData,
     sidebar,
-    setSidebar
+    setSidebar,
   } = useGlobalContext();
 
   const toggleSidebar = () => {
@@ -60,7 +60,7 @@ export default function Layout({ children }: LayoutProps) {
             <div className="w-full hidden md:flex">
               <GameHeader />
             </div>
-            <main className="w-full h-full md:px-[2.5%] max-h-[calc(100vh-16.6rem)] md:max-h-[calc(100vh-11rem)]">
+            <main className="w-full h-full md:px-[2.5%] md:pt-[4.5%] lg:pt-0 max-h-[calc(100vh-16.6rem)] lg:max-h-[calc(100vh-11rem)]">
               <section className="w-full h-full overflow-y-auto no-scrollbar">
                 {children}
               </section>
