@@ -10,21 +10,19 @@ const minesSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
-    numMines: {
+    minesCount: {
       type: Number,
       required: true,
     },
-    strikeNumber: {
-      type: Number,
-      required: true,
-    },
+    inputMines: Array<Number>,
+    resultMines: Array<Number>,
     tokenMint: {
       type: String,
       required: true,
     },
     result: {
       type: String,
-      enum: ["Won", "Lost"],
+      enum: ["Won", "Lost", "Pending"],
       required: true,
     },
     amountWon: {
