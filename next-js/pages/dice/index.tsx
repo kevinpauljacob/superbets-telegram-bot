@@ -398,9 +398,9 @@ export default function Dice() {
             </div>
 
             <div className="w-full bg-[#282E3D] rounded-full h-2 flex items-end justify-around">
-              {[1, 2, 3, 4, 5, 6].map((num, index) => (
+              {[1, 2, 3, 4, 5, 6].map((num) => (
                 <DicePointer
-                  key={index}
+                  key={num}
                   className="relative top-1.5 text-[#282E3D]"
                 />
               ))}

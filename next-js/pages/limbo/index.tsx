@@ -39,17 +39,17 @@ export default function Limbo() {
 
   const [multiplier, setMultiplier] = useState(1.01);
   const [lastMultipliers, setLastMultipliers] = useState<number[]>([]);
-  const [targetMultiplier, setTargetMultiplier] = useState(1.0);
-  const duration = 500;
+  const [targetMultiplier, setTargetMultiplier] = useState(1.01);
+  const duration = 200;
 
   const [inputMultiplier, setInputMultiplier] = useState(2.0);
 
   useEffect(() => {
-    const increment = (targetMultiplier - multiplier) / (duration / 16); // 16ms is about 60fps
+    const increment = (targetMultiplier - multiplier) / (duration / 16);
     const timer = setInterval(() => {
       setMultiplier((prevNumber) => {
         let nextNumber = prevNumber + increment;
-        nextNumber = parseFloat(nextNumber.toFixed(2));
+        // nextNumber = parseFloat(nextNumber.toFixed(2));
 
         if (increment > 0)
           return nextNumber >= targetMultiplier ? targetMultiplier : nextNumber;
@@ -62,8 +62,8 @@ export default function Limbo() {
   }, [targetMultiplier, multiplier]);
 
   const bet = async () => {
-    setMultiplier(1.0);
-    setTargetMultiplier(1.0);
+    setMultiplier(1.01);
+    setTargetMultiplier(1.01);
     try {
       console.log("Placing Flip");
       // function to place bet
@@ -90,7 +90,6 @@ export default function Limbo() {
       setRefresh(true);
     } catch (e) {
       toast.error("Could not make Flip.");
-
       setDeposit(false);
       setFlipping(false);
       setLoading(false);
@@ -98,7 +97,7 @@ export default function Limbo() {
     }
   };
 
-  const onSubmit = async (data: any) => {
+  const onSubmit = async () => {
     if (!wallet.publicKey) {
       toast.error("Wallet not connected");
       return;
@@ -117,6 +116,33 @@ export default function Limbo() {
     setTimeout(() => {
       bet();
     }, 300);
+  };
+
+  const onSubmitAutoBet = async (numOfBets: number) => {
+    if (!wallet.publicKey) {
+      toast.error("Wallet not connected");
+      return;
+    }
+    if (betAmt === 0) {
+      toast.error("Set Amount.");
+      return;
+    }
+    if (inputMultiplier < 1.01) {
+      toast.error("Input multiplier should be atleast 1.01");
+      return;
+    }
+    setLoading(true);
+    setDeposit(false);
+    try {
+      for (let i = 0; i < numOfBets; i++) {
+        console.log("i", i);
+        await onSubmit();
+        await new Promise((resolve) => setTimeout(resolve, 500));
+      }
+    } catch (err: any) {
+      console.log(err);
+      toast.error(err.message);
+    }
   };
 
   useEffect(() => {
@@ -501,7 +527,7 @@ export default function Limbo() {
                       disabled={
                         coinData && coinData[0].amount < 0.0001 ? true : false
                       }
-                      onClick={onSubmit}
+                      onClick={() => onSubmitAutoBet(betCount)}
                       className={`${
                         coinData && coinData[0].amount < 0.0001
                           ? "cursor-not-allowed opacity-70"
@@ -518,20 +544,20 @@ export default function Limbo() {
         </>
       </GameOptions>
       <GameDisplay>
-        <>
+        <div className="flex flex-col justify-end h-full w-full gap-6 md:gap-0">
           <div className="grid w-full h-full">
             <div className="grid place-items-center">
-              <div className="bg-[#1E2024] md:w-1/4 md:h-1/4 place-content-center text-center rounded-md">
+              <div className="bg-[#1E2024] py-4 px-4 md:px-0 md:py-10 md:mt-0 md:w-1/4 md:h-1/4 place-content-center text-center rounded-md">
                 <span
                   className={`${
                     result
-                      ? multiplier === 1.0
+                      ? multiplier === 1.01
                         ? "text-white"
                         : multiplier >= inputMultiplier
                         ? "text-[#72F238]"
                         : "text-[#F1323E]"
                       : "text-white"
-                  } font-changa inline-block transition-transform duration-200 ease-out md:text-6xl`}
+                  } font-changa inline-block transition-transform duration-200 ease-out text-4xl md:text-6xl`}
                 >
                   {multiplier.toFixed(2)}x
                 </span>
@@ -546,7 +572,7 @@ export default function Limbo() {
             multiplierHistory={lastMultipliers}
             inputMultiplier={inputMultiplier}
           />
-        </>
+        </div>
       </GameDisplay>
       <GameTable>
         <HistoryTable refresh={refresh} />
