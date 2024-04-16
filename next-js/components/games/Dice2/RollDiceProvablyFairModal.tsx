@@ -99,7 +99,7 @@ export default function RollDiceProvablyFairModal({
         name === "clientSeed" ? value : clientSeed,
         parseInt(name === "nonce" ? value : nonce),
         GameType.dice,
-      ) as number,
+      ),
     );
   };
 

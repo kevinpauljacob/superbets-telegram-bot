@@ -177,8 +177,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         serverSeed,
         clientSeed,
         nonce,
-        GameType.plinko,
-      ) as number;
+        GameType.roulette2,
+      );
 
       if (strikeNumber == null) throw new Error("Invalid strike number!");
 
