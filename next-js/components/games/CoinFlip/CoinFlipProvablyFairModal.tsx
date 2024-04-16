@@ -94,12 +94,12 @@ export default function CoinFlipProvablyFairModal({
     const { clientSeed, serverSeed, nonce } = verificationState;
 
     setWonCoinface(
-      (generateGameResult(
+      generateGameResult(
         name === "serverSeed" ? value : serverSeed,
         name === "clientSeed" ? value : clientSeed,
         parseInt(name === "nonce" ? value : nonce),
         GameType.coin,
-      ) as number) === 1
+      ) === 1
         ? "heads"
         : "tails",
     );

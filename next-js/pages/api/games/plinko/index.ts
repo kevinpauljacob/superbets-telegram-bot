@@ -125,14 +125,13 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       const { serverSeed, clientSeed, nonce } = activeGameSeed;
 
       const strikeNumber =
-        ((generateGameResult(
+        generateGameResult(
           serverSeed,
           clientSeed,
           nonce,
           GameType.plinko,
-        ) as number) %
-          Math.pow(2, rows)) +
-        1;
+          rows,
+        ) % Math.pow(2, rows);
 
       if (!strikeNumber) throw new Error("Invalid strike number!");
 

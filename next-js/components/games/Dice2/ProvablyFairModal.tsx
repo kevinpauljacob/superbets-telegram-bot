@@ -93,15 +93,11 @@ export default function RollDiceProvablyFairModal({
     const { clientSeed, serverSeed, nonce } = verificationState;
 
     setStrikeNumber(
-      parseFloat(
-        (
-          generateGameResult(
-            name === "serverSeed" ? value : serverSeed,
-            name === "clientSeed" ? value : clientSeed,
-            parseInt(name === "nonce" ? value : nonce),
-            GameType.dice2,
-          ) as number
-        ).toFixed(2),
+      generateGameResult(
+        name === "serverSeed" ? value : serverSeed,
+        name === "clientSeed" ? value : clientSeed,
+        parseInt(name === "nonce" ? value : nonce),
+        GameType.dice2,
       ),
     );
   };
