@@ -311,7 +311,7 @@ export default function CoinFlipProvablyFairModal({
                         }
                         className="bg-[#202329] text-white font-chakra text-xs font-medium mt-1 rounded-md p-3 w-full relative appearance-none"
                       >
-                        <option value={GameType.dice}>Dice</option>
+                        {/* <option value={GameType.dice}>Dice</option> */}
                         <option value={GameType.coin}>Coin Flip</option>
                       </select>
                     </div>
