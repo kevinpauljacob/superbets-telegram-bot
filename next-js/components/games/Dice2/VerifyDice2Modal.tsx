@@ -138,7 +138,9 @@ export default function VerifyDice2Modal({
             <div className="mt-6 px-4 md:px-12 pt-7 border-2 border-white border-opacity-5 rounded-md">
               <div className="relative w-full mb-8 xl:mb-6 pb-5 pt-10">
                 <DraggableBar
-                  choice={choice}
+                  choice={
+                    bet.direction === "over" ? 100 - bet.chance : bet.chance
+                  }
                   setChoice={setChoice}
                   strikeNumber={bet.strikeNumber}
                   result={bet.result === "Won" ? true : false}
