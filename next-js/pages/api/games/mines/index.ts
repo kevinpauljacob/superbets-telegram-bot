@@ -2,7 +2,7 @@ import connectDatabase from "@/utils/database";
 import { getToken } from "next-auth/jwt";
 import { NextApiRequest, NextApiResponse } from "next";
 import { GameSeed, Mines, User } from "@/models/games";
-import { seedStatus } from "@/utils/vrf";
+import { seedStatus } from "@/utils/provably-fair";
 
 const secret = process.env.NEXTAUTH_SECRET;
 

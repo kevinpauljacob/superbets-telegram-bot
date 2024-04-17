@@ -18,7 +18,7 @@ import { Flip } from "./games/CoinFlip/HistoryTable";
 import { Dice2 } from "./games/Dice2/HistoryTable";
 import { Dice } from "./games/Dice/HistoryTable";
 import { Limbo } from "./games/Limbo/HistoryTable";
-import { GameType } from "@/utils/vrf";
+import { GameType } from "@/utils/provably-fair";
 import ConfigureAutoModal from "./games/ConfigureAutoModal";
 
 interface LayoutProps {

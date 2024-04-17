@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { obfuscatePubKey } from "@/context/transactions";
 import Image from "next/image";
 import { useGlobalContext } from "@/components/GlobalContext";
-import { GameType, seedStatus } from "@/utils/vrf";
+import { GameType, seedStatus } from "@/utils/provably-fair";
 import { Table } from "@/components/table/Table";
 
 export interface Dice {

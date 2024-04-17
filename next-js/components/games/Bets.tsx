@@ -2,7 +2,7 @@ import { useWallet } from "@solana/wallet-adapter-react";
 import { useState, useEffect } from "react";
 import toast from "react-hot-toast";
 import { obfuscatePubKey } from "@/context/transactions";
-import { GameType } from "@/utils/vrf";
+import { GameType } from "@/utils/provably-fair";
 import { Table } from "../table/Table";
 interface Bet {
   wallet: string;

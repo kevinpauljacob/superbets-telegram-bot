@@ -1,12 +1,8 @@
 import connectDatabase from "@/utils/database";
 import { getToken } from "next-auth/jwt";
 import { NextApiRequest, NextApiResponse } from "next";
-import { GameSeed } from "@/models/games";
-import {
-  generateClientSeed,
-  generateServerSeed,
-  seedStatus,
-} from "@/utils/vrf";
+import { GameSeed, Mines } from "@/models/games";
+import { generateServerSeed, seedStatus } from "@/utils/provably-fair";
 
 const secret = process.env.NEXTAUTH_SECRET;
 
@@ -16,12 +12,13 @@ export const config = {
 
 type InputType = {
   wallet: string;
+  clientSeed: string;
 };
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === "POST") {
     try {
-      let { wallet }: InputType = req.body;
+      let { wallet, clientSeed }: InputType = req.body;
 
       const token = await getToken({ req, secret });
 
@@ -33,56 +30,64 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
       await connectDatabase();
 
-      if (!wallet)
+      if (
+        !wallet ||
+        !clientSeed ||
+        clientSeed.trim() === "" ||
+        !/^[\x00-\x7F]*$/.test(clientSeed)
+      ) {
         return res
           .status(400)
-          .json({ success: false, message: "Missing parameters" });
+          .json({ success: false, message: "Missing or invalid parameters" });
+      }
 
-      const clientSeed = generateClientSeed();
-      const serverSeedInfo1 = generateServerSeed();
-      const serverSeedInfo2 = generateServerSeed();
+      const pendingMines = await Mines.findOne({ wallet, result: "Pending" });
+      if (pendingMines)
+        return res
+          .status(400)
+          .json({ success: false, message: "Pending mines game" });
 
-      const activeGameSeed = await GameSeed.findOneAndUpdate(
+      const expiredGameSeed = await GameSeed.findOneAndUpdate(
         {
           wallet,
           status: seedStatus.ACTIVE,
         },
         {
-          $setOnInsert: {
-            clientSeed,
-            serverSeed: serverSeedInfo1.serverSeed,
-            serverSeedHash: serverSeedInfo1.serverSeedHash,
+          $set: {
+            status: seedStatus.EXPIRED,
           },
         },
         {
-          projection: { serverSeed: 0 },
-          upsert: true,
           new: true,
         },
       );
 
-      if (!activeGameSeed) {
+      if (!expiredGameSeed) {
         throw new Error("Server hash not found!");
       }
 
-      const nextGameSeed = await GameSeed.findOneAndUpdate(
+      const activeGameSeed = await GameSeed.findOneAndUpdate(
         {
           wallet,
           status: seedStatus.NEXT,
         },
         {
-          $setOnInsert: {
+          $set: {
             clientSeed,
-            serverSeed: serverSeedInfo2.serverSeed,
-            serverSeedHash: serverSeedInfo2.serverSeedHash,
+            status: seedStatus.ACTIVE,
           },
         },
-        {
-          projection: { serverSeed: 0 },
-          upsert: true,
-          new: true,
-        },
+        { projection: { serverSeed: 0 }, new: true },
       );
+
+      const newServerHash = generateServerSeed();
+
+      const nextGameSeed = await GameSeed.create({
+        wallet,
+        serverSeed: newServerHash.serverSeed,
+        serverSeedHash: newServerHash.serverSeedHash,
+      });
+      delete nextGameSeed.serverSeed;
 
       return res.status(201).json({
         success: true,

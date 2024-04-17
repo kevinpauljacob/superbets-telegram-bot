@@ -1,10 +1,13 @@
 import connectDatabase from "../../../../utils/database";
-import { FLIP_TAX } from "../../../../context/config";
 import { getToken } from "next-auth/jwt";
 import { NextApiRequest, NextApiResponse } from "next";
 import { wsEndpoint, minGameAmount } from "@/context/gameTransactions";
 import { Coin, GameSeed, User } from "@/models/games";
-import { GameType, generateGameResult, seedStatus } from "@/utils/vrf";
+import {
+  GameType,
+  generateGameResult,
+  seedStatus,
+} from "@/utils/provably-fair";
 import StakingUser from "@/models/staking/user";
 import { pointTiers } from "@/context/transactions";
 
@@ -102,7 +105,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         (flipType === "tails" && strikeNumber === 2)
       ) {
         result = "Won";
-        amountWon = amount;
+        amountWon = amount * 2;
         amountLost = 0;
       }
 
@@ -129,7 +132,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         },
         {
           $inc: {
-            "deposit.$.amount": -amount + amountWon * (1 + (1 - FLIP_TAX)),
+            "deposit.$.amount": -amount + amountWon,
           },
           sns,
         },

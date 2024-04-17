@@ -1,6 +1,10 @@
-import { GameType, generateClientSeed, generateGameResult } from "@/utils/vrf";
+import {
+  GameType,
+  generateClientSeed,
+  generateGameResult,
+} from "@/utils/provably-fair";
 import { useEffect, useState } from "react";
-import { Flip } from "./HistoryTable";
+import { Limbo } from "./HistoryTable";
 import Image from "next/image";
 import toast from "react-hot-toast";
 
@@ -29,7 +33,7 @@ interface Props {
   onClose: () => void;
   modalData: PFModalData;
   setModalData: React.Dispatch<React.SetStateAction<PFModalData>>;
-  flip?: Flip;
+  flip?: Limbo;
 }
 
 export default function LimboProvablyFairModal({
@@ -108,7 +112,7 @@ export default function LimboProvablyFairModal({
     if (!/^[\x00-\x7F]*$/.test(newClientSeed) || newClientSeed.trim() === "")
       return toast.error("Invalid client seed");
 
-    let data = await fetch(`/api/games/vrf/change`, {
+    let data = await fetch(`/api/games/gameSeed/change`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

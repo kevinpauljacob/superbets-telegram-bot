@@ -1,4 +1,4 @@
-import { GameType, seedStatus } from "@/utils/vrf";
+import { GameType, seedStatus } from "@/utils/provably-fair";
 import Image from "next/image";
 import { useState } from "react";
 import { IoIosArrowDown, IoMdCopy } from "react-icons/io";
