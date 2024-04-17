@@ -6,13 +6,14 @@ import {
   Dice2,
   Keno,
   Limbo,
+  Mines,
   Option,
   Plinko,
   Roulette1,
   Roulette2,
   Wheel,
 } from "@/models/games";
-import { GameType } from "@/utils/vrf";
+import { GameType } from "@/utils/provably-fair";
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === "GET") {
@@ -185,6 +186,22 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
             {
               $addFields: {
                 players: { $size: "$players" },
+              },
+            },
+          ]).then((res) => res[0]);
+          break;
+        case GameType.mines:
+          stats = await Mines.aggregate([
+            {
+              $group: {
+                _id: null,
+                volume: { $sum: "$amount" },
+                wallets: { $addToSet: "$wallet" },
+              },
+            },
+            {
+              $addFields: {
+                players: { $size: "$wallets" },
               },
             },
           ]).then((res) => res[0]);

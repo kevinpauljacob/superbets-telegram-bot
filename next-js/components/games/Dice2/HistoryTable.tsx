@@ -2,7 +2,7 @@ import { useWallet } from "@solana/wallet-adapter-react";
 import { useState, useEffect } from "react";
 import { obfuscatePubKey } from "@/context/transactions";
 import { useGlobalContext } from "@/components/GlobalContext";
-import { GameType, seedStatus } from "@/utils/vrf";
+import { GameType, seedStatus } from "@/utils/provably-fair";
 import { Table } from "@/components/table/Table";
 
 export interface Dice2 {

@@ -4,7 +4,11 @@ import { getToken } from "next-auth/jwt";
 import { NextApiRequest, NextApiResponse } from "next";
 import { wsEndpoint, minGameAmount } from "@/context/gameTransactions";
 import { GameSeed, User, Dice } from "@/models/games";
-import { GameType, generateGameResult, seedStatus } from "@/utils/vrf";
+import {
+  GameType,
+  generateGameResult,
+  seedStatus,
+} from "@/utils/provably-fair";
 import StakingUser from "@/models/staking/user";
 import { pointTiers } from "@/context/transactions";
 
@@ -136,7 +140,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         },
         {
           $inc: {
-            "deposit.$.amount": -amount + amountWon * (1 - ROLL_TAX),
+            "deposit.$.amount": -amount + amountWon,
           },
           sns,
         },
@@ -201,9 +205,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           amountLost,
         },
         message: `${result} ${
-          result == "Won"
-            ? (amountWon * (1 - ROLL_TAX)).toFixed(4)
-            : amountLost.toFixed(4)
+          result == "Won" ? amountWon.toFixed(4) : amountLost.toFixed(4)
         } SOL!`,
       });
     } catch (e: any) {

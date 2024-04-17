@@ -1,4 +1,4 @@
-import { seedStatus } from "@/utils/vrf";
+import { seedStatus } from "@/utils/provably-fair";
 import mongoose from "mongoose";
 
 const gameSeedSchema = new mongoose.Schema(

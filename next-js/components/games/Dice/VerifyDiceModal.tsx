@@ -1,4 +1,4 @@
-import { seedStatus } from "@/utils/vrf";
+import { seedStatus } from "@/utils/provably-fair";
 import Image from "next/image";
 import { useState } from "react";
 import { IoIosArrowDown } from "react-icons/io";

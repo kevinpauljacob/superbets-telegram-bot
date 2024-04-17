@@ -1,7 +1,7 @@
 import { useWallet } from "@solana/wallet-adapter-react";
 import { useState, useEffect } from "react";
 import { obfuscatePubKey } from "@/context/transactions";
-import { GameType, seedStatus } from "@/utils/vrf";
+import { GameType, seedStatus } from "@/utils/provably-fair";
 import { useGlobalContext } from "@/components/GlobalContext";
 import { Table } from "@/components/table/Table";
 

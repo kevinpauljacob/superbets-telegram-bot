@@ -263,7 +263,7 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
   const getProvablyFairData = async () => {
     if (wallet?.publicKey)
       try {
-        const res = await fetch(`/api/games/vrf`, {
+        const res = await fetch(`/api/games/gameSeed`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",

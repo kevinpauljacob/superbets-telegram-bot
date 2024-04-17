@@ -5,7 +5,7 @@ import { NextApiRequest, NextApiResponse } from "next";
 import { getToken } from "next-auth/jwt";
 import StakingUser from "@/models/staking/user";
 import { pointTiers } from "@/context/transactions";
-import { GameType } from "@/utils/vrf";
+import { GameType } from "@/utils/provably-fair";
 import { wsEndpoint } from "@/context/gameTransactions";
 
 const secret = process.env.NEXTAUTH_SECRET;

@@ -1,4 +1,4 @@
-import { seedStatus } from "@/utils/vrf";
+import { seedStatus } from "@/utils/provably-fair";
 import { useState } from "react";
 import { IoIosArrowDown, IoMdCopy } from "react-icons/io";
 import { Limbo } from "./HistoryTable";

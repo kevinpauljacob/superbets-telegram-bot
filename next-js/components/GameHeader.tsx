@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import RollDiceProvablyFairModal from "./games/Dice/RollDiceProvablyFairModal";
 import Dice2ProvablyFairModal from "./games/Dice2/ProvablyFairModal";
 import { useWallet } from "@solana/wallet-adapter-react";
-import { GameType } from "@/utils/vrf";
+import { GameType } from "@/utils/provably-fair";
 import { useGlobalContext } from "./GlobalContext";
 import CoinFlipProvablyFairModal from "./games/CoinFlip/CoinFlipProvablyFairModal";
 import { useSession } from "next-auth/react";
