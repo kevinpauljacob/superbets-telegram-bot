@@ -126,8 +126,7 @@ export default function Dice() {
           const { strikeNumber, result } = res.data;
           const isWin = result === "Won";
           const newBetResults = [
-            // ...(betResults.length <= 4 ? betResults : betResults.slice(-4)),
-            ...betResults,
+            ...(betResults.length <= 4 ? betResults : betResults.slice(-4)),
             { face: strikeNumber, isWin },
           ];
           setBetResults(newBetResults);
@@ -342,27 +341,20 @@ export default function Dice() {
                 </div>
               )}
             </div>
-            <div className="flex">
+            <div>
               {betResults.map((result, index) => (
-                <div
+                <Image
                   key={index}
-                  className={`${
-                    betResults.length <= 5 ? "slideInFadeIn" : ""
-                  } ${index === 5 ? "slideOutFadeOut" : ""}
-                  ${index >= 6 ? "hiddenResults" : ""}`}
-                >
-                  <Image
-                    src={`/assets/${
-                      result.isWin ? "winDiceFace" : "lossDiceFace"
-                    }${result.face}.png`}
-                    width={15}
-                    height={15}
-                    alt={`Dice face ${result.face}`}
-                    className={`mr-2 inline-block w-[15px] h-[15px] sm:w-[20px] sm:h-[20px] md:w-[30px] md:h-[30px] ${
-                      selectedFace.includes(result.face) ? "selected-face" : ""
-                    }`}
-                  />
-                </div>
+                  src={`/assets/${
+                    result.isWin ? "winDiceFace" : "lossDiceFace"
+                  }${result.face}.png`}
+                  width={15}
+                  height={15}
+                  alt={`Dice face ${result.face}`}
+                  className={`mr-2 inline-block w-[15px] h-[15px] sm:w-[20px] sm:h-[20px] md:w-[30px] md:h-[30px] ${
+                    selectedFace.includes(result.face) ? "selected-face" : ""
+                  }`}
+                />
               ))}
             </div>
           </div>
