@@ -1,7 +1,7 @@
 import { GameType, generateClientSeed, generateGameResult } from "@/utils/vrf";
 import Image from "next/image";
 import { useEffect, useState } from "react";
-import { Bet } from "./HistoryTable";
+import { Dice } from "./HistoryTable";
 import { GiDivergence } from "react-icons/gi";
 import toast from "react-hot-toast";
 
@@ -30,7 +30,7 @@ interface Props {
   onClose: () => void;
   modalData: PFModalData;
   setModalData: React.Dispatch<React.SetStateAction<PFModalData>>;
-  bet?: Bet;
+  bet?: Dice;
 }
 
 export default function RollDiceProvablyFairModal({
