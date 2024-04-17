@@ -170,6 +170,22 @@ text-shadow-gold {
   animation: blink50 1s ease-in-out infinite;
 }
 
+@keyframes blink_dice {
+  0% {
+    color: #202329;
+  }
+  50% {
+    color: #47484a;
+  }
+  100% {
+    opacity: #202329;
+  }
+}
+
+.blink_dice {
+  animation: blink_dice 0.4s ease-in-out 5;
+}
+
 .box-shadow-green {
   box-shadow:
     0 0 7px #00e372,
@@ -367,7 +383,29 @@ button.dark-bg {
 }
 
 .rotate {
-  animation: rotate 1s ease-in-out 0s infinite normal forwards;
+  animation: rotate 1s linear 0s infinite normal forwards;
+}
+
+@keyframes translateZ {
+  0% {
+    z-index: 1;
+  }
+  49.99% {
+    z-index: 1;
+  }
+  50% {
+    z-index: 50;
+  }
+  99.99% {
+    z-index: 50;
+  }
+  100% {
+    z-index: 1;
+  }
+}
+
+.translateZ1 {
+  animation: translateZ 1s linear 0.25s infinite normal forwards;
 }
 
 /* .selected-face {
@@ -401,6 +439,21 @@ button.dark-bg {
   animation: fadeInUp 0.8s ease forwards;
 }
 
+@keyframes fadeInDown {
+  0% {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0px);
+  }
+}
+
+.fadeInDown {
+  animation: fadeInDown 0.8s ease forwards;
+}
+
 @keyframes fadeOutDown {
   0% {
     opacity: 1;
@@ -429,9 +482,31 @@ button.dark-bg {
   animation: fadeIn 0.8s ease forwards;
 }
 
+@keyframes slideInFadeIn {
+  0% {
+    transform: translateX(20px);
+  }
+  100% {
+    transform: translateX(0);
+  }
+}
+
 .connect-wallet {
   background: linear-gradient(89deg, #dc1fff 12.97%, #00ffa3 93.89%);
   background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
+}
+
+/* hide arrow sin number input  */
+/* Chrome, Safari, Edge, Opera */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Firefox */
+input[type="number"] {
+  -moz-appearance: textfield;
 }

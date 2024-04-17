@@ -11,8 +11,9 @@ import {
   Roulette1,
   Roulette2,
   Wheel,
+  Mines,
 } from "@/models/games";
-import { GameType } from "@/utils/vrf";
+import { GameType } from "@/utils/provably-fair";
 import StakingUser from "@/models/staking/user";
 import { pointTiers } from "@/context/transactions";
 
@@ -125,6 +126,16 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         createdAt: record.createdAt,
       }));
 
+      const mines = (
+        await Mines.find({ result: "Won" }).sort({ createdAt: -1 }).limit(10)
+      ).map((record) => ({
+        game: GameType.mines,
+        wallet: record.wallet,
+        absAmount: Math.abs(record.amountWon - record.amountLost),
+        result: record.result,
+        createdAt: record.createdAt,
+      }));
+
       const allGames = [
         ...dice,
         ...coin,
@@ -136,6 +147,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         ...roulette1,
         ...roulette2,
         ...wheel,
+        ...mines,
       ];
 
       const sortedGames = allGames.sort((a: any, b: any) => {

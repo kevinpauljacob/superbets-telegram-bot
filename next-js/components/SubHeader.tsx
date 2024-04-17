@@ -3,7 +3,7 @@ import { useGlobalContext } from "./GlobalContext";
 import Link from "next/link";
 import { wsEndpoint, trimStringToLength } from "@/context/gameTransactions";
 import { useEffect, useRef, useState } from "react";
-import { GameType } from "@/utils/vrf";
+import { GameType } from "@/utils/provably-fair";
 import { useRouter } from "next/router";
 
 export default function SubHeader() {
@@ -92,7 +92,7 @@ export default function SubHeader() {
               href={`/${card.game}`}
             >
               <Image
-                src={`/assets/games/${card.game}.png`}
+                src={`/assets/live-win-cards/${card.game}.png`}
                 alt="badge"
                 width={52}
                 height={52}

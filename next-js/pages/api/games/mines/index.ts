@@ -2,10 +2,7 @@ import connectDatabase from "@/utils/database";
 import { getToken } from "next-auth/jwt";
 import { NextApiRequest, NextApiResponse } from "next";
 import { GameSeed, Mines, User } from "@/models/games";
-import { generateGameResult, GameType, seedStatus } from "@/utils/vrf";
-import StakingUser from "@/models/staking/user";
-import { pointTiers } from "@/context/transactions";
-import { wsEndpoint } from "@/context/gameTransactions";
+import { seedStatus } from "@/utils/provably-fair";
 
 const secret = process.env.NEXTAUTH_SECRET;
 
@@ -17,13 +14,13 @@ type InputType = {
   wallet: string;
   amount: number;
   tokenMint: string;
-  numMines: number;
+  minesCount: number;
 };
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === "POST") {
     try {
-      let { wallet, amount, tokenMint, numMines }: InputType = req.body;
+      let { wallet, amount, tokenMint, minesCount }: InputType = req.body;
 
       const token = await getToken({ req, secret });
 
@@ -35,12 +32,12 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
       await connectDatabase();
 
-      if (!wallet || !amount || !tokenMint || !numMines)
+      if (!wallet || !amount || !tokenMint || !minesCount)
         return res
           .status(400)
           .json({ success: false, message: "Missing parameters" });
 
-      if (tokenMint !== "SOL" || !(1 <= numMines && numMines <= 24))
+      if (tokenMint !== "SOL" || !(1 <= minesCount && minesCount <= 24))
         return res
           .status(400)
           .json({ success: false, message: "Invalid parameters" });
@@ -120,20 +117,18 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       await Mines.create({
         wallet,
         amount,
-        numMines,
+        minesCount,
         result,
         tokenMint,
+        amountWon: 0,
+        amountLost: 0,
         nonce,
         gameSeed: activeGameSeed._id,
       });
 
       return res.status(201).json({
         success: true,
-        message:
-          result === "Won"
-            ? "Congratulations! You won!"
-            : "Better luck next time!",
-        result,
+        message: "Mines game created",
       });
     } catch (e: any) {
       console.log(e);

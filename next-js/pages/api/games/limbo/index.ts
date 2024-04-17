@@ -2,7 +2,11 @@ import connectDatabase from "@/utils/database";
 import { getToken } from "next-auth/jwt";
 import { NextApiRequest, NextApiResponse } from "next";
 import { GameSeed, Limbo, User } from "@/models/games";
-import { generateGameResult, GameType, seedStatus } from "@/utils/vrf";
+import {
+  generateGameResult,
+  GameType,
+  seedStatus,
+} from "@/utils/provably-fair";
 import StakingUser from "@/models/staking/user";
 import { pointTiers } from "@/context/transactions";
 import { wsEndpoint } from "@/context/gameTransactions";
@@ -84,7 +88,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         clientSeed,
         nonce,
         GameType.limbo,
-      ) as number;
+      );
 
       if (!strikeNumber) throw new Error("Invalid strike number!");
 
@@ -92,10 +96,10 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       let amountWon = 0;
       let amountLost = amount;
 
-      if (strikeNumber < chance) {
+      if (strikeNumber <= chance) {
         result = "Won";
-        amountWon = amount * (100 / chance - 1);
-        amountLost = 0;
+        amountWon = amount * (100 / chance);
+        amountLost = Math.max(amount - amountWon, 0);
       }
 
       let sns;

@@ -208,8 +208,8 @@ export default function Sidebar({
                   </div>
                   <button
                     className={`${
-                      showExitTokens ? "bg-white/10" : "bg-[#1D1A21]"
-                    } hover:bg-white/10 transition duration-300 ease-in-out hover:transition hover:duration-300 hover:ease-in-out rounded-md p-3`}
+                      showExitTokens ? "bg-[#47484A]" : "bg-[#292C32]"
+                    } hover:bg-[#47484A] transition duration-300 ease-in-out hover:transition hover:duration-300 hover:ease-in-out rounded-md p-3`}
                     onClick={() => setShowExitTokens(!showExitTokens)}
                   >
                     <Image
@@ -235,15 +235,15 @@ export default function Sidebar({
                         onClick={() => toggleExitToken(index)}
                         className={`${
                           token.active ? "bg-white/10" : "hover:bg-[#191a1d]"
-                        } flex items-center rounded-md p-2 pl-6 gap-2`}
+                        } group flex transition-all items-center rounded-md p-2 pl-12 gap-2`}
                       >
-                        <Image src={token.src} alt="" width={15} height={15} />
+                        {/* <Image src={token.src} alt="" width={15} height={15} /> */}
                         <span
-                          className={`font-changa ${
-                            token.active ? "text-[#7839C5]" : "text-white/50"
+                          className={`font-changa transition-all ${
+                            token.active ? "text-white/90" : "text-white/50 group-hover:text-white/90"
                           }`}
                         >
-                          ${token.token}
+                          {token.token}
                         </span>
                       </Link>
                     ))}
@@ -260,8 +260,8 @@ export default function Sidebar({
                   </div>
                   <button
                     className={`${
-                      showPlayTokens ? "bg-white/10" : "bg-[#1D1A21]"
-                    } hover:bg-white/10 transition duration-300 ease-in-out hover:transition hover:duration-300 hover:ease-in-out rounded-md p-3`}
+                      showPlayTokens ? "bg-[#47484A]" : "bg-[#292C32]"
+                    } hover:bg-[#47484A] transition duration-300 ease-in-out hover:transition hover:duration-300 hover:ease-in-out rounded-md p-3`}
                     onClick={() => setShowPlayTokens(!showPlayTokens)}
                   >
                     <Image
@@ -286,15 +286,15 @@ export default function Sidebar({
                         onClick={() => toggleCasinoToken(index)}
                         className={`${
                           token.active ? "bg-white/10" : "hover:bg-[#191a1d]"
-                        } flex items-center rounded-md p-2 pl-6 gap-2`}
+                        } group flex transition-all items-center rounded-md p-2 pl-12 gap-2`}
                       >
-                        <Image src={token.src} alt="" width={15} height={15} />
+                        {/* <Image src={token.src} alt="" width={15} height={15} /> */}
                         <span
-                          className={`font-changa ${
-                            token.active ? "text-[#7839C5]" : "text-white/50"
+                          className={`font-changa transition-all ${
+                            token.active ? "text-white/90" : "text-white/50 group-hover:text-white/90"
                           }`}
                         >
-                          ${token.token}
+                          {token.token}
                         </span>
                       </Link>
                     ))}

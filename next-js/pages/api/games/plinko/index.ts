@@ -2,7 +2,11 @@ import connectDatabase from "@/utils/database";
 import { getToken } from "next-auth/jwt";
 import { NextApiRequest, NextApiResponse } from "next";
 import { GameSeed, Plinko, User } from "@/models/games";
-import { generateGameResult, GameType, seedStatus } from "@/utils/vrf";
+import {
+  generateGameResult,
+  GameType,
+  seedStatus,
+} from "@/utils/provably-fair";
 import StakingUser from "@/models/staking/user";
 import { pointTiers } from "@/context/transactions";
 import { wsEndpoint } from "@/context/gameTransactions";
@@ -125,14 +129,13 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       const { serverSeed, clientSeed, nonce } = activeGameSeed;
 
       const strikeNumber =
-        ((generateGameResult(
+        generateGameResult(
           serverSeed,
           clientSeed,
           nonce,
           GameType.plinko,
-        ) as number) %
-          Math.pow(2, rows)) +
-        1;
+          rows,
+        ) % Math.pow(2, rows);
 
       if (!strikeNumber) throw new Error("Invalid strike number!");
 

@@ -6,13 +6,14 @@ import {
   Dice2,
   Keno,
   Limbo,
+  Mines,
   Option,
   Plinko,
   Roulette1,
   Roulette2,
   Wheel,
 } from "@/models/games";
-import { GameType, seedStatus } from "@/utils/vrf";
+import { GameType, seedStatus } from "@/utils/provably-fair";
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === "GET") {
@@ -151,6 +152,19 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
             { populate: { path: "gameSeed" } },
           );
           expired = await Wheel.find(
+            { wallet, "gameSeed.status": seedStatus.EXPIRED },
+            {},
+            { populate: { path: "gameSeed" } },
+          );
+          break;
+
+        case GameType.mines:
+          nonExpired = await Mines.find(
+            { wallet, "gameSeed.status": { $ne: seedStatus.EXPIRED } },
+            { "gameSeed.serverSeed": 0 },
+            { populate: { path: "gameSeed" } },
+          );
+          expired = await Mines.find(
             { wallet, "gameSeed.status": seedStatus.EXPIRED },
             {},
             { populate: { path: "gameSeed" } },

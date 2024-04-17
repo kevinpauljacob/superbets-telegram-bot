@@ -46,27 +46,42 @@ export enum GameType {
   mines = "mines",
 }
 
-export const generateGameResult = (
+type GameResult<T extends GameType> = T extends GameType.mines | GameType.keno
+  ? number[]
+  : number;
+
+export const generateGameResult = <T extends GameType>(
   serverSeed: string,
   clientSeed: string,
   nonce: number,
-  gameType: GameType,
-) => {
+  gameType: T,
+  parameter?: number,
+): GameResult<T> => {
   const hash = generateGameHash(serverSeed, clientSeed, nonce);
 
   switch (gameType) {
     case GameType.dice:
-      return (parseInt(hash.slice(0, 4), 16) % 6) + 1;
+      return ((parseInt(hash.slice(0, 4), 16) % 6) + 1) as GameResult<T>;
+
     case GameType.coin:
       const temp = (parseInt(hash.slice(0, 4), 16) % 100) + 1;
-      return temp % 2 === 0 ? 1 : 2;
+      return (temp % 2 === 0 ? 1 : 2) as GameResult<T>;
+
     case GameType.dice2:
-      return ((parseInt(hash.slice(0, 4), 16) % 10000) + 1) / 100;
+      return (((parseInt(hash.slice(0, 4), 16) % 10000) + 1) /
+        100) as GameResult<T>;
+
     case GameType.wheel:
     case GameType.limbo:
-      return (parseInt(hash.slice(0, 4), 16) % 100) + 1;
-    case GameType.plinko:
-      return parseInt(hash.slice(0, 4), 16);
+      return ((parseInt(hash.slice(0, 4), 16) % 100) + 1) as GameResult<T>;
+
+    case GameType.plinko: {
+      if (!parameter) throw new Error("Game parameter missing!");
+
+      return ((parseInt(hash.slice(0, 4), 16) % Math.pow(2, parameter)) +
+        1) as GameResult<T>;
+    }
+
     case GameType.keno: {
       let generatedNumbers = new Set<number>();
       let start = 0;
@@ -75,27 +90,33 @@ export const generateGameResult = (
         generatedNumbers.add(num);
         start++;
       }
-      return Array.from(generatedNumbers);
+      return Array.from(generatedNumbers) as GameResult<T>;
     }
+
     case GameType.roulette1:
-      return parseInt(hash.slice(0, 4), 16) % 37;
+      return (parseInt(hash.slice(0, 4), 16) % 37) as GameResult<T>;
+
     case GameType.roulette2:
-      return (parseInt(hash.slice(0, 4), 16) % 38) - 1;
+      return ((parseInt(hash.slice(0, 4), 16) % 38) - 1) as GameResult<T>;
+
     case GameType.mines: {
-      let x = 5;
-      // in a 5x5 grid, fill 25 cells with 0s and 1s, there should be x number of 1s
-      let mineGrid = new Array(25).fill(0);
-      for (let i = 0; i < x; i++) {
-        mineGrid[i] = 1;
+      if (!parameter) throw new Error("Game parameter missing!");
+      let mines = Array.from({ length: 25 }, () => 0);
+
+      for (let minesCount = 0; minesCount < parameter; minesCount++) {
+        let mineIndex =
+          parseInt(hash.slice(minesCount * 2, minesCount * 2 + 2), 16) % 25;
+
+        //if the mine is already there then place mine in the next available slot
+        while (mines[mineIndex] === 1) {
+          mineIndex = (mineIndex + 1) % 25;
+        }
+        mines[mineIndex] = 1;
       }
-      // shuffle the array
-      for (let i = mineGrid.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [mineGrid[i], mineGrid[j]] = [mineGrid[j], mineGrid[i]];
-      }
-      return mineGrid;
-      
+
+      return mines as GameResult<T>;
     }
+
     default:
       throw new Error("Invalid game type!");
   }

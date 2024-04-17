@@ -365,7 +365,7 @@ export default function Options() {
                   className={`flex w-full min-w-0 bg-transparent text-base text-[#94A3B8] placeholder-[#94A3B8]  font-chakra placeholder-opacity-40 outline-none`}
                 />
                 <span
-                  className="text-xs font-medium text-white text-opacity-50 bg-[#292C32] hover:bg-[#555555] focus:bg-[#555555] transition-all rounded-[5px] py-1.5 px-4"
+                  className="text-xs font-medium text-white text-opacity-50 bg-[#292C32] hover:bg-[#47484A] focus:bg-[#47484A] transition-all rounded-[5px] py-1.5 px-4"
                   onClick={() =>
                     setBetAmt(coinData ? coinData[0]?.amount / 4 : 0)
                   }
@@ -373,7 +373,7 @@ export default function Options() {
                   1/4
                 </span>
                 <span
-                  className="text-xs mx-2 font-medium text-white text-opacity-50 bg-[#292C32] hover:bg-[#555555] focus:bg-[#555555] transition-all rounded-[5px] py-1.5 px-4"
+                  className="text-xs mx-2 font-medium text-white text-opacity-50 bg-[#292C32] hover:bg-[#47484A] focus:bg-[#47484A] transition-all rounded-[5px] py-1.5 px-4"
                   onClick={() =>
                     setBetAmt(coinData ? coinData[0]?.amount / 2 : 0)
                   }
@@ -381,7 +381,7 @@ export default function Options() {
                   Half
                 </span>
                 <span
-                  className="text-xs font-medium text-white text-opacity-50 bg-[#292C32] hover:bg-[#555555] focus:bg-[#555555] transition-all rounded-[5px] py-1.5 px-4"
+                  className="text-xs font-medium text-white text-opacity-50 bg-[#292C32] hover:bg-[#47484A] focus:bg-[#47484A] transition-all rounded-[5px] py-1.5 px-4"
                   onClick={() => setBetAmt(coinData ? coinData[0]?.amount : 0)}
                 >
                   Max
@@ -498,6 +498,7 @@ export default function Options() {
               <button
                 type="submit"
                 disabled={
+                  !betType ||
                   !coinData ||
                   (coinData && coinData[0].amount < 0.0001) ||
                   loading ||
@@ -507,10 +508,12 @@ export default function Options() {
                 }
                 onClick={onSubmit}
                 className={`${
-                  !coinData || (coinData && coinData[0].amount < 0.0001)
+                  !betType ||
+                  !coinData ||
+                  (coinData && coinData[0].amount < 0.0001)
                     ? "cursor-not-allowed opacity-70"
                     : "hover:opacity-90"
-                } w-full rounded-lg transition-all bg-[#7839C5] disabled:bg-[#4b2876] hover:bg-[#9361d1] focus:bg-[#602E9E] py-2.5 font-changa font-semibold text-[1.75rem] text-white`}
+                } w-full h-[3.75rem] rounded-lg transition-all bg-[#7839C5] disabled:bg-[#4b2876] hover:bg-[#9361d1] focus:bg-[#602E9E] flex items-center justify-center font-changa font-semibold text-[1.75rem] text-white`}
               >
                 {loading || (strikePrice > 0 && !result) ? (
                   <Loader />
@@ -559,7 +562,7 @@ export default function Options() {
           </div>
 
           {/* central loader  */}
-          <div className="flex flex-1 flex-col items-center relative -mt-4 md:mt-10 mb-6 md:mb-0">
+          <div className="flex flex-1 flex-col justify-center items-center relative py-4 mb-6 md:mb-6">
             <div className="flex flex-col items-center absolute w-[14rem] h-[14rem] justify-start pt-14">
               <span className="font-chakra text-sm text-[#94A3B8] text-opacity-75 mb-5">
                 $SOL
@@ -634,7 +637,7 @@ export default function Options() {
               ))}
             </div>
           </div>
-          <GameFooterInfo multiplier={1.0} amount={betAmt ?? 0} chance={50} />
+          <GameFooterInfo multiplier={2.0} amount={betAmt ?? 0} />
         </>
       </GameDisplay>
       <GameTable>

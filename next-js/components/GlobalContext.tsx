@@ -79,6 +79,34 @@ interface GlobalContextProps {
   showWalletModal: boolean;
   setShowWalletModal: React.Dispatch<React.SetStateAction<boolean>>;
 
+  isVerifyModalOpen: boolean;
+  setIsVerifyModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
+
+  verifyModalData: any;
+  setVerifyModalData: (verifyModalData: any) => void;
+
+  sidebar: boolean;
+  setSidebar: React.Dispatch<React.SetStateAction<boolean>>;
+
+  //configure auto
+  showAutoModal: boolean;
+  setShowAutoModal: React.Dispatch<React.SetStateAction<boolean>>;
+  autoWinChange: number;
+  setAutoWinChange: React.Dispatch<React.SetStateAction<number>>;
+  autoLossChange: number;
+  setAutoLossChange: React.Dispatch<React.SetStateAction<number>>;
+  autoWinChangeReset: boolean;
+  setAutoWinChangeReset: React.Dispatch<React.SetStateAction<boolean>>;
+  autoLossChangeReset: boolean;
+  setAutoLossChangeReset: React.Dispatch<React.SetStateAction<boolean>>;
+  autoStopProfit: number;
+  setAutoStopProfit: React.Dispatch<React.SetStateAction<number>>;
+  autoStopLoss: number;
+  setAutoStopLoss: React.Dispatch<React.SetStateAction<number>>;
+
+  openVerifyModal: () => void;
+  closeVerifyModal: () => void;
+
   getUserDetails: () => Promise<void>;
   getGlobalInfo: () => Promise<void>;
   getWalletBalance: () => Promise<void>;
@@ -122,8 +150,28 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
       tokenMint: "SOL",
     },
   ]);
-
   const [showWalletModal, setShowWalletModal] = useState<boolean>(false);
+  const [isVerifyModalOpen, setIsVerifyModalOpen] = useState(false);
+  const [verifyModalData, setVerifyModalData] = useState({});
+
+  const [sidebar, setSidebar] = useState<boolean>(false);
+
+  // configure auto
+  const [showAutoModal, setShowAutoModal] = useState<boolean>(false);
+  const [autoWinChange, setAutoWinChange] = useState<number>(0);
+  const [autoLossChange, setAutoLossChange] = useState<number>(0);
+  const [autoWinChangeReset, setAutoWinChangeReset] = useState<boolean>(true);
+  const [autoLossChangeReset, setAutoLossChangeReset] = useState<boolean>(true);
+  const [autoStopProfit, setAutoStopProfit] = useState<number>(0);
+  const [autoStopLoss, setAutoStopLoss] = useState<number>(0);
+
+  const openVerifyModal = () => {
+    setIsVerifyModalOpen(true);
+  };
+
+  const closeVerifyModal = () => {
+    setIsVerifyModalOpen(false);
+  };
 
   const getUserDetails = async () => {
     if (wallet && wallet.publicKey)
@@ -215,7 +263,7 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
   const getProvablyFairData = async () => {
     if (wallet?.publicKey)
       try {
-        const res = await fetch(`/api/games/vrf`, {
+        const res = await fetch(`/api/games/gameSeed`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -259,6 +307,28 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
         setWalletBalance,
         coinData,
         showWalletModal,
+        isVerifyModalOpen,
+        setIsVerifyModalOpen,
+        verifyModalData,
+        setVerifyModalData,
+        sidebar,
+        setSidebar,
+        showAutoModal,
+        setShowAutoModal,
+        autoWinChange,
+        setAutoWinChange,
+        autoLossChange,
+        setAutoLossChange,
+        autoWinChangeReset,
+        setAutoWinChangeReset,
+        autoLossChangeReset,
+        setAutoLossChangeReset,
+        autoStopProfit,
+        setAutoStopProfit,
+        autoStopLoss,
+        setAutoStopLoss,
+        openVerifyModal,
+        closeVerifyModal,
         setShowWalletModal,
         setCoinData,
         getUserDetails,

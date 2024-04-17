@@ -1,13 +1,14 @@
 import { useRouter } from "next/router";
 import Image from "next/image";
 import { useEffect, useState } from "react";
-import RollDiceProvablyFairModal from "./games/RollDice/RollDiceProvablyFairModal";
+import RollDiceProvablyFairModal from "./games/Dice/RollDiceProvablyFairModal";
 import Dice2ProvablyFairModal from "./games/Dice2/ProvablyFairModal";
 import { useWallet } from "@solana/wallet-adapter-react";
-import { GameType } from "@/utils/vrf";
+import { GameType } from "@/utils/provably-fair";
 import { useGlobalContext } from "./GlobalContext";
 import CoinFlipProvablyFairModal from "./games/CoinFlip/CoinFlipProvablyFairModal";
 import { useSession } from "next-auth/react";
+import LimboProvablyFairModal from "./games/Limbo/LimboProvablyFairModal";
 
 export default function GameHeader() {
   const { data: session, status } = useSession();
@@ -101,6 +102,10 @@ export default function GameHeader() {
       icon: "/assets/binary.png",
       name: "Binary Options",
     },
+    limbo: {
+      icon: "/assets/binary.png",
+      name: "Limbo",
+    },
     dice2: {
       icon: "/assets/dice.png",
       name: "Dice 2",
@@ -153,7 +158,7 @@ export default function GameHeader() {
               className="underline text-[#94A3B8] decoration-[#94A3B8] underline-offset-2 hover:cursor-pointer text-xs font-medium"
               onClick={openModal}
             >
-              Provabaly Fair
+              Provably Fair
             </p>
             <Image
               src={"/assets/fair.png"}
@@ -164,14 +169,21 @@ export default function GameHeader() {
           </div>
         </div>
       </div>
-      {game === "coinflip" ? (
+      {game === GameType.coin ? (
         <CoinFlipProvablyFairModal
           isOpen={isOpen}
           onClose={closeModal}
           modalData={modalData}
           setModalData={setModalData}
         />
-      ) : game === "dice2" ? (
+      ) : game === GameType.dice ? (
+        <RollDiceProvablyFairModal
+          isOpen={isOpen}
+          onClose={closeModal}
+          modalData={modalData}
+          setModalData={setModalData}
+        />
+      ) : game === GameType.dice2 ? (
         <Dice2ProvablyFairModal
           isOpen={isOpen}
           onClose={closeModal}
@@ -179,7 +191,7 @@ export default function GameHeader() {
           setModalData={setModalData}
         />
       ) : (
-        <RollDiceProvablyFairModal
+        <LimboProvablyFairModal
           isOpen={isOpen}
           onClose={closeModal}
           modalData={modalData}

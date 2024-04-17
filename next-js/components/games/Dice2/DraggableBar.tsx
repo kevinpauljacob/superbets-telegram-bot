@@ -2,9 +2,11 @@ import React, { useState, useEffect, useRef, RefObject } from "react";
 
 type ProgressBarProps = {
   choice: number;
+  setChoice: (choice: number) => void;
   strikeNumber: number;
   result: boolean;
   rollType: string;
+  draggable?: boolean;
 };
 
 type ProgressBarStyles = {
@@ -21,12 +23,14 @@ type IndicatorStyles = {
 
 const ProgressBar: React.FC<ProgressBarProps> = ({
   choice,
+  setChoice,
   strikeNumber,
   result,
   rollType,
+  draggable = true,
 }) => {
   const [isDragging, setIsDragging] = useState(false);
-  console.log("choice", choice);
+
   const progressBarRef: RefObject<HTMLDivElement> =
     useRef<HTMLDivElement>(null);
   const indicatorsRef: RefObject<HTMLDivElement> = useRef<HTMLDivElement>(null);
@@ -68,6 +72,35 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
     }
   };
 
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let newValue = parseFloat(e.target.value);
+    newValue = Math.max(2, Math.min(newValue, 98));
+    setChoice(newValue);
+  };
+
+  const handleDragStart = () => {
+    setIsDragging(true);
+  };
+
+  const handleDragEnd = () => {
+    setIsDragging(false);
+  };
+
+  const handleDrag = (e: any) => {
+    if (isDragging) {
+      const rect = e.target.getBoundingClientRect();
+      const offsetX = e.clientX - rect.left;
+      let newChoice = (offsetX / rect.width) * 100;
+
+      if (newChoice < 2) {
+        newChoice = 2;
+      } else if (newChoice > 98) {
+        newChoice = 98;
+      }
+      setChoice(newChoice);
+    }
+  };
+
   const indicators = [0, 25, 50, 75, 100];
 
   const progressBarStyles: ProgressBarStyles = {
@@ -85,7 +118,6 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
       opacity: 0,
     },
     fill: {
-      height: "10px",
       width: choice <= 2 ? `2%` : `${choice}%`,
       background: rollType === "over" ? "#F1323E" : "#72F238",
     },
@@ -93,9 +125,7 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
       position: "absolute",
       top: "50%",
       transform: "translateY(-50%)",
-      backgroundColor: "#7839C5",
-      width: "17px",
-      height: "26px",
+      backgroundColor: "#9945FF",
       borderRadius: "7px",
       left:
         choice <= 2
@@ -103,7 +133,7 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
           : choice >= 98
           ? `calc(${choice}% - 8.5px)`
           : `calc(${choice}% - 8.5px)`,
-      cursor: "pointer",
+      cursor: draggable ? "pointer" : "default",
     },
   };
 
@@ -127,7 +157,7 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
 
   return (
     <div>
-      <div className="border-8 border-[#282E3D] bg-[#282E3D] rounded-lg">
+      <div className="border-4 sm:border-[6px] border-[#282E3D] bg-[#282E3D] rounded-lg">
         <div className="bg-[#0C0F16] rounded-md p-4">
           <div
             ref={progressBarRef}
@@ -140,13 +170,30 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
               max="100"
               step="10"
               value={choice}
+              {...(draggable && {
+                onChange: handleChange,
+                onMouseMove: handleDrag,
+                onTouchMove: handleDrag,
+                onMouseDown: handleDragStart,
+                onMouseUp: handleDragEnd,
+                onTouchStart: handleDragStart,
+                onTouchEnd: handleDragEnd,
+              })}
               style={progressBarStyles.rangeInput}
+              className=""
             />
             <div
-              className="progress-bar-fill rounded-full"
+              className="progress-bar-fill rounded-full h-[4px] sm:h-[8px]"
               style={progressBarStyles.fill}
             ></div>
-            <div style={progressBarStyles.cursor}></div>
+            <div
+              style={progressBarStyles.cursor}
+              {...(draggable && {
+                onMouseDown: handleDragStart,
+                onMouseUp: handleDragEnd,
+              })}
+              className="w-[13px] h-[23px] sm:w-[17px] sm:h-[26px]"
+            />
             <div
               className="absolute -top-16 -translate-x-1/2 -translate-y-1/2 transition-all duration-300"
               style={{ marginLeft: `${strikeNumber}%` }}
@@ -158,8 +205,10 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
                 >
                   <div
                     className={`${
-                      result ? "border-[#72F238]" : "border-[#F1323E]"
-                    } z-10 font-chakra text-sm font-semibold border-2 bg-[#282E3D] w-max text-white text-opacity-75 rounded-md px-4 py-1.5`}
+                      result
+                        ? "border-[#72F238] text-[#72F238]"
+                        : "border-[#F1323E] text-white"
+                    } z-10 font-chakra text-sm font-semibold border-2 bg-[#282E3D] w-max text-opacity-75 rounded-md px-4 py-1.5`}
                   >
                     {strikeNumber}
                   </div>
@@ -187,15 +236,18 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
           <div key={indicator} className="relative">
             <svg
               xmlns="http://www.w3.org/2000/svg"
+              width="12px"
+              height="12px"
               viewBox="0 0 11 10"
               style={indicatorStyles.svg}
+              className="w-[12px] h-[12px]"
             >
               <path
                 d="M8.0572 7.83135C6.8865 9.73978 4.1135 9.73978 2.9428 7.83134L0.941367 4.56867C-0.284844 2.56975 1.15351 0 3.49857 0L7.50144 0C9.8465 0 11.2848 2.56975 10.0586 4.56867L8.0572 7.83135Z"
                 fill="#282E3D"
               />
             </svg>
-            <span className="absolute -bottom-5 left-1/2 -translate-x-1/2">
+            <span className="absolute -bottom-3 sm:-bottom-5 left-1/2 -translate-x-1/2 text-xs sm:text-base font-chakra font-semibold">
               {indicator}
             </span>
           </div>

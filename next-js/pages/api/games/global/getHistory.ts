@@ -1,6 +1,6 @@
 import connectDatabase from "../../../../utils/database";
 import { NextApiRequest, NextApiResponse } from "next";
-import { GameType } from "@/utils/vrf";
+import { GameType } from "@/utils/provably-fair";
 import {
   Coin,
   Dice,
@@ -12,6 +12,7 @@ import {
   Roulette1,
   Roulette2,
   Wheel,
+  Mines,
 } from "@/models/games";
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -58,6 +59,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           break;
         case GameType.wheel:
           data = await Wheel.find({}).sort({ createdAt: -1 }).limit(1000);
+          break;
+        case GameType.mines:
+          data = await Mines.find({}).sort({ createdAt: -1 }).limit(1000);
           break;
       }
 

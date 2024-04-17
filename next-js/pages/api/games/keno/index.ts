@@ -2,7 +2,11 @@ import connectDatabase from "@/utils/database";
 import { getToken } from "next-auth/jwt";
 import { NextApiRequest, NextApiResponse } from "next";
 import { GameSeed, Keno, User } from "@/models/games";
-import { generateGameResult, GameType, seedStatus } from "@/utils/vrf";
+import {
+  generateGameResult,
+  GameType,
+  seedStatus,
+} from "@/utils/provably-fair";
 import StakingUser from "@/models/staking/user";
 import { pointTiers } from "@/context/transactions";
 import { wsEndpoint } from "@/context/gameTransactions";
@@ -152,7 +156,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         clientSeed,
         nonce,
         GameType.keno,
-      ) as number[];
+      );
 
       if (!strikeNumber) throw new Error("Invalid strike number!");
 

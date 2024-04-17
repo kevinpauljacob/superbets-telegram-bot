@@ -1,8 +1,12 @@
-import { GameType, generateClientSeed, generateGameResult } from "@/utils/vrf";
+import {
+  GameType,
+  generateClientSeed,
+  generateGameResult,
+} from "@/utils/provably-fair";
 import { useEffect, useState } from "react";
 import { Flip } from "./HistoryTable";
-import Image from "next/image";
 import toast from "react-hot-toast";
+import { FaRegCopy } from "react-icons/fa6";
 
 export interface PFModalData {
   activeGameSeed: {
@@ -94,12 +98,12 @@ export default function CoinFlipProvablyFairModal({
     const { clientSeed, serverSeed, nonce } = verificationState;
 
     setWonCoinface(
-      (generateGameResult(
+      generateGameResult(
         name === "serverSeed" ? value : serverSeed,
         name === "clientSeed" ? value : clientSeed,
         parseInt(name === "nonce" ? value : nonce),
         GameType.coin,
-      ) as number) === 1
+      ) === 1
         ? "heads"
         : "tails",
     );
@@ -109,7 +113,7 @@ export default function CoinFlipProvablyFairModal({
     if (!/^[\x00-\x7F]*$/.test(newClientSeed) || newClientSeed.trim() === "")
       return toast.error("Invalid client seed");
 
-    let data = await fetch(`/api/games/vrf/change`, {
+    let data = await fetch(`/api/games/gameSeed/change`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -135,11 +139,11 @@ export default function CoinFlipProvablyFairModal({
       {isOpen && (
         <div className="fixed inset-0 flex items-center justify-center z-50">
           <div
-            className="absolute inset-0 bg-gray-800 opacity-75"
+            className="absolute inset-0 bg-black bg-opacity-50 backdrop-blur transition-all"
             onClick={handleClose}
           ></div>
           <div className="bg-[#121418] p-8 rounded-lg z-10 w-11/12 sm:w-[600px]">
-            <div className="font-changa text-[1.75rem] font-semibold text-white">
+            <div className="font-changa text-[1.75rem] font-semibold text-[#F0F0F0]">
               Provably Fair
             </div>
             <div className="my-4 flex w-full items-center justify-center">
@@ -167,61 +171,49 @@ export default function CoinFlipProvablyFairModal({
             {state === "seeds" && (
               <div className="text-white">
                 <div className="">
-                  <div>
-                    <label className="text-sm font-semibold">
+                  <div className="mt-2.5">
+                    <label className="text-[13px] font-medium font-changa text-opacity-90 text-[#F0F0F0]">
                       Active Client Seed
                     </label>
-                    <div className="flex items-center justify-between bg-[#202329] mt-1 rounded-md px-4 py-2 mb-4 w-full">
-                      <div className="truncate">
+                    <div className="bg-[#202329] mt-1 rounded-md px-4 py-3 w-full relative flex items-center justify-between">
+                      <span className="truncate text-[#B9B9BA] text-xs font-semibold">
                         {modalData.activeGameSeed.clientSeed}
-                      </div>
-                      <div
+                      </span>
+                      <FaRegCopy
                         onClick={() =>
                           copyToClipboard(modalData.activeGameSeed.clientSeed)
                         }
-                        className="cursor-pointer"
-                      >
-                        <Image
-                          src={"/assets/copy.png"}
-                          width={20}
-                          height={20}
-                          alt="copy"
-                        />
-                      </div>
+                        className="w-5 h-5 text-[#555555] cursor-pointer"
+                      />
                     </div>
                   </div>
-                  <div>
-                    <label className="text-sm font-semibold">
+                  <div className="mt-2.5">
+                    <label className="text-[13px] font-medium font-changa text-opacity-90 text-[#F0F0F0]">
                       Active Server Seed (Hashed)
                     </label>
-                    <div className="flex items-center justify-between bg-[#202329] mt-1 rounded-md px-4 py-2 mb-4 w-full">
-                      <div className="truncate mr-1">
+                    <div className="bg-[#202329] mt-1 rounded-md px-4 py-3 w-full relative flex items-center justify-between">
+                      <span className="truncate text-[#B9B9BA] text-xs font-semibold">
                         {modalData.activeGameSeed.serverSeedHash}
-                      </div>
-                      <div
+                      </span>
+                      <FaRegCopy
                         onClick={() =>
                           copyToClipboard(
                             modalData.activeGameSeed.serverSeedHash,
                           )
                         }
-                        className="cursor-pointer"
-                      >
-                        <Image
-                          src={"/assets/copy.png"}
-                          width={20}
-                          height={20}
-                          alt="copy"
-                        />
-                      </div>
+                        className="w-5 h-5 text-[#555555] cursor-pointer"
+                      />
                     </div>
                   </div>
-                  <div>
-                    <label className="text-sm font-semibold">Total Flips</label>
+                  <div className="mt-2.5">
+                    <label className="text-[13px] font-medium font-changa text-opacity-90 text-[#F0F0F0]">
+                      Total Flips
+                    </label>
                     <input
                       type="text"
                       name="totalFlips"
                       placeholder={modalData.activeGameSeed.nonce.toString()}
-                      className="bg-[#202329] mt-1 rounded-md px-4 py-2 mb-4 w-full pointer-events-none"
+                      className="bg-[#202329] text-[#B9B9BA] text-xs font-semibold mt-1 rounded-md px-4 py-3 w-full relative flex items-center justify-between"
                       readOnly
                     />
                   </div>
@@ -232,7 +224,7 @@ export default function CoinFlipProvablyFairModal({
                   </div>
                   <div className="">
                     <div>
-                      <label className="text-sm font-semibold">
+                      <label className="text-[13px] font-medium font-changa text-opacity-90 text-[#F0F0F0]">
                         New Client Seed *
                       </label>
                       <div className="mt-1 flex items-center justify-end gap-4">
@@ -240,7 +232,7 @@ export default function CoinFlipProvablyFairModal({
                           value={newClientSeed}
                           type="text"
                           onChange={(e) => setNewClientSeed(e.target.value)}
-                          className="bg-[#202329] rounded-md px-4 py-2 w-full"
+                          className="bg-[#202329] text-[#B9B9BA] text-xs font-semibold mt-1 rounded-md px-4 py-3 w-full relative flex items-center justify-between"
                         />
                         <button
                           className="flex items-center justify-center h-full px-4 py-2 my-auto bg-[#7839C5] text-white rounded-md"
@@ -250,29 +242,22 @@ export default function CoinFlipProvablyFairModal({
                         </button>
                       </div>
                     </div>
-                    <div className="mt-5">
-                      <label className="text-sm font-semibold">
+                    <div className="mt-2.5">
+                      <label className="text-[13px] font-medium font-changa text-opacity-90 text-[#F0F0F0]">
                         Next Server Seed
                       </label>
-                      <div className="flex items-center justify-between bg-[#202329] mt-1 rounded-md px-4 py-2 mb-4 w-full">
-                        <div className="truncate mr-1">
+                      <div className="bg-[#202329] mt-1 rounded-md px-4 py-3 w-full relative flex items-center justify-between">
+                        <span className="truncate text-[#B9B9BA] text-xs font-semibold">
                           {modalData.nextGameSeed.serverSeedHash}
-                        </div>
-                        <div
+                        </span>
+                        <FaRegCopy
                           onClick={() =>
                             copyToClipboard(
                               modalData.nextGameSeed.serverSeedHash,
                             )
                           }
-                          className="cursor-pointer"
-                        >
-                          <Image
-                            src={"/assets/copy.png"}
-                            width={20}
-                            height={20}
-                            alt="copy"
-                          />
-                        </div>
+                          className="w-5 h-5 text-[#555555] cursor-pointer"
+                        />
                       </div>
                     </div>
                   </div>
@@ -311,7 +296,9 @@ export default function CoinFlipProvablyFairModal({
                     </div>
                   </div>
                   <div>
-                    <label className="text-sm font-semibold">Game</label>
+                    <label className="text-xs text-opacity-75 font-changa text-[#F0F0F0]">
+                      Game
+                    </label>
                     <div className="flex items-center">
                       <select
                         name="game"
@@ -322,41 +309,47 @@ export default function CoinFlipProvablyFairModal({
                             game: e.target.value as GameType,
                           }))
                         }
-                        className="bg-[#202329] mt-1 rounded-md px-4 py-2 mb-4 w-full relative appearance-none"
+                        className="bg-[#202329] text-white font-chakra text-xs font-medium mt-1 rounded-md p-3 w-full relative appearance-none"
                       >
-                        <option value={GameType.dice}>Dice</option>
+                        {/* <option value={GameType.dice}>Dice</option> */}
                         <option value={GameType.coin}>Coin Flip</option>
                       </select>
                     </div>
                   </div>
                   <div>
-                    <label className="text-sm font-semibold">Client Seed</label>
+                    <label className="text-xs text-opacity-75 font-changa text-[#F0F0F0]">
+                      Client Seed
+                    </label>
                     <input
                       type="text"
                       name="clientSeed"
                       value={verificationState.clientSeed}
                       onChange={handleChange}
-                      className="bg-[#202329] mt-1 rounded-md px-4 py-2 mb-4 w-full relative"
+                      className="bg-[#202329] text-white font-chakra text-xs font-medium mt-1 rounded-md p-3 w-full relative"
                     />
                   </div>
                   <div>
-                    <label className="text-sm font-semibold">Server Seed</label>
+                    <label className="text-xs text-opacity-75 font-changa text-[#F0F0F0]">
+                      Server Seed
+                    </label>
                     <input
                       type="text"
                       name="serverSeed"
                       value={verificationState.serverSeed}
                       onChange={handleChange}
-                      className="bg-[#202329] mt-1 rounded-md px-4 py-2 mb-4 w-full relative"
+                      className="bg-[#202329] text-white font-chakra text-xs font-medium mt-1 rounded-md p-3 w-full relative"
                     />
                   </div>
                   <div>
-                    <label className="text-sm font-semibold">Nonce</label>
+                    <label className="text-xs text-opacity-75 font-changa text-[#F0F0F0]">
+                      Nonce
+                    </label>
                     <input
                       type="text"
                       name="nonce"
                       value={verificationState.nonce}
                       onChange={handleChange}
-                      className="bg-[#202329] mt-1 rounded-md px-4 py-2 mb-4 w-full relative"
+                      className="bg-[#202329] text-white font-chakra text-xs font-medium mt-1 rounded-md p-3 w-full relative"
                     />
                   </div>
                 </div>
