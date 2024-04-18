@@ -15,7 +15,6 @@ import {
 import HistoryTable from "@/components/games/Wheel/HistoryTable";
 import { WalletContextState } from "@solana/wallet-adapter-react";
 import Arc from "@/components/games/Wheel/Arc";
-import { multipliers } from "@/components/games/Wheel/Segments";
 
 export default function Wheel() {
   const wallet = useWallet();
@@ -302,13 +301,7 @@ export default function Wheel() {
                       key={index}
                       index={index}
                       rotationAngle={rotationAngle}
-                      multiplier={
-                        risk === "high"
-                          ? multipliers.high
-                          : risk === "medium"
-                          ? multipliers.medium
-                          : multipliers.low
-                      }
+                      risk={risk}
                       segments={segments}
                     />
                   ))}
