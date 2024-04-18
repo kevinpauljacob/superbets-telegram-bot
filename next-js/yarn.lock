@@ -6087,6 +6087,11 @@ supports-preserve-symlinks-flag@^1.0.0:
   resolved "https://registry.yarnpkg.com/supports-preserve-symlinks-flag/-/supports-preserve-symlinks-flag-1.0.0.tgz#6eda4bd344a3c94aea376d4cc31bc77311039e09"
   integrity sha512-ot0WnXS9fgdkgIcePe6RHNk1WA8+muPa6cSjeR3V8K27q9BB1rTE3R1p7Hv0z1ZyAc8s6Vvv8DIyWf681MAt0w==
 
+svg-arc@^1.0.2:
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/svg-arc/-/svg-arc-1.0.2.tgz#49cd27c9e045a0d23149dcd76ab75ba72d6d5b41"
+  integrity sha512-XbWz6cZPCLdEECEM/bRfXNzJGcrhPLBoF7kSqACFvcwyZN0UoSWg4o1eJZbiAzr+ayz4SqGc+l0LD/IWaryyrQ==
+
 tailwindcss@^3.3.0:
   version "3.3.5"
   resolved "https://registry.yarnpkg.com/tailwindcss/-/tailwindcss-3.3.5.tgz#22a59e2fbe0ecb6660809d9cc5f3976b077be3b8"

@@ -5,7 +5,7 @@ import {
 } from "@/utils/provably-fair";
 import Image from "next/image";
 import { useEffect, useState } from "react";
-import { Dice } from "./HistoryTable";
+import { Bet } from "./HistoryTable";
 import toast from "react-hot-toast";
 import { FaRegCopy } from "react-icons/fa6";
 
@@ -34,7 +34,7 @@ interface Props {
   onClose: () => void;
   modalData: PFModalData;
   setModalData: React.Dispatch<React.SetStateAction<PFModalData>>;
-  bet?: Dice;
+  bet?: Bet;
 }
 
 export default function RollDiceProvablyFairModal({

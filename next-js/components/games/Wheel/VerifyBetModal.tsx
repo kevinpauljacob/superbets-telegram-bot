@@ -1,4 +1,4 @@
-import { seedStatus } from "@/utils/vrf";
+import { seedStatus } from "@/utils/provably-fair";
 import Image from "next/image";
 import { useState } from "react";
 import { IoIosArrowDown, IoMdCopy } from "react-icons/io";
@@ -90,7 +90,7 @@ export default function VerifyBetModal({ isOpen, onClose, modalData }: Props) {
               <button className="px-4 py-1.5 sm:py-2 mb-2 sm:mb-0 w-full text-white rounded-md bg-[#D9D9D9] bg-opacity-5 grid">
                 <div className="text-[#94A3B8] text-sm">Multiplier</div>
                 <div className="text-white">
-                  {(6 / bet.chosenNumbers.length).toFixed(2)} x
+                  {/* {(6 / bet.chosenNumbers.length).toFixed(2)} x */}
                 </div>
               </button>
               <button className="px-4 py-1.5 sm:py-2 mb-2 sm:mb-0 w-full text-white rounded-md bg-[#D9D9D9] bg-opacity-5 grid">
@@ -116,7 +116,7 @@ export default function VerifyBetModal({ isOpen, onClose, modalData }: Props) {
                       key={face}
                       className="flex flex-col items-center mr-2 sm:mr-0"
                     >
-                      {bet.chosenNumbers.includes(face) &&
+                      {/* {bet.chosenNumbers.includes(face) &&
                         bet.strikeNumber === face && (
                           <Image
                             src="/assets/pointer-green.png"
@@ -125,7 +125,7 @@ export default function VerifyBetModal({ isOpen, onClose, modalData }: Props) {
                             height={13}
                             className="absolute -top-[20px]"
                           />
-                        )}
+                        )} */}
                       <Image
                         src="/assets/progressTip.png"
                         alt="progress bar"
@@ -133,7 +133,7 @@ export default function VerifyBetModal({ isOpen, onClose, modalData }: Props) {
                         height={13}
                         className="absolute top-[2px]"
                       />
-                      <Image
+                      {/* <Image
                         src={
                           bet.strikeNumber === face
                             ? bet.chosenNumbers.includes(face)
@@ -151,7 +151,7 @@ export default function VerifyBetModal({ isOpen, onClose, modalData }: Props) {
                             ? "selected-face"
                             : ""
                         }`}
-                      />
+                      /> */}
                     </div>
                   ))}
                 </div>
@@ -162,7 +162,7 @@ export default function VerifyBetModal({ isOpen, onClose, modalData }: Props) {
                   <input
                     type="text"
                     name="multiplier"
-                    value={(6 / bet.chosenNumbers.length).toFixed(2)}
+                    // value={(6 / bet.chosenNumbers.length).toFixed(2)}
                     className="bg-[#202329] text-white mt-1 rounded-md px-4 py-2 mb-4 w-full relative"
                     readOnly
                   />
@@ -172,7 +172,7 @@ export default function VerifyBetModal({ isOpen, onClose, modalData }: Props) {
                   <input
                     type="text"
                     name="chance"
-                    value={((bet.chosenNumbers.length / 6) * 100).toFixed(2)}
+                    // value={((bet.chosenNumbers.length / 6) * 100).toFixed(2)}
                     className="bg-[#202329] text-white mt-1 rounded-md px-4 py-2 mb-4 w-full relative"
                     readOnly
                   />

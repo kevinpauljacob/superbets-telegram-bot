@@ -4,7 +4,7 @@ import toast from "react-hot-toast";
 import { obfuscatePubKey } from "@/context/transactions";
 import Image from "next/image";
 import VerifyBetModal from "./VerifyBetModal";
-import { GameType, seedStatus } from "@/utils/vrf";
+import { GameType, seedStatus } from "@/utils/provably-fair";
 
 export interface Bet {
   createdAt: string;

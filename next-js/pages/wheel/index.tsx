@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useWallet } from "@solana/wallet-adapter-react";
@@ -14,9 +14,12 @@ import {
 } from "@/components/GameLayout";
 import HistoryTable from "@/components/games/Wheel/HistoryTable";
 import { WalletContextState } from "@solana/wallet-adapter-react";
+import Arc from "@/components/games/Wheel/Arc";
+import { multipliers } from "@/components/games/Wheel/Segments";
 
 export default function Wheel() {
   const wallet = useWallet();
+  const wheelRef = useRef<HTMLDivElement>(null);
   const { coinData, getBalance, getWalletBalance } = useGlobalContext();
   const [betAmt, setBetAmt] = useState(0);
   const [isRolling, setIsRolling] = useState(false);
@@ -24,7 +27,29 @@ export default function Wheel() {
   const [betType, setBetType] = useState<"manual" | "auto">("manual");
   const [strikeFace, setStrikeFace] = useState<number>(0);
   const [risk, setRisk] = useState<"low" | "medium" | "high">("low");
+
   const [segments, setSegments] = useState<number>(10);
+  const [segmentWidth, setSegmentWidth] = useState(0);
+  const [numSegments, setNumSegments] = useState(0);
+  const [rotationAngle, setRotationAngle] = useState(0);
+
+  useEffect(() => {
+    if (!wheelRef.current) return;
+
+    const width = wheelRef.current.offsetWidth;
+    const radius = width / 2;
+    const numSegments = segments;
+
+    const circumference = 2 * Math.PI * radius;
+    const arcLength = circumference / numSegments;
+
+    const segmentWidth = 2 * radius * Math.sin(arcLength / (2 * radius));
+    const rotationAngle = (360 * arcLength) / circumference;
+
+    setSegmentWidth(segmentWidth);
+    setNumSegments(numSegments);
+    setRotationAngle(rotationAngle);
+  }, [segments]);
 
   const handleBetAmountChange = (
     event: React.ChangeEvent<HTMLInputElement>,
@@ -90,7 +115,8 @@ export default function Wheel() {
 
   useEffect(() => {
     console.log("strikeface", strikeFace);
-  }, [strikeFace]);
+    console.log("segments", segments);
+  }, [strikeFace, segments]);
 
   useEffect(() => {
     if (refresh && wallet?.publicKey) {
@@ -256,12 +282,40 @@ export default function Wheel() {
           </div>
         </div>
         <div className="w-full">
-          <div className="relative inline-block mr-[20px]">
-            <div className="relative w-[200px] h-[200px] bg-red-300 rounded-full overflow-hidden">
-              <div
-                className="absolute top-[50%] left-[50%] w-full h-full bg-blue-600 origin-[0_0]"
-                style={{ transform: "rotate(0deg) skew(45deg)" }}
-              />
+          <div className="relative flex justify-center w-full h-full">
+            <Image
+              src="/assets/wheelPointer.svg"
+              alt="Pointer"
+              width={40}
+              height={40}
+              className="absolute z-50 -top-5 "
+            />
+            <div
+              ref={wheelRef}
+              className="relative w-[200px] h-[200px] sm:w-[350px] sm:h-[350px] rounded-full overflow-hidden"
+            >
+              <svg viewBox="0 0 300 300">
+                {typeof window !== "undefined" &&
+                  rotationAngle &&
+                  Array.from({ length: numSegments }).map((_, index) => (
+                    <Arc
+                      key={index}
+                      index={index}
+                      rotationAngle={rotationAngle}
+                      multiplier={
+                        risk === "high"
+                          ? multipliers.high
+                          : risk === "medium"
+                          ? multipliers.medium
+                          : multipliers.low
+                      }
+                      segments={segments}
+                    />
+                  ))}
+              </svg>
+              <div className="absolute z-10 w-[88.75%] h-[88.75%] rounded-full bg-black/10 left-[5.625%] top-[5.625%]" />
+              <div className="absolute z-20 w-[77.5%] h-[77.5%] rounded-full bg-[#171A1F] left-[11.25%] top-[11.25%]" />
+              <div className="absolute z-20 w-[72.5%] h-[72.5%] rounded-full bg-[#0C0F16] left-[13.75%] top-[13.75%]" />
             </div>
           </div>
         </div>
