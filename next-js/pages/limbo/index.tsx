@@ -16,6 +16,7 @@ import { MultiplierChanceDisplay } from "@/components/games/Limbo/MultiplierChan
 import Spinner from "@/components/Spinner";
 import { MultiplierHistory } from "@/components/games/Limbo/MultiplierHistory";
 import { limboBet } from "@/context/gameTransactions";
+import BetAmount from "@/components/games/BetAmountInput";
 
 export default function Limbo() {
   const wallet = useWallet();
@@ -205,57 +206,7 @@ export default function Limbo() {
                   onSubmit={methods.handleSubmit(onSubmit)}
                 >
                   {/* amt input  */}
-                  <div className="mb-0 flex w-full flex-col">
-                    <div className="mb-1 flex w-full items-center justify-between text-sm font-changa font-medium">
-                      <label className="text-[#F0F0F0] text-opacity-90">
-                        Bet amount
-                      </label>
-                      <span className="text-[#94A3B8] text-opacity-90">
-                        Available :{" "}
-                        {coinData ? coinData[0]?.amount.toFixed(4) : 0}
-                      </span>
-                    </div>
-
-                    <div
-                      className={`group flex h-11 w-full cursor-pointer items-center rounded-[8px] bg-[#202329] px-4`}
-                    >
-                      <input
-                        id={"amount-input"}
-                        {...methods.register("amount", {
-                          required: "Amount is required",
-                        })}
-                        type={"number"}
-                        step={"any"}
-                        autoComplete="off"
-                        onChange={handleChange}
-                        placeholder={"Amount"}
-                        value={betAmt}
-                        className={`flex w-full min-w-0 bg-transparent text-base text-white font-chakra placeholder-white  placeholder-opacity-40 outline-none`}
-                      />
-                      <span
-                        className="text-xs font-medium text-white text-opacity-50 bg-[#292C32] hover:bg-[#47484A] focus:bg-[#47484A] transition-all rounded-[5px] py-1.5 px-4"
-                        onClick={() =>
-                          setBetAmt(coinData ? coinData[0]?.amount : 0)
-                        }
-                      >
-                        MAX
-                      </span>
-                    </div>
-
-                    <span
-                      className={`${
-                        methods.formState.errors["amount"]
-                          ? "opacity-100"
-                          : "opacity-0"
-                      } mt-1.5 flex items-center gap-1 text-xs text-[#D92828]`}
-                    >
-                      {methods.formState.errors["amount"]
-                        ? methods.formState.errors[
-                            "amount"
-                          ]!.message!.toString()
-                        : "NONE"}
-                    </span>
-                  </div>
+                  <BetAmount betAmt={betAmt} setBetAmt={setBetAmt} />
 
                   {/* balance alert  */}
                   {(!coinData || (coinData && coinData[0].amount < 0.0001)) && (

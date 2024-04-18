@@ -18,6 +18,8 @@ import {
   GameFooterInfo,
   GameTable,
 } from "@/components/GameLayout";
+import BetAmount from "@/components/games/BetAmountInput";
+import BetButton from "@/components/games/BetButton";
 
 const Timer = dynamic(() => import("../../components/games/Timer"), {
   ssr: false,
@@ -55,6 +57,9 @@ export default function Options() {
   const [refresh, setRefresh] = useState(true);
   const [betTime, setBetTime] = useState();
   const [betEndPrice, setBetEndPrice] = useState<number>();
+  const [betResults, setBetResults] = useState<
+    { result: number; win: boolean }[]
+  >([]);
 
   const [timeLeft, setTimeLeft] = useState(
     betTime
@@ -78,6 +83,20 @@ export default function Options() {
               ? res?.data?.amountWon
               : res?.data?.amountLost,
           );
+
+          setBetResults((prevResults) => {
+            const newResults = [
+              ...prevResults,
+              {
+                result: res?.data?.amountWon,
+                win: res?.data?.result === "Won",
+              },
+            ];
+            if (newResults.length > 6) {
+              newResults.shift();
+            }
+            return newResults;
+          });
           setRefresh(true);
         } else {
           setResult(null);
@@ -310,10 +329,10 @@ export default function Options() {
             onSubmit={methods.handleSubmit(onSubmit)}
           >
             {/* mobile button  */}
-            <div className="flex md:hidden w-full flex-col mb-5">
-              <button
-                type="submit"
+            <div className="w-full flex md:hidden mb-5">
+              <BetButton
                 disabled={
+                  !betType ||
                   !coinData ||
                   (coinData && coinData[0].amount < 0.0001) ||
                   loading ||
@@ -321,12 +340,7 @@ export default function Options() {
                     ? true
                     : false
                 }
-                onClick={onSubmit}
-                className={`${
-                  !coinData || (coinData && coinData[0].amount < 0.0001)
-                    ? "cursor-not-allowed opacity-70"
-                    : "hover:opacity-90"
-                } w-full rounded-lg transition-all bg-[#7839C5] disabled:bg-[#4b2876] hover:bg-[#9361d1] focus:bg-[#602E9E] py-2.5 font-changa font-semibold text-[1.75rem] text-white`}
+                onClickFunction={onSubmit}
               >
                 {loading || (strikePrice > 0 && !result) ? (
                   <Loader />
@@ -335,71 +349,10 @@ export default function Options() {
                 ) : (
                   "BET"
                 )}
-              </button>
+              </BetButton>
             </div>
 
-            <div className="mb-0 flex w-full flex-col">
-              <div className="mb-1 flex w-full items-center justify-between text-sm font-changa text-opacity-90">
-                <label className="text-white/90 font-medium font-changa">
-                  Bet Amount
-                </label>
-                <span className="text-[#94A3B8] text-opacity-90 font-changa font-medium text-sm">
-                  {coinData ? coinData[0]?.amount.toFixed(4) : 0} $SOL
-                </span>
-              </div>
-
-              <div
-                className={`group flex h-11 w-full cursor-pointer items-center rounded-[8px] bg-[#202329] pl-4 pr-2.5`}
-              >
-                <input
-                  id={"amount-input"}
-                  {...methods.register("amount", {
-                    required: "Amount is required",
-                  })}
-                  type={"number"}
-                  step={"any"}
-                  autoComplete="off"
-                  onChange={handleChange}
-                  placeholder={"Amount"}
-                  value={betAmt}
-                  className={`flex w-full min-w-0 bg-transparent text-base text-[#94A3B8] placeholder-[#94A3B8]  font-chakra placeholder-opacity-40 outline-none`}
-                />
-                <span
-                  className="text-xs font-medium text-white text-opacity-50 bg-[#292C32] hover:bg-[#47484A] focus:bg-[#47484A] transition-all rounded-[5px] py-1.5 px-4"
-                  onClick={() =>
-                    setBetAmt(coinData ? coinData[0]?.amount / 4 : 0)
-                  }
-                >
-                  1/4
-                </span>
-                <span
-                  className="text-xs mx-2 font-medium text-white text-opacity-50 bg-[#292C32] hover:bg-[#47484A] focus:bg-[#47484A] transition-all rounded-[5px] py-1.5 px-4"
-                  onClick={() =>
-                    setBetAmt(coinData ? coinData[0]?.amount / 2 : 0)
-                  }
-                >
-                  Half
-                </span>
-                <span
-                  className="text-xs font-medium text-white text-opacity-50 bg-[#292C32] hover:bg-[#47484A] focus:bg-[#47484A] transition-all rounded-[5px] py-1.5 px-4"
-                  onClick={() => setBetAmt(coinData ? coinData[0]?.amount : 0)}
-                >
-                  Max
-                </span>
-              </div>
-
-              <span
-                className={`${
-                  methods.formState.errors["amount"]
-                    ? "opacity-100"
-                    : "opacity-0"
-                } mt-1.5 flex items-center gap-1 text-xs text-[#D92828]`}
-              >
-                {methods.formState.errors["amount"]
-                  ? methods.formState.errors["amount"]!.message!.toString()
-                  : "NONE"}
-              </span>
-            </div>
+            <BetAmount betAmt={betAmt} setBetAmt={setBetAmt} />
 
             {/* select interval  */}
             <div className="mb-4 flex w-full flex-col rounded-lg bg-transparent bg-opacity-10">
@@ -494,9 +447,8 @@ export default function Options() {
             </div>
 
             {/* lap  button  */}
-            <div className="hidden md:flex w-full flex-col mt-2">
-              <button
-                type="submit"
+            <div className="w-full hidden md:flex mt-2">
+              <BetButton
                 disabled={
                   !betType ||
                   !coinData ||
@@ -506,14 +458,7 @@ export default function Options() {
                     ? true
                     : false
                 }
-                onClick={onSubmit}
-                className={`${
-                  !betType ||
-                  !coinData ||
-                  (coinData && coinData[0].amount < 0.0001)
-                    ? "cursor-not-allowed opacity-70"
-                    : "hover:opacity-90"
-                } w-full h-[3.75rem] rounded-lg transition-all bg-[#7839C5] disabled:bg-[#4b2876] hover:bg-[#9361d1] focus:bg-[#602E9E] flex items-center justify-center font-changa font-semibold text-[1.75rem] text-white`}
+                onClickFunction={onSubmit}
               >
                 {loading || (strikePrice > 0 && !result) ? (
                   <Loader />
@@ -522,7 +467,7 @@ export default function Options() {
                 ) : (
                   "BET"
                 )}
-              </button>
+              </BetButton>
             </div>
           </form>
         </FormProvider>

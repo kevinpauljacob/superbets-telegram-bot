@@ -9,18 +9,6 @@ type ProgressBarProps = {
   draggable?: boolean;
 };
 
-type ProgressBarStyles = {
-  progressBar: React.CSSProperties;
-  rangeInput: React.CSSProperties;
-  fill: React.CSSProperties;
-  cursor: React.CSSProperties;
-};
-
-type IndicatorStyles = {
-  container: React.CSSProperties;
-  svg: React.CSSProperties;
-};
-
 const ProgressBar: React.FC<ProgressBarProps> = ({
   choice,
   setChoice,
@@ -103,97 +91,38 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
 
   const indicators = [0, 25, 50, 75, 100];
 
-  const progressBarStyles: ProgressBarStyles = {
-    progressBar: {
-      position: "relative",
-      width: "100%",
-      backgroundColor: rollType === "over" ? "#72F238" : "#F1323E",
-    },
-    rangeInput: {
-      position: "absolute",
-      width: "100%",
-      height: "20px",
-      margin: 0,
-      padding: 0,
-      opacity: 0,
-    },
-    fill: {
-      width: choice <= 2 ? `2%` : `${choice}%`,
-      background: rollType === "over" ? "#F1323E" : "#72F238",
-    },
-    cursor: {
-      position: "absolute",
-      top: "50%",
-      transform: "translateY(-50%)",
-      backgroundColor: "#9945FF",
-      borderRadius: "7px",
-      left:
-        choice <= 2
-          ? `8.5px`
-          : choice >= 98
-          ? `calc(${choice}% - 8.5px)`
-          : `calc(${choice}% - 8.5px)`,
-      cursor: draggable ? "pointer" : "default",
-    },
-  };
-
-  const indicatorStyles: IndicatorStyles = {
-    container: {
-      display: "flex",
-      justifyContent: "space-between",
-      color: "white",
-      fontWeight: "bold",
-      margin: "auto",
-      // width: `${progressBarRef.current?.clientWidth}px`,
-    },
-    svg: {
-      width: "11px",
-      height: "10px",
-      fill: "#282E3D",
-      top: "-25px",
-      marginBottom: "10px",
-    },
-  };
-
   return (
     <div>
       <div className="border-4 sm:border-[6px] border-[#282E3D] bg-[#282E3D] rounded-lg">
         <div className="bg-[#0C0F16] rounded-md p-4">
           <div
-            ref={progressBarRef}
-            style={progressBarStyles.progressBar}
-            className="relative rounded-full"
+            className={`relative rounded-full h-1 sm:h-2 flex ${
+              rollType === "over" ? "bg-fomo-green" : "bg-fomo-red"
+            }`}
           >
             <input
+              id="min-slider"
               type="range"
-              min="0"
+              onChange={(e) => {
+                const value = parseInt(e.currentTarget.value);
+                //@ts-ignore
+                document.getElementById("min-slider")!.value =
+                  value >= 2 ? value : 2;
+                setChoice(value >= 2 ? value : 2);
+              }}
+              disabled={!draggable}
+              min={0}
               max="100"
-              step="10"
-              value={choice}
-              {...(draggable && {
-                onChange: handleChange,
-                onMouseMove: handleDrag,
-                onTouchMove: handleDrag,
-                onMouseDown: handleDragStart,
-                onMouseUp: handleDragEnd,
-                onTouchStart: handleDragStart,
-                onTouchEnd: handleDragEnd,
-              })}
-              style={progressBarStyles.rangeInput}
-              className=""
+              step={1}
+              className={`w-full h-1 sm:h-2 bg-transparent rounded-lg appearance-none cursor-pointer z-50`}
             />
+            {/* bar fill  */}
             <div
-              className="progress-bar-fill rounded-full h-[4px] sm:h-[8px]"
-              style={progressBarStyles.fill}
+              className={`progress-bar-fill absolute rounded-l-full h-1 sm:h-2 ${
+                rollType === "over" ? "bg-fomo-red" : "bg-fomo-green"
+              }`}
+              style={{ width: `${choice}%` }}
             ></div>
-            <div
-              style={progressBarStyles.cursor}
-              {...(draggable && {
-                onMouseDown: handleDragStart,
-                onMouseUp: handleDragEnd,
-              })}
-              className="w-[13px] h-[23px] sm:w-[17px] sm:h-[26px]"
-            />
             <div
               className="absolute -top-16 -translate-x-1/2 -translate-y-1/2 transition-all duration-300"
               style={{ marginLeft: `${strikeNumber}%` }}
@@ -206,8 +135,8 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
                   <div
                     className={`${
                       result
-                        ? "border-[#72F238] text-[#72F238]"
-                        : "border-[#F1323E] text-white"
+                        ? "border-fomo-green text-fomo-green"
+                        : "border-fomo-red text-white"
                     } z-10 font-chakra text-sm font-semibold border-2 bg-[#282E3D] w-max text-opacity-75 rounded-md px-4 py-1.5`}
                   >
                     {strikeNumber}
@@ -231,7 +160,10 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
           </div>
         </div>
       </div>
-      <div ref={indicatorsRef} style={indicatorStyles.container}>
+      <div
+        ref={indicatorsRef}
+        className="flex items-center justify-between px-[1.5rem] text-white m-auto font-bold"
+      >
         {indicators.map((indicator) => (
           <div key={indicator} className="relative">
             <svg
@@ -239,8 +171,7 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
               width="12px"
               height="12px"
               viewBox="0 0 11 10"
-              style={indicatorStyles.svg}
-              className="w-[12px] h-[12px]"
+              className="w-[12px] h-[12px] mb-2 -mt-0.5"
             >
               <path
                 d="M8.0572 7.83135C6.8865 9.73978 4.1135 9.73978 2.9428 7.83134L0.941367 4.56867C-0.284844 2.56975 1.15351 0 3.49857 0L7.50144 0C9.8465 0 11.2848 2.56975 10.0586 4.56867L8.0572 7.83135Z"
