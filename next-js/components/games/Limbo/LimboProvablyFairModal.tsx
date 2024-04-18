@@ -99,12 +99,12 @@ export default function LimboProvablyFairModal({
     setMultiplier(
       (
         100 /
-        (generateGameResult(
+        generateGameResult(
           name === "serverSeed" ? value : serverSeed,
           name === "clientSeed" ? value : clientSeed,
           parseInt(name === "nonce" ? value : nonce),
           GameType.limbo,
-        ) as number)
+        )
       ).toFixed(2),
     );
   };
