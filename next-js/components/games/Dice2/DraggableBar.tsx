@@ -107,13 +107,13 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
                 const value = parseInt(e.currentTarget.value);
                 //@ts-ignore
                 document.getElementById("min-slider")!.value =
-                  value >= 2 ? value : 2;
-                setChoice(value >= 2 ? value : 2);
+                  value >= 2 ? value <= 98 ? value : 98 : 2;
+                setChoice(value >= 2 ? value <= 98 ? value : 98 : 2);
               }}
               disabled={!draggable}
               min={0}
               max="100"
-              step={1}
+              step={0.01}
               className={`w-full h-1 sm:h-2 bg-transparent rounded-lg appearance-none cursor-pointer z-50`}
             />
             {/* bar fill  */}
@@ -135,7 +135,7 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
                   <div
                     className={`${
                       result
-                        ? "border-fomo-green text-fomo-green"
+                        ? "border-fomo-green text-white"
                         : "border-fomo-red text-white"
                     } z-10 font-chakra text-sm font-semibold border-2 bg-[#282E3D] w-max text-opacity-75 rounded-md px-4 py-1.5`}
                   >

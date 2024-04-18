@@ -206,6 +206,27 @@ export default function Dice() {
     <GameLayout title="FOMO - Dice">
       <GameOptions>
         <>
+          <div className="w-full relative flex md:hidden mb-5">
+            {selectedFace.length === 0 && (
+              <div
+                onClick={handleBlink}
+                className="absolute w-full h-full opacity-0 z-20"
+              />
+            )}
+            <BetButton
+              disabled={
+                !wallet ||
+                selectedFace.length == 0 ||
+                isRolling ||
+                (coinData && coinData[0].amount < 0.0001)
+                  ? true
+                  : false
+              }
+              onClickFunction={diceRoll}
+            >
+              {isRolling ? <Loader /> : "BET"}
+            </BetButton>
+          </div>
           <BetSetting betSetting={rollType} setBetSetting={setRollType} />
           <div className="w-full flex flex-col">
             <FormProvider {...methods}>
@@ -214,28 +235,6 @@ export default function Dice() {
                 autoComplete="off"
                 onSubmit={methods.handleSubmit(diceRoll)}
               >
-                <div className="w-full relative flex md:hidden mb-5">
-                  {selectedFace.length === 0 && (
-                    <div
-                      onClick={handleBlink}
-                      className="absolute w-full h-full opacity-0 z-20"
-                    />
-                  )}
-                  <BetButton
-                    disabled={
-                      !wallet ||
-                      selectedFace.length == 0 ||
-                      isRolling ||
-                      (coinData && coinData[0].amount < 0.0001)
-                        ? true
-                        : false
-                    }
-                    onClickFunction={diceRoll}
-                  >
-                    {isRolling ? <Loader /> : "BET"}
-                  </BetButton>
-                </div>
-
                 {/* amt input  */}
                 <BetAmount betAmt={betAmt} setBetAmt={setBetAmt} />
                 {rollType === "manual" ? (
@@ -336,7 +335,7 @@ export default function Dice() {
               ) : (
                 <div className="font-chakra text-sm font-medium text-white text-opacity-75">
                   {selectedFace.length === 0
-                    ? "Choose up to 5 faces"
+                    ? "Choose Upto 5 Faces"
                     : `${selectedFace.length
                         .toString()
                         .padStart(2, "0")}/05 faces`}
@@ -397,15 +396,15 @@ export default function Dice() {
               ))}
             </div>
 
-            <div className="w-full bg-[#282E3D] rounded-full h-2 flex items-end justify-around">
+            <div className="w-full bg-[#282E3D] rounded-full h-1 md:h-2 flex items-end justify-around">
               {[1, 2, 3, 4, 5, 6].map((num) => (
                 <DicePointer
                   key={num}
-                  className="relative top-1.5 text-[#282E3D]"
+                  className="relative w-2 h-2 md:w-3 md:h-3 top-1.5 text-[#282E3D]"
                 />
               ))}
             </div>
-            <div className="w-full flex items-end justify-around mt-5">
+            <div className="w-full flex items-end justify-around  mt-3 md:mt-4">
               <DiceFace
                 selectedFace={selectedFace}
                 selectedFaces={selectedFaces}
@@ -501,7 +500,7 @@ function DiceFace({
             : strikeFace === diceNumber
             ? "text-fomo-red" // Use losing dice face image if strikeFace is 1 and face 1 is not selected
             : "text-[#202329] hover:text-[#47484A] hover:duration-75" // Use regular dice face image if face 1 is not selected and strikeFace is not 1
-        } cursor-pointer w-12 h-12 transition-all duration-300 ease-in-out dice-face-icon-${diceNumber}`}
+        } cursor-pointer w-10 h-10 md:w-12 md:h-12 transition-all duration-300 ease-in-out dice-face-icon-${diceNumber}`}
       />
     </div>
   );
