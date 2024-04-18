@@ -25,6 +25,8 @@ import Dice3 from "@/public/assets/Dice3";
 import Dice4 from "@/public/assets/Dice4";
 import Dice5 from "@/public/assets/Dice5";
 import Dice6 from "@/public/assets/Dice6";
+import BetAmount from "@/components/games/BetAmountInput";
+import BetButton from "@/components/games/BetButton";
 
 export default function Dice() {
   const wallet = useWallet();
@@ -56,9 +58,11 @@ export default function Dice() {
   const [betResults, setBetResults] = useState<
     { face: number; isWin: boolean }[]
   >([]);
+  const [showPointer, setShowPointer] = useState<boolean>(false);
 
   const handleDiceClick = (newFace: number) => {
     setStrikeFace(0);
+    setShowPointer(false);
     if (selectedFace.length >= 5 && !selectedFace.includes(newFace)) {
       toast.error("You can only select up to 5 faces");
       return;
@@ -130,8 +134,8 @@ export default function Dice() {
             { face: strikeNumber, isWin },
           ];
           setBetResults(newBetResults);
+          setShowPointer(true);
           setStrikeFace(strikeNumber);
-          setBetAmt(0.0);
           setRefresh(true);
         }
       } catch (e) {
@@ -179,6 +183,25 @@ export default function Dice() {
     }
   }, [setPointerPosition]);
 
+  const handleBlink = () => {
+    console.log("blink");
+    const diceElements = Array.from({ length: 6 }, (_, i) =>
+      document.querySelector(`.dice-face-icon-${i + 1}`),
+    );
+    diceElements.forEach((element) => element?.classList.add("blink_dice"));
+    setTimeout(() => {
+      diceElements.forEach(
+        (element) => element?.classList.remove("blink_dice"),
+      );
+    }, 2000);
+  };
+
+  useEffect(() => {
+    setTimeout(() => {
+      handleBlink();
+    }, 3000);
+  }, []);
+
   return (
     <GameLayout title="FOMO - Dice">
       <GameOptions>
@@ -191,55 +214,30 @@ export default function Dice() {
                 autoComplete="off"
                 onSubmit={methods.handleSubmit(diceRoll)}
               >
-                {/* amt input  */}
-                <div className="mb-0 flex w-full flex-col">
-                  <div className="mb-1 flex w-full items-center justify-between text-sm font-changa text-opacity-90">
-                    <label className="text-white/90 font-medium font-changa">
-                      Bet Amount
-                    </label>
-                    <span className="text-[#94A3B8] text-opacity-90 font-changa font-medium text-sm">
-                      {coinData ? coinData[0]?.amount.toFixed(4) : 0} $SOL
-                    </span>
-                  </div>
-
-                  <div
-                    className={`group flex h-11 w-full cursor-pointer items-center rounded-[8px] bg-[#202329] px-4`}
-                  >
-                    <input
-                      id={"amount-input"}
-                      {...methods.register("amount", {
-                        required: "Amount is required",
-                      })}
-                      type={"number"}
-                      step={"any"}
-                      autoComplete="off"
-                      onChange={handleBetAmountChange}
-                      placeholder={"Amount"}
-                      value={betAmt}
-                      className={`flex w-full min-w-0 bg-transparent text-base text-[#94A3B8] placeholder-[#94A3B8]  font-chakra placeholder-opacity-40 outline-none`}
+                <div className="w-full relative flex md:hidden mb-5">
+                  {selectedFace.length === 0 && (
+                    <div
+                      onClick={handleBlink}
+                      className="absolute w-full h-full opacity-0 z-20"
                     />
-                    <span
-                      className="text-xs font-medium text-white text-opacity-50 bg-[#292C32] hover:bg-[#47484A] focus:bg-[#47484A] transition-all rounded-[5px] py-1.5 px-4"
-                      onClick={() =>
-                        setBetAmt(coinData ? coinData[0]?.amount : 0)
-                      }
-                    >
-                      MAX
-                    </span>
-                  </div>
-
-                  <span
-                    className={`${
-                      methods.formState.errors["amount"]
-                        ? "opacity-100"
-                        : "opacity-0"
-                    } mt-1.5 flex items-center gap-1 text-xs text-[#D92828]`}
+                  )}
+                  <BetButton
+                    disabled={
+                      !wallet ||
+                      selectedFace.length == 0 ||
+                      isRolling ||
+                      (coinData && coinData[0].amount < 0.0001)
+                        ? true
+                        : false
+                    }
+                    onClickFunction={diceRoll}
                   >
-                    {methods.formState.errors["amount"]
-                      ? methods.formState.errors["amount"]!.message!.toString()
-                      : "NONE"}
-                  </span>
+                    {isRolling ? <Loader /> : "BET"}
+                  </BetButton>
                 </div>
+
+                {/* amt input  */}
+                <BetAmount betAmt={betAmt} setBetAmt={setBetAmt} />
                 {rollType === "manual" ? (
                   <></>
                 ) : (
@@ -301,9 +299,14 @@ export default function Dice() {
                     </div>
                   </div>
                 )}
-                <div className="hidden md:flex w-full flex-col mt-2">
-                  <button
-                    type="submit"
+                <div className="w-full relative hidden md:flex mt-2">
+                  {selectedFace.length === 0 && (
+                    <div
+                      onClick={handleBlink}
+                      className="absolute w-full h-full opacity-0 z-20"
+                    />
+                  )}
+                  <BetButton
                     disabled={
                       !wallet ||
                       selectedFace.length == 0 ||
@@ -312,11 +315,10 @@ export default function Dice() {
                         ? true
                         : false
                     }
-                    onClick={diceRoll}
-                    className={`disabled:cursor-default disabled:opacity-70 hover:opacity-90 w-full h-[3.75rem] rounded-lg transition-all bg-[#7839C5] disabled:bg-[#4b2876] hover:bg-[#9361d1] focus:bg-[#602E9E] flex items-center justify-center font-changa font-semibold text-[1.75rem] text-white`}
+                    onClickFunction={diceRoll}
                   >
                     {isRolling ? <Loader /> : "BET"}
-                  </button>
+                  </BetButton>
                 </div>
               </form>
             </FormProvider>
@@ -363,18 +365,18 @@ export default function Dice() {
             {/* win pointer  */}
             <div
               className={`${
-                betResults.length > 0 ? "opacity-100" : "opacity-0"
-              } transition-width duration-300 h-4 bg-transparent flex w-full`}
+                showPointer ? "opacity-100" : "opacity-0"
+              } transition-all duration-300 h-4 bg-transparent flex w-full`}
             >
               <div
                 ref={topWinPointerRef}
-                className="absolute -top-[1rem] z-[10] transition-all"
+                className="absolute -top-[1rem] z-[10] transition-all ease-in-out duration-300"
               >
                 <WinPointer
                   className={`relative ${
                     selectedFace.includes(strikeFace)
-                      ? "text-[#72F238]"
-                      : "text-[#A0293D]"
+                      ? "text-fomo-green"
+                      : "text-fomo-red"
                   }`}
                 />
               </div>
@@ -453,316 +455,6 @@ export default function Dice() {
                 handleClick={handleDiceClick}
               />
             </div>
-            {/* <div className="">
-              <Image
-                src="/assets/progressBar.png"
-                alt="progress bar"
-                width={900}
-                height={100}
-              />
-            </div> */}
-            {/* <div className="flex justify-around">
-              <div className="flex flex-col items-center mr-2 sm:mr-0">
-                {selectedFaces[1] ? (
-                  selectedFace.includes(1) ? (
-                    strikeFace === 1 ? (
-                      <Image
-                        src="/assets/winPointer.png"
-                        alt="win pointer"
-                        width={20}
-                        height={20}
-                        className="absolute -top-[30px]"
-                      />
-                    ) : null
-                  ) : null
-                ) : strikeFace === 1 ? (
-                  <Image
-                    src="/assets/lossPointer.png"
-                    alt="loss pointer"
-                    width={20}
-                    height={20}
-                    className="absolute -top-[30px]"
-                  />
-                ) : null}
-                <Image
-                  src="/assets/progressTip.png"
-                  alt="progress bar"
-                  width={8}
-                  height={8}
-                  className="absolute top-[0px] w-[8px] h-[8px] sm:w-[10px] sm:h-[10px] md:w-[13px] md:h-[13px] sm:top-[2px] md:top-[1rem]"
-                />
-                <Image
-                  src={
-                    selectedFaces[1]
-                      ? selectedFace.includes(1)
-                        ? strikeFace === 1
-                          ? "/assets/winDiceFace1.png" // Use winning dice face image if strikeFace is 1
-                          : "/assets/selectedDiceFace1.png" // Use selected dice face image if face 1 is selected but not strikeFace
-                        : "/assets/diceFace1.png" // Use regular dice face image if face 1 is not selected
-                      : strikeFace === 1
-                      ? "/assets/lossDiceFace1.png" // Use losing dice face image if strikeFace is 1 and face 1 is not selected
-                      : "/assets/diceFace1.png" // Use regular dice face image if face 1 is not selected and strikeFace is not 1
-                  }
-                  width={50}
-                  height={50}
-                  alt=""
-                  className={`inline-block mt-6 ${
-                    selectedFace.includes(1) ? "selected-face" : ""
-                  }`}
-                  onClick={() => handleDiceClick(1)}
-                />
-              </div>
-              <div className="flex flex-col items-center mr-2 sm:mr-0">
-                {selectedFaces[2] ? (
-                  selectedFace.includes(2) ? (
-                    strikeFace === 2 ? (
-                      <Image
-                        src="/assets/winPointer.png"
-                        alt="win pointer"
-                        width={20}
-                        height={20}
-                        className="absolute -top-[30px]"
-                      />
-                    ) : null
-                  ) : null
-                ) : strikeFace === 2 ? (
-                  <Image
-                    src="/assets/lossPointer.png"
-                    alt="loss pointer"
-                    width={20}
-                    height={20}
-                    className="absolute -top-[30px]"
-                  />
-                ) : null}
-                <Image
-                  src="/assets/progressTip.png"
-                  alt="progress bar"
-                  width={13}
-                  height={13}
-                  className="absolute top-[0px] w-[8px] h-[8px] sm:w-[10px] sm:h-[10px] md:w-[13px] md:h-[13px] sm:top-[2px] md:top-[4px]"
-                />
-                <Image
-                  src={
-                    selectedFaces[2]
-                      ? selectedFace.includes(2)
-                        ? strikeFace === 2
-                          ? "/assets/winDiceFace2.png" // Use winning dice face image if strikeFace is 1
-                          : "/assets/selectedDiceFace2.png" // Use selected dice face image if face 1 is selected but not strikeFace
-                        : "/assets/diceFace2.png" // Use regular dice face image if face 1 is not selected
-                      : strikeFace === 2
-                      ? "/assets/lossDiceFace2.png" // Use losing dice face image if strikeFace is 1 and face 1 is not selected
-                      : "/assets/diceFace2.png" // Use regular dice face image if face 1 is not selected and strikeFace is not 1
-                  }
-                  width={50}
-                  height={50}
-                  alt=""
-                  className={`inline-block mt-6 ${
-                    selectedFace.includes(2) ? "selected-face" : ""
-                  }`}
-                  onClick={() => handleDiceClick(2)}
-                />
-              </div>
-              <div className="flex flex-col items-center mr-2 sm:mr-0">
-                {selectedFaces[3] ? (
-                  selectedFace.includes(3) ? (
-                    strikeFace === 3 ? (
-                      <Image
-                        src="/assets/winPointer.png"
-                        alt="win pointer"
-                        width={20}
-                        height={20}
-                        className="absolute -top-[30px]"
-                      />
-                    ) : null
-                  ) : null
-                ) : strikeFace === 3 ? (
-                  <Image
-                    src="/assets/lossPointer.png"
-                    alt="loss pointer"
-                    width={20}
-                    height={20}
-                    className="absolute -top-[30px]"
-                  />
-                ) : null}
-                <Image
-                  src="/assets/progressTip.png"
-                  alt="progress bar"
-                  width={13}
-                  height={13}
-                  className="absolute top-[0px] w-[8px] h-[8px] sm:w-[10px] sm:h-[10px] md:w-[13px] md:h-[13px] sm:top-[2px] md:top-[4px]"
-                />
-                <Image
-                  src={
-                    selectedFaces[3]
-                      ? selectedFace.includes(3)
-                        ? strikeFace === 3
-                          ? "/assets/winDiceFace3.png" // Use winning dice face image if strikeFace is 1
-                          : "/assets/selectedDiceFace3.png" // Use selected dice face image if face 1 is selected but not strikeFace
-                        : "/assets/diceFace3.png" // Use regular dice face image if face 1 is not selected
-                      : strikeFace === 3
-                      ? "/assets/lossDiceFace3.png" // Use losing dice face image if strikeFace is 1 and face 1 is not selected
-                      : "/assets/diceFace3.png" // Use regular dice face image if face 1 is not selected and strikeFace is not 1
-                  }
-                  width={50}
-                  height={50}
-                  alt=""
-                  className={`inline-block mt-6 ${
-                    selectedFace.includes(3) ? "selected-face" : ""
-                  }`}
-                  onClick={() => handleDiceClick(3)}
-                />
-              </div>
-              <div className="flex flex-col items-center mr-2 sm:mr-0">
-                {selectedFaces[4] ? (
-                  selectedFace.includes(4) ? (
-                    strikeFace === 4 ? (
-                      <Image
-                        src="/assets/winPointer.png"
-                        alt="win pointer"
-                        width={20}
-                        height={20}
-                        className="absolute -top-[30px]"
-                      />
-                    ) : null
-                  ) : null
-                ) : strikeFace === 4 ? (
-                  <Image
-                    src="/assets/lossPointer.png"
-                    alt="loss pointer"
-                    width={20}
-                    height={20}
-                    className="absolute -top-[30px]"
-                  />
-                ) : null}
-                <Image
-                  src="/assets/progressTip.png"
-                  alt="progress bar"
-                  width={13}
-                  height={13}
-                  className="absolute top-[0px] w-[8px] h-[8px] sm:w-[10px] sm:h-[10px] md:w-[13px] md:h-[13px] sm:top-[2px] md:top-[4px]"
-                />
-                <Image
-                  src={
-                    selectedFaces[4]
-                      ? selectedFace.includes(4)
-                        ? strikeFace === 4
-                          ? "/assets/winDiceFace4.png" // Use winning dice face image if strikeFace is 1
-                          : "/assets/selectedDiceFace4.png" // Use selected dice face image if face 1 is selected but not strikeFace
-                        : "/assets/diceFace4.png" // Use regular dice face image if face 1 is not selected
-                      : strikeFace === 4
-                      ? "/assets/lossDiceFace4.png" // Use losing dice face image if strikeFace is 1 and face 1 is not selected
-                      : "/assets/diceFace4.png" // Use regular dice face image if face 1 is not selected and strikeFace is not 1
-                  }
-                  width={50}
-                  height={50}
-                  alt=""
-                  className={`inline-block mt-6 ${
-                    selectedFace.includes(4) ? "selected-face" : ""
-                  }`}
-                  onClick={() => handleDiceClick(4)}
-                />
-              </div>
-              <div className="flex flex-col items-center mr-2 sm:mr-0">
-                {selectedFaces[5] ? (
-                  selectedFace.includes(5) ? (
-                    strikeFace === 5 ? (
-                      <Image
-                        src="/assets/winPointer.png"
-                        alt="win pointer"
-                        width={20}
-                        height={20}
-                        className="absolute -top-[30px]"
-                      />
-                    ) : null
-                  ) : null
-                ) : strikeFace === 5 ? (
-                  <Image
-                    src="/assets/lossPointer.png"
-                    alt="loss pointer"
-                    width={20}
-                    height={20}
-                    className="absolute -top-[30px]"
-                  />
-                ) : null}
-                <Image
-                  src="/assets/progressTip.png"
-                  alt="progress bar"
-                  width={13}
-                  height={13}
-                  className="absolute top-[0px] w-[8px] h-[8px] sm:w-[10px] sm:h-[10px] md:w-[13px] md:h-[13px] sm:top-[2px] md:top-[4px]"
-                />
-                <Image
-                  src={
-                    selectedFaces[5]
-                      ? selectedFace.includes(5)
-                        ? strikeFace === 5
-                          ? "/assets/winDiceFace5.png" // Use winning dice face image if strikeFace is 1
-                          : "/assets/selectedDiceFace5.png" // Use selected dice face image if face 1 is selected but not strikeFace
-                        : "/assets/diceFace5.png" // Use regular dice face image if face 1 is not selected
-                      : strikeFace === 5
-                      ? "/assets/lossDiceFace5.png" // Use losing dice face image if strikeFace is 1 and face 1 is not selected
-                      : "/assets/diceFace5.png" // Use regular dice face image if face 1 is not selected and strikeFace is not 1
-                  }
-                  width={50}
-                  height={50}
-                  alt=""
-                  className={`inline-block mt-6 ${
-                    selectedFace.includes(5) ? "selected-face" : ""
-                  }`}
-                  onClick={() => handleDiceClick(5)}
-                />
-              </div>
-              <div className="flex flex-col items-center">
-                {selectedFaces[6] ? (
-                  selectedFace.includes(6) ? (
-                    strikeFace === 6 ? (
-                      <Image
-                        src="/assets/winPointer.png"
-                        alt="win pointer"
-                        width={20}
-                        height={20}
-                        className="absolute -top-[30px]"
-                      />
-                    ) : null
-                  ) : null
-                ) : strikeFace === 6 ? (
-                  <Image
-                    src="/assets/lossPointer.png"
-                    alt="loss pointer"
-                    width={20}
-                    height={20}
-                    className="absolute -top-[30px]"
-                  />
-                ) : null}
-                <Image
-                  src="/assets/progressTip.png"
-                  alt="progress bar"
-                  width={13}
-                  height={13}
-                  className="absolute top-[0px] w-[8px] h-[8px] sm:w-[10px] sm:h-[10px] md:w-[13px] md:h-[13px] sm:top-[2px] md:top-[4px]"
-                />
-                <Image
-                  src={
-                    selectedFaces[6]
-                      ? selectedFace.includes(6)
-                        ? strikeFace === 6
-                          ? "/assets/winDiceFace6.png" // Use winning dice face image if strikeFace is 1
-                          : "/assets/selectedDiceFace6.png" // Use selected dice face image if face 1 is selected but not strikeFace
-                        : "/assets/diceFace6.png" // Use regular dice face image if face 1 is not selected
-                      : strikeFace === 6
-                      ? "/assets/lossDiceFace6.png" // Use losing dice face image if strikeFace is 1 and face 1 is not selected
-                      : "/assets/diceFace6.png" // Use regular dice face image if face 1 is not selected and strikeFace is not 1
-                  }
-                  width={50}
-                  height={50}
-                  alt=""
-                  className={`inline-block mt-6 ${
-                    selectedFace.includes(6) ? "selected-face" : ""
-                  }`}
-                  onClick={() => handleDiceClick(6)}
-                />
-              </div>
-            </div> */}
           </div>
 
           <GameFooterInfo
@@ -803,13 +495,13 @@ function DiceFace({
           selectedFaces[diceNumber]
             ? selectedFace.includes(diceNumber)
               ? strikeFace === diceNumber
-                ? "text-[#72F238]" // Use winning dice face image if strikeFace is 1
+                ? "text-fomo-green" // Use winning dice face image if strikeFace is 1
                 : "text-[#94A3B8]" // Use selected dice face image if face 1 is selected but not strikeFace
-              : "text-[#202329] hover:text-[#47484A]" // Use regular dice face image if face 1 is not selected
+              : "text-[#202329] hover:text-[#47484A] hover:duration-75" // Use regular dice face image if face 1 is not selected
             : strikeFace === diceNumber
-            ? "text-[#A0293D]" // Use losing dice face image if strikeFace is 1 and face 1 is not selected
-            : "text-[#202329] hover:text-[#47484A]" // Use regular dice face image if face 1 is not selected and strikeFace is not 1
-        } cursor-pointer w-12 h-12 transition-all blink_dice`}
+            ? "text-fomo-red" // Use losing dice face image if strikeFace is 1 and face 1 is not selected
+            : "text-[#202329] hover:text-[#47484A] hover:duration-75" // Use regular dice face image if face 1 is not selected and strikeFace is not 1
+        } cursor-pointer w-12 h-12 transition-all duration-300 ease-in-out dice-face-icon-${diceNumber}`}
       />
     </div>
   );

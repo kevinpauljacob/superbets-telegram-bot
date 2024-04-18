@@ -44,6 +44,12 @@ export default function Sidebar({ mobileSidebar }: { mobileSidebar: boolean }) {
   const [casinoGames, setCasinoGames] = useState<Game[]>([
     {
       src: "",
+      token: "Dice 2",
+      link: "/dice2", // Update the links to include "/"
+      active: false,
+    },
+    {
+      src: "",
       token: "Dice To Win",
       link: "/dice", // Update the links to include "/"
       active: false,

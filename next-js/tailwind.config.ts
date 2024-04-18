@@ -19,6 +19,10 @@ const config: Config = {
       screens: {
         xs: "400px",
       },
+      colors: {
+        "fomo-green": "#72F238",
+        "fomo-red": "#F1323E",
+      },
       fontFamily: {
         sans: ["Inter", "sans-serif"],
         koulen: ["Koulen", "sans-serif"],

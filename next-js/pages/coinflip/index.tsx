@@ -20,6 +20,8 @@ import {
 } from "@/components/GameLayout";
 import { BsInfinity } from "react-icons/bs";
 import Loader from "@/components/games/Loader";
+import BetAmount from "@/components/games/BetAmountInput";
+import BetButton from "@/components/games/BetButton";
 
 const Timer = dynamic(() => import("../../components/games/Timer"), {
   ssr: false,
@@ -155,55 +157,23 @@ export default function Flip() {
                 autoComplete="off"
                 onSubmit={methods.handleSubmit(onSubmit)}
               >
-                {/* amt input  */}
-                <div className="mb-0 flex w-full flex-col">
-                  <div className="mb-1 flex w-full items-center justify-between text-sm font-changa text-opacity-90">
-                    <label className="text-white/90 font-medium font-changa">
-                      Bet Amount
-                    </label>
-                    <span className="text-[#94A3B8] text-opacity-90 font-changa font-medium text-sm">
-                      {coinData ? coinData[0]?.amount.toFixed(4) : 0} $SOL
-                    </span>
-                  </div>
-
-                  <div
-                    className={`group flex h-11 w-full cursor-pointer items-center rounded-[8px] bg-[#202329] px-4`}
+                <div className="w-full flex md:hidden mb-5">
+                  <BetButton
+                    disabled={
+                      !betType ||
+                      loading ||
+                      (coinData && coinData[0].amount < 0.0001)
+                        ? true
+                        : false
+                    }
+                    onClickFunction={onSubmit}
                   >
-                    <input
-                      id={"amount-input"}
-                      {...methods.register("amount", {
-                        required: "Amount is required",
-                      })}
-                      type={"number"}
-                      step={"any"}
-                      autoComplete="off"
-                      onChange={handleChange}
-                      placeholder={"Amount"}
-                      value={betAmt}
-                      className={`flex w-full min-w-0 bg-transparent text-base text-[#94A3B8] placeholder-[#94A3B8]  font-chakra placeholder-opacity-40 outline-none`}
-                    />
-                    <span
-                      className="text-xs font-medium text-white text-opacity-50 bg-[#292C32] hover:bg-[#47484A] focus:bg-[#47484A] transition-all rounded-[5px] py-1.5 px-4"
-                      onClick={() =>
-                        setBetAmt(coinData ? coinData[0]?.amount : 0)
-                      }
-                    >
-                      MAX
-                    </span>
-                  </div>
-
-                  <span
-                    className={`${
-                      methods.formState.errors["amount"]
-                        ? "opacity-100"
-                        : "opacity-0"
-                    } mt-1.5 flex items-center gap-1 text-xs text-[#D92828]`}
-                  >
-                    {methods.formState.errors["amount"]
-                      ? methods.formState.errors["amount"]!.message!.toString()
-                      : "NONE"}
-                  </span>
+                    {loading ? <Loader /> : result ? "BET AGAIN" : "BET"}
+                  </BetButton>
                 </div>
+
+                {/* amt input  */}
+                <BetAmount betAmt={betAmt} setBetAmt={setBetAmt} />
 
                 {betSetting === "manual" ? (
                   <></>
@@ -283,7 +253,7 @@ export default function Flip() {
                     </div>
                   </div>
                 )}
-                
+
                 {/* choosing bet options  */}
                 <div className="flex flex-col w-full gap-4">
                   <div className="flex w-full flex-row gap-3">
@@ -331,10 +301,8 @@ export default function Flip() {
                       <span className="mt-0.5">Tails</span>
                     </div>
                   </div>
-
-                  <div className="hidden md:flex w-full flex-col mt-2">
-                    <button
-                      type="submit"
+                  <div className="w-full hidden md:flex mt-2">
+                    <BetButton
                       disabled={
                         !betType ||
                         loading ||
@@ -342,11 +310,10 @@ export default function Flip() {
                           ? true
                           : false
                       }
-                      onClick={onSubmit}
-                      className={`disabled:cursor-not-allowed disabled:opacity-70 hover:opacity-90 w-full h-[3.75rem] rounded-lg transition-all bg-[#7839C5] disabled:bg-[#4b2876] hover:bg-[#9361d1] focus:bg-[#602E9E] flex items-center justify-center font-changa font-semibold text-[1.75rem] text-white`}
+                      onClickFunction={onSubmit}
                     >
                       {loading ? <Loader /> : result ? "BET AGAIN" : "BET"}
-                    </button>
+                    </BetButton>
                   </div>
                 </div>
               </form>

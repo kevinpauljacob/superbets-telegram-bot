@@ -17,6 +17,9 @@ import HistoryTable from "@/components/games/Dice2/HistoryTable";
 import { FormProvider, useForm } from "react-hook-form";
 import { BsInfinity } from "react-icons/bs";
 import Loader from "@/components/games/Loader";
+import BetAmount from "@/components/games/BetAmountInput";
+import BetButton from "@/components/games/BetButton";
+import ResultsSlider from "@/components/ResultsSlider";
 
 export default function Dice2() {
   const wallet = useWallet();
@@ -35,7 +38,7 @@ export default function Dice2() {
   const [multiplier, setMultiplier] = useState(0);
   const [chance, setChance] = useState(0);
   const [betResults, setBetResults] = useState<
-    { result: number; isWin: boolean }[]
+    { result: number; win: boolean }[]
   >([]);
 
   const handleBetAmountChange = (
@@ -153,19 +156,19 @@ export default function Dice2() {
         if (result === "Won") toast.success(message, { duration: 2000 });
         else toast.error(message, { duration: 2000 });
 
-        const isWin = result === "Won";
-        const newBetResult = { result: strikeNumber, isWin };
+        const win = result === "Won";
+        const newBetResult = { result: strikeNumber, win };
 
         setBetResults((prevResults) => {
           const newResults = [...prevResults, newBetResult];
-          if (newResults.length > 5) {
+          if (newResults.length > 6) {
             newResults.shift();
           }
           return newResults;
         });
 
         setStrikeNumber(strikeNumber);
-        setResult(isWin);
+        setResult(win);
         setRefresh(true);
       } catch (error) {
         console.error("Error occurred while betting:", error);
@@ -220,55 +223,23 @@ export default function Dice2() {
                 autoComplete="off"
                 onSubmit={methods.handleSubmit(handleBet)}
               >
-                {/* amt input  */}
-                <div className="mb-0 flex w-full flex-col">
-                  <div className="mb-1 flex w-full items-center justify-between text-sm font-changa text-opacity-90">
-                    <label className="text-white/90 font-medium font-changa">
-                      Bet Amount
-                    </label>
-                    <span className="text-[#94A3B8] text-opacity-90 font-changa font-medium text-sm">
-                      {coinData ? coinData[0]?.amount.toFixed(4) : 0} $SOL
-                    </span>
-                  </div>
-
-                  <div
-                    className={`group flex h-11 w-full cursor-pointer items-center rounded-[8px] bg-[#202329] px-4`}
+                <div className="w-full flex md:hidden mb-5">
+                  <BetButton
+                    disabled={
+                      !wallet ||
+                      isRolling ||
+                      (coinData && coinData[0].amount < 0.0001)
+                        ? true
+                        : false
+                    }
+                    onClickFunction={handleBet}
                   >
-                    <input
-                      id={"amount-input"}
-                      {...methods.register("amount", {
-                        required: "Amount is required",
-                      })}
-                      type={"number"}
-                      step={"any"}
-                      autoComplete="off"
-                      onChange={handleBetAmountChange}
-                      placeholder={"Amount"}
-                      value={betAmt}
-                      className={`flex w-full min-w-0 bg-transparent text-base text-[#94A3B8] placeholder-[#94A3B8]  font-chakra placeholder-opacity-40 outline-none`}
-                    />
-                    <span
-                      className="text-xs font-medium text-white text-opacity-50 bg-[#292C32] hover:bg-[#47484A] focus:bg-[#47484A] transition-all rounded-[5px] py-1.5 px-4"
-                      onClick={() =>
-                        setBetAmt(coinData ? coinData[0]?.amount : 0)
-                      }
-                    >
-                      MAX
-                    </span>
-                  </div>
-
-                  <span
-                    className={`${
-                      methods.formState.errors["amount"]
-                        ? "opacity-100"
-                        : "opacity-0"
-                    } mt-1.5 flex items-center gap-1 text-xs text-[#D92828]`}
-                  >
-                    {methods.formState.errors["amount"]
-                      ? methods.formState.errors["amount"]!.message!.toString()
-                      : "NONE"}
-                  </span>
+                    {isRolling ? <Loader /> : "BET"}
+                  </BetButton>
                 </div>
+
+                {/* amt input  */}
+                <BetAmount betAmt={betAmt} setBetAmt={setBetAmt} />
                 {betType === "manual" ? (
                   <></>
                 ) : (
@@ -330,9 +301,9 @@ export default function Dice2() {
                     </div>
                   </div>
                 )}
-                <div className="hidden md:flex w-full flex-col mt-2">
-                  <button
-                    type="submit"
+
+                <div className="w-full hidden md:flex mt-2">
+                  <BetButton
                     disabled={
                       !wallet ||
                       isRolling ||
@@ -340,11 +311,10 @@ export default function Dice2() {
                         ? true
                         : false
                     }
-                    onClick={handleBet}
-                    className={`disabled:cursor-default disabled:opacity-70 hover:opacity-90 w-full h-[3.75rem] rounded-lg transition-all bg-[#7839C5] disabled:bg-[#4b2876] hover:bg-[#9361d1] focus:bg-[#602E9E] flex items-center justify-center font-changa font-semibold text-[1.75rem] text-white`}
+                    onClickFunction={handleBet}
                   >
                     {isRolling ? <Loader /> : "BET"}
-                  </button>
+                  </BetButton>
                 </div>
               </form>
             </FormProvider>
@@ -352,7 +322,7 @@ export default function Dice2() {
         </>
       </GameOptions>
       <GameDisplay>
-        <div className="w-full flex justify-between items-center mb-7 sm:mb-0">
+        <div className="w-full flex justify-between items-center h-[2.125rem] mb-7 sm:mb-0">
           <div>
             {isRolling ? (
               <div className="font-chakra text-xs sm:text-sm font-medium text-white text-opacity-75">
@@ -360,20 +330,21 @@ export default function Dice2() {
               </div>
             ) : null}
           </div>
-          <div className="flex">
+          <ResultsSlider results={betResults} />
+          {/* <div className="flex">
             {betResults.map((result, index) => (
               <div
                 key={index}
                 className={`${
-                  result.isWin
+                  result.win
                     ? "border-[#72F238] text-[#72F238]"
                     : "border-[#282E3D] text-white"
-                } font-chakra text-xs sm:text-sm font-semibold border bg-[#282E3D] text-opacity-75 rounded-md transition-all duration-300 px-2 sm:px-4 py-1.5 ml-1 sm:ml-2`}
+                } font-chakra text-xs sm:text-sm font-semibold border-2 bg-[#282E3D] text-opacity-75 rounded-md transition-all duration-300 px-2 sm:px-4 py-1.5 ml-1 sm:ml-2`}
               >
                 {result.result}
               </div>
             ))}
-          </div>
+          </div> */}
         </div>
         <div className="w-full my-16 md:my-20">
           <DraggableBar
