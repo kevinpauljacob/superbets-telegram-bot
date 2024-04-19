@@ -5,12 +5,9 @@ import toast from "react-hot-toast";
 import { placeFlip } from "../../context/gameTransactions";
 import HistoryTable from "../../components/games/CoinFlip/HistoryTable";
 import Image from "next/image";
-import Link from "next/link";
-import Head from "next/head";
 import { FormProvider, useForm } from "react-hook-form";
 import { useGlobalContext } from "@/components/GlobalContext";
 import BetSetting from "@/components/BetSetting";
-import GameHeader from "@/components/GameHeader";
 import {
   GameDisplay,
   GameFooterInfo,
@@ -42,7 +39,6 @@ export default function Flip() {
     setShowAutoModal,
   } = useGlobalContext();
 
-  const [user, setUser] = useState<any>(null);
   const [betAmt, setBetAmt] = useState(0.2);
   const [betCount, setBetCount] = useState(0);
   const [betType, setBetType] = useState<string | null>(null);
