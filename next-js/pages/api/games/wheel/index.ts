@@ -10,6 +10,7 @@ import {
 import StakingUser from "@/models/staking/user";
 import { pointTiers } from "@/context/transactions";
 import { wsEndpoint } from "@/context/gameTransactions";
+import { riskToChance } from "@/components/games/Wheel/Segments";
 
 const secret = process.env.NEXTAUTH_SECRET;
 
@@ -23,26 +24,6 @@ type InputType = {
   tokenMint: string;
   segments: number;
   risk: "low" | "medium" | "high";
-};
-
-type RiskToChance = Record<string, Record<number, number>>;
-
-const riskToChance: RiskToChance = {
-  low: {
-    0: 20,
-    1.1: 60,
-    1.7: 20,
-  },
-  medium: {
-    0: 50,
-    1.5: 20,
-    2: 20,
-    3: 10,
-  },
-  high: {
-    0: 90,
-    10: 10,
-  },
 };
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -121,16 +102,18 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       let amountWon = 0;
       let amountLost = amount;
 
-      const chance = riskToChance[risk];
-      for (let i = 0; i < 100; ) {
-        Object.entries(chance).forEach(([key, value]) => {
-          i += (value * 10) / segments;
+      const item = riskToChance[risk];
+      for (let i = 0, isFound = false; i < 100 && !isFound; ) {
+        for (let j = 0; j < item.length; j++) {
+          i += (item[j].chance * 10) / segments;
           if (i >= strikeNumber) {
             result = "Won";
-            amountWon = amount * parseFloat(key);
+            amountWon = amount * item[j].multiplier;
             amountLost = 0;
+            isFound = true;
+            break;
           }
-        });
+        }
       }
 
       let sns;
