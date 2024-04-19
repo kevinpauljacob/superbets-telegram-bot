@@ -1,5 +1,5 @@
 import { useWallet } from "@solana/wallet-adapter-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, Fragment } from "react";
 import { obfuscatePubKey } from "@/context/transactions";
 import { GameType, seedStatus } from "@/utils/provably-fair";
 import { useGlobalContext } from "@/components/GlobalContext";
@@ -93,7 +93,7 @@ export default function StatsHistory({ refresh }: { refresh: boolean }) {
             page * transactionsPerPage,
           )
           .map((flip, index) => (
-            <>
+            <Fragment key={index}>
               <div
                 key={index}
                 className={`mb-2.5 ml-2.5 mr-2.5 flex w-full flex-row items-center gap-2 rounded-[5px] bg-[#121418] py-3 ${
@@ -159,7 +159,7 @@ export default function StatsHistory({ refresh }: { refresh: boolean }) {
                   {flip.amountWon > 0 ? flip.amountWon.toFixed(4) : "-"}
                 </span>
               </div>
-            </>
+            </Fragment>
           ))
       ) : (
         <span className="w-full text-center font-changa text-[#F0F0F080]">

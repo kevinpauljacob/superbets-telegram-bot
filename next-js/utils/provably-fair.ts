@@ -68,11 +68,11 @@ export const generateGameResult = <T extends GameType>(
       return (temp % 2 === 0 ? 1 : 2) as GameResult<T>;
 
     case GameType.dice2:
+    case GameType.limbo:
       return (((parseInt(hash.slice(0, 4), 16) % 10000) + 1) /
         100) as GameResult<T>;
 
     case GameType.wheel:
-    case GameType.limbo:
       return ((parseInt(hash.slice(0, 4), 16) % 100) + 1) as GameResult<T>;
 
     case GameType.plinko: {

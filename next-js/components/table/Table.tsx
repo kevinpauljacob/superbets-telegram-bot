@@ -82,7 +82,7 @@ interface TableButtonProps {
 export const TableButtons: React.FC<TableButtonProps> = ({ all, setAll }) => {
   const wallet = useWallet();
   return (
-    <div className="mt-[3.5rem] flex w-full items-center justify-center gap-4 md:justify-start">
+    <div className="mt-[1rem] md:mt-[3.5rem] flex w-full items-center justify-center gap-4 md:justify-start">
       <button
         onClick={() => {
           if (wallet.publicKey) setAll(false);

@@ -215,6 +215,20 @@ export default function Dice2() {
     <GameLayout title="FOMO - Dice 2">
       <GameOptions>
         <>
+          <div className="w-full flex md:hidden mb-5">
+            <BetButton
+              disabled={
+                !wallet ||
+                isRolling ||
+                (coinData && coinData[0].amount < 0.0001)
+                  ? true
+                  : false
+              }
+              onClickFunction={handleBet}
+            >
+              {isRolling ? <Loader /> : "BET"}
+            </BetButton>
+          </div>
           <BetSetting betSetting={betType} setBetSetting={setBetType} />
           <div className="w-full flex flex-col">
             <FormProvider {...methods}>
@@ -223,21 +237,6 @@ export default function Dice2() {
                 autoComplete="off"
                 onSubmit={methods.handleSubmit(handleBet)}
               >
-                <div className="w-full flex md:hidden mb-5">
-                  <BetButton
-                    disabled={
-                      !wallet ||
-                      isRolling ||
-                      (coinData && coinData[0].amount < 0.0001)
-                        ? true
-                        : false
-                    }
-                    onClickFunction={handleBet}
-                  >
-                    {isRolling ? <Loader /> : "BET"}
-                  </BetButton>
-                </div>
-
                 {/* amt input  */}
                 <BetAmount betAmt={betAmt} setBetAmt={setBetAmt} />
                 {betType === "manual" ? (

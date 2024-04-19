@@ -46,21 +46,35 @@ export default function Limbo() {
   const [inputMultiplier, setInputMultiplier] = useState(2.0);
 
   useEffect(() => {
-    const increment = (targetMultiplier - multiplier) / (duration / 16);
-    const timer = setInterval(() => {
-      setMultiplier((prevNumber) => {
-        let nextNumber = prevNumber + increment;
-        // nextNumber = parseFloat(nextNumber.toFixed(2));
+    const startMultiplier = multiplier;
+    let increment = (targetMultiplier - multiplier) / (duration / 16);
 
-        if (increment > 0)
-          return nextNumber >= targetMultiplier ? targetMultiplier : nextNumber;
-        else
-          return nextNumber <= targetMultiplier ? targetMultiplier : nextNumber;
-      });
+    const timer = setInterval(() => {
+      if (multiplier == targetMultiplier) clearInterval(timer);
+      else {
+        const currentMultiplier = startMultiplier + increment;
+
+        if (
+          (multiplier < targetMultiplier &&
+            currentMultiplier >= targetMultiplier) ||
+          (multiplier > targetMultiplier &&
+            currentMultiplier <= targetMultiplier)
+        ) {
+          setMultiplier(targetMultiplier);
+          clearInterval(timer);
+          setLastMultipliers((prev) => {
+            const newValues = [targetMultiplier, ...prev];
+            return newValues.slice(0, 4);
+          });
+        } else {
+          setMultiplier(currentMultiplier);
+          increment *= 2;
+        }
+      }
     }, 16);
 
     return () => clearInterval(timer);
-  }, [targetMultiplier, multiplier]);
+  }, [targetMultiplier]);
 
   const bet = async () => {
     setMultiplier(1.01);
@@ -78,10 +92,6 @@ export default function Limbo() {
       const winningMultiplier = parseFloat(
         (100 / response.strikeNumber).toFixed(2),
       );
-      setLastMultipliers((prev) => {
-        const newValues = [winningMultiplier, ...prev];
-        return newValues.slice(0, 4);
-      });
 
       setDeposit(false);
       setFlipping(false);
@@ -153,23 +163,6 @@ export default function Limbo() {
       !result && setFlipping(true);
     }
   }, [deposit]);
-
-  // useEffect(() => {
-  //   console.log("Bet type: ", betType);
-  //   console.log("Others: ", loading, flipping, deposit);
-  // }, [betType]);
-  // useEffect(() => {
-  //   console.log("load Bet type: ", betType);
-  //   console.log("load Others: ", loading, flipping, deposit);
-  // }, [loading]);
-  // useEffect(() => {
-  //   console.log("flip Bet type: ", betType);
-  //   console.log("flip Others: ", loading, flipping, deposit);
-  // }, [flipping]);
-  // useEffect(() => {
-  //   console.log("depo Bet type: ", betType);
-  //   console.log("depo Others: ", loading, flipping, deposit);
-  // }, [deposit]);
 
   useEffect(() => {
     if (refresh && wallet?.publicKey) {
