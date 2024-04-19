@@ -1,16 +1,13 @@
 import Bets from "../../components/games/Bets";
-import { use, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import { useWallet } from "@solana/wallet-adapter-react";
 import toast from "react-hot-toast";
 import Loader from "../../components/games/Loader";
 import { placeBet } from "../../context/gameTransactions";
 import { checkResult as checkResultAPI } from "../../context/gameTransactions";
-import Head from "next/head";
-import Link from "next/link";
 import { useGlobalContext } from "@/components/GlobalContext";
 import { FormProvider, useForm } from "react-hook-form";
-import GameHeader from "@/components/GameHeader";
 import {
   GameDisplay,
   GameLayout,
