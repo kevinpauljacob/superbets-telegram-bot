@@ -12,6 +12,7 @@ import {
   Roulette2,
   Wheel,
   Mines,
+  Hilo,
 } from "@/models/games";
 import { GameType } from "@/utils/provably-fair";
 import StakingUser from "@/models/staking/user";
@@ -136,6 +137,16 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         createdAt: record.createdAt,
       }));
 
+      const hilo = (
+        await Hilo.find({ result: "Won" }).sort({ createdAt: -1 }).limit(10)
+      ).map((record) => ({
+        game: GameType.hilo,
+        wallet: record.wallet,
+        absAmount: Math.abs(record.amountWon - record.amountLost),
+        result: record.result,
+        createdAt: record.createdAt,
+      }));
+
       const allGames = [
         ...dice,
         ...coin,
@@ -148,6 +159,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         ...roulette2,
         ...wheel,
         ...mines,
+        ...hilo,
       ];
 
       const sortedGames = allGames.sort((a: any, b: any) => {
