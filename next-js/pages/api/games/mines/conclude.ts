@@ -55,7 +55,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           .status(400)
           .json({ success: false, message: "Game does not exist !" });
 
-      let { nonce, gameSeed, minesCount } = gameInfo;
+      let { nonce, gameSeed, minesCount, amountWon } = gameInfo;
 
       const strikeNumbers = generateGameResult(
         gameSeed.serverSeed,
@@ -66,11 +66,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       );
 
       const result = "Won";
-      let amountWon = 0;
-      for (let i = 0; i < 25 - minesCount; i++) {
-        amountWon += (gameInfo.amount * (25 - i)) / minesCount;
-      }
-
       const userUpdate = await User.findOneAndUpdate(
         {
           wallet,
@@ -102,7 +97,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         {
           result,
           strikeNumbers,
-          amountWon,
         },
       );
 

@@ -60,7 +60,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           .status(400)
           .json({ success: false, message: "Game does not exist !" });
 
-      let { nonce, gameSeed, minesCount, userBets } = gameInfo;
+      let { nonce, gameSeed, minesCount, userBets, amountWon, amount } =
+        gameInfo;
 
       const strikeNumbers = generateGameResult(
         gameSeed.serverSeed,
@@ -71,9 +72,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       );
 
       let result = "Pending";
-      userBets = userBets.map((m: number, i: number) =>
-        i === userBet ? 1 : m,
-      );
+      const numBets = userBets.length;
 
       if (strikeNumbers[userBet] === 1) {
         result = "Lost";
@@ -91,88 +90,89 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
             amountLost: gameInfo.amount,
           },
         );
-      } else if (
-        userBets.filter((m: number) => m === 1).length === minesCount
-      ) {
-        result = "Won";
-        let amountWon = 0;
-        for (let i = 0; i < 25 - minesCount; i++) {
-          amountWon += (gameInfo.amount * (25 - i)) / minesCount;
-        }
+      } else {
+        amountWon =
+          (Math.max(amount, amountWon) * (25 - minesCount)) /
+          (25 - minesCount - numBets + 1);
 
-        const userUpdate = await User.findOneAndUpdate(
-          {
-            wallet,
-            deposit: {
-              $elemMatch: {
-                tokenMint: "SOL",
+        if (numBets === 25 - minesCount) {
+          result = "Won";
+
+          const userUpdate = await User.findOneAndUpdate(
+            {
+              wallet,
+              deposit: {
+                $elemMatch: {
+                  tokenMint: "SOL",
+                },
               },
             },
-          },
-          {
-            $inc: {
-              "deposit.$.amount": amountWon,
-            },
-          },
-          {
-            new: true,
-          },
-        );
-
-        if (!userUpdate) {
-          throw new Error("Insufficient balance for action!!");
-        }
-
-        await Mines.findOneAndUpdate(
-          {
-            _id: gameId,
-            result: "Pending",
-          },
-          {
-            result,
-            userBets,
-            strikeNumbers,
-            amountWon,
-          },
-        );
-
-        const userData = await StakingUser.findOne({ wallet });
-        let points = userData?.points ?? 0;
-        const userTier = Object.entries(pointTiers).reduce((prev, next) => {
-          return points >= next[1]?.limit ? next : prev;
-        })[0];
-
-        const socket = new WebSocket(wsEndpoint);
-
-        socket.onopen = () => {
-          console.log("WebSocket connection opened");
-          socket.send(
-            JSON.stringify({
-              clientType: "api-client",
-              channel: "fomo-casino_games-channel",
-              authKey: process.env.FOMO_CHANNEL_AUTH_KEY!,
-              payload: {
-                game: GameType.mines,
-                wallet,
-                absAmount: amountWon,
-                result,
-                userTier,
+            {
+              $inc: {
+                "deposit.$.amount": amountWon,
               },
-            }),
+            },
+            {
+              new: true,
+            },
           );
 
-          socket.close();
-        };
-      } else {
-        await Mines.findOneAndUpdate(
-          {
-            _id: gameId,
-            result: "Pending",
-          },
-          {
-            userBets,
-          },
-        );
+          if (!userUpdate) {
+            throw new Error("Insufficient balance for action!!");
+          }
+
+          await Mines.findOneAndUpdate(
+            {
+              _id: gameId,
+              result: "Pending",
+            },
+            {
+              result,
+              userBets: { $addToSet: userBet },
+              strikeNumbers,
+              amountWon,
+            },
+          );
+
+          const userData = await StakingUser.findOne({ wallet });
+          let points = userData?.points ?? 0;
+          const userTier = Object.entries(pointTiers).reduce((prev, next) => {
+            return points >= next[1]?.limit ? next : prev;
+          })[0];
+
+          const socket = new WebSocket(wsEndpoint);
+
+          socket.onopen = () => {
+            console.log("WebSocket connection opened");
+            socket.send(
+              JSON.stringify({
+                clientType: "api-client",
+                channel: "fomo-casino_games-channel",
+                authKey: process.env.FOMO_CHANNEL_AUTH_KEY!,
+                payload: {
+                  game: GameType.mines,
+                  wallet,
+                  absAmount: amountWon,
+                  result,
+                  userTier,
+                },
+              }),
+            );
+
+            socket.close();
+          };
+        } else {
+          await Mines.findOneAndUpdate(
+            {
+              _id: gameId,
+              result: "Pending",
+            },
+            {
+              userBets: { $addToSet: userBet },
+              amountWon,
+            },
+          );
+        }
       }
 
       return res.status(201).json({
