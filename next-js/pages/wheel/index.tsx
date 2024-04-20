@@ -116,9 +116,9 @@ export default function Wheel() {
           }),
         });
 
-        const { success, message, result, strikeNumber } =
+        const { success, message, result, strikeNumber, strikeMultiplier } =
           await response.json();
-
+        console.log("strikeMultiplier", strikeMultiplier);
         spinWheel(strikeNumber);
         if (success != true) {
           toast.error(message);
