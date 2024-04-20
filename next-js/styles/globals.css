@@ -511,15 +511,23 @@ input[type="number"] {
   -moz-appearance: textfield;
 }
 
-input[type=range] {
-  -webkit-appearance: none; 
+input[type="range"] {
+  -webkit-appearance: none;
 }
 
-input[type=range]::-webkit-slider-thumb {
-  -webkit-appearance: none; 
+.dice2::-webkit-slider-thumb {
+  -webkit-appearance: none;
   height: 1.625rem;
   width: 1rem;
-  background: #9945FF;
+  background: #9945ff;
   border-radius: 7px;
-  /* ...my custom edits... */
+}
+
+.defaultSlider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 21px; /* Set thumb width as desired */
+  height: 21px; /* Set thumb height as desired */
+  background-color: white;
+  cursor: pointer;
+  border-radius: 100%;
 }
