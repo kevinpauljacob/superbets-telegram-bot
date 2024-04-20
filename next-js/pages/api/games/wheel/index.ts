@@ -107,9 +107,11 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         for (let j = 0; j < item.length; j++) {
           i += (item[j].chance * 10) / segments;
           if (i >= strikeNumber) {
-            result = "Won";
-            amountWon = amount * item[j].multiplier;
-            amountLost = 0;
+            if (item[j].multiplier !== 0) {
+              result = "Won";
+              amountWon = amount * item[j].multiplier;
+              amountLost = 0;
+            }
             isFound = true;
             break;
           }
