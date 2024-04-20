@@ -44,9 +44,13 @@ export enum GameType {
   roulette1 = "roulette1",
   roulette2 = "roulette2",
   mines = "mines",
+  hilo = "hilo",
 }
 
-type GameResult<T extends GameType> = T extends GameType.mines | GameType.keno
+type GameResult<T extends GameType> = T extends
+  | GameType.hilo
+  | GameType.mines
+  | GameType.keno
   ? number[]
   : number;
 
@@ -115,6 +119,21 @@ export const generateGameResult = <T extends GameType>(
       }
 
       return mines as GameResult<T>;
+    }
+
+    case GameType.hilo: {
+      if (!parameter) throw new Error("Game parameter missing!");
+
+      let numbers = [parameter];
+      for (let i = 1; i < 5; i++) {
+        let currentNum = (parseInt(hash.slice(i * 2, i * 2 + 2), 16) % 52) + 1;
+        while (numbers.includes(currentNum)) {
+          currentNum = (currentNum % 52) + 1;
+        }
+        numbers.push(currentNum);
+      }
+
+      return numbers as GameResult<T>;
     }
 
     default:

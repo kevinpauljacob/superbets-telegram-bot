@@ -13,6 +13,7 @@ import {
   Roulette2,
   Wheel,
   Mines,
+  Hilo,
 } from "@/models/games";
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -62,6 +63,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           break;
         case GameType.mines:
           data = await Mines.find({}).sort({ createdAt: -1 }).limit(1000);
+          break;
+        case GameType.hilo:
+          data = await Hilo.find({}).sort({ createdAt: -1 }).limit(1000);
           break;
       }
 

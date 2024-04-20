@@ -11,3 +11,4 @@ export { default as Keno } from "./keno";
 export { default as Roulette1} from "./roulette1";
 export { default as Roulette2} from "./roulette2";
 export { default as Mines } from "./mines";
+export { default as Hilo } from "./hilo";

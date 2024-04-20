@@ -206,6 +206,22 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
             },
           ]).then((res) => res[0]);
           break;
+        case GameType.hilo:
+          stats = await Mines.aggregate([
+            {
+              $group: {
+                _id: null,
+                volume: { $sum: "$amount" },
+                wallets: { $addToSet: "$wallet" },
+              },
+            },
+            {
+              $addFields: {
+                players: { $size: "$wallets" },
+              },
+            },
+          ]).then((res) => res[0]);
+          break;
       }
 
       return res.json({
