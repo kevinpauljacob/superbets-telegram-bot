@@ -203,6 +203,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
             ? "Congratulations! You won!"
             : "Better luck next time!",
         result,
+        segments,
+        risk,
         strikeNumber,
         amountWon,
         amountLost,
