@@ -1,16 +1,13 @@
 import { seedStatus } from "@/utils/provably-fair";
-import Image from "next/image";
 import { useState } from "react";
 import { IoIosArrowDown } from "react-icons/io";
-import { Dice } from "./HistoryTable";
-import RollDiceProvablyFairModal, {
-  PFModalData,
-} from "./DiceProvablyFairModal";
+import { Wheel } from "./HistoryTable";
+import WheelProvablyFairModal, { PFModalData } from "./WheelProvablyFairModal";
 import { useGlobalContext } from "@/components/GlobalContext";
 import { FaRegCopy } from "react-icons/fa6";
 
 interface ModalData {
-  bet: Dice;
+  bet: Wheel;
 }
 
 interface Props {
@@ -19,11 +16,16 @@ interface Props {
   modalData: ModalData;
 }
 
-export default function VerifyDiceModal({ isOpen, onClose, modalData }: Props) {
+export default function VerifyWheelModal({
+  isOpen,
+  onClose,
+  modalData,
+}: Props) {
   //handling dice
   const { bet } = modalData;
   const { getProvablyFairData } = useGlobalContext();
 
+  //Provably Fair Modal handling
   const [isPFModalOpen, setIsPFModalOpen] = useState(false);
 
   const openPFModal = () => {
@@ -54,6 +56,7 @@ export default function VerifyDiceModal({ isOpen, onClose, modalData }: Props) {
     tab: "seeds",
   });
 
+  //to handle dropodown
   const [openDropDown, setOpenDropDown] = useState<boolean>(false);
 
   const handleClose = () => {
@@ -112,96 +115,45 @@ export default function VerifyDiceModal({ isOpen, onClose, modalData }: Props) {
                 <div className="font-changa text-xs text-[#94A3B8] text-opacity-75">
                   Multiplier
                 </div>
-                <div className="text-white font-chakra text-xs font-medium">
-                  {(6 / bet.chosenNumbers.length).toFixed(2)} x
-                </div>
+                {/* <div className="text-white font-chakra text-xs font-medium">
+                  {bet.direction === "over"
+                    ? (98 / (100 - (100 - bet.chance))).toFixed(2)
+                    : (98 / (100 - bet.chance)).toFixed(2)}{" "}
+                  x
+                </div> */}
               </button>
               <button className="px-1 py-3 flex flex-col items-center justify-center w-full text-white rounded-md bg-[#202329]">
                 <div className="font-changa text-xs text-[#94A3B8] text-opacity-75">
                   Payout
                 </div>
                 <div className="text-white font-chakra text-xs font-medium">
-                  {bet.amountWon.toFixed(4)} $SOL
+                  {bet.amountWon?.toFixed(4)} $SOL
                 </div>
               </button>
             </div>
             <div className="mt-6 px-4 md:px-12 pt-7 border-2 border-white border-opacity-5 rounded-md">
-              <div className="relative w-full mb-8 xl:mb-6">
-                <div>
-                  <Image
-                    src="/assets/progressBar.png"
-                    alt="progress bar"
-                    width={900}
-                    height={100}
-                  />
-                </div>
-                <div className="flex justify-around md:gap-2">
-                  {Array.from({ length: 6 }, (_, i) => i + 1).map((face) => (
-                    <div
-                      key={face}
-                      className="flex flex-col items-center mr-2 sm:mr-0"
-                    >
-                      {bet.chosenNumbers.includes(face) &&
-                        bet.strikeNumber === face && (
-                          <Image
-                            src="/assets/pointer-green.png"
-                            alt="pointer green"
-                            width={13}
-                            height={13}
-                            className="absolute -top-[20px]"
-                          />
-                        )}
-                      <Image
-                        src="/assets/progressTip.png"
-                        alt="progress bar"
-                        width={13}
-                        height={13}
-                        className="absolute top-[2px]"
-                      />
-                      <Image
-                        src={
-                          bet.strikeNumber === face
-                            ? bet.chosenNumbers.includes(face)
-                              ? `/assets/winDiceFace${face}.png`
-                              : `/assets/lossDiceFace${face}.png`
-                            : bet.chosenNumbers.includes(face)
-                            ? `/assets/selectedDiceFace${face}.png`
-                            : `/assets/diceFace${face}.png`
-                        }
-                        width={50}
-                        height={50}
-                        alt=""
-                        className={`inline-block mt-6 ${
-                          bet.chosenNumbers.includes(face)
-                            ? "selected-face"
-                            : ""
-                        }`}
-                      />
-                    </div>
-                  ))}
-                </div>
-              </div>
+              <div className="relative w-full mb-8 xl:mb-6 pb-5 pt-10"></div>
               <div className="flex gap-4 pt-7 mb-8">
                 <div className="w-full">
                   <label className="text-xs text-opacity-75 font-changa text-[#F0F0F0]">
-                    Multiplier
+                    Risk
                   </label>
                   <input
                     type="text"
-                    name="multiplier"
-                    value={(6 / bet.chosenNumbers.length).toFixed(2)}
-                    className="bg-[#202329] text-white font-chakra text-xs font-medium mt-1 rounded-md p-3 w-full relative"
+                    name="risk"
+                    value={bet.risk}
+                    className="bg-[#202329] text-white capitalize font-chakra text-xs font-medium mt-1 rounded-md p-3 w-full relative"
                     readOnly
                   />
                 </div>
                 <div className="w-full">
                   <label className="text-xs text-opacity-75 font-changa text-[#F0F0F0]">
-                    Chance
+                    Segments
                   </label>
                   <input
                     type="text"
                     name="chance"
-                    value={((bet.chosenNumbers.length / 6) * 100).toFixed(2)}
+                    value={bet.segments}
                     className="bg-[#202329] text-white font-chakra text-xs font-medium mt-1 rounded-md p-3 w-full relative"
                     readOnly
                   />
@@ -320,7 +272,7 @@ export default function VerifyDiceModal({ isOpen, onClose, modalData }: Props) {
               )}
             </div>
           </div>
-          <RollDiceProvablyFairModal
+          <WheelProvablyFairModal
             isOpen={isPFModalOpen}
             onClose={closePFModal}
             modalData={PFModalData}

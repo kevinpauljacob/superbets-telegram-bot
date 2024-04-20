@@ -3,9 +3,8 @@ import {
   generateClientSeed,
   generateGameResult,
 } from "@/utils/provably-fair";
-import Image from "next/image";
 import { useEffect, useState } from "react";
-import { Bet } from "./HistoryTable";
+import { Wheel } from "./HistoryTable";
 import toast from "react-hot-toast";
 import { FaRegCopy } from "react-icons/fa6";
 
@@ -34,10 +33,10 @@ interface Props {
   onClose: () => void;
   modalData: PFModalData;
   setModalData: React.Dispatch<React.SetStateAction<PFModalData>>;
-  bet?: Bet;
+  bet?: Wheel;
 }
 
-export default function RollDiceProvablyFairModal({
+export default function WheelProvablyFairModal({
   isOpen,
   onClose,
   modalData,
@@ -50,6 +49,7 @@ export default function RollDiceProvablyFairModal({
   const [newClientSeed, setNewClientSeed] = useState<string>(
     generateClientSeed(),
   );
+  const [strikeNumber, setStrikeNumber] = useState<number>(50.0);
 
   const [verificationState, setVerificationState] = useState<{
     clientSeed: string;
@@ -68,8 +68,6 @@ export default function RollDiceProvablyFairModal({
           nonce: "",
         },
   );
-
-  const [wonDiceFace, setWonDiceFace] = useState<number>(1);
 
   const handleToggleState = (newState: "seeds" | "verify") => {
     setState(newState);
@@ -97,12 +95,12 @@ export default function RollDiceProvablyFairModal({
 
     const { clientSeed, serverSeed, nonce } = verificationState;
 
-    setWonDiceFace(
+    setStrikeNumber(
       generateGameResult(
         name === "serverSeed" ? value : serverSeed,
         name === "clientSeed" ? value : clientSeed,
         parseInt(name === "nonce" ? value : nonce),
-        GameType.dice,
+        GameType.wheel,
       ),
     );
   };
@@ -266,57 +264,8 @@ export default function RollDiceProvablyFairModal({
               <div className="grid w-full text-white">
                 <div className="grid gap-2">
                   <div className="border-2 border-opacity-5 border-[#FFFFFF] md:px-8">
-                    <div className="px-8 pt-10 pb-4">
-                      <div className="relative w-full mb-8 xl:mb-6">
-                        <div>
-                          <Image
-                            src="/assets/progressBar.png"
-                            alt="progress bar"
-                            width={900}
-                            height={100}
-                          />
-                        </div>
-                        <div className="flex justify-around md:gap-2">
-                          {Array.from({ length: 6 }, (_, i) => i + 1).map(
-                            (face) => (
-                              <div
-                                key={face}
-                                className="flex flex-col items-center"
-                              >
-                                {wonDiceFace === face && (
-                                  <Image
-                                    src="/assets/pointer-green.png"
-                                    alt="pointer green"
-                                    width={13}
-                                    height={13}
-                                    className="absolute -top-[20px]"
-                                  />
-                                )}
-                                <Image
-                                  src="/assets/progressTip.png"
-                                  alt="progress bar"
-                                  width={13}
-                                  height={13}
-                                  className="absolute top-[2px]"
-                                />
-                                <Image
-                                  src={
-                                    wonDiceFace === face
-                                      ? `/assets/winDiceFace${face}.png`
-                                      : `/assets/diceFace${face}.png`
-                                  }
-                                  width={50}
-                                  height={50}
-                                  alt=""
-                                  className={`inline-block mt-6 ${
-                                    wonDiceFace === face ? "selected-face" : ""
-                                  }`}
-                                />
-                              </div>
-                            ),
-                          )}
-                        </div>
-                      </div>
+                    <div className="px-8 pt-20 pb-8">
+                      <div className="w-full"></div>
                     </div>
                   </div>
                   <div>
@@ -326,7 +275,7 @@ export default function RollDiceProvablyFairModal({
                     <div className="flex items-center">
                       <select
                         name="game"
-                        value={GameType.dice}
+                        value={GameType.wheel}
                         onChange={(e) =>
                           setModalData((prevData) => ({
                             ...prevData,
@@ -335,7 +284,7 @@ export default function RollDiceProvablyFairModal({
                         }
                         className="bg-[#202329] text-white font-chakra text-xs font-medium mt-1 rounded-md p-3 w-full relative appearance-none"
                       >
-                        <option value={GameType.dice}>Dice</option>
+                        <option value={GameType.wheel}>Wheel</option>
                       </select>
                     </div>
                   </div>
