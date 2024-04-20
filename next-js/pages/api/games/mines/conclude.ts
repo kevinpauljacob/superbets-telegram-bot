@@ -55,9 +55,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           .status(400)
           .json({ success: false, message: "Game does not exist !" });
 
-      let { nonce, gameSeed, minesCount, inputMines } = gameInfo;
+      let { nonce, gameSeed, minesCount } = gameInfo;
 
-      const resultMines = generateGameResult(
+      const strikeNumbers = generateGameResult(
         gameSeed.serverSeed,
         gameSeed.clientSeed,
         nonce,
@@ -101,7 +101,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         },
         {
           result,
-          resultMines,
+          strikeNumbers,
           amountWon,
         },
       );

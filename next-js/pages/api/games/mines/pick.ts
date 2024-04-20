@@ -1,12 +1,8 @@
 import connectDatabase from "@/utils/database";
 import { getToken } from "next-auth/jwt";
 import { NextApiRequest, NextApiResponse } from "next";
-import { GameSeed, Mines, User } from "@/models/games";
-import {
-  generateGameResult,
-  GameType,
-  seedStatus,
-} from "@/utils/provably-fair";
+import { Mines, User } from "@/models/games";
+import { generateGameResult, GameType } from "@/utils/provably-fair";
 import StakingUser from "@/models/staking/user";
 import { pointTiers } from "@/context/transactions";
 import { wsEndpoint } from "@/context/gameTransactions";
@@ -20,13 +16,13 @@ export const config = {
 type InputType = {
   wallet: string;
   gameId: string;
-  choosenIndex: number;
+  userBet: number;
 };
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === "POST") {
     try {
-      let { wallet, gameId, choosenIndex }: InputType = req.body;
+      let { wallet, gameId, userBet }: InputType = req.body;
 
       const token = await getToken({ req, secret });
 
@@ -38,12 +34,12 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
       await connectDatabase();
 
-      if (!wallet || !gameId || choosenIndex == null)
+      if (!wallet || !gameId || userBet == null)
         return res
           .status(400)
           .json({ success: false, message: "Missing parameters" });
 
-      if (!(0 <= choosenIndex && choosenIndex <= 24))
+      if (!(0 <= userBet && userBet <= 24))
         return res
           .status(400)
           .json({ success: false, message: "Invalid parameters" });
@@ -64,9 +60,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           .status(400)
           .json({ success: false, message: "Game does not exist !" });
 
-      let { nonce, gameSeed, minesCount, inputMines } = gameInfo;
+      let { nonce, gameSeed, minesCount, userBets } = gameInfo;
 
-      const resultMines = generateGameResult(
+      const strikeNumbers = generateGameResult(
         gameSeed.serverSeed,
         gameSeed.clientSeed,
         nonce,
@@ -75,11 +71,11 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       );
 
       let result = "Pending";
-      inputMines = inputMines.map((m: number, i: number) =>
-        i === choosenIndex ? 1 : m,
+      userBets = userBets.map((m: number, i: number) =>
+        i === userBet ? 1 : m,
       );
 
-      if (resultMines[choosenIndex] === 1) {
+      if (strikeNumbers[userBet] === 1) {
         result = "Lost";
 
         await Mines.findOneAndUpdate(
@@ -89,14 +85,14 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           },
           {
             result,
-            inputMines,
-            resultMines,
+            userBets,
+            strikeNumbers,
             amountWon: 0,
             amountLost: gameInfo.amount,
           },
         );
       } else if (
-        inputMines.filter((m: number) => m === 1).length === minesCount
+        userBets.filter((m: number) => m === 1).length === minesCount
       ) {
         result = "Won";
         let amountWon = 0;
@@ -134,8 +130,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           },
           {
             result,
-            inputMines,
-            resultMines,
+            userBets,
+            strikeNumbers,
             amountWon,
           },
         );
@@ -174,7 +170,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
             result: "Pending",
           },
           {
-            inputMines,
+            userBets,
           },
         );
       }

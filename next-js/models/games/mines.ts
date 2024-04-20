@@ -14,8 +14,8 @@ const minesSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
-    inputMines: Array<Number>,
-    resultMines: Array<Number>,
+    userBets: Array<Number>,
+    strikeNumbers: Array<Number>,
     tokenMint: {
       type: String,
       required: true,
