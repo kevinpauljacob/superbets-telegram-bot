@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-const minesSchema = new mongoose.Schema(
+const hiloSchema = new mongoose.Schema(
   {
     wallet: {
       type: String,
@@ -10,11 +10,15 @@ const minesSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
-    minesCount: {
+    startNumber: {
       type: Number,
       required: true,
     },
-    userBets: Array<Number>,
+    userBets: Array<{
+      type: String;
+      enum: ["Higher", "Lower"];
+      required: true;
+    }>,
     strikeNumbers: Array<Number>,
     tokenMint: {
       type: String,
@@ -46,5 +50,5 @@ const minesSchema = new mongoose.Schema(
   { timestamps: true },
 );
 
-let Mines = mongoose.models.Mines || mongoose.model("Mines", minesSchema);
-export default Mines;
+let Hilo = mongoose.models.Hilo || mongoose.model("Hilo", hiloSchema);
+export default Hilo;

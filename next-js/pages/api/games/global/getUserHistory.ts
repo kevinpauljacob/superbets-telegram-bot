@@ -170,6 +170,19 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
             { populate: { path: "gameSeed" } },
           );
           break;
+
+        case GameType.hilo:
+          nonExpired = await Mines.find(
+            { wallet, "gameSeed.status": { $ne: seedStatus.EXPIRED } },
+            { "gameSeed.serverSeed": 0 },
+            { populate: { path: "gameSeed" } },
+          );
+          expired = await Mines.find(
+            { wallet, "gameSeed.status": seedStatus.EXPIRED },
+            {},
+            { populate: { path: "gameSeed" } },
+          );
+          break;
       }
 
       const data = [...nonExpired, ...expired].sort(

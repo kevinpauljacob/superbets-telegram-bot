@@ -27,16 +27,34 @@ import Dice5 from "@/public/assets/Dice5";
 import Dice6 from "@/public/assets/Dice6";
 import BetAmount from "@/components/games/BetAmountInput";
 import BetButton from "@/components/games/BetButton";
+import ResultsSlider from "@/components/ResultsSlider";
 
 export default function Dice() {
   const wallet = useWallet();
   const methods = useForm();
 
-  const { coinData, getBalance, getWalletBalance, setShowAutoModal, sidebar } =
-    useGlobalContext();
+  const {
+    coinData,
+    getBalance,
+    getWalletBalance,
+    setShowAutoModal,
+    sidebar,
+    autoWinChange,
+    autoLossChange,
+    autoWinChangeReset,
+    autoLossChangeReset,
+    autoStopProfit,
+    autoStopLoss,
+    startAuto,
+    setStartAuto,
+    autoBetCount,
+    setAutoBetCount,
+    autoBetProfit,
+    setAutoBetProfit,
+  } = useGlobalContext();
   const [user, setUser] = useState<any>(null);
   const [betAmt, setBetAmt] = useState(0);
-  const [betCount, setBetCount] = useState(0);
+
   const [isRolling, setIsRolling] = useState(false);
   const [winningPays, setWinningPays] = useState(6);
   const [winningAmount, setWinningAmount] = useState(0.6);
@@ -56,7 +74,7 @@ export default function Dice() {
   const [strikeFace, setStrikeFace] = useState<number>(0);
   const [rollType, setRollType] = useState<"manual" | "auto">("manual");
   const [betResults, setBetResults] = useState<
-    { face: number; isWin: boolean }[]
+    { result: number; win: boolean }[]
   >([]);
   const [showPointer, setShowPointer] = useState<boolean>(false);
 
@@ -96,20 +114,26 @@ export default function Dice() {
     }
   };
 
-  const handleBetAmountChange = (
-    event: React.ChangeEvent<HTMLInputElement>,
-  ) => {
-    const amount = parseFloat(event.target.value);
-    setBetAmt(amount);
-  };
-
   const handleCountChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
-    setBetCount(parseFloat(e.target.value));
+    setAutoBetCount(parseFloat(e.target.value));
   };
 
   const diceRoll = async () => {
+    console.log(
+      "betting",
+      autoWinChange,
+      autoLossChange,
+      autoWinChangeReset,
+      autoLossChangeReset,
+      autoStopProfit,
+      autoStopLoss,
+      startAuto,
+      autoBetCount,
+      autoBetProfit,
+      betAmt,
+    );
     if (wallet.connected) {
       if (!wallet.publicKey) {
         toast.error("Wallet not connected");
@@ -123,6 +147,10 @@ export default function Dice() {
         toast.error("Set Amount.");
         return;
       }
+      if (selectedFace.length === 0) {
+        toast.error("Choose at least 1 face.");
+        return;
+      }
       setIsRolling(true);
       try {
         const res = await rollDice(wallet, betAmt, selectedFace);
@@ -131,12 +159,33 @@ export default function Dice() {
           const isWin = result === "Won";
           const newBetResults = [
             ...(betResults.length <= 4 ? betResults : betResults.slice(-4)),
-            { face: strikeNumber, isWin },
+            { result: winningPays, win: isWin },
           ];
           setBetResults(newBetResults);
           setShowPointer(true);
           setStrikeFace(strikeNumber);
           setRefresh(true);
+
+          // auto options
+          if (rollType === "auto") {
+            if (isWin) {
+              setAutoBetProfit(autoBetProfit + (winningPays - 1) * betAmt);
+              setBetAmt(
+                autoWinChangeReset
+                  ? betAmt
+                  : betAmt + (autoWinChange * betAmt) / 100.0,
+              );
+            } else {
+              setAutoBetProfit(autoBetProfit - betAmt);
+              setBetAmt(
+                autoLossChangeReset
+                  ? betAmt
+                  : betAmt + (autoLossChange * betAmt) / 100.0,
+              );
+            }
+            if (typeof autoBetCount === "number")
+              setAutoBetCount(autoBetCount - 1);
+          }
         }
       } catch (e) {
         setIsRolling(false);
@@ -171,7 +220,6 @@ export default function Dice() {
   }, [strikeFace, sidebar]);
 
   useEffect(() => {
-    console.log("from fhvdfnvhdf");
     setPointerPosition();
 
     if (typeof window !== "undefined") {
@@ -202,6 +250,34 @@ export default function Dice() {
     }, 3000);
   }, []);
 
+  useEffect(() => {
+    if (
+      rollType === "auto" &&
+      startAuto &&
+      ((typeof autoBetCount === "string" && autoBetCount === "inf") ||
+        (typeof autoBetCount === "number" && autoBetCount > 0)) &&
+      autoBetProfit <= autoStopProfit &&
+      autoBetProfit >= -1 * autoStopLoss
+    ) {
+      console.log("from here", startAuto);
+      diceRoll();
+    } else {
+      setStartAuto(false);
+      setAutoBetProfit(0);
+    }
+  }, [startAuto, autoBetCount]);
+
+  const onSubmit = async (data: any) => {
+    if (
+      rollType === "auto" &&
+      ((typeof autoBetCount === "string" && autoBetCount === "inf") ||
+        (typeof autoBetCount === "number" && autoBetCount > 0))
+    ) {
+      console.log("Auto betting");
+      setStartAuto(true);
+    } else if (wallet.connected && selectedFace.length > 0) diceRoll();
+  };
+
   return (
     <GameLayout title="FOMO - Dice">
       <GameOptions>
@@ -222,7 +298,7 @@ export default function Dice() {
                   ? true
                   : false
               }
-              onClickFunction={diceRoll}
+              onClickFunction={onSubmit}
             >
               {isRolling ? <Loader /> : "BET"}
             </BetButton>
@@ -233,7 +309,7 @@ export default function Dice() {
               <form
                 className="flex w-full flex-col gap-0"
                 autoComplete="off"
-                onSubmit={methods.handleSubmit(diceRoll)}
+                onSubmit={methods.handleSubmit(onSubmit)}
               >
                 {/* amt input  */}
                 <BetAmount betAmt={betAmt} setBetAmt={setBetAmt} />
@@ -260,15 +336,23 @@ export default function Dice() {
                           step={"any"}
                           autoComplete="off"
                           onChange={handleCountChange}
-                          placeholder={"00"}
-                          value={betCount}
-                          className={`flex w-full min-w-0 bg-transparent text-base text-[#94A3B8] placeholder-[#94A3B8]  font-chakra placeholder-opacity-40 outline-none`}
+                          placeholder={
+                            autoBetCount === "inf" ? "Infinity" : "00"
+                          }
+                          value={autoBetCount}
+                          className={`flex w-full min-w-0 bg-transparent text-base text-[#94A3B8] placeholder-[#94A3B8] font-chakra ${
+                            autoBetCount === "inf"
+                              ? "placeholder-opacity-100"
+                              : "placeholder-opacity-40"
+                          } placeholder-opacity-40 outline-none`}
                         />
                         <span
-                          className="text-2xl font-medium text-white text-opacity-50 bg-[#292C32] hover:bg-[#47484A] focus:bg-[#47484A] transition-all rounded-[5px] py-0.5 px-3"
-                          onClick={() =>
-                            setBetCount(coinData ? coinData[0]?.amount : 0)
-                          }
+                          className={`text-2xl font-medium text-white text-opacity-50 ${
+                            autoBetCount === "inf"
+                              ? "bg-[#47484A]"
+                              : "bg-[#292C32]"
+                          } hover:bg-[#47484A] focus:bg-[#47484A] transition-all rounded-[5px] py-0.5 px-3`}
+                          onClick={() => setAutoBetCount("inf")}
                         >
                           <BsInfinity />
                         </span>
@@ -292,9 +376,19 @@ export default function Dice() {
                       onClick={() => {
                         setShowAutoModal(true);
                       }}
-                      className="mb-[1.4rem] rounded-md w-full h-11 flex items-center justify-center opacity-75 cursor-pointer text-white text-opacity-90 border-2 border-white bg-white bg-opacity-0 hover:bg-opacity-5"
+                      className={`relative mb-[1.4rem] rounded-md w-full h-11 flex items-center justify-center opacity-75 cursor-pointer text-white text-opacity-90 border-2 border-white bg-white bg-opacity-0 hover:bg-opacity-5`}
                     >
                       Configure Auto
+                      <div
+                        className={`${
+                          autoLossChange >= 0 &&
+                          autoWinChange >= 0 &&
+                          autoStopLoss > 0 &&
+                          autoStopProfit > 0
+                            ? "bg-fomo-green"
+                            : "bg-fomo-red"
+                        } absolute top-0 right-0 m-1.5 bg-fomo-green w-2 h-2 rounded-full`}
+                      />
                     </div>
                   </div>
                 )}
@@ -314,7 +408,7 @@ export default function Dice() {
                         ? true
                         : false
                     }
-                    onClickFunction={diceRoll}
+                    onClickFunction={onSubmit}
                   >
                     {isRolling ? <Loader /> : "BET"}
                   </BetButton>
@@ -326,7 +420,7 @@ export default function Dice() {
       </GameOptions>
       <GameDisplay>
         <>
-          <div className="w-full flex justify-between items-center">
+          <div className="w-full flex justify-between items-center h-7">
             <div>
               {isRolling ? (
                 <div className="font-chakra text-sm font-medium text-white text-opacity-75">
@@ -342,7 +436,8 @@ export default function Dice() {
                 </div>
               )}
             </div>
-            <div>
+            <ResultsSlider results={betResults} />
+            {/* <div>
               {betResults.map((result, index) => (
                 <Image
                   key={index}
@@ -357,7 +452,7 @@ export default function Dice() {
                   }`}
                 />
               ))}
-            </div>
+            </div> */}
           </div>
 
           <div className="relative w-full my-16 md:my-20">

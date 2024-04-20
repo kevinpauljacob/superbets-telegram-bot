@@ -103,6 +103,12 @@ interface GlobalContextProps {
   setAutoStopProfit: React.Dispatch<React.SetStateAction<number>>;
   autoStopLoss: number;
   setAutoStopLoss: React.Dispatch<React.SetStateAction<number>>;
+  startAuto: boolean;
+  setStartAuto: React.Dispatch<React.SetStateAction<boolean>>;
+  autoBetCount: number | "inf";
+  setAutoBetCount: React.Dispatch<React.SetStateAction<number | "inf">>;
+  autoBetProfit: number;
+  setAutoBetProfit: React.Dispatch<React.SetStateAction<number>>;
 
   openVerifyModal: () => void;
   closeVerifyModal: () => void;
@@ -164,6 +170,9 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
   const [autoLossChangeReset, setAutoLossChangeReset] = useState<boolean>(true);
   const [autoStopProfit, setAutoStopProfit] = useState<number>(0);
   const [autoStopLoss, setAutoStopLoss] = useState<number>(0);
+  const [startAuto, setStartAuto] = useState<boolean>(false);
+  const [autoBetCount, setAutoBetCount] = useState<number | "inf">(0);
+  const [autoBetProfit, setAutoBetProfit] = useState<number>(0);
 
   const openVerifyModal = () => {
     setIsVerifyModalOpen(true);
@@ -327,6 +336,12 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
         setAutoStopProfit,
         autoStopLoss,
         setAutoStopLoss,
+        startAuto,
+        setStartAuto,
+        autoBetCount,
+        setAutoBetCount,
+        autoBetProfit,
+        setAutoBetProfit,
         openVerifyModal,
         closeVerifyModal,
         setShowWalletModal,

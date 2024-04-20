@@ -1,7 +1,7 @@
 import connectDatabase from "@/utils/database";
 import { getToken } from "next-auth/jwt";
 import { NextApiRequest, NextApiResponse } from "next";
-import { Mines, User } from "@/models/games";
+import { Hilo, User } from "@/models/games";
 import { generateGameResult, GameType } from "@/utils/provably-fair";
 import StakingUser from "@/models/staking/user";
 import { pointTiers } from "@/context/transactions";
@@ -16,7 +16,7 @@ export const config = {
 type InputType = {
   wallet: string;
   gameId: string;
-  userBet: number;
+  userBet: "Higher" | "Lower";
 };
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -34,12 +34,12 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
       await connectDatabase();
 
-      if (!wallet || !gameId || userBet == null)
+      if (!wallet || !gameId || !userBet)
         return res
           .status(400)
           .json({ success: false, message: "Missing parameters" });
 
-      if (!(0 <= userBet && userBet <= 24))
+      if (!["Higher", "Lower"].includes(userBet))
         return res
           .status(400)
           .json({ success: false, message: "Invalid parameters" });
@@ -51,7 +51,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           .status(400)
           .json({ success: false, message: "User does not exist !" });
 
-      let gameInfo = await Mines.findOne({
+      let gameInfo = await Hilo.findOne({
         _id: gameId,
         result: "Pending",
       }).populate("gameSeed");
@@ -60,42 +60,65 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           .status(400)
           .json({ success: false, message: "Game does not exist !" });
 
-      let { nonce, gameSeed, minesCount, userBets, amountWon, amount } =
+      let { nonce, gameSeed, userBets, startNumber, amount, amountWon } =
         gameInfo;
 
       const strikeNumbers = generateGameResult(
         gameSeed.serverSeed,
         gameSeed.clientSeed,
         nonce,
-        GameType.mines,
-        minesCount,
+        GameType.hilo,
+        startNumber,
       );
 
       let result = "Pending";
-      const numBets = userBets.length;
+      const currentIndex = userBets.length;
 
-      if (strikeNumbers[userBet] === 1) {
+      if (
+        !(
+          (userBet === "Higher" &&
+            strikeNumbers[currentIndex] % 13 >=
+              strikeNumbers[currentIndex - 1] % 13) ||
+          (userBet === "Lower" &&
+            strikeNumbers[currentIndex] % 13 <=
+              strikeNumbers[currentIndex - 1] % 13)
+        )
+      ) {
         result = "Lost";
 
-        await Mines.findOneAndUpdate(
+        await Hilo.findOneAndUpdate(
           {
             _id: gameId,
             result: "Pending",
           },
           {
             result,
-            userBets,
+            user,
+            userBets: { $addToSet: userBet },
             strikeNumbers,
             amountWon: 0,
             amountLost: gameInfo.amount,
           },
         );
       } else {
-        amountWon =
-          (Math.max(amount, amountWon) * (25 - minesCount)) /
-          (25 - minesCount - numBets + 1);
+        amountWon = Math.max(amount, amountWon);
 
-        if (numBets === 25 - minesCount) {
+        let winChance = 0;
+        for (let i = 1; i <= 52; ++i) {
+          if (userBets.includes(i)) continue;
+
+          if (
+            (userBet === "Higher" &&
+              i % 13 >= strikeNumbers[currentIndex - 1] % 13) ||
+            (userBet === "Lower" &&
+              i % 13 <= strikeNumbers[currentIndex - 1] % 13)
+          )
+            winChance++;
+        }
+
+        amountWon *= winChance / 52;
+
+        if (currentIndex + 1 === 52) {
           result = "Won";
 
           const userUpdate = await User.findOneAndUpdate(
@@ -121,7 +144,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
             throw new Error("Insufficient balance for action!!");
           }
 
-          await Mines.findOneAndUpdate(
+          await Hilo.findOneAndUpdate(
             {
               _id: gameId,
               result: "Pending",
@@ -129,7 +152,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
             {
               result,
               userBets: { $addToSet: userBet },
-              strikeNumbers,
               amountWon,
             },
           );
@@ -150,7 +172,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
                 channel: "fomo-casino_games-channel",
                 authKey: process.env.FOMO_CHANNEL_AUTH_KEY!,
                 payload: {
-                  game: GameType.mines,
+                  game: GameType.hilo,
                   wallet,
                   absAmount: amountWon,
                   result,
@@ -162,7 +184,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
             socket.close();
           };
         } else {
-          await Mines.findOneAndUpdate(
+          await Hilo.findOneAndUpdate(
             {
               _id: gameId,
               result: "Pending",

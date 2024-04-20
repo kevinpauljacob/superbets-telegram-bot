@@ -1,7 +1,7 @@
 import connectDatabase from "@/utils/database";
 import { getToken } from "next-auth/jwt";
 import { NextApiRequest, NextApiResponse } from "next";
-import { Mines, User } from "@/models/games";
+import { Hilo, User } from "@/models/games";
 import { generateGameResult, GameType } from "@/utils/provably-fair";
 import StakingUser from "@/models/staking/user";
 import { pointTiers } from "@/context/transactions";
@@ -45,7 +45,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           .status(400)
           .json({ success: false, message: "User does not exist !" });
 
-      let gameInfo = await Mines.findOne({
+      let gameInfo = await Hilo.findOne({
         _id: gameId,
         result: "Pending",
       }).populate("gameSeed");
@@ -55,17 +55,18 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           .status(400)
           .json({ success: false, message: "Game does not exist !" });
 
-      let { nonce, gameSeed, minesCount, amountWon } = gameInfo;
+      let { nonce, gameSeed, startNumber, amountWon } = gameInfo;
 
       const strikeNumbers = generateGameResult(
         gameSeed.serverSeed,
         gameSeed.clientSeed,
         nonce,
         GameType.mines,
-        minesCount,
+        startNumber,
       );
 
       const result = "Won";
+
       const userUpdate = await User.findOneAndUpdate(
         {
           wallet,
@@ -89,7 +90,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         throw new Error("Insufficient balance for action!!");
       }
 
-      await Mines.findOneAndUpdate(
+      await Hilo.findOneAndUpdate(
         {
           _id: gameId,
           result: "Pending",

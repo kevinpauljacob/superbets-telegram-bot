@@ -1,7 +1,7 @@
 import connectDatabase from "@/utils/database";
 import { getToken } from "next-auth/jwt";
 import { NextApiRequest, NextApiResponse } from "next";
-import { GameSeed, Mines } from "@/models/games";
+import { GameSeed, Hilo, Mines } from "@/models/games";
 import { generateServerSeed, seedStatus } from "@/utils/provably-fair";
 
 const secret = process.env.NEXTAUTH_SECRET;
@@ -46,6 +46,12 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         return res
           .status(400)
           .json({ success: false, message: "Pending mines game" });
+
+      const pendingHilo = await Hilo.findOne({ wallet, result: "Pending" });
+      if (pendingHilo)
+        return res
+          .status(400)
+          .json({ success: false, message: "Pending hilo game" });
 
       const expiredGameSeed = await GameSeed.findOneAndUpdate(
         {

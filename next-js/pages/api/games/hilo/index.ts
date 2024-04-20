@@ -1,7 +1,7 @@
 import connectDatabase from "@/utils/database";
 import { getToken } from "next-auth/jwt";
 import { NextApiRequest, NextApiResponse } from "next";
-import { GameSeed, Mines, User } from "@/models/games";
+import { GameSeed, Hilo, User } from "@/models/games";
 import { seedStatus } from "@/utils/provably-fair";
 
 const secret = process.env.NEXTAUTH_SECRET;
@@ -14,13 +14,13 @@ type InputType = {
   wallet: string;
   amount: number;
   tokenMint: string;
-  minesCount: number;
+  startNumber: number;
 };
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === "POST") {
     try {
-      let { wallet, amount, tokenMint, minesCount }: InputType = req.body;
+      let { wallet, amount, tokenMint, startNumber }: InputType = req.body;
 
       const token = await getToken({ req, secret });
 
@@ -32,12 +32,12 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
       await connectDatabase();
 
-      if (!wallet || !amount || !tokenMint || !minesCount)
+      if (!wallet || !amount || !tokenMint || !startNumber)
         return res
           .status(400)
           .json({ success: false, message: "Missing parameters" });
 
-      if (tokenMint !== "SOL" || !(1 <= minesCount && minesCount <= 24))
+      if (tokenMint !== "SOL" || !(1 <= startNumber && startNumber <= 52))
         return res
           .status(400)
           .json({ success: false, message: "Invalid parameters" });
@@ -114,10 +114,10 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         throw new Error("Insufficient balance for action!!");
       }
 
-      await Mines.create({
+      await Hilo.create({
         wallet,
         amount,
-        minesCount,
+        startNumber,
         userBets: [],
         result,
         tokenMint,
@@ -129,7 +129,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
       return res.status(201).json({
         success: true,
-        message: "Mines game created",
+        message: "Hilo game created",
       });
     } catch (e: any) {
       console.log(e);
