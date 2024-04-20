@@ -1,14 +1,15 @@
 import { useRouter } from "next/router";
 import Image from "next/image";
 import { useEffect, useState } from "react";
-import RollDiceProvablyFairModal from "./games/Dice/RollDiceProvablyFairModal";
-import Dice2ProvablyFairModal from "./games/Dice2/ProvablyFairModal";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { GameType } from "@/utils/provably-fair";
 import { useGlobalContext } from "./GlobalContext";
-import CoinFlipProvablyFairModal from "./games/CoinFlip/CoinFlipProvablyFairModal";
 import { useSession } from "next-auth/react";
+import RollDiceProvablyFairModal from "./games/Dice/DiceProvablyFairModal";
+import Dice2ProvablyFairModal from "./games/Dice2/Dice2ProvablyFairModal";
+import CoinFlipProvablyFairModal from "./games/CoinFlip/CoinFlipProvablyFairModal";
 import LimboProvablyFairModal from "./games/Limbo/LimboProvablyFairModal";
+import WheelProvablyFairModal from "./games/Wheel/WheelProvablyFairModal";
 
 export default function GameHeader() {
   const { data: session, status } = useSession();
@@ -190,14 +191,21 @@ export default function GameHeader() {
           modalData={modalData}
           setModalData={setModalData}
         />
-      ) : (
+      ) : game === GameType.limbo ? (
         <LimboProvablyFairModal
           isOpen={isOpen}
           onClose={closeModal}
           modalData={modalData}
           setModalData={setModalData}
         />
-      )}
+      ) : game === GameType.wheel ? (
+        <WheelProvablyFairModal
+          isOpen={isOpen}
+          onClose={closeModal}
+          modalData={modalData}
+          setModalData={setModalData}
+        />
+      ) : null}
     </div>
   ) : null;
 }
