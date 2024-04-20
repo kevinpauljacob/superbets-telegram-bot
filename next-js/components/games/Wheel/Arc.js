@@ -26,5 +26,13 @@ export default function Arc({ index, rotationAngle, risk, segments }) {
     end: (index + 1) * rotationAngle,
   });
 
-  return <path key={index} d={d} fill={color} fillRule="evenodd" />;
+  return (
+    <path
+      key={index}
+      d={d}
+      fill={color}
+      fillRule="evenodd"
+      className="segment"
+    />
+  );
 }

@@ -26,19 +26,15 @@ export default function Wheel() {
   const [betType, setBetType] = useState<"manual" | "auto">("manual");
   const [strikeNumber, setStrikeNumber] = useState<number>(0);
   const [risk, setRisk] = useState<"low" | "medium" | "high">("low");
-
   const [segments, setSegments] = useState<number>(10);
-  const [segmentWidth, setSegmentWidth] = useState(0);
-  const [numSegments, setNumSegments] = useState(0);
   const [rotationAngle, setRotationAngle] = useState(0);
-  const [resultAngle, setResultAngle] = useState(0);
-  const [spin, setSpin] = useState(false);
   const [betResults, setBetResults] = useState<
     { result: number; win: boolean }[]
   >([]);
   const [hoveredMultiplier, setHoveredMultiplier] = useState<number | null>(
     null,
   );
+
   const multipliers = riskToChance[risk];
   const sortedMultipliers = multipliers
     .slice()
@@ -48,31 +44,12 @@ export default function Wheel() {
     (segment, index, self) =>
       index === 0 || self[index - 1].multiplier !== segment.multiplier,
   );
-  console.log(uniqueSegments);
 
   useEffect(() => {
     if (!wheelRef.current) return;
-
-    const width = wheelRef.current.offsetWidth;
-    const radius = width / 2;
-    const numSegments = segments;
-
-    const circumference = 2 * Math.PI * radius;
-    const arcLength = circumference / numSegments;
-
-    const segmentWidth = 2 * radius * Math.sin(arcLength / (2 * radius));
-    const rotationAngle = (360 * arcLength) / circumference;
-
-    setSegmentWidth(segmentWidth);
-    setNumSegments(numSegments);
+    const rotationAngle = 360 / segments;
     setRotationAngle(rotationAngle);
   }, [segments]);
-
-  useEffect(() => {
-    // if (spin === true) {
-    //   spinWheel();
-    // }
-  }, [spin]);
 
   const spinWheel = (strikeNumber: number) => {
     const resultAngle = ((strikeNumber - 1) * 360) / 99;
@@ -81,16 +58,25 @@ export default function Wheel() {
       wheelRef.current.style.transition = "transform 1s ease-in-out";
       wheelRef.current.style.transform = `rotate(${360 - resultAngle}deg)`;
     }
-    setSpin(false);
+    calculateMultiplier(resultAngle);
   };
 
-  // useEffect(() => {
-  //   if (strikeNumber !== 0) {
-  //     const resultAngle = ((strikeNumber - 1) * 360) / 99;
-  //     setResultAngle(resultAngle);
-  //     console.log("resultAngle", resultAngle);
-  //   }
-  // }, [strikeNumber]);
+  const calculateMultiplier = (resultAngle: number) => {
+    const ranges = Array.from({ length: segments }).map((range, index) => {
+      return {
+        range: {
+          start: index * rotationAngle,
+          end: (index + 1) * rotationAngle,
+        },
+      };
+    });
+    console.log("segments", segments);
+    const multiplierPosition = ranges.findIndex((range) => {
+      return resultAngle >= range.range.start && resultAngle <= range.range.end;
+    });
+
+    console.log("multiplierPosition", multiplierPosition);
+  };
 
   const handleBetAmountChange = (
     event: React.ChangeEvent<HTMLInputElement>,
@@ -114,7 +100,6 @@ export default function Wheel() {
         return;
       }
       setIsRolling(true);
-      setSpin(true);
       setStrikeNumber(0);
       try {
         const response = await fetch(`/api/games/wheel`, {
@@ -162,15 +147,11 @@ export default function Wheel() {
       } catch (error) {
         setIsRolling(false);
         console.error("Error occurred while betting:", error);
+      } finally {
+        setIsRolling(false);
       }
-      setIsRolling(false);
     }
   };
-
-  useEffect(() => {
-    console.log("strikeface", strikeNumber);
-    console.log("segments", segments);
-  }, [strikeNumber, segments]);
 
   useEffect(() => {
     if (refresh && wallet?.publicKey) {
@@ -299,8 +280,9 @@ export default function Wheel() {
 
           <div className="w-full">
             <button
+              disabled={isRolling}
               onClick={() => {
-                if (!isRolling) handleBet();
+                handleBet();
               }}
               className={`${
                 !wallet ? "cursor-not-allowed opacity-70" : "hover:opacity-90"
@@ -341,18 +323,21 @@ export default function Wheel() {
               alt="Pointer"
               width={40}
               height={40}
+              id="pointer"
               className={`${
-                spin ? "-rotate-[20deg]" : "rotate-0"
+                isRolling ? "-rotate-[20deg]" : "rotate-0"
               } absolute z-50 -top-5 transition-all duration-100`}
             />
             <div
               ref={wheelRef}
-              className="relative w-[200px] h-[200px] sm:w-[350px] sm:h-[350px] rounded-full overflow-hidden"
+              className={`${
+                isRolling ? "animate-spin" : "animate-none"
+              } relative w-[200px] h-[200px] sm:w-[350px] sm:h-[350px] rounded-full overflow-hidden`}
             >
               {typeof window !== "undefined" && (
                 <svg viewBox="0 0 300 300">
                   {rotationAngle &&
-                    Array.from({ length: numSegments }).map((_, index) => (
+                    Array.from({ length: segments }).map((_, index) => (
                       <Arc
                         key={index}
                         index={index}
