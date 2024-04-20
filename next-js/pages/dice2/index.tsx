@@ -24,10 +24,25 @@ import ResultsSlider from "@/components/ResultsSlider";
 export default function Dice2() {
   const wallet = useWallet();
   const methods = useForm();
-  const { coinData, getBalance, getWalletBalance, setShowAutoModal } =
-    useGlobalContext();
+  const {
+    coinData,
+    getBalance,
+    getWalletBalance,
+    setShowAutoModal,
+    autoWinChange,
+    autoLossChange,
+    autoWinChangeReset,
+    autoLossChangeReset,
+    autoStopProfit,
+    autoStopLoss,
+    startAuto,
+    setStartAuto,
+    autoBetCount,
+    setAutoBetCount,
+    autoBetProfit,
+    setAutoBetProfit,
+  } = useGlobalContext();
   const [betAmt, setBetAmt] = useState(0);
-  const [betCount, setBetCount] = useState(0);
   const [isRolling, setIsRolling] = useState(false);
   const [refresh, setRefresh] = useState(true);
   const [betType, setBetType] = useState<"manual" | "auto">("manual");
@@ -41,17 +56,10 @@ export default function Dice2() {
     { result: number; win: boolean }[]
   >([]);
 
-  const handleBetAmountChange = (
-    event: React.ChangeEvent<HTMLInputElement>,
-  ) => {
-    const amount = parseFloat(event.target.value);
-    setBetAmt(amount);
-  };
-
   const handleCountChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
-    setBetCount(parseFloat(e.target.value));
+    setAutoBetCount(parseFloat(e.target.value));
   };
 
   const adjustPrecision = (value: string, maxDecimalPlaces: number) => {
@@ -116,6 +124,19 @@ export default function Dice2() {
   };
 
   const handleBet = async () => {
+    console.log(
+      "betting",
+      autoWinChange,
+      autoLossChange,
+      autoWinChangeReset,
+      autoLossChangeReset,
+      autoStopProfit,
+      autoStopLoss,
+      startAuto,
+      autoBetCount,
+      autoBetProfit,
+      betAmt,
+    );
     if (wallet.connected) {
       if (!wallet.publicKey) {
         toast.error("Wallet not connected");
@@ -170,6 +191,27 @@ export default function Dice2() {
         setStrikeNumber(strikeNumber);
         setResult(win);
         setRefresh(true);
+
+        // auto options
+        if (betType === "auto") {
+          if (win) {
+            setAutoBetProfit(autoBetProfit + (multiplier - 1) * betAmt);
+            setBetAmt(
+              autoWinChangeReset
+                ? betAmt
+                : betAmt + (autoWinChange * betAmt) / 100.0,
+            );
+          } else {
+            setAutoBetProfit(autoBetProfit - betAmt);
+            setBetAmt(
+              autoLossChangeReset
+                ? betAmt
+                : betAmt + (autoLossChange * betAmt) / 100.0,
+            );
+          }
+          if (typeof autoBetCount === "number")
+            setAutoBetCount(autoBetCount - 1);
+        }
       } catch (error) {
         console.error("Error occurred while betting:", error);
       } finally {
@@ -211,6 +253,34 @@ export default function Dice2() {
     }
   }, [wallet?.publicKey, refresh]);
 
+  useEffect(() => {
+    console.log("Auto: ",startAuto,autoBetCount)
+    if (
+      betType === "auto" &&
+      startAuto &&
+      ((typeof autoBetCount === "string" && autoBetCount === "inf") ||
+        (typeof autoBetCount === "number" && autoBetCount > 0)) &&
+      autoBetProfit <= autoStopProfit &&
+      autoBetProfit >= -1 * autoStopLoss
+    ) {
+      handleBet();
+    } else {
+      setStartAuto(false);
+      setAutoBetProfit(0);
+    }
+  }, [startAuto, autoBetCount]);
+
+  const onSubmit = async (data: any) => {
+    if (
+      betType === "auto" &&
+      ((typeof autoBetCount === "string" && autoBetCount === "inf") ||
+        (typeof autoBetCount === "number" && autoBetCount > 0))
+    ) {
+      console.log("Auto betting");
+      setStartAuto(true);
+    } else if (wallet.connected) handleBet();
+  };
+
   return (
     <GameLayout title="FOMO - Dice 2">
       <GameOptions>
@@ -224,7 +294,7 @@ export default function Dice2() {
                   ? true
                   : false
               }
-              onClickFunction={handleBet}
+              onClickFunction={onSubmit}
             >
               {isRolling ? <Loader /> : "BET"}
             </BetButton>
@@ -235,7 +305,7 @@ export default function Dice2() {
               <form
                 className="flex w-full flex-col gap-0"
                 autoComplete="off"
-                onSubmit={methods.handleSubmit(handleBet)}
+                onSubmit={methods.handleSubmit(onSubmit)}
               >
                 {/* amt input  */}
                 <BetAmount betAmt={betAmt} setBetAmt={setBetAmt} />
@@ -262,15 +332,23 @@ export default function Dice2() {
                           step={"any"}
                           autoComplete="off"
                           onChange={handleCountChange}
-                          placeholder={"00"}
-                          value={betCount}
-                          className={`flex w-full min-w-0 bg-transparent text-base text-[#94A3B8] placeholder-[#94A3B8]  font-chakra placeholder-opacity-40 outline-none`}
+                          placeholder={
+                            autoBetCount === "inf" ? "Infinity" : "00"
+                          }
+                          value={autoBetCount}
+                          className={`flex w-full min-w-0 bg-transparent text-base text-[#94A3B8] placeholder-[#94A3B8] font-chakra ${
+                            autoBetCount === "inf"
+                              ? "placeholder-opacity-100"
+                              : "placeholder-opacity-40"
+                          } placeholder-opacity-40 outline-none`}
                         />
                         <span
-                          className="text-2xl font-medium text-white text-opacity-50 bg-[#292C32] hover:bg-[#47484A] focus:bg-[#47484A] transition-all rounded-[5px] py-0.5 px-3"
-                          onClick={() =>
-                            setBetCount(coinData ? coinData[0]?.amount : 0)
-                          }
+                          className={`text-2xl font-medium text-white text-opacity-50 ${
+                            autoBetCount === "inf"
+                              ? "bg-[#47484A]"
+                              : "bg-[#292C32]"
+                          } hover:bg-[#47484A] focus:bg-[#47484A] transition-all rounded-[5px] py-0.5 px-3`}
+                          onClick={() => setAutoBetCount("inf")}
                         >
                           <BsInfinity />
                         </span>
@@ -294,9 +372,19 @@ export default function Dice2() {
                       onClick={() => {
                         setShowAutoModal(true);
                       }}
-                      className="mb-[1.4rem] rounded-md w-full h-11 flex items-center justify-center opacity-75 cursor-pointer text-white text-opacity-90 border-2 border-white bg-white bg-opacity-0 hover:bg-opacity-5"
+                      className={`relative mb-[1.4rem] rounded-md w-full h-11 flex items-center justify-center opacity-75 cursor-pointer text-white text-opacity-90 border-2 border-white bg-white bg-opacity-0 hover:bg-opacity-5`}
                     >
                       Configure Auto
+                      <div
+                        className={`${
+                          autoLossChange >= 0 &&
+                          autoWinChange >= 0 &&
+                          autoStopLoss > 0 &&
+                          autoStopProfit > 0
+                            ? "bg-fomo-green"
+                            : "bg-fomo-red"
+                        } absolute top-0 right-0 m-1.5 bg-fomo-green w-2 h-2 rounded-full`}
+                      />
                     </div>
                   </div>
                 )}
@@ -310,7 +398,7 @@ export default function Dice2() {
                         ? true
                         : false
                     }
-                    onClickFunction={handleBet}
+                    onClickFunction={onSubmit}
                   >
                     {isRolling ? <Loader /> : "BET"}
                   </BetButton>

@@ -25,7 +25,7 @@ export default function ResultsSlider({ results }: { results: Result[] }) {
 
   return (
     <div
-      className="flex overflow-x-auto no-scrollbar items-center max-w-[11rem] md:max-w-[15.9rem] xl:max-w-[19.9rem]"
+      className="flex overflow-x-auto no-scrollbar items-center max-w-[11rem] md:max-w-[15.9rem] xl:max-w-[19.6rem]"
       ref={resultsContainerRef}
     >
       {results.map((result, index) => (

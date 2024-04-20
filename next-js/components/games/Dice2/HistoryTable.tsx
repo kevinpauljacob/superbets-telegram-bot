@@ -74,8 +74,6 @@ export default function HistoryTable({ refresh }: { refresh: boolean }) {
           // toast.error("Could not fetch history.");
         }
       });
-
-    console.log("bets", bets);
   }, [all, refresh]);
 
   return (

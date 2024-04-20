@@ -44,11 +44,16 @@ export default function Layout({ children }: LayoutProps) {
     verifyModalData,
     sidebar,
     setSidebar,
+    setStartAuto,
   } = useGlobalContext();
 
   const toggleSidebar = () => {
     setSidebar(!sidebar);
   };
+
+  useEffect(() => {
+    setStartAuto(false);
+  }, [router.pathname]);
 
   useEffect(() => {
     if (session?.user && !showWalletModal) {
