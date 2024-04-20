@@ -55,17 +55,23 @@ export default function WheelProvablyFairModal({
     clientSeed: string;
     serverSeed: string;
     nonce: string;
+    risk: string;
+    segments: number;
   }>(
     bet?.gameSeed
       ? {
           clientSeed: bet.gameSeed?.clientSeed,
           serverSeed: bet.gameSeed?.serverSeed ?? "",
           nonce: bet.nonce?.toString() ?? "",
+          risk: bet.risk?.toString() ?? "",
+          segments: bet.segments ?? 0,
         }
       : {
           clientSeed: "",
           serverSeed: "",
           nonce: "",
+          risk: "low",
+          segments: 10,
         },
   );
 
@@ -323,6 +329,42 @@ export default function WheelProvablyFairModal({
                       onChange={handleChange}
                       className="bg-[#202329] text-white font-chakra text-xs font-medium mt-1 rounded-md p-3 w-full relative"
                     />
+                  </div>
+                  <div>
+                    <label className="text-xs text-opacity-75 font-changa text-[#F0F0F0]">
+                      Risk
+                    </label>
+                    <div className="flex items-center">
+                      <select
+                        name="risk"
+                        value={verificationState.risk}
+                        onChange={handleChange}
+                        className="bg-[#202329] text-white font-chakra text-xs font-medium mt-1 rounded-md p-3 w-full relative appearance-none"
+                      >
+                        <option value={"low"}>Low</option>
+                        <option value={"medium"}>Medium</option>
+                        <option value={"high"}>High</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div>
+                    <label className="text-xs text-opacity-75 font-changa text-[#F0F0F0]">
+                      Segments
+                    </label>
+                    <div className="flex items-center">
+                      <select
+                        name="segments"
+                        value={verificationState.segments}
+                        onChange={handleChange}
+                        className="bg-[#202329] text-white font-chakra text-xs font-medium mt-1 rounded-md p-3 w-full relative appearance-none"
+                      >
+                        <option value={10}>10</option>
+                        <option value={20}>20</option>
+                        <option value={30}>30</option>
+                        <option value={40}>40</option>
+                        <option value={50}>50</option>
+                      </select>
+                    </div>
                   </div>
                 </div>
               </div>
