@@ -7,14 +7,14 @@ import BetSetting from "@/components/BetSetting";
 import { useGlobalContext } from "@/components/GlobalContext";
 import {
   GameDisplay,
-  GameFooterInfo,
   GameLayout,
   GameOptions,
   GameTable,
 } from "@/components/GameLayout";
 import HistoryTable from "@/components/games/Wheel/HistoryTable";
-import { WalletContextState } from "@solana/wallet-adapter-react";
+import ResultsSlider from "@/components/ResultsSlider";
 import Arc from "@/components/games/Wheel/Arc";
+import { riskToChance } from "@/components/games/Wheel/Segments";
 
 export default function Wheel() {
   const wallet = useWallet();
@@ -24,13 +24,31 @@ export default function Wheel() {
   const [isRolling, setIsRolling] = useState(false);
   const [refresh, setRefresh] = useState(true);
   const [betType, setBetType] = useState<"manual" | "auto">("manual");
-  const [strikeFace, setStrikeFace] = useState<number>(0);
+  const [strikeNumber, setStrikeNumber] = useState<number>(0);
   const [risk, setRisk] = useState<"low" | "medium" | "high">("low");
 
   const [segments, setSegments] = useState<number>(10);
   const [segmentWidth, setSegmentWidth] = useState(0);
   const [numSegments, setNumSegments] = useState(0);
   const [rotationAngle, setRotationAngle] = useState(0);
+  const [resultAngle, setResultAngle] = useState(0);
+  const [spin, setSpin] = useState(false);
+  const [betResults, setBetResults] = useState<
+    { result: number; win: boolean }[]
+  >([]);
+  const [hoveredMultiplier, setHoveredMultiplier] = useState<number | null>(
+    null,
+  );
+  const multipliers = riskToChance[risk];
+  const sortedMultipliers = multipliers
+    .slice()
+    .sort((a, b) => a.multiplier - b.multiplier);
+
+  const uniqueSegments = sortedMultipliers.filter(
+    (segment, index, self) =>
+      index === 0 || self[index - 1].multiplier !== segment.multiplier,
+  );
+  console.log(uniqueSegments);
 
   useEffect(() => {
     if (!wheelRef.current) return;
@@ -49,6 +67,30 @@ export default function Wheel() {
     setNumSegments(numSegments);
     setRotationAngle(rotationAngle);
   }, [segments]);
+
+  useEffect(() => {
+    // if (spin === true) {
+    //   spinWheel();
+    // }
+  }, [spin]);
+
+  const spinWheel = (strikeNumber: number) => {
+    const resultAngle = ((strikeNumber - 1) * 360) / 99;
+    console.log("resultAngle", resultAngle);
+    if (wheelRef.current) {
+      wheelRef.current.style.transition = "transform 1s ease-in-out";
+      wheelRef.current.style.transform = `rotate(${360 - resultAngle}deg)`;
+    }
+    setSpin(false);
+  };
+
+  // useEffect(() => {
+  //   if (strikeNumber !== 0) {
+  //     const resultAngle = ((strikeNumber - 1) * 360) / 99;
+  //     setResultAngle(resultAngle);
+  //     console.log("resultAngle", resultAngle);
+  //   }
+  // }, [strikeNumber]);
 
   const handleBetAmountChange = (
     event: React.ChangeEvent<HTMLInputElement>,
@@ -72,7 +114,8 @@ export default function Wheel() {
         return;
       }
       setIsRolling(true);
-      await new Promise((r) => setTimeout(r, 5000));
+      setSpin(true);
+      setStrikeNumber(0);
       try {
         const response = await fetch(`/api/games/wheel`, {
           method: "POST",
@@ -91,6 +134,7 @@ export default function Wheel() {
         const { success, message, result, strikeNumber } =
           await response.json();
 
+        spinWheel(strikeNumber);
         if (success != true) {
           toast.error(message);
           throw new Error(message);
@@ -99,8 +143,19 @@ export default function Wheel() {
         if (result == "Won") toast.success(message, { duration: 2000 });
         else toast.error(message, { duration: 2000 });
 
+        const win = result === "Won";
+        const newBetResult = { result: strikeNumber, win };
+
+        setBetResults((prevResults) => {
+          const newResults = [...prevResults, newBetResult];
+          if (newResults.length > 6) {
+            newResults.shift();
+          }
+          return newResults;
+        });
+
         if (success) {
-          setStrikeFace(strikeNumber);
+          setStrikeNumber(strikeNumber);
           console.log("strikeNumber", strikeNumber);
           setRefresh(true);
         }
@@ -113,9 +168,9 @@ export default function Wheel() {
   };
 
   useEffect(() => {
-    console.log("strikeface", strikeFace);
+    console.log("strikeface", strikeNumber);
     console.log("segments", segments);
-  }, [strikeFace, segments]);
+  }, [strikeNumber, segments]);
 
   useEffect(() => {
     if (refresh && wallet?.publicKey) {
@@ -225,13 +280,11 @@ export default function Wheel() {
           </div>
 
           <div className="mb-6 w-full">
-            <div className="flex justify-between text-sm mb-2">
-              <p className="font-medium font-changa text-[#F0F0F0] text-opacity-90">
-                Segments
-              </p>
+            <div className="flex justify-between text-sm mb-2 font-medium font-changa text-[#F0F0F0] text-opacity-90">
+              <p className="">Segments</p>
+              <p className="text-[#94A3B8]">{segments}</p>
             </div>
-            <div className="w-full rounded-[8px] text-white font-chakra text-sm font-semibold bg-[#0C0F16] p-4">
-              <div className="mb-2">{segments}</div>
+            <div className="w-full">
               <input
                 type="range"
                 min={10}
@@ -239,7 +292,7 @@ export default function Wheel() {
                 step={10}
                 value={segments}
                 onChange={(e) => setSegments(parseInt(e.target.value))}
-                className="w-full"
+                className="defaultSlider w-full bg-[#2A2E38] appearance-none h-[5px] rounded-full"
               />
             </div>
           </div>
@@ -275,57 +328,84 @@ export default function Wheel() {
           <div>
             {isRolling ? (
               <div className="font-chakra text-sm font-medium text-white text-opacity-75">
-                Rolling the dice...
+                Betting...
               </div>
             ) : null}
           </div>
+          <ResultsSlider results={betResults} />
         </div>
-        <div className="w-full">
+        <div className="w-full my-5">
           <div className="relative flex justify-center w-full h-full">
             <Image
               src="/assets/wheelPointer.svg"
               alt="Pointer"
               width={40}
               height={40}
-              className="absolute z-50 -top-5 "
+              className={`${
+                spin ? "-rotate-[20deg]" : "rotate-0"
+              } absolute z-50 -top-5 transition-all duration-100`}
             />
             <div
               ref={wheelRef}
               className="relative w-[200px] h-[200px] sm:w-[350px] sm:h-[350px] rounded-full overflow-hidden"
             >
-              <svg viewBox="0 0 300 300">
-                {typeof window !== "undefined" &&
-                  rotationAngle &&
-                  Array.from({ length: numSegments }).map((_, index) => (
-                    <Arc
-                      key={index}
-                      index={index}
-                      rotationAngle={rotationAngle}
-                      risk={risk}
-                      segments={segments}
-                    />
-                  ))}
-              </svg>
+              {typeof window !== "undefined" && (
+                <svg viewBox="0 0 300 300">
+                  {rotationAngle &&
+                    Array.from({ length: numSegments }).map((_, index) => (
+                      <Arc
+                        key={index}
+                        index={index}
+                        rotationAngle={rotationAngle}
+                        risk={risk}
+                        segments={segments}
+                      />
+                    ))}
+                </svg>
+              )}
               <div className="absolute z-10 w-[88.75%] h-[88.75%] rounded-full bg-black/10 left-[5.625%] top-[5.625%]" />
               <div className="absolute z-20 w-[77.5%] h-[77.5%] rounded-full bg-[#171A1F] left-[11.25%] top-[11.25%]" />
               <div className="absolute z-20 w-[72.5%] h-[72.5%] rounded-full bg-[#0C0F16] left-[13.75%] top-[13.75%]" />
             </div>
           </div>
         </div>
-        <div className="flex px-0 xl:px-4 mb-0 px:mb-6 gap-4 flex-row w-full justify-between">
-          {coinData && coinData[0].amount > 0.0001 && (
-            <>
-              <div className="w-full border-t-[3px] border-[#343843] text-center font-chakra font-semibold bg-[#202329] text-xs text-white rounded-md px-1.5 md:px-5 py-2.5">
-                0.0x
+        <div className="relative flex w-full justify-between px-0 xl:px-4 mb-0 px:mb-6 gap-4">
+          {uniqueSegments.map((segment, index) => (
+            <div
+              key={index}
+              className="relative w-full"
+              onMouseEnter={() => setHoveredMultiplier(segment.multiplier)}
+              onMouseLeave={() => setHoveredMultiplier(null)}
+            >
+              <div
+                className={`w-full border-t-[6px] text-center font-chakra font-semibold bg-[#202329] text-xs text-white rounded-md px-1.5 md:px-5 py-2.5`}
+                style={{ borderColor: segment.color }}
+              >
+                {segment.multiplier}x
               </div>
-              <div className="w-full border-t-[3px] border-[#BEC6D1] text-center font-chakra font-semibold bg-[#202329] text-xs text-white rounded-md px-1.5 md:px-5 py-2.5">
-                2.6x
-              </div>
-              <div className="w-full border-t-[3px] border-[#8042FF] text-center font-chakra font-semibold bg-[#202329] text-xs text-white rounded-md px-1.5 md:px-5 py-2.5">
-                5x
-              </div>
-            </>
-          )}
+              {hoveredMultiplier === segment.multiplier && (
+                <div className="absolute top-[-120px] left-0 z-50 flex gap-4 text-white bg-[#202329] border border-white/10 rounded-lg w-full p-4 fadeInUp duration-100 min-w-[250px]">
+                  <div className="w-1/2">
+                    <div className="flex justify-between text-[13px] font-medium font-changa text-opacity-90 text-[#F0F0F0]">
+                      <span className="">Profit</span>
+                      <span>0.00 ETH</span>
+                    </div>
+                    <div className="border border-white/10 rounded-lg p-3 mt-2">
+                      0.00
+                    </div>
+                  </div>
+                  <div className="w-1/2">
+                    <div className="text-[13px] font-medium font-changa text-opacity-90 text-[#F0F0F0]">
+                      Chance
+                    </div>
+                    <div className="border border-white/10 rounded-lg p-3 mt-2">
+                      {segment.chance}%
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          ))}
 
           {!coinData ||
             (coinData[0].amount < 0.0001 && (
