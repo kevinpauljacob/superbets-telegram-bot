@@ -91,22 +91,24 @@ interface GlobalContextProps {
   //configure auto
   showAutoModal: boolean;
   setShowAutoModal: React.Dispatch<React.SetStateAction<boolean>>;
-  autoWinChange: number;
-  setAutoWinChange: React.Dispatch<React.SetStateAction<number>>;
-  autoLossChange: number;
-  setAutoLossChange: React.Dispatch<React.SetStateAction<number>>;
+  autoWinChange: number | null;
+  setAutoWinChange: React.Dispatch<React.SetStateAction<number | null>>;
+  autoLossChange: number | null;
+  setAutoLossChange: React.Dispatch<React.SetStateAction<number | null>>;
   autoWinChangeReset: boolean;
   setAutoWinChangeReset: React.Dispatch<React.SetStateAction<boolean>>;
   autoLossChangeReset: boolean;
   setAutoLossChangeReset: React.Dispatch<React.SetStateAction<boolean>>;
-  autoStopProfit: number;
-  setAutoStopProfit: React.Dispatch<React.SetStateAction<number>>;
-  autoStopLoss: number;
-  setAutoStopLoss: React.Dispatch<React.SetStateAction<number>>;
+  autoStopProfit: number | null;
+  setAutoStopProfit: React.Dispatch<React.SetStateAction<number | null>>;
+  autoStopLoss: number | null;
+  setAutoStopLoss: React.Dispatch<React.SetStateAction<number | null>>;
   startAuto: boolean;
   setStartAuto: React.Dispatch<React.SetStateAction<boolean>>;
-  autoBetCount: number | "inf";
-  setAutoBetCount: React.Dispatch<React.SetStateAction<number | "inf">>;
+  useAutoConfig: boolean;
+  setUseAutoConfig: React.Dispatch<React.SetStateAction<boolean>>;
+  autoBetCount: number | string;
+  setAutoBetCount: React.Dispatch<React.SetStateAction<number | string>>;
   autoBetProfit: number;
   setAutoBetProfit: React.Dispatch<React.SetStateAction<number>>;
 
@@ -164,14 +166,15 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
 
   // configure auto
   const [showAutoModal, setShowAutoModal] = useState<boolean>(false);
-  const [autoWinChange, setAutoWinChange] = useState<number>(0);
-  const [autoLossChange, setAutoLossChange] = useState<number>(0);
+  const [autoWinChange, setAutoWinChange] = useState<number | null>(null);
+  const [autoLossChange, setAutoLossChange] = useState<number | null>(null);
   const [autoWinChangeReset, setAutoWinChangeReset] = useState<boolean>(true);
   const [autoLossChangeReset, setAutoLossChangeReset] = useState<boolean>(true);
-  const [autoStopProfit, setAutoStopProfit] = useState<number>(0);
-  const [autoStopLoss, setAutoStopLoss] = useState<number>(0);
+  const [autoStopProfit, setAutoStopProfit] = useState<number | null>(null);
+  const [autoStopLoss, setAutoStopLoss] = useState<number | null>(null);
   const [startAuto, setStartAuto] = useState<boolean>(false);
-  const [autoBetCount, setAutoBetCount] = useState<number | "inf">(0);
+  const [useAutoConfig, setUseAutoConfig] = useState<boolean>(false);
+  const [autoBetCount, setAutoBetCount] = useState<number | string>(0);
   const [autoBetProfit, setAutoBetProfit] = useState<number>(0);
 
   const openVerifyModal = () => {
@@ -342,6 +345,8 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
         setAutoBetCount,
         autoBetProfit,
         setAutoBetProfit,
+        useAutoConfig,
+        setUseAutoConfig,
         openVerifyModal,
         closeVerifyModal,
         setShowWalletModal,

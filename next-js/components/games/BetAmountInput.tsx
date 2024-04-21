@@ -63,7 +63,7 @@ export default function BetAmount({
           className="text-xs font-medium text-white text-opacity-50 bg-[#292C32] hover:bg-[#47484A] focus:bg-[#47484A] transition-all hover:duration-75 rounded-[5px] py-1.5 px-4"
           onClick={() => setBetAmt(coinData ? coinData[0]?.amount : 0)}
         >
-          MAX
+          Max
         </span>
       </div>
 

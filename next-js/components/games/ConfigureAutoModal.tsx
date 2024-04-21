@@ -27,6 +27,8 @@ export default function ConfigureAutoModal() {
     setAutoWinChangeReset,
     autoLossChangeReset,
     setAutoLossChangeReset,
+    useAutoConfig,
+    setUseAutoConfig,
     startAuto,
     setStartAuto,
     walletBalance,
@@ -44,20 +46,21 @@ export default function ConfigureAutoModal() {
 
   const onSubmit = async (data: any) => {
     if (
-      data.autoWinChange &&
-      data.autoLossChange &&
-      data.autoStopProfit &&
-      data.autoStopLoss
+      parseFloat(data.autoWinChange) > 0 ||
+      parseFloat(data.autoLossChange) > 0 ||
+      parseFloat(data.autoStopProfit) > 0 ||
+      parseFloat(data.autoStopLoss) > 0
     ) {
+      setUseAutoConfig(true);
       setShowAutoModal(false);
       console.log(
         "Setting auto",
-        autoWinChange,
-        autoLossChange,
+        data.autoWinChange,
+        data.autoLossChange,
         autoWinChangeReset,
         autoLossChangeReset,
-        autoStopProfit,
-        autoStopLoss,
+        data.autoStopProfit,
+        data.autoStopLoss,
       );
     }
   };
@@ -110,7 +113,10 @@ export default function ConfigureAutoModal() {
                       ? "bg-[#7839C5] text-opacity-90"
                       : "bg-[#292C32] hover:bg-[#47484A] focus:bg-[#47484A] text-opacity-50"
                   } text-xs font-chakra font-medium text-white transition-all rounded-[5px] py-1.5 px-4`}
-                  onClick={() => setAutoWinChangeReset(true)}
+                  onClick={() => {
+                    setAutoWinChangeReset(true);
+                    setAutoWinChange(null);
+                  }}
                 >
                   Reset
                 </span>
@@ -126,22 +132,17 @@ export default function ConfigureAutoModal() {
                 </span>
                 <input
                   id={"autoWinChange"}
-                  {...methods.register("autoWinChange", {
-                    required: "Amount is required.",
-                    min: {
-                      value: 0,
-                      message: "Value must be greater than or equal to 0.0001",
-                    },
-                  })}
+                  {...methods.register("autoWinChange")}
                   type={"number"}
                   step={"any"}
                   autoComplete="off"
+                  disabled={autoWinChangeReset}
                   onChange={(e) => {
                     setAutoWinChange(parseFloat(e.target.value));
                   }}
-                  placeholder={"00.00%"}
-                  value={autoWinChange}
-                  className={`flex w-full min-w-0 bg-transparent text-right text-base text-[#94A3B8] placeholder-[#94A3B8] font-chakra placeholder-opacity-40 outline-none`}
+                  placeholder={"00.00"}
+                  value={autoWinChange ?? undefined}
+                  className={`flex w-full min-w-0 bg-transparent text-right text-base disabled:text-opacity-40 text-[#94A3B8] placeholder-[#94A3B8] font-chakra placeholder-opacity-40 outline-none`}
                 />
                 <span className="text-[#94A3B8] text-base font-chakra ml-3">
                   %
@@ -180,7 +181,10 @@ export default function ConfigureAutoModal() {
                       ? "bg-[#7839C5] text-opacity-90"
                       : "bg-[#292C32] hover:bg-[#47484A] focus:bg-[#47484A] text-opacity-50"
                   } text-xs font-chakra font-medium text-white transition-all rounded-[5px] py-1.5 px-4`}
-                  onClick={() => setAutoLossChangeReset(true)}
+                  onClick={() => {
+                    setAutoLossChangeReset(true);
+                    setAutoLossChange(null);
+                  }}
                 >
                   Reset
                 </span>
@@ -196,22 +200,17 @@ export default function ConfigureAutoModal() {
                 </span>
                 <input
                   id={"autoLossChange"}
-                  {...methods.register("autoLossChange", {
-                    required: "Amount is required.",
-                    min: {
-                      value: 0,
-                      message: "Value must be greater than or equal to 0.0001",
-                    },
-                  })}
+                  {...methods.register("autoLossChange")}
                   type={"number"}
                   step={"any"}
                   autoComplete="off"
+                  disabled={autoLossChangeReset}
                   onChange={(e) => {
                     setAutoLossChange(parseFloat(e.target.value));
                   }}
-                  placeholder={"00.00%"}
-                  value={autoLossChange}
-                  className={`flex w-full min-w-0 bg-transparent text-right text-base text-[#94A3B8] placeholder-[#94A3B8] font-chakra placeholder-opacity-40 outline-none`}
+                  placeholder={"00.00"}
+                  value={autoLossChange ?? undefined}
+                  className={`flex w-full min-w-0 bg-transparent text-right text-base disabled:text-opacity-40 text-[#94A3B8] placeholder-[#94A3B8] font-chakra placeholder-opacity-40 outline-none`}
                 />
                 <span className="text-[#94A3B8] text-base font-chakra ml-3">
                   %
@@ -257,10 +256,9 @@ export default function ConfigureAutoModal() {
                 <input
                   id={"autoStopProfit"}
                   {...methods.register("autoStopProfit", {
-                    required: "Amount is required",
                     min: {
-                      value: 0.0001,
-                      message: "Value must be greater than or equal to 0.0001",
+                      value: 0,
+                      message: "Value must be greater than or equal to 0",
                     },
                   })}
                   type={"number"}
@@ -269,8 +267,8 @@ export default function ConfigureAutoModal() {
                   onChange={(e) => {
                     setAutoStopProfit(parseFloat(e.target.value));
                   }}
-                  placeholder={"Amount"}
-                  value={autoStopProfit}
+                  placeholder={"00.00"}
+                  value={autoStopProfit ?? undefined}
                   className={`ml-2 flex w-full min-w-0 bg-transparent text-base text-[#94A3B8] placeholder-[#94A3B8]  font-chakra placeholder-opacity-40 outline-none`}
                 />
               </div>
@@ -314,10 +312,9 @@ export default function ConfigureAutoModal() {
                 <input
                   id={"autoStopLoss"}
                   {...methods.register("autoStopLoss", {
-                    required: "Amount is required",
                     min: {
-                      value: 0.0001,
-                      message: "Value must be greater than or equal to 0.0001",
+                      value: 0,
+                      message: "Value must be greater than or equal to 0",
                     },
                   })}
                   type={"number"}
@@ -327,7 +324,7 @@ export default function ConfigureAutoModal() {
                     setAutoStopLoss(parseFloat(e.target.value));
                   }}
                   placeholder={"00.00"}
-                  value={autoStopLoss}
+                  value={autoStopLoss ?? undefined}
                   className={`ml-2 flex w-full min-w-0 bg-transparent text-base text-[#94A3B8] placeholder-[#94A3B8]  font-chakra placeholder-opacity-40 outline-none`}
                 />
               </div>
@@ -351,21 +348,32 @@ export default function ConfigureAutoModal() {
             <div className="hidden md:flex w-full flex-col mt-2">
               <button
                 type="submit"
-                disabled={false}
+                disabled={
+                  !autoLossChange &&
+                  !autoWinChange &&
+                  !autoStopLoss &&
+                  !autoStopProfit
+                }
                 onClick={onSubmit}
-                className={`disabled:cursor-not-allowed opacity-70 hover:opacity-90 w-full h-[3.75rem] rounded-lg transition-all bg-[#7839C5] disabled:bg-[#4b2876] hover:bg-[#9361d1] focus:bg-[#602E9E] flex items-center justify-center font-chakra font-semibold text-xl text-white`}
+                className={`disabled:cursor-default opacity-70 hover:opacity-90 w-full h-[3.75rem] rounded-lg transition-all bg-[#7839C5] disabled:bg-[#4b2876] hover:bg-[#9361d1] focus:bg-[#602E9E] flex items-center justify-center font-chakra font-semibold text-xl text-white`}
               >
                 APPLY
               </button>
             </div>
-            <span onClick={() => {
-              setAutoLossChange(0)
-              setAutoWinChange(0)
-              setAutoLossChangeReset(true)
-              setAutoWinChangeReset(true)
-              setAutoStopLoss(0)
-              setAutoStopProfit(0)
-            }} className="text-[#94A3B8] hover:text-white/70 transition-all hover:duration-75 w-full text-center cursor-pointer text-base font-semibold font-chakra mt-8 underline underline-offset-2">Reset All</span>
+            <span
+              onClick={() => {
+                setAutoLossChange(null);
+                setAutoWinChange(null);
+                setAutoLossChangeReset(true);
+                setAutoWinChangeReset(true);
+                setAutoStopLoss(null);
+                setAutoStopProfit(null);
+                setUseAutoConfig(false);
+              }}
+              className="text-[#94A3B8] hover:text-white/70 transition-all hover:duration-75 w-full text-center cursor-pointer text-base font-semibold font-chakra mt-8 underline underline-offset-2"
+            >
+              Reset All
+            </span>
           </form>
         </FormProvider>
       </div>
