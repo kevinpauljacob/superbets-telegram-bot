@@ -1,10 +1,12 @@
 import { seedStatus } from "@/utils/provably-fair";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { IoIosArrowDown } from "react-icons/io";
 import { Wheel } from "./HistoryTable";
+import Image from "next/image";
 import WheelProvablyFairModal, { PFModalData } from "./WheelProvablyFairModal";
 import { useGlobalContext } from "@/components/GlobalContext";
 import { FaRegCopy } from "react-icons/fa6";
+import Arc from "@/components/games/Wheel/Arc";
 
 interface ModalData {
   bet: Wheel;
@@ -24,6 +26,8 @@ export default function VerifyWheelModal({
   //handling dice
   const { bet } = modalData;
   const { getProvablyFairData } = useGlobalContext();
+  const wheelRef = useRef<HTMLDivElement>(null);
+  const [rotationAngle, setRotationAngle] = useState(0);
 
   //Provably Fair Modal handling
   const [isPFModalOpen, setIsPFModalOpen] = useState(false);
@@ -83,6 +87,19 @@ export default function VerifyWheelModal({
     return `${day}-${month}-${year} ${hours}:${minutes} UTC`;
   }
 
+  useEffect(() => {
+    if (!wheelRef.current) return;
+    const rotationAngle = 360 / bet.segments;
+    setRotationAngle(rotationAngle);
+  }, [bet.segments]);
+
+  useEffect(() => {
+    const resultAngle = ((bet.strikeNumber - 1) * 360) / 99;
+    if (wheelRef.current) {
+      wheelRef.current.style.transform = `rotate(${360 - resultAngle}deg)`;
+    }
+  }, [bet.strikeNumber]);
+
   return (
     <>
       {isOpen && (
@@ -115,12 +132,7 @@ export default function VerifyWheelModal({
                 <div className="font-changa text-xs text-[#94A3B8] text-opacity-75">
                   Multiplier
                 </div>
-                {/* <div className="text-white font-chakra text-xs font-medium">
-                  {bet.direction === "over"
-                    ? (98 / (100 - (100 - bet.chance))).toFixed(2)
-                    : (98 / (100 - bet.chance)).toFixed(2)}{" "}
-                  x
-                </div> */}
+                {bet.strikeMultiplier}
               </button>
               <button className="px-1 py-3 flex flex-col items-center justify-center w-full text-white rounded-md bg-[#202329]">
                 <div className="font-changa text-xs text-[#94A3B8] text-opacity-75">
@@ -132,8 +144,47 @@ export default function VerifyWheelModal({
               </button>
             </div>
             <div className="mt-6 px-4 md:px-12 pt-7 border-2 border-white border-opacity-5 rounded-md">
-              <div className="relative w-full mb-8 xl:mb-6 pb-5 pt-10"></div>
-              <div className="flex gap-4 pt-7 mb-8">
+              <div className="relative w-full">
+                <div className="flex justify-center items-center w-full">
+                  <div className="relative  w-[200px] h-[200px] flex justify-center">
+                    <Image
+                      src="/assets/wheelPointer.svg"
+                      alt="Pointer"
+                      width={25}
+                      height={25}
+                      id="pointer"
+                      className="absolute z-50 -top-2 transition-all duration-100"
+                    />
+                    <div
+                      ref={wheelRef}
+                      className="relative w-[200px] h-[200px] rounded-full overflow-hidden"
+                    >
+                      {typeof window !== "undefined" && (
+                        <svg viewBox="0 0 300 300">
+                          {rotationAngle &&
+                            Array.from({ length: bet.segments }).map(
+                              (_, index) => (
+                                <Arc
+                                  key={index}
+                                  index={index}
+                                  rotationAngle={rotationAngle}
+                                  risk={bet.risk}
+                                  segments={bet.segments}
+                                />
+                              ),
+                            )}
+                        </svg>
+                      )}
+                    </div>
+                    <div className="absolute z-10 w-[79.75%] h-[79.75%] rounded-full bg-black/10 left-[10%] top-[10%]" />
+                    <div className="absolute z-20 w-[66.5%] h-[66.5%] rounded-full bg-[#171A1F] left-[16.75%] top-[16.75%]" />
+                    <div className="absolute z-20 w-[62.5%] h-[62.5%] rounded-full bg-[#0C0F16] left-[18.75%] top-[18.75%] text-white flex items-center justify-center text-2xl font-semibold font-changa text-opacity-80 ">
+                      {bet.strikeMultiplier}
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div className="flex gap-4 pt-2 mb-8">
                 <div className="w-full">
                   <label className="text-xs text-opacity-75 font-changa text-[#F0F0F0]">
                     Risk

@@ -25,6 +25,7 @@ export default function Wheel() {
   const [refresh, setRefresh] = useState(true);
   const [betType, setBetType] = useState<"manual" | "auto">("manual");
   const [strikeNumber, setStrikeNumber] = useState<number>(0);
+  const [strikeMultiplier, setStrikeMultiplier] = useState<number>();
   const [risk, setRisk] = useState<"low" | "medium" | "high">("low");
   const [segments, setSegments] = useState<number>(10);
   const [rotationAngle, setRotationAngle] = useState(0);
@@ -129,7 +130,7 @@ export default function Wheel() {
         else toast.error(message, { duration: 2000 });
 
         const win = result === "Won";
-        const newBetResult = { result: strikeNumber, win };
+        const newBetResult = { result: strikeMultiplier, win };
 
         setBetResults((prevResults) => {
           const newResults = [...prevResults, newBetResult];
@@ -141,6 +142,7 @@ export default function Wheel() {
 
         if (success) {
           setStrikeNumber(strikeNumber);
+          setStrikeMultiplier(strikeMultiplier);
           console.log("strikeNumber", strikeNumber);
           setRefresh(true);
         }
@@ -306,7 +308,7 @@ export default function Wheel() {
         </>
       </GameOptions>
       <GameDisplay>
-        <div className="w-full flex justify-between items-center mb-7 sm:mb-0">
+        <div className="w-full flex justify-between items-center mb-7 sm:mb-2">
           <div>
             {isRolling ? (
               <div className="font-chakra text-sm font-medium text-white text-opacity-75">
@@ -316,17 +318,17 @@ export default function Wheel() {
           </div>
           <ResultsSlider results={betResults} />
         </div>
-        <div className="w-full my-5">
-          <div className="relative flex justify-center w-full h-full">
+        <div className="flex justify-center items-center w-full my-5">
+          <div className="relative  w-[200px] h-[200px] sm:w-[350px] sm:h-[350px] flex justify-center">
             <Image
               src="/assets/wheelPointer.svg"
               alt="Pointer"
-              width={40}
-              height={40}
+              width={35}
+              height={35}
               id="pointer"
               className={`${
                 isRolling ? "-rotate-[20deg]" : "rotate-0"
-              } absolute z-50 -top-5 transition-all duration-100`}
+              } absolute z-50 -top-3 transition-all duration-100`}
             />
             <div
               ref={wheelRef}
@@ -348,9 +350,11 @@ export default function Wheel() {
                     ))}
                 </svg>
               )}
-              <div className="absolute z-10 w-[88.75%] h-[88.75%] rounded-full bg-black/10 left-[5.625%] top-[5.625%]" />
-              <div className="absolute z-20 w-[77.5%] h-[77.5%] rounded-full bg-[#171A1F] left-[11.25%] top-[11.25%]" />
-              <div className="absolute z-20 w-[72.5%] h-[72.5%] rounded-full bg-[#0C0F16] left-[13.75%] top-[13.75%]" />
+            </div>
+            <div className="absolute z-10 w-[79.75%] h-[79.75%] rounded-full bg-black/10 left-[10%] top-[10%]" />
+            <div className="absolute z-20 w-[66.5%] h-[66.5%] rounded-full bg-[#171A1F] left-[16.75%] top-[16.75%]" />
+            <div className="absolute z-20 w-[62.5%] h-[62.5%] rounded-full bg-[#0C0F16] left-[18.75%] top-[18.75%] text-white flex items-center justify-center text-2xl font-semibold font-changa text-opacity-80 ">
+              {strikeMultiplier}
             </div>
           </div>
         </div>

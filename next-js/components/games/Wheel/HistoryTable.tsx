@@ -13,6 +13,7 @@ export interface Wheel {
   segments: number;
   result: string;
   strikeNumber: number;
+  strikeMultiplier: number;
   amountWon: number;
   nonce?: number;
   gameSeed?: {
@@ -149,7 +150,7 @@ export default function HistoryTable({ refresh }: { refresh: boolean }) {
                   {bet.amount} SOL
                 </span>
                 <span className="w-full hidden md:block text-center font-changa text-sm text-[#F0F0F0]">
-                  {bet.strikeNumber}
+                  {bet.strikeMultiplier}
                 </span>
                 <span
                   className={`w-full text-center font-changa text-sm ${
