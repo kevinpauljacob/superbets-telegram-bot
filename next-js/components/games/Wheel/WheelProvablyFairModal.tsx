@@ -3,10 +3,14 @@ import {
   generateClientSeed,
   generateGameResult,
 } from "@/utils/provably-fair";
-import { useEffect, useState } from "react";
+import Image from "next/image";
+import { useEffect, useState, useRef } from "react";
 import { Wheel } from "./HistoryTable";
 import toast from "react-hot-toast";
 import { FaRegCopy } from "react-icons/fa6";
+import Arc from "@/components/games/Wheel/Arc";
+import { riskToChance } from "@/components/games/Wheel/Segments";
+import { verify } from "tweetnacl";
 
 export interface PFModalData {
   activeGameSeed: {
@@ -50,39 +54,65 @@ export default function WheelProvablyFairModal({
     generateClientSeed(),
   );
   const [strikeNumber, setStrikeNumber] = useState<number>(50.0);
+  const wheelRef = useRef<HTMLDivElement>(null);
+  const [rotationAngle, setRotationAngle] = useState(0);
+  const [hoveredMultiplier, setHoveredMultiplier] = useState<number | null>(
+    null,
+  );
 
-  const [verificationState, setVerificationState] = useState<{
-    clientSeed: string;
-    serverSeed: string;
-    nonce: string;
-    risk: string;
-    segments: number;
-  }>(
-    bet?.gameSeed
-      ? {
-          clientSeed: bet.gameSeed?.clientSeed,
-          serverSeed: bet.gameSeed?.serverSeed ?? "",
-          nonce: bet.nonce?.toString() ?? "",
-          risk: bet.risk?.toString() ?? "",
-          segments: bet.segments ?? 0,
-        }
-      : {
-          clientSeed: "",
-          serverSeed: "",
-          nonce: "",
-          risk: "low",
-          segments: 10,
-        },
+  // const [verificationState, setVerificationState] = useState<{
+  //   clientSeed: string;
+  //   serverSeed: string;
+  //   nonce: string;
+  //   risk: string;
+  //   segments: number;
+  // }>(
+  //   bet?.gameSeed
+  //     ? {
+  //         clientSeed: bet.gameSeed?.clientSeed,
+  //         serverSeed: bet.gameSeed?.serverSeed ?? "",
+  //         nonce: bet.nonce?.toString() ?? "",
+  //         risk: "low",
+  //         segments: 10,
+  //       }
+  //     : {
+  //         clientSeed: "",
+  //         serverSeed: "",
+  //         nonce: "",
+  //         risk: "low",
+  //         segments: 10,
+  //       },
+  // );
+
+  const [verificationState, setVerificationState] = useState({
+    clientSeed: bet?.gameSeed?.clientSeed || "",
+    serverSeed: bet?.gameSeed?.serverSeed || "",
+    nonce: bet?.nonce?.toString() || "",
+    risk: "low",
+    segments: 10,
+  });
+
+  const multipliers = riskToChance[verificationState.risk];
+  const sortedMultipliers = multipliers
+    .slice()
+    .sort((a, b) => a.multiplier - b.multiplier);
+
+  const uniqueSegments = sortedMultipliers.filter(
+    (segment, index, self) =>
+      index === 0 || self[index - 1].multiplier !== segment.multiplier,
   );
 
   const handleToggleState = (newState: "seeds" | "verify") => {
     setState(newState);
   };
 
-  const handleClose = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (e.target === e.currentTarget) {
-      onClose();
-    }
+  const handleClose = () => {
+    //@ts-ignore
+    document.addEventListener("click", function (event) {
+      //@ts-ignore
+      var targetId = event.target.id;
+      if (targetId && targetId === "modal-bg") onClose();
+    });
   };
 
   useEffect(() => {
@@ -136,15 +166,40 @@ export default function WheelProvablyFairModal({
     if (text) navigator.clipboard.writeText(text);
   };
 
+  useEffect(() => {
+    const resultAngle = ((strikeNumber - 1) * 360) / 99;
+    const rotationAngle = 360 / verificationState.segments;
+    setRotationAngle(rotationAngle);
+    if (wheelRef.current) {
+      wheelRef.current.style.transform = `rotate(${360 - resultAngle}deg)`;
+    }
+
+    const item = riskToChance[verificationState.risk];
+    let strikeMultiplier = 0;
+
+    for (let i = 0, isFound = false; i < 100 && !isFound; ) {
+      for (let j = 0; j < item.length; j++) {
+        i += (item[j].chance * 10) / verificationState.segments;
+        if (i >= strikeNumber) {
+          strikeMultiplier = item[j].multiplier;
+          isFound = true;
+          break;
+        }
+      }
+    }
+  }, [strikeNumber, verificationState.risk, verificationState.segments]);
+
   return (
     <>
       {isOpen && (
-        <div className="fixed inset-0 flex items-center justify-center z-50">
-          <div
-            className="absolute inset-0 bg-black bg-opacity-50 backdrop-blur transition-all"
-            onClick={handleClose}
-          ></div>
-          <div className="bg-[#121418] p-8 rounded-lg z-10 w-11/12 sm:w-[600px]">
+        <div
+          onClick={() => {
+            handleClose();
+          }}
+          id="modal-bg"
+          className="absolute z-[150] left-0 top-0 flex h-full w-full items-center justify-center bg-black bg-opacity-50 backdrop-blur transition-all"
+        >
+          <div className="bg-[#121418] max-h-[80vh] no-scrollbar overflow-y-auto p-4 md:p-11 rounded-lg z-10 w-11/12 sm:w-[600px]">
             <div className="font-changa text-[1.75rem] font-semibold text-[#F0F0F0]">
               Provably Fair
             </div>
@@ -270,8 +325,86 @@ export default function WheelProvablyFairModal({
               <div className="grid w-full text-white">
                 <div className="grid gap-2">
                   <div className="border-2 border-opacity-5 border-[#FFFFFF] md:px-8">
-                    <div className="px-8 pt-20 pb-8">
-                      <div className="w-full"></div>
+                    <div className="px-8 py-5">
+                      <div className="flex justify-center items-center w-full">
+                        <div className="relative  w-[200px] h-[200px] flex justify-center">
+                          <Image
+                            src="/assets/wheelPointer.svg"
+                            alt="Pointer"
+                            width={25}
+                            height={25}
+                            id="pointer"
+                            className="absolute z-50 -top-2 transition-all duration-100"
+                          />
+                          <div
+                            ref={wheelRef}
+                            className="relative w-[200px] h-[200px] rounded-full overflow-hidden"
+                            style={{ transform: `rotate(${rotationAngle}deg)` }}
+                          >
+                            {typeof window !== "undefined" && (
+                              <svg viewBox="0 0 300 300">
+                                {rotationAngle &&
+                                  Array.from({
+                                    length: verificationState.segments,
+                                  }).map((_, index) => (
+                                    <Arc
+                                      key={index}
+                                      index={index}
+                                      rotationAngle={rotationAngle}
+                                      risk={verificationState.risk}
+                                      segments={verificationState.segments}
+                                    />
+                                  ))}
+                              </svg>
+                            )}
+                          </div>
+                          <div className="absolute z-10 w-[79.75%] h-[79.75%] rounded-full bg-black/10 left-[10%] top-[10%]" />
+                          <div className="absolute z-20 w-[66.5%] h-[66.5%] rounded-full bg-[#171A1F] left-[16.75%] top-[16.75%]" />
+                          <div className="absolute z-20 w-[62.5%] h-[62.5%] rounded-full bg-[#0C0F16] left-[18.75%] top-[18.75%] text-white flex items-center justify-center text-2xl font-semibold font-changa text-opacity-80 ">
+                            {bet?.strikeMultiplier}
+                          </div>
+                        </div>
+                      </div>
+                      <div className="flex gap-2">
+                        {uniqueSegments.map((segment, index) => (
+                          <div
+                            key={index}
+                            className="relative w-full"
+                            onMouseEnter={() =>
+                              setHoveredMultiplier(segment.multiplier)
+                            }
+                            onMouseLeave={() => setHoveredMultiplier(null)}
+                          >
+                            <div
+                              className={`w-full border-t-[6px] text-center font-chakra font-semibold bg-[#202329] text-xs text-white rounded-md px-1.5 md:px-5 py-2.5`}
+                              style={{ borderColor: segment.color }}
+                            >
+                              {segment.multiplier}x
+                            </div>
+                            {hoveredMultiplier === segment.multiplier && (
+                              <div className="absolute top-[-80px] left-0 z-50 flex gap-2 text-white bg-[#202329] border border-white/10 rounded-lg w-full p-2 fadeInUp duration-100 min-w-[200px]">
+                                <div className="w-1/2">
+                                  <div className="flex justify-between text-[10px] font-medium font-changa text-opacity-90 text-[#F0F0F0]">
+                                    <span className="">Profit</span>
+                                    <span>0.00 SOL</span>
+                                  </div>
+                                  <div className="border border-white/10 rounded-lg text-[10px] p-2 mt-2">
+                                    0.00
+                                  </div>
+                                </div>
+                                <div className="w-1/2">
+                                  <div className="text-[10px] font-medium font-changa text-opacity-90 text-[#F0F0F0]">
+                                    Chance
+                                  </div>
+                                  <div className="border border-white/10 rounded-lg text-[10px] p-2 mt-2">
+                                    {segment.chance}%
+                                  </div>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   </div>
                   <div>

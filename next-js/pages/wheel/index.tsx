@@ -359,43 +359,46 @@ export default function Wheel() {
           </div>
         </div>
         <div className="relative flex w-full justify-between px-0 xl:px-4 mb-0 px:mb-6 gap-4">
-          {uniqueSegments.map((segment, index) => (
-            <div
-              key={index}
-              className="relative w-full"
-              onMouseEnter={() => setHoveredMultiplier(segment.multiplier)}
-              onMouseLeave={() => setHoveredMultiplier(null)}
-            >
-              <div
-                className={`w-full border-t-[6px] text-center font-chakra font-semibold bg-[#202329] text-xs text-white rounded-md px-1.5 md:px-5 py-2.5`}
-                style={{ borderColor: segment.color }}
-              >
-                {segment.multiplier}x
-              </div>
-              {hoveredMultiplier === segment.multiplier && (
-                <div className="absolute top-[-120px] left-0 z-50 flex gap-4 text-white bg-[#202329] border border-white/10 rounded-lg w-full p-4 fadeInUp duration-100 min-w-[250px]">
-                  <div className="w-1/2">
-                    <div className="flex justify-between text-[13px] font-medium font-changa text-opacity-90 text-[#F0F0F0]">
-                      <span className="">Profit</span>
-                      <span>0.00 SOL</span>
-                    </div>
-                    <div className="border border-white/10 rounded-lg p-3 mt-2">
-                      0.00
-                    </div>
+          {coinData && coinData[0].amount > 0.0001 && (
+            <>
+              {uniqueSegments.map((segment, index) => (
+                <div
+                  key={index}
+                  className="relative w-full"
+                  onMouseEnter={() => setHoveredMultiplier(segment.multiplier)}
+                  onMouseLeave={() => setHoveredMultiplier(null)}
+                >
+                  <div
+                    className={`w-full border-t-[6px] text-center font-chakra font-semibold bg-[#202329] text-xs text-white rounded-md px-1.5 md:px-5 py-2.5`}
+                    style={{ borderColor: segment.color }}
+                  >
+                    {segment.multiplier}x
                   </div>
-                  <div className="w-1/2">
-                    <div className="text-[13px] font-medium font-changa text-opacity-90 text-[#F0F0F0]">
-                      Chance
+                  {hoveredMultiplier === segment.multiplier && (
+                    <div className="absolute top-[-120px] left-0 z-50 flex gap-4 text-white bg-[#202329] border border-white/10 rounded-lg w-full p-4 fadeInUp duration-100 min-w-[250px]">
+                      <div className="w-1/2">
+                        <div className="flex justify-between text-[13px] font-medium font-changa text-opacity-90 text-[#F0F0F0]">
+                          <span className="">Profit</span>
+                          <span>0.00 SOL</span>
+                        </div>
+                        <div className="border border-white/10 rounded-lg p-3 mt-2">
+                          0.00
+                        </div>
+                      </div>
+                      <div className="w-1/2">
+                        <div className="text-[13px] font-medium font-changa text-opacity-90 text-[#F0F0F0]">
+                          Chance
+                        </div>
+                        <div className="border border-white/10 rounded-lg p-3 mt-2">
+                          {segment.chance}%
+                        </div>
+                      </div>
                     </div>
-                    <div className="border border-white/10 rounded-lg p-3 mt-2">
-                      {segment.chance}%
-                    </div>
-                  </div>
+                  )}
                 </div>
-              )}
-            </div>
-          ))}
-
+              ))}
+            </>
+          )}
           {!coinData ||
             (coinData[0].amount < 0.0001 && (
               <div className="w-full rounded-lg bg-[#d9d9d90d] bg-opacity-10 flex items-center px-3 py-3 text-white md:px-6">
