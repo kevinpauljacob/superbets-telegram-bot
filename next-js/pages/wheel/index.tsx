@@ -179,9 +179,9 @@ export default function Wheel() {
             );
           }
           // update profit / loss
-          setAutoBetProfit(
-            autoBetProfit + (win ? multiplier - 1 : -1) * betAmt,
-          );
+          // setAutoBetProfit(
+          //   autoBetProfit + (win ? multiplier - 1 : -1) * betAmt,
+          // );
           // update count
           if (typeof autoBetCount === "number")
             setAutoBetCount(autoBetCount - 1);
