@@ -7,6 +7,7 @@ import WheelProvablyFairModal, { PFModalData } from "./WheelProvablyFairModal";
 import { useGlobalContext } from "@/components/GlobalContext";
 import { FaRegCopy } from "react-icons/fa6";
 import Arc from "@/components/games/Wheel/Arc";
+import { riskToChance } from "@/components/games/Wheel/Segments";
 
 interface ModalData {
   bet: Wheel;
@@ -28,6 +29,7 @@ export default function VerifyWheelModal({
   const { getProvablyFairData } = useGlobalContext();
   const wheelRef = useRef<HTMLDivElement>(null);
   const [rotationAngle, setRotationAngle] = useState(0);
+  const [strikeMultiplier, setStrikeMultiplier] = useState(0);
 
   //Provably Fair Modal handling
   const [isPFModalOpen, setIsPFModalOpen] = useState(false);

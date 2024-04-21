@@ -53,44 +53,37 @@ export default function WheelProvablyFairModal({
   const [newClientSeed, setNewClientSeed] = useState<string>(
     generateClientSeed(),
   );
-  const [strikeNumber, setStrikeNumber] = useState<number>(50.0);
+  const [strikeNumber, setStrikeNumber] = useState<number>(0);
+  const [strikeMultiplier, setStrikeMultiplier] = useState<number>();
   const wheelRef = useRef<HTMLDivElement>(null);
   const [rotationAngle, setRotationAngle] = useState(0);
   const [hoveredMultiplier, setHoveredMultiplier] = useState<number | null>(
     null,
   );
 
-  // const [verificationState, setVerificationState] = useState<{
-  //   clientSeed: string;
-  //   serverSeed: string;
-  //   nonce: string;
-  //   risk: string;
-  //   segments: number;
-  // }>(
-  //   bet?.gameSeed
-  //     ? {
-  //         clientSeed: bet.gameSeed?.clientSeed,
-  //         serverSeed: bet.gameSeed?.serverSeed ?? "",
-  //         nonce: bet.nonce?.toString() ?? "",
-  //         risk: "low",
-  //         segments: 10,
-  //       }
-  //     : {
-  //         clientSeed: "",
-  //         serverSeed: "",
-  //         nonce: "",
-  //         risk: "low",
-  //         segments: 10,
-  //       },
-  // );
-
-  const [verificationState, setVerificationState] = useState({
-    clientSeed: bet?.gameSeed?.clientSeed || "",
-    serverSeed: bet?.gameSeed?.serverSeed || "",
-    nonce: bet?.nonce?.toString() || "",
-    risk: "low",
-    segments: 10,
-  });
+  const [verificationState, setVerificationState] = useState<{
+    clientSeed: string;
+    serverSeed: string;
+    nonce: string;
+    risk: string;
+    segments: number;
+  }>(
+    bet?.gameSeed
+      ? {
+          clientSeed: bet.gameSeed?.clientSeed,
+          serverSeed: bet.gameSeed?.serverSeed ?? "",
+          nonce: bet.nonce?.toString() ?? "",
+          risk: "low",
+          segments: 10,
+        }
+      : {
+          clientSeed: "",
+          serverSeed: "",
+          nonce: "",
+          risk: "low",
+          segments: 10,
+        },
+  );
 
   const multipliers = riskToChance[verificationState.risk];
   const sortedMultipliers = multipliers
@@ -167,7 +160,7 @@ export default function WheelProvablyFairModal({
   };
 
   useEffect(() => {
-    const resultAngle = ((strikeNumber - 1) * 360) / 99;
+    const resultAngle = ((strikeNumber - 1) * 360) / 100;
     const rotationAngle = 360 / verificationState.segments;
     setRotationAngle(rotationAngle);
     if (wheelRef.current) {
@@ -182,6 +175,7 @@ export default function WheelProvablyFairModal({
         i += (item[j].chance * 10) / verificationState.segments;
         if (i >= strikeNumber) {
           strikeMultiplier = item[j].multiplier;
+          setStrikeMultiplier(strikeMultiplier);
           isFound = true;
           break;
         }
@@ -339,7 +333,6 @@ export default function WheelProvablyFairModal({
                           <div
                             ref={wheelRef}
                             className="relative w-[200px] h-[200px] rounded-full overflow-hidden"
-                            style={{ transform: `rotate(${rotationAngle}deg)` }}
                           >
                             {typeof window !== "undefined" && (
                               <svg viewBox="0 0 300 300">
@@ -361,7 +354,7 @@ export default function WheelProvablyFairModal({
                           <div className="absolute z-10 w-[79.75%] h-[79.75%] rounded-full bg-black/10 left-[10%] top-[10%]" />
                           <div className="absolute z-20 w-[66.5%] h-[66.5%] rounded-full bg-[#171A1F] left-[16.75%] top-[16.75%]" />
                           <div className="absolute z-20 w-[62.5%] h-[62.5%] rounded-full bg-[#0C0F16] left-[18.75%] top-[18.75%] text-white flex items-center justify-center text-2xl font-semibold font-changa text-opacity-80 ">
-                            {bet?.strikeMultiplier}
+                            {strikeMultiplier}
                           </div>
                         </div>
                       </div>

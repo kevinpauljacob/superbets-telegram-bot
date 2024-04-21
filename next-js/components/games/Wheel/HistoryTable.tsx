@@ -106,61 +106,59 @@ export default function HistoryTable({ refresh }: { refresh: boolean }) {
             page * transactionsPerPage,
           )
           .map((bet, index) => (
-            <>
-              <div
-                key={index}
-                className={`mb-2.5 ml-2.5 mr-2.5 flex w-full flex-row items-center gap-2 rounded-[5px] bg-[#121418] py-3 ${
-                  !all && "cursor-pointer"
+            <div
+              key={index}
+              className={`mb-2.5 ml-2.5 mr-2.5 flex w-full flex-row items-center gap-2 rounded-[5px] bg-[#121418] py-3 ${
+                !all && "cursor-pointer"
+              }`}
+              onClick={() => {
+                //fetch flipDetails and verification details here
+                if (!all) {
+                  setVerifyModalData(bet);
+                  openModal();
+                }
+              }}
+            >
+              <span className="w-full text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
+                {bet.createdAt
+                  ? new Date(bet.createdAt).toLocaleDateString("en-GB", {
+                      day: "2-digit",
+                      month: "2-digit",
+                      year: "2-digit",
+                    })
+                  : "-"}{" "}
+                {bet.createdAt
+                  ? new Date(bet.createdAt).toLocaleTimeString("en-GB", {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })
+                  : "-"}
+              </span>
+              {all && (
+                <span className="w-full hidden md:block text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
+                  {obfuscatePubKey(bet.wallet)}
+                </span>
+              )}
+              <span className="w-full hidden md:block capitalize text-center font-changa text-sm text-[#F0F0F0] ">
+                {bet.risk}
+              </span>
+              <span className="w-full hidden md:block capitalize text-center font-changa text-sm text-[#F0F0F0] ">
+                {bet.segments}
+              </span>
+              <span className="w-full hidden md:block text-center font-changa text-sm text-[#F0F0F0]">
+                {bet.amount} SOL
+              </span>
+              <span className="w-full hidden md:block text-center font-changa text-sm text-[#F0F0F0]">
+                {bet.strikeMultiplier}
+              </span>
+              <span
+                className={`w-full text-center font-changa text-sm ${
+                  bet.result === "Won" ? "text-fomo-green" : "text-fomo-red"
                 }`}
-                onClick={() => {
-                  //fetch flipDetails and verification details here
-                  if (!all) {
-                    setVerifyModalData(bet);
-                    openModal();
-                  }
-                }}
               >
-                <span className="w-full text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
-                  {bet.createdAt
-                    ? new Date(bet.createdAt).toLocaleDateString("en-GB", {
-                        day: "2-digit",
-                        month: "2-digit",
-                        year: "2-digit",
-                      })
-                    : "-"}{" "}
-                  {bet.createdAt
-                    ? new Date(bet.createdAt).toLocaleTimeString("en-GB", {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })
-                    : "-"}
-                </span>
-                {all && (
-                  <span className="w-full hidden md:block text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
-                    {obfuscatePubKey(bet.wallet)}
-                  </span>
-                )}
-                <span className="w-full hidden md:block capitalize text-center font-changa text-sm text-[#F0F0F0] ">
-                  {bet.risk}
-                </span>
-                <span className="w-full hidden md:block capitalize text-center font-changa text-sm text-[#F0F0F0] ">
-                  {bet.segments}
-                </span>
-                <span className="w-full hidden md:block text-center font-changa text-sm text-[#F0F0F0]">
-                  {bet.amount} SOL
-                </span>
-                <span className="w-full hidden md:block text-center font-changa text-sm text-[#F0F0F0]">
-                  {bet.strikeMultiplier}
-                </span>
-                <span
-                  className={`w-full text-center font-changa text-sm ${
-                    bet.result === "Won" ? "text-fomo-green" : "text-fomo-red"
-                  }`}
-                >
-                  {bet.amountWon.toFixed(4)} SOL
-                </span>
-              </div>
-            </>
+                {bet.amountWon.toFixed(4)} SOL
+              </span>
+            </div>
           ))
       ) : (
         <span className="w-full text-center font-changa text-[#F0F0F080]">
