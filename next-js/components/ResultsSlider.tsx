@@ -25,7 +25,7 @@ export default function ResultsSlider({ results }: { results: Result[] }) {
 
   return (
     <div
-      className="flex overflow-x-auto no-scrollbar items-center max-w-[11rem] md:max-w-[15.9rem] xl:max-w-[19.6rem]"
+      className="flex overflow-x-auto no-scrollbar items-center max-w-[11.7rem] md:max-w-[15.7rem] xl:max-w-[19.6rem]"
       ref={resultsContainerRef}
     >
       {results.map((result, index) => (
@@ -35,7 +35,7 @@ export default function ResultsSlider({ results }: { results: Result[] }) {
             result.win
               ? "border-[#72F238] text-[#72F238]"
               : "border-[#282E3D] text-white"
-          } font-chakra text-center text-xs font-semibold border-2 bg-[#282E3D] text-opacity-75 rounded-md transition-all duration-300 w-14 px-3 py-1 ml-1 sm:ml-2`}
+          } font-chakra text-center text-xs font-semibold border-2 bg-[#282E3D] text-opacity-75 rounded-md transition-all duration-300 min-w-[3.5rem] max-w-[3.5rem] py-1 ml-2`}
         >
           {result.result}
         </div>

@@ -28,6 +28,7 @@ import Dice6 from "@/public/assets/Dice6";
 import BetAmount from "@/components/games/BetAmountInput";
 import BetButton from "@/components/games/BetButton";
 import ResultsSlider from "@/components/ResultsSlider";
+import showInfoToast from "@/components/games/toasts/toasts";
 
 export default function Dice() {
   const wallet = useWallet();
@@ -51,8 +52,11 @@ export default function Dice() {
     setAutoBetCount,
     autoBetProfit,
     setAutoBetProfit,
+    useAutoConfig,
+    setUseAutoConfig,
   } = useGlobalContext();
   const [user, setUser] = useState<any>(null);
+  const [userInput, setUserInput] = useState(0);
   const [betAmt, setBetAmt] = useState(0);
 
   const [isRolling, setIsRolling] = useState(false);
@@ -74,7 +78,7 @@ export default function Dice() {
   const [strikeFace, setStrikeFace] = useState<number>(0);
   const [rollType, setRollType] = useState<"manual" | "auto">("manual");
   const [betResults, setBetResults] = useState<
-    { result: number; win: boolean }[]
+    { face: number; win: boolean }[]
   >([]);
   const [showPointer, setShowPointer] = useState<boolean>(false);
 
@@ -159,7 +163,7 @@ export default function Dice() {
           const isWin = result === "Won";
           const newBetResults = [
             ...(betResults.length <= 4 ? betResults : betResults.slice(-4)),
-            { result: winningPays, win: isWin },
+            { face: strikeNumber, win: isWin },
           ];
           setBetResults(newBetResults);
           setShowPointer(true);
@@ -168,27 +172,36 @@ export default function Dice() {
 
           // auto options
           if (rollType === "auto") {
-            if (isWin) {
-              setAutoBetProfit(autoBetProfit + (winningPays - 1) * betAmt);
+            if (useAutoConfig && autoWinChange && isWin) {
               setBetAmt(
                 autoWinChangeReset
-                  ? betAmt
+                  ? userInput
                   : betAmt + (autoWinChange * betAmt) / 100.0,
               );
-            } else {
-              setAutoBetProfit(autoBetProfit - betAmt);
+            } else if (useAutoConfig && autoLossChange && !isWin) {
               setBetAmt(
                 autoLossChangeReset
-                  ? betAmt
+                  ? userInput
                   : betAmt + (autoLossChange * betAmt) / 100.0,
               );
             }
+            // update profit / loss
+            setAutoBetProfit(
+              autoBetProfit + (isWin ? winningPays - 1 : -1) * betAmt,
+            );
+            // update count
             if (typeof autoBetCount === "number")
               setAutoBetCount(autoBetCount - 1);
+            else setAutoBetCount(autoBetCount + 1);
           }
+        } else {
+          setAutoBetCount(0);
+          setStartAuto(false);
         }
       } catch (e) {
         setIsRolling(false);
+        setAutoBetCount(0);
+        setStartAuto(false);
         console.error("Error occurred while rolling the dice:", e);
       }
       setIsRolling(false);
@@ -251,15 +264,30 @@ export default function Dice() {
   }, []);
 
   useEffect(() => {
+    setBetAmt(userInput);
+  }, [userInput]);
+
+  useEffect(() => {
+    console.log(
+      rollType,
+      startAuto,
+      autoBetCount,
+      typeof autoBetCount === "string" && autoBetCount === "inf",
+    );
     if (
       rollType === "auto" &&
       startAuto &&
-      ((typeof autoBetCount === "string" && autoBetCount === "inf") ||
-        (typeof autoBetCount === "number" && autoBetCount > 0)) &&
-      autoBetProfit <= autoStopProfit &&
-      autoBetProfit >= -1 * autoStopLoss
+      ((typeof autoBetCount === "string" && autoBetCount.includes("inf")) ||
+        (typeof autoBetCount === "number" && autoBetCount > 0))
     ) {
-      console.log("from here", startAuto);
+      if (useAutoConfig && autoStopProfit && autoBetProfit <= autoStopProfit) {
+        showInfoToast("Profit limit reached.");
+        return;
+      }
+      if (useAutoConfig && autoStopLoss && autoBetProfit >= -1 * autoStopLoss) {
+        showInfoToast("Loss limit reached.");
+        return;
+      }
       diceRoll();
     } else {
       setStartAuto(false);
@@ -270,10 +298,11 @@ export default function Dice() {
   const onSubmit = async (data: any) => {
     if (
       rollType === "auto" &&
-      ((typeof autoBetCount === "string" && autoBetCount === "inf") ||
+      ((typeof autoBetCount === "string" && autoBetCount.includes("inf")) ||
         (typeof autoBetCount === "number" && autoBetCount > 0))
     ) {
-      console.log("Auto betting");
+      console.log("Auto betting. config: ", useAutoConfig);
+      setAutoBetCount("inf");
       setStartAuto(true);
     } else if (wallet.connected && selectedFace.length > 0) diceRoll();
   };
@@ -288,6 +317,17 @@ export default function Dice() {
                 onClick={handleBlink}
                 className="absolute w-full h-full opacity-0 z-20"
               />
+            )}
+            {startAuto && (
+              <div
+                onClick={() => {
+                  setAutoBetCount(0);
+                  setStartAuto(false);
+                }}
+                className="cursor-pointer rounded-lg absolute w-full h-full z-20 bg-[#442c62] hover:bg-[#7653A2] focus:bg-[#53307E] flex items-center justify-center font-chakra font-semibold text-2xl tracking-wider text-white"
+              >
+                STOP
+              </div>
             )}
             <BetButton
               disabled={
@@ -312,7 +352,7 @@ export default function Dice() {
                 onSubmit={methods.handleSubmit(onSubmit)}
               >
                 {/* amt input  */}
-                <BetAmount betAmt={betAmt} setBetAmt={setBetAmt} />
+                <BetAmount betAmt={userInput} setBetAmt={setUserInput} />
                 {rollType === "manual" ? (
                   <></>
                 ) : (
@@ -337,7 +377,9 @@ export default function Dice() {
                           autoComplete="off"
                           onChange={handleCountChange}
                           placeholder={
-                            autoBetCount === "inf" ? "Infinity" : "00"
+                            autoBetCount.toString().includes("inf")
+                              ? "Infinity"
+                              : "00"
                           }
                           value={autoBetCount}
                           className={`flex w-full min-w-0 bg-transparent text-base text-[#94A3B8] placeholder-[#94A3B8] font-chakra ${
@@ -381,12 +423,7 @@ export default function Dice() {
                       Configure Auto
                       <div
                         className={`${
-                          autoLossChange >= 0 &&
-                          autoWinChange >= 0 &&
-                          autoStopLoss > 0 &&
-                          autoStopProfit > 0
-                            ? "bg-fomo-green"
-                            : "bg-fomo-red"
+                          useAutoConfig ? "bg-fomo-green" : "bg-fomo-red"
                         } absolute top-0 right-0 m-1.5 bg-fomo-green w-2 h-2 rounded-full`}
                       />
                     </div>
@@ -398,6 +435,17 @@ export default function Dice() {
                       onClick={handleBlink}
                       className="absolute w-full h-full opacity-0 z-20"
                     />
+                  )}
+                  {startAuto && (
+                    <div
+                      onClick={() => {
+                        setAutoBetCount(0);
+                        setStartAuto(false);
+                      }}
+                      className="cursor-pointer rounded-lg absolute w-full h-full z-20 bg-[#442c62] hover:bg-[#7653A2] focus:bg-[#53307E] flex items-center justify-center font-chakra font-semibold text-2xl tracking-wider text-white"
+                    >
+                      STOP
+                    </div>
                   )}
                   <BetButton
                     disabled={
@@ -436,23 +484,23 @@ export default function Dice() {
                 </div>
               )}
             </div>
-            <ResultsSlider results={betResults} />
-            {/* <div>
+            <div className="flex items-center gap-2">
               {betResults.map((result, index) => (
-                <Image
+                <div
                   key={index}
-                  src={`/assets/${
-                    result.isWin ? "winDiceFace" : "lossDiceFace"
-                  }${result.face}.png`}
-                  width={15}
-                  height={15}
-                  alt={`Dice face ${result.face}`}
-                  className={`mr-2 inline-block w-[15px] h-[15px] sm:w-[20px] sm:h-[20px] md:w-[30px] md:h-[30px] ${
-                    selectedFace.includes(result.face) ? "selected-face" : ""
+                  className={`${
+                    result.win ? "text-fomo-green" : "text-fomo-red"
                   }`}
-                />
+                >
+                  {result.face === 1 && <Dice1 className="w-7 h-7" />}
+                  {result.face === 2 && <Dice2 className="w-7 h-7" />}
+                  {result.face === 3 && <Dice3 className="w-7 h-7" />}
+                  {result.face === 4 && <Dice4 className="w-7 h-7" />}
+                  {result.face === 5 && <Dice5 className="w-7 h-7" />}
+                  {result.face === 6 && <Dice6 className="w-7 h-7" />}
+                </div>
               ))}
-            </div> */}
+            </div>
           </div>
 
           <div className="relative w-full my-16 md:my-20">

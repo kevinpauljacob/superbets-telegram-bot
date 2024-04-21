@@ -20,6 +20,7 @@ import Loader from "@/components/games/Loader";
 import BetAmount from "@/components/games/BetAmountInput";
 import BetButton from "@/components/games/BetButton";
 import ResultsSlider from "@/components/ResultsSlider";
+import showInfoToast from "@/components/games/toasts/toasts";
 
 export default function Dice2() {
   const wallet = useWallet();
@@ -41,8 +42,11 @@ export default function Dice2() {
     setAutoBetCount,
     autoBetProfit,
     setAutoBetProfit,
+    useAutoConfig,
+    setUseAutoConfig,
   } = useGlobalContext();
   const [betAmt, setBetAmt] = useState(0);
+  const [userInput, setUserInput] = useState(0);
   const [isRolling, setIsRolling] = useState(false);
   const [refresh, setRefresh] = useState(true);
   const [betType, setBetType] = useState<"manual" | "auto">("manual");
@@ -194,26 +198,33 @@ export default function Dice2() {
 
         // auto options
         if (betType === "auto") {
-          if (win) {
-            setAutoBetProfit(autoBetProfit + (multiplier - 1) * betAmt);
+          if (useAutoConfig && autoWinChange && win) {
             setBetAmt(
               autoWinChangeReset
-                ? betAmt
+                ? userInput
                 : betAmt + (autoWinChange * betAmt) / 100.0,
             );
-          } else {
+          } else if (useAutoConfig && autoLossChange && !win) {
             setAutoBetProfit(autoBetProfit - betAmt);
             setBetAmt(
               autoLossChangeReset
-                ? betAmt
+                ? userInput
                 : betAmt + (autoLossChange * betAmt) / 100.0,
             );
           }
+          // update profit / loss
+          setAutoBetProfit(
+            autoBetProfit + (win ? multiplier - 1 : -1) * betAmt,
+          );
+          // update count
           if (typeof autoBetCount === "number")
             setAutoBetCount(autoBetCount - 1);
+          else setAutoBetCount(autoBetCount + 1);
         }
       } catch (error) {
         console.error("Error occurred while betting:", error);
+        setAutoBetCount(0);
+        setStartAuto(false);
       } finally {
         setIsRolling(false);
       }
@@ -254,15 +265,25 @@ export default function Dice2() {
   }, [wallet?.publicKey, refresh]);
 
   useEffect(() => {
-    console.log("Auto: ",startAuto,autoBetCount)
+    setBetAmt(userInput);
+  }, [userInput]);
+
+  useEffect(() => {
+    console.log("Auto: ", startAuto, autoBetCount);
     if (
       betType === "auto" &&
       startAuto &&
-      ((typeof autoBetCount === "string" && autoBetCount === "inf") ||
-        (typeof autoBetCount === "number" && autoBetCount > 0)) &&
-      autoBetProfit <= autoStopProfit &&
-      autoBetProfit >= -1 * autoStopLoss
+      ((typeof autoBetCount === "string" && autoBetCount.includes("inf")) ||
+        (typeof autoBetCount === "number" && autoBetCount > 0))
     ) {
+      if (useAutoConfig && autoStopProfit && autoBetProfit <= autoStopProfit) {
+        showInfoToast("Profit limit reached.");
+        return;
+      }
+      if (useAutoConfig && autoStopLoss && autoBetProfit >= -1 * autoStopLoss) {
+        showInfoToast("Loss limit reached.");
+        return;
+      }
       handleBet();
     } else {
       setStartAuto(false);
@@ -273,10 +294,10 @@ export default function Dice2() {
   const onSubmit = async (data: any) => {
     if (
       betType === "auto" &&
-      ((typeof autoBetCount === "string" && autoBetCount === "inf") ||
+      ((typeof autoBetCount === "string" && autoBetCount.includes("inf")) ||
         (typeof autoBetCount === "number" && autoBetCount > 0))
     ) {
-      console.log("Auto betting");
+      console.log("Auto betting. config: ", useAutoConfig);
       setStartAuto(true);
     } else if (wallet.connected) handleBet();
   };
@@ -285,7 +306,18 @@ export default function Dice2() {
     <GameLayout title="FOMO - Dice 2">
       <GameOptions>
         <>
-          <div className="w-full flex md:hidden mb-5">
+          <div className="relative w-full flex md:hidden mb-5">
+            {startAuto && (
+              <div
+                onClick={() => {
+                  setAutoBetCount(0);
+                  setStartAuto(false);
+                }}
+                className="cursor-pointer rounded-lg absolute w-full h-full z-20 bg-[#442c62] hover:bg-[#7653A2] focus:bg-[#53307E] flex items-center justify-center font-chakra font-semibold text-2xl tracking-wider text-white"
+              >
+                STOP
+              </div>
+            )}
             <BetButton
               disabled={
                 !wallet ||
@@ -308,7 +340,7 @@ export default function Dice2() {
                 onSubmit={methods.handleSubmit(onSubmit)}
               >
                 {/* amt input  */}
-                <BetAmount betAmt={betAmt} setBetAmt={setBetAmt} />
+                <BetAmount betAmt={userInput} setBetAmt={setUserInput} />
                 {betType === "manual" ? (
                   <></>
                 ) : (
@@ -333,7 +365,9 @@ export default function Dice2() {
                           autoComplete="off"
                           onChange={handleCountChange}
                           placeholder={
-                            autoBetCount === "inf" ? "Infinity" : "00"
+                            autoBetCount.toString().includes("inf")
+                              ? "Infinity"
+                              : "00"
                           }
                           value={autoBetCount}
                           className={`flex w-full min-w-0 bg-transparent text-base text-[#94A3B8] placeholder-[#94A3B8] font-chakra ${
@@ -377,19 +411,25 @@ export default function Dice2() {
                       Configure Auto
                       <div
                         className={`${
-                          autoLossChange >= 0 &&
-                          autoWinChange >= 0 &&
-                          autoStopLoss > 0 &&
-                          autoStopProfit > 0
-                            ? "bg-fomo-green"
-                            : "bg-fomo-red"
+                          useAutoConfig ? "bg-fomo-green" : "bg-fomo-red"
                         } absolute top-0 right-0 m-1.5 bg-fomo-green w-2 h-2 rounded-full`}
                       />
                     </div>
                   </div>
                 )}
 
-                <div className="w-full hidden md:flex mt-2">
+                <div className="relative w-full hidden md:flex mt-2">
+                  {startAuto && (
+                    <div
+                      onClick={() => {
+                        setAutoBetCount(0);
+                        setStartAuto(false);
+                      }}
+                      className="rounded-lg absolute w-full h-full z-20 bg-[#442c62] hover:bg-[#7653A2] focus:bg-[#53307E] flex items-center justify-center font-chakra font-semibold text-2xl tracking-wider text-white"
+                    >
+                      STOP
+                    </div>
+                  )}
                   <BetButton
                     disabled={
                       !wallet ||
