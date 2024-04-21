@@ -103,13 +103,18 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       let amountLost = amount;
 
       const item = riskToChance[risk];
+      let strikeMultiplier = 0;
+
       for (let i = 0, isFound = false; i < 100 && !isFound; ) {
         for (let j = 0; j < item.length; j++) {
           i += (item[j].chance * 10) / segments;
           if (i >= strikeNumber) {
-            result = "Won";
-            amountWon = amount * item[j].multiplier;
-            amountLost = 0;
+            if (item[j].multiplier !== 0) {
+              result = "Won";
+              amountWon = amount * item[j].multiplier;
+              amountLost = 0;
+            }
+            strikeMultiplier = item[j].multiplier;
             isFound = true;
             break;
           }
@@ -203,9 +208,12 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
             ? "Congratulations! You won!"
             : "Better luck next time!",
         result,
+        segments,
+        risk,
         strikeNumber,
         amountWon,
         amountLost,
+        strikeMultiplier,
       });
     } catch (e: any) {
       console.log(e);

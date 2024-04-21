@@ -60,34 +60,34 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
     }
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    let newValue = parseFloat(e.target.value);
-    newValue = Math.max(2, Math.min(newValue, 98));
-    setChoice(newValue);
-  };
+  // const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  //   let newValue = parseFloat(e.target.value);
+  //   newValue = Math.max(2, Math.min(newValue, 98));
+  //   setChoice(newValue);
+  // };
 
-  const handleDragStart = () => {
-    setIsDragging(true);
-  };
+  // const handleDragStart = () => {
+  //   setIsDragging(true);
+  // };
 
-  const handleDragEnd = () => {
-    setIsDragging(false);
-  };
+  // const handleDragEnd = () => {
+  //   setIsDragging(false);
+  // };
 
-  const handleDrag = (e: any) => {
-    if (isDragging) {
-      const rect = e.target.getBoundingClientRect();
-      const offsetX = e.clientX - rect.left;
-      let newChoice = (offsetX / rect.width) * 100;
+  // const handleDrag = (e: any) => {
+  //   if (isDragging) {
+  //     const rect = e.target.getBoundingClientRect();
+  //     const offsetX = e.clientX - rect.left;
+  //     let newChoice = (offsetX / rect.width) * 100;
 
-      if (newChoice < 2) {
-        newChoice = 2;
-      } else if (newChoice > 98) {
-        newChoice = 98;
-      }
-      setChoice(newChoice);
-    }
-  };
+  //     if (newChoice < 2) {
+  //       newChoice = 2;
+  //     } else if (newChoice > 98) {
+  //       newChoice = 98;
+  //     }
+  //     setChoice(newChoice);
+  //   }
+  // };
 
   const indicators = [0, 25, 50, 75, 100];
 
@@ -107,14 +107,14 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
                 const value = parseInt(e.currentTarget.value);
                 //@ts-ignore
                 document.getElementById("min-slider")!.value =
-                  value >= 2 ? value <= 98 ? value : 98 : 2;
-                setChoice(value >= 2 ? value <= 98 ? value : 98 : 2);
+                  value >= 2 ? (value <= 98 ? value : 98) : 2;
+                setChoice(value >= 2 ? (value <= 98 ? value : 98) : 2);
               }}
               disabled={!draggable}
               min={0}
               max="100"
               step={0.01}
-              className={`w-full h-1 sm:h-2 bg-transparent rounded-lg appearance-none cursor-pointer z-50`}
+              className={`dice2 w-full h-1 sm:h-2 bg-transparent rounded-lg appearance-none cursor-pointer z-50`}
             />
             {/* bar fill  */}
             <div

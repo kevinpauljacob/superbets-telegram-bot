@@ -20,11 +20,19 @@ export default function Arc({ index, rotationAngle, risk, segments }) {
   const d = arc({
     x: 150,
     y: 150,
-    R: 150,
-    r: 90,
+    R: 140,
+    r: 100,
     start: index * rotationAngle,
     end: (index + 1) * rotationAngle,
   });
 
-  return <path key={index} d={d} fill={color} fillRule="evenodd" />;
+  return (
+    <path
+      key={index}
+      d={d}
+      fill={color}
+      fillRule="evenodd"
+      className="segment"
+    />
+  );
 }

@@ -14,10 +14,12 @@ import VerifyFlipModal from "./games/CoinFlip/VerifyFlipModal";
 import VerifyDiceModal from "./games/Dice/VerifyDiceModal";
 import VerifyDice2Modal from "./games/Dice2/VerifyDice2Modal";
 import VerifyLimboModal from "./games/Limbo/VerifyLimboModal";
+import VerifyWheelModal from "./games/Wheel/VerifyWheelModal";
 import { Flip } from "./games/CoinFlip/HistoryTable";
 import { Dice2 } from "./games/Dice2/HistoryTable";
 import { Dice } from "./games/Dice/HistoryTable";
 import { Limbo } from "./games/Limbo/HistoryTable";
+import { Wheel } from "./games/Wheel/HistoryTable";
 import { GameType } from "@/utils/provably-fair";
 import ConfigureAutoModal from "./games/ConfigureAutoModal";
 
@@ -106,13 +108,19 @@ export default function Layout({ children }: LayoutProps) {
           onClose={closeVerifyModal}
           modalData={{ bet: (verifyModalData as Dice2)! }}
         />
-      ) : (
+      ) : game === GameType.limbo ? (
         <VerifyLimboModal
           isOpen={isVerifyModalOpen}
           onClose={closeVerifyModal}
           modalData={{ flip: (verifyModalData as Limbo)! }}
         />
-      )}
+      ) : game === GameType.wheel ? (
+        <VerifyWheelModal
+          isOpen={isVerifyModalOpen}
+          onClose={closeVerifyModal}
+          modalData={{ bet: (verifyModalData as Wheel)! }}
+        />
+      ) : null}
       <ConfigureAutoModal />
     </>
   );

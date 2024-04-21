@@ -2,7 +2,7 @@ import { seedStatus } from "@/utils/provably-fair";
 import { useState } from "react";
 import { IoIosArrowDown, IoMdCopy } from "react-icons/io";
 import { Dice2 } from "./HistoryTable";
-import DiceProvablyFairModal, { PFModalData } from "./ProvablyFairModal";
+import DiceProvablyFairModal, { PFModalData } from "./Dice2ProvablyFairModal";
 import { useGlobalContext } from "@/components/GlobalContext";
 import DraggableBar from "./DraggableBar";
 import { FaRegCopy } from "react-icons/fa6";

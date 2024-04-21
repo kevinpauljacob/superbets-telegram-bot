@@ -458,20 +458,6 @@ export default function Dice2() {
             ) : null}
           </div>
           <ResultsSlider results={betResults} />
-          {/* <div className="flex">
-            {betResults.map((result, index) => (
-              <div
-                key={index}
-                className={`${
-                  result.win
-                    ? "border-[#72F238] text-[#72F238]"
-                    : "border-[#282E3D] text-white"
-                } font-chakra text-xs sm:text-sm font-semibold border-2 bg-[#282E3D] text-opacity-75 rounded-md transition-all duration-300 px-2 sm:px-4 py-1.5 ml-1 sm:ml-2`}
-              >
-                {result.result}
-              </div>
-            ))}
-          </div> */}
         </div>
         <div className="w-full my-16 md:my-20">
           <DraggableBar
