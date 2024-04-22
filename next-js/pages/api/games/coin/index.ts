@@ -10,6 +10,8 @@ import {
 } from "@/utils/provably-fair";
 import StakingUser from "@/models/staking/user";
 import { pointTiers } from "@/context/transactions";
+import { Decimal } from "decimal.js";
+Decimal.set({ precision: 9 });
 
 const secret = process.env.NEXTAUTH_SECRET;
 
@@ -43,8 +45,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           message: "Invalid bet amount",
         });
 
-      await connectDatabase();
-
       if (
         !wallet ||
         !amount ||
@@ -54,6 +54,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         return res
           .status(400)
           .json({ success: false, message: "Missing parameters" });
+
+      await connectDatabase();
 
       let user = await User.findOne({ wallet });
 
@@ -97,7 +99,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       );
 
       let result = "Lost";
-      let amountWon = 0;
+      let amountWon = new Decimal(0);
       let amountLost = amount;
       const strikeMultiplier = 2;
 
@@ -106,7 +108,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         (flipType === "tails" && strikeNumber === 2)
       ) {
         result = "Won";
-        amountWon = amount * strikeMultiplier;
+        amountWon = Decimal.mul(amount, strikeMultiplier);
         amountLost = 0;
       }
 
@@ -122,7 +124,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         },
         {
           $inc: {
-            "deposit.$.amount": -amount + amountWon,
+            "deposit.$.amount": amountWon.sub(amount),
           },
         },
         {
@@ -166,7 +168,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
               payload: {
                 game: GameType.coin,
                 wallet,
-                absAmount: Math.abs(amountWon - amountLost),
+                absAmount: amountWon.sub(amountLost).abs().toNumber(),
                 result,
                 userTier,
               },

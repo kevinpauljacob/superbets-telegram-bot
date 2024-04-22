@@ -9,7 +9,9 @@ import {
 } from "@/utils/provably-fair";
 import StakingUser from "@/models/staking/user";
 import { pointTiers } from "@/context/transactions";
-import { wsEndpoint } from "@/context/gameTransactions";
+import { minGameAmount, wsEndpoint } from "@/context/gameTransactions";
+import { Decimal } from "decimal.js";
+Decimal.set({ precision: 9 });
 
 const secret = process.env.NEXTAUTH_SECRET;
 
@@ -37,17 +39,23 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           message: "User wallet not authenticated",
         });
 
-      await connectDatabase();
-
       if (!wallet || !amount || !tokenMint || !chance)
         return res
           .status(400)
           .json({ success: false, message: "Missing parameters" });
 
+      if (amount < minGameAmount)
+        return res.status(400).json({
+          success: false,
+          message: "Invalid bet amount",
+        });
+
       if (tokenMint !== "SOL" || !(2 <= chance && chance <= 98))
         return res
           .status(400)
           .json({ success: false, message: "Invalid parameters" });
+
+      await connectDatabase();
 
       let user = await User.findOne({ wallet });
 
@@ -93,14 +101,14 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       if (!strikeNumber) throw new Error("Invalid strike number!");
 
       let result = "Lost";
-      let amountWon = 0;
+      let amountWon = new Decimal(0);
       let amountLost = amount;
-      const strikeMultiplier = 100 / chance;
+      const strikeMultiplier = new Decimal(100).dividedBy(chance).toDP(2);
 
       if (strikeNumber <= chance) {
         result = "Won";
-        amountWon = amount * strikeMultiplier;
-        amountLost = Math.max(amount - amountWon, 0);
+        amountWon = new Decimal(amount).mul(strikeMultiplier);
+        amountLost = Math.max(new Decimal(amount).sub(amountWon).toNumber(), 0);
       }
 
       const userUpdate = await User.findOneAndUpdate(
@@ -115,7 +123,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         },
         {
           $inc: {
-            "deposit.$.amount": -amount + amountWon,
+            "deposit.$.amount": amountWon.sub(amount),
           },
         },
         {
@@ -159,7 +167,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
               payload: {
                 game: GameType.limbo,
                 wallet,
-                absAmount: Math.abs(amountWon - amountLost),
+                absAmount: amountWon.sub(amountLost).abs().toNumber(),
                 result,
                 userTier,
               },
@@ -178,7 +186,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
             : "Better luck next time!",
         result,
         strikeNumber,
-        amountWon,
+        amountWon: amountWon.toNumber(),
         amountLost,
       });
     } catch (e: any) {

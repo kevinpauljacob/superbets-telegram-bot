@@ -45,8 +45,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           message: "Invalid bet amount",
         });
 
-      await connectDatabase();
-
       if (!wallet || !amount || tokenMint !== "SOL")
         return res
           .status(400)
@@ -66,6 +64,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         return res
           .status(400)
           .json({ success: false, message: "Invalid chosen numbers" });
+
+      await connectDatabase();
 
       let user = await User.findOne({ wallet });
 
