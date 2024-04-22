@@ -151,37 +151,27 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
       const { serverSeed, clientSeed, nonce } = activeGameSeed;
 
-      const strikeNumber = generateGameResult(
+      const strikeNumbers = generateGameResult(
         serverSeed,
         clientSeed,
         nonce,
         GameType.keno,
       );
 
-      if (!strikeNumber) throw new Error("Invalid strike number!");
+      if (!strikeNumbers) throw new Error("Invalid strike number!");
 
       const multiplier = riskToChance[risk][chosenNumbers.length];
 
-      //find the number of matches in strikeNumber and chosenNumbers
+      //find the number of matches in strikeNumbers and chosenNumbers
       let matches = 0;
       chosenNumbers.forEach((number) => {
-        if (strikeNumber.includes(number)) {
+        if (strikeNumbers.includes(number)) {
           matches++;
         }
       });
-      const amountWon = amount * multiplier[matches];
+      const strikeMultiplier = multiplier[matches];
+      const amountWon = amount * strikeMultiplier;
       const amountLost = Math.max(amount - amountWon, 0);
-
-      let sns;
-
-      if (!user.sns) {
-        sns = (
-          await fetch(
-            `https://sns-api.bonfida.com/owners/${wallet}/domains`,
-          ).then((data) => data.json())
-        ).result[0];
-        if (sns) sns = sns + ".sol";
-      }
 
       const userUpdate = await User.findOneAndUpdate(
         {
@@ -197,7 +187,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           $inc: {
             "deposit.$.amount": -amount + amountWon,
           },
-          sns,
         },
         {
           new: true,
@@ -214,7 +203,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         amount,
         chosenNumbers,
         risk,
-        strikeNumber,
+        strikeNumbers,
+        strikeMultiplier,
         tokenMint,
         result,
         amountWon,
@@ -256,7 +246,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       return res.status(201).json({
         success: true,
         message: `Congratulations! You won ${amountWon}!`,
-        strikeNumber,
+        strikeNumbers,
         amountWon,
         amountLost,
       });

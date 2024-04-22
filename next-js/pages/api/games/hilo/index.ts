@@ -78,17 +78,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
       let result = "Pending";
 
-      let sns;
-
-      if (!user.sns) {
-        sns = (
-          await fetch(
-            `https://sns-api.bonfida.com/owners/${wallet}/domains`,
-          ).then((data) => data.json())
-        ).result[0];
-        if (sns) sns = sns + ".sol";
-      }
-
       const userUpdate = await User.findOneAndUpdate(
         {
           wallet,
@@ -103,7 +92,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           $inc: {
             "deposit.$.amount": -amount,
           },
-          sns,
         },
         {
           new: true,

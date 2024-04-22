@@ -15,7 +15,14 @@ const coinSchema = new mongoose.Schema(
       enum: ["heads", "tails"],
       required: true,
     },
-    strikeNumber: Number,
+    strikeNumber: {
+      type: Number,
+      required: true,
+    },
+    strikeMultiplier: {
+      type: Number,
+      required: true,
+    },
     result: {
       type: String,
       enum: ["Won", "Lost"],
