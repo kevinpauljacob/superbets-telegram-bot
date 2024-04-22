@@ -333,7 +333,7 @@ export default function Limbo() {
               </div>
             ) : null}
           </div>
-          <ResultsSlider results={lastMultipliers} />
+          <ResultsSlider results={lastMultipliers} align={"horizontal"} />
         </div>
         <div className="grid place-items-center">
           <div className="bg-[#1E2024] px-8 py-6 md:px-10 md:py-8 lg:px-12 lg:py-10 my-5 md:my-10 lg:my-0 place-content-center text-center rounded-[10px]">
