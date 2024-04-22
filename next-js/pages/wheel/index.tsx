@@ -83,8 +83,16 @@ export default function Wheel() {
     const resultAngle = ((strikeNumber - 1) * 360) / 99;
     console.log("resultAngle", resultAngle);
     if (wheelRef.current) {
-      wheelRef.current.style.transition = "transform 1s ease-in-out";
-      wheelRef.current.style.transform = `rotate(${360 - resultAngle}deg)`;
+      wheelRef.current.style.animation = "spin 1s linear forwards";
+      setTimeout(() => {
+        if (wheelRef.current) {
+          wheelRef.current.style.transition = "transform 1s ease-in-out";
+          wheelRef.current.style.transform = `rotate(${360 - resultAngle}deg)`;
+        }
+        setTimeout(() => {
+          if (wheelRef.current) wheelRef.current.style.animation = "none";
+        }, 500);
+      }, 50);
     }
   };
 
@@ -136,6 +144,7 @@ export default function Wheel() {
           await response.json();
 
         spinWheel(strikeNumber);
+        await new Promise((resolve) => setTimeout(resolve, 550));
         if (success != true) {
           toast.error(message);
           throw new Error(message);
@@ -459,7 +468,7 @@ export default function Wheel() {
           <ResultsSlider results={betResults} />
         </div>
         <div className="flex justify-center items-center w-full my-5">
-          <div className="relative  w-[200px] h-[200px] sm:w-[350px] sm:h-[350px] flex justify-center">
+          <div className="relative  w-[200px] h-[200px] sm:w-[280px] sm:h-[280px] flex justify-center">
             <Image
               src="/assets/wheelPointer.svg"
               alt="Pointer"
@@ -472,9 +481,7 @@ export default function Wheel() {
             />
             <div
               ref={wheelRef}
-              className={`${
-                isRolling ? "animate-spin" : "animate-none"
-              } relative w-[200px] h-[200px] sm:w-[350px] sm:h-[350px] rounded-full overflow-hidden`}
+              className={`relative w-[200px] h-[200px] sm:w-[280px] sm:h-[280px] rounded-full overflow-hidden`}
             >
               {typeof window !== "undefined" && (
                 <svg viewBox="0 0 300 300">
