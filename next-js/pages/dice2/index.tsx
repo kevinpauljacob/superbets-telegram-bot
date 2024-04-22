@@ -346,7 +346,7 @@ export default function Dice2() {
                 ) : (
                   <div className="w-full flex flex-row items-end gap-3">
                     <div className="mb-0 flex w-full flex-col">
-                      <div className="mb-1 flex w-full items-center justify-between text-sm font-changa text-opacity-90">
+                      <div className="mb-1 flex w-full items-center justify-between text-xs font-changa text-opacity-90">
                         <label className="text-white/90 font-medium font-changa">
                           Number of Bets
                         </label>
