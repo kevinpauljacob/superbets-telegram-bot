@@ -151,6 +151,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         segments,
         risk,
         strikeNumber,
+        strikeMultiplier,
         result,
         tokenMint,
         amountWon,
