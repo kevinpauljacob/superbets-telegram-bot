@@ -73,8 +73,8 @@ export default function WheelProvablyFairModal({
           clientSeed: bet.gameSeed?.clientSeed,
           serverSeed: bet.gameSeed?.serverSeed ?? "",
           nonce: bet.nonce?.toString() ?? "",
-          risk: "low",
-          segments: 10,
+          risk: bet.risk,
+          segments: bet.segments,
         }
       : {
           clientSeed: "",
@@ -84,6 +84,17 @@ export default function WheelProvablyFairModal({
           segments: 10,
         },
   );
+
+  useEffect(() => {
+    setStrikeNumber(
+      generateGameResult(
+        verificationState.serverSeed,
+        verificationState.clientSeed,
+        parseInt(verificationState.nonce),
+        GameType.wheel,
+      ),
+    );
+  }, []);
 
   const multipliers = riskToChance[verificationState.risk];
   const sortedMultipliers = multipliers
@@ -181,7 +192,12 @@ export default function WheelProvablyFairModal({
         }
       }
     }
-  }, [strikeNumber, verificationState.risk, verificationState.segments]);
+  }, [
+    isOpen,
+    strikeNumber,
+    verificationState.risk,
+    verificationState.segments,
+  ]);
 
   return (
     <>
