@@ -1,5 +1,4 @@
 import connectDatabase from "../../../../utils/database";
-import { ROLL_TAX } from "../../../../context/config";
 import { getToken } from "next-auth/jwt";
 import { NextApiRequest, NextApiResponse } from "next";
 import { wsEndpoint, minGameAmount } from "@/context/gameTransactions";
@@ -110,22 +109,12 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       let result = "Lost";
       let amountWon = 0;
       let amountLost = amount;
+      const strikeMultiplier = 6 / chosenNumbers.length;
 
       if (chosenNumbers.includes(strikeNumber)) {
         result = "Won";
-        amountWon = (amount * 6) / chosenNumbers.length;
+        amountWon = amount * strikeMultiplier;
         amountLost = 0;
-      }
-
-      let sns;
-
-      if (!user.sns) {
-        sns = (
-          await fetch(
-            `https://sns-api.bonfida.com/owners/${wallet}/domains`,
-          ).then((data) => data.json())
-        ).result[0];
-        if (sns) sns = sns + ".sol";
       }
 
       const userUpdate = await User.findOneAndUpdate(
@@ -142,7 +131,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           $inc: {
             "deposit.$.amount": -amount + amountWon,
           },
-          sns,
         },
         {
           new: true,
@@ -158,6 +146,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         amount,
         chosenNumbers,
         strikeNumber,
+        strikeMultiplier,
         result,
         tokenMint,
         amountWon,

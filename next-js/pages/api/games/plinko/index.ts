@@ -139,31 +139,20 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
       if (!strikeNumber) throw new Error("Invalid strike number!");
 
-      let amountWon = 0;
-
       const multiplier = riskToChance[risk][rows];
+      let strikeMultiplier = 1;
       for (
         let i = 1, chance = 1, totalChance = chance;
         i <= rows;
         ++i, chance = (chance * (rows - i + 1)) / i, totalChance += chance
       ) {
         if (strikeNumber <= totalChance) {
-          amountWon = multiplier[i - 1] * amount;
+          strikeMultiplier = multiplier[i - 1];
         }
       }
 
+      const amountWon = strikeMultiplier * amount;
       const amountLost = Math.max(amount - amountWon, 0);
-
-      let sns;
-
-      if (!user.sns) {
-        sns = (
-          await fetch(
-            `https://sns-api.bonfida.com/owners/${wallet}/domains`,
-          ).then((data) => data.json())
-        ).result[0];
-        if (sns) sns = sns + ".sol";
-      }
 
       const userUpdate = await User.findOneAndUpdate(
         {
@@ -179,7 +168,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           $inc: {
             "deposit.$.amount": -amount + amountWon,
           },
-          sns,
         },
         {
           new: true,
@@ -197,6 +185,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         rows,
         risk,
         strikeNumber,
+        strikeMultiplier,
         tokenMint,
         result,
         amountWon,

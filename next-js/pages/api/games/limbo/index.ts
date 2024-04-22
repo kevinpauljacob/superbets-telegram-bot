@@ -95,22 +95,12 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       let result = "Lost";
       let amountWon = 0;
       let amountLost = amount;
+      const strikeMultiplier = 100 / chance;
 
       if (strikeNumber <= chance) {
         result = "Won";
-        amountWon = amount * (100 / chance);
+        amountWon = amount * strikeMultiplier;
         amountLost = Math.max(amount - amountWon, 0);
-      }
-
-      let sns;
-
-      if (!user.sns) {
-        sns = (
-          await fetch(
-            `https://sns-api.bonfida.com/owners/${wallet}/domains`,
-          ).then((data) => data.json())
-        ).result[0];
-        if (sns) sns = sns + ".sol";
       }
 
       const userUpdate = await User.findOneAndUpdate(
@@ -127,7 +117,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           $inc: {
             "deposit.$.amount": -amount + amountWon,
           },
-          sns,
         },
         {
           new: true,
@@ -143,6 +132,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         amount,
         chance,
         strikeNumber,
+        strikeMultiplier,
         result,
         tokenMint,
         amountWon,

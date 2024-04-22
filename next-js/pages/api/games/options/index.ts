@@ -95,17 +95,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           .status(400)
           .json({ success: false, message: "Insufficient balance !" });
 
-      let sns;
-
-      if (!user.sns) {
-        sns = (
-          await fetch(
-            `https://sns-api.bonfida.com/owners/${wallet}/domains`,
-          ).then((data) => data.json())
-        ).result[0];
-        if (sns) sns = sns + ".sol";
-      }
-
       const result = await User.findOneAndUpdate(
         {
           wallet,
@@ -120,7 +109,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         {
           $inc: { "deposit.$.amount": -amount },
           isOptionOngoing: true,
-          sns,
         },
         {
           new: true,

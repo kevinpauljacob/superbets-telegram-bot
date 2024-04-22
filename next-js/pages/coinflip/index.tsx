@@ -19,6 +19,8 @@ import { BsInfinity } from "react-icons/bs";
 import Loader from "@/components/games/Loader";
 import BetAmount from "@/components/games/BetAmountInput";
 import BetButton from "@/components/games/BetButton";
+import ResultsSlider from "@/components/ResultsSlider";
+import showInfoToast from "@/components/games/toasts/toasts";
 
 const Timer = dynamic(() => import("../../components/games/Timer"), {
   ssr: false,
@@ -37,10 +39,24 @@ export default function Flip() {
     getWalletBalance,
     setShowWalletModal,
     setShowAutoModal,
+    autoWinChange,
+    autoLossChange,
+    autoWinChangeReset,
+    autoLossChangeReset,
+    autoStopProfit,
+    autoStopLoss,
+    startAuto,
+    setStartAuto,
+    autoBetCount,
+    setAutoBetCount,
+    autoBetProfit,
+    setAutoBetProfit,
+    useAutoConfig,
+    setUseAutoConfig,
   } = useGlobalContext();
 
-  const [betAmt, setBetAmt] = useState(0.2);
-  const [betCount, setBetCount] = useState(0);
+  const [betAmt, setBetAmt] = useState(0);
+  const [userInput, setUserInput] = useState(0);
   const [betType, setBetType] = useState<string | null>(null);
   const [flipping, setFlipping] = useState(false);
   const [result, setResult] = useState<string | null>(null);
@@ -49,8 +65,24 @@ export default function Flip() {
   const [refresh, setRefresh] = useState(true);
 
   const [betSetting, setBetSetting] = useState<"manual" | "auto">("manual");
+  const [betResults, setBetResults] = useState<
+    { result: number; win: boolean }[]
+  >([]);
 
   const bet = async () => {
+    console.log(
+      "betting",
+      autoWinChange,
+      autoLossChange,
+      autoWinChangeReset,
+      autoLossChangeReset,
+      autoStopProfit,
+      autoStopLoss,
+      startAuto,
+      autoBetCount,
+      autoBetProfit,
+      betAmt,
+    );
     try {
       console.log("Placing Flip");
       let response = await placeFlip(
@@ -62,10 +94,46 @@ export default function Flip() {
         response?.data?.result == "Won"
           ? toast.success(response?.message)
           : toast.error(response?.message);
+
+        const win = response?.data?.result === "Won";
+        const newBetResult = { result: response?.data?.strikeNumber, win };
+
+        setBetResults((prevResults) => {
+          const newResults = [...prevResults, newBetResult];
+          if (newResults.length > 6) {
+            newResults.shift();
+          }
+          return newResults;
+        });
+
         setResult(response?.data?.result ?? "Lost");
         setRefresh(true);
         setLoading(false);
         setFlipping(false);
+
+        // auto options
+        if (betSetting === "auto") {
+          if (useAutoConfig && autoWinChange && win) {
+            setBetAmt(
+              autoWinChangeReset
+                ? userInput
+                : betAmt + (autoWinChange * betAmt) / 100.0,
+            );
+          } else if (useAutoConfig && autoLossChange && !win) {
+            setAutoBetProfit(autoBetProfit - betAmt);
+            setBetAmt(
+              autoLossChangeReset
+                ? userInput
+                : betAmt + (autoLossChange * betAmt) / 100.0,
+            );
+          }
+          // update profit / loss
+          setAutoBetProfit(autoBetProfit + (win ? 1 : -1) * betAmt);
+          // update count
+          if (typeof autoBetCount === "number")
+            setAutoBetCount(autoBetCount - 1);
+          else setAutoBetCount(autoBetCount + 1);
+        }
       } else {
         setBetType(null);
         setLoading(false);
@@ -79,31 +147,6 @@ export default function Flip() {
       setFlipping(false);
       setLoading(false);
       setResult(null);
-    }
-  };
-
-  const onSubmit = async (data: any) => {
-    console.log(data);
-    if (result) {
-      setBetType(null);
-      setLoading(false);
-      setResult(null);
-      setFlipping(false);
-      setBetAmt(0);
-    } else {
-      if (!wallet.publicKey) {
-        toast.error("Wallet not connected");
-        return;
-      }
-      if (betAmt === 0) {
-        toast.error("Set Amount.");
-        return;
-      }
-      if (betType) {
-        setLoading(true);
-        setFlipping(true);
-        bet();
-      }
     }
   };
 
@@ -128,6 +171,60 @@ export default function Flip() {
     }
   }, [wallet?.publicKey, refresh]);
 
+  useEffect(() => {
+    setBetAmt(userInput);
+  }, [userInput]);
+
+  useEffect(() => {
+    console.log("Auto: ", startAuto, autoBetCount);
+    if (
+      betSetting === "auto" &&
+      startAuto &&
+      ((typeof autoBetCount === "string" && autoBetCount.includes("inf")) ||
+        (typeof autoBetCount === "number" && autoBetCount > 0))
+    ) {
+      if (useAutoConfig && autoStopProfit && autoBetProfit <= autoStopProfit) {
+        showInfoToast("Profit limit reached.");
+        return;
+      }
+      if (useAutoConfig && autoStopLoss && autoBetProfit >= -1 * autoStopLoss) {
+        showInfoToast("Loss limit reached.");
+        return;
+      }
+      setLoading(true);
+      setFlipping(true);
+      bet();
+    } else {
+      setStartAuto(false);
+      setAutoBetProfit(0);
+    }
+  }, [startAuto, autoBetCount]);
+
+  const onSubmit = async (data: any) => {
+    console.log(data);
+    if (!wallet.publicKey) {
+      toast.error("Wallet not connected");
+      return;
+    }
+    if (betAmt === 0) {
+      toast.error("Set Amount.");
+      return;
+    }
+    if (betType) {
+      if (
+        betSetting === "auto" &&
+        ((typeof autoBetCount === "string" && autoBetCount.includes("inf")) ||
+          (typeof autoBetCount === "number" && autoBetCount > 0))
+      ) {
+        console.log("Auto betting. config: ", useAutoConfig);
+        setStartAuto(true);
+      } else {
+        setLoading(true);
+        setFlipping(true);
+        bet();
+      }
+    }
+  };
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
@@ -137,7 +234,7 @@ export default function Flip() {
   const handleCountChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
-    setBetCount(parseFloat(e.target.value));
+    setAutoBetCount(parseFloat(e.target.value));
   };
 
   return (
@@ -164,7 +261,7 @@ export default function Flip() {
                     }
                     onClickFunction={onSubmit}
                   >
-                    {loading ? <Loader /> : result ? "BET AGAIN" : "BET"}
+                    {loading ? <Loader /> : "BET"}
                   </BetButton>
                 </div>
 
@@ -176,8 +273,8 @@ export default function Flip() {
                 ) : (
                   <div className="w-full flex flex-row items-end gap-3">
                     <div className="mb-0 flex w-full flex-col">
-                      <div className="mb-1 flex w-full items-center justify-between text-sm font-changa text-opacity-90">
-                        <label className="text-white/90 font-medium font-changa">
+                      <div className="mb-1 flex w-full items-center justify-between text-xs font-changa text-opacity-90">
+                        <label className="text-white/90 font-changa">
                           Number of Bets
                         </label>
                       </div>
@@ -194,15 +291,25 @@ export default function Flip() {
                           step={"any"}
                           autoComplete="off"
                           onChange={handleCountChange}
-                          placeholder={"00"}
-                          value={betCount}
-                          className={`flex w-full min-w-0 bg-transparent text-base text-[#94A3B8] placeholder-[#94A3B8]  font-chakra placeholder-opacity-40 outline-none`}
+                          placeholder={
+                            autoBetCount.toString().includes("inf")
+                              ? "Infinity"
+                              : "00"
+                          }
+                          value={autoBetCount}
+                          className={`flex w-full min-w-0 bg-transparent text-base text-[#94A3B8] placeholder-[#94A3B8] font-chakra ${
+                            autoBetCount === "inf"
+                              ? "placeholder-opacity-100"
+                              : "placeholder-opacity-40"
+                          } placeholder-opacity-40 outline-none`}
                         />
                         <span
-                          className="text-2xl font-medium text-white text-opacity-50 bg-[#292C32] hover:bg-[#47484A] focus:bg-[#47484A] transition-all rounded-[5px] py-0.5 px-3"
-                          onClick={() =>
-                            setBetCount(coinData ? coinData[0]?.amount : 0)
-                          }
+                          className={`text-2xl font-medium text-white text-opacity-50 ${
+                            autoBetCount === "inf"
+                              ? "bg-[#47484A]"
+                              : "bg-[#292C32]"
+                          } hover:bg-[#47484A] focus:bg-[#47484A] transition-all rounded-[5px] py-0.5 px-3`}
+                          onClick={() => setAutoBetCount("inf")}
                         >
                           <BsInfinity />
                         </span>
@@ -269,9 +376,7 @@ export default function Flip() {
                         width={23}
                         height={23}
                         alt=""
-                        className={`${
-                          betType && loading && !result ? "rotate" : ""
-                        }`}
+                        className={``}
                       />
                       <span className="mt-0.5">Heads</span>
                     </div>
@@ -290,9 +395,7 @@ export default function Flip() {
                         width={23}
                         height={23}
                         alt=""
-                        className={`${
-                          betType && loading && !result ? "rotate" : ""
-                        }`}
+                        className={``}
                       />
                       <span className="mt-0.5">Tails</span>
                     </div>
@@ -308,7 +411,7 @@ export default function Flip() {
                       }
                       onClickFunction={onSubmit}
                     >
-                      {loading ? <Loader /> : result ? "BET AGAIN" : "BET"}
+                      {loading ? <Loader /> : "BET"}
                     </BetButton>
                   </div>
                 </div>
@@ -329,29 +432,40 @@ export default function Flip() {
                   : "You Lost!"
                 : ""}
             </span>
-            <div className="flex gap-3">
-              <span
-                className={`px-4 py-1 ${
-                  flipping
-                    ? "border-transparent text-white"
-                    : result
-                    ? result === "Won"
-                      ? "border-[#72F238] text-[#72F238]"
-                      : "border-[#D92828] text-[#D92828]"
-                    : "border-transparent text-white"
-                } border bg-[#282E3D] rounded text-xs font-chakra font-semibold`}
-              >
-                {betAmt.toFixed(3)}
-              </span>
-              <span className="text-xs px-4 py-1 font-chakra bg-[#282E3D] text-white rounded font-semibold">
-                2x
-              </span>
+            <div className="flex items-center gap-2">
+              {betResults.map((result, index) => (
+                <div
+                  key={index}
+                  className={`bg-[#282E3D] p-0.5 flex items-center justify-center border-2 rounded-full ${
+                    result.win ? "border-fomo-green" : "border-fomo-red"
+                  }`}
+                >
+                  {result.result === 1 && (
+                    <Image
+                      src={"/assets/coin.png"}
+                      width={23}
+                      height={23}
+                      alt=""
+                      className={``}
+                    />
+                  )}
+                  {result.result === 2 && (
+                    <Image
+                      src={"/assets/tails.png"}
+                      width={23}
+                      height={23}
+                      alt=""
+                      className={``}
+                    />
+                  )}
+                </div>
+              ))}
             </div>
           </div>
 
           <div
             className={`w-[11rem] h-[11rem] relative mb-10 ${
-              betType && loading && !result ? "rotate" : ""
+              betType && loading ? "rotate" : ""
             }`}
           >
             <Image
@@ -361,11 +475,15 @@ export default function Flip() {
               objectPosition="center"
               alt=""
               className={`absolute ${
-                betType && loading && !result
+                betType && loading
                   ? "translateZ1"
-                  : result === "Won" && betType === "Tails"
-                  ? "z-[100]"
-                  : "z-[10]"
+                  : result === "Won"
+                  ? betType === "Tails"
+                    ? "z-[100]"
+                    : "z-[10]"
+                  : betType === "Tails"
+                  ? "z-[10]"
+                  : "z-[100]"
               }`}
             />
             <Image
@@ -375,11 +493,15 @@ export default function Flip() {
               objectPosition="center"
               alt=""
               className={`absolute ${
-                betType && loading && !result
+                betType && loading
                   ? "z-[10]"
-                  : result === "Won" && betType === "Heads"
-                  ? "z-[100]"
-                  : "z-[1]"
+                  : result === "Won"
+                  ? betType === "Heads"
+                    ? "z-[100]"
+                    : "z-[1]"
+                  : betType === "Heads"
+                  ? "z-[1]"
+                  : "z-[100]"
               }`}
             />
           </div>

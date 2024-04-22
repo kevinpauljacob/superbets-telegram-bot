@@ -69,6 +69,17 @@ export default function RollDiceProvablyFairModal({
         },
   );
 
+  useEffect(() => {
+    setWonDiceFace(
+      generateGameResult(
+        verificationState.serverSeed,
+        verificationState.clientSeed,
+        parseInt(verificationState.nonce),
+        GameType.dice,
+      ),
+    );
+  }, []);
+
   const [wonDiceFace, setWonDiceFace] = useState<number>(1);
 
   const handleToggleState = (newState: "seeds" | "verify") => {

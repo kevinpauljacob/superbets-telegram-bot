@@ -179,9 +179,9 @@ export default function Wheel() {
             );
           }
           // update profit / loss
-          // setAutoBetProfit(
-          //   autoBetProfit + (win ? multiplier - 1 : -1) * betAmt,
-          // );
+          setAutoBetProfit(
+            autoBetProfit + (win ? strikeMultiplier - 1 : -1) * betAmt,
+          );
           // update count
           if (typeof autoBetCount === "number")
             setAutoBetCount(autoBetCount - 1);
@@ -345,8 +345,8 @@ export default function Wheel() {
                 ) : (
                   <div className="w-full flex flex-row items-end gap-3">
                     <div className="mb-0 flex w-full flex-col">
-                      <div className="mb-1 flex w-full items-center justify-between text-sm font-changa text-opacity-90">
-                        <label className="text-white/90 font-medium font-changa">
+                      <div className="mb-1 flex w-full items-center justify-between text-xs font-changa text-opacity-90">
+                        <label className="text-white/90 font-changa">
                           Number of Bets
                         </label>
                       </div>
