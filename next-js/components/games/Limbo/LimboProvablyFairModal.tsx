@@ -70,6 +70,20 @@ export default function LimboProvablyFairModal({
         },
   );
 
+  useEffect(() => {
+    setMultiplier(
+      (
+        100 /
+        generateGameResult(
+          verificationState.serverSeed,
+          verificationState.clientSeed,
+          parseInt(verificationState.nonce),
+          GameType.limbo,
+        )
+      ).toFixed(2),
+    );
+  }, []);
+
   const handleToggleState = (newState: "seeds" | "verify") => {
     setState(newState);
   };

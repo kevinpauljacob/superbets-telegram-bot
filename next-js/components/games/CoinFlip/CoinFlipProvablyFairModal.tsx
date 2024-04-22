@@ -71,6 +71,19 @@ export default function CoinFlipProvablyFairModal({
   //handling coin flip
   const [wonCoinFace, setWonCoinface] = useState<"heads" | "tails">("heads");
 
+  useEffect(() => {
+    setWonCoinface(
+      generateGameResult(
+        verificationState.serverSeed,
+        verificationState.clientSeed,
+        parseInt(verificationState.nonce),
+        GameType.coin,
+      ) === 1
+        ? "heads"
+        : "tails",
+    );
+  }, []);
+
   const handleToggleState = (newState: "seeds" | "verify") => {
     setState(newState);
   };
