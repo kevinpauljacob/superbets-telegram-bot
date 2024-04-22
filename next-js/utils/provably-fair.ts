@@ -111,7 +111,6 @@ export const generateGameResult = <T extends GameType>(
         let mineIndex =
           parseInt(hash.slice(minesCount * 2, minesCount * 2 + 2), 16) % 25;
 
-        //if the mine is already there then place mine in the next available slot
         while (mines[mineIndex] === 1) {
           mineIndex = (mineIndex + 1) % 25;
         }

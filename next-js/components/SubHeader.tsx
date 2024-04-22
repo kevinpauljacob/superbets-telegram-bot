@@ -40,7 +40,6 @@ export default function SubHeader() {
     const socket = new WebSocket(wsEndpoint);
 
     socket.onopen = () => {
-      console.log("WebSocket connection opened");
       socket.send(
         JSON.stringify({
           clientType: "listener-client",

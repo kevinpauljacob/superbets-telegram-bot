@@ -147,8 +147,6 @@ export default function Options() {
           setBetEnd(true);
           setCheckResult(true);
 
-          // await new Promise((r) => setTimeout(r, 2000));
-
           let betEndPrice = await fetch(
             `https://hermes.pyth.network/api/get_price_feed?id=0xef0d8b6fda2ceba41da15d4095d1da392a0d2f8ed0c6c7bc0f4cfac8c280b56d&publish_time=${Math.floor(
               (new Date(res?.data?.betTime).getTime() + betInterval * 60000) /
@@ -201,7 +199,6 @@ export default function Options() {
                 Date.now(),
             );
             if (new Date(bet.betEndTime!).getTime() < Date.now()) {
-              // await new Promise((r) => setTimeout(r, 2000));
 
               setBetEnd(true);
               setCheckResult(true);

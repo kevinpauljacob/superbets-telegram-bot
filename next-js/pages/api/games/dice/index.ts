@@ -10,6 +10,8 @@ import {
 } from "@/utils/provably-fair";
 import StakingUser from "@/models/staking/user";
 import { pointTiers } from "@/context/transactions";
+import { Decimal } from "decimal.js";
+Decimal.set({ precision: 9 });
 
 const secret = process.env.NEXTAUTH_SECRET;
 
@@ -107,13 +109,13 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       );
 
       let result = "Lost";
-      let amountWon = 0;
+      let amountWon = new Decimal(0);
       let amountLost = amount;
-      const strikeMultiplier = 6 / chosenNumbers.length;
+      const strikeMultiplier = new Decimal(6 / chosenNumbers.length);
 
       if (chosenNumbers.includes(strikeNumber)) {
         result = "Won";
-        amountWon = amount * strikeMultiplier;
+        amountWon = new Decimal(amount).mul(strikeMultiplier);
         amountLost = 0;
       }
 
@@ -129,7 +131,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         },
         {
           $inc: {
-            "deposit.$.amount": -amount + amountWon,
+            "deposit.$.amount": amountWon.minus(amount).toNumber(),
           },
         },
         {
@@ -165,7 +167,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         const socket = new WebSocket(wsEndpoint);
 
         socket.onopen = () => {
-          console.log("WebSocket connection opened");
           socket.send(
             JSON.stringify({
               clientType: "api-client",
@@ -174,7 +175,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
               payload: {
                 game: GameType.dice,
                 wallet,
-                absAmount: Math.abs(amountWon - amountLost),
+                absAmount: amountWon.sub(amountLost).abs().toNumber(),
                 result,
                 userTier,
               },
@@ -189,8 +190,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         success: true,
         data: {
           strikeNumber,
+          strikeMultiplier: strikeMultiplier.toNumber(),
           result,
-          amountWon,
+          amountWon: amountWon.toNumber(),
           amountLost,
         },
         message: `${result} ${

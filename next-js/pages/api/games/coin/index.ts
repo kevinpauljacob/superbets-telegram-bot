@@ -158,7 +158,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         const socket = new WebSocket(wsEndpoint);
 
         socket.onopen = () => {
-          console.log("WebSocket connection opened");
           socket.send(
             JSON.stringify({
               clientType: "api-client",
