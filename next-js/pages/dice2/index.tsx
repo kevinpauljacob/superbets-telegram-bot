@@ -457,7 +457,7 @@ export default function Dice2() {
               </div>
             ) : null}
           </div>
-          <ResultsSlider results={betResults} />
+          <ResultsSlider results={betResults} align={"horizontal"} />
         </div>
         <div className="w-full my-16 md:my-20">
           <DraggableBar

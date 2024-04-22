@@ -5,7 +5,13 @@ interface Result {
   win: boolean;
 }
 
-export default function ResultsSlider({ results }: { results: Result[] }) {
+export default function ResultsSlider({
+  results,
+  align,
+}: {
+  results: Result[];
+  align: string;
+}) {
   const resultsContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -25,7 +31,14 @@ export default function ResultsSlider({ results }: { results: Result[] }) {
 
   return (
     <div
-      className="flex overflow-x-auto no-scrollbar items-center max-w-[11.7rem] md:max-w-[15.7rem] xl:max-w-[19.6rem]"
+      className={`flex ${
+        align === "horizontal"
+          ? "flex-row"
+          : align === "vertical"
+          ? "flex-col gap-1"
+          : ""
+      }
+overflow-x-auto no-scrollbar items-center max-w-[11.7rem] md:max-w-[15.7rem] xl:max-w-[19.6rem]`}
       ref={resultsContainerRef}
     >
       {results.map((result, index) => (

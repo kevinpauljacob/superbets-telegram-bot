@@ -293,38 +293,38 @@ export default function Wheel() {
                 {/* amt input  */}
                 <BetAmount betAmt={userInput} setBetAmt={setUserInput} />
                 <div className="mb-6 w-full">
-                  <div className="flex justify-between text-sm mb-2">
+                  <div className="flex justify-between text-xs mb-2">
                     <p className="font-medium font-changa text-[#F0F0F0] text-opacity-90">
                       Risk
                     </p>
                   </div>
-                  <div className="group flex w-full items-center rounded-[8px] text-white font-chakra text-sm font-semibold bg-[#0C0F16] p-4">
+                  <div className="group flex gap-2.5 w-full items-center rounded-[8px] text-white font-chakra text-sm font-semibold bg-[#0C0F16] p-4">
                     <div
                       onClick={() => setRisk("low")}
-                      className={`text-center bg-[#202329] border-2 rounded-md w-1/3 py-3 transition-all ${
+                      className={`text-center w-full rounded-[5px] border-[2px] bg-[#202329] py-2 text-xs font-chakra text-white text-opacity-90 transition duration-200 ${
                         risk === "low"
                           ? "border-[#7839C5]"
-                          : "border-transparent"
+                          : "border-transparent hover:border-[#7839C580]"
                       }`}
                     >
                       Low
                     </div>
                     <div
                       onClick={() => setRisk("medium")}
-                      className={`text-center bg-[#202329] border-2 rounded-md mx-3 w-1/3 py-3 transition-all ${
+                      className={`text-center w-full rounded-[5px] border-[2px] bg-[#202329] py-2 text-xs font-chakra text-white text-opacity-90 transition duration-200 ${
                         risk === "medium"
                           ? "border-[#7839C5]"
-                          : "border-transparent"
+                          : "border-transparent hover:border-[#7839C580]"
                       }`}
                     >
                       Medium
                     </div>
                     <div
                       onClick={() => setRisk("high")}
-                      className={`text-center bg-[#202329] border-2 rounded-md w-1/3 py-3 transition-all ${
+                      className={`text-center w-full rounded-[5px] border-[2px] bg-[#202329] py-2 text-xs font-chakra text-white text-opacity-90 transition duration-200 ${
                         risk === "high"
                           ? "border-[#7839C5]"
-                          : "border-transparent"
+                          : "border-transparent hover:border-[#7839C580]"
                       }`}
                     >
                       High
@@ -333,9 +333,9 @@ export default function Wheel() {
                 </div>
 
                 <div className="mb-6 w-full">
-                  <div className="flex justify-between text-sm mb-2 font-medium font-changa text-[#F0F0F0] text-opacity-90">
+                  <div className="flex justify-between text-xs mb-2 font-medium font-changa text-[#F0F0F0] text-opacity-90">
                     <p className="">Segments</p>
-                    <p className="text-[#94A3B8]">{segments}</p>
+                    <p className="text-[#94A3B8] text-sm">{segments}</p>
                   </div>
                   <div className="w-full">
                     <input
@@ -457,7 +457,7 @@ export default function Wheel() {
         </>
       </GameOptions>
       <GameDisplay>
-        <div className="w-full flex justify-between items-center mb-7 sm:mb-2">
+        <div className="w-full flex justify-between items-center h-[2.125rem]">
           <div>
             {isRolling ? (
               <div className="font-chakra text-sm font-medium text-white text-opacity-75">
@@ -465,7 +465,9 @@ export default function Wheel() {
               </div>
             ) : null}
           </div>
-          <ResultsSlider results={betResults} />
+        </div>
+        <div className="absolute right-3 lg:right-6">
+          <ResultsSlider results={betResults} align={"vertical"} />
         </div>
         <div className="flex justify-center items-center w-full my-5">
           <div className="relative  w-[200px] h-[200px] sm:w-[280px] sm:h-[280px] flex justify-center">
