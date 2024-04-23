@@ -110,8 +110,10 @@ export default function Wheel() {
 
       // After 3 seconds, stop the rotation and move to the resultAngle
       setTimeout(() => {
-        wheelRef.current.style.transition = "transform 0s ease-in-out"; // Remove transition to stop animation
-        wheelRef.current.style.transform = `rotate(${360 - resultAngle}deg)`; // Move to the result angle
+        if (wheelRef.current) {
+          wheelRef.current.style.transition = "transform 0s ease-in-out"; // Remove transition to stop animation
+          wheelRef.current.style.transform = `rotate(${360 - resultAngle}deg)`; // Move to the result angle
+        }
       }, 3000);
     }
   };
