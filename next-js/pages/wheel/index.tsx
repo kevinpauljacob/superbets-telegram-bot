@@ -53,6 +53,7 @@ export default function Wheel() {
   const [betType, setBetType] = useState<"manual" | "auto">("manual");
   const [strikeNumber, setStrikeNumber] = useState<number>(0);
   const [strikeMultiplier, setStrikeMultiplier] = useState<number>();
+  const [resultAngle, setResultAngle] = useState<number>(0);
   const [risk, setRisk] = useState<"low" | "medium" | "high">("low");
   const [segments, setSegments] = useState<number>(10);
   const [rotationAngle, setRotationAngle] = useState(0);
@@ -80,19 +81,25 @@ export default function Wheel() {
   }, [segments]);
 
   const spinWheel = (strikeNumber: number) => {
-    const resultAngle = ((strikeNumber - 1) * 360) / 99;
+    const resultAngle = ((strikeNumber - 1) * 360) / 100;
+    setResultAngle(resultAngle);
     console.log("resultAngle", resultAngle);
     if (wheelRef.current) {
-      wheelRef.current.style.animation = "spin 1s linear forwards";
+      // Set initial rotation to zero to ensure it starts from the right position
+      wheelRef.current.style.transform = `rotate(${resultAngle}deg)`;
+
+      // Apply transition for the rotation
+      wheelRef.current.style.transition =
+        "transform 3s cubic-bezier(0.4, 0, 0.2, 1)";
+
+      // Rotate the wheel clockwise for 3 seconds
+      wheelRef.current.style.transform = `rotate(1080deg)`;
+
+      // After 3 seconds, stop the rotation and move to the resultAngle
       setTimeout(() => {
-        if (wheelRef.current) {
-          wheelRef.current.style.transition = "transform 1s ease-in-out";
-          wheelRef.current.style.transform = `rotate(${360 - resultAngle}deg)`;
-        }
-        setTimeout(() => {
-          if (wheelRef.current) wheelRef.current.style.animation = "none";
-        }, 500);
-      }, 50);
+        wheelRef.current.style.transition = "transform 0s ease-in-out"; // Remove transition to stop animation
+        wheelRef.current.style.transform = `rotate(${360 - resultAngle}deg)`; // Move to the result angle
+      }, 3000);
     }
   };
 
@@ -144,7 +151,7 @@ export default function Wheel() {
           await response.json();
 
         spinWheel(strikeNumber);
-        await new Promise((resolve) => setTimeout(resolve, 550));
+        await new Promise((resolve) => setTimeout(resolve, 3000));
         if (success != true) {
           toast.error(message);
           throw new Error(message);
@@ -283,7 +290,7 @@ export default function Wheel() {
             </BetButton>
           </div>
           <BetSetting betSetting={betType} setBetSetting={setBetType} />
-          <div className="w-full flex flex-col">
+          <div className="w-full flex flex-col no-scrollbar overflow-y-auto">
             <FormProvider {...methods}>
               <form
                 className="flex w-full flex-col gap-0"
@@ -483,7 +490,10 @@ export default function Wheel() {
             />
             <div
               ref={wheelRef}
-              className={`relative w-[200px] h-[200px] sm:w-[280px] sm:h-[280px] rounded-full overflow-hidden`}
+              style={{ "--result-angle": `${resultAngle}deg` }}
+              className={`${
+                isRolling ? "spin" : ""
+              } relative w-[200px] h-[200px] sm:w-[280px] sm:h-[280px] rounded-full overflow-hidden`}
             >
               {typeof window !== "undefined" && (
                 <svg viewBox="0 0 300 300">
