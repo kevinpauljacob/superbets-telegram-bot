@@ -9,7 +9,9 @@ import {
 } from "@/utils/provably-fair";
 import StakingUser from "@/models/staking/user";
 import { pointTiers } from "@/context/transactions";
-import { wsEndpoint } from "@/context/gameTransactions";
+import { minGameAmount, wsEndpoint } from "@/context/gameTransactions";
+import { Decimal } from "decimal.js";
+Decimal.set({ precision: 9 });
 
 const secret = process.env.NEXTAUTH_SECRET;
 
@@ -78,12 +80,16 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           message: "User wallet not authenticated",
         });
 
-      await connectDatabase();
-
       if (!wallet || !amount || !tokenMint || !rows || !risk)
         return res
           .status(400)
           .json({ success: false, message: "Missing parameters" });
+
+      if (amount < minGameAmount)
+        return res.status(400).json({
+          success: false,
+          message: "Invalid bet amount",
+        });
 
       if (
         tokenMint !== "SOL" ||
@@ -93,6 +99,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         return res
           .status(400)
           .json({ success: false, message: "Invalid parameters" });
+
+      await connectDatabase();
 
       let user = await User.findOne({ wallet });
 
@@ -151,8 +159,11 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         }
       }
 
-      const amountWon = strikeMultiplier * amount;
-      const amountLost = Math.max(amount - amountWon, 0);
+      const amountWon = new Decimal(amount).mul(strikeMultiplier);
+      const amountLost = Math.max(
+        new Decimal(amount).sub(amountWon).toNumber(),
+        0,
+      );
 
       const userUpdate = await User.findOneAndUpdate(
         {
@@ -166,7 +177,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         },
         {
           $inc: {
-            "deposit.$.amount": -amount + amountWon,
+            "deposit.$.amount": amountWon.sub(amount),
           },
         },
         {
@@ -178,7 +189,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         throw new Error("Insufficient balance for action!!");
       }
 
-      const result = amountWon > amount ? "Won" : "Lost";
+      const result = amountWon.toNumber() > amount ? "Won" : "Lost";
       await Plinko.create({
         wallet,
         amount,
@@ -212,8 +223,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
               payload: {
                 game: GameType.plinko,
                 wallet,
-                absAmount: Math.abs(amountWon - amountLost),
-                result: amountWon > amountLost ? "Won" : "Lost",
+                absAmount: amountWon.sub(amount).toNumber(),
+                result,
                 userTier,
               },
             }),

@@ -3,6 +3,7 @@ import { getToken } from "next-auth/jwt";
 import { NextApiRequest, NextApiResponse } from "next";
 import { GameSeed, Hilo, User } from "@/models/games";
 import { seedStatus } from "@/utils/provably-fair";
+import { minGameAmount } from "@/context/gameTransactions";
 
 const secret = process.env.NEXTAUTH_SECRET;
 
@@ -30,17 +31,23 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           message: "User wallet not authenticated",
         });
 
-      await connectDatabase();
-
       if (!wallet || !amount || !tokenMint || !startNumber)
         return res
           .status(400)
           .json({ success: false, message: "Missing parameters" });
 
+      if (amount < minGameAmount)
+        return res.status(400).json({
+          success: false,
+          message: "Invalid bet amount",
+        });
+
       if (tokenMint !== "SOL" || !(1 <= startNumber && startNumber <= 52))
         return res
           .status(400)
           .json({ success: false, message: "Invalid parameters" });
+
+      await connectDatabase();
 
       let user = await User.findOne({ wallet });
 

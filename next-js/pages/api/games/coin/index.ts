@@ -168,7 +168,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
               payload: {
                 game: GameType.coin,
                 wallet,
-                absAmount: amountWon.sub(amountLost).abs().toNumber(),
+                absAmount: amountWon.sub(amount).toNumber(),
                 result,
                 userTier,
               },
