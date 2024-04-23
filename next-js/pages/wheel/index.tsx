@@ -74,6 +74,19 @@ export default function Wheel() {
       index === 0 || self[index - 1].multiplier !== segment.multiplier,
   );
 
+  const segmentFill =
+    segments === 10
+      ? 0
+      : segments === 20
+      ? 25
+      : segments === 30
+      ? 50
+      : segments === 40
+      ? 75
+      : segments === 50
+      ? 100
+      : null;
+
   useEffect(() => {
     if (!wheelRef.current) return;
     const rotationAngle = 360 / segments;
@@ -344,7 +357,7 @@ export default function Wheel() {
                     <p className="">Segments</p>
                     <p className="text-[#94A3B8] text-sm">{segments}</p>
                   </div>
-                  <div className="w-full">
+                  <div className="relative h-[5px] rounded-full bg-[#2A2E38] w-full mt-5">
                     <input
                       type="range"
                       min={10}
@@ -352,8 +365,12 @@ export default function Wheel() {
                       step={10}
                       value={segments}
                       onChange={(e) => setSegments(parseInt(e.target.value))}
-                      className="defaultSlider w-full bg-[#2A2E38] appearance-none h-[5px] rounded-full"
+                      className="defaultSlider absolute top-[-8px] w-full bg-transparent appearance-none z-20"
                     />
+                    <div
+                      className="absolute rounded-l-full h-[5px] bg-[#9945ff] z-10"
+                      style={{ width: `${segmentFill}%` }}
+                    ></div>
                   </div>
                 </div>
                 {betType === "manual" ? (
@@ -490,7 +507,6 @@ export default function Wheel() {
             />
             <div
               ref={wheelRef}
-              style={{ "--result-angle": `${resultAngle}deg` }}
               className={`${
                 isRolling ? "spin" : ""
               } relative w-[200px] h-[200px] sm:w-[280px] sm:h-[280px] rounded-full overflow-hidden`}
@@ -538,10 +554,17 @@ export default function Wheel() {
                       <div className="w-1/2">
                         <div className="flex justify-between text-[13px] font-medium font-changa text-opacity-90 text-[#F0F0F0]">
                           <span className="">Profit</span>
-                          <span>0.00 SOL</span>
+                          <span>
+                            {/* {coinData ? coinData[0]?.amount.toFixed(4) : 0} $SOL */}
+                            SOL
+                          </span>
                         </div>
                         <div className="border border-white/10 rounded-lg p-3 mt-2">
-                          0.00
+                          {coinData
+                            ? (
+                                coinData[0]?.amount * segment.multiplier
+                              ).toFixed(4)
+                            : 0}
                         </div>
                       </div>
                       <div className="w-1/2">
