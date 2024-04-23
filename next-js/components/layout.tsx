@@ -22,6 +22,7 @@ import { Limbo } from "./games/Limbo/HistoryTable";
 import { Wheel } from "./games/Wheel/HistoryTable";
 import { GameType } from "@/utils/provably-fair";
 import ConfigureAutoModal from "./games/ConfigureAutoModal";
+import Footer from "./Footer";
 
 interface LayoutProps {
   children: ReactNode;
@@ -82,6 +83,7 @@ export default function Layout({ children }: LayoutProps) {
                 {children}
               </section>
             </main>
+            {/* <><Footer/></> */}
           </section>
         </section>
       </section>
