@@ -58,7 +58,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         !(
           1 <= chosenNumbers.length &&
           chosenNumbers.length <= 10 &&
-          chosenNumbers.every((n) => 1 <= n && n <= 40 && n % 10 === 0)
+          chosenNumbers.every((n) => 1 <= n && n <= 40 && Number.isInteger(n))
         ) ||
         !(
           risk === "classic" ||
