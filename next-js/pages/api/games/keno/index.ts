@@ -29,7 +29,7 @@ type InputType = {
 
 type RiskToChance = Record<string, Record<number, Array<number>>>;
 
-const riskToChance: RiskToChance = {
+export const riskToChance: RiskToChance = {
   classic: {
     1: [0.0, 3.96],
     2: [0.0, 1.9, 4.5],
