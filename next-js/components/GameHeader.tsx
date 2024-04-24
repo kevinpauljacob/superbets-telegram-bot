@@ -10,6 +10,7 @@ import Dice2ProvablyFairModal from "./games/Dice2/Dice2ProvablyFairModal";
 import CoinFlipProvablyFairModal from "./games/CoinFlip/CoinFlipProvablyFairModal";
 import LimboProvablyFairModal from "./games/Limbo/LimboProvablyFairModal";
 import WheelProvablyFairModal from "./games/Wheel/WheelProvablyFairModal";
+import KenoProvablyFairModal from "./games/Keno/KenoProvablyFairModal";
 
 export default function GameHeader() {
   const { data: session, status } = useSession();
@@ -115,6 +116,10 @@ export default function GameHeader() {
       icon: "/assets/dice.png",
       name: "Wheel",
     },
+    keno: {
+      icon: "/assets/dice.png",
+      name: "Keno",
+    },
   });
 
   // Get the game details based on the extracted game name
@@ -200,6 +205,13 @@ export default function GameHeader() {
         />
       ) : game === GameType.wheel ? (
         <WheelProvablyFairModal
+          isOpen={isOpen}
+          onClose={closeModal}
+          modalData={modalData}
+          setModalData={setModalData}
+        />
+      ) : game === GameType.keno ? (
+        <KenoProvablyFairModal
           isOpen={isOpen}
           onClose={closeModal}
           modalData={modalData}
