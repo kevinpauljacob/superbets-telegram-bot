@@ -90,57 +90,62 @@ export default function Flip() {
         betAmt,
         betType === "Heads" ? "heads" : "tails",
       );
-      if (response.success) {
-        response?.data?.result == "Won"
-          ? toast.success(response?.message)
-          : toast.error(response?.message);
+      setTimeout(
+        () => {
+          if (response.success) {
+            response?.data?.result == "Won"
+              ? toast.success(response?.message)
+              : toast.error(response?.message);
 
-        const win = response?.data?.result === "Won";
-        const newBetResult = { result: response?.data?.strikeNumber, win };
+            const win = response?.data?.result === "Won";
+            const newBetResult = { result: response?.data?.strikeNumber, win };
 
-        setBetResults((prevResults) => {
-          const newResults = [...prevResults, newBetResult];
-          if (newResults.length > 6) {
-            newResults.shift();
+            setBetResults((prevResults) => {
+              const newResults = [...prevResults, newBetResult];
+              if (newResults.length > 6) {
+                newResults.shift();
+              }
+              return newResults;
+            });
+
+            setResult(response?.data?.result ?? "Lost");
+            setRefresh(true);
+            setLoading(false);
+            setFlipping(false);
+
+            // auto options
+            if (betSetting === "auto") {
+              if (useAutoConfig && autoWinChange && win) {
+                setBetAmt(
+                  autoWinChangeReset
+                    ? userInput
+                    : betAmt + (autoWinChange * betAmt) / 100.0,
+                );
+              } else if (useAutoConfig && autoLossChange && !win) {
+                setAutoBetProfit(autoBetProfit - betAmt);
+                setBetAmt(
+                  autoLossChangeReset
+                    ? userInput
+                    : betAmt + (autoLossChange * betAmt) / 100.0,
+                );
+              }
+              // update profit / loss
+              setAutoBetProfit(autoBetProfit + (win ? 1 : -1) * betAmt);
+              // update count
+              if (typeof autoBetCount === "number")
+                setAutoBetCount(autoBetCount - 1);
+              else setAutoBetCount(autoBetCount + 1);
+            }
+          } else {
+            setBetType(null);
+            setLoading(false);
+            setFlipping(false);
+            setResult(null);
+            response?.message && toast.error(response?.message);
           }
-          return newResults;
-        });
-
-        setResult(response?.data?.result ?? "Lost");
-        setRefresh(true);
-        setLoading(false);
-        setFlipping(false);
-
-        // auto options
-        if (betSetting === "auto") {
-          if (useAutoConfig && autoWinChange && win) {
-            setBetAmt(
-              autoWinChangeReset
-                ? userInput
-                : betAmt + (autoWinChange * betAmt) / 100.0,
-            );
-          } else if (useAutoConfig && autoLossChange && !win) {
-            setAutoBetProfit(autoBetProfit - betAmt);
-            setBetAmt(
-              autoLossChangeReset
-                ? userInput
-                : betAmt + (autoLossChange * betAmt) / 100.0,
-            );
-          }
-          // update profit / loss
-          setAutoBetProfit(autoBetProfit + (win ? 1 : -1) * betAmt);
-          // update count
-          if (typeof autoBetCount === "number")
-            setAutoBetCount(autoBetCount - 1);
-          else setAutoBetCount(autoBetCount + 1);
-        }
-      } else {
-        setBetType(null);
-        setLoading(false);
-        setFlipping(false);
-        setResult(null);
-        response?.message && toast.error(response?.message);
-      }
+        },
+        betSetting === "auto" ? 0 : 3000,
+      );
     } catch (e) {
       toast.error("Could not make Flip.");
       setBetType(null);
@@ -333,7 +338,7 @@ export default function Flip() {
                       onClick={() => {
                         setShowAutoModal(true);
                       }}
-                      className="mb-[1.4rem] rounded-md w-full h-11 flex items-center justify-center opacity-75 cursor-pointer text-white text-opacity-90 border-2 border-white bg-white bg-opacity-0 hover:bg-opacity-5"
+                      className="mb-[1.4rem] rounded-md w-full h-11 flex items-center justify-center opacity-75 cursor-pointer font-sans font-semibold text-sm text-white text-opacity-90 border-2 border-white bg-white bg-opacity-0 hover:bg-opacity-5"
                     >
                       Configure Auto
                     </div>
@@ -378,7 +383,9 @@ export default function Flip() {
                         alt=""
                         className={``}
                       />
-                      <span className="mt-0.5">Heads</span>
+                      <span className="mt-0.5 font-chakra text-xl font-semibold">
+                        Heads
+                      </span>
                     </div>
                     <div
                       onClick={() => {
@@ -397,7 +404,9 @@ export default function Flip() {
                         alt=""
                         className={``}
                       />
-                      <span className="mt-0.5">Tails</span>
+                      <span className="mt-0.5 font-chakra text-xl font-semibold">
+                        Tails
+                      </span>
                     </div>
                   </div>
                   <div className="w-full hidden md:flex mt-2">
@@ -422,7 +431,7 @@ export default function Flip() {
       </GameOptions>
       <GameDisplay>
         <>
-          <div className={`w-full flex items-center justify-between`}>
+          <div className={`w-full flex items-center justify-between h-8`}>
             <span className="text-xs md:text-sm font-chakra font-medium text-[#f0f0f0] text-opacity-75">
               {flipping
                 ? "Flipping..."
@@ -464,7 +473,7 @@ export default function Flip() {
           </div>
 
           <div
-            className={`w-[11rem] h-[11rem] relative mb-10 ${
+            className={`w-[11rem] h-[11rem] relative ${
               betType && loading ? "rotate" : ""
             }`}
           >
@@ -482,8 +491,8 @@ export default function Flip() {
                     ? "z-[100]"
                     : "z-[10]"
                   : betType === "Tails"
-                  ? "z-[10]"
-                  : "z-[100]"
+                  ? "z-[100]"
+                  : "z-[10]"
               }`}
             />
             <Image
@@ -500,11 +509,12 @@ export default function Flip() {
                     ? "z-[100]"
                     : "z-[1]"
                   : betType === "Heads"
-                  ? "z-[1]"
-                  : "z-[100]"
+                  ? "z-[100]"
+                  : "z-[1]"
               }`}
             />
           </div>
+
           <GameFooterInfo multiplier={2.0} amount={betAmt} chance={50} />
         </>
       </GameDisplay>

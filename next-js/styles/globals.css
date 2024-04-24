@@ -383,7 +383,7 @@ button.dark-bg {
 }
 
 .rotate {
-  animation: rotate 1s linear 0s infinite normal forwards;
+  animation: rotate 0.5s linear 0s infinite normal forwards;
 }
 
 @keyframes translateZ {
@@ -405,7 +405,7 @@ button.dark-bg {
 }
 
 .translateZ1 {
-  animation: translateZ 1s linear 0.25s infinite normal forwards;
+  animation: translateZ 0.5s linear 0.125s infinite normal forwards;
 }
 
 /* .selected-face {
