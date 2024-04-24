@@ -11,7 +11,7 @@ import {
   GameOptions,
   GameTable,
 } from "@/components/GameLayout";
-import HistoryTable from "@/components/games/Wheel/HistoryTable";
+import HistoryTable from "@/components/games/Keno/HistoryTable";
 import { FormProvider, useForm } from "react-hook-form";
 import { BsInfinity } from "react-icons/bs";
 import Loader from "@/components/games/Loader";
@@ -19,7 +19,7 @@ import BetAmount from "@/components/games/BetAmountInput";
 import BetButton from "@/components/games/BetButton";
 import showInfoToast from "@/components/games/toasts/toasts";
 import ResultsSlider from "@/components/ResultsSlider";
-import { riskToChance } from "../api/games/keno";
+import { riskToChance } from "@/components/games/Keno/RiskToChance";
 
 export default function Keno() {
   const wallet = useWallet();
@@ -61,6 +61,8 @@ export default function Keno() {
     { result: number; win: boolean }[]
   >([]);
 
+  const multipliers = riskToChance[risk][chosenNumbers.length];
+
   const handleCountChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
@@ -69,12 +71,17 @@ export default function Keno() {
 
   const handleChosenNumber = (number: number) => {
     const numberIndex = chosenNumbers.indexOf(number);
+
     if (numberIndex !== -1) {
       setChosenNumbers((prevNumbers) =>
         prevNumbers.filter((_, index) => index !== numberIndex),
       );
     } else {
-      setChosenNumbers((prevNumbers) => [...prevNumbers, number]);
+      if (chosenNumbers.length < 10) {
+        setChosenNumbers((prevNumbers) => [...prevNumbers, number]);
+      } else {
+        toast.error("10 numbers can be selected at max");
+      }
     }
   };
 
@@ -476,21 +483,46 @@ export default function Keno() {
           </div>
         </div>
         <div className="relative flex w-full justify-between px-0 xl:px-4 mb-0 px:mb-6 gap-4">
-          {coinData && coinData[0].amount > 0.0001 && (
-            <div>
-              {Object.keys(riskToChance[risk][chosenNumbers.length]).map(
-                (multiplier, index) => (
-                  <div key={index}>
-                    {
-                      riskToChance[risk][chosenNumbers.length][
-                        Number(multiplier)
-                      ]
-                    }
+          {coinData &&
+            coinData[0].amount > 0.0001 &&
+            chosenNumbers.length > 0 && (
+              <div className="w-full">
+                <div className="flex justify-between gap-3.5 text-white w-full">
+                  {multipliers.map((multiplier, index) => (
+                    <div
+                      key={index}
+                      className="bg-[#202329] text-center font-chakra text-xs font-semibold rounded-[5px] py-3 w-full"
+                    >
+                      {multiplier.toFixed(1)}x
+                    </div>
+                  ))}
+                </div>
+                <div>
+                  <div className="flex justify-between gap-3.5 text-white bg-[#202329] rounded-[5px] w-full mt-3">
+                    {multipliers.map((multiplier, index) => (
+                      <div
+                        key={index}
+                        className="flex justify-center items-center font-chakra text-xs font-semibold py-3 w-full"
+                      >
+                        <span className="mr-1">{index}x</span>
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="10"
+                          height="10"
+                          viewBox="0 0 10 10"
+                          fill="none"
+                        >
+                          <path
+                            d="M5 10C7.76142 10 10 7.76142 10 5C10 2.23858 7.76142 0 5 0C2.23858 0 0 2.23858 0 5C0 7.76142 2.23858 10 5 10Z"
+                            fill="#FFD100"
+                          />
+                        </svg>
+                      </div>
+                    ))}
                   </div>
-                ),
-              )}
-            </div>
-          )}
+                </div>
+              </div>
+            )}
 
           {!coinData ||
             (coinData[0].amount < 0.0001 ? (
