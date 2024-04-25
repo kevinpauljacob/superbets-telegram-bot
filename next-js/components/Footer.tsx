@@ -3,7 +3,7 @@ import Image from "next/image";
 
 function Footer() {
   return (
-    <div className="w-full h-full bg-[#121519] flex flex-col pl-28 pr-28">
+    <div className="w-full h-full bg-[#121519] flex flex-col pl-20 pr-28">
       <div className="w-full flex items-center justify-items-start">
         <div className="w-[1/3] flex gap-1">
           <Image
@@ -17,32 +17,32 @@ function Footer() {
             FOMO
           </span>
         </div>
-        <div className="w-full flex items-start justify-items-start mt-20 mb-20 mx-28">
+        <div className="w-full flex items-start justify-items-start mt-20 mb-20 gap-5 mx-24">
           <div className="px-10">
-            <h3 className="font-semibold font-changa text-white text-lg leading-[18px] mb-4">
+            <h3 className="font-semibold font-changa text-white text-lg leading-[18px] mb-4 text-opacity-90">
               Support
             </h3>
-            <div className="text-[#94A3B8] font-chakra flex flex-col items-start justify-start gap-5 text-base leading-[14px] font-medium">
+            <div className="text-[#94A3B8] font-chakra flex flex-col items-start justify-start gap-5 text-sm leading-[14px] font-medium text-opacity-80">
               <span>Live Support</span>
               <span>Help Center</span>
               <span>Game Responsibily</span>
             </div>
           </div>
           <div className="px-10">
-            <h3 className="font-semibold font-changa text-white text-lg leading-[18px] mb-4">
+            <h3 className="font-semibold font-changa text-white text-lg leading-[18px] mb-4 text-opacity-90">
               Platform
             </h3>
-            <div className="text-[#94A3B8] font-chakra flex flex-col items-start justify-start gap-5 text-base leading-[14px] font-medium">
+            <div className="text-[#94A3B8] font-chakra flex flex-col items-start justify-start gap-5 text-sm leading-[14px] font-medium text-opacity-80">
               <span>Provably Fair</span>
               <span>Affiliate Program</span>
               <span>Redeem Code</span>
             </div>
           </div>
           <div className="px-10">
-            <h3 className="font-semibold font-changa text-white text-lg leading-[18px] mb-4">
+            <h3 className="font-semibold font-changa text-white text-lg leading-[18px] mb-4 text-opacity-90">
               Policy
             </h3>
-            <div className="text-[#94A3B8] font-chakra flex flex-col items-start justify-start gap-5 text-base leading-[14px] font-medium">
+            <div className="text-[#94A3B8] font-chakra flex flex-col items-start justify-start gap-5 text-sm leading-[14px] font-medium text-opacity-80">
               <span>Terms Of Service</span>
               <span>Privacy Policy</span>
               <span>AML Policy</span>
@@ -50,10 +50,10 @@ function Footer() {
             </div>
           </div>
           <div className="px-10">
-            <h3 className="font-semibold font-changa text-white text-lg leading-[18px] mb-4">
+            <h3 className="font-semibold font-changa text-white text-lg leading-[18px] mb-4 text-opacity-90">
               Community
             </h3>
-            <div className="text-[#94A3B8] font-chakra flex flex-col items-start justify-start gap-5 text-base leading-[14px] font-medium">
+            <div className="text-[#94A3B8] font-chakra flex flex-col items-start justify-start gap-5 text-sm leading-[14px] font-medium text-opacity-80">
               <span>Twitter</span>
               <span>Telegram</span>
               <span>BUY FOMO</span>
@@ -62,7 +62,7 @@ function Footer() {
         </div>
       </div>
       <div>
-        <p className="text-[#94A3B8] font-medium font-chakra text-base leading-6 mt-10">
+        <p className="text-[#94A3B8] font-medium font-chakra text-sm leading-6 mt-10 text-opacity-80">
           Shuffle is owned and operated by Natural Nine B.V., Curaçao company
           registration number 160998, with its registered address at
           Korporaalweg 10, Willemstad, Curaçao. Shuffle is authorized and

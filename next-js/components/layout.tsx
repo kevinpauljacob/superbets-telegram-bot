@@ -22,7 +22,6 @@ import { Limbo } from "./games/Limbo/HistoryTable";
 import { Wheel } from "./games/Wheel/HistoryTable";
 import { GameType } from "@/utils/provably-fair";
 import ConfigureAutoModal from "./games/ConfigureAutoModal";
-import Footer from "./Footer";
 
 interface LayoutProps {
   children: ReactNode;
@@ -81,9 +80,6 @@ export default function Layout({ children }: LayoutProps) {
             <main className="marker:w-full h-full md:pt-[4.5%] lg:pt-0 max-h-[calc(100vh-16.6rem)] lg:max-h-[calc(100vh-11rem)]">
               <section className="w-full h-full overflow-y-auto no-scrollbar">
                 {children}
-                <section className="w-full">
-                  <Footer />
-                </section>
               </section>
             </main>
           </section>
