@@ -8,13 +8,13 @@ import { Table } from "@/components/table/Table";
 export interface Keno {
   createdAt: string;
   wallet: string;
-  rollOver: number;
-  direction: string;
   amount: number;
   result: string;
-  strikeNumber: number;
+  risk: string;
+  strikeNumbers: number[];
+  chosenNumbers: number[];
+  strikeMultiplier: number;
   amountWon: number;
-  chance: number;
   nonce?: number;
   gameSeed?: {
     status: seedStatus;
@@ -42,15 +42,8 @@ export default function HistoryTable({ refresh }: { refresh: boolean }) {
   const transactionsPerPage = 10;
   const [maxPages, setMaxPages] = useState(0);
 
-  const headers = ["Time", "Roll Type", "Bet Amount", "Result", "Amount Won"];
-  const allHeaders = [
-    "Time",
-    "Wallet",
-    "Roll Type",
-    "Bet Amount",
-    "Result",
-    "Amount Won",
-  ];
+  const headers = ["Time", "Bet Amount", "Result", "Amount Won"];
+  const allHeaders = ["Time", "Wallet", "Bet Amount", "Result", "Amount Won"];
 
   //headers to be displayed in small screen devices
   const smallScreenHeaders = ["Time", "Amount Won"];
@@ -130,14 +123,11 @@ export default function HistoryTable({ refresh }: { refresh: boolean }) {
                     {obfuscatePubKey(bet.wallet)}
                   </span>
                 )}
-                <span className="w-full hidden md:block capitalize text-center font-changa text-sm text-[#F0F0F0] ">
-                  {bet.direction}
-                </span>
                 <span className="w-full hidden md:block text-center font-changa text-sm text-[#F0F0F0]">
                   {bet.amount} SOL
                 </span>
-                <span className="w-full hidden md:block text-center font-changa text-sm text-[#F0F0F0]">
-                  {bet.strikeNumber}
+                <span className="w-full hidden md:block text-center font-changa capitalize text-sm text-[#F0F0F0]">
+                  {bet.risk}
                 </span>
                 <span
                   className={`w-full text-center font-changa text-sm ${

@@ -27,9 +27,6 @@ export default function VerifyDice2Modal({
 
   //Provably Fair Modal handling
   const [isPFModalOpen, setIsPFModalOpen] = useState(false);
-  const [choice, setChoice] = useState<number>(
-    bet.direction === "over" ? 100 - bet.chance : bet.chance,
-  );
 
   const openPFModal = () => {
     setIsPFModalOpen(true);
@@ -86,6 +83,8 @@ export default function VerifyDice2Modal({
     return `${day}-${month}-${year} ${hours}:${minutes} UTC`;
   }
 
+  console.log("bet", bet);
+
   return (
     <>
       {isOpen && (
@@ -119,10 +118,7 @@ export default function VerifyDice2Modal({
                   Multiplier
                 </div>
                 <div className="text-white font-chakra text-xs font-medium">
-                  {bet.direction === "over"
-                    ? (98 / (100 - (100 - bet.chance))).toFixed(2)
-                    : (98 / (100 - bet.chance)).toFixed(2)}{" "}
-                  x
+                  {bet.strikeMultiplier?.toFixed(1)} x
                 </div>
               </button>
               <button className="px-1 py-3 flex flex-col items-center justify-center w-full text-white rounded-md bg-[#202329]">
@@ -135,47 +131,47 @@ export default function VerifyDice2Modal({
               </button>
             </div>
             <div className="mt-6 px-4 md:px-12 pt-7 border-2 border-white border-opacity-5 rounded-md">
-              <div className="relative w-full mb-8 xl:mb-6 pb-5 pt-10"></div>
+              <div className="relative w-full">
+                <div className="grid grid-cols-8 gap-2 text-white text-xl font-chakra">
+                  {Array.from({ length: 40 }, (_, index) => index + 1).map(
+                    (number) => (
+                      <div
+                        key={number}
+                        className={`flex items-center justify-center cursor-pointer ${
+                          bet.strikeNumbers.length === 0 &&
+                          bet.chosenNumbers.includes(number)
+                            ? "bg-[#7839C5]"
+                            : bet.strikeNumbers.includes(number) &&
+                              bet.chosenNumbers.includes(number)
+                            ? "bg-black border-2 border-fomo-green"
+                            : bet.chosenNumbers.includes(number)
+                            ? "bg-black border-2 border-fomo-red text-fomo-red"
+                            : "bg-[#202329]"
+                        } rounded-md text-center transition-all duration-300 ease-in-out w-[45px] h-[45px]`}
+                      >
+                        {bet.strikeNumbers.includes(number) &&
+                        bet.chosenNumbers.includes(number) ? (
+                          <div className="flex justify-center items-center bg-[#FFD100] text-black rounded-full w-[32px] h-[32px]">
+                            {number}
+                          </div>
+                        ) : (
+                          <div>{number}</div>
+                        )}
+                      </div>
+                    ),
+                  )}
+                </div>
+              </div>
               <div className="flex gap-4 pt-7 mb-8">
                 <div className="w-full">
                   <label className="text-xs text-opacity-75 font-changa text-[#F0F0F0]">
-                    Multiplier
+                    Risk
                   </label>
                   <input
                     type="text"
                     name="multiplier"
-                    value={
-                      bet.direction === "over"
-                        ? (98 / (100 - (100 - bet.chance))).toFixed(2)
-                        : (98 / (100 - bet.chance)).toFixed(2)
-                    }
-                    className="bg-[#202329] text-white font-chakra text-xs font-medium mt-1 rounded-md p-3 w-full relative"
-                    readOnly
-                  />
-                </div>
-                <div className="w-full">
-                  <label className="text-xs text-opacity-75 font-changa text-[#F0F0F0]">
-                    {bet.direction === "over" ? "Roll Over" : "Roll Under"}
-                  </label>
-                  <input
-                    type="text"
-                    name="choice"
-                    value={
-                      bet.direction === "over" ? 100 - bet.chance : bet.chance
-                    }
-                    className="bg-[#202329] text-white font-chakra text-xs font-medium mt-1 rounded-md p-3 w-full relative"
-                    readOnly
-                  />
-                </div>
-                <div className="w-full">
-                  <label className="text-xs text-opacity-75 font-changa text-[#F0F0F0]">
-                    Chance
-                  </label>
-                  <input
-                    type="text"
-                    name="chance"
-                    value={bet.chance}
-                    className="bg-[#202329] text-white font-chakra text-xs font-medium mt-1 rounded-md p-3 w-full relative"
+                    value={bet.risk}
+                    className="bg-[#202329] text-white font-chakra capitalize text-xs font-medium mt-1 rounded-md p-3 w-full relative"
                     readOnly
                   />
                 </div>
