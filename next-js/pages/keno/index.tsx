@@ -86,19 +86,22 @@ export default function Keno() {
   };
 
   const handleAutoPick = () => {
-    if (!autoPick) {
-      const min = 1;
-      const max = 40;
-      const count = 10;
+    setAutoPick(true);
+    setStrikeNumbers([]);
+    setChosenNumbers([]);
+    const min = 1;
+    const max = 40;
+    const count = 10;
 
-      const randomNumbers = Array.from(
-        { length: count },
-        () => Math.floor(Math.random() * (max - min + 1)) + min,
-      );
-
-      setChosenNumbers(randomNumbers);
+    const uniqueNumbers: Set<number> = new Set();
+    while (uniqueNumbers.size < count) {
+      const randomNumber = Math.floor(Math.random() * (max - min + 1)) + min;
+      uniqueNumbers.add(randomNumber);
     }
-    setAutoPick((prevAutoPick) => !prevAutoPick);
+
+    const randomNumbers: number[] = Array.from(uniqueNumbers);
+    setChosenNumbers(randomNumbers);
+    console.log("chosenNumbers", randomNumbers);
   };
 
   const handleClear = () => {
@@ -463,8 +466,8 @@ export default function Keno() {
         </>
       </GameOptions>
       <GameDisplay>
-        <div className="w-full flex justify-between items-center h-[2.125rem]">
-          <div className="absolute top-10 left-12">
+        <div className="w-full flex justify-between items-center">
+          <div className="hidden sm:absolute top-10 left-12">
             {isRolling ? (
               <div className="font-chakra text-sm font-medium text-white text-opacity-75">
                 Betting...
@@ -472,8 +475,8 @@ export default function Keno() {
             ) : null}
           </div>
         </div>
-        <div className="flex justify-center items-center w-full my-5">
-          <div className="grid grid-cols-8 gap-2 text-white text-xl font-chakra">
+        <div className="flex justify-center items-center w-full mb-5 sm:my-5">
+          <div className="grid grid-cols-8 gap-2 text-white text-sm md:text-xl font-chakra">
             {Array.from({ length: 40 }, (_, index) => index + 1).map(
               (number) => (
                 <div
@@ -490,11 +493,11 @@ export default function Keno() {
                       : chosenNumbers.includes(number)
                       ? "bg-black border-2 border-fomo-red text-fomo-red"
                       : "bg-[#202329]"
-                  } rounded-md text-center transition-all duration-300 ease-in-out w-[65px] h-[65px]`}
+                  } rounded-md text-center transition-all duration-300 ease-in-out w-[35px] h-[35px] sm:w-[55px] sm:h-[55px] md:w-[60px] md:h-[60px] xl:w-[65px] xl:h-[65px]`}
                 >
                   {strikeNumbers.includes(number) &&
                   chosenNumbers.includes(number) ? (
-                    <div className="flex justify-center items-center bg-[#FFD100] text-black rounded-full w-[38px] h-[38px]">
+                    <div className="flex justify-center items-center bg-[#FFD100] text-black rounded-full w-[25px] h-[25px] md:w-[38px] md:h-[38px]">
                       {number}
                     </div>
                   ) : (
@@ -510,18 +513,18 @@ export default function Keno() {
             coinData[0].amount > 0.0001 &&
             chosenNumbers.length > 0 && (
               <div className="w-full">
-                <div className="flex justify-between gap-3.5 text-white w-full">
+                <div className="flex justify-between gap-[3px] sm:gap-3.5 lg:gap-2 2xl:gap-3.5 text-white w-full">
                   {multipliers.map((multiplier, index) => (
                     <div
                       key={index}
-                      className="bg-[#202329] text-center font-chakra text-xs font-semibold rounded-[5px] py-3 w-full"
+                      className="bg-[#202329] text-center font-chakra text-[8px] sm:text-xs font-semibold rounded-[5px] p-1 sm:py-3 sm:px-1 w-full"
                     >
                       {multiplier.toFixed(1)}x
                     </div>
                   ))}
                 </div>
                 <div>
-                  <div className="flex justify-between gap-3.5 text-white bg-[#202329] rounded-[5px] w-full mt-3">
+                  <div className="flex justify-between gap-[3px] sm:gap-3.5 text-white bg-[#202329] rounded-[5px] w-full mt-3">
                     {multipliers.map((multiplier, index) => (
                       <div
                         key={index}
@@ -531,7 +534,7 @@ export default function Keno() {
                           commonNumbers.length === index
                             ? "bg-white/20"
                             : ""
-                        } flex justify-center items-center rounded-[5px] font-chakra text-xs font-semibold transition-all duration-300 ease-in-out py-3 w-full`}
+                        } flex justify-center items-center rounded-[5px] font-chakra text-[8px] sm:text-xs font-semibold transition-all duration-300 ease-in-out py-1 sm:py-3 w-full`}
                       >
                         <span className="mr-1">{index}x</span>
                         <svg
