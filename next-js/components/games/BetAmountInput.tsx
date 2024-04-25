@@ -14,7 +14,10 @@ export default function BetAmount({
     <div className="mb-0 flex w-full flex-col">
       <div className="mb-1 flex w-full items-center justify-between text-xs font-changa text-opacity-90">
         <label className="text-white/90 font-changa">Bet Amount</label>
-        <span className="text-[#94A3B8] text-opacity-90 font-changa text-sm">
+        <span
+          onClick={() => setBetAmt(coinData ? coinData[0]?.amount : 0)}
+          className="text-[#94A3B8] text-opacity-90 cursor-pointer font-changa text-xs"
+        >
           {coinData ? coinData[0]?.amount.toFixed(4) : 0} $SOL
         </span>
       </div>
@@ -34,44 +37,45 @@ export default function BetAmount({
             setBetAmt(parseFloat(e.target.value));
           }}
           placeholder={"Amount"}
+          min={0.0001}
           value={betAmt}
           lang="en"
           className={`flex w-full min-w-0 bg-transparent text-base text-[#94A3B8] placeholder-[#94A3B8]  font-chakra placeholder-opacity-40 outline-none`}
         />
-        <span
-          className="text-xs font-medium text-white text-opacity-50 bg-[#292C32] hover:bg-[#47484A] focus:bg-[#47484A] transition-all hover:duration-75 rounded-[5px] min-w-[1.75rem] h-7 flex items-center justify-center"
-          onClick={() =>
-            setBetAmt(
-              betAmt === 0
-                ? coinData
-                  ? coinData[0]?.amount / 4
-                  : 0
-                : betAmt / 4,
-            )
-          }
+         <span
+          className="text-xs font-medium text-white text-opacity-50 bg-[#292C32] hover:bg-[#47484A] focus:bg-[#47484A] transition-all hover:duration-75 rounded-[5px] py-1.5 px-4"
+          onClick={() => setBetAmt(0.0001)}
         >
-          1/4
+          Min
         </span>
         <span
-          className="text-xs ml-2 font-medium text-white text-opacity-50 bg-[#292C32] hover:bg-[#47484A] focus:bg-[#47484A] transition-all hover:duration-75 rounded-[5px] min-w-[1.75rem] h-7 flex items-center justify-center"
+          className="text-xs mx-2 font-medium text-white text-opacity-50 bg-[#292C32] hover:bg-[#47484A] focus:bg-[#47484A] transition-all hover:duration-75 rounded-[5px] py-1.5 px-4"
           onClick={() =>
             setBetAmt(
               betAmt === 0
                 ? coinData
-                  ? coinData[0]?.amount / 4
+                  ? coinData[0]?.amount / 2
                   : 0
-                : betAmt / 4,
+                : betAmt / 2,
             )
           }
         >
           1/2
         </span>
-        {/* <span
+        <span
           className="text-xs font-medium text-white text-opacity-50 bg-[#292C32] hover:bg-[#47484A] focus:bg-[#47484A] transition-all hover:duration-75 rounded-[5px] py-1.5 px-4"
-          onClick={() => setBetAmt(coinData ? coinData[0]?.amount : 0)}
+          onClick={() =>
+            setBetAmt(
+              coinData
+                ? betAmt * 2 < coinData[0].amount
+                  ? betAmt * 2
+                  : betAmt
+                : 0,
+            )
+          }
         >
-          Max
-        </span> */}
+          2x
+        </span>
       </div>
 
       <span
