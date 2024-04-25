@@ -296,7 +296,7 @@ export default function RollDiceProvablyFairModal({
                             } rounded-md text-center transition-all duration-300 ease-in-out w-[45px] h-[45px]`}
                           >
                             {strikeNumbers.includes(number) ? (
-                              <div className="flex justify-center items-center bg-[#FFD100] text-black rounded-full w-[38px] h-[38px]">
+                              <div className="flex justify-center items-center bg-[#FFD100] text-black rounded-full w-[32px] h-[32px]">
                                 {number}
                               </div>
                             ) : (
