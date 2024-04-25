@@ -50,7 +50,7 @@ export default function RollDiceProvablyFairModal({
   const [newClientSeed, setNewClientSeed] = useState<string>(
     generateClientSeed(),
   );
-  const [strikeNumber, setStrikeNumber] = useState<number[]>([]);
+  const [strikeNumbers, setStrikeNumbers] = useState<number[]>([]);
 
   const [verificationState, setVerificationState] = useState<{
     clientSeed: string;
@@ -71,7 +71,7 @@ export default function RollDiceProvablyFairModal({
   );
 
   useEffect(() => {
-    setStrikeNumber(
+    setStrikeNumbers(
       generateGameResult(
         verificationState.serverSeed,
         verificationState.clientSeed,
@@ -85,10 +85,13 @@ export default function RollDiceProvablyFairModal({
     setState(newState);
   };
 
-  const handleClose = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (e.target === e.currentTarget) {
-      onClose();
-    }
+  const handleClose = () => {
+    //@ts-ignore
+    document.addEventListener("click", function (event) {
+      //@ts-ignore
+      var targetId = event.target.id;
+      if (targetId && targetId === "modal-bg") onClose();
+    });
   };
 
   useEffect(() => {
@@ -107,7 +110,7 @@ export default function RollDiceProvablyFairModal({
 
     const { clientSeed, serverSeed, nonce } = verificationState;
 
-    setStrikeNumber(
+    setStrikeNumbers(
       generateGameResult(
         name === "serverSeed" ? value : serverSeed,
         name === "clientSeed" ? value : clientSeed,
@@ -145,11 +148,13 @@ export default function RollDiceProvablyFairModal({
   return (
     <>
       {isOpen && (
-        <div className="fixed inset-0 flex items-center justify-center z-50">
-          <div
-            className="absolute inset-0 bg-black bg-opacity-50 backdrop-blur transition-all"
-            onClick={handleClose}
-          ></div>
+        <div
+          onClick={() => {
+            handleClose();
+          }}
+          id="modal-bg"
+          className="absolute z-[150] left-0 top-0 flex h-full w-full items-center justify-center bg-black bg-opacity-50 backdrop-blur transition-all"
+        >
           <div className="bg-[#121418] p-8 rounded-lg z-10 w-11/12 sm:w-[600px]">
             <div className="font-changa text-[1.75rem] font-semibold text-[#F0F0F0]">
               Provably Fair
@@ -276,8 +281,30 @@ export default function RollDiceProvablyFairModal({
               <div className="grid w-full text-white">
                 <div className="grid gap-2">
                   <div className="border-2 border-opacity-5 border-[#FFFFFF] md:px-8">
-                    <div className="px-8 pt-20 pb-8">
-                      <div className="w-full"></div>
+                    <div className="p-4">
+                      <div className="grid grid-cols-8 gap-2 text-white text-xl font-chakra w-full">
+                        {Array.from(
+                          { length: 40 },
+                          (_, index) => index + 1,
+                        ).map((number) => (
+                          <div
+                            key={number}
+                            className={`flex items-center justify-center cursor-pointer ${
+                              strikeNumbers.includes(number)
+                                ? "bg-black border-2 border-fomo-green"
+                                : "bg-[#202329]"
+                            } rounded-md text-center transition-all duration-300 ease-in-out w-[45px] h-[45px]`}
+                          >
+                            {strikeNumbers.includes(number) ? (
+                              <div className="flex justify-center items-center bg-[#FFD100] text-black rounded-full w-[38px] h-[38px]">
+                                {number}
+                              </div>
+                            ) : (
+                              <div>{number}</div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   </div>
                   <div>
