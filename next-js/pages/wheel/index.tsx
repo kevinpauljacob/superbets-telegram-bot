@@ -492,7 +492,7 @@ export default function Wheel() {
             ) : null}
           </div>
         </div>
-        <div className="absolute right-3 lg:right-6">
+        <div className="hidden sm:block absolute right-3 lg:right-6">
           <ResultsSlider results={betResults} align={"vertical"} />
         </div>
         <div className="flex justify-center items-center w-full my-5">
@@ -538,49 +538,61 @@ export default function Wheel() {
         <div className="relative flex w-full justify-between px-0 xl:px-4 mb-0 px:mb-6 gap-4">
           {coinData && coinData[0].amount > 0.0001 && (
             <>
-              {uniqueSegments.map((segment, index) => (
-                <div
-                  key={index}
-                  className="relative w-full"
-                  onMouseEnter={() => setHoveredMultiplier(segment.multiplier)}
-                  onMouseLeave={() => setHoveredMultiplier(null)}
-                >
+              {uniqueSegments.map((segment, index) => {
+                const backgroundColor = segment.color; // Store segment.color in a separate variable
+                return (
                   <div
-                    className={`w-full border-t-[6px] text-center font-chakra font-semibold bg-[#202329] text-xs text-white rounded-md px-1.5 md:px-5 py-2.5`}
-                    style={{ borderColor: segment.color }}
+                    key={index}
+                    className="relative w-full"
+                    onMouseEnter={() =>
+                      setHoveredMultiplier(segment.multiplier)
+                    }
+                    onMouseLeave={() => setHoveredMultiplier(null)}
                   >
-                    {segment.multiplier}x
-                  </div>
-                  {hoveredMultiplier === segment.multiplier && (
-                    <div className="absolute top-[-120px] left-0 z-50 flex gap-4 text-white bg-[#202329] border border-white/10 rounded-lg w-full p-4 fadeInUp duration-100 min-w-[250px]">
-                      <div className="w-1/2">
-                        <div className="flex justify-between text-[13px] font-medium font-changa text-opacity-90 text-[#F0F0F0]">
-                          <span className="">Profit</span>
-                          <span>
-                            {/* {coinData ? coinData[0]?.amount.toFixed(4) : 0} $SOL */}
-                            SOL
-                          </span>
-                        </div>
-                        <div className="border border-white/10 rounded-lg p-3 mt-2">
-                          {coinData
-                            ? (
-                                coinData[0]?.amount * segment.multiplier
-                              ).toFixed(4)
-                            : 0}
-                        </div>
-                      </div>
-                      <div className="w-1/2">
-                        <div className="text-[13px] font-medium font-changa text-opacity-90 text-[#F0F0F0]">
-                          Chance
-                        </div>
-                        <div className="border border-white/10 rounded-lg p-3 mt-2">
-                          {segment.chance}%
-                        </div>
-                      </div>
+                    <div
+                      className="w-full border-t-[6px] text-center font-chakra font-semibold text-xs text-white rounded-md transition-all duration-300 ease-in-out px-1.5 md:px-5 py-2.5"
+                      style={{
+                        backgroundColor:
+                          strikeMultiplier === segment.multiplier
+                            ? `${backgroundColor}50`
+                            : "#202329",
+                        borderColor: segment.color,
+                      }}
+                    >
+                      {segment.multiplier}x
                     </div>
-                  )}
-                </div>
-              ))}
+
+                    {hoveredMultiplier === segment.multiplier && (
+                      <div className="absolute top-[-120px] left-0 z-50 flex gap-4 text-white bg-[#202329] border border-white/10 rounded-lg w-full p-4 fadeInUp duration-100 min-w-[250px]">
+                        <div className="w-1/2">
+                          <div className="flex justify-between text-[13px] font-medium font-changa text-opacity-90 text-[#F0F0F0]">
+                            <span className="">Profit</span>
+                            <span>
+                              {/* {coinData ? coinData[0]?.amount.toFixed(4) : 0} $SOL */}
+                              SOL
+                            </span>
+                          </div>
+                          <div className="border border-white/10 rounded-lg p-3 mt-2">
+                            {coinData
+                              ? (
+                                  coinData[0]?.amount * segment.multiplier
+                                ).toFixed(4)
+                              : 0}
+                          </div>
+                        </div>
+                        <div className="w-1/2">
+                          <div className="text-[13px] font-medium font-changa text-opacity-90 text-[#F0F0F0]">
+                            Chance
+                          </div>
+                          <div className="border border-white/10 rounded-lg p-3 mt-2">
+                            {segment.chance}%
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
             </>
           )}
           {!coinData ||
