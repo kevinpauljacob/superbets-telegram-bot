@@ -19,8 +19,8 @@ const kenoSchema = new mongoose.Schema(
       type: Array<number>,
       required: true,
     },
-    strikeNumber: {
-      type: Number,
+    strikeNumbers: {
+      type: Array<number>,
       required: true,
     },
     tokenMint: {

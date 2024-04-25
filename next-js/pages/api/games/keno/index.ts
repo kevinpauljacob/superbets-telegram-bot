@@ -201,9 +201,14 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         };
       }
 
+      const message =
+        result === "Won"
+          ? `Congratulations! You won ${amountWon}!`
+          : `Sorry, Better luck next time!`;
       return res.status(201).json({
         success: true,
-        message: `Congratulations! You won ${amountWon}!`,
+        message: message,
+        result,
         strikeNumbers,
         strikeMultiplier,
         amountWon: amountWon.toNumber(),

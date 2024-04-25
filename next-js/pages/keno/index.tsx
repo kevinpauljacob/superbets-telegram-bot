@@ -49,19 +49,18 @@ export default function Keno() {
   const [isRolling, setIsRolling] = useState(false);
   const [refresh, setRefresh] = useState(true);
   const [betType, setBetType] = useState<"manual" | "auto">("manual");
-  const [strikeNumber, setStrikeNumber] = useState<number>(0);
+  const [strikeNumbers, setStrikeNumbers] = useState<number[]>([]);
   const [strikeMultiplier, setStrikeMultiplier] = useState<number>();
   const [chosenNumbers, setChosenNumbers] = useState<number[]>([]);
   const [risk, setRisk] = useState<"classic" | "low" | "medium" | "high">(
     "classic",
   );
   const [autoPick, setAutoPick] = useState<boolean>(false);
-  const [segments, setSegments] = useState<number>(10);
-  const [betResults, setBetResults] = useState<
-    { result: number; win: boolean }[]
-  >([]);
 
   const multipliers = riskToChance[risk][chosenNumbers.length];
+  const commonNumbers = strikeNumbers.filter((num) =>
+    chosenNumbers.includes(num),
+  );
 
   const handleCountChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
@@ -70,6 +69,7 @@ export default function Keno() {
   };
 
   const handleChosenNumber = (number: number) => {
+    setStrikeNumbers([]);
     const numberIndex = chosenNumbers.indexOf(number);
 
     if (numberIndex !== -1) {
@@ -83,6 +83,27 @@ export default function Keno() {
         toast.error("10 numbers can be selected at max");
       }
     }
+  };
+
+  const handleAutoPick = () => {
+    if (!autoPick) {
+      const min = 1;
+      const max = 40;
+      const count = 10;
+
+      const randomNumbers = Array.from(
+        { length: count },
+        () => Math.floor(Math.random() * (max - min + 1)) + min,
+      );
+
+      setChosenNumbers(randomNumbers);
+    }
+    setAutoPick((prevAutoPick) => !prevAutoPick);
+  };
+
+  const handleClear = () => {
+    setChosenNumbers([]);
+    setAutoPick((prevAutoPick) => !prevAutoPick);
   };
 
   const handleBet = async () => {
@@ -100,9 +121,9 @@ export default function Keno() {
         return;
       }
       setIsRolling(true);
-      setStrikeNumber(0);
+      setStrikeNumbers([]);
       try {
-        const response = await fetch(`/api/games/wheel`, {
+        const response = await fetch(`/api/games/keno`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -111,12 +132,12 @@ export default function Keno() {
             wallet: wallet.publicKey,
             amount: betAmt,
             tokenMint: "SOL",
-            segments: segments,
+            chosenNumbers: chosenNumbers,
             risk: risk,
           }),
         });
 
-        const { success, message, result, strikeNumber, strikeMultiplier } =
+        const { success, message, result, strikeNumbers, strikeMultiplier } =
           await response.json();
 
         if (success != true) {
@@ -128,20 +149,11 @@ export default function Keno() {
         else toast.error(message, { duration: 2000 });
 
         const win = result === "Won";
-        const newBetResult = { result: strikeMultiplier, win };
-
-        setBetResults((prevResults) => {
-          const newResults = [...prevResults, newBetResult];
-          if (newResults.length > 6) {
-            newResults.shift();
-          }
-          return newResults;
-        });
 
         if (success) {
-          setStrikeNumber(strikeNumber);
+          setStrikeNumbers(strikeNumbers);
           setStrikeMultiplier(strikeMultiplier);
-          console.log("strikeNumber", strikeNumber);
+          console.log("strikeNumbers", strikeNumbers);
           setRefresh(true);
         }
 
@@ -272,7 +284,7 @@ export default function Keno() {
                       Risk
                     </p>
                   </div>
-                  <div className="group flex gap-2.5 w-full items-center rounded-[8px] text-white font-chakra text-sm font-semibold bg-[#0C0F16] p-4">
+                  <div className="grid grid-cols-2 gap-3 w-full items-center rounded-[8px] text-white font-chakra text-sm font-semibold bg-[#0C0F16] p-4">
                     <div
                       onClick={() => setRisk("classic")}
                       className={`text-center w-full rounded-[5px] border-[2px] bg-[#202329] py-2 text-xs font-chakra text-white text-opacity-90 transition duration-200 ${
@@ -319,25 +331,25 @@ export default function Keno() {
                 <div className="flex w-full flex-row gap-3 mb-5">
                   <div
                     onClick={() => {
-                      setAutoPick(true);
+                      handleAutoPick();
                     }}
                     className={`${
                       autoPick === true
                         ? "border-[#7839C5] text-opacity-100"
                         : "border-transparent hover:border-[#7839C580] text-opacity-80"
-                    } w-full flex items-center justify-center gap-1 rounded-lg text-center cursor-pointer border-2 bg-[#202329] py-2.5 font-changa text-xl text-white font-semibold`}
+                    } w-full flex items-center justify-center gap-1 rounded-lg text-center cursor-pointer border-2 bg-[#202329] py-2.5 font-chakra text-xl text-white font-semibold`}
                   >
                     AUTOPICK
                   </div>
                   <div
                     onClick={() => {
-                      setAutoPick(false);
+                      handleClear();
                     }}
                     className={`${
                       autoPick === false
                         ? "border-transparent hover:border-[#7839C580] text-opacity-80"
                         : "border-transparent hover:border-[#7839C580] text-opacity-80"
-                    } w-full flex items-center justify-center gap-1 rounded-lg text-center cursor-pointer border-2 bg-[#202329] py-2.5 font-changa text-xl text-white font-semibold`}
+                    } w-full flex items-center justify-center gap-1 rounded-lg text-center cursor-pointer border-2 bg-[#202329] py-2.5 font-chakra text-xl text-white font-semibold`}
                   >
                     CLEAR
                   </div>
@@ -452,7 +464,7 @@ export default function Keno() {
       </GameOptions>
       <GameDisplay>
         <div className="w-full flex justify-between items-center h-[2.125rem]">
-          <div>
+          <div className="absolute top-10 left-12">
             {isRolling ? (
               <div className="font-chakra text-sm font-medium text-white text-opacity-75">
                 Betting...
@@ -460,23 +472,34 @@ export default function Keno() {
             ) : null}
           </div>
         </div>
-        <div className="absolute right-3 lg:right-6">
-          <ResultsSlider results={betResults} align={"vertical"} />
-        </div>
         <div className="flex justify-center items-center w-full my-5">
-          <div className="grid grid-cols-8 gap-1.5 text-white">
+          <div className="grid grid-cols-8 gap-2 text-white text-xl font-chakra">
             {Array.from({ length: 40 }, (_, index) => index + 1).map(
               (number) => (
                 <div
                   key={number}
                   onClick={() => handleChosenNumber(number)}
-                  className={`flex items-center justify-center ${
+                  className={`flex items-center justify-center cursor-pointer ${
+                    !isRolling &&
+                    strikeNumbers.length === 0 &&
                     chosenNumbers.includes(number)
                       ? "bg-[#7839C5]"
+                      : strikeNumbers.includes(number) &&
+                        chosenNumbers.includes(number)
+                      ? "bg-black border-2 border-fomo-green"
+                      : chosenNumbers.includes(number)
+                      ? "bg-black border-2 border-fomo-red text-fomo-red"
                       : "bg-[#202329]"
-                  } rounded-md text-center w-[55px] h-[55px]`}
+                  } rounded-md text-center transition-all duration-300 ease-in-out w-[65px] h-[65px]`}
                 >
-                  {number}
+                  {strikeNumbers.includes(number) &&
+                  chosenNumbers.includes(number) ? (
+                    <div className="flex justify-center items-center bg-[#FFD100] text-black rounded-full w-[38px] h-[38px]">
+                      {number}
+                    </div>
+                  ) : (
+                    <div>{number}</div>
+                  )}
                 </div>
               ),
             )}
@@ -502,7 +525,13 @@ export default function Keno() {
                     {multipliers.map((multiplier, index) => (
                       <div
                         key={index}
-                        className="flex justify-center items-center font-chakra text-xs font-semibold py-3 w-full"
+                        className={`${
+                          !isRolling &&
+                          strikeNumbers.length > 0 &&
+                          commonNumbers.length === index
+                            ? "bg-white/20"
+                            : ""
+                        } flex justify-center items-center rounded-[5px] font-chakra text-xs font-semibold transition-all duration-300 ease-in-out py-3 w-full`}
                       >
                         <span className="mr-1">{index}x</span>
                         <svg
