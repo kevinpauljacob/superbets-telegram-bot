@@ -19,7 +19,11 @@ const kenoSchema = new mongoose.Schema(
       type: Array<number>,
       required: true,
     },
-    strikeNumber: {
+    strikeNumbers: {
+      type: Array<number>,
+      required: true,
+    },
+    strikeMultiplier: {
       type: Number,
       required: true,
     },
