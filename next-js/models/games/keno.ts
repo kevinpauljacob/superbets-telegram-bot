@@ -23,6 +23,10 @@ const kenoSchema = new mongoose.Schema(
       type: Array<number>,
       required: true,
     },
+    strikeMultiplier: {
+      type: Number,
+      required: true,
+    },
     tokenMint: {
       type: String,
       required: true,
