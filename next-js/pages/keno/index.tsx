@@ -390,6 +390,7 @@ export default function Keno() {
                               ? "Infinity"
                               : "00"
                           }
+                          disabled={isRolling || startAuto}
                           value={autoBetCount}
                           className={`flex w-full min-w-0 bg-transparent text-base text-[#94A3B8] placeholder-[#94A3B8] font-chakra ${
                             autoBetCount.toString().includes("inf")
