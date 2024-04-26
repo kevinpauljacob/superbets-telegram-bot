@@ -315,9 +315,10 @@ export default function Flip() {
                               ? "Infinity"
                               : "00"
                           }
+                          disabled={loading || startAuto}
                           value={autoBetCount}
                           className={`flex w-full min-w-0 bg-transparent text-base text-[#94A3B8] placeholder-[#94A3B8] font-chakra ${
-                            autoBetCount === "inf"
+                            autoBetCount.toString().includes("inf")
                               ? "placeholder-opacity-100"
                               : "placeholder-opacity-40"
                           } placeholder-opacity-40 outline-none`}
@@ -489,7 +490,7 @@ export default function Flip() {
           </div>
 
           <div
-            className={`w-[11rem] h-[11rem] relative ${
+            className={`w-[11rem] h-[11rem] my-4 relative ${
               betType && loading ? "rotate" : ""
             }`}
           >

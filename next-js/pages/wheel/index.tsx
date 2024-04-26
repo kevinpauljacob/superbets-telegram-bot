@@ -369,6 +369,7 @@ export default function Wheel() {
                       min={10}
                       max={50}
                       step={10}
+                      disabled={isRolling || startAuto}
                       value={segments}
                       onChange={(e) => setSegments(parseInt(e.target.value))}
                       className="defaultSlider absolute top-[-8px] w-full bg-transparent appearance-none z-20"
@@ -407,9 +408,10 @@ export default function Wheel() {
                               ? "Infinity"
                               : "00"
                           }
+                          disabled={isRolling || startAuto}
                           value={autoBetCount}
                           className={`flex w-full min-w-0 bg-transparent text-base text-[#94A3B8] placeholder-[#94A3B8] font-chakra ${
-                            autoBetCount === "inf"
+                            autoBetCount.toString().includes("inf")
                               ? "placeholder-opacity-100"
                               : "placeholder-opacity-40"
                           } placeholder-opacity-40 outline-none`}

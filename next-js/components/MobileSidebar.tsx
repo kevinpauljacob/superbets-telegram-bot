@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -14,9 +14,17 @@ import Twitter from "@/public/assets/Twitter";
 import Birdeye from "@/public/assets/Birdeye";
 import Telegram from "@/public/assets/Telegram";
 import Home from "@/public/assets/Home";
+import { useRouter } from "next/router";
 
-export default function Sidebar({ mobileSidebar }: { mobileSidebar: boolean }) {
+export default function Sidebar({
+  mobileSidebar,
+  setSidebar,
+}: {
+  mobileSidebar: boolean;
+  setSidebar: React.Dispatch<React.SetStateAction<boolean>>;
+}) {
   const wallet = useWallet();
+  const router = useRouter();
   const [showExitTokens, setShowExitTokens] = useState(false);
   const [showPlayTokens, setShowPlayTokens] = useState(false);
 
@@ -101,6 +109,10 @@ export default function Sidebar({ mobileSidebar }: { mobileSidebar: boolean }) {
     }));
     setCasinoGames(updatedCasinoGames);
   };
+
+  useEffect(() => {
+    setSidebar(false);
+  }, [router.pathname]);
 
   const openLinkCss =
     "w-full gap-2 flex items-center justify-center text-sm font-semibold text-white text-opacity-50 hover:bg-white/10 transition duration-300 ease-in-out hover:transition hover:duration-300 hover:ease-in-out bg-[#191A1D] rounded-md text-center py-2 mb-2";
@@ -235,7 +247,9 @@ export default function Sidebar({ mobileSidebar }: { mobileSidebar: boolean }) {
                   <Link
                     href={token.link}
                     key={index}
-                    onClick={() => toggleCasinoToken(index)}
+                    onClick={() => {
+                      toggleCasinoToken(index);
+                    }}
                     className={`${
                       token.active ? "bg-white/10" : "hover:bg-[#191a1d]"
                     } group flex transition-all items-center rounded-md p-2 pl-12 gap-2`}

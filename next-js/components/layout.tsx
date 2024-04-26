@@ -73,7 +73,7 @@ export default function Layout({ children }: LayoutProps) {
       <section className="relative flex flex-1 max-h-[calc(100vh-6.25rem)]">
         <Sidebar sidebar={sidebar} setSidebar={setSidebar} />
         <section className="w-full relative overflow-hidden">
-          <MobileSidebar mobileSidebar={sidebar} />
+          <MobileSidebar mobileSidebar={sidebar} setSidebar={setSidebar}/>
           <section className="w-full h-full">
             <SubHeader />
     

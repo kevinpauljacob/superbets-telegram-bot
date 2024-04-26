@@ -83,36 +83,38 @@ export default function Dice() {
   const [showPointer, setShowPointer] = useState<boolean>(false);
 
   const handleDiceClick = (newFace: number) => {
-    setStrikeFace(0);
-    setShowPointer(false);
-    if (selectedFace.length >= 5 && !selectedFace.includes(newFace)) {
-      toast.error("You can only select up to 5 faces");
-      return;
-    }
+    if (!startAuto && !isRolling) {
+      setStrikeFace(0);
+      setShowPointer(false);
+      if (selectedFace.length >= 5 && !selectedFace.includes(newFace)) {
+        toast.error("You can only select up to 5 faces");
+        return;
+      }
 
-    setSelectedFaces((prevState) => ({
-      ...prevState,
-      [newFace]: !prevState[newFace],
-    }));
+      setSelectedFaces((prevState) => ({
+        ...prevState,
+        [newFace]: !prevState[newFace],
+      }));
 
-    if (1 <= newFace && newFace <= 6) {
-      if (!selectedFace.includes(newFace)) {
-        setSelectedFace([...selectedFace, newFace]);
-        const newLength = selectedFace.length + 1;
-        setWinningPays(6 / newLength);
-        setWinningAmount((betAmt * 6) / newLength);
-        setWinningProbability((newLength * 100) / 6);
-      } else {
-        setSelectedFace(selectedFace.filter((face) => face !== newFace));
-        const newLength = selectedFace.length - 1;
-        if (newLength === 0) {
-          setWinningPays(6);
-          setWinningAmount(betAmt * 6);
-          setWinningProbability(0);
-        } else {
+      if (1 <= newFace && newFace <= 6) {
+        if (!selectedFace.includes(newFace)) {
+          setSelectedFace([...selectedFace, newFace]);
+          const newLength = selectedFace.length + 1;
           setWinningPays(6 / newLength);
           setWinningAmount((betAmt * 6) / newLength);
           setWinningProbability((newLength * 100) / 6);
+        } else {
+          setSelectedFace(selectedFace.filter((face) => face !== newFace));
+          const newLength = selectedFace.length - 1;
+          if (newLength === 0) {
+            setWinningPays(6);
+            setWinningAmount(betAmt * 6);
+            setWinningProbability(0);
+          } else {
+            setWinningPays(6 / newLength);
+            setWinningAmount((betAmt * 6) / newLength);
+            setWinningProbability((newLength * 100) / 6);
+          }
         }
       }
     }
@@ -285,7 +287,8 @@ export default function Dice() {
       rollType,
       startAuto,
       autoBetCount,
-      typeof autoBetCount === "string" && autoBetCount === "inf",
+      typeof autoBetCount === "string" &&
+        autoBetCount.toString().includes("inf"),
     );
     if (
       rollType === "auto" &&
@@ -397,9 +400,10 @@ export default function Dice() {
                               ? "Infinity"
                               : "00"
                           }
+                          disabled={isRolling || startAuto}
                           value={autoBetCount}
                           className={`flex w-full min-w-0 bg-transparent text-base text-[#94A3B8] placeholder-[#94A3B8] font-chakra ${
-                            autoBetCount === "inf"
+                            autoBetCount.toString().includes("inf")
                               ? "placeholder-opacity-100"
                               : "placeholder-opacity-40"
                           } placeholder-opacity-40 outline-none`}

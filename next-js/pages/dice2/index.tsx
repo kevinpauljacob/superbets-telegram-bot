@@ -373,9 +373,10 @@ export default function Dice2() {
                               ? "Infinity"
                               : "00"
                           }
+                          disabled={startAuto || isRolling}
                           value={autoBetCount}
                           className={`flex w-full min-w-0 bg-transparent text-base text-[#94A3B8] placeholder-[#94A3B8] font-chakra ${
-                            autoBetCount === "inf"
+                            autoBetCount.toString().includes("inf")
                               ? "placeholder-opacity-100"
                               : "placeholder-opacity-40"
                           } placeholder-opacity-40 outline-none`}
@@ -470,6 +471,7 @@ export default function Dice2() {
             strikeNumber={strikeNumber}
             result={result}
             rollType={rollType}
+            draggable={startAuto || isRolling ? false : true}
           />
         </div>
         <div className="flex px-0 xl:px-4 mb-0 md:mb-5 gap-4 flex-row w-full justify-between">
@@ -487,15 +489,17 @@ export default function Dice2() {
                   step={1}
                   min={1.0}
                   max={9900.0}
+                  disabled={startAuto || isRolling}
                   onChange={(e) => handleMultiplierInput(e)}
                 />
               </div>
 
               <div
                 className="flex flex-col w-full"
-                onClick={() =>
-                  setRollType(rollType === "over" ? "under" : "over")
-                }
+                onClick={() => {
+                  if (!startAuto && !isRolling)
+                    setRollType(rollType === "over" ? "under" : "over");
+                }}
               >
                 {rollType === "over" ? (
                   <span className="text-[#F0F0F0] text-xs font-changa font-semibold mb-1">
@@ -530,6 +534,7 @@ export default function Dice2() {
                     step={1}
                     min={0}
                     max={98.0}
+                    disabled={startAuto || isRolling}
                     onChange={(e) => handleChanceInput(e)}
                   />
                 </div>

@@ -45,7 +45,7 @@ export default function Keno() {
     setUseAutoConfig,
   } = useGlobalContext();
   const [betAmt, setBetAmt] = useState(0);
-  const [userInput, setUserInput] = useState(0);
+  const [userInput, setUserInput] = useState<number | undefined>();
   const [isRolling, setIsRolling] = useState(false);
   const [refresh, setRefresh] = useState(true);
   const [betType, setBetType] = useState<"manual" | "auto">("manual");
@@ -201,14 +201,14 @@ export default function Keno() {
           if (useAutoConfig && autoWinChange && win) {
             setBetAmt(
               autoWinChangeReset
-                ? userInput
+                ? userInput!
                 : betAmt + (autoWinChange * betAmt) / 100.0,
             );
           } else if (useAutoConfig && autoLossChange && !win) {
             setAutoBetProfit(autoBetProfit - betAmt);
             setBetAmt(
               autoLossChangeReset
-                ? userInput
+                ? userInput!
                 : betAmt + (autoLossChange * betAmt) / 100.0,
             );
           }
@@ -241,7 +241,7 @@ export default function Keno() {
   }, [wallet?.publicKey, refresh]);
 
   useEffect(() => {
-    setBetAmt(userInput);
+    setBetAmt(userInput ?? 0);
   }, [userInput]);
 
   useEffect(() => {
@@ -273,6 +273,10 @@ export default function Keno() {
       ((typeof autoBetCount === "string" && autoBetCount.includes("inf")) ||
         (typeof autoBetCount === "number" && autoBetCount > 0))
     ) {
+      if (betAmt === 0) {
+        toast.error("Set Amount.");
+        return;
+      }
       console.log("Auto betting. config: ", useAutoConfig);
       setStartAuto(true);
     } else if (wallet.connected) handleBet();
@@ -422,16 +426,17 @@ export default function Keno() {
                               ? "Infinity"
                               : "00"
                           }
+                          disabled={isRolling || startAuto}
                           value={autoBetCount}
                           className={`flex w-full min-w-0 bg-transparent text-base text-[#94A3B8] placeholder-[#94A3B8] font-chakra ${
-                            autoBetCount === "inf"
+                            autoBetCount.toString().includes("inf")
                               ? "placeholder-opacity-100"
                               : "placeholder-opacity-40"
                           } placeholder-opacity-40 outline-none`}
                         />
                         <span
                           className={`text-2xl font-medium text-white text-opacity-50 ${
-                            autoBetCount === "inf"
+                            autoBetCount.toString().includes("inf")
                               ? "bg-[#47484A]"
                               : "bg-[#292C32]"
                           } hover:bg-[#47484A] focus:bg-[#47484A] transition-all rounded-[5px] py-0.5 px-3`}
