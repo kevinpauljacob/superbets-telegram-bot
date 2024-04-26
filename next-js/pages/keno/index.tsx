@@ -18,7 +18,7 @@ import Loader from "@/components/games/Loader";
 import BetAmount from "@/components/games/BetAmountInput";
 import BetButton from "@/components/games/BetButton";
 import showInfoToast from "@/components/games/toasts/toasts";
-import ResultsSlider from "@/components/ResultsSlider";
+const Combinatorics = require("combinatorics");
 import { riskToChance } from "@/components/games/Keno/RiskToChance";
 
 export default function Keno() {
@@ -56,6 +56,9 @@ export default function Keno() {
     "classic",
   );
   const [autoPick, setAutoPick] = useState<boolean>(false);
+  const [hoveredMultiplier, setHoveredMultiplier] = useState<number | null>(
+    null,
+  );
 
   const multipliers = riskToChance[risk][chosenNumbers.length];
   const commonNumbers = strikeNumbers.filter((num) =>
@@ -107,6 +110,39 @@ export default function Keno() {
   const handleClear = () => {
     setChosenNumbers([]);
     setAutoPick((prevAutoPick) => !prevAutoPick);
+  };
+
+  const calculateChance = (index: number) => {
+    const n = 40;
+    const m = 10;
+    const k = chosenNumbers.length;
+    const x = index;
+
+    function factorial(n: number) {
+      if (n === 0 || n === 1) {
+        return 1;
+      }
+      for (let i = n - 1; i >= 1; i--) {
+        n *= i;
+      }
+      return n;
+    }
+
+    const binomialCoefficient = (n: number, k: number) => {
+      if (k > n || k < 0) {
+        return 0;
+      }
+      const numerator = factorial(n);
+      const denominator = factorial(k) * factorial(n - k);
+      return numerator / denominator;
+    };
+
+    const numerator =
+      binomialCoefficient(k, x) * binomialCoefficient(n - k, m - x);
+    const denominator = binomialCoefficient(n, m);
+    const probability = numerator / denominator;
+
+    return probability * 100;
   };
 
   const handleBet = async () => {
@@ -528,6 +564,8 @@ export default function Keno() {
                     {multipliers.map((multiplier, index) => (
                       <div
                         key={index}
+                        onMouseEnter={() => setHoveredMultiplier(multiplier)}
+                        onMouseLeave={() => setHoveredMultiplier(null)}
                         className={`${
                           !isRolling &&
                           strikeNumbers.length > 0 &&
@@ -549,6 +587,34 @@ export default function Keno() {
                             fill="#FFD100"
                           />
                         </svg>
+                        {hoveredMultiplier === multiplier && (
+                          <div className="absolute top-[-120px] left-0 z-50 flex gap-4 text-white bg-[#202329] border border-white/10 rounded-lg w-full p-4 fadeInUp duration-100 min-w-[250px]">
+                            <div className="w-1/2">
+                              <div className="flex justify-between text-[13px] font-medium font-changa text-opacity-90 text-[#F0F0F0]">
+                                <span className="">Profit</span>
+                                <span>
+                                  {/* {coinData ? coinData[0]?.amount.toFixed(4) : 0} $SOL */}
+                                  SOL
+                                </span>
+                              </div>
+                              <div className="border border-white/10 rounded-lg p-3 mt-2">
+                                {coinData
+                                  ? (coinData[0]?.amount * multiplier).toFixed(
+                                      4,
+                                    )
+                                  : 0}
+                              </div>
+                            </div>
+                            <div className="w-1/2">
+                              <div className="text-[13px] font-medium font-changa text-opacity-90 text-[#F0F0F0]">
+                                Chance
+                              </div>
+                              <div className="border border-white/10 rounded-lg p-3 mt-2">
+                                {calculateChance(index).toFixed(2)} %
+                              </div>
+                            </div>
+                          </div>
+                        )}
                       </div>
                     ))}
                   </div>
