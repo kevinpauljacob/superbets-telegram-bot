@@ -126,6 +126,17 @@ export const pointTiers: Record<
   },
 };
 
+export const houseEdgeTiers: Record<number, number> = {
+  0: 0.01,
+  1: 0.009,
+  2: 0.0075,
+  3: 0.006,
+  4: 0.005,
+  5: 0.0035,
+  6: 0.0015,
+  7: 0,
+};
+
 export const obfuscatePubKey = (address: string) => {
   return (
     address?.substring(0, 4) + "..." + address?.substring(address.length - 4)
@@ -189,7 +200,7 @@ export const stakeFOMO = async (
       })
       .toString("base64");
 
-    const res = await fetch(`/api/wallet/stake`, {
+    const res = await fetch(`/api/staking/wallet/stake`, {
       method: "POST",
       body: JSON.stringify({
         blockhash,
@@ -254,7 +265,7 @@ export const unstakeFOMO = async (
       })
       .toString("base64");
 
-    const res = await fetch(`/api/wallet/unstake`, {
+    const res = await fetch(`/api/staking/wallet/unstake`, {
       method: "POST",
       body: JSON.stringify({
         transactionBase64,

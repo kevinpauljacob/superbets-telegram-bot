@@ -29,6 +29,10 @@ const limboSchema = new mongoose.Schema(
     },
     tokenMint: {
       type: String,
+      required: false,
+    },
+    houseEdge: {
+      type: Number,
       required: true,
     },
     amountWon: {

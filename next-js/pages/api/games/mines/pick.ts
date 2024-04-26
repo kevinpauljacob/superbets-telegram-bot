@@ -4,8 +4,10 @@ import { NextApiRequest, NextApiResponse } from "next";
 import { Mines, User } from "@/models/games";
 import { generateGameResult, GameType } from "@/utils/provably-fair";
 import StakingUser from "@/models/staking/user";
-import { pointTiers } from "@/context/transactions";
+import { houseEdgeTiers, pointTiers } from "@/context/transactions";
 import { wsEndpoint } from "@/context/gameTransactions";
+import Decimal from "decimal.js";
+Decimal.set({ precision: 9 });
 
 const secret = process.env.NEXTAUTH_SECRET;
 
@@ -55,6 +57,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         _id: gameId,
         result: "Pending",
       }).populate("gameSeed");
+
       if (!gameInfo)
         return res
           .status(400)
@@ -91,9 +94,17 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           },
         );
       } else {
-        amountWon =
-          (Math.max(amount, amountWon) * (25 - minesCount)) /
-          (25 - minesCount - numBets + 1);
+        const userData = await StakingUser.findOne({ wallet });
+        let points = userData?.points ?? 0;
+        const userTier = Object.entries(pointTiers).reduce((prev, next) => {
+          return points >= next[1]?.limit ? next : prev;
+        })[0];
+        const houseEdge = houseEdgeTiers[parseInt(userTier)];
+
+        amountWon = Decimal.mul(Math.max(amount, amountWon), 25 - minesCount)
+          .div(25 - minesCount - numBets + 1)
+          .mul(Decimal.sub(1, houseEdge))
+          .toNumber();
 
         if (numBets === 25 - minesCount) {
           result = "Won";
@@ -128,17 +139,12 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
             },
             {
               result,
-              userBets: { $addToSet: userBet },
+              houseEdge,
               strikeNumbers,
               amountWon,
+              $push: { userBets: userBet },
             },
           );
-
-          const userData = await StakingUser.findOne({ wallet });
-          let points = userData?.points ?? 0;
-          const userTier = Object.entries(pointTiers).reduce((prev, next) => {
-            return points >= next[1]?.limit ? next : prev;
-          })[0];
 
           const socket = new WebSocket(wsEndpoint);
 
@@ -167,7 +173,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
               result: "Pending",
             },
             {
-              userBets: { $addToSet: userBet },
+              $push: { userBets: userBet },
               amountWon,
             },
           );

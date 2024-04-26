@@ -4,8 +4,10 @@ import { NextApiRequest, NextApiResponse } from "next";
 import { Hilo, User } from "@/models/games";
 import { generateGameResult, GameType } from "@/utils/provably-fair";
 import StakingUser from "@/models/staking/user";
-import { pointTiers } from "@/context/transactions";
+import { houseEdgeTiers, pointTiers } from "@/context/transactions";
 import { wsEndpoint } from "@/context/gameTransactions";
+import { Decimal } from "decimal.js";
+Decimal.set({ precision: 9 });
 
 const secret = process.env.NEXTAUTH_SECRET;
 
@@ -55,7 +57,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           .status(400)
           .json({ success: false, message: "Game does not exist !" });
 
-      let { nonce, gameSeed, startNumber, amountWon } = gameInfo;
+      let { nonce, gameSeed, startNumber, amountWon, amount } = gameInfo;
 
       const strikeNumbers = generateGameResult(
         gameSeed.serverSeed,
@@ -65,6 +67,14 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         startNumber,
       );
 
+      const userData = await StakingUser.findOne({ wallet });
+      let points = userData?.points ?? 0;
+      const userTier = Object.entries(pointTiers).reduce((prev, next) => {
+        return points >= next[1]?.limit ? next : prev;
+      })[0];
+      const houseEdge = houseEdgeTiers[parseInt(userTier)];
+
+      amountWon = Decimal.mul(amountWon, Decimal.sub(1, houseEdge)).toNumber();
       const result = "Won";
 
       const userUpdate = await User.findOneAndUpdate(
@@ -98,14 +108,10 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         {
           result,
           strikeNumbers,
+          houseEdge,
+          amountWon,
         },
       );
-
-      const userData = await StakingUser.findOne({ wallet });
-      let points = userData?.points ?? 0;
-      const userTier = Object.entries(pointTiers).reduce((prev, next) => {
-        return points >= next[1]?.limit ? next : prev;
-      })[0];
 
       const socket = new WebSocket(wsEndpoint);
 
@@ -118,7 +124,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
             payload: {
               game: GameType.mines,
               wallet,
-              absAmount: amountWon,
+              absAmount: Decimal.sub(amountWon, amount).toNumber(),
               result,
               userTier,
             },
