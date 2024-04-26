@@ -496,9 +496,10 @@ export default function Dice2() {
 
               <div
                 className="flex flex-col w-full"
-                onClick={() =>
-                  setRollType(rollType === "over" ? "under" : "over")
-                }
+                onClick={() => {
+                  if (!startAuto && !isRolling)
+                    setRollType(rollType === "over" ? "under" : "over");
+                }}
               >
                 {rollType === "over" ? (
                   <span className="text-[#F0F0F0] text-xs font-changa font-semibold mb-1">
