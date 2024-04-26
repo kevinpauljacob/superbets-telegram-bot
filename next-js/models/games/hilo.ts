@@ -14,11 +14,7 @@ const hiloSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
-    userBets: Array<{
-      type: String;
-      enum: ["Higher", "Lower"];
-      required: true;
-    }>,
+    userBets: Array<"Higher" | "Lower">,
     strikeNumbers: Array<Number>,
     tokenMint: {
       type: String,

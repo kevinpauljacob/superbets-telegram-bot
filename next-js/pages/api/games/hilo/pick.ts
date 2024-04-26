@@ -6,6 +6,8 @@ import { generateGameResult, GameType } from "@/utils/provably-fair";
 import StakingUser from "@/models/staking/user";
 import { pointTiers } from "@/context/transactions";
 import { wsEndpoint } from "@/context/gameTransactions";
+import { Decimal } from "decimal.js";
+Decimal.set({ precision: 9 });
 
 const secret = process.env.NEXTAUTH_SECRET;
 
@@ -72,7 +74,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       );
 
       let result = "Pending";
-      const currentIndex = userBets.length;
+      const currentIndex = userBets.length + 1;
 
       if (
         !(
@@ -94,10 +96,12 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           {
             result,
             user,
-            userBets: { $addToSet: userBet },
             strikeNumbers,
             amountWon: 0,
             amountLost: gameInfo.amount,
+            $push: {
+              userBets: userBet,
+            },
           },
         );
       } else {
@@ -105,7 +109,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
         let winChance = 0;
         for (let i = 1; i <= 52; ++i) {
-          if (userBets.includes(i)) continue;
+          if (strikeNumbers.slice(0, currentIndex).includes(i)) continue;
 
           if (
             (userBet === "Higher" &&
@@ -116,7 +120,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
             winChance++;
         }
 
-        amountWon *= winChance / 52;
+        amountWon *= (52 - currentIndex) / winChance;
+        amountWon = new Decimal(amountWon).mul(52-currentIndex).div(winChance).toNumber()
 
         if (currentIndex + 1 === 52) {
           result = "Won";
@@ -151,8 +156,10 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
             },
             {
               result,
-              userBets: { $addToSet: userBet },
               amountWon,
+              $push: {
+                userBets: userBet,
+              },
             },
           );
 
@@ -189,8 +196,10 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
               result: "Pending",
             },
             {
-              userBets: { $addToSet: userBet },
               amountWon,
+              $push: {
+                userBets: userBet,
+              },
             },
           );
         }
@@ -205,6 +214,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
             ? "Better luck next time!"
             : "Game in progress",
         result,
+        strikeNumber: strikeNumbers[currentIndex],
       });
     } catch (e: any) {
       console.log(e);

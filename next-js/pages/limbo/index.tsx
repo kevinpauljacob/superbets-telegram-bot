@@ -284,7 +284,7 @@ export default function Limbo() {
                         onClick={() => {
                           setShowAutoModal(true);
                         }}
-                        className="mb-[1.4rem] rounded-md w-full h-11 flex items-center justify-center opacity-75 cursor-pointer text-white text-opacity-90 border-2 border-white bg-white bg-opacity-0 hover:bg-opacity-5"
+                        className="mb-[1.4rem] rounded-md w-full h-11 flex items-center justify-center opacity-75 cursor-pointer font-sans font-semibold text-sm text-white text-opacity-90 border-2 border-white bg-white bg-opacity-0 hover:bg-opacity-5"
                       >
                         Configure Auto
                       </div>

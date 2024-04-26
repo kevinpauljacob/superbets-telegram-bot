@@ -124,8 +124,19 @@ export const generateGameResult = <T extends GameType>(
       if (!parameter) throw new Error("Game parameter missing!");
 
       let numbers = [parameter];
-      for (let i = 1; i < 5; i++) {
-        let currentNum = (parseInt(hash.slice(i * 2, i * 2 + 2), 16) % 52) + 1;
+      console.log(hash);
+      const reversedHash = hash.split("").reverse().join("");
+
+      let combinedHash = "";
+      for (let i = 0; i < hash.length; i += 2) {
+        combinedHash += hash.substring(i, i + 2);
+        combinedHash += reversedHash.substring(i, i + 2);
+      }
+
+      for (let i = 0; i < 51; i++) {
+        let currentNum =
+          (parseInt(combinedHash.slice(i * 2, i * 2 + 2), 16) % 52) + 1;
+
         while (numbers.includes(currentNum)) {
           currentNum = (currentNum % 52) + 1;
         }

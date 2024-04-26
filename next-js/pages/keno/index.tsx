@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useWallet } from "@solana/wallet-adapter-react";
@@ -11,7 +11,7 @@ import {
   GameOptions,
   GameTable,
 } from "@/components/GameLayout";
-import HistoryTable from "@/components/games/Wheel/HistoryTable";
+import HistoryTable from "@/components/games/Keno/HistoryTable";
 import { FormProvider, useForm } from "react-hook-form";
 import { BsInfinity } from "react-icons/bs";
 import Loader from "@/components/games/Loader";
@@ -19,13 +19,11 @@ import BetAmount from "@/components/games/BetAmountInput";
 import BetButton from "@/components/games/BetButton";
 import showInfoToast from "@/components/games/toasts/toasts";
 import ResultsSlider from "@/components/ResultsSlider";
-import Arc from "@/components/games/Wheel/Arc";
-import { riskToChance } from "@/components/games/Wheel/Segments";
+import { riskToChance } from "@/components/games/Keno/RiskToChance";
 
-export default function Wheel() {
+export default function Keno() {
   const wallet = useWallet();
   const methods = useForm();
-  const wheelRef = useRef<HTMLDivElement>(null);
   const {
     coinData,
     getBalance,
@@ -51,72 +49,18 @@ export default function Wheel() {
   const [isRolling, setIsRolling] = useState(false);
   const [refresh, setRefresh] = useState(true);
   const [betType, setBetType] = useState<"manual" | "auto">("manual");
-  const [strikeNumber, setStrikeNumber] = useState<number>(0);
+  const [strikeNumbers, setStrikeNumbers] = useState<number[]>([]);
   const [strikeMultiplier, setStrikeMultiplier] = useState<number>();
-  const [resultAngle, setResultAngle] = useState<number>(0);
-  const [risk, setRisk] = useState<"low" | "medium" | "high">("low");
-  const [segments, setSegments] = useState<number>(10);
-  const [rotationAngle, setRotationAngle] = useState(0);
-  const [betResults, setBetResults] = useState<
-    { result: number; win: boolean }[]
-  >([]);
-  const [hoveredMultiplier, setHoveredMultiplier] = useState<number | null>(
-    null,
+  const [chosenNumbers, setChosenNumbers] = useState<number[]>([]);
+  const [risk, setRisk] = useState<"classic" | "low" | "medium" | "high">(
+    "classic",
   );
+  const [autoPick, setAutoPick] = useState<boolean>(false);
 
-  const multipliers = riskToChance[risk];
-  const sortedMultipliers = multipliers
-    .slice()
-    .sort((a, b) => a.multiplier - b.multiplier);
-
-  const uniqueSegments = sortedMultipliers.filter(
-    (segment, index, self) =>
-      index === 0 || self[index - 1].multiplier !== segment.multiplier,
+  const multipliers = riskToChance[risk][chosenNumbers.length];
+  const commonNumbers = strikeNumbers.filter((num) =>
+    chosenNumbers.includes(num),
   );
-
-  const segmentFill =
-    segments === 10
-      ? 0
-      : segments === 20
-      ? 25
-      : segments === 30
-      ? 50
-      : segments === 40
-      ? 75
-      : segments === 50
-      ? 100
-      : null;
-
-  useEffect(() => {
-    if (!wheelRef.current) return;
-    const rotationAngle = 360 / segments;
-    setRotationAngle(rotationAngle);
-  }, [segments]);
-
-  const spinWheel = (strikeNumber: number) => {
-    const resultAngle = ((strikeNumber - 1) * 360) / 100;
-    setResultAngle(resultAngle);
-    console.log("resultAngle", resultAngle);
-    if (wheelRef.current) {
-      // Set initial rotation to zero to ensure it starts from the right position
-      wheelRef.current.style.transform = `rotate(${resultAngle}deg)`;
-
-      // Apply transition for the rotation
-      wheelRef.current.style.transition =
-        "transform 3s cubic-bezier(0.4, 0, 0.2, 1)";
-
-      // Rotate the wheel clockwise for 3 seconds
-      wheelRef.current.style.transform = `rotate(1080deg)`;
-
-      // After 3 seconds, stop the rotation and move to the resultAngle
-      setTimeout(() => {
-        if (wheelRef.current) {
-          wheelRef.current.style.transition = "transform 0s ease-in-out"; // Remove transition to stop animation
-          wheelRef.current.style.transform = `rotate(${360 - resultAngle}deg)`; // Move to the result angle
-        }
-      }, 3000);
-    }
-  };
 
   const handleCountChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
@@ -124,11 +68,45 @@ export default function Wheel() {
     setAutoBetCount(parseFloat(e.target.value));
   };
 
-  const handleBetAmountChange = (
-    event: React.ChangeEvent<HTMLInputElement>,
-  ) => {
-    const amount = parseFloat(event.target.value); // Convert input value to float
-    setBetAmt(amount); // Update betAmt state
+  const handleChosenNumber = (number: number) => {
+    setStrikeNumbers([]);
+    const numberIndex = chosenNumbers.indexOf(number);
+
+    if (numberIndex !== -1) {
+      setChosenNumbers((prevNumbers) =>
+        prevNumbers.filter((_, index) => index !== numberIndex),
+      );
+    } else {
+      if (chosenNumbers.length < 10) {
+        setChosenNumbers((prevNumbers) => [...prevNumbers, number]);
+      } else {
+        toast.error("10 numbers can be selected at max");
+      }
+    }
+  };
+
+  const handleAutoPick = () => {
+    setAutoPick(true);
+    setStrikeNumbers([]);
+    setChosenNumbers([]);
+    const min = 1;
+    const max = 40;
+    const count = 10;
+
+    const uniqueNumbers: Set<number> = new Set();
+    while (uniqueNumbers.size < count) {
+      const randomNumber = Math.floor(Math.random() * (max - min + 1)) + min;
+      uniqueNumbers.add(randomNumber);
+    }
+
+    const randomNumbers: number[] = Array.from(uniqueNumbers);
+    setChosenNumbers(randomNumbers);
+    console.log("chosenNumbers", randomNumbers);
+  };
+
+  const handleClear = () => {
+    setChosenNumbers([]);
+    setAutoPick((prevAutoPick) => !prevAutoPick);
   };
 
   const handleBet = async () => {
@@ -146,9 +124,9 @@ export default function Wheel() {
         return;
       }
       setIsRolling(true);
-      setStrikeNumber(0);
+      setStrikeNumbers([]);
       try {
-        const response = await fetch(`/api/games/wheel`, {
+        const response = await fetch(`/api/games/keno`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -157,16 +135,14 @@ export default function Wheel() {
             wallet: wallet.publicKey,
             amount: betAmt,
             tokenMint: "SOL",
-            segments: segments,
+            chosenNumbers: chosenNumbers,
             risk: risk,
           }),
         });
 
-        const { success, message, result, strikeNumber, strikeMultiplier } =
+        const { success, message, result, strikeNumbers, strikeMultiplier } =
           await response.json();
 
-        spinWheel(strikeNumber);
-        await new Promise((resolve) => setTimeout(resolve, 3000));
         if (success != true) {
           toast.error(message);
           throw new Error(message);
@@ -176,20 +152,11 @@ export default function Wheel() {
         else toast.error(message, { duration: 2000 });
 
         const win = result === "Won";
-        const newBetResult = { result: strikeMultiplier, win };
-
-        setBetResults((prevResults) => {
-          const newResults = [...prevResults, newBetResult];
-          if (newResults.length > 6) {
-            newResults.shift();
-          }
-          return newResults;
-        });
 
         if (success) {
-          setStrikeNumber(strikeNumber);
+          setStrikeNumbers(strikeNumbers);
           setStrikeMultiplier(strikeMultiplier);
-          console.log("strikeNumber", strikeNumber);
+          console.log("strikeNumbers", strikeNumbers);
           setRefresh(true);
         }
 
@@ -276,7 +243,7 @@ export default function Wheel() {
   };
 
   return (
-    <GameLayout title="FOMO - Wheel">
+    <GameLayout title="FOMO - Keno">
       <GameOptions>
         <>
           <div className="relative w-full flex md:hidden mb-5">
@@ -320,7 +287,17 @@ export default function Wheel() {
                       Risk
                     </p>
                   </div>
-                  <div className="group flex gap-2.5 w-full items-center rounded-[8px] text-white font-chakra text-sm font-semibold bg-[#0C0F16] p-4">
+                  <div className="grid grid-cols-2 gap-3 w-full items-center rounded-[8px] text-white font-chakra text-sm font-semibold bg-[#0C0F16] p-4">
+                    <div
+                      onClick={() => setRisk("classic")}
+                      className={`text-center w-full rounded-[5px] border-[2px] bg-[#202329] py-2 text-xs font-chakra text-white text-opacity-90 transition duration-200 ${
+                        risk === "classic"
+                          ? "border-[#7839C5]"
+                          : "border-transparent hover:border-[#7839C580]"
+                      }`}
+                    >
+                      Classic
+                    </div>
                     <div
                       onClick={() => setRisk("low")}
                       className={`text-center w-full rounded-[5px] border-[2px] bg-[#202329] py-2 text-xs font-chakra text-white text-opacity-90 transition duration-200 ${
@@ -354,27 +331,33 @@ export default function Wheel() {
                   </div>
                 </div>
 
-                <div className="mb-6 w-full">
-                  <div className="flex justify-between text-xs mb-2 font-medium font-changa text-[#F0F0F0] text-opacity-90">
-                    <p className="">Segments</p>
-                    <p className="text-[#94A3B8] text-sm">{segments}</p>
+                <div className="flex w-full flex-row gap-3 mb-5">
+                  <div
+                    onClick={() => {
+                      handleAutoPick();
+                    }}
+                    className={`${
+                      autoPick === true
+                        ? "border-[#7839C5] text-opacity-100"
+                        : "border-transparent hover:border-[#7839C580] text-opacity-80"
+                    } w-full flex items-center justify-center gap-1 rounded-lg text-center cursor-pointer border-2 bg-[#202329] py-2.5 font-chakra text-xl text-white font-semibold`}
+                  >
+                    AUTOPICK
                   </div>
-                  <div className="relative h-[5px] rounded-full bg-[#2A2E38] w-full mt-5">
-                    <input
-                      type="range"
-                      min={10}
-                      max={50}
-                      step={10}
-                      value={segments}
-                      onChange={(e) => setSegments(parseInt(e.target.value))}
-                      className="defaultSlider absolute top-[-8px] w-full bg-transparent appearance-none z-20"
-                    />
-                    <div
-                      className="absolute rounded-l-full h-[5px] bg-[#9945ff] z-10"
-                      style={{ width: `${segmentFill}%` }}
-                    ></div>
+                  <div
+                    onClick={() => {
+                      handleClear();
+                    }}
+                    className={`${
+                      autoPick === false
+                        ? "border-transparent hover:border-[#7839C580] text-opacity-80"
+                        : "border-transparent hover:border-[#7839C580] text-opacity-80"
+                    } w-full flex items-center justify-center gap-1 rounded-lg text-center cursor-pointer border-2 bg-[#202329] py-2.5 font-chakra text-xl text-white font-semibold`}
+                  >
+                    CLEAR
                   </div>
                 </div>
+
                 {betType === "manual" ? (
                   <></>
                 ) : (
@@ -440,7 +423,7 @@ export default function Wheel() {
                       onClick={() => {
                         setShowAutoModal(true);
                       }}
-                      className={`relative mb-[1.4rem] rounded-md w-full h-11 flex items-center justify-center opacity-75 cursor-pointer font-sans font-semibold text-sm text-white text-opacity-90 border-2 border-white bg-white bg-opacity-0 hover:bg-opacity-5`}
+                      className={`relative mb-[1.4rem] rounded-md w-full h-11 flex items-center justify-center opacity-75 cursor-pointer text-white text-opacity-90 border-2 border-white bg-white bg-opacity-0 hover:bg-opacity-5`}
                     >
                       Configure Auto
                       <div
@@ -483,8 +466,8 @@ export default function Wheel() {
         </>
       </GameOptions>
       <GameDisplay>
-        <div className="w-full flex justify-between items-center h-[2.125rem]">
-          <div>
+        <div className="w-full flex justify-between items-center">
+          <div className="hidden sm:absolute top-10 left-12">
             {isRolling ? (
               <div className="font-chakra text-sm font-medium text-white text-opacity-75">
                 Betting...
@@ -492,111 +475,89 @@ export default function Wheel() {
             ) : null}
           </div>
         </div>
-        <div className="hidden sm:block absolute right-3 lg:right-6">
-          <ResultsSlider results={betResults} align={"vertical"} />
-        </div>
-        <div className="flex justify-center items-center w-full my-5">
-          <div className="relative  w-[200px] h-[200px] sm:w-[280px] sm:h-[280px] flex justify-center">
-            <Image
-              src="/assets/wheelPointer.svg"
-              alt="Pointer"
-              width={35}
-              height={35}
-              id="pointer"
-              className={`${
-                isRolling ? "-rotate-[20deg]" : "rotate-0"
-              } absolute z-50 -top-3 transition-all duration-100`}
-            />
-            <div
-              ref={wheelRef}
-              className={`${
-                isRolling ? "spin" : ""
-              } relative w-[200px] h-[200px] sm:w-[280px] sm:h-[280px] rounded-full overflow-hidden`}
-            >
-              {typeof window !== "undefined" && (
-                <svg viewBox="0 0 300 300">
-                  {rotationAngle &&
-                    Array.from({ length: segments }).map((_, index) => (
-                      <Arc
-                        key={index}
-                        index={index}
-                        rotationAngle={rotationAngle}
-                        risk={risk}
-                        segments={segments}
-                      />
-                    ))}
-                </svg>
-              )}
-            </div>
-            <div className="absolute z-10 w-[79.75%] h-[79.75%] rounded-full bg-black/10 left-[10%] top-[10%]" />
-            <div className="absolute z-20 w-[66.5%] h-[66.5%] rounded-full bg-[#171A1F] left-[16.75%] top-[16.75%]" />
-            <div className="absolute z-20 w-[62.5%] h-[62.5%] rounded-full bg-[#0C0F16] left-[18.75%] top-[18.75%] text-white flex items-center justify-center text-2xl font-semibold font-changa text-opacity-80 ">
-              {strikeMultiplier}
-            </div>
+        <div className="flex justify-center items-center w-full mb-5 sm:my-5">
+          <div className="grid grid-cols-8 gap-2 text-white text-sm md:text-xl font-chakra">
+            {Array.from({ length: 40 }, (_, index) => index + 1).map(
+              (number) => (
+                <div
+                  key={number}
+                  onClick={() => handleChosenNumber(number)}
+                  className={`flex items-center justify-center cursor-pointer ${
+                    !isRolling &&
+                    strikeNumbers.length === 0 &&
+                    chosenNumbers.includes(number)
+                      ? "bg-[#7839C5]"
+                      : strikeNumbers.includes(number) &&
+                        chosenNumbers.includes(number)
+                      ? "bg-black border-2 border-fomo-green"
+                      : chosenNumbers.includes(number)
+                      ? "bg-black border-2 border-fomo-red text-fomo-red"
+                      : "bg-[#202329]"
+                  } rounded-md text-center transition-all duration-300 ease-in-out w-[35px] h-[35px] sm:w-[55px] sm:h-[55px] md:w-[60px] md:h-[60px] xl:w-[65px] xl:h-[65px]`}
+                >
+                  {strikeNumbers.includes(number) &&
+                  chosenNumbers.includes(number) ? (
+                    <div className="flex justify-center items-center bg-[#FFD100] text-black rounded-full w-[25px] h-[25px] md:w-[38px] md:h-[38px]">
+                      {number}
+                    </div>
+                  ) : (
+                    <div>{number}</div>
+                  )}
+                </div>
+              ),
+            )}
           </div>
         </div>
         <div className="relative flex w-full justify-between px-0 xl:px-4 mb-0 px:mb-6 gap-4">
-          {coinData && coinData[0].amount > 0.0001 && (
-            <>
-              {uniqueSegments.map((segment, index) => {
-                const backgroundColor = segment.color; // Store segment.color in a separate variable
-                return (
-                  <div
-                    key={index}
-                    className="relative w-full"
-                    onMouseEnter={() =>
-                      setHoveredMultiplier(segment.multiplier)
-                    }
-                    onMouseLeave={() => setHoveredMultiplier(null)}
-                  >
+          {coinData &&
+            coinData[0].amount > 0.0001 &&
+            chosenNumbers.length > 0 && (
+              <div className="w-full">
+                <div className="flex justify-between gap-[3px] sm:gap-3.5 lg:gap-2 2xl:gap-3.5 text-white w-full">
+                  {multipliers.map((multiplier, index) => (
                     <div
-                      className="w-full border-t-[6px] text-center font-chakra font-semibold text-xs text-white rounded-md transition-all duration-300 ease-in-out px-1.5 md:px-5 py-2.5"
-                      style={{
-                        backgroundColor:
-                          strikeMultiplier === segment.multiplier
-                            ? `${backgroundColor}50`
-                            : "#202329",
-                        borderColor: segment.color,
-                      }}
+                      key={index}
+                      className="bg-[#202329] text-center font-chakra text-[8px] sm:text-xs font-semibold rounded-[5px] p-1 sm:py-3 sm:px-1 w-full"
                     >
-                      {segment.multiplier}x
+                      {multiplier.toFixed(1)}x
                     </div>
-
-                    {hoveredMultiplier === segment.multiplier && (
-                      <div className="absolute top-[-120px] left-0 z-50 flex gap-4 text-white bg-[#202329] border border-white/10 rounded-lg w-full p-4 fadeInUp duration-100 min-w-[250px]">
-                        <div className="w-1/2">
-                          <div className="flex justify-between text-[13px] font-medium font-changa text-opacity-90 text-[#F0F0F0]">
-                            <span className="">Profit</span>
-                            <span>
-                              {/* {coinData ? coinData[0]?.amount.toFixed(4) : 0} $SOL */}
-                              SOL
-                            </span>
-                          </div>
-                          <div className="border border-white/10 rounded-lg p-3 mt-2">
-                            {coinData
-                              ? (
-                                  coinData[0]?.amount * segment.multiplier
-                                ).toFixed(4)
-                              : 0}
-                          </div>
-                        </div>
-                        <div className="w-1/2">
-                          <div className="text-[13px] font-medium font-changa text-opacity-90 text-[#F0F0F0]">
-                            Chance
-                          </div>
-                          <div className="border border-white/10 rounded-lg p-3 mt-2">
-                            {segment.chance}%
-                          </div>
-                        </div>
+                  ))}
+                </div>
+                <div>
+                  <div className="flex justify-between gap-[3px] sm:gap-3.5 text-white bg-[#202329] rounded-[5px] w-full mt-3">
+                    {multipliers.map((multiplier, index) => (
+                      <div
+                        key={index}
+                        className={`${
+                          !isRolling &&
+                          strikeNumbers.length > 0 &&
+                          commonNumbers.length === index
+                            ? "bg-white/20"
+                            : ""
+                        } flex justify-center items-center rounded-[5px] font-chakra text-[8px] sm:text-xs font-semibold transition-all duration-300 ease-in-out py-1 sm:py-3 w-full`}
+                      >
+                        <span className="mr-1">{index}x</span>
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="10"
+                          height="10"
+                          viewBox="0 0 10 10"
+                          fill="none"
+                        >
+                          <path
+                            d="M5 10C7.76142 10 10 7.76142 10 5C10 2.23858 7.76142 0 5 0C2.23858 0 0 2.23858 0 5C0 7.76142 2.23858 10 5 10Z"
+                            fill="#FFD100"
+                          />
+                        </svg>
                       </div>
-                    )}
+                    ))}
                   </div>
-                );
-              })}
-            </>
-          )}
+                </div>
+              </div>
+            )}
+
           {!coinData ||
-            (coinData[0].amount < 0.0001 && (
+            (coinData[0].amount < 0.0001 ? (
               <div className="w-full rounded-lg bg-[#d9d9d90d] bg-opacity-10 flex items-center px-3 py-3 text-white md:px-6">
                 <div className="w-full text-center font-changa font-medium text-sm md:text-base text-[#F0F0F0] text-opacity-75">
                   Please deposit funds to start playing. View{" "}
@@ -605,7 +566,13 @@ export default function Wheel() {
                   </Link>
                 </div>
               </div>
-            ))}
+            ) : coinData && chosenNumbers.length === 0 ? (
+              <div className="w-full rounded-lg bg-[#d9d9d90d] bg-opacity-10 flex items-center px-3 py-3 text-white md:px-6">
+                <div className="w-full text-center font-changa font-medium text-sm md:text-base text-[#F0F0F0] text-opacity-75">
+                  Pick upto 10 numbers
+                </div>
+              </div>
+            ) : null)}
         </div>
       </GameDisplay>
       <GameTable>

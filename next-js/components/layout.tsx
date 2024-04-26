@@ -15,11 +15,13 @@ import VerifyDiceModal from "./games/Dice/VerifyDiceModal";
 import VerifyDice2Modal from "./games/Dice2/VerifyDice2Modal";
 import VerifyLimboModal from "./games/Limbo/VerifyLimboModal";
 import VerifyWheelModal from "./games/Wheel/VerifyWheelModal";
+import VerifyKenoModal from "./games/Keno/VerifyKenoModal";
 import { Flip } from "./games/CoinFlip/HistoryTable";
 import { Dice2 } from "./games/Dice2/HistoryTable";
 import { Dice } from "./games/Dice/HistoryTable";
 import { Limbo } from "./games/Limbo/HistoryTable";
 import { Wheel } from "./games/Wheel/HistoryTable";
+import { Keno } from "./games/Keno/HistoryTable";
 import { GameType } from "@/utils/provably-fair";
 import ConfigureAutoModal from "./games/ConfigureAutoModal";
 
@@ -119,6 +121,12 @@ export default function Layout({ children }: LayoutProps) {
           isOpen={isVerifyModalOpen}
           onClose={closeVerifyModal}
           modalData={{ bet: (verifyModalData as Wheel)! }}
+        />
+      ) : game === GameType.keno ? (
+        <VerifyKenoModal
+          isOpen={isVerifyModalOpen}
+          onClose={closeVerifyModal}
+          modalData={{ bet: (verifyModalData as Keno)! }}
         />
       ) : null}
       <ConfigureAutoModal />
