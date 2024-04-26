@@ -3,7 +3,7 @@ import Image from "next/image";
 
 function Footer() {
   return (
-    <div className="w-full h-full bg-[#121519] flex flex-col pl-20 pr-28">
+    <div className="w-full h-full bg-[#121519] flex flex-col px-[3.5rem]">
       <div className="w-full flex items-center justify-items-start">
         <div className="w-[1/3] flex gap-1">
           <Image
@@ -73,7 +73,7 @@ function Footer() {
           Floor 6, 6057 Larnaca, Cyprus. Contact us at support@shuffle.com.
         </p>
       </div>
-      <div className="w-full h-[0.1rem] bg-[#94A3B8] bg-opacity-30 rounded-full mb-20 mt-8" />
+      <div className="w-full h-[1px] bg-[#94A3B8] bg-opacity-20 rounded-full mb-20 mt-8" />
     </div>
   );
 }
