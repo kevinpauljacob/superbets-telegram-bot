@@ -285,7 +285,8 @@ export default function Dice() {
       rollType,
       startAuto,
       autoBetCount,
-      typeof autoBetCount === "string" && autoBetCount === "inf",
+      typeof autoBetCount === "string" &&
+        autoBetCount.toString().includes("inf"),
     );
     if (
       rollType === "auto" &&
@@ -399,7 +400,7 @@ export default function Dice() {
                           }
                           value={autoBetCount}
                           className={`flex w-full min-w-0 bg-transparent text-base text-[#94A3B8] placeholder-[#94A3B8] font-chakra ${
-                            autoBetCount === "inf"
+                            autoBetCount.toString().includes("inf")
                               ? "placeholder-opacity-100"
                               : "placeholder-opacity-40"
                           } placeholder-opacity-40 outline-none`}
