@@ -21,6 +21,7 @@ import BetAmount from "@/components/games/BetAmountInput";
 import BetButton from "@/components/games/BetButton";
 import ResultsSlider from "@/components/ResultsSlider";
 import showInfoToast from "@/components/games/toasts/toasts";
+import BalanceAlert from "@/components/games/BalanceAlert";
 
 const Timer = dynamic(() => import("../../components/games/Timer"), {
   ssr: false,
@@ -56,7 +57,7 @@ export default function Flip() {
   } = useGlobalContext();
 
   const [betAmt, setBetAmt] = useState(0);
-  const [userInput, setUserInput] = useState(0);
+  const [userInput, setUserInput] = useState<number | undefined>();
   const [betType, setBetType] = useState<string | null>(null);
   const [flipping, setFlipping] = useState(false);
   const [result, setResult] = useState<string | null>(null);
@@ -118,14 +119,14 @@ export default function Flip() {
               if (useAutoConfig && autoWinChange && win) {
                 setBetAmt(
                   autoWinChangeReset
-                    ? userInput
+                    ? userInput!
                     : betAmt + (autoWinChange * betAmt) / 100.0,
                 );
               } else if (useAutoConfig && autoLossChange && !win) {
                 setAutoBetProfit(autoBetProfit - betAmt);
                 setBetAmt(
                   autoLossChangeReset
-                    ? userInput
+                    ? userInput!
                     : betAmt + (autoLossChange * betAmt) / 100.0,
                 );
               }
@@ -177,7 +178,7 @@ export default function Flip() {
   }, [wallet?.publicKey, refresh]);
 
   useEffect(() => {
-    setBetAmt(userInput);
+    setBetAmt(userInput ?? 0);
   }, [userInput]);
 
   useEffect(() => {
@@ -221,6 +222,10 @@ export default function Flip() {
         ((typeof autoBetCount === "string" && autoBetCount.includes("inf")) ||
           (typeof autoBetCount === "number" && autoBetCount > 0))
       ) {
+        if (betAmt === 0) {
+          toast.error("Set Amount.");
+          return;
+        }
         console.log("Auto betting. config: ", useAutoConfig);
         setStartAuto(true);
       } else {
@@ -246,6 +251,30 @@ export default function Flip() {
     <GameLayout title="FOMO - Coin Flip">
       <GameOptions>
         <>
+          <div className="relative w-full flex md:hidden mb-5">
+            {startAuto && (
+              <div
+                onClick={() => {
+                  setAutoBetCount(0);
+                  setStartAuto(false);
+                }}
+                className="cursor-pointer rounded-lg absolute w-full h-full z-20 bg-[#442c62] hover:bg-[#7653A2] focus:bg-[#53307E] flex items-center justify-center font-chakra font-semibold text-2xl tracking-wider text-white"
+              >
+                STOP
+              </div>
+            )}
+            <BetButton
+              disabled={
+                !betType || loading || (coinData && coinData[0].amount < 0.0001)
+                  ? true
+                  : false
+              }
+              onClickFunction={onSubmit}
+            >
+              {loading ? <Loader /> : "BET"}
+            </BetButton>
+          </div>
+
           <BetSetting betSetting={betSetting} setBetSetting={setBetSetting} />
 
           <div className="w-full flex flex-col">
@@ -255,23 +284,8 @@ export default function Flip() {
                 autoComplete="off"
                 onSubmit={methods.handleSubmit(onSubmit)}
               >
-                <div className="w-full flex md:hidden mb-5">
-                  <BetButton
-                    disabled={
-                      !betType ||
-                      loading ||
-                      (coinData && coinData[0].amount < 0.0001)
-                        ? true
-                        : false
-                    }
-                    onClickFunction={onSubmit}
-                  >
-                    {loading ? <Loader /> : "BET"}
-                  </BetButton>
-                </div>
-
                 {/* amt input  */}
-                <BetAmount betAmt={betAmt} setBetAmt={setBetAmt} />
+                <BetAmount betAmt={userInput} setBetAmt={setUserInput} />
 
                 {betSetting === "manual" ? (
                   <></>
@@ -310,7 +324,7 @@ export default function Flip() {
                         />
                         <span
                           className={`text-2xl font-medium text-white text-opacity-50 ${
-                            autoBetCount === "inf"
+                            autoBetCount.toString().includes("inf")
                               ? "bg-[#47484A]"
                               : "bg-[#292C32]"
                           } hover:bg-[#47484A] focus:bg-[#47484A] transition-all rounded-[5px] py-0.5 px-3`}
@@ -338,29 +352,20 @@ export default function Flip() {
                       onClick={() => {
                         setShowAutoModal(true);
                       }}
-                      className="mb-[1.4rem] rounded-md w-full h-11 flex items-center justify-center opacity-75 cursor-pointer font-sans font-semibold text-sm text-white text-opacity-90 border-2 border-white bg-white bg-opacity-0 hover:bg-opacity-5"
+                      className="relative mb-[1.4rem] rounded-md w-full h-11 flex items-center justify-center opacity-75 cursor-pointer font-sans font-medium text-sm text-white text-opacity-90 border-2 border-white bg-white bg-opacity-0 hover:bg-opacity-5"
                     >
                       Configure Auto
+                      <div
+                        className={`${
+                          useAutoConfig ? "bg-fomo-green" : "bg-fomo-red"
+                        } absolute top-0 right-0 m-1.5 bg-fomo-green w-2 h-2 rounded-full`}
+                      />
                     </div>
                   </div>
                 )}
 
                 {/* balance alert  */}
-                {(!coinData || (coinData && coinData[0].amount < 0.0001)) && (
-                  <div className="mb-5 w-full rounded-lg bg-[#0C0F16] px-3 pb-2 pt-4 text-white md:px-6">
-                    <div className="-full mb-3 text-center font-changa font-medium text-[#F0F0F0] text-opacity-75">
-                      Please deposit funds to start playing. View{" "}
-                      <u
-                        onClick={() => {
-                          setShowWalletModal(true);
-                        }}
-                        className="cursor-pointer"
-                      >
-                        WALLET
-                      </u>
-                    </div>
-                  </div>
-                )}
+                <BalanceAlert />
 
                 {/* choosing bet options  */}
                 <div className="flex flex-col w-full gap-4">
@@ -374,7 +379,7 @@ export default function Flip() {
                         betType === "Heads"
                           ? "border-[#7839C5] text-opacity-100"
                           : "border-transparent hover:border-[#7839C580] text-opacity-80"
-                      } w-full flex items-center justify-center gap-1 rounded-lg text-center cursor-pointer border-2 bg-[#202329] py-2.5 font-changa text-xl text-white font-semibold`}
+                      } w-full flex items-center justify-center gap-2 rounded-lg text-center cursor-pointer border-2 bg-[#202329] py-2.5 font-changa text-xl text-white font-semibold`}
                     >
                       <Image
                         src={"/assets/coin.png"}
@@ -395,7 +400,7 @@ export default function Flip() {
                         betType === "Tails"
                           ? "border-[#7839C5] text-opacity-100"
                           : "border-transparent hover:border-[#7839C580] text-opacity-80"
-                      } w-full flex items-center justify-center gap-1 rounded-lg text-center cursor-pointer border-2 bg-[#202329] py-2.5 font-changa text-xl text-white font-semibold`}
+                      } w-full flex items-center justify-center gap-2 rounded-lg text-center cursor-pointer border-2 bg-[#202329] py-2.5 font-changa text-xl text-white font-semibold`}
                     >
                       <Image
                         src={"/assets/tails.png"}
@@ -409,7 +414,18 @@ export default function Flip() {
                       </span>
                     </div>
                   </div>
-                  <div className="w-full hidden md:flex mt-2">
+                  <div className="relative w-full hidden md:flex mb-5">
+                    {startAuto && (
+                      <div
+                        onClick={() => {
+                          setAutoBetCount(0);
+                          setStartAuto(false);
+                        }}
+                        className="cursor-pointer rounded-lg absolute w-full h-full z-20 bg-[#442c62] hover:bg-[#7653A2] focus:bg-[#53307E] flex items-center justify-center font-chakra font-semibold text-2xl tracking-wider text-white"
+                      >
+                        STOP
+                      </div>
+                    )}
                     <BetButton
                       disabled={
                         !betType ||
@@ -515,7 +531,11 @@ export default function Flip() {
             />
           </div>
 
-          <GameFooterInfo multiplier={2.0} amount={betAmt} chance={50} />
+          <GameFooterInfo
+            multiplier={2.0}
+            amount={betAmt ? betAmt : 0.0}
+            chance={50}
+          />
         </>
       </GameDisplay>
       <GameTable>

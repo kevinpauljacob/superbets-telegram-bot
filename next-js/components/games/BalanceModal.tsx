@@ -66,7 +66,7 @@ export default function BalanceModal() {
         handleClose();
       }}
       id="modal-bg"
-      className="absolute z-[150] left-0 top-0 flex h-full w-full items-start pt-[11rem] justify-center bg-black bg-opacity-50 backdrop-blur transition-all"
+      className="absolute z-[150] left-0 top-0 flex h-full w-full items-start pt-[11rem] justify-center bg-[#33314680] backdrop-blur-[0px] transition-all"
     >
       <div
         id="modal-box"
@@ -90,7 +90,7 @@ export default function BalanceModal() {
 
         <div className="w-full flex mb-8 mt-2">
           <button
-            className={`w-full border-2 rounded-md py-2 mr-1 text-white font-semibold text-sm transition duration-300 ease-in-out ${
+            className={`w-full border-2 rounded-md py-2 mr-1 text-white font-semibold text-sm transition hover:duration-75 ease-in-out ${
               actionType === "Deposit"
                 ? "bg-[#d9d9d90d] border-transparent text-opacity-90"
                 : "border-[#d9d9d90d] hover:bg-[#9361d1] focus:bg-[#602E9E] text-opacity-50 hover:text-opacity-90"
@@ -100,7 +100,7 @@ export default function BalanceModal() {
             Deposit
           </button>
           <button
-            className={`w-full border-2 rounded-md py-2 ml-1 text-white font-semibold text-sm transition-all duration-300 ease-in-out ${
+            className={`w-full border-2 rounded-md py-2 ml-1 text-white font-semibold text-sm transition-all hover:duration-75 ease-in-out ${
               actionType === "Withdraw"
                 ? "bg-[#d9d9d90d] border-transparent text-opacity-90"
                 : "border-[#d9d9d90d] hover:bg-[#9361d1] focus:bg-[#602E9E] text-opacity-50 hover:text-opacity-90"

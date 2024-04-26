@@ -55,13 +55,13 @@ export default function Dice() {
     useAutoConfig,
     setUseAutoConfig,
   } = useGlobalContext();
-  const [user, setUser] = useState<any>(null);
-  const [userInput, setUserInput] = useState(0);
+
+  const [userInput, setUserInput] = useState<number | undefined>();
   const [betAmt, setBetAmt] = useState(0);
 
   const [isRolling, setIsRolling] = useState(false);
-  const [winningPays, setWinningPays] = useState(6);
-  const [winningAmount, setWinningAmount] = useState(0.6);
+  const [winningPays, setWinningPays] = useState(0.0);
+  const [winningAmount, setWinningAmount] = useState(0.0);
   const [winningProbability, setWinningProbability] = useState(0.0);
   const [refresh, setRefresh] = useState(true);
   const [selectedFace, setSelectedFace] = useState<number[]>([]);
@@ -117,6 +117,19 @@ export default function Dice() {
       }
     }
   };
+
+  useEffect(() => {
+    const newLength = selectedFace.length;
+    if (newLength === 0) {
+      setWinningPays(0.0);
+      setWinningAmount(0.0);
+      setWinningProbability(0.0);
+    } else {
+      setWinningPays(6 / newLength);
+      setWinningAmount((betAmt * 6) / newLength);
+      setWinningProbability((newLength * 100) / 6);
+    }
+  }, [betAmt]);
 
   const handleCountChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
@@ -175,13 +188,13 @@ export default function Dice() {
             if (useAutoConfig && autoWinChange && isWin) {
               setBetAmt(
                 autoWinChangeReset
-                  ? userInput
+                  ? userInput!
                   : betAmt + (autoWinChange * betAmt) / 100.0,
               );
             } else if (useAutoConfig && autoLossChange && !isWin) {
               setBetAmt(
                 autoLossChangeReset
-                  ? userInput
+                  ? userInput!
                   : betAmt + (autoLossChange * betAmt) / 100.0,
               );
             }
@@ -264,7 +277,7 @@ export default function Dice() {
   }, []);
 
   useEffect(() => {
-    setBetAmt(userInput);
+    setBetAmt(userInput ?? 0);
   }, [userInput]);
 
   useEffect(() => {
@@ -301,8 +314,11 @@ export default function Dice() {
       ((typeof autoBetCount === "string" && autoBetCount.includes("inf")) ||
         (typeof autoBetCount === "number" && autoBetCount > 0))
     ) {
+      if (betAmt === 0) {
+        toast.error("Set Amount.");
+        return;
+      }
       console.log("Auto betting. config: ", useAutoConfig);
-      setAutoBetCount("inf");
       setStartAuto(true);
     } else if (wallet.connected && selectedFace.length > 0) diceRoll();
   };
@@ -390,7 +406,7 @@ export default function Dice() {
                         />
                         <span
                           className={`text-2xl font-medium text-white text-opacity-50 ${
-                            autoBetCount === "inf"
+                            autoBetCount.toString().includes("inf")
                               ? "bg-[#47484A]"
                               : "bg-[#292C32]"
                           } hover:bg-[#47484A] focus:bg-[#47484A] transition-all rounded-[5px] py-0.5 px-3`}
@@ -418,7 +434,7 @@ export default function Dice() {
                       onClick={() => {
                         setShowAutoModal(true);
                       }}
-                      className={`relative mb-[1.4rem] rounded-md w-full h-11 flex items-center justify-center opacity-75 cursor-pointer text-white text-opacity-90 border-2 border-white bg-white bg-opacity-0 hover:bg-opacity-5`}
+                      className="relative mb-[1.4rem] rounded-md w-full h-11 flex items-center justify-center opacity-75 cursor-pointer font-sans font-medium text-sm text-white text-opacity-90 border-2 border-white bg-white bg-opacity-0 hover:bg-opacity-5"
                     >
                       Configure Auto
                       <div
@@ -601,7 +617,7 @@ export default function Dice() {
 
           <GameFooterInfo
             multiplier={winningPays}
-            amount={winningAmount * (1 - ROLL_TAX)}
+            amount={winningAmount ? winningAmount * (1 - ROLL_TAX) : 0.0}
             chance={winningProbability}
           />
         </>

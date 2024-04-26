@@ -111,6 +111,7 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
                 setChoice(value >= 2 ? (value <= 98 ? value : 98) : 2);
               }}
               disabled={!draggable}
+              value={choice}
               min={0}
               max="100"
               step={0.01}

@@ -25,12 +25,14 @@ const GameTable: React.FC<LayoutProps> = ({ children }) => {
 
 interface GameFooterProps {
   multiplier?: number;
+  setMultiplier?: React.Dispatch<React.SetStateAction<number>>;
   amount: number;
   chance?: number;
 }
 
 export const GameFooterInfo: React.FC<GameFooterProps> = ({
   multiplier,
+  setMultiplier,
   amount,
   chance,
 }) => {
@@ -39,7 +41,27 @@ export const GameFooterInfo: React.FC<GameFooterProps> = ({
     <div className="flex px-0 xl:px-4 mb-0 md:mb-5 gap-4 flex-row w-full justify-between">
       {coinData && coinData[0].amount > 0.0001 && (
         <>
-          {multiplier && (
+          {setMultiplier ? (
+            <div className="flex flex-col w-full">
+              <span className="text-[#F0F0F0] font-changa font-semibold text-xs mb-1">
+                Multiplier
+              </span>
+              <input
+                id={"amount-input"}
+                type={"number"}
+                step={"any"}
+                autoComplete="off"
+                onChange={(e) => {
+                  setMultiplier(Math.max(1, parseFloat(e.target.value)));
+                }}
+                placeholder={"0.0"}
+                min={1}
+                value={multiplier}
+                lang="en"
+                className={`bg-[#202329] w-full min-w-0 font-chakra text-xs text-white rounded-md px-2 md:px-5 py-3 placeholder-[#94A3B8] placeholder-opacity-40 outline-none`}
+              />
+            </div>
+          ) : multiplier !== undefined ? (
             <div className="flex flex-col w-full">
               <span className="text-[#F0F0F0] font-changa font-semibold text-xs mb-1">
                 Multiplier
@@ -48,8 +70,10 @@ export const GameFooterInfo: React.FC<GameFooterProps> = ({
                 {multiplier.toFixed(2)}x
               </span>
             </div>
+          ) : (
+            <></>
           )}
-
+          
           <div className="flex flex-col w-full">
             <span className="text-[#F0F0F0] font-changa font-sembiold text-xs mb-1">
               Winning
@@ -93,11 +117,11 @@ export const GameFooterInfo: React.FC<GameFooterProps> = ({
 
 const GameLayout: React.FC<LayoutProps> = ({ children, title }) => {
   return (
-    <div className="flex flex-1 h-full w-full flex-col items-center justify-start px-3 lg:px-6">
+    <div className="flex flex-1 h-fit w-full flex-col items-center justify-start px-3 lg:px-6">
       <Head>
         <title>{title}</title>
       </Head>
-      <div className="fadeInUp mt-0 lg:mt-6 w-full min-h-fit lg:min-h-[calc(100vh-17.5rem)] items-stretch bg-[#121418] rounded-2xl flex flex-col-reverse lg:flex-row">
+      <div className="fadeInUp mt-0 lg:mt-6 w-full min-h-fit lg:min-h-[calc(100vh-13.7rem)] items-stretch bg-[#121418] rounded-2xl flex flex-col-reverse lg:flex-row">
         <div className="fadeInUp flex w-full min-h-fit lg:w-[35%] flex-col items-center rounded-[1.15rem] px-3 py-5 lg:p-9 2xl:p-14">
           {React.Children.map(children, (child) => {
             if (React.isValidElement(child) && child.type === GameOptions) {
@@ -114,7 +138,7 @@ const GameLayout: React.FC<LayoutProps> = ({ children, title }) => {
           })}
         </div>
       </div>
-      <div className="fadeInUp w-full flex lg:hidden mt-4 rounded-[5px] overflow-hidden">
+      <div className="fadeInUp w-full flex min-h-[4rem]  mt-4 rounded-[5px] overflow-hidden">
         <GameHeader />
       </div>
       {React.Children.map(children, (child) => {

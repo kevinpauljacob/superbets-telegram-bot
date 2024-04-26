@@ -17,6 +17,7 @@ import {
 } from "@/components/GameLayout";
 import BetAmount from "@/components/games/BetAmountInput";
 import BetButton from "@/components/games/BetButton";
+import BalanceAlert from "@/components/games/BalanceAlert";
 
 const Timer = dynamic(() => import("../../components/games/Timer"), {
   ssr: false,
@@ -42,7 +43,7 @@ export default function Options() {
   const [user, setUser] = useState<any>();
   const [strikePrice, setStrikePrice] = useState(0);
   const [betInterval, setBetInterval] = useState(3);
-  const [betAmt, setBetAmt] = useState(0.1);
+  const [betAmt, setBetAmt] = useState<number | undefined>();
   const [betType, setBetType] = useState<string | null>(null);
 
   const [betEnd, setBetEnd] = useState(false);
@@ -115,6 +116,10 @@ export default function Options() {
     setCheckResult(false);
     try {
       // console.log("Placing bet");
+      if (betAmt === undefined) {
+        toast.error("Invalid amount");
+        return;
+      }
 
       if (betAmt > coinData![0].amount) {
         toast.error("Insufficient balance to place bet");
@@ -199,7 +204,6 @@ export default function Options() {
                 Date.now(),
             );
             if (new Date(bet.betEndTime!).getTime() < Date.now()) {
-
               setBetEnd(true);
               setCheckResult(true);
 
@@ -288,7 +292,12 @@ export default function Options() {
     } else {
       if (!wallet.publicKey) toast.error("Wallet not connected");
       else {
-        if (betType && betAmt !== 0 && betInterval !== 0) {
+        if (
+          betType &&
+          betAmt !== undefined &&
+          betAmt !== 0 &&
+          betInterval !== 0
+        ) {
           // setBetType("up");
           await bet(betType);
         } else toast.error("Choose amount, interval and type.");
@@ -396,21 +405,7 @@ export default function Options() {
               </div>
             </div>
 
-            {(!coinData || (coinData && coinData[0].amount < 0.0001)) &&
-              strikePrice == 0 && (
-                <div className="mb-5 w-full rounded-lg bg-[#0C0F16] p-2 text-white md:px-6">
-                  <div className="-full text-center font-changa font-medium text-[#F0F0F0] text-opacity-75">
-                    Please deposit funds to start playing. View{" "}
-                    <u
-                      onClick={() => {
-                        setShowWalletModal(true);
-                      }}
-                    >
-                      WALLET
-                    </u>
-                  </div>
-                </div>
-              )}
+            <BalanceAlert />
 
             <div className="flex w-full flex-row mb-4 gap-3">
               {/* buttons  */}
@@ -576,7 +571,10 @@ export default function Options() {
               ))}
             </div>
           </div>
-          <GameFooterInfo multiplier={2.0} amount={betAmt ?? 0} />
+          <GameFooterInfo
+            multiplier={2.0}
+            amount={betAmt ? betAmt: 0.0}
+          />
         </>
       </GameDisplay>
       <GameTable>

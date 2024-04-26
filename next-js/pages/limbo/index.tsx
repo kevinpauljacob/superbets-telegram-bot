@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useWallet } from "@solana/wallet-adapter-react";
 import toast from "react-hot-toast";
 import HistoryTable from "@/components/games/Limbo/HistoryTable";
@@ -7,11 +7,11 @@ import { useGlobalContext } from "@/components/GlobalContext";
 import BetSetting from "@/components/BetSetting";
 import {
   GameDisplay,
+  GameFooterInfo,
   GameLayout,
   GameOptions,
   GameTable,
 } from "@/components/GameLayout";
-import { MultiplierChanceDisplay } from "@/components/games/Limbo/MultiplierChanceDisplay";
 import Spinner from "@/components/Spinner";
 import { MultiplierHistory } from "@/components/games/Limbo/MultiplierHistory";
 import { limboBet } from "@/context/gameTransactions";
@@ -20,6 +20,28 @@ import BetButton from "@/components/games/BetButton";
 import Loader from "../../components/games/Loader";
 import { BsInfinity } from "react-icons/bs";
 import ResultsSlider from "@/components/ResultsSlider";
+import BalanceAlert from "@/components/games/BalanceAlert";
+
+function useInterval(callback: Function, delay: number | null) {
+  const savedCallback = useRef<Function | null>(null);
+
+  useEffect(() => {
+    savedCallback.current = callback;
+  }, [callback]);
+
+  useEffect(() => {
+    function tick() {
+      if (savedCallback.current) {
+        savedCallback.current();
+      }
+    }
+
+    if (delay !== null) {
+      const id = setInterval(tick, delay);
+      return () => clearInterval(id);
+    }
+  }, [delay]);
+}
 
 export default function Limbo() {
   const wallet = useWallet();
@@ -33,6 +55,7 @@ export default function Limbo() {
     setShowAutoModal,
   } = useGlobalContext();
 
+  const [userInput, setUserInput] = useState<number | undefined>();
   const [betAmt, setBetAmt] = useState(0.2);
   const [betCount, setBetCount] = useState(0);
 
@@ -42,6 +65,7 @@ export default function Limbo() {
 
   const [loading, setLoading] = useState(false);
   const [refresh, setRefresh] = useState(true);
+  const [displayMultiplier, setDisplayMultiplier] = useState(0);
 
   const [betSetting, setBetSetting] = useState<"manual" | "auto">("manual");
 
@@ -52,11 +76,11 @@ export default function Limbo() {
   const [targetMultiplier, setTargetMultiplier] = useState(1.01);
   const duration = 200;
 
-  const [inputMultiplier, setInputMultiplier] = useState(2.0);
+  const [inputMultiplier, setInputMultiplier] = useState(0.0);
 
   useEffect(() => {
     const startMultiplier = multiplier;
-    let increment = (targetMultiplier - multiplier) / (duration / 16);
+    let increment = (targetMultiplier - multiplier) / (duration / 1000);
 
     const timer = setInterval(() => {
       if (multiplier == targetMultiplier) clearInterval(timer);
@@ -86,7 +110,7 @@ export default function Limbo() {
           increment *= 2;
         }
       }
-    }, 16);
+    }, 1000);
 
     return () => clearInterval(timer);
   }, [targetMultiplier]);
@@ -102,6 +126,7 @@ export default function Limbo() {
         betAmt,
         parseFloat((100 / inputMultiplier).toFixed(8)),
       );
+
       if (!response.success) throw response.message;
 
       const winningMultiplier = parseFloat(
@@ -199,10 +224,40 @@ export default function Limbo() {
     setBetCount(parseFloat(e.target.value));
   };
 
+  useEffect(() => {
+    setDisplayMultiplier(0);
+  }, [multiplier]);
+
+  useInterval(
+    () => {
+      setDisplayMultiplier((prevDisplayMultiplier) => {
+        const newValue = prevDisplayMultiplier + 0.1;
+        return newValue > multiplier ? multiplier : newValue;
+      });
+    },
+    displayMultiplier < multiplier ? 2 : null,
+  );
+
+  useEffect(() => {
+    setBetAmt(userInput ?? 0);
+  }, [userInput]);
+
   return (
     <GameLayout title="FOMO - Limbo">
       <GameOptions>
         <>
+          <div className="flex md:hidden flex-col w-full gap-4 mb-5">
+            <BetButton
+              disabled={
+                loading || (coinData && coinData[0].amount < 0.0001)
+                  ? true
+                  : false
+              }
+              onClickFunction={onSubmit}
+            >
+              {loading ? <Loader /> : "BET"}
+            </BetButton>
+          </div>
           <BetSetting betSetting={betSetting} setBetSetting={setBetSetting} />
 
           <div className="w-full flex flex-col">
@@ -213,23 +268,10 @@ export default function Limbo() {
                 onSubmit={methods.handleSubmit(onSubmit)}
               >
                 {/* amt input  */}
-                <BetAmount betAmt={betAmt} setBetAmt={setBetAmt} />
+                <BetAmount betAmt={userInput} setBetAmt={setUserInput} />
 
                 {betSetting == "manual" ? (
-                  <>
-                    <div className="flex flex-col w-full gap-4">
-                      <BetButton
-                        disabled={
-                          loading || (coinData && coinData[0].amount < 0.0001)
-                            ? true
-                            : false
-                        }
-                        onClickFunction={onSubmit}
-                      >
-                        {loading ? <Loader /> : result ? "BET AGAIN" : "BET"}
-                      </BetButton>
-                    </div>
-                  </>
+                  <></>
                 ) : (
                   <>
                     <div className="w-full flex flex-row items-end gap-3">
@@ -284,40 +326,28 @@ export default function Limbo() {
                         onClick={() => {
                           setShowAutoModal(true);
                         }}
-                        className="mb-[1.4rem] rounded-md w-full h-11 flex items-center justify-center opacity-75 cursor-pointer font-sans font-semibold text-sm text-white text-opacity-90 border-2 border-white bg-white bg-opacity-0 hover:bg-opacity-5"
+                        className="mb-[1.4rem] rounded-md w-full h-11 flex items-center justify-center opacity-75 cursor-pointer font-sans font-medium text-sm text-white text-opacity-90 border-2 border-white bg-white bg-opacity-0 hover:bg-opacity-5"
                       >
                         Configure Auto
                       </div>
                     </div>
-                    <div className="flex flex-col w-full gap-4">
-                      <BetButton
-                        disabled={
-                          loading || (coinData && coinData[0].amount < 0.0001)
-                            ? true
-                            : false
-                        }
-                        onClickFunction={() => onSubmitAutoBet(betCount)}
-                      >
-                        {loading ? <Loader /> : result ? "BET AGAIN" : "BET"}
-                      </BetButton>
-                    </div>
                   </>
                 )}
                 {/* balance alert  */}
-                {(!coinData || (coinData && coinData[0].amount < 0.0001)) && (
-                  <div className="mb-5 w-full rounded-lg bg-[#0C0F16] px-3 pb-2 pt-4 text-white md:px-6">
-                    <div className="-full mb-3 text-center font-changa font-medium text-[#F0F0F0] text-opacity-75">
-                      Please deposit funds to start playing. View{" "}
-                      <u
-                        onClick={() => {
-                          setShowWalletModal(true);
-                        }}
-                      >
-                        WALLET
-                      </u>
-                    </div>
-                  </div>
-                )}
+                <BalanceAlert />
+
+                <div className="hidden md:flex flex-col w-full gap-4">
+                  <BetButton
+                    disabled={
+                      loading || (coinData && coinData[0].amount < 0.0001)
+                        ? true
+                        : false
+                    }
+                    onClickFunction={onSubmit}
+                  >
+                    {loading ? <Loader /> : "BET"}
+                  </BetButton>
+                </div>
               </form>
               {/* choosing bet options  */}
             </FormProvider>
@@ -325,7 +355,7 @@ export default function Limbo() {
         </>
       </GameOptions>
       <GameDisplay>
-        <div className="w-full flex justify-between items-center h-[2.125rem] mb-7 sm:mb-0">
+        <div className="w-full flex justify-between items-center h-[2.125rem]">
           <div>
             {loading ? (
               <div className="font-chakra text-xs sm:text-sm font-medium text-white text-opacity-75">
@@ -335,26 +365,30 @@ export default function Limbo() {
           </div>
           <ResultsSlider results={lastMultipliers} align={"horizontal"} />
         </div>
+
         <div className="grid place-items-center">
-          <div className="bg-[#1E2024] px-8 py-6 md:px-10 md:py-8 lg:px-12 lg:py-10 my-5 md:my-10 lg:my-0 place-content-center text-center rounded-[10px]">
+          <div className="bg-black border-2 border-white border-opacity-20 px-8 py-6 sm:px-10 lg:px-[4.5rem] lg:py-10 my-10 md:my-10 lg:my-0 place-content-center text-center rounded-[10px]">
             <span
               className={`${
                 result
                   ? multiplier === 1.01
                     ? "text-white"
                     : multiplier >= inputMultiplier
-                    ? "text-[#72F238]"
-                    : "text-[#F1323E]"
+                    ? "text-fomo-green"
+                    : "text-fomo-red"
                   : "text-white"
-              } font-changa inline-block transition-transform duration-200 ease-out text-4xl md:text-6xl`}
+              } font-chakra inline-block transition-transform duration-1000 ease-out text-[5rem] font-black`}
             >
-              {multiplier.toFixed(2)}x
+              {displayMultiplier.toFixed(2)}x
             </span>
           </div>
         </div>
-        <MultiplierChanceDisplay
+
+        <GameFooterInfo
           multiplier={inputMultiplier}
           setMultiplier={setInputMultiplier}
+          amount={betAmt && inputMultiplier ? inputMultiplier * betAmt : 0.0}
+          chance={inputMultiplier > 0 ? 100 / inputMultiplier : 0.0}
         />
       </GameDisplay>
       <GameTable>

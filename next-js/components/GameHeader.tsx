@@ -127,8 +127,8 @@ export default function GameHeader() {
 
   // If the selected game exists, render its details, otherwise render null
   return selectedGame ? (
-    <div className="w-full text-white border-y sm:border-b border-[#1E2220] bg-[#121418] px-4 py-2">
-      <div className="flex flex-row items-center justify-between">
+    <div className="w-full flex items-center text-white border-y sm:border-b border-[#1E2220] bg-[#121418] px-4 h-[4rem]">
+      <div className="flex flex-row w-full items-center justify-between">
         <div className="flex items-center">
           <Image
             src={selectedGame.icon}
@@ -147,13 +147,13 @@ export default function GameHeader() {
               {coinData ? coinData[0].amount.toFixed(4) : 0} $SOL
             </p>
           </div> */}
-          <div className="hidden md:flex items-center justify-between bg-[#1E2220] rounded-md mx-1.5  my-1 px-2 py-1">
+          <div className="hidden md:flex items-center justify-between bg-[#1E2220] rounded-md mx-1.5  my-1 px-4 py-1">
             <p className="font-thin text-xs">Volume :&nbsp;</p>
             <p className="text-[#7839C5] font-semibold text-xs">
               {selectedGame.stats?.volume.toFixed(2)}
             </p>
           </div>
-          <div className="hidden md:flex items-center justify-between bg-[#1E2220] rounded-md mx-1.5  my-1 px-2 py-1">
+          <div className="hidden md:flex items-center justify-between bg-[#1E2220] rounded-md mx-1.5  my-1 px-4 py-1">
             <p className="font-thin text-xs">Unique Players :&nbsp;</p>
             <p className="text-[#7839C5] font-semibold text-xs">
               {selectedGame.stats?.players}

@@ -148,7 +148,7 @@ export default function RollDiceProvablyFairModal({
       {isOpen && (
         <div className="fixed inset-0 flex items-center justify-center z-50">
           <div
-            className="absolute inset-0 bg-black bg-opacity-50 backdrop-blur transition-all"
+            className="absolute inset-0 bg-[#33314680] backdrop-blur-[0px] transition-all"
             onClick={handleClose}
           ></div>
           <div className="bg-[#121418] p-8 rounded-lg z-10 w-11/12 sm:w-[600px]">

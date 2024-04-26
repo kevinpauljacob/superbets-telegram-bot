@@ -316,7 +316,7 @@ export default function Sidebar({
           <div
             className={`${
               sidebar ? "fadeInUp" : "fadeOutDown"
-            } w-full flex flex-col p-4 mb-12`}
+            } w-full flex flex-col p-4 mb-0`}
           >
             <Link href="/" className={`${openLinkCss}`}>
               <Twitter className="w-4 h-4" />
@@ -398,7 +398,7 @@ export default function Sidebar({
               <Fomo className="w-4 h-4" />
             </div>
           </div>
-          <div className="w-full flex flex-col items-center mb-12">
+          <div className="w-full flex flex-col items-center mb-2">
             <div className={`${bottomIconCss}`}>
               <Twitter className="w-4 h-4" />
             </div>

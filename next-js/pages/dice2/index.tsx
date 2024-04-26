@@ -46,7 +46,7 @@ export default function Dice2() {
     setUseAutoConfig,
   } = useGlobalContext();
   const [betAmt, setBetAmt] = useState(0);
-  const [userInput, setUserInput] = useState(0);
+  const [userInput, setUserInput] = useState<number | undefined>();
   const [isRolling, setIsRolling] = useState(false);
   const [refresh, setRefresh] = useState(true);
   const [betType, setBetType] = useState<"manual" | "auto">("manual");
@@ -54,8 +54,8 @@ export default function Dice2() {
   const [strikeNumber, setStrikeNumber] = useState<number>(0);
   const [result, setResult] = useState<boolean>(false);
   const [choice, setChoice] = useState<number>(50);
-  const [multiplier, setMultiplier] = useState(0);
-  const [chance, setChance] = useState(0);
+  const [multiplier, setMultiplier] = useState(0.0);
+  const [chance, setChance] = useState(0.0);
   const [betResults, setBetResults] = useState<
     { result: number; win: boolean }[]
   >([]);
@@ -201,14 +201,14 @@ export default function Dice2() {
           if (useAutoConfig && autoWinChange && win) {
             setBetAmt(
               autoWinChangeReset
-                ? userInput
+                ? userInput!
                 : betAmt + (autoWinChange * betAmt) / 100.0,
             );
           } else if (useAutoConfig && autoLossChange && !win) {
             setAutoBetProfit(autoBetProfit - betAmt);
             setBetAmt(
               autoLossChangeReset
-                ? userInput
+                ? userInput!
                 : betAmt + (autoLossChange * betAmt) / 100.0,
             );
           }
@@ -265,7 +265,7 @@ export default function Dice2() {
   }, [wallet?.publicKey, refresh]);
 
   useEffect(() => {
-    setBetAmt(userInput);
+    setBetAmt(userInput ?? 0);
   }, [userInput]);
 
   useEffect(() => {
@@ -297,6 +297,10 @@ export default function Dice2() {
       ((typeof autoBetCount === "string" && autoBetCount.includes("inf")) ||
         (typeof autoBetCount === "number" && autoBetCount > 0))
     ) {
+      if (betAmt === 0) {
+        toast.error("Set Amount.");
+        return;
+      }
       console.log("Auto betting. config: ", useAutoConfig);
       setStartAuto(true);
     } else if (wallet.connected) handleBet();
@@ -378,7 +382,7 @@ export default function Dice2() {
                         />
                         <span
                           className={`text-2xl font-medium text-white text-opacity-50 ${
-                            autoBetCount === "inf"
+                            autoBetCount.toString().includes("inf")
                               ? "bg-[#47484A]"
                               : "bg-[#292C32]"
                           } hover:bg-[#47484A] focus:bg-[#47484A] transition-all rounded-[5px] py-0.5 px-3`}
@@ -406,7 +410,7 @@ export default function Dice2() {
                       onClick={() => {
                         setShowAutoModal(true);
                       }}
-                      className={`relative mb-[1.4rem] rounded-md w-full h-11 flex items-center justify-center opacity-75 cursor-pointer text-white text-opacity-90 border-2 border-white bg-white bg-opacity-0 hover:bg-opacity-5`}
+                      className="relative mb-[1.4rem] rounded-md w-full h-11 flex items-center justify-center opacity-75 cursor-pointer font-sans font-medium text-sm text-white text-opacity-90 border-2 border-white bg-white bg-opacity-0 hover:bg-opacity-5"
                     >
                       Configure Auto
                       <div
@@ -425,7 +429,7 @@ export default function Dice2() {
                         setAutoBetCount(0);
                         setStartAuto(false);
                       }}
-                      className="rounded-lg absolute w-full h-full z-20 bg-[#442c62] hover:bg-[#7653A2] focus:bg-[#53307E] flex items-center justify-center font-chakra font-semibold text-2xl tracking-wider text-white"
+                      className="cursor-pointer rounded-lg absolute w-full h-full z-20 bg-[#442c62] hover:bg-[#7653A2] focus:bg-[#53307E] flex items-center justify-center font-chakra font-semibold text-2xl tracking-wider text-white"
                     >
                       STOP
                     </div>

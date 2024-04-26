@@ -207,7 +207,7 @@ export default function WheelProvablyFairModal({
             handleClose();
           }}
           id="modal-bg"
-          className="absolute z-[150] left-0 top-0 flex h-full w-full items-center justify-center bg-black bg-opacity-50 backdrop-blur transition-all"
+          className="absolute z-[150] left-0 top-0 flex h-full w-full items-center justify-center bg-[#33314680] backdrop-blur-[0px] transition-all"
         >
           <div className="bg-[#121418] max-h-[80vh] no-scrollbar overflow-y-auto p-4 md:p-11 rounded-lg z-10 w-11/12 sm:w-[600px]">
             <div className="font-changa text-[1.75rem] font-semibold text-[#F0F0F0]">

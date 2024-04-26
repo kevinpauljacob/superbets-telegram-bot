@@ -89,7 +89,7 @@ export default function VerifyFlipModal({ isOpen, onClose, modalData }: Props) {
             handleClose();
           }}
           id="modal-bg"
-          className="absolute z-[150] left-0 top-0 flex h-full w-full items-center justify-center bg-black bg-opacity-50 backdrop-blur transition-all"
+          className="absolute z-[150] left-0 top-0 flex h-full w-full items-center justify-center bg-[#33314680] backdrop-blur-[0px] transition-all"
         >
           <div className="bg-[#121418] max-h-[80vh] no-scrollbar overflow-y-scroll p-8 rounded-lg z-10 w-11/12 sm:w-[600px] ">
             <div className="flex flex-wrap justify-between items-center mb-4 sm:mb-5">

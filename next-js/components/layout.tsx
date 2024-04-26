@@ -76,10 +76,8 @@ export default function Layout({ children }: LayoutProps) {
           <MobileSidebar mobileSidebar={sidebar} />
           <section className="w-full h-full">
             <SubHeader />
-            <div className="w-full hidden md:flex">
-              <GameHeader />
-            </div>
-            <main className="marker:w-full h-full md:pt-[4.5%] lg:pt-0 max-h-[calc(100vh-16.6rem)] lg:max-h-[calc(100vh-11rem)]">
+    
+            <main className="marker:w-full h-full md:pt-[4.5%] lg:pt-0 max-h-[calc(100vh-1rem)] lg:max-h-[calc(100vh-11rem)]">
               <section className="w-full h-full overflow-y-auto no-scrollbar">
                 {children}
               </section>
