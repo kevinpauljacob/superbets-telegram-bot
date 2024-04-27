@@ -18,7 +18,6 @@ import Loader from "@/components/games/Loader";
 import BetAmount from "@/components/games/BetAmountInput";
 import BetButton from "@/components/games/BetButton";
 import showInfoToast from "@/components/games/toasts/toasts";
-const Combinatorics = require("combinatorics");
 import { riskToChance } from "@/components/games/Keno/RiskToChance";
 
 export default function Keno() {
