@@ -8,10 +8,10 @@ import {
   seedStatus,
 } from "@/utils/provably-fair";
 import StakingUser from "@/models/staking/user";
-import { pointTiers } from "@/context/transactions";
+import { houseEdgeTiers, pointTiers } from "@/context/transactions";
 import { minGameAmount, wsEndpoint } from "@/context/gameTransactions";
-import { Decimal } from "decimal.js";
 import { riskToChance } from "@/components/games/Keno/RiskToChance";
+import { Decimal } from "decimal.js";
 Decimal.set({ precision: 9 });
 
 const secret = process.env.NEXTAUTH_SECRET;
@@ -88,6 +88,13 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           .status(400)
           .json({ success: false, message: "Insufficient balance !" });
 
+      const userData = await StakingUser.findOne({ wallet });
+      let points = userData?.points ?? 0;
+      const userTier = Object.entries(pointTiers).reduce((prev, next) => {
+        return points >= next[1]?.limit ? next : prev;
+      })[0];
+      const houseEdge = houseEdgeTiers[parseInt(userTier)];
+
       const activeGameSeed = await GameSeed.findOneAndUpdate(
         {
           wallet,
@@ -126,7 +133,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         }
       });
       const strikeMultiplier = multiplier[matches];
-      const amountWon = new Decimal(amount).mul(strikeMultiplier);
+      const amountWon = Decimal.mul(amount, strikeMultiplier).mul(
+        Decimal.sub(1, houseEdge),
+      );
       const amountLost = Math.max(
         new Decimal(amount).sub(amountWon).toNumber(),
         0,
@@ -165,6 +174,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         strikeNumbers,
         strikeMultiplier,
         tokenMint,
+        houseEdge,
         result,
         amountWon,
         amountLost,
@@ -173,12 +183,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       });
 
       if (result === "Won") {
-        const userData = await StakingUser.findOne({ wallet });
-        let points = userData?.points ?? 0;
-        const userTier = Object.entries(pointTiers).reduce((prev, next) => {
-          return points >= next[1]?.limit ? next : prev;
-        })[0];
-
         const socket = new WebSocket(wsEndpoint);
 
         socket.onopen = () => {

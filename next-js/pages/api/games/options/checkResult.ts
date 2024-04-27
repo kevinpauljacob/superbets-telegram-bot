@@ -3,7 +3,7 @@ import { Option, User } from "../../../../models/games";
 import { NextApiRequest, NextApiResponse } from "next";
 import { getToken } from "next-auth/jwt";
 import StakingUser from "@/models/staking/user";
-import { pointTiers } from "@/context/transactions";
+import { houseEdgeTiers, pointTiers } from "@/context/transactions";
 import { GameType } from "@/utils/provably-fair";
 import { wsEndpoint } from "@/context/gameTransactions";
 import { Decimal } from "decimal.js";
@@ -47,6 +47,13 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           message: "No active bets on this account",
         });
 
+      const userData = await StakingUser.findOne({ wallet });
+      let points = userData?.points ?? 0;
+      const userTier = Object.entries(pointTiers).reduce((prev, next) => {
+        return points >= next[1]?.limit ? next : prev;
+      })[0];
+      const houseEdge = houseEdgeTiers[parseInt(userTier)];
+
       await new Promise((r) => setTimeout(r, 2000));
 
       let betEndPrice = await fetch(
@@ -66,7 +73,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         (bet.betType === "betDown" && betEndPrice < bet.strikePrice)
       ) {
         result = "Won";
-        amountWon = new Decimal(bet.amount).mul(2);
+        amountWon = Decimal.mul(bet.amount, 2).mul(Decimal.sub(1, houseEdge));
         amountLost = 0;
       }
 
@@ -82,7 +89,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         },
         {
           $inc: {
-            "deposit.$.amount": amountWon.sub(bet.amount),
+            "deposit.$.amount": amountWon,
           },
           isOptionOngoing: false,
         },
@@ -100,16 +107,11 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         {
           result,
           betEndPrice,
+          houseEdge,
         },
       );
 
       if (result === "Won") {
-        const userData = await StakingUser.findOne({ wallet });
-        let points = userData?.points ?? 0;
-        const userTier = Object.entries(pointTiers).reduce((prev, next) => {
-          return points >= next[1]?.limit ? next : prev;
-        })[0];
-
         const socket = new WebSocket(wsEndpoint);
 
         socket.onopen = () => {

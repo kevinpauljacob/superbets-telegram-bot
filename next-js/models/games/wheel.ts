@@ -34,6 +34,10 @@ const wheelSchema = new mongoose.Schema(
     },
     tokenMint: {
       type: String,
+      required: false,
+    },
+    houseEdge: {
+      type: Number,
       required: true,
     },
     amountWon: {

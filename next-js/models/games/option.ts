@@ -45,6 +45,7 @@ const OptionSchema = new Schema(
       type: String,
       required: false,
     },
+    houseEdge: Number,
   },
   { timestamps: true },
 );
