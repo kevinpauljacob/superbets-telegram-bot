@@ -55,9 +55,7 @@ export default function Keno() {
     "classic",
   );
   const [autoPick, setAutoPick] = useState<boolean>(false);
-  const [hoveredMultiplier, setHoveredMultiplier] = useState<number | null>(
-    null,
-  );
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
 
   const multipliers = riskToChance[risk][chosenNumbers.length];
   const commonNumbers = strikeNumbers.filter((num) =>
@@ -90,10 +88,9 @@ export default function Keno() {
   const handleAutoPick = () => {
     setAutoPick(true);
     setStrikeNumbers([]);
-    setChosenNumbers([]);
     const min = 1;
     const max = 40;
-    const count = 10;
+    const count = 10 - chosenNumbers.length;
 
     const uniqueNumbers: Set<number> = new Set();
     while (uniqueNumbers.size < count) {
@@ -102,8 +99,7 @@ export default function Keno() {
     }
 
     const randomNumbers: number[] = Array.from(uniqueNumbers);
-    setChosenNumbers(randomNumbers);
-    console.log("chosenNumbers", randomNumbers);
+    setChosenNumbers((prevNumbers) => [...prevNumbers, ...randomNumbers]);
   };
 
   const handleClear = () => {
@@ -133,7 +129,7 @@ export default function Keno() {
       }
       const numerator = factorial(n);
       const denominator = factorial(k) * factorial(n - k);
-      return numerator / denominator;
+      return Math.round(numerator / denominator);
     };
 
     const numerator =
@@ -568,8 +564,8 @@ export default function Keno() {
                     {multipliers.map((multiplier, index) => (
                       <div
                         key={index}
-                        onMouseEnter={() => setHoveredMultiplier(multiplier)}
-                        onMouseLeave={() => setHoveredMultiplier(null)}
+                        onMouseEnter={() => setHoveredIndex(index)}
+                        onMouseLeave={() => setHoveredIndex(null)}
                         className={`${
                           !isRolling &&
                           strikeNumbers.length > 0 &&
@@ -591,7 +587,7 @@ export default function Keno() {
                             fill="#FFD100"
                           />
                         </svg>
-                        {hoveredMultiplier === multiplier && (
+                        {hoveredIndex === index && (
                           <div className="absolute top-[-120px] left-0 z-50 flex gap-4 text-white bg-[#202329] border border-white/10 rounded-lg w-full p-4 fadeInUp duration-100 min-w-[250px]">
                             <div className="w-1/2">
                               <div className="flex justify-between text-[13px] font-medium font-changa text-opacity-90 text-[#F0F0F0]">
