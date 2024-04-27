@@ -35,10 +35,9 @@ export default function ResultsSlider({
         align === "horizontal"
           ? "flex-row"
           : align === "vertical"
-          ? "flex-col gap-1"
+          ? "flex-col gap-2"
           : ""
-      }
-overflow-x-auto no-scrollbar items-center max-w-[11.7rem] md:max-w-[15.7rem] xl:max-w-[19.6rem]`}
+      } overflow-x-auto no-scrollbar items-center max-w-[11.7rem] md:max-w-[15.7rem] xl:max-w-[19.6rem]`}
       ref={resultsContainerRef}
     >
       {results.map((result, index) => (

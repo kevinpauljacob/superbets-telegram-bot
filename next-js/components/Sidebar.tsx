@@ -36,6 +36,7 @@ export default function Sidebar({
 }) {
   const wallet = useWallet();
   const router = useRouter();
+  const { fomoPrice } = useGlobalContext();
   const [showExitTokens, setShowExitTokens] = useState<boolean>(false);
   const [showPlayTokens, setShowPlayTokens] = useState<boolean>(false);
 
@@ -188,7 +189,7 @@ export default function Sidebar({
                 </span>
                 <div className="flex items-center gap-1">
                   <span className="text-sm text-[#94A3B8] font-medium font-chakra leading-3">
-                    $0.3113
+                    ${fomoPrice.toFixed(3)}
                   </span>
                   <span
                     className={`text-xs text-[#72F238] font-medium pt-[0.1px] leading-[0.6rem]`}
@@ -246,7 +247,9 @@ export default function Sidebar({
                         {/* <Image src={token.src} alt="" width={15} height={15} /> */}
                         <span
                           className={`font-changa transition-all ${
-                            token.active ? "text-white/90" : "text-white/50 group-hover:text-white/90"
+                            token.active
+                              ? "text-white/90"
+                              : "text-white/50 group-hover:text-white/90"
                           }`}
                         >
                           {token.token}
@@ -297,7 +300,9 @@ export default function Sidebar({
                         {/* <Image src={token.src} alt="" width={15} height={15} /> */}
                         <span
                           className={`font-changa transition-all ${
-                            token.active ? "text-white/90" : "text-white/50 group-hover:text-white/90"
+                            token.active
+                              ? "text-white/90"
+                              : "text-white/50 group-hover:text-white/90"
                           }`}
                         >
                           {token.token}

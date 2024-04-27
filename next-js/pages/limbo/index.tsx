@@ -21,6 +21,7 @@ import Loader from "../../components/games/Loader";
 import { BsInfinity } from "react-icons/bs";
 import ResultsSlider from "@/components/ResultsSlider";
 import BalanceAlert from "@/components/games/BalanceAlert";
+import showInfoToast from "@/components/games/toasts/toasts";
 
 function useInterval(callback: Function, delay: number | null) {
   const savedCallback = useRef<Function | null>(null);
@@ -53,47 +54,57 @@ export default function Limbo() {
     getWalletBalance,
     setShowWalletModal,
     setShowAutoModal,
+    autoWinChange,
+    autoLossChange,
+    autoWinChangeReset,
+    autoLossChangeReset,
+    autoStopProfit,
+    autoStopLoss,
+    startAuto,
+    setStartAuto,
+    autoBetCount,
+    setAutoBetCount,
+    autoBetProfit,
+    setAutoBetProfit,
+    useAutoConfig,
+    setUseAutoConfig,
   } = useGlobalContext();
 
   const [userInput, setUserInput] = useState<number | undefined>();
   const [betAmt, setBetAmt] = useState(0.2);
-  const [betCount, setBetCount] = useState(0);
 
-  const [deposit, setDeposit] = useState(false);
   const [flipping, setFlipping] = useState(false);
   const [result, setResult] = useState<string | null>(null);
 
   const [loading, setLoading] = useState(false);
   const [refresh, setRefresh] = useState(true);
-  const [displayMultiplier, setDisplayMultiplier] = useState(0);
-
   const [betSetting, setBetSetting] = useState<"manual" | "auto">("manual");
 
-  const [multiplier, setMultiplier] = useState(1.01);
+  const [multiplier, setMultiplier] = useState(0.0);
+  const [displayMultiplier, setDisplayMultiplier] = useState(0.0);
+  const [targetMultiplier, setTargetMultiplier] = useState(1.03);
+  const [inputMultiplier, setInputMultiplier] = useState(1.03);
   const [lastMultipliers, setLastMultipliers] = useState<
     { result: number; win: boolean }[]
   >([]);
-  const [targetMultiplier, setTargetMultiplier] = useState(1.01);
-  const duration = 200;
-
-  const [inputMultiplier, setInputMultiplier] = useState(0.0);
+  const duration = 2000;
 
   useEffect(() => {
-    const startMultiplier = multiplier;
-    let increment = (targetMultiplier - multiplier) / (duration / 1000);
+    const startMultiplier = displayMultiplier;
+    let increment = (targetMultiplier - displayMultiplier) / (duration / 10);
 
     const timer = setInterval(() => {
-      if (multiplier == targetMultiplier) clearInterval(timer);
+      if (displayMultiplier == targetMultiplier) clearInterval(timer);
       else {
         const currentMultiplier = startMultiplier + increment;
 
         if (
-          (multiplier < targetMultiplier &&
+          (displayMultiplier < targetMultiplier &&
             currentMultiplier >= targetMultiplier) ||
-          (multiplier > targetMultiplier &&
+          (displayMultiplier > targetMultiplier &&
             currentMultiplier <= targetMultiplier)
         ) {
-          setMultiplier(targetMultiplier);
+          setDisplayMultiplier(targetMultiplier);
           clearInterval(timer);
 
           const win = result === "Won";
@@ -105,19 +116,57 @@ export default function Limbo() {
             }
             return newResults;
           });
+
+          // auto options
+          if (betSetting === "auto") {
+            if (useAutoConfig && autoWinChange && win) {
+              setBetAmt(
+                autoWinChangeReset
+                  ? userInput!
+                  : betAmt + (autoWinChange * betAmt) / 100.0,
+              );
+            } else if (useAutoConfig && autoLossChange && !win) {
+              setAutoBetProfit(autoBetProfit - betAmt);
+              setBetAmt(
+                autoLossChangeReset
+                  ? userInput!
+                  : betAmt + (autoLossChange * betAmt) / 100.0,
+              );
+            }
+            // update profit / loss
+            setAutoBetProfit(
+              autoBetProfit + (win ? multiplier - 1 : -1) * betAmt,
+            );
+            // update count
+            if (typeof autoBetCount === "number")
+              setAutoBetCount(autoBetCount - 1);
+            else setAutoBetCount(autoBetCount + 1);
+          }
         } else {
-          setMultiplier(currentMultiplier);
-          increment *= 2;
+          setDisplayMultiplier(currentMultiplier);
+          increment *= 1.5;
         }
       }
-    }, 1000);
+    }, 50);
 
     return () => clearInterval(timer);
   }, [targetMultiplier]);
 
   const bet = async () => {
-    setMultiplier(1.01);
-    setTargetMultiplier(1.01);
+    if (!wallet.publicKey) {
+      toast.error("Wallet not connected");
+      return;
+    }
+    if (betAmt === 0) {
+      toast.error("Set Amount.");
+      return;
+    }
+    if (inputMultiplier < 1.03) {
+      toast.error("Input multiplier should be atleast 1.03");
+      return;
+    }
+    setDisplayMultiplier(1.03);
+    setTargetMultiplier(1.03);
     try {
       console.log("Placing Flip");
       // function to place bet
@@ -133,76 +182,21 @@ export default function Limbo() {
         (100 / response.strikeNumber).toFixed(2),
       );
 
-      setDeposit(false);
       setFlipping(false);
       setLoading(false);
       setTargetMultiplier(winningMultiplier);
       setResult(response.result);
       setRefresh(true);
+      //auto options are in the useEffect to modify displayMultiplier
     } catch (e) {
       toast.error("Could not make Flip.");
-      setDeposit(false);
       setFlipping(false);
       setLoading(false);
       setResult(null);
+      setAutoBetCount(0);
+      setStartAuto(false);
     }
   };
-
-  const onSubmit = async () => {
-    if (!wallet.publicKey) {
-      toast.error("Wallet not connected");
-      return;
-    }
-    if (betAmt === 0) {
-      toast.error("Set Amount.");
-      return;
-    }
-    if (inputMultiplier < 1.01) {
-      toast.error("Input multiplier should be atleast 1.01");
-      return;
-    }
-
-    setLoading(true);
-    setDeposit(false);
-    setTimeout(() => {
-      bet();
-    }, 300);
-  };
-
-  const onSubmitAutoBet = async (numOfBets: number) => {
-    if (!wallet.publicKey) {
-      toast.error("Wallet not connected");
-      return;
-    }
-    if (betAmt === 0) {
-      toast.error("Set Amount.");
-      return;
-    }
-    if (inputMultiplier < 1.01) {
-      toast.error("Input multiplier should be atleast 1.01");
-      return;
-    }
-    setLoading(true);
-    setDeposit(false);
-    try {
-      for (let i = 0; i < numOfBets; i++) {
-        console.log("i", i);
-        await onSubmit();
-        await new Promise((resolve) => setTimeout(resolve, 500));
-      }
-    } catch (err: any) {
-      console.log(err);
-      toast.error(err.message);
-    }
-  };
-
-  useEffect(() => {
-    if (deposit) {
-      // console.log("deposit", deposit);
-      setLoading(true);
-      !result && setFlipping(true);
-    }
-  }, [deposit]);
 
   useEffect(() => {
     if (refresh && wallet?.publicKey) {
@@ -212,41 +206,79 @@ export default function Limbo() {
     }
   }, [wallet?.publicKey, refresh]);
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
-  ) => {
-    setBetAmt(parseFloat(e.target.value));
-  };
-
   const handleCountChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
-    setBetCount(parseFloat(e.target.value));
+    setAutoBetCount(parseFloat(e.target.value));
   };
-
-  useEffect(() => {
-    setDisplayMultiplier(0);
-  }, [multiplier]);
-
-  useInterval(
-    () => {
-      setDisplayMultiplier((prevDisplayMultiplier) => {
-        const newValue = prevDisplayMultiplier + 0.1;
-        return newValue > multiplier ? multiplier : newValue;
-      });
-    },
-    displayMultiplier < multiplier ? 2 : null,
-  );
 
   useEffect(() => {
     setBetAmt(userInput ?? 0);
   }, [userInput]);
+
+  useEffect(() => {
+    console.log("Auto: ", startAuto, autoBetCount);
+    if (
+      betSetting === "auto" &&
+      startAuto &&
+      ((typeof autoBetCount === "string" && autoBetCount.includes("inf")) ||
+        (typeof autoBetCount === "number" && autoBetCount > 0))
+    ) {
+      if (useAutoConfig && autoStopProfit && autoBetProfit <= autoStopProfit) {
+        showInfoToast("Profit limit reached.");
+        return;
+      }
+      if (useAutoConfig && autoStopLoss && autoBetProfit >= -1 * autoStopLoss) {
+        showInfoToast("Loss limit reached.");
+        return;
+      }
+      setTimeout(() => {
+        setLoading(true);
+        setResult(null);
+        bet();
+      }, 500);
+    } else {
+      setStartAuto(false);
+      setAutoBetProfit(0);
+    }
+  }, [startAuto, autoBetCount]);
+
+  const onSubmit = async (data: any) => {
+    setMultiplier(inputMultiplier);
+    if (
+      betSetting === "auto" &&
+      ((typeof autoBetCount === "string" && autoBetCount.includes("inf")) ||
+        (typeof autoBetCount === "number" && autoBetCount > 0))
+    ) {
+      if (betAmt === 0) {
+        toast.error("Set Amount.");
+        return;
+      }
+      console.log("Auto betting. config: ", useAutoConfig);
+      setStartAuto(true);
+    } else if (wallet.connected) {
+      setLoading(true);
+      setResult(null);
+      bet();
+    }
+  };
 
   return (
     <GameLayout title="FOMO - Limbo">
       <GameOptions>
         <>
           <div className="flex md:hidden flex-col w-full gap-4 mb-5">
+            {startAuto && (
+              <div
+                onClick={() => {
+                  setAutoBetCount(0);
+                  setStartAuto(false);
+                }}
+                className="cursor-pointer rounded-lg absolute w-full h-full z-20 bg-[#442c62] hover:bg-[#7653A2] focus:bg-[#53307E] flex items-center justify-center font-chakra font-semibold text-2xl tracking-wider text-white"
+              >
+                STOP
+              </div>
+            )}
             <BetButton
               disabled={
                 loading || (coinData && coinData[0].amount < 0.0001)
@@ -294,15 +326,26 @@ export default function Limbo() {
                             step={"any"}
                             autoComplete="off"
                             onChange={handleCountChange}
-                            placeholder={"00"}
-                            value={betCount}
-                            className={`flex w-full min-w-0 bg-transparent text-base text-[#94A3B8] placeholder-[#94A3B8]  font-chakra placeholder-opacity-40 outline-none`}
+                            placeholder={
+                              autoBetCount.toString().includes("inf")
+                                ? "Infinity"
+                                : "00"
+                            }
+                            disabled={startAuto || loading}
+                            value={autoBetCount}
+                            className={`flex w-full min-w-0 bg-transparent text-base text-[#94A3B8] placeholder-[#94A3B8] font-chakra ${
+                              autoBetCount.toString().includes("inf")
+                                ? "placeholder-opacity-100"
+                                : "placeholder-opacity-40"
+                            } placeholder-opacity-40 outline-none`}
                           />
                           <span
-                            className="text-2xl font-medium text-white text-opacity-50 bg-[#292C32] hover:bg-[#47484A] focus:bg-[#47484A] transition-all rounded-[5px] py-0.5 px-3"
-                            onClick={() =>
-                              setBetCount(coinData ? coinData[0]?.amount : 0)
-                            }
+                            className={`text-2xl font-medium text-white text-opacity-50 ${
+                              autoBetCount.toString().includes("inf")
+                                ? "bg-[#47484A]"
+                                : "bg-[#292C32]"
+                            } hover:bg-[#47484A] focus:bg-[#47484A] transition-all rounded-[5px] py-0.5 px-3`}
+                            onClick={() => setAutoBetCount("inf")}
                           >
                             <BsInfinity />
                           </span>
@@ -326,9 +369,14 @@ export default function Limbo() {
                         onClick={() => {
                           setShowAutoModal(true);
                         }}
-                        className="mb-[1.4rem] rounded-md w-full h-11 flex items-center justify-center opacity-75 cursor-pointer font-sans font-medium text-sm text-white text-opacity-90 border-2 border-white bg-white bg-opacity-0 hover:bg-opacity-5"
+                        className="relative mb-[1.4rem] rounded-md w-full h-11 flex items-center justify-center opacity-75 cursor-pointer font-sans font-medium text-sm text-white text-opacity-90 border-2 border-white bg-white bg-opacity-0 hover:bg-opacity-5"
                       >
                         Configure Auto
+                        <div
+                          className={`${
+                            useAutoConfig ? "bg-fomo-green" : "bg-fomo-red"
+                          } absolute top-0 right-0 m-1.5 bg-fomo-green w-2 h-2 rounded-full`}
+                        />
                       </div>
                     </div>
                   </>
@@ -336,7 +384,18 @@ export default function Limbo() {
                 {/* balance alert  */}
                 <BalanceAlert />
 
-                <div className="hidden md:flex flex-col w-full gap-4">
+                <div className="relative w-full hidden md:flex mt-2">
+                  {startAuto && (
+                    <div
+                      onClick={() => {
+                        setAutoBetCount(0);
+                        setStartAuto(false);
+                      }}
+                      className="cursor-pointer rounded-lg absolute w-full h-full z-20 bg-[#442c62] hover:bg-[#7653A2] focus:bg-[#53307E] flex items-center justify-center font-chakra font-semibold text-2xl tracking-wider text-white"
+                    >
+                      STOP
+                    </div>
+                  )}
                   <BetButton
                     disabled={
                       loading || (coinData && coinData[0].amount < 0.0001)
@@ -371,11 +430,11 @@ export default function Limbo() {
             <span
               className={`${
                 result
-                  ? multiplier === 1.01
-                    ? "text-white"
-                    : multiplier >= inputMultiplier
-                    ? "text-fomo-green"
-                    : "text-fomo-red"
+                  ? displayMultiplier === targetMultiplier
+                    ? displayMultiplier >= multiplier
+                      ? "text-fomo-green"
+                      : "text-fomo-red"
+                    : "text-white"
                   : "text-white"
               } font-chakra inline-block transition-transform duration-1000 ease-out text-[5rem] font-black`}
             >

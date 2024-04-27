@@ -15,6 +15,7 @@ import Birdeye from "@/public/assets/Birdeye";
 import Telegram from "@/public/assets/Telegram";
 import Home from "@/public/assets/Home";
 import { useRouter } from "next/router";
+import { useGlobalContext } from "./GlobalContext";
 
 export default function Sidebar({
   mobileSidebar,
@@ -25,6 +26,7 @@ export default function Sidebar({
 }) {
   const wallet = useWallet();
   const router = useRouter();
+  const { fomoPrice } = useGlobalContext();
   const [showExitTokens, setShowExitTokens] = useState(false);
   const [showPlayTokens, setShowPlayTokens] = useState(false);
 
@@ -144,7 +146,7 @@ export default function Sidebar({
             </span>
             <div className="flex items-center gap-1">
               <span className="text-sm text-[#94A3B8] font-medium font-chakra leading-3">
-                $0.3113
+                ${fomoPrice.toFixed(3)}
               </span>
               <span
                 className={`text-xs text-[#72F238] font-medium pt-[0.1px] leading-[0.6rem]`}
