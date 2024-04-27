@@ -482,7 +482,8 @@ export default function Dice2() {
                   Multiplier
                 </span>
                 <input
-                  className="bg-[#202329] text-xs text-white font-chakra rounded-md px-2 md:px-5 py-3"
+                  id={"amount-input"}
+                  className={`bg-[#202329] w-full min-w-0 font-chakra text-xs text-white rounded-md px-2 md:px-5 py-3 placeholder-[#94A3B8] placeholder-opacity-40 outline-none`}
                   value={multiplier}
                   type="number"
                   maxLength={1}
@@ -527,8 +528,8 @@ export default function Dice2() {
                     Chance
                   </span>
                   <input
-                    className="bg-[#202329] text-xs text-white font-chakra rounded-md px-2 md:px-5 py-3"
-                    value={chance.toPrecision(4)}
+                    className={`bg-[#202329] w-full min-w-0 font-chakra text-xs text-white rounded-md px-2 md:px-5 py-3 placeholder-[#94A3B8] placeholder-opacity-40 outline-none`}
+                    value={chance}
                     type="number"
                     maxLength={1}
                     step={1}

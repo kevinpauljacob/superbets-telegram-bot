@@ -22,6 +22,7 @@ import { BsInfinity } from "react-icons/bs";
 import ResultsSlider from "@/components/ResultsSlider";
 import BalanceAlert from "@/components/games/BalanceAlert";
 import showInfoToast from "@/components/games/toasts/toasts";
+import Link from "next/link";
 
 function useInterval(callback: Function, delay: number | null) {
   const savedCallback = useRef<Function | null>(null);
@@ -70,6 +71,8 @@ export default function Limbo() {
     setUseAutoConfig,
   } = useGlobalContext();
 
+  const multiplierLimits = [1.02, 50];
+
   const [userInput, setUserInput] = useState<number | undefined>();
   const [betAmt, setBetAmt] = useState(0.2);
 
@@ -82,8 +85,8 @@ export default function Limbo() {
 
   const [multiplier, setMultiplier] = useState(0.0);
   const [displayMultiplier, setDisplayMultiplier] = useState(0.0);
-  const [targetMultiplier, setTargetMultiplier] = useState(1.03);
-  const [inputMultiplier, setInputMultiplier] = useState(1.03);
+  const [targetMultiplier, setTargetMultiplier] = useState(multiplierLimits[0]);
+  const [inputMultiplier, setInputMultiplier] = useState(multiplierLimits[0]);
   const [lastMultipliers, setLastMultipliers] = useState<
     { result: number; win: boolean }[]
   >([]);
@@ -161,12 +164,17 @@ export default function Limbo() {
       toast.error("Set Amount.");
       return;
     }
-    if (inputMultiplier < 1.03) {
-      toast.error("Input multiplier should be atleast 1.03");
+    if (inputMultiplier < multiplierLimits[0]) {
+      toast.error("Multiplier should be at least 1.02");
       return;
     }
-    setDisplayMultiplier(1.03);
-    setTargetMultiplier(1.03);
+    if (inputMultiplier > multiplierLimits[1]) {
+      toast.error("Multiplier cannot be greater than 50");
+      return;
+    }
+    setLoading(true);
+    setDisplayMultiplier(multiplierLimits[0]);
+    setTargetMultiplier(multiplierLimits[0]);
     try {
       console.log("Placing Flip");
       // function to place bet
@@ -189,7 +197,7 @@ export default function Limbo() {
       setRefresh(true);
       //auto options are in the useEffect to modify displayMultiplier
     } catch (e) {
-      toast.error("Could not make Flip.");
+      toast.error("Could not make Bet.");
       setFlipping(false);
       setLoading(false);
       setResult(null);
@@ -233,7 +241,6 @@ export default function Limbo() {
         return;
       }
       setTimeout(() => {
-        setLoading(true);
         setResult(null);
         bet();
       }, 500);
@@ -257,7 +264,6 @@ export default function Limbo() {
       console.log("Auto betting. config: ", useAutoConfig);
       setStartAuto(true);
     } else if (wallet.connected) {
-      setLoading(true);
       setResult(null);
       bet();
     }
@@ -402,7 +408,6 @@ export default function Limbo() {
                         ? true
                         : false
                     }
-                    onClickFunction={onSubmit}
                   >
                     {loading ? <Loader /> : "BET"}
                   </BetButton>
@@ -443,12 +448,64 @@ export default function Limbo() {
           </div>
         </div>
 
-        <GameFooterInfo
-          multiplier={inputMultiplier}
-          setMultiplier={setInputMultiplier}
-          amount={betAmt && inputMultiplier ? inputMultiplier * betAmt : 0.0}
-          chance={inputMultiplier > 0 ? 100 / inputMultiplier : 0.0}
-        />
+        <div className="flex px-0 xl:px-4 mb-0 md:mb-5 gap-4 flex-row w-full justify-between">
+          {coinData && coinData[0].amount > 0.0001 && (
+            <>
+              <div className="flex flex-col w-full">
+                <span className="text-[#F0F0F0] font-changa font-semibold text-xs mb-1">
+                  Multiplier
+                </span>
+                <input
+                  id={"amount-input"}
+                  className={`bg-[#202329] w-full min-w-0 font-chakra text-xs text-white rounded-md px-2 md:px-5 py-3 placeholder-[#94A3B8] placeholder-opacity-40 outline-none`}
+                  value={inputMultiplier}
+                  type="number"
+                  maxLength={1}
+                  step={1}
+                  min={1.02}
+                  max={50}
+                  disabled={startAuto || loading}
+                  onChange={(e) => {
+                    setInputMultiplier(parseFloat(e.target.value));
+                  }}
+                />
+              </div>
+
+              <div className="flex flex-col w-full">
+                <span className="text-[#F0F0F0] font-changa font-sembiold text-xs mb-1">
+                  Winning
+                </span>
+                <span className="bg-[#202329] font-chakra text-xs text-white rounded-md px-2 md:px-5 py-3">
+                  {betAmt && inputMultiplier
+                    ? (inputMultiplier * betAmt).toFixed(3)
+                    : 0.0}{" "}
+                  $SOL
+                </span>
+              </div>
+
+              <div className="flex flex-col w-full">
+                <span className="text-[#F0F0F0] font-changa font-sembiold text-xs mb-1">
+                  Chance
+                </span>
+                <span className="bg-[#202329] font-chakra text-xs text-white rounded-md px-2 md:px-5 py-3">
+                  {inputMultiplier > 0 ? 100 / inputMultiplier : 0.0}x
+                </span>
+              </div>
+            </>
+          )}
+
+          {!coinData ||
+            (coinData[0].amount < 0.0001 && (
+              <div className="w-full rounded-lg bg-[#d9d9d90d] bg-opacity-10 flex items-center px-3 py-3 text-white md:px-6">
+                <div className="w-full text-center font-changa font-medium text-sm md:text-base text-[#F0F0F0] text-opacity-75">
+                  Please deposit funds to start playing. View{" "}
+                  <Link href="/balance">
+                    <u>WALLET</u>
+                  </Link>
+                </div>
+              </div>
+            ))}
+        </div>
       </GameDisplay>
       <GameTable>
         <HistoryTable refresh={refresh} />

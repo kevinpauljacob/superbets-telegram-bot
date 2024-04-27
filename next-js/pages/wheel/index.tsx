@@ -122,10 +122,9 @@ export default function Wheel() {
       setTimeout(() => {
         if (wheelRef.current) {
           console.log("sbsudbsd", 360 - resultAngle);
-          wheelRef.current.style.transition = "transform 1s cubic-bezier(0.4, 0, 0.2, 1)"; // Remove transition to stop animation
-          wheelRef.current.style.transform = `rotate(${
-            360 - resultAngle
-          }deg)`; // Move to the result angle
+          wheelRef.current.style.transition =
+            "transform 1s cubic-bezier(0.4, 0, 0.2, 1)"; // Remove transition to stop animation
+          wheelRef.current.style.transform = `rotate(${360 - resultAngle}deg)`; // Move to the result angle
         }
       }, 2000);
     }
@@ -210,7 +209,7 @@ export default function Wheel() {
           toast.error(message);
           throw new Error(message);
         }
-
+        setIsRolling(false);
         if (result == "Won") toast.success(message, { duration: 2000 });
         else toast.error(message, { duration: 2000 });
 
@@ -262,8 +261,6 @@ export default function Wheel() {
         setAutoBetCount(0);
         setStartAuto(false);
         console.error("Error occurred while betting:", error);
-      } finally {
-        setIsRolling(false);
       }
     }
   };
@@ -296,7 +293,9 @@ export default function Wheel() {
         showInfoToast("Loss limit reached.");
         return;
       }
-      handleBet();
+      setTimeout(() => {
+        handleBet();
+      }, 200);
     } else {
       setStartAuto(false);
       setAutoBetProfit(0);
