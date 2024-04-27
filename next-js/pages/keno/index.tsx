@@ -85,21 +85,36 @@ export default function Keno() {
     }
   };
 
-  const handleAutoPick = () => {
+  const handleAutoPick = async () => {
     setAutoPick(true);
     setStrikeNumbers([]);
     const min = 1;
     const max = 40;
-    const count = 10 - chosenNumbers.length;
 
-    const uniqueNumbers: Set<number> = new Set();
-    while (uniqueNumbers.size < count) {
-      const randomNumber = Math.floor(Math.random() * (max - min + 1)) + min;
-      uniqueNumbers.add(randomNumber);
+    let count = 10 - chosenNumbers.length;
+    let randomNumbers: Array<number> = chosenNumbers.slice();
+
+    if (chosenNumbers.length === 10) {
+      count = 10;
+      setChosenNumbers([]);
+      randomNumbers = [];
     }
 
-    const randomNumbers: number[] = Array.from(uniqueNumbers);
-    setChosenNumbers((prevNumbers) => [...prevNumbers, ...randomNumbers]);
+    const getRandomNumber = (max: number, min: number) => {
+      let randomNumber = Math.floor(Math.random() * (max - min + 1)) + min;
+      return randomNumber;
+    };
+
+    for (let randomCount = 0; randomCount < count; ) {
+      let randomNumber = getRandomNumber(max, min);
+      if (randomNumbers.includes(randomNumber)) continue;
+
+      await new Promise((resolve) => setTimeout(resolve, 100));
+
+      setChosenNumbers((prevNumbers) => [...prevNumbers, randomNumber]);
+      randomNumbers.push(randomNumber);
+      ++randomCount;
+    }
   };
 
   const handleClear = () => {

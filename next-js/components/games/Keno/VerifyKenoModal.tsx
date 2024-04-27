@@ -83,8 +83,6 @@ export default function VerifyDice2Modal({
     return `${day}-${month}-${year} ${hours}:${minutes} UTC`;
   }
 
-  console.log("bet", bet);
-
   return (
     <>
       {isOpen && (
