@@ -8,8 +8,10 @@ import {
   seedStatus,
 } from "@/utils/provably-fair";
 import StakingUser from "@/models/staking/user";
-import { pointTiers } from "@/context/transactions";
+import { houseEdgeTiers, pointTiers } from "@/context/transactions";
 import { wsEndpoint } from "@/context/gameTransactions";
+import { Decimal } from "decimal.js";
+Decimal.set({ precision: 9 });
 
 const secret = process.env.NEXTAUTH_SECRET;
 
@@ -110,7 +112,6 @@ type Wager = Record<string, number | Record<string, number>>;
 
 type InputType = {
   wallet: string;
-  amount: number;
   tokenMint: string;
   wager: Wager;
 };
@@ -118,7 +119,7 @@ type InputType = {
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === "POST") {
     try {
-      let { wallet, amount, tokenMint, wager }: InputType = req.body;
+      let { wallet, tokenMint, wager }: InputType = req.body;
 
       const token = await getToken({ req, secret });
 
@@ -130,7 +131,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
       await connectDatabase();
 
-      if (!wallet || !amount || !tokenMint || !wager)
+      if (!wallet || !tokenMint || !wager)
         return res
           .status(400)
           .json({ success: false, message: "Missing parameters" });
@@ -150,6 +151,20 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           .status(400)
           .json({ success: false, message: "User does not exist !" });
 
+      const amount = Object.entries(wager)
+        .reduce((acc, next) => {
+          if (next[0] === "straight") {
+            const straightTotal = Object.values(
+              next[1] as Record<string, number>,
+            ).reduce((acc, next) => acc.add(next), new Decimal(0));
+
+            return acc.add(straightTotal);
+          } else {
+            return acc.add(next[1] as number);
+          }
+        }, new Decimal(0))
+        .toNumber();
+
       if (
         user.deposit.find((d: any) => d.tokenMint === tokenMint)?.amount <
         amount
@@ -157,6 +172,13 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         return res
           .status(400)
           .json({ success: false, message: "Insufficient balance !" });
+
+      const userData = await StakingUser.findOne({ wallet });
+      let points = userData?.points ?? 0;
+      const userTier = Object.entries(pointTiers).reduce((prev, next) => {
+        return points >= next[1]?.limit ? next : prev;
+      })[0];
+      const houseEdge = houseEdgeTiers[parseInt(userTier)];
 
       const activeGameSeed = await GameSeed.findOneAndUpdate(
         {
@@ -186,7 +208,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
       if (strikeNumber == null) throw new Error("Invalid strike number!");
 
-      let amountWon = 0;
+      let amountWon = new Decimal(0);
       let result = "Lost";
 
       Object.entries(wager).forEach(([key, value]) => {
@@ -194,7 +216,12 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           if (
             (value as Record<string, number>)[strikeNumber.toString()] != null
           ) {
-            amountWon += amount * WagerPayout[key];
+            amountWon = amountWon.add(
+              Decimal.mul(
+                (value as Record<string, number>)[strikeNumber.toString()],
+                WagerPayout[key],
+              ),
+            );
             result = "Won";
           }
         } else if (
@@ -202,12 +229,15 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
             strikeNumber,
           )
         ) {
-          amountWon += amount * WagerPayout[key as WagerType];
+          amountWon = amountWon.add(
+            Decimal.mul(value as number, WagerPayout[key as WagerType]),
+          );
           result = "Won";
         }
       });
 
-      const amountLost = Math.max(amount - amountWon, 0);
+      amountWon = amountWon.mul(Decimal.sub(1, houseEdge));
+      const amountLost = Math.max(Decimal.sub(amount, amountWon).toNumber(), 0);
 
       const userUpdate = await User.findOneAndUpdate(
         {
@@ -221,7 +251,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         },
         {
           $inc: {
-            "deposit.$.amount": -amount + amountWon,
+            "deposit.$.amount": amountWon.sub(amount),
           },
         },
         {
@@ -240,6 +270,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         strikeNumber,
         result,
         tokenMint,
+        houseEdge,
         amountWon,
         amountLost,
         nonce,
@@ -247,12 +278,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       });
 
       if (result === "Won") {
-        const userData = await StakingUser.findOne({ wallet });
-        let points = userData?.points ?? 0;
-        const userTier = Object.entries(pointTiers).reduce((prev, next) => {
-          return points >= next[1]?.limit ? next : prev;
-        })[0];
-
         const socket = new WebSocket(wsEndpoint);
 
         socket.onopen = () => {
@@ -264,7 +289,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
               payload: {
                 game: GameType.roulette2,
                 wallet,
-                absAmount: Math.abs(amountWon - amountLost),
+                absAmount: amountWon.sub(amount).toNumber(),
                 result,
                 userTier,
               },

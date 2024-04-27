@@ -8,7 +8,7 @@ import {
   seedStatus,
 } from "@/utils/provably-fair";
 import StakingUser from "@/models/staking/user";
-import { pointTiers } from "@/context/transactions";
+import { houseEdgeTiers, pointTiers } from "@/context/transactions";
 import { minGameAmount, wsEndpoint } from "@/context/gameTransactions";
 import { riskToChance } from "@/components/games/Wheel/Segments";
 import { Decimal } from "decimal.js";
@@ -78,6 +78,13 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           .status(400)
           .json({ success: false, message: "Insufficient balance !" });
 
+      const userData = await StakingUser.findOne({ wallet });
+      let points = userData?.points ?? 0;
+      const userTier = Object.entries(pointTiers).reduce((prev, next) => {
+        return points >= next[1]?.limit ? next : prev;
+      })[0];
+      const houseEdge = houseEdgeTiers[parseInt(userTier)];
+
       const activeGameSeed = await GameSeed.findOneAndUpdate(
         {
           wallet,
@@ -117,12 +124,14 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         for (let j = 0; j < item.length; j++) {
           i += (item[j].chance * 10) / segments;
           if (i >= strikeNumber) {
+            strikeMultiplier = item[j].multiplier;
             if (item[j].multiplier !== 0) {
               result = "Won";
-              amountWon = new Decimal(amount).mul(item[j].multiplier);
+              amountWon = Decimal.mul(amount, strikeMultiplier).mul(
+                Decimal.sub(1, houseEdge),
+              );
               amountLost = 0;
             }
-            strikeMultiplier = item[j].multiplier;
             isFound = true;
             break;
           }
@@ -162,6 +171,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         strikeMultiplier,
         result,
         tokenMint,
+        houseEdge,
         amountWon,
         amountLost,
         nonce,
@@ -169,12 +179,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       });
 
       if (result === "Won") {
-        const userData = await StakingUser.findOne({ wallet });
-        let points = userData?.points ?? 0;
-        const userTier = Object.entries(pointTiers).reduce((prev, next) => {
-          return points >= next[1]?.limit ? next : prev;
-        })[0];
-
         const socket = new WebSocket(wsEndpoint);
 
         socket.onopen = () => {

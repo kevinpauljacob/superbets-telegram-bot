@@ -4,7 +4,7 @@ import { NextApiRequest, NextApiResponse } from "next";
 import { Hilo, User } from "@/models/games";
 import { generateGameResult, GameType } from "@/utils/provably-fair";
 import StakingUser from "@/models/staking/user";
-import { pointTiers } from "@/context/transactions";
+import { houseEdgeTiers, pointTiers } from "@/context/transactions";
 import { wsEndpoint } from "@/context/gameTransactions";
 import { Decimal } from "decimal.js";
 Decimal.set({ precision: 9 });
@@ -120,10 +120,23 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
             winChance++;
         }
 
-        amountWon *= (52 - currentIndex) / winChance;
-        amountWon = new Decimal(amountWon).mul(52-currentIndex).div(winChance).toNumber()
+        amountWon = Decimal.mul(amountWon, 52 - currentIndex)
+          .div(winChance)
+          .toNumber();
 
         if (currentIndex + 1 === 52) {
+          const userData = await StakingUser.findOne({ wallet });
+          let points = userData?.points ?? 0;
+          const userTier = Object.entries(pointTiers).reduce((prev, next) => {
+            return points >= next[1]?.limit ? next : prev;
+          })[0];
+          const houseEdge = houseEdgeTiers[parseInt(userTier)];
+
+          amountWon = Decimal.mul(
+            amountWon,
+            Decimal.sub(1, houseEdge),
+          ).toNumber();
+
           result = "Won";
 
           const userUpdate = await User.findOneAndUpdate(
@@ -157,17 +170,12 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
             {
               result,
               amountWon,
+              houseEdge,
               $push: {
                 userBets: userBet,
               },
             },
           );
-
-          const userData = await StakingUser.findOne({ wallet });
-          let points = userData?.points ?? 0;
-          const userTier = Object.entries(pointTiers).reduce((prev, next) => {
-            return points >= next[1]?.limit ? next : prev;
-          })[0];
 
           const socket = new WebSocket(wsEndpoint);
 
@@ -180,7 +188,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
                 payload: {
                   game: GameType.hilo,
                   wallet,
-                  absAmount: amountWon,
+                  absAmount: Decimal.sub(amountWon, amount).toNumber(),
                   result,
                   userTier,
                 },

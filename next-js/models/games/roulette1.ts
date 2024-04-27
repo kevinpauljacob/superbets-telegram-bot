@@ -23,6 +23,10 @@ const roulette1Schema = new mongoose.Schema(
       type: String,
       required: false,
     },
+    houseEdge: {
+      type: Number,
+      required: true,
+    },
     amountWon: {
       type: Number,
       required: true,

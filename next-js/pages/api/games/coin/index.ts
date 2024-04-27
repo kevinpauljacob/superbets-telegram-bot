@@ -9,7 +9,7 @@ import {
   seedStatus,
 } from "@/utils/provably-fair";
 import StakingUser from "@/models/staking/user";
-import { pointTiers } from "@/context/transactions";
+import { houseEdgeTiers, pointTiers } from "@/context/transactions";
 import { Decimal } from "decimal.js";
 Decimal.set({ precision: 9 });
 
@@ -72,6 +72,13 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           .status(400)
           .json({ success: false, message: "Insufficient balance !" });
 
+      const userData = await StakingUser.findOne({ wallet });
+      let points = userData?.points ?? 0;
+      const userTier = Object.entries(pointTiers).reduce((prev, next) => {
+        return points >= next[1]?.limit ? next : prev;
+      })[0];
+      const houseEdge = houseEdgeTiers[parseInt(userTier)];
+
       const activeGameSeed = await GameSeed.findOneAndUpdate(
         {
           wallet,
@@ -108,7 +115,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         (flipType === "tails" && strikeNumber === 2)
       ) {
         result = "Won";
-        amountWon = Decimal.mul(amount, strikeMultiplier);
+        amountWon = Decimal.mul(amount, strikeMultiplier).mul(
+          Decimal.sub(1, houseEdge),
+        );
         amountLost = 0;
       }
 
@@ -144,6 +153,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         strikeMultiplier,
         result,
         tokenMint,
+        houseEdge,
         amountWon,
         amountLost,
         nonce,
@@ -151,12 +161,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       });
 
       if (result === "Won") {
-        const userData = await StakingUser.findOne({ wallet });
-        let points = userData?.points ?? 0;
-        const userTier = Object.entries(pointTiers).reduce((prev, next) => {
-          return points >= next[1]?.limit ? next : prev;
-        })[0];
-
         const socket = new WebSocket(wsEndpoint);
 
         socket.onopen = () => {

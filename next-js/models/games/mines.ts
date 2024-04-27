@@ -18,8 +18,9 @@ const minesSchema = new mongoose.Schema(
     strikeNumbers: Array<Number>,
     tokenMint: {
       type: String,
-      required: true,
+      required: false,
     },
+    houseEdge: Number,
     result: {
       type: String,
       enum: ["Won", "Lost", "Pending"],
