@@ -5,12 +5,6 @@ import { useWallet } from "@solana/wallet-adapter-react";
 import { GameType } from "@/utils/provably-fair";
 import { useGlobalContext } from "./GlobalContext";
 import { useSession } from "next-auth/react";
-import RollDiceProvablyFairModal from "./games/Dice/DiceProvablyFairModal";
-import Dice2ProvablyFairModal from "./games/Dice2/Dice2ProvablyFairModal";
-import CoinFlipProvablyFairModal from "./games/CoinFlip/CoinFlipProvablyFairModal";
-import LimboProvablyFairModal from "./games/Limbo/LimboProvablyFairModal";
-import WheelProvablyFairModal from "./games/Wheel/WheelProvablyFairModal";
-import KenoProvablyFairModal from "./games/Keno/KenoProvablyFairModal";
 
 export default function GameHeader() {
   const { data: session, status } = useSession();
@@ -19,46 +13,7 @@ export default function GameHeader() {
   const router = useRouter();
   const game = router.pathname.split("/")[1];
 
-  const { coinData, getProvablyFairData } = useGlobalContext();
-
-  //Provably Fair Modal handling
-  const [isOpen, setIsOpen] = useState(false);
-
-  const openModal = () => {
-    setIsOpen(true);
-  };
-
-  const closeModal = () => {
-    setIsOpen(false);
-  };
-
-  const [modalData, setModalData] = useState({
-    activeGameSeed: {
-      wallet: "",
-      clientSeed: "",
-      serverSeed: "",
-      serverSeedHash: "",
-      nonce: 0,
-      status: "",
-    },
-    nextGameSeed: {
-      wallet: "",
-      clientSeed: "",
-      serverSeed: "",
-      serverSeedHash: "",
-      nonce: 0,
-      status: "",
-    },
-  });
-
-  useEffect(() => {
-    (async () => {
-      if (wallet?.publicKey && session?.user) {
-        const pfData = await getProvablyFairData();
-        if (pfData) setModalData(pfData);
-      }
-    })();
-  }, [wallet.publicKey, session?.user]);
+  const { coinData, getProvablyFairData, setOpenPFModal } = useGlobalContext();
 
   useEffect(() => {
     const fetchGameData = (game: GameType) => {
@@ -159,65 +114,24 @@ export default function GameHeader() {
               {selectedGame.stats?.players}
             </p>
           </div>
-          <div className="flex items-center gap-2 mx-1.5 my-1 ">
-            <p
-              className="underline text-[#94A3B8] decoration-[#94A3B8] underline-offset-2 hover:cursor-pointer text-xs font-medium"
-              onClick={openModal}
-            >
-              Provably Fair
-            </p>
-            <Image
-              src={"/assets/fair.png"}
-              alt="Fairness"
-              width={20}
-              height={20}
-            />
-          </div>
+          {!router.pathname.includes("options") && (
+            <div className="flex items-center gap-2 mx-1.5 my-1 ">
+              <p
+                className="underline text-[#94A3B8] decoration-[#94A3B8] underline-offset-2 hover:cursor-pointer text-xs font-medium"
+                onClick={() => setOpenPFModal(true)}
+              >
+                Provably Fair
+              </p>
+              <Image
+                src={"/assets/fair.png"}
+                alt="Fairness"
+                width={20}
+                height={20}
+              />
+            </div>
+          )}
         </div>
       </div>
-      {game === GameType.coin ? (
-        <CoinFlipProvablyFairModal
-          isOpen={isOpen}
-          onClose={closeModal}
-          modalData={modalData}
-          setModalData={setModalData}
-        />
-      ) : game === GameType.dice ? (
-        <RollDiceProvablyFairModal
-          isOpen={isOpen}
-          onClose={closeModal}
-          modalData={modalData}
-          setModalData={setModalData}
-        />
-      ) : game === GameType.dice2 ? (
-        <Dice2ProvablyFairModal
-          isOpen={isOpen}
-          onClose={closeModal}
-          modalData={modalData}
-          setModalData={setModalData}
-        />
-      ) : game === GameType.limbo ? (
-        <LimboProvablyFairModal
-          isOpen={isOpen}
-          onClose={closeModal}
-          modalData={modalData}
-          setModalData={setModalData}
-        />
-      ) : game === GameType.wheel ? (
-        <WheelProvablyFairModal
-          isOpen={isOpen}
-          onClose={closeModal}
-          modalData={modalData}
-          setModalData={setModalData}
-        />
-      ) : game === GameType.keno ? (
-        <KenoProvablyFairModal
-          isOpen={isOpen}
-          onClose={closeModal}
-          modalData={modalData}
-          setModalData={setModalData}
-        />
-      ) : null}
     </div>
   ) : null;
 }

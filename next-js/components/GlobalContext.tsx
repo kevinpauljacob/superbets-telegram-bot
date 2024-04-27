@@ -88,6 +88,9 @@ interface GlobalContextProps {
   sidebar: boolean;
   setSidebar: React.Dispatch<React.SetStateAction<boolean>>;
 
+  openPFModal: boolean;
+  setOpenPFModal: React.Dispatch<React.SetStateAction<boolean>>;
+
   //configure auto
   showAutoModal: boolean;
   setShowAutoModal: React.Dispatch<React.SetStateAction<boolean>>;
@@ -159,10 +162,12 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
     },
   ]);
   const [showWalletModal, setShowWalletModal] = useState<boolean>(false);
-  const [isVerifyModalOpen, setIsVerifyModalOpen] = useState(false);
+  const [isVerifyModalOpen, setIsVerifyModalOpen] = useState<boolean>(false);
   const [verifyModalData, setVerifyModalData] = useState({});
 
   const [sidebar, setSidebar] = useState<boolean>(false);
+
+  const [openPFModal, setOpenPFModal] = useState<boolean>(false);
 
   // configure auto
   const [showAutoModal, setShowAutoModal] = useState<boolean>(false);
@@ -325,6 +330,8 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
         setVerifyModalData,
         sidebar,
         setSidebar,
+        openPFModal,
+        setOpenPFModal,
         showAutoModal,
         setShowAutoModal,
         autoWinChange,

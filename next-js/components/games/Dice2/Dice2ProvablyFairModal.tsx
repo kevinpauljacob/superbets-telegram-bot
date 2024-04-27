@@ -86,10 +86,13 @@ export default function RollDiceProvablyFairModal({
     setState(newState);
   };
 
-  const handleClose = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (e.target === e.currentTarget) {
-      onClose();
-    }
+  const handleClose = () => {
+    //@ts-ignore
+    document.addEventListener("click", function (event) {
+      //@ts-ignore
+      var targetId = event.target.id;
+      if (targetId && targetId === "pf-modal-bg") onClose();
+    });
   };
 
   useEffect(() => {
@@ -146,31 +149,33 @@ export default function RollDiceProvablyFairModal({
   return (
     <>
       {isOpen && (
-        <div className="fixed inset-0 flex items-center justify-center z-50">
-          <div
-            className="absolute inset-0 bg-[#33314680] backdrop-blur-[0px] transition-all"
-            onClick={handleClose}
-          ></div>
-          <div className="bg-[#121418] p-8 rounded-lg z-10 w-11/12 sm:w-[600px]">
-            <div className="font-changa text-[1.75rem] font-semibold text-[#F0F0F0]">
-              Provably Fair
+        <div
+          onClick={() => {
+            handleClose();
+          }}
+          id="pf-modal-bg"
+          className="absolute z-[150] left-0 top-0 flex h-full w-full items-center justify-center bg-[#33314680] backdrop-blur-[0px] transition-all"
+        >
+          <div className="bg-[#121418] max-h-[80vh] no-scrollbar overflow-y-scroll p-8 rounded-lg z-10 w-11/12 sm:w-[32rem]">
+            <div className="font-chakra tracking-wider text-2xl font-semibold text-[#F0F0F0]">
+              PROVABLY FAIR
             </div>
-            <div className="my-4 flex w-full items-center justify-center">
+            <div className="w-full flex mt-8 mb-6">
               <button
-                className={`px-4 py-2 mr-2 w-full text-white rounded-md ${
+                className={`w-full border-2 hover:duration-75 rounded-md py-2 mr-1 text-white font-semibold text-sm transition duration-300 ease-in-out ${
                   state === "seeds"
-                    ? "bg-[#D9D9D9] bg-opacity-5"
-                    : "border-2 border-opacity-5 border-[#FFFFFF]"
+                    ? "bg-[#d9d9d90d] border-transparent text-opacity-90"
+                    : "border-[#d9d9d90d] hover:bg-[#9361d1] focus:bg-[#602E9E] text-opacity-50 hover:text-opacity-90"
                 }`}
                 onClick={() => handleToggleState("seeds")}
               >
                 Seeds
               </button>
               <button
-                className={`px-4 py-2 w-full text-white rounded-md ${
+                className={`w-full border-2 hover:duration-75 rounded-md py-2 ml-1 text-white font-semibold text-sm transition-all duration-300 ease-in-out ${
                   state === "verify"
-                    ? "bg-[#D9D9D9] bg-opacity-5"
-                    : "border-2 border-opacity-5 border-[#FFFFFF]"
+                    ? "bg-[#d9d9d90d] border-transparent text-opacity-90"
+                    : "border-[#d9d9d90d] hover:bg-[#9361d1] focus:bg-[#602E9E] text-opacity-50 hover:text-opacity-90"
                 }`}
                 onClick={() => handleToggleState("verify")}
               >
@@ -180,8 +185,8 @@ export default function RollDiceProvablyFairModal({
             {state === "seeds" && (
               <div className="text-white">
                 <div className="">
-                  <div className="mt-2.5">
-                    <label className="text-[13px] font-medium font-changa text-opacity-90 text-[#F0F0F0]">
+                  <div className="mt-3">
+                    <label className="text-xs font-changa text-opacity-90 text-[#F0F0F0]">
                       Active Client Seed
                     </label>
                     <div className="bg-[#202329] mt-1 rounded-md px-4 py-3 w-full relative flex items-center justify-between">
@@ -196,8 +201,8 @@ export default function RollDiceProvablyFairModal({
                       />
                     </div>
                   </div>
-                  <div className="mt-2.5">
-                    <label className="text-[13px] font-medium font-changa text-opacity-90 text-[#F0F0F0]">
+                  <div className="mt-4">
+                    <label className="text-xs font-changa text-opacity-90 text-[#F0F0F0]">
                       Active Server Seed (Hashed)
                     </label>
                     <div className="bg-[#202329] mt-1 rounded-md px-4 py-3 w-full relative flex items-center justify-between">
@@ -214,8 +219,8 @@ export default function RollDiceProvablyFairModal({
                       />
                     </div>
                   </div>
-                  <div className="mt-2.5">
-                    <label className="text-[13px] font-medium font-changa text-opacity-90 text-[#F0F0F0]">
+                  <div className="mt-4">
+                    <label className="text-xs font-changa text-opacity-90 text-[#F0F0F0]">
                       Total Bets
                     </label>
                     <input
@@ -228,12 +233,12 @@ export default function RollDiceProvablyFairModal({
                   </div>
                 </div>
                 <div>
-                  <div className="font-changa text-[1.60rem] font-semibold text-white my-4">
+                  <div className="font-chakra mt-8 tracking-wider text-xl font-semibold text-[#F0F0F0]">
                     Rotate Seed Pair
                   </div>
-                  <div className="">
+                  <div className="mt-2">
                     <div>
-                      <label className="text-[13px] font-medium font-changa text-opacity-90 text-[#F0F0F0]">
+                      <label className="text-xs font-changa text-opacity-90 text-[#F0F0F0]">
                         New Client Seed *
                       </label>
                       <div className="mt-1 flex items-center justify-end gap-4">
@@ -252,7 +257,7 @@ export default function RollDiceProvablyFairModal({
                       </div>
                     </div>
                     <div className="mt-5">
-                      <label className="text-[13px] font-medium font-changa text-opacity-90 text-[#F0F0F0]">
+                      <label className="text-xs font-changa text-opacity-90 text-[#F0F0F0]">
                         Next Server Seed
                       </label>
                       <div className="bg-[#202329] mt-1 rounded-md px-4 py-3 w-full relative flex items-center justify-between">

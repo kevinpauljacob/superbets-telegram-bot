@@ -24,6 +24,13 @@ import { Wheel } from "./games/Wheel/HistoryTable";
 import { Keno } from "./games/Keno/HistoryTable";
 import { GameType } from "@/utils/provably-fair";
 import ConfigureAutoModal from "./games/ConfigureAutoModal";
+import RollDiceProvablyFairModal from "./games/Dice/DiceProvablyFairModal";
+import Dice2ProvablyFairModal from "./games/Dice2/Dice2ProvablyFairModal";
+import CoinFlipProvablyFairModal from "./games/CoinFlip/CoinFlipProvablyFairModal";
+import LimboProvablyFairModal from "./games/Limbo/LimboProvablyFairModal";
+import WheelProvablyFairModal from "./games/Wheel/WheelProvablyFairModal";
+import KenoProvablyFairModal from "./games/Keno/KenoProvablyFairModal";
+import { useWallet } from "@solana/wallet-adapter-react";
 
 interface LayoutProps {
   children: ReactNode;
@@ -31,6 +38,7 @@ interface LayoutProps {
 
 export default function Layout({ children }: LayoutProps) {
   const router = useRouter();
+  const wallet = useWallet();
   const game = router.pathname.split("/")[1];
   const { data: session, status } = useSession();
 
@@ -49,10 +57,49 @@ export default function Layout({ children }: LayoutProps) {
     sidebar,
     setSidebar,
     setStartAuto,
+    openPFModal,
+    setOpenPFModal,
+    getProvablyFairData,
   } = useGlobalContext();
+
+  const [modalData, setModalData] = useState({
+    activeGameSeed: {
+      wallet: "",
+      clientSeed: "",
+      serverSeed: "",
+      serverSeedHash: "",
+      nonce: 0,
+      status: "",
+    },
+    nextGameSeed: {
+      wallet: "",
+      clientSeed: "",
+      serverSeed: "",
+      serverSeedHash: "",
+      nonce: 0,
+      status: "",
+    },
+  });
+
+  useEffect(() => {
+    (async () => {
+      if (wallet?.publicKey && session?.user) {
+        const pfData = await getProvablyFairData();
+        if (pfData) setModalData(pfData);
+      }
+    })();
+  }, [wallet.publicKey, session?.user]);
 
   const toggleSidebar = () => {
     setSidebar(!sidebar);
+  };
+
+  const openPfModal = () => {
+    setOpenPFModal(true);
+  };
+
+  const closePfModal = () => {
+    setOpenPFModal(false);
   };
 
   useEffect(() => {
@@ -73,10 +120,10 @@ export default function Layout({ children }: LayoutProps) {
       <section className="relative flex flex-1 max-h-[calc(100vh-6.25rem)]">
         <Sidebar sidebar={sidebar} setSidebar={setSidebar} />
         <section className="w-full relative overflow-hidden">
-          <MobileSidebar mobileSidebar={sidebar} setSidebar={setSidebar}/>
+          <MobileSidebar mobileSidebar={sidebar} setSidebar={setSidebar} />
           <section className="w-full h-full">
             <SubHeader />
-    
+
             <main className="marker:w-full h-full md:pt-[4.5%] lg:pt-0 max-h-[calc(100vh-1rem)] lg:max-h-[calc(100vh-11rem)]">
               <section className="w-full h-full overflow-y-auto no-scrollbar">
                 {children}
@@ -90,6 +137,7 @@ export default function Layout({ children }: LayoutProps) {
       </div>
       {showWalletModal && <BalanceModal />}
 
+      {/* verify modals  */}
       {game === GameType.coin ? (
         <VerifyFlipModal
           isOpen={isVerifyModalOpen}
@@ -127,6 +175,52 @@ export default function Layout({ children }: LayoutProps) {
           modalData={{ bet: (verifyModalData as Keno)! }}
         />
       ) : null}
+
+      {/* pf modals  */}
+      {game === GameType.coin ? (
+        <CoinFlipProvablyFairModal
+          isOpen={openPFModal}
+          onClose={closePfModal}
+          modalData={modalData}
+          setModalData={setModalData}
+        />
+      ) : game === GameType.dice ? (
+        <RollDiceProvablyFairModal
+          isOpen={openPFModal}
+          onClose={closePfModal}
+          modalData={modalData}
+          setModalData={setModalData}
+        />
+      ) : game === GameType.dice2 ? (
+        <Dice2ProvablyFairModal
+          isOpen={openPFModal}
+          onClose={closePfModal}
+          modalData={modalData}
+          setModalData={setModalData}
+        />
+      ) : game === GameType.limbo ? (
+        <LimboProvablyFairModal
+          isOpen={openPFModal}
+          onClose={closePfModal}
+          modalData={modalData}
+          setModalData={setModalData}
+        />
+      ) : game === GameType.wheel ? (
+        <WheelProvablyFairModal
+          isOpen={openPFModal}
+          onClose={closePfModal}
+          modalData={modalData}
+          setModalData={setModalData}
+        />
+      ) : game === GameType.keno ? (
+        <KenoProvablyFairModal
+          isOpen={openPFModal}
+          onClose={closePfModal}
+          modalData={modalData}
+          setModalData={setModalData}
+        />
+      ) : null}
+
       <ConfigureAutoModal />
     </>
   );

@@ -238,8 +238,8 @@ export default function WheelProvablyFairModal({
             {state === "seeds" && (
               <div className="text-white">
                 <div className="">
-                  <div className="mt-2.5">
-                    <label className="text-[13px] font-medium font-changa text-opacity-90 text-[#F0F0F0]">
+                  <div className="mt-3">
+                    <label className="text-xs font-changa text-opacity-90 text-[#F0F0F0]">
                       Active Client Seed
                     </label>
                     <div className="bg-[#202329] mt-1 rounded-md px-4 py-3 w-full relative flex items-center justify-between">
@@ -254,8 +254,8 @@ export default function WheelProvablyFairModal({
                       />
                     </div>
                   </div>
-                  <div className="mt-2.5">
-                    <label className="text-[13px] font-medium font-changa text-opacity-90 text-[#F0F0F0]">
+                  <div className="mt-4">
+                    <label className="text-xs font-changa text-opacity-90 text-[#F0F0F0]">
                       Active Server Seed (Hashed)
                     </label>
                     <div className="bg-[#202329] mt-1 rounded-md px-4 py-3 w-full relative flex items-center justify-between">
@@ -272,8 +272,8 @@ export default function WheelProvablyFairModal({
                       />
                     </div>
                   </div>
-                  <div className="mt-2.5">
-                    <label className="text-[13px] font-medium font-changa text-opacity-90 text-[#F0F0F0]">
+                  <div className="mt-4">
+                    <label className="text-xs font-changa text-opacity-90 text-[#F0F0F0]">
                       Total Bets
                     </label>
                     <input
@@ -286,12 +286,12 @@ export default function WheelProvablyFairModal({
                   </div>
                 </div>
                 <div>
-                  <div className="font-changa text-[1.60rem] font-semibold text-white my-4">
+                  <div className="font-chakra mt-8 tracking-wider text-xl font-semibold text-[#F0F0F0]">
                     Rotate Seed Pair
                   </div>
-                  <div className="">
+                  <div className="mt-2">
                     <div>
-                      <label className="text-[13px] font-medium font-changa text-opacity-90 text-[#F0F0F0]">
+                      <label className="text-xs font-changa text-opacity-90 text-[#F0F0F0]">
                         New Client Seed *
                       </label>
                       <div className="mt-1 flex items-center justify-end gap-4">
@@ -310,7 +310,7 @@ export default function WheelProvablyFairModal({
                       </div>
                     </div>
                     <div className="mt-5">
-                      <label className="text-[13px] font-medium font-changa text-opacity-90 text-[#F0F0F0]">
+                      <label className="text-xs font-changa text-opacity-90 text-[#F0F0F0]">
                         Next Server Seed
                       </label>
                       <div className="bg-[#202329] mt-1 rounded-md px-4 py-3 w-full relative flex items-center justify-between">
