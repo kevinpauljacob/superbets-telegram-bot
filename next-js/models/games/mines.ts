@@ -16,6 +16,10 @@ const minesSchema = new mongoose.Schema(
     },
     userBets: Array<Number>,
     strikeNumbers: Array<Number>,
+    stirkeMultiplier: {
+      type: Number,
+      required: true,
+    },
     tokenMint: {
       type: String,
       required: false,

@@ -62,8 +62,15 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           .status(400)
           .json({ success: false, message: "Game does not exist !" });
 
-      let { nonce, gameSeed, userBets, startNumber, amount, amountWon } =
-        gameInfo;
+      let {
+        nonce,
+        gameSeed,
+        userBets,
+        startNumber,
+        amount,
+        amountWon,
+        strikeMultiplier,
+      } = gameInfo;
 
       const strikeNumbers = generateGameResult(
         gameSeed.serverSeed,
@@ -75,6 +82,30 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
       let result = "Pending";
       const currentIndex = userBets.length + 1;
+
+      const userData = await StakingUser.findOne({ wallet });
+      let points = userData?.points ?? 0;
+      const userTier = Object.entries(pointTiers).reduce((prev, next) => {
+        return points >= next[1]?.limit ? next : prev;
+      })[0];
+      const houseEdge = houseEdgeTiers[parseInt(userTier)];
+
+      let winChance = 0;
+      for (let i = 1; i <= 52; ++i) {
+        if (strikeNumbers.slice(0, currentIndex).includes(i)) continue;
+
+        if (
+          (userBet === "Higher" &&
+            i % 13 >= strikeNumbers[currentIndex - 1] % 13) ||
+          (userBet === "Lower" &&
+            i % 13 <= strikeNumbers[currentIndex - 1] % 13)
+        )
+          winChance++;
+      }
+
+      strikeMultiplier = Decimal.mul(strikeMultiplier, 52 - currentIndex)
+        .div(winChance)
+        .toNumber();
 
       if (
         !(
@@ -97,6 +128,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
             result,
             user,
             strikeNumbers,
+            strikeMultiplier,
             amountWon: 0,
             amountLost: gameInfo.amount,
             $push: {
@@ -105,33 +137,12 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           },
         );
       } else {
-        amountWon = Math.max(amount, amountWon);
-
-        let winChance = 0;
-        for (let i = 1; i <= 52; ++i) {
-          if (strikeNumbers.slice(0, currentIndex).includes(i)) continue;
-
-          if (
-            (userBet === "Higher" &&
-              i % 13 >= strikeNumbers[currentIndex - 1] % 13) ||
-            (userBet === "Lower" &&
-              i % 13 <= strikeNumbers[currentIndex - 1] % 13)
-          )
-            winChance++;
-        }
-
-        amountWon = Decimal.mul(amountWon, 52 - currentIndex)
-          .div(winChance)
-          .toNumber();
+        amountWon = Decimal.mul(
+          Math.max(amount, amountWon),
+          strikeMultiplier,
+        ).toNumber();
 
         if (currentIndex + 1 === 52) {
-          const userData = await StakingUser.findOne({ wallet });
-          let points = userData?.points ?? 0;
-          const userTier = Object.entries(pointTiers).reduce((prev, next) => {
-            return points >= next[1]?.limit ? next : prev;
-          })[0];
-          const houseEdge = houseEdgeTiers[parseInt(userTier)];
-
           amountWon = Decimal.mul(
             amountWon,
             Decimal.sub(1, houseEdge),
@@ -170,33 +181,13 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
             {
               result,
               amountWon,
+              strikeMultiplier,
               houseEdge,
               $push: {
                 userBets: userBet,
               },
             },
           );
-
-          const socket = new WebSocket(wsEndpoint);
-
-          socket.onopen = () => {
-            socket.send(
-              JSON.stringify({
-                clientType: "api-client",
-                channel: "fomo-casino_games-channel",
-                authKey: process.env.FOMO_CHANNEL_AUTH_KEY!,
-                payload: {
-                  game: GameType.hilo,
-                  wallet,
-                  absAmount: Decimal.sub(amountWon, amount).toNumber(),
-                  result,
-                  userTier,
-                },
-              }),
-            );
-
-            socket.close();
-          };
         } else {
           await Hilo.findOneAndUpdate(
             {
@@ -205,12 +196,39 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
             },
             {
               amountWon,
+              strikeMultiplier,
               $push: {
                 userBets: userBet,
               },
             },
           );
         }
+      }
+
+      if (result !== "Pending") {
+        const socket = new WebSocket(wsEndpoint);
+
+        socket.onopen = () => {
+          socket.send(
+            JSON.stringify({
+              clientType: "api-client",
+              channel: "fomo-casino_games-channel",
+              authKey: process.env.FOMO_CHANNEL_AUTH_KEY!,
+              payload: {
+                game: GameType.hilo,
+                wallet,
+                result,
+                userTier,
+                time: new Date(),
+                strikeMultiplier,
+                amount,
+                amountWon,
+              },
+            }),
+          );
+
+          socket.close();
+        };
       }
 
       return res.status(201).json({
