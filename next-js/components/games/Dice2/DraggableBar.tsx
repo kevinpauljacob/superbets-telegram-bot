@@ -1,4 +1,16 @@
+import { soundAlert } from "@/utils/soundUtils";
 import React, { useState, useEffect, useRef, RefObject } from "react";
+
+function debounce(func: any, timeout = 100) {
+  let timer: any;
+  return (...args: any[]) => {
+    clearTimeout(timer);
+    timer = setTimeout(() => {
+      //@ts-ignore
+      func.apply(this, args);
+    }, timeout);
+  };
+}
 
 type ProgressBarProps = {
   choice: number;
@@ -25,7 +37,10 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
   const strikeNumberRef: RefObject<HTMLDivElement> =
     useRef<HTMLDivElement>(null);
 
+  const sliderMove = debounce(() => soundAlert("/sounds/slider.wav"))
+
   useEffect(() => {
+    sliderMove()
     if (progressBarRef.current && indicatorsRef.current) {
       indicatorsRef.current.style.width = `${progressBarRef.current.clientWidth}px`;
       alignIndicators(); // Call function to align indicators

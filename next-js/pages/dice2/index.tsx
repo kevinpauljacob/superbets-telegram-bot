@@ -21,6 +21,7 @@ import BetAmount from "@/components/games/BetAmountInput";
 import BetButton from "@/components/games/BetButton";
 import ResultsSlider from "@/components/ResultsSlider";
 import showInfoToast from "@/components/games/toasts/toasts";
+import { loopSound, soundAlert } from "@/utils/soundUtils";
 
 export default function Dice2() {
   const wallet = useWallet();
@@ -178,10 +179,11 @@ export default function Dice2() {
           throw new Error(message);
         }
 
-        if (result === "Won") toast.success(message, { duration: 2000 });
-        else toast.error(message, { duration: 2000 });
-
         const win = result === "Won";
+        if (win) {
+          toast.success(message, { duration: 2000 });
+          soundAlert("/sounds/win.wav");
+        } else toast.error(message, { duration: 2000 });
         const newBetResult = { result: strikeNumber, win };
 
         setBetResults((prevResults) => {
@@ -195,6 +197,7 @@ export default function Dice2() {
         setStrikeNumber(strikeNumber);
         setResult(win);
         setRefresh(true);
+        loopSound("/sounds/diceshake.wav", 0.3);
 
         // auto options
         if (betType === "auto") {
