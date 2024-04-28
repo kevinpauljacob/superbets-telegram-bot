@@ -8,6 +8,7 @@ import { useEffect, useState } from "react";
 import { Dice } from "./HistoryTable";
 import toast from "react-hot-toast";
 import { FaRegCopy } from "react-icons/fa6";
+import CheckPF from "@/public/assets/CheckPF.svg"
 
 export interface PFModalData {
   activeGameSeed: {
@@ -58,15 +59,15 @@ export default function RollDiceProvablyFairModal({
   }>(
     bet?.gameSeed
       ? {
-          clientSeed: bet.gameSeed?.clientSeed,
-          serverSeed: bet.gameSeed?.serverSeed ?? "",
-          nonce: bet.nonce?.toString() ?? "",
-        }
+        clientSeed: bet.gameSeed?.clientSeed,
+        serverSeed: bet.gameSeed?.serverSeed ?? "",
+        nonce: bet.nonce?.toString() ?? "",
+      }
       : {
-          clientSeed: "",
-          serverSeed: "",
-          nonce: "",
-        },
+        clientSeed: "",
+        serverSeed: "",
+        nonce: "",
+      },
   );
 
   useEffect(() => {
@@ -156,27 +157,26 @@ export default function RollDiceProvablyFairModal({
           id="pf-modal-bg"
           className="absolute z-[150] left-0 top-0 flex h-full w-full items-center justify-center bg-[#33314680] backdrop-blur-[0px] transition-all"
         >
-          <div className="bg-[#121418] p-8 rounded-lg z-10 w-11/12 sm:w-[600px]">
-            <div className="font-changa text-[1.75rem] font-semibold text-[#F0F0F0]">
-              Provably Fair
+          <div className="bg-[#121418] max-h-[80vh] no-scrollbar overflow-y-scroll p-8 rounded-lg z-10 w-11/12 sm:w-[32rem]">
+            <div className="flex font-chakra tracking-wider text-2xl font-semibold text-[#F0F0F0] gap-2 items-start">
+              <Image src={CheckPF} alt="" />
+              PROVABLY FAIR
             </div>
             <div className="w-full flex mt-8 mb-6">
               <button
-                className={`w-full border-2 hover:duration-75 rounded-md py-2 mr-1 text-white font-semibold text-sm transition duration-300 ease-in-out ${
-                  state === "seeds"
+                className={`w-full border-2 hover:duration-75 rounded-md py-2 mr-1 text-white font-semibold text-sm transition duration-300 ease-in-out ${state === "seeds"
                     ? "bg-[#d9d9d90d] border-transparent text-opacity-90"
                     : "border-[#d9d9d90d] hover:bg-[#9361d1] focus:bg-[#602E9E] text-opacity-50 hover:text-opacity-90"
-                }`}
+                  }`}
                 onClick={() => handleToggleState("seeds")}
               >
                 Seeds
               </button>
               <button
-                className={`w-full border-2 hover:duration-75 rounded-md py-2 ml-1 text-white font-semibold text-sm transition-all duration-300 ease-in-out ${
-                  state === "verify"
+                className={`w-full border-2 hover:duration-75 rounded-md py-2 ml-1 text-white font-semibold text-sm transition-all duration-300 ease-in-out ${state === "verify"
                     ? "bg-[#d9d9d90d] border-transparent text-opacity-90"
                     : "border-[#d9d9d90d] hover:bg-[#9361d1] focus:bg-[#602E9E] text-opacity-50 hover:text-opacity-90"
-                }`}
+                  }`}
                 onClick={() => handleToggleState("verify")}
               >
                 Verify
@@ -241,15 +241,15 @@ export default function RollDiceProvablyFairModal({
                       <label className="text-xs font-changa text-opacity-90 text-[#F0F0F0]">
                         New Client Seed *
                       </label>
-                      <div className="mt-1 flex items-center justify-end gap-4">
+                      <div className="mt-1 w-full flex items-center justify-end gap-4 bg-[#202329] rounded-md">
                         <input
                           value={newClientSeed}
                           type="text"
                           onChange={(e) => setNewClientSeed(e.target.value)}
-                          className="bg-[#202329] text-[#B9B9BA] text-xs font-semibold mt-1 rounded-md px-4 py-3 w-full relative flex items-center justify-between"
+                          className="bg-[#202329] text-[#B9B9BA] text-xs font-semibold rounded-md px-5 py-4 w-full relative flex items-center justify-between"
                         />
                         <button
-                          className="flex items-center justify-center h-full px-4 py-2 my-auto bg-[#7839C5] text-white rounded-md"
+                          className="flex items-center justify-center h-full mx-2 px-5 py-1 my-auto bg-[#7839C5] text-white rounded-md font-bold text-sm"
                           onClick={handleSetClientSeed}
                         >
                           Change
@@ -324,9 +324,8 @@ export default function RollDiceProvablyFairModal({
                                   width={50}
                                   height={50}
                                   alt=""
-                                  className={`inline-block mt-6 ${
-                                    wonDiceFace === face ? "selected-face" : ""
-                                  }`}
+                                  className={`inline-block mt-6 ${wonDiceFace === face ? "selected-face" : ""
+                                    }`}
                                 />
                               </div>
                             ),
@@ -349,7 +348,7 @@ export default function RollDiceProvablyFairModal({
                             game: e.target.value as GameType,
                           }))
                         }
-                        className="bg-[#202329] text-white font-chakra text-xs font-medium mt-1 rounded-md p-3 w-full relative appearance-none"
+                        className="bg-[#202329] text-white font-chakra text-xs font-medium mt-1 rounded-md px-5 py-4 w-full relative appearance-none"
                       >
                         <option value={GameType.dice}>Dice</option>
                       </select>
@@ -364,7 +363,7 @@ export default function RollDiceProvablyFairModal({
                       name="clientSeed"
                       value={verificationState.clientSeed}
                       onChange={handleChange}
-                      className="bg-[#202329] text-white font-chakra text-xs font-medium mt-1 rounded-md p-3 w-full relative"
+                      className="bg-[#202329] text-white font-chakra text-xs font-medium mt-1 rounded-md px-5 py-4 w-full relative"
                     />
                   </div>
                   <div>
@@ -376,7 +375,7 @@ export default function RollDiceProvablyFairModal({
                       name="serverSeed"
                       value={verificationState.serverSeed}
                       onChange={handleChange}
-                      className="bg-[#202329] text-white font-chakra text-xs font-medium mt-1 rounded-md p-3 w-full relative"
+                      className="bg-[#202329] text-white font-chakra text-xs font-medium mt-1 rounded-md px-5 py-4 w-full relative"
                     />
                   </div>
                   <div>
@@ -388,7 +387,7 @@ export default function RollDiceProvablyFairModal({
                       name="nonce"
                       value={verificationState.nonce}
                       onChange={handleChange}
-                      className="bg-[#202329] text-white font-chakra text-xs font-medium mt-1 rounded-md p-3 w-full relative"
+                      className="bg-[#202329] text-white font-chakra text-xs font-medium mt-1 rounded-md px-5 py-4 w-full relative"
                     />
                   </div>
                 </div>
