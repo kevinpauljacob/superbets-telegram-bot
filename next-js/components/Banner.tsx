@@ -28,10 +28,9 @@ export default function StoreBanner() {
           <Link href={game.href} className="bg-white mx-4">
             <Image
               src={game.src}
-              alt=""
+              alt="banners"
               width="100"
               height="100"
-              unoptimized
               className="w-[95%] mr-3.5"
             />
           </Link>
