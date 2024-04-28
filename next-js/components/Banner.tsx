@@ -31,6 +31,7 @@ export default function StoreBanner() {
               alt="banners"
               width="100"
               height="100"
+              unoptimized
               className="w-[95%] mr-3.5"
             />
           </Link>
