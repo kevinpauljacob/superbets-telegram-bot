@@ -3,7 +3,6 @@ let alertInstance: HTMLAudioElement | null = null;
 export function soundAlert(audioFilePath: string) {
   alertInstance = new Audio(audioFilePath);
   alertInstance.addEventListener("ended", () => {
-    console.log("clearing ref");
     alertInstance = null;
   });
   if (alertInstance) {
@@ -22,7 +21,6 @@ export function loopSound(audioFilePath: string, duration: number) {
     }, loopInstance.duration * 1000);
 
     setTimeout(() => {
-      console.log("clearing");
       loopInstance=null
       clearInterval(interval);
     }, duration * 1000);

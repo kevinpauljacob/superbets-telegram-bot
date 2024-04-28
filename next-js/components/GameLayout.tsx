@@ -73,13 +73,13 @@ export const GameFooterInfo: React.FC<GameFooterProps> = ({
           ) : (
             <></>
           )}
-          
+
           <div className="flex flex-col w-full">
             <span className="text-[#F0F0F0] font-changa font-sembiold text-xs mb-1">
               Winning
             </span>
             <span className="bg-[#202329] font-chakra text-xs text-white rounded-md px-2 md:px-5 py-3">
-              {amount.toFixed(3)} $SOL
+              {amount.toFixed(4)} $SOL
             </span>
           </div>
 

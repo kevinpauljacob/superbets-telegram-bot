@@ -477,7 +477,7 @@ export default function Limbo() {
                 </span>
                 <span className="bg-[#202329] font-chakra text-xs text-white rounded-md px-2 md:px-5 py-3">
                   {betAmt && inputMultiplier
-                    ? (inputMultiplier * betAmt).toFixed(3)
+                    ? (inputMultiplier * betAmt).toFixed(4)
                     : 0.0}{" "}
                   $SOL
                 </span>
@@ -488,7 +488,10 @@ export default function Limbo() {
                   Chance
                 </span>
                 <span className="bg-[#202329] font-chakra text-xs text-white rounded-md px-2 md:px-5 py-3">
-                  {inputMultiplier > 0 ? 100 / inputMultiplier : 0.0}x
+                  {(inputMultiplier > 0 ? 100 / inputMultiplier : 0.0).toFixed(
+                    2,
+                  )}
+                  x
                 </span>
               </div>
             </>
