@@ -18,7 +18,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         createdAt: any;
       }[] = [];
 
-      Object.entries(GameType).forEach(async ([_, value]) => {
+      for (const [_, value] of Object.entries(GameType)) {
         const game = value;
         const model = gameModelMap[game as keyof typeof gameModelMap];
 
@@ -33,7 +33,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         }));
 
         allGames.push(...gameInfo);
-      });
+      }
 
       const sortedGames = allGames
         .sort((a: any, b: any) => {
