@@ -21,6 +21,7 @@ import showInfoToast from "@/components/games/toasts/toasts";
 import ResultsSlider from "@/components/ResultsSlider";
 import Arc from "@/components/games/Wheel/Arc";
 import { riskToChance } from "@/components/games/Wheel/Segments";
+import { soundAlert } from "@/utils/soundUtils";
 
 export default function Wheel() {
   const wallet = useWallet();
@@ -53,6 +54,8 @@ export default function Wheel() {
   const [betType, setBetType] = useState<"manual" | "auto">("manual");
   const [strikeNumber, setStrikeNumber] = useState<number>(0);
   const [strikeMultiplier, setStrikeMultiplier] = useState<number>();
+  const [strikeMultiplierColor, setStrikeMultiplierColor] =
+    useState<string>("#ffffff00");
   const [resultAngle, setResultAngle] = useState<number>(0);
   const [risk, setRisk] = useState<"low" | "medium" | "high">("low");
   const [segments, setSegments] = useState<number>(10);
@@ -93,68 +96,34 @@ export default function Wheel() {
     setRotationAngle(rotationAngle);
   }, [segments]);
 
-  function getRotationDegrees(el: any): number {
-    const style = window.getComputedStyle(el);
-    const transform = style.getPropertyValue("transform");
-    const values = transform.split("(")[1].split(")")[0].split(",");
-    const a = parseFloat(values[0]);
-    const b = parseFloat(values[1]);
-    const angle = Math.round(Math.atan2(b, a) * (180 / Math.PI));
-    return angle < 0 ? 360 + angle : angle;
-  }
+  const getCurrentRotation = () => {
+    if (wheelRef.current) {
+      let transforms = wheelRef.current?.style.getPropertyValue("transform");
+      if (transforms.includes("rotate")) {
+        const match = transforms.match(/rotate\((-?\d+(?:\.\d+)?deg)\)/);
+        if (match) return parseFloat(match[1].slice(0, -3));
+      }
+    }
+
+    return 0;
+  };
 
   const spinWheel = (strikeNumber: number) => {
     const resultAngle = ((strikeNumber - 1) * 360) / 100;
+    const currentTheta = getCurrentRotation();
+    const delta =
+      currentTheta +
+      (currentTheta % 360 === 0 ? 0 : 360 - (currentTheta % 360));
     setResultAngle(resultAngle);
-    console.log("resultAngle", resultAngle);
+    console.log("resultAngle", resultAngle, currentTheta, delta);
     if (wheelRef.current) {
-      // Set initial rotation to zero to ensure it starts from the right position
-
-      // Apply transition for the rotation
       wheelRef.current.style.transition =
-        "transform 2s cubic-bezier(0.4, 0, 0.2, 1)";
-      wheelRef.current.style.transform = `rotate(1080deg)`;
-
-      // // Rotate the wheel clockwise for 3 seconds
-      // wheelRef.current.style.transform = `rotate(1080deg)`;
-
-      // // After 3 seconds, stop the rotation and move to the resultAngle
-      setTimeout(() => {
-        if (wheelRef.current) {
-          console.log("sbsudbsd", 360 - resultAngle);
-          wheelRef.current.style.transition =
-            "transform 1s cubic-bezier(0.4, 0, 0.2, 1)"; // Remove transition to stop animation
-          wheelRef.current.style.transform = `rotate(${360 - resultAngle}deg)`; // Move to the result angle
-        }
-      }, 2000);
+        "transform 3s cubic-bezier(0.4, 0, 0.2, 1)";
+      wheelRef.current.style.transform = `rotate(${
+        delta + 360 + 360 - resultAngle
+      }deg)`;
     }
   };
-
-  // const spinWheel = (strikeNumber: number) => {
-  //   const resultAngle = ((strikeNumber - 1) * 360) / 100;
-  //   setResultAngle(resultAngle);
-  //   console.log("resultAngle", resultAngle);
-  //   if (wheelRef.current) {
-  //     // Set initial rotation to zero to ensure it starts from the right position
-  //     wheelRef.current.style.transform = `rotate(${resultAngle}deg)`;
-
-  //     // Apply transition for the rotation
-  //     wheelRef.current.style.transition =
-  //       "transform 2s cubic-bezier(0.4, 0, 0.2, 1)";
-
-  //     // Rotate the wheel clockwise for 3 seconds
-  //     wheelRef.current.style.transform = `rotate(1080deg)`;
-
-  //     // After 3 seconds, stop the rotation and move to the resultAngle
-  //     setTimeout(() => {
-  //       if (wheelRef.current) {
-  //         console.log("sbsudbsd", 360 - resultAngle)
-  //         wheelRef.current.style.transition = "transform 1s ease-in-out"; // Remove transition to stop animation
-  //         wheelRef.current.style.transform = `rotate(${360 -resultAngle}deg)`; // Move to the result angle
-  //       }
-  //     }, 2000);
-  //   }
-  // };
 
   const handleCountChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
@@ -210,15 +179,23 @@ export default function Wheel() {
           throw new Error(message);
         }
         setIsRolling(false);
-        if (result == "Won") toast.success(message, { duration: 2000 });
-        else toast.error(message, { duration: 2000 });
+        //set strikeMultiplier color
+        const riskObjects = riskToChance[risk];
+        const riskObject = riskObjects.find(
+          (obj) => obj.multiplier === strikeMultiplier,
+        );
+        setStrikeMultiplierColor(riskObject ? riskObject.color : "#ffffff");
+        if (result == "Won") {
+          toast.success(message, { duration: 2000 });
+          soundAlert("/sounds/win.wav");
+        } else toast.error(message, { duration: 2000 });
 
         const win = result === "Won";
         const newBetResult = { result: strikeMultiplier, win };
 
         setBetResults((prevResults) => {
           const newResults = [...prevResults, newBetResult];
-          if (newResults.length > 6) {
+          if (newResults.length > 5) {
             newResults.shift();
           }
           return newResults;
@@ -540,7 +517,7 @@ export default function Wheel() {
           <ResultsSlider results={betResults} align={"vertical"} />
         </div>
         <div className="flex justify-center items-center w-full my-5">
-          <div className="relative  w-[30rem] h-[30rem] flex justify-center">
+          <div className="relative w-[20rem] h-[20rem] md:w-[25rem] md:h-[25rem] flex justify-center">
             <Image
               src="/assets/wheelPointer.svg"
               alt="Pointer"
@@ -548,14 +525,16 @@ export default function Wheel() {
               height={35}
               id="pointer"
               className={`${
-                isRolling ? "-rotate-[20deg] delay-[700ms]" : "rotate-0"
-              } absolute z-50 -top-3 transition-all ease-[cubic-bezier(0.4,0,0.2,1)] duration-500`}
+                isRolling
+                  ? "-rotate-[20deg] delay-[500ms] duration-500"
+                  : "rotate-0 duration-200"
+              } absolute z-50 -top-3 transition-all ease-[cubic-bezier(0.4,0,0.2,1)]`}
             />
             <div
               ref={wheelRef}
               className={`${
                 isRolling ? "" : ""
-              } relative w-[30rem] h-[30rem] rounded-full overflow-hidden`}
+              } relative w-[20rem] h-[20rem] md:w-[25rem] md:h-[25rem] rounded-full overflow-hidden`}
             >
               {typeof window !== "undefined" && (
                 <svg viewBox="0 0 300 300">
@@ -574,8 +553,11 @@ export default function Wheel() {
             </div>
             <div className="absolute z-10 w-[93%] h-[93%] rounded-full border-[0.7rem] border-black/20 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2" />
             <div className="absolute z-20 w-[77%] h-[77%] rounded-full bg-[#828998] bg-opacity-10 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2" />
-            <div className="absolute z-20 w-[71%] h-[71%] rounded-full bg-[#0C0F16] top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-white flex items-center justify-center text-2xl font-semibold font-changa text-opacity-80 ">
-              {strikeMultiplier}
+            <div
+              className={`absolute z-20 w-[71%] h-[71%] rounded-full bg-[#0C0F16] top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-4xl flex items-center justify-center font-semibold font-chakra text-opacity-80`}
+              style={{ color: strikeMultiplierColor }}
+            >
+              {strikeMultiplier}x
             </div>
           </div>
         </div>

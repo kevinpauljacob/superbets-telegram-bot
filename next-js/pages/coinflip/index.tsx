@@ -22,6 +22,7 @@ import BetButton from "@/components/games/BetButton";
 import ResultsSlider from "@/components/ResultsSlider";
 import showInfoToast from "@/components/games/toasts/toasts";
 import BalanceAlert from "@/components/games/BalanceAlert";
+import { soundAlert } from "@/utils/soundUtils";
 
 const Timer = dynamic(() => import("../../components/games/Timer"), {
   ssr: false,
@@ -86,6 +87,7 @@ export default function Flip() {
               : toast.error(response?.message);
 
             const win = response?.data?.result === "Won";
+            if (win) soundAlert("/sounds/win.wav");
             const newBetResult = { result: response?.data?.strikeNumber, win };
 
             setBetResults((prevResults) => {
@@ -132,7 +134,7 @@ export default function Flip() {
             response?.message && toast.error(response?.message);
           }
         },
-        betSetting === "auto" ? 0 : 3000,
+        betSetting === "auto" ? 500 : 3000,
       );
     } catch (e) {
       toast.error("Could not make Flip.");
@@ -184,9 +186,11 @@ export default function Flip() {
         showInfoToast("Loss limit reached.");
         return;
       }
-      setLoading(true);
-      setFlipping(true);
-      bet();
+      setTimeout(() => {
+        setLoading(true);
+        setFlipping(true);
+        bet();
+      }, 500);
     } else {
       setStartAuto(false);
       setAutoBetProfit(0);
@@ -495,8 +499,8 @@ export default function Flip() {
                     ? "z-[100]"
                     : "z-[10]"
                   : betType === "Tails"
-                  ? "z-[100]"
-                  : "z-[10]"
+                  ? "z-[10]"
+                  : "z-[100]"
               }`}
             />
             <Image
@@ -513,8 +517,8 @@ export default function Flip() {
                     ? "z-[100]"
                     : "z-[1]"
                   : betType === "Heads"
-                  ? "z-[100]"
-                  : "z-[1]"
+                  ? "z-[1]"
+                  : "z-[100]"
               }`}
             />
           </div>
