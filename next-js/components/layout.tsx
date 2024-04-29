@@ -83,13 +83,16 @@ export default function Layout({ children }: LayoutProps) {
   });
 
   function resetHeight() {
-    document.body.style.height = window.innerHeight + "px";
+    if (typeof window !== "undefined") {
+      console.log("resetting height")
+      document.body.style.height = window.innerHeight + "px";
+    }
   }
 
   useEffect(() => {
     if (typeof window !== "undefined") {
       window.addEventListener("resize", () => {
-        console.log("resizing");
+        console.log("resizing", window.innerHeight);
         resetHeight();
       });
     }
