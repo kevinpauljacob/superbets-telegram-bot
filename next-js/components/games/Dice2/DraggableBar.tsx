@@ -72,6 +72,11 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
     }
   };
 
+  const debouncedSoundAlert = debounce(() => {
+    soundAlert("/sounds/slider.wav");
+    console.log("debounced");
+  });
+
   // const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
   //   let newValue = parseFloat(e.target.value);
   //   newValue = Math.max(2, Math.min(newValue, 98));
@@ -116,7 +121,7 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
               id="min-slider"
               type="range"
               onChange={(e) => {
-                debounce(() => soundAlert("/sounds/slider.wav"))
+                debouncedSoundAlert();
                 const value = parseInt(e.currentTarget.value);
                 //@ts-ignore
                 document.getElementById("min-slider")!.value =

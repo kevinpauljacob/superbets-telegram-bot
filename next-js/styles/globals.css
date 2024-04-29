@@ -15,13 +15,13 @@
   }
 
   .modalscrollbar::-webkit-scrollbar-track {
-    border-radius: 100vh;
+    border-radius: 100dvh;
     background: #202329;
   }
 
   .modalscrollbar::-webkit-scrollbar-thumb {
     background: #000000;
-    border-radius: 100vh;
+    border-radius: 100dvh;
     border: 3px solid #202329;
   }
 
@@ -48,7 +48,7 @@
 
 html,
 body {
-  max-height: 100vh;
+  max-height: 100dvh;
   padding: 0;
   margin: 0;
   font-family:

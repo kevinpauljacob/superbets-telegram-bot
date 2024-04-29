@@ -123,7 +123,7 @@ export default function Sidebar({
     <div
       className={`${
         mobileSidebar ? "fadeIn fixed" : "fadeOutDown hidden"
-      } top-[6.6rem] z-20 md:hidden bg-[#121418] no-scrollbar overflow-y-auto text-white flex flex-col justify-between w-full h-[calc(100vh-11.2rem)]`}
+      } top-[6.6rem] z-20 md:hidden bg-[#121418] no-scrollbar overflow-y-auto text-white flex flex-col justify-between w-full h-[calc(100dvh-11.2rem)]`}
     >
       <div className="w-full">
         <div
