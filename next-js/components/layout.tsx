@@ -82,29 +82,30 @@ export default function Layout({ children }: LayoutProps) {
     },
   });
 
-  function resetHeight() {
-    if (typeof window !== "undefined") {
-      console.log("resetting height")
-      document.body.style.height = window.innerHeight + "px";
-    }
-  }
+  // function resetHeight() {
+  //   if (typeof window !== "undefined") {
+  //     console.log("resetting height");
+  //     const container = document.getElementById("main-parent");
+  //     if (container) container.style.height = window.innerHeight + "px";
+  //   }
+  // }
 
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      window.addEventListener("resize", () => {
-        console.log("resizing", window.innerHeight);
-        resetHeight();
-      });
-    }
+  // useEffect(() => {
+  //   if (typeof window !== "undefined") {
+  //     window.addEventListener("resize", () => {
+  //       console.log("resizing", window.innerHeight);
+  //       resetHeight();
+  //     });
+  //   }
 
-    return () => {
-      if (typeof window !== "undefined") {
-        window.removeEventListener("resize", () => {});
-      }
-    };
-  }, []);
+  //   return () => {
+  //     if (typeof window !== "undefined") {
+  //       window.removeEventListener("resize", () => {});
+  //     }
+  //   };
+  // }, []);
 
-  resetHeight();
+  // resetHeight();
 
   useEffect(() => {
     //sound pre-loader
