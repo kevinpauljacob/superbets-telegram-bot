@@ -82,6 +82,27 @@ export default function Layout({ children }: LayoutProps) {
     },
   });
 
+  function resetHeight() {
+    document.body.style.height = window.innerHeight + "px";
+  }
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      window.addEventListener("resize", () => {
+        console.log("resizing");
+        resetHeight();
+      });
+    }
+
+    return () => {
+      if (typeof window !== "undefined") {
+        window.removeEventListener("resize", () => {});
+      }
+    };
+  }, []);
+
+  resetHeight();
+
   useEffect(() => {
     //sound pre-loader
     soundAlert("/sounds/betbutton.wav", true);

@@ -204,7 +204,7 @@ export default function Sidebar({
                 sidebar ? "fadeInUp" : "fadeOutDown"
               } w-full flex flex-col p-4`}
             >
-              <SidebarOpenElement text={"Home"} Icon={Home} />
+              <SidebarOpenElement text={"Home"} Icon={Home} link="/"/>
               <div className={`mt-0`}>
                 <div className="w-full transition-all cursor-pointer rounded-md flex items-center justify-between gap-2 pl-4 pr-2 py-2 bg-transparent hover:bg-[#1f2024] focus:bg-[#1f2024] group">
                   <div className="flex items-center gap-2">
@@ -423,12 +423,15 @@ export default function Sidebar({
 export const SidebarOpenElement = ({
   text,
   Icon,
+  link
 }: {
   text: string;
   Icon: any;
+  link?:string
 }) => {
+  const router = useRouter()
   return (
-    <div className="w-full transition-all cursor-pointer rounded-md flex items-center gap-2 pl-4 py-2 bg-transparent hover:bg-[#1f2024] focus:bg-[#1f2024] group">
+    <div onClick={() => {link && router.push(link)}} className="w-full transition-all cursor-pointer rounded-md flex items-center gap-2 pl-4 py-2 bg-transparent hover:bg-[#1f2024] focus:bg-[#1f2024] group">
       <Icon className="w-4 h-4 transition-all text-[#ababac] group-hover:text-[#9945FF] group-focus:text-[#9945FF]" />
       <span className="transition-all text-base font-changa font-light text-white text-opacity-75 group-hover:text-opacity-100 group-focus:text-opacity-100">
         {text}

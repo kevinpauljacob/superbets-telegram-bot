@@ -161,7 +161,7 @@ export default function Sidebar({
             mobileSidebar ? "fadeInUp" : "fadeOutDown"
           } w-full flex flex-col p-4`}
         >
-          <SidebarOpenElement text={"Home"} Icon={Home} />
+          <SidebarOpenElement text={"Home"} Icon={Home} link="/"/>
           <div className={`mt-0`}>
             <div className="w-full transition-all cursor-pointer rounded-md flex items-center justify-between gap-2 pl-4 pr-2 py-2 bg-transparent hover:bg-[#1f2024] focus:bg-[#1f2024] group">
               <div className="flex items-center gap-2">
