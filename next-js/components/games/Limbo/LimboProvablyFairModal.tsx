@@ -8,6 +8,8 @@ import { Limbo } from "./HistoryTable";
 import Image from "next/image";
 import toast from "react-hot-toast";
 import { FaRegCopy } from "react-icons/fa6";
+import { MdCancel } from "react-icons/md";
+import CheckPF from "@/public/assets/CheckPF.svg";
 
 export interface PFModalData {
   activeGameSeed: {
@@ -88,14 +90,14 @@ export default function LimboProvablyFairModal({
     setState(newState);
   };
 
-  const handleClose = () => {
-    //@ts-ignore
-    document.addEventListener("click", function (event) {
-      //@ts-ignore
-      var targetId = event.target.id;
-      if (targetId && targetId === "pf-modal-bg") onClose();
-    });
-  };
+  // const handleClose = () => {
+  //   //@ts-ignore
+  //   document.addEventListener("click", function (event) {
+  //     //@ts-ignore
+  //     var targetId = event.target.id;
+  //     if (targetId && targetId === "pf-modal-bg") onClose();
+  //   });
+  // };
 
   useEffect(() => {
     if (modalData.tab) handleToggleState(modalData.tab);
@@ -155,15 +157,27 @@ export default function LimboProvablyFairModal({
     <>
       {isOpen && (
         <div
-          onClick={() => {
-            handleClose();
-          }}
-          id="pf-modal-bg"
+          // onClick={() => {
+          //   handleClose();
+          // }}
+          // id="pf-modal-bg"
           className="absolute z-[150] left-0 top-0 flex h-full w-full items-center justify-center bg-[#33314680] backdrop-blur-[0px] transition-all"
         >
-          <div className="bg-[#121418] p-8 rounded-lg z-10 w-11/12 sm:w-[600px]">
-            <div className="font-changa text-[1.75rem] font-semibold text-[#F0F0F0]">
-              Provably Fair
+          <div className="bg-[#121418] max-h-[80vh] no-scrollbar overflow-y-scroll p-8 rounded-lg z-10 w-11/12 sm:w-[32rem]">
+            <div className="flex font-chakra tracking-wider text-2xl font-semibold text-[#F0F0F0] items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Image src={CheckPF} alt="" />
+                PROVABLY FAIR
+              </div>
+              <div className="hover:cursor-pointer">
+                <MdCancel
+                  size={30}
+                  color="#F0F0F0"
+                  onClick={() => {
+                    onClose();
+                  }}
+                />
+              </div>
             </div>
             <div className="w-full flex mt-8 mb-6">
               <button
@@ -194,7 +208,7 @@ export default function LimboProvablyFairModal({
                     <label className="text-xs font-changa text-opacity-90 text-[#F0F0F0]">
                       Active Client Seed
                     </label>
-                    <div className="bg-[#202329] mt-1 rounded-md px-4 py-3 w-full relative flex items-center justify-between">
+                    <div className="bg-[#202329] mt-1 rounded-md px-5 py-4 w-full relative flex items-center justify-between">
                       <span className="truncate text-[#B9B9BA] text-xs font-semibold">
                         {modalData.activeGameSeed.clientSeed}
                       </span>
@@ -210,7 +224,7 @@ export default function LimboProvablyFairModal({
                     <label className="text-xs font-changa text-opacity-90 text-[#F0F0F0]">
                       Active Server Seed (Hashed)
                     </label>
-                    <div className="bg-[#202329] mt-1 rounded-md px-4 py-3 w-full relative flex items-center justify-between">
+                    <div className="bg-[#202329] mt-1 rounded-md px-5 py-4 w-full relative flex items-center justify-between">
                       <span className="truncate text-[#B9B9BA] text-xs font-semibold">
                         {modalData.activeGameSeed.serverSeedHash}
                       </span>
@@ -232,7 +246,7 @@ export default function LimboProvablyFairModal({
                       type="text"
                       name="totalBets"
                       placeholder={modalData.activeGameSeed.nonce.toString()}
-                      className="bg-[#202329] text-[#B9B9BA] text-xs font-semibold mt-1 rounded-md px-4 py-3 w-full relative flex items-center justify-between"
+                      className="bg-[#202329] text-[#B9B9BA] text-xs font-semibold mt-1 rounded-md px-5 py-4 w-full relative flex items-center justify-between"
                       readOnly
                     />
                   </div>
@@ -246,15 +260,15 @@ export default function LimboProvablyFairModal({
                       <label className="text-xs font-changa text-opacity-90 text-[#F0F0F0]">
                         New Client Seed *
                       </label>
-                      <div className="mt-1 flex items-center justify-end gap-4">
+                      <div className="mt-1 w-full flex items-center justify-end gap-4 bg-[#202329] rounded-md">
                         <input
                           value={newClientSeed}
                           type="text"
                           onChange={(e) => setNewClientSeed(e.target.value)}
-                          className="bg-[#202329] text-[#B9B9BA] text-xs font-semibold mt-1 rounded-md px-4 py-3 w-full relative flex items-center justify-between"
+                          className="bg-[#202329] text-[#B9B9BA] text-xs font-semibold rounded-md px-5 py-4 w-full relative flex items-center justify-between"
                         />
                         <button
-                          className="flex items-center justify-center h-full px-4 py-2 my-auto bg-[#7839C5] text-white rounded-md"
+                          className="flex items-center justify-center h-full mx-2 px-5 py-1 my-auto bg-[#7839C5] text-white rounded-md font-bold text-sm"
                           onClick={handleSetClientSeed}
                         >
                           Change
@@ -265,7 +279,7 @@ export default function LimboProvablyFairModal({
                       <label className="text-xs font-changa text-opacity-90 text-[#F0F0F0]">
                         Next Server Seed
                       </label>
-                      <div className="bg-[#202329] mt-1 rounded-md px-4 py-3 w-full relative flex items-center justify-between">
+                      <div className="bg-[#202329] mt-1 rounded-md px-5 py-4 w-full relative flex items-center justify-between">
                         <span className="truncate text-[#B9B9BA] text-xs font-semibold">
                           {modalData.nextGameSeed.serverSeedHash}
                         </span>
@@ -306,7 +320,7 @@ export default function LimboProvablyFairModal({
                           game: e.target.value as GameType,
                         }))
                       }
-                      className="bg-[#202329] text-white font-chakra text-xs font-medium mt-1 rounded-md p-3 w-full relative appearance-none"
+                      className="bg-[#202329] text-white font-chakra text-xs font-medium mt-1 rounded-md px-5 py-4 w-full relative appearance-none"
                     >
                       {/* <option value={GameType.dice}>Dice</option>
                       <option value={GameType.coin}>Coin Flip</option> */}
@@ -323,7 +337,7 @@ export default function LimboProvablyFairModal({
                     name="clientSeed"
                     value={verificationState.clientSeed}
                     onChange={handleChange}
-                    className="bg-[#202329] text-white font-chakra text-xs font-medium mt-1 rounded-md p-3 w-full relative"
+                    className="bg-[#202329] text-white font-chakra text-xs font-medium mt-1 rounded-md px-5 py-4 w-full relative"
                   />
                 </div>
                 <div>
@@ -335,7 +349,7 @@ export default function LimboProvablyFairModal({
                     name="serverSeed"
                     value={verificationState.serverSeed}
                     onChange={handleChange}
-                    className="bg-[#202329] text-white font-chakra text-xs font-medium mt-1 rounded-md p-3 w-full relative"
+                    className="bg-[#202329] text-white font-chakra text-xs font-medium mt-1 rounded-md px-5 py-4 w-full relative"
                   />
                 </div>
                 <div>
@@ -347,7 +361,7 @@ export default function LimboProvablyFairModal({
                     name="nonce"
                     value={verificationState.nonce}
                     onChange={handleChange}
-                    className="bg-[#202329] text-white font-chakra text-xs font-medium mt-1 rounded-md p-3 w-full relative"
+                    className="bg-[#202329] text-white font-chakra text-xs font-medium mt-1 rounded-md px-5 py-4 w-full relative"
                   />
                 </div>
               </div>
