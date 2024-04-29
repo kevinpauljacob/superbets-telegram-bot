@@ -1,20 +1,7 @@
 import connectDatabase from "../../../../utils/database";
 import { NextApiRequest, NextApiResponse } from "next";
 import { GameType } from "@/utils/provably-fair";
-import {
-  Coin,
-  Dice,
-  Option,
-  Dice2,
-  Keno,
-  Limbo,
-  Plinko,
-  Roulette1,
-  Roulette2,
-  Wheel,
-  Mines,
-  Hilo,
-} from "@/models/games";
+import { gameModelMap } from "@/models/games";
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === "GET") {
@@ -29,45 +16,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
       await connectDatabase();
 
-      let data;
-      switch (game) {
-        case GameType.dice:
-          data = await Dice.find({}).sort({ createdAt: -1 }).limit(1000);
-          break;
-        case GameType.coin:
-          data = await Coin.find({}).sort({ createdAt: -1 }).limit(1000);
-          break;
-        case GameType.options:
-          data = await Option.find({}).sort({ createdAt: -1 }).limit(1000);
-          break;
-        case GameType.dice2:
-          data = await Dice2.find({}).sort({ createdAt: -1 }).limit(1000);
-          break;
-        case GameType.keno:
-          data = await Keno.find({}).sort({ createdAt: -1 }).limit(1000);
-          break;
-        case GameType.limbo:
-          data = await Limbo.find({}).sort({ createdAt: -1 }).limit(1000);
-          break;
-        case GameType.plinko:
-          data = await Plinko.find({}).sort({ createdAt: -1 }).limit(1000);
-          break;
-        case GameType.roulette1:
-          data = await Roulette1.find({}).sort({ createdAt: -1 }).limit(1000);
-          break;
-        case GameType.roulette2:
-          data = await Roulette2.find({}).sort({ createdAt: -1 }).limit(1000);
-          break;
-        case GameType.wheel:
-          data = await Wheel.find({}).sort({ createdAt: -1 }).limit(1000);
-          break;
-        case GameType.mines:
-          data = await Mines.find({}).sort({ createdAt: -1 }).limit(1000);
-          break;
-        case GameType.hilo:
-          data = await Hilo.find({}).sort({ createdAt: -1 }).limit(1000);
-          break;
-      }
+      const model = gameModelMap[game as keyof typeof gameModelMap];
+
+      const data = await model.find({}).sort({ createdAt: -1 }).limit(1000);
 
       return res.json({
         success: true,

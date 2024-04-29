@@ -72,19 +72,6 @@ export default function Flip() {
   >([]);
 
   const bet = async () => {
-    console.log(
-      "betting",
-      autoWinChange,
-      autoLossChange,
-      autoWinChangeReset,
-      autoLossChangeReset,
-      autoStopProfit,
-      autoStopLoss,
-      startAuto,
-      autoBetCount,
-      autoBetProfit,
-      betAmt,
-    );
     try {
       console.log("Placing Flip");
       let response = await placeFlip(
