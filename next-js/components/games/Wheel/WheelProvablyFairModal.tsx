@@ -11,6 +11,8 @@ import { FaRegCopy } from "react-icons/fa6";
 import Arc from "@/components/games/Wheel/Arc";
 import { riskToChance } from "@/components/games/Wheel/Segments";
 import { verify } from "tweetnacl";
+import CheckPF from "@/public/assets/CheckPF.svg"
+
 
 export interface PFModalData {
   activeGameSeed: {
@@ -209,9 +211,10 @@ export default function WheelProvablyFairModal({
           id="modal-bg"
           className="absolute z-[150] left-0 top-0 flex h-full w-full items-center justify-center bg-[#33314680] backdrop-blur-[0px] transition-all"
         >
-          <div className="bg-[#121418] max-h-[80vh] no-scrollbar overflow-y-auto p-4 md:p-11 rounded-lg z-10 w-11/12 sm:w-[600px]">
-            <div className="font-changa text-[1.75rem] font-semibold text-[#F0F0F0]">
-              Provably Fair
+          <div className="bg-[#121418] max-h-[80vh] no-scrollbar overflow-y-scroll p-8 rounded-lg z-10 w-11/12 sm:w-[32rem]">
+            <div className="flex font-chakra tracking-wider text-2xl font-semibold text-[#F0F0F0] gap-2 items-start">
+              <Image src={CheckPF} alt="" />
+              PROVABLY FAIR
             </div>
             <div className="my-4 flex w-full items-center justify-center">
               <button
@@ -242,7 +245,7 @@ export default function WheelProvablyFairModal({
                     <label className="text-xs font-changa text-opacity-90 text-[#F0F0F0]">
                       Active Client Seed
                     </label>
-                    <div className="bg-[#202329] mt-1 rounded-md px-4 py-3 w-full relative flex items-center justify-between">
+                    <div className="bg-[#202329] mt-1 rounded-md px-5 py-4 w-full relative flex items-center justify-between">
                       <span className="truncate text-[#B9B9BA] text-xs font-semibold">
                         {modalData.activeGameSeed.clientSeed}
                       </span>
@@ -258,7 +261,7 @@ export default function WheelProvablyFairModal({
                     <label className="text-xs font-changa text-opacity-90 text-[#F0F0F0]">
                       Active Server Seed (Hashed)
                     </label>
-                    <div className="bg-[#202329] mt-1 rounded-md px-4 py-3 w-full relative flex items-center justify-between">
+                    <div className="bg-[#202329] mt-1 rounded-md px-5 py-4 w-full relative flex items-center justify-between">
                       <span className="truncate text-[#B9B9BA] text-xs font-semibold">
                         {modalData.activeGameSeed.serverSeedHash}
                       </span>
@@ -280,7 +283,7 @@ export default function WheelProvablyFairModal({
                       type="text"
                       name="totalBets"
                       placeholder={modalData.activeGameSeed.nonce.toString()}
-                      className="bg-[#202329] text-[#B9B9BA] text-xs font-semibold mt-1 rounded-md px-4 py-3 w-full relative flex items-center justify-between"
+                      className="bg-[#202329] text-[#B9B9BA] text-xs font-semibold mt-1 rounded-md px-5 py-4 w-full relative flex items-center justify-between"
                       readOnly
                     />
                   </div>
@@ -294,15 +297,15 @@ export default function WheelProvablyFairModal({
                       <label className="text-xs font-changa text-opacity-90 text-[#F0F0F0]">
                         New Client Seed *
                       </label>
-                      <div className="mt-1 flex items-center justify-end gap-4">
+                      <div className="mt-1 w-full flex items-center justify-end gap-4 bg-[#202329] rounded-md">
                         <input
                           value={newClientSeed}
                           type="text"
                           onChange={(e) => setNewClientSeed(e.target.value)}
-                          className="bg-[#202329] text-[#B9B9BA] text-xs font-semibold mt-1 rounded-md px-4 py-3 w-full relative flex items-center justify-between"
+                          className="bg-[#202329] text-[#B9B9BA] text-xs font-semibold rounded-md px-5 py-4 w-full relative flex items-center justify-between"
                         />
                         <button
-                          className="flex items-center justify-center h-full px-4 py-2 my-auto bg-[#7839C5] text-white rounded-md"
+                          className="flex items-center justify-center h-full mx-2 px-5 py-1 my-auto bg-[#7839C5] text-white rounded-md font-bold text-sm"
                           onClick={handleSetClientSeed}
                         >
                           Change
@@ -313,7 +316,7 @@ export default function WheelProvablyFairModal({
                       <label className="text-xs font-changa text-opacity-90 text-[#F0F0F0]">
                         Next Server Seed
                       </label>
-                      <div className="bg-[#202329] mt-1 rounded-md px-4 py-3 w-full relative flex items-center justify-between">
+                      <div className="bg-[#202329] mt-1 rounded-md px-5 py-4 w-full relative flex items-center justify-between">
                         <span className="truncate text-[#B9B9BA] text-xs font-semibold">
                           {modalData.nextGameSeed.serverSeedHash}
                         </span>
@@ -430,7 +433,7 @@ export default function WheelProvablyFairModal({
                             game: e.target.value as GameType,
                           }))
                         }
-                        className="bg-[#202329] text-white font-chakra text-xs font-medium mt-1 rounded-md p-3 w-full relative appearance-none"
+                        className="bg-[#202329] text-white font-chakra text-xs font-medium mt-1 rounded-md px-5 py-4 w-full relative appearance-none"
                       >
                         <option value={GameType.wheel}>Wheel</option>
                       </select>
@@ -445,7 +448,7 @@ export default function WheelProvablyFairModal({
                       name="clientSeed"
                       value={verificationState.clientSeed}
                       onChange={handleChange}
-                      className="bg-[#202329] text-white font-chakra text-xs font-medium mt-1 rounded-md p-3 w-full relative"
+                      className="bg-[#202329] text-white font-chakra text-xs font-medium mt-1 rounded-md px-5 py-4 w-full relative"
                     />
                   </div>
                   <div>
@@ -457,7 +460,7 @@ export default function WheelProvablyFairModal({
                       name="serverSeed"
                       value={verificationState.serverSeed}
                       onChange={handleChange}
-                      className="bg-[#202329] text-white font-chakra text-xs font-medium mt-1 rounded-md p-3 w-full relative"
+                      className="bg-[#202329] text-white font-chakra text-xs font-medium mt-1 rounded-md px-5 py-4 w-full relative"
                     />
                   </div>
                   <div>
@@ -469,7 +472,7 @@ export default function WheelProvablyFairModal({
                       name="nonce"
                       value={verificationState.nonce}
                       onChange={handleChange}
-                      className="bg-[#202329] text-white font-chakra text-xs font-medium mt-1 rounded-md p-3 w-full relative"
+                      className="bg-[#202329] text-white font-chakra text-xs font-medium mt-1 rounded-md px-5 py-4 w-full relative"
                     />
                   </div>
                   <div>
@@ -481,7 +484,7 @@ export default function WheelProvablyFairModal({
                         name="risk"
                         value={verificationState.risk}
                         onChange={handleChange}
-                        className="bg-[#202329] text-white font-chakra text-xs font-medium mt-1 rounded-md p-3 w-full relative appearance-none"
+                        className="bg-[#202329] text-white font-chakra text-xs font-medium mt-1 rounded-md px-5 py-4 w-full relative appearance-none"
                       >
                         <option value={"low"}>Low</option>
                         <option value={"medium"}>Medium</option>
@@ -498,7 +501,7 @@ export default function WheelProvablyFairModal({
                         name="segments"
                         value={verificationState.segments}
                         onChange={handleChange}
-                        className="bg-[#202329] text-white font-chakra text-xs font-medium mt-1 rounded-md p-3 w-full relative appearance-none"
+                        className="bg-[#202329] text-white font-chakra text-xs font-medium mt-1 rounded-md px-5 py-4 w-full relative appearance-none"
                       >
                         <option value={10}>10</option>
                         <option value={20}>20</option>
