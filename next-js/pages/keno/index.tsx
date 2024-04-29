@@ -19,6 +19,7 @@ import BetAmount from "@/components/games/BetAmountInput";
 import BetButton from "@/components/games/BetButton";
 import showInfoToast from "@/components/games/toasts/toasts";
 import { riskToChance } from "@/components/games/Keno/RiskToChance";
+import { soundAlert } from "@/utils/soundUtils";
 
 export default function Keno() {
   const wallet = useWallet();
@@ -198,6 +199,7 @@ export default function Keno() {
         else toast.error(message, { duration: 2000 });
 
         const win = result === "Won";
+        if (win) soundAlert("/sounds/win.wav");
 
         if (success) {
           setStrikeNumbers(strikeNumbers);

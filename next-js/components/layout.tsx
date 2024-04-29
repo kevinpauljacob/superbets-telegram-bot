@@ -31,6 +31,7 @@ import LimboProvablyFairModal from "./games/Limbo/LimboProvablyFairModal";
 import WheelProvablyFairModal from "./games/Wheel/WheelProvablyFairModal";
 import KenoProvablyFairModal from "./games/Keno/KenoProvablyFairModal";
 import { useWallet } from "@solana/wallet-adapter-react";
+import { soundAlert } from "@/utils/soundUtils";
 
 interface LayoutProps {
   children: ReactNode;
@@ -80,6 +81,14 @@ export default function Layout({ children }: LayoutProps) {
       status: "",
     },
   });
+
+  useEffect(() => {
+    //sound pre-loader
+    soundAlert("/sounds/betbutton.wav", true);
+    soundAlert("/sounds/diceshake.wav", true);
+    soundAlert("/sounds/slider.wav", true);
+    soundAlert("/sounds/win.wav", true);
+  }, []);
 
   useEffect(() => {
     (async () => {

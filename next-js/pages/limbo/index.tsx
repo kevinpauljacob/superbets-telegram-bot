@@ -23,6 +23,7 @@ import ResultsSlider from "@/components/ResultsSlider";
 import BalanceAlert from "@/components/games/BalanceAlert";
 import showInfoToast from "@/components/games/toasts/toasts";
 import Link from "next/link";
+import { soundAlert } from "@/utils/soundUtils";
 
 function useInterval(callback: Function, delay: number | null) {
   const savedCallback = useRef<Function | null>(null);
@@ -111,6 +112,7 @@ export default function Limbo() {
           clearInterval(timer);
 
           const win = result === "Won";
+          if (win) soundAlert("/sounds/win.wav");
           const newBetResult = { result: targetMultiplier, win };
           setLastMultipliers((prevResults) => {
             const newResults = [...prevResults, newBetResult];
@@ -408,6 +410,7 @@ export default function Limbo() {
                         ? true
                         : false
                     }
+                    onClickFunction={onSubmit}
                   >
                     {loading ? <Loader /> : "BET"}
                   </BetButton>
