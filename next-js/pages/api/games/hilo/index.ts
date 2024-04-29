@@ -109,7 +109,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         throw new Error("Insufficient balance for action!!");
       }
 
-      await Hilo.create({
+      const hiloGame = await Hilo.create({
         wallet,
         amount,
         startNumber,
@@ -123,6 +123,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
       return res.status(201).json({
         success: true,
+        gameId: hiloGame._id,
         message: "Hilo game created",
       });
     } catch (e: any) {
