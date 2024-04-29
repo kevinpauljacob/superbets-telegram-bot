@@ -164,7 +164,7 @@ export default function Sidebar({
     <div
       className={`${
         sidebar ? "min-w-[15rem] justify-between" : "w-[4.15rem]"
-      } z-50 relative transition-width hidden bg-[#121418] text-white md:flex flex-col items-center pb-3.5 h-[calc(100dvh-6.25rem)]`}
+      } z-50 relative transition-width hidden bg-[#121418] text-white md:flex flex-col items-center pb-3.5 no-scrollbar overflow-y-auto h-[calc(100dvh-6.25rem)]`}
     >
       {sidebar ? (
         <>
