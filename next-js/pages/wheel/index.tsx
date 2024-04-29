@@ -517,8 +517,8 @@ export default function Wheel() {
               height={35}
               id="pointer"
               className={`${
-                isRolling ? "-rotate-[20deg] delay-[700ms]" : "rotate-0"
-              } absolute z-50 -top-3 transition-all ease-[cubic-bezier(0.4,0,0.2,1)] duration-500`}
+                isRolling ? "-rotate-[20deg] delay-[500ms] duration-500" : "rotate-0 duration-200"
+              } absolute z-50 -top-3 transition-all ease-[cubic-bezier(0.4,0,0.2,1)]`}
             />
             <div
               ref={wheelRef}
