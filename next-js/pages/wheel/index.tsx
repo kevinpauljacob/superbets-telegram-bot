@@ -54,6 +54,8 @@ export default function Wheel() {
   const [betType, setBetType] = useState<"manual" | "auto">("manual");
   const [strikeNumber, setStrikeNumber] = useState<number>(0);
   const [strikeMultiplier, setStrikeMultiplier] = useState<number>();
+  const [strikeMultiplierColor, setStrikeMultiplierColor] =
+    useState<string>("#ffffff00");
   const [resultAngle, setResultAngle] = useState<number>(0);
   const [risk, setRisk] = useState<"low" | "medium" | "high">("low");
   const [segments, setSegments] = useState<number>(10);
@@ -177,6 +179,12 @@ export default function Wheel() {
           throw new Error(message);
         }
         setIsRolling(false);
+        //set strikeMultiplier color
+        const riskObjects = riskToChance[risk];
+        const riskObject = riskObjects.find(
+          (obj) => obj.multiplier === strikeMultiplier,
+        );
+        setStrikeMultiplierColor(riskObject ? riskObject.color : "#ffffff");
         if (result == "Won") {
           toast.success(message, { duration: 2000 });
           soundAlert("/sounds/win.wav");
@@ -187,7 +195,7 @@ export default function Wheel() {
 
         setBetResults((prevResults) => {
           const newResults = [...prevResults, newBetResult];
-          if (newResults.length > 6) {
+          if (newResults.length > 5) {
             newResults.shift();
           }
           return newResults;
@@ -509,7 +517,7 @@ export default function Wheel() {
           <ResultsSlider results={betResults} align={"vertical"} />
         </div>
         <div className="flex justify-center items-center w-full my-5">
-          <div className="relative  w-[30rem] h-[30rem] flex justify-center">
+          <div className="relative w-[20rem] h-[20rem] md:w-[25rem] md:h-[25rem] flex justify-center">
             <Image
               src="/assets/wheelPointer.svg"
               alt="Pointer"
@@ -517,14 +525,16 @@ export default function Wheel() {
               height={35}
               id="pointer"
               className={`${
-                isRolling ? "-rotate-[20deg] delay-[500ms] duration-500" : "rotate-0 duration-200"
+                isRolling
+                  ? "-rotate-[20deg] delay-[500ms] duration-500"
+                  : "rotate-0 duration-200"
               } absolute z-50 -top-3 transition-all ease-[cubic-bezier(0.4,0,0.2,1)]`}
             />
             <div
               ref={wheelRef}
               className={`${
                 isRolling ? "" : ""
-              } relative w-[30rem] h-[30rem] rounded-full overflow-hidden`}
+              } relative w-[20rem] h-[20rem] md:w-[25rem] md:h-[25rem] rounded-full overflow-hidden`}
             >
               {typeof window !== "undefined" && (
                 <svg viewBox="0 0 300 300">
@@ -543,8 +553,11 @@ export default function Wheel() {
             </div>
             <div className="absolute z-10 w-[93%] h-[93%] rounded-full border-[0.7rem] border-black/20 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2" />
             <div className="absolute z-20 w-[77%] h-[77%] rounded-full bg-[#828998] bg-opacity-10 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2" />
-            <div className="absolute z-20 w-[71%] h-[71%] rounded-full bg-[#0C0F16] top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-white flex items-center justify-center text-2xl font-semibold font-changa text-opacity-80 ">
-              {strikeMultiplier}
+            <div
+              className={`absolute z-20 w-[71%] h-[71%] rounded-full bg-[#0C0F16] top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-4xl flex items-center justify-center font-semibold font-chakra text-opacity-80`}
+              style={{ color: strikeMultiplierColor }}
+            >
+              {strikeMultiplier}x
             </div>
           </div>
         </div>
