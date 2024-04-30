@@ -19,6 +19,9 @@ import BetAmount from "@/components/games/BetAmountInput";
 import BetButton from "@/components/games/BetButton";
 import showInfoToast from "@/components/games/toasts/toasts";
 import { riskToChance } from "@/components/games/Keno/RiskToChance";
+import { soundAlert } from "@/utils/soundUtils";
+import ConfigureAutoButton from "@/components/ConfigureAutoButton";
+import AutoCount from "@/components/AutoCount";
 
 export default function Keno() {
   const wallet = useWallet();
@@ -194,17 +197,21 @@ export default function Keno() {
           throw new Error(message);
         }
 
+        if (success) {
+          setStrikeMultiplier(strikeMultiplier);
+          console.log("strikeNumbers", strikeNumbers);
+          setRefresh(true);
+          for (const number of strikeNumbers) {
+            await new Promise((resolve) => setTimeout(resolve, 200));
+
+            setStrikeNumbers((prevNumbers) => [...prevNumbers, number]);
+          }
+        }
         if (result == "Won") toast.success(message, { duration: 2000 });
         else toast.error(message, { duration: 2000 });
 
         const win = result === "Won";
-
-        if (success) {
-          setStrikeNumbers(strikeNumbers);
-          setStrikeMultiplier(strikeMultiplier);
-          console.log("strikeNumbers", strikeNumbers);
-          setRefresh(true);
-        }
+        if (win) soundAlert("/sounds/win.wav");
 
         // auto options
         if (betType === "auto") {
@@ -270,7 +277,9 @@ export default function Keno() {
         showInfoToast("Loss limit reached.");
         return;
       }
-      handleBet();
+      setTimeout(() => {
+        handleBet();
+      }, 500);
     } else {
       setStartAuto(false);
       setAutoBetProfit(0);
@@ -292,11 +301,42 @@ export default function Keno() {
     } else if (wallet.connected) handleBet();
   };
 
+  const Autopick = () => {
+    return (
+      <>
+        <div
+          onClick={() => {
+            handleAutoPick();
+          }}
+          className={`${
+            autoPick === true
+              ? "border-[#7839C5] text-opacity-100"
+              : "border-transparent hover:border-[#7839C580] text-opacity-80"
+          } w-full flex items-center justify-center gap-1 rounded-lg text-center cursor-pointer border-2 bg-[#202329] h-[3.75rem] lg:h-11 font-chakra text-base tracking-wider text-white font-semibold`}
+        >
+          AUTOPICK
+        </div>
+        <div
+          onClick={() => {
+            handleClear();
+          }}
+          className={`${
+            autoPick === false
+              ? "border-transparent hover:border-[#7839C580] text-opacity-80"
+              : "border-transparent hover:border-[#7839C580] text-opacity-80"
+          } w-full flex items-center justify-center gap-1 rounded-lg text-center cursor-pointer border-2 bg-[#202329] h-[3.75rem] lg:h-11 font-chakra text-base tracking-wider text-white font-semibold`}
+        >
+          CLEAR
+        </div>
+      </>
+    );
+  };
+
   return (
     <GameLayout title="FOMO - Keno">
       <GameOptions>
         <>
-          <div className="relative w-full flex md:hidden mb-5">
+          <div className="relative w-full flex lg:hidden mb-5">
             {startAuto && (
               <div
                 onClick={() => {
@@ -321,7 +361,15 @@ export default function Keno() {
               {isRolling ? <Loader /> : "BET"}
             </BetButton>
           </div>
-          <BetSetting betSetting={betType} setBetSetting={setBetType} />
+          <div className="flex lg:hidden w-full flex-row gap-3 mb-5">
+            <Autopick />
+          </div>
+          <div className="w-full flex lg:hidden">
+            <ConfigureAutoButton />
+          </div>
+          <div className="w-full hidden lg:flex">
+            <BetSetting betSetting={betType} setBetSetting={setBetType} />
+          </div>
           <div className="w-full flex flex-col no-scrollbar overflow-y-auto">
             <FormProvider {...methods}>
               <form
@@ -337,7 +385,7 @@ export default function Keno() {
                       Risk
                     </p>
                   </div>
-                  <div className="grid grid-cols-2 gap-3 w-full items-center rounded-[8px] text-white font-chakra text-sm font-semibold bg-[#0C0F16] p-4">
+                  <div className="grid grid-cols-4 gap-3 w-full items-center rounded-[8px] text-white font-chakra text-sm font-semibold bg-[#0C0F16] p-4">
                     <div
                       onClick={() => setRisk("classic")}
                       className={`text-center w-full rounded-[5px] border-[2px] bg-[#202329] py-2 text-xs font-chakra text-white text-opacity-90 transition duration-200 ${
@@ -381,112 +429,25 @@ export default function Keno() {
                   </div>
                 </div>
 
-                <div className="flex w-full flex-row gap-3 mb-5">
-                  <div
-                    onClick={() => {
-                      handleAutoPick();
-                    }}
-                    className={`${
-                      autoPick === true
-                        ? "border-[#7839C5] text-opacity-100"
-                        : "border-transparent hover:border-[#7839C580] text-opacity-80"
-                    } w-full flex items-center justify-center gap-1 rounded-lg text-center cursor-pointer border-2 bg-[#202329] py-2.5 font-chakra text-xl text-white font-semibold`}
-                  >
-                    AUTOPICK
-                  </div>
-                  <div
-                    onClick={() => {
-                      handleClear();
-                    }}
-                    className={`${
-                      autoPick === false
-                        ? "border-transparent hover:border-[#7839C580] text-opacity-80"
-                        : "border-transparent hover:border-[#7839C580] text-opacity-80"
-                    } w-full flex items-center justify-center gap-1 rounded-lg text-center cursor-pointer border-2 bg-[#202329] py-2.5 font-chakra text-xl text-white font-semibold`}
-                  >
-                    CLEAR
-                  </div>
+                <div className="hidden lg:flex w-full flex-row gap-3 mb-5">
+                  <Autopick />
                 </div>
 
                 {betType === "manual" ? (
                   <></>
                 ) : (
                   <div className="w-full flex flex-row items-end gap-3">
-                    <div className="mb-0 flex w-full flex-col">
-                      <div className="mb-1 flex w-full items-center justify-between text-xs font-changa text-opacity-90">
-                        <label className="text-white/90 font-changa">
-                          Number of Bets
-                        </label>
-                      </div>
-
-                      <div
-                        className={`group flex h-11 w-full cursor-pointer items-center rounded-[8px] bg-[#202329] px-4`}
-                      >
-                        <input
-                          id={"count-input"}
-                          {...methods.register("betCount", {
-                            required: "Bet count is required",
-                          })}
-                          type={"number"}
-                          step={"any"}
-                          autoComplete="off"
-                          onChange={handleCountChange}
-                          placeholder={
-                            autoBetCount.toString().includes("inf")
-                              ? "Infinity"
-                              : "00"
-                          }
-                          disabled={isRolling || startAuto}
-                          value={autoBetCount}
-                          className={`flex w-full min-w-0 bg-transparent text-base text-[#94A3B8] placeholder-[#94A3B8] font-chakra ${
-                            autoBetCount.toString().includes("inf")
-                              ? "placeholder-opacity-100"
-                              : "placeholder-opacity-40"
-                          } placeholder-opacity-40 outline-none`}
-                        />
-                        <span
-                          className={`text-2xl font-medium text-white text-opacity-50 ${
-                            autoBetCount.toString().includes("inf")
-                              ? "bg-[#47484A]"
-                              : "bg-[#292C32]"
-                          } hover:bg-[#47484A] focus:bg-[#47484A] transition-all rounded-[5px] py-0.5 px-3`}
-                          onClick={() => setAutoBetCount("inf")}
-                        >
-                          <BsInfinity />
-                        </span>
-                      </div>
-
-                      <span
-                        className={`${
-                          methods.formState.errors["amount"]
-                            ? "opacity-100"
-                            : "opacity-0"
-                        } mt-1.5 flex items-center gap-1 text-xs text-[#D92828]`}
-                      >
-                        {methods.formState.errors["amount"]
-                          ? methods.formState.errors[
-                              "amount"
-                            ]!.message!.toString()
-                          : "NONE"}
-                      </span>
-                    </div>
-                    <div
-                      onClick={() => {
-                        setShowAutoModal(true);
-                      }}
-                      className={`relative mb-[1.4rem] rounded-md w-full h-11 flex items-center justify-center opacity-75 cursor-pointer text-white text-opacity-90 border-2 border-white bg-white bg-opacity-0 hover:bg-opacity-5`}
-                    >
-                      Configure Auto
-                      <div
-                        className={`${
-                          useAutoConfig ? "bg-fomo-green" : "bg-fomo-red"
-                        } absolute top-0 right-0 m-1.5 bg-fomo-green w-2 h-2 rounded-full`}
-                      />
+                    <AutoCount
+                      loading={isRolling}
+                      onChange={handleCountChange}
+                    />
+                    <div className="w-full hidden lg:flex">
+                      <ConfigureAutoButton />
                     </div>
                   </div>
                 )}
 
-                <div className="relative w-full hidden md:flex mt-2">
+                <div className="relative w-full hidden lg:flex mt-2">
                   {startAuto && (
                     <div
                       onClick={() => {
@@ -513,6 +474,9 @@ export default function Keno() {
                 </div>
               </form>
             </FormProvider>
+            <div className="w-full flex lg:hidden">
+              <BetSetting betSetting={betType} setBetSetting={setBetType} />
+            </div>
           </div>
         </>
       </GameOptions>
@@ -537,14 +501,15 @@ export default function Keno() {
                     !isRolling &&
                     strikeNumbers.length === 0 &&
                     chosenNumbers.includes(number)
-                      ? "bg-[#7839C5]"
-                      : strikeNumbers.includes(number) &&
-                        chosenNumbers.includes(number)
-                      ? "bg-black border-2 border-fomo-green"
+                      ? "bg-[#7839C5] border-transparent"
+                      : strikeNumbers.includes(number)
+                      ? chosenNumbers.includes(number)
+                        ? "bg-black border-fomo-green"
+                        : "bg-black border-fomo-red text-fomo-red"
                       : chosenNumbers.includes(number)
-                      ? "bg-black border-2 border-fomo-red text-fomo-red"
-                      : "bg-[#202329]"
-                  } rounded-md text-center transition-all duration-300 ease-in-out w-[35px] h-[35px] sm:w-[55px] sm:h-[55px] md:w-[60px] md:h-[60px] xl:w-[65px] xl:h-[65px]`}
+                      ? "bg-[#7839C5] border-transparent"
+                      : "bg-[#202329] border-transparent"
+                  } rounded-md text-center border-2 transition-all duration-300 ease-in-out w-[1.75rem] h-[1.75rem] sm:w-[3.4375rem] sm:h-[3.4375rem] md:w-[3.75rem] md:h-[3.75rem] xl:w-[3.8rem] xl:h-[3.8rem]`}
                 >
                   {strikeNumbers.includes(number) &&
                   chosenNumbers.includes(number) ? (
@@ -575,7 +540,7 @@ export default function Keno() {
                   ))}
                 </div>
                 <div>
-                  <div className="flex justify-between gap-[3px] sm:gap-3.5 text-white bg-[#202329] rounded-[5px] w-full mt-3">
+                  <div className="flex justify-between gap-[3px] sm:gap-3.5 lg:gap-2 2xl:gap-3.5 text-white bg-[#202329] rounded-[5px] w-full mt-3">
                     {multipliers.map((multiplier, index) => (
                       <div
                         key={index}
@@ -587,7 +552,7 @@ export default function Keno() {
                           commonNumbers.length === index
                             ? "bg-white/20"
                             : ""
-                        } flex justify-center items-center rounded-[5px] font-chakra text-[8px] sm:text-xs font-semibold transition-all duration-300 ease-in-out py-1 sm:py-3 w-full`}
+                        } flex hover:bg-white/20 cursor-pointer justify-center items-center rounded-[5px] font-chakra text-[8px] sm:text-xs font-semibold transition-all duration-300 ease-in-out py-1 sm:py-3 w-full`}
                       >
                         <span className="mr-1">{index}x</span>
                         <svg
@@ -603,28 +568,20 @@ export default function Keno() {
                           />
                         </svg>
                         {hoveredIndex === index && (
-                          <div className="absolute top-[-120px] left-0 z-50 flex gap-4 text-white bg-[#202329] border border-white/10 rounded-lg w-full p-4 fadeInUp duration-100 min-w-[250px]">
+                          <div className="absolute top-[-120px] left-0 xl:left-4 z-50 flex gap-4 text-white bg-[#0f0f0f] border border-white/10 rounded-[5px] w-full xl:w-[calc(100%-2rem)] p-4 fadeInUp duration-100 min-w-[250px]">
                             <div className="w-1/2">
                               <div className="flex justify-between text-[13px] font-medium font-changa text-opacity-90 text-[#F0F0F0]">
                                 <span className="">Profit</span>
-                                <span>
-                                  {/* {coinData ? coinData[0]?.amount.toFixed(4) : 0} $SOL */}
-                                  SOL
-                                </span>
                               </div>
-                              <div className="border border-white/10 rounded-lg p-3 mt-2">
-                                {coinData
-                                  ? (coinData[0]?.amount * multiplier).toFixed(
-                                      4,
-                                    )
-                                  : 0}
+                              <div className="border border-white/10 rounded-[5px] p-3 mt-2">
+                                {(betAmt * multiplier).toFixed(4)} SOL
                               </div>
                             </div>
                             <div className="w-1/2">
                               <div className="text-[13px] font-medium font-changa text-opacity-90 text-[#F0F0F0]">
                                 Chance
                               </div>
-                              <div className="border border-white/10 rounded-lg p-3 mt-2">
+                              <div className="border border-white/10 rounded-[5px] p-3 mt-2">
                                 {calculateChance(index).toFixed(2)} %
                               </div>
                             </div>

@@ -1,6 +1,6 @@
 let alertInstance: HTMLAudioElement | null = null;
 
-export function soundAlert(audioFilePath: string) {
+export function soundAlert(audioFilePath: string, muted?: boolean) {
   alertInstance = new Audio(audioFilePath);
   alertInstance.addEventListener("ended", () => {
     alertInstance = null;
@@ -9,6 +9,7 @@ export function soundAlert(audioFilePath: string) {
     alertInstance.pause();
     alertInstance.currentTime = 0;
   }
+  if(muted) alertInstance.muted = muted
   alertInstance.play();
 }
 

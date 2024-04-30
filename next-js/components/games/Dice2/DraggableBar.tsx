@@ -37,10 +37,7 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
   const strikeNumberRef: RefObject<HTMLDivElement> =
     useRef<HTMLDivElement>(null);
 
-  const sliderMove = debounce(() => soundAlert("/sounds/slider.wav"))
-
   useEffect(() => {
-    sliderMove()
     if (progressBarRef.current && indicatorsRef.current) {
       indicatorsRef.current.style.width = `${progressBarRef.current.clientWidth}px`;
       alignIndicators(); // Call function to align indicators
@@ -74,6 +71,11 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
       }
     }
   };
+
+  const debouncedSoundAlert = debounce(() => {
+    soundAlert("/sounds/slider.wav");
+    console.log("debounced");
+  });
 
   // const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
   //   let newValue = parseFloat(e.target.value);
@@ -119,6 +121,7 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
               id="min-slider"
               type="range"
               onChange={(e) => {
+                debouncedSoundAlert();
                 const value = parseInt(e.currentTarget.value);
                 //@ts-ignore
                 document.getElementById("min-slider")!.value =

@@ -18,6 +18,7 @@ const config: Config = {
       },
       screens: {
         xs: "400px",
+        lg2: '1160px'
       },
       colors: {
         "fomo-green": "#72F238",
