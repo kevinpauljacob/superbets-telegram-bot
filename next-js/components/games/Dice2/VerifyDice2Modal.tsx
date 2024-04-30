@@ -6,6 +6,7 @@ import DiceProvablyFairModal, { PFModalData } from "./Dice2ProvablyFairModal";
 import { useGlobalContext } from "@/components/GlobalContext";
 import DraggableBar from "./DraggableBar";
 import { FaRegCopy } from "react-icons/fa6";
+import { MdCancel } from "react-icons/md";
 
 interface ModalData {
   bet: Dice2;
@@ -63,14 +64,14 @@ export default function VerifyDice2Modal({
   //to handle dropodown
   const [openDropDown, setOpenDropDown] = useState<boolean>(false);
 
-  const handleClose = () => {
-    //@ts-ignore
-    document.addEventListener("click", function (event) {
-      //@ts-ignore
-      var targetId = event.target.id;
-      if (targetId && targetId === "modal-bg") onClose();
-    });
-  };
+  // const handleClose = () => {
+  //   //@ts-ignore
+  //   document.addEventListener("click", function (event) {
+  //     //@ts-ignore
+  //     var targetId = event.target.id;
+  //     if (targetId && targetId === "modal-bg") onClose();
+  //   });
+  // };
 
   const copyToClipboard = (text?: string) => {
     if (text) navigator.clipboard.writeText(text);
@@ -91,13 +92,13 @@ export default function VerifyDice2Modal({
     <>
       {isOpen && (
         <div
-          onClick={() => {
-            handleClose();
-          }}
-          id="modal-bg"
+          // onClick={() => {
+          //   handleClose();
+          // }}
+          // id="modal-bg"
           className="absolute z-[150] left-0 top-0 flex h-full w-full items-center justify-center bg-[#33314680] backdrop-blur-[0px] transition-all"
         >
-          <div className="bg-[#121418] max-h-[80vh] no-scrollbar overflow-y-auto p-4 md:p-11 rounded-lg z-10 w-11/12 sm:w-[600px] ">
+          <div className="relative bg-[#121418] max-h-[80vh] no-scrollbar overflow-y-auto p-4 md:p-11 rounded-lg z-10 w-11/12 sm:w-[34rem]">
             <div className="flex flex-wrap justify-between items-center mb-4 sm:mb-5">
               <div className="font-changa text-2xl font-semibold text-white mr-4 text-opacity-90">
                 Dice
@@ -150,7 +151,7 @@ export default function VerifyDice2Modal({
               </div>
               <div className="flex gap-4 pt-7 mb-8">
                 <div className="w-full">
-                  <label className="text-xs text-opacity-75 font-changa text-[#F0F0F0]">
+                  <label className="text-xs text-opacity-75 font-changa text-[#F0F0F0] font-normal">
                     Multiplier
                   </label>
                   <input
@@ -161,12 +162,12 @@ export default function VerifyDice2Modal({
                         ? (98 / (100 - (100 - bet.chance))).toFixed(2)
                         : (98 / (100 - bet.chance)).toFixed(2)
                     }
-                    className="bg-[#202329] text-white font-chakra text-xs font-medium mt-1 rounded-md p-3 w-full relative"
+                    className="bg-[#202329] text-white font-chakra text-xs font-semibold mt-1 rounded-md p-3 w-full relative"
                     readOnly
                   />
                 </div>
                 <div className="w-full">
-                  <label className="text-xs text-opacity-75 font-changa text-[#F0F0F0]">
+                  <label className="text-xs text-opacity-75 font-changa text-[#F0F0F0] font-normal">
                     {bet.direction === "over" ? "Roll Over" : "Roll Under"}
                   </label>
                   <input
@@ -175,19 +176,19 @@ export default function VerifyDice2Modal({
                     value={
                       bet.direction === "over" ? 100 - bet.chance : bet.chance
                     }
-                    className="bg-[#202329] text-white font-chakra text-xs font-medium mt-1 rounded-md p-3 w-full relative"
+                    className="bg-[#202329] text-white font-chakra text-xs font-semibold mt-1 rounded-md p-3 w-full relative"
                     readOnly
                   />
                 </div>
                 <div className="w-full">
-                  <label className="text-xs text-opacity-75 font-changa text-[#F0F0F0]">
+                  <label className="text-xs text-opacity-75 font-changa text-[#F0F0F0] font-normal">
                     Chance
                   </label>
                   <input
                     type="text"
                     name="chance"
                     value={bet.chance}
-                    className="bg-[#202329] text-white font-chakra text-xs font-medium mt-1 rounded-md p-3 w-full relative"
+                    className="bg-[#202329] text-white font-chakra text-xs font-semibold mt-1 rounded-md p-3 w-full relative"
                     readOnly
                   />
                 </div>
@@ -304,6 +305,14 @@ export default function VerifyDice2Modal({
                 </div>
               )}
             </div>
+            <MdCancel
+              onClick={() => {
+                onClose();
+              }}
+              size={22}
+              className="absolute top-3 right-3 hover:cursor-pointer"
+              color="#F0F0F0"
+            />
           </div>
           <DiceProvablyFairModal
             isOpen={isPFModalOpen}
