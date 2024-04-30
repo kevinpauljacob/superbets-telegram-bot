@@ -5,7 +5,7 @@ import { Limbo } from "./HistoryTable";
 import LimboProvablyFairModal, { PFModalData } from "./LimboProvablyFairModal";
 import { useGlobalContext } from "@/components/GlobalContext";
 import { FaRegCopy } from "react-icons/fa6";
-import { MdCancel } from "react-icons/md";
+import { MdClose } from "react-icons/md";
 
 interface ModalData {
   flip: Limbo;
@@ -280,7 +280,7 @@ export default function VerifyLimboModal({
                 </div>
               )}
             </div>
-            <MdCancel
+            <MdClose
               onClick={() => {
                 onClose();
               }}

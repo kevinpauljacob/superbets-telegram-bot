@@ -4,6 +4,7 @@ import toast from "react-hot-toast";
 import { obfuscatePubKey } from "@/context/transactions";
 import { GameType } from "@/utils/provably-fair";
 import { Table } from "../table/Table";
+import BetRow from "../BetRow";
 interface Bet {
   wallet: string;
   betTime?: string;
@@ -21,27 +22,9 @@ export default function Bets({ refresh }: { refresh: boolean }) {
   const wallet = useWallet();
   const transactionsPerPage = 10;
   const [all, setAll] = useState(wallet.publicKey ? false : true);
-
   const [page, setPage] = useState(1);
-
   const [maxPages, setMaxPages] = useState(0);
-
   const [bets, setBets] = useState<Bet[]>([]);
-
-  const myHeaders = [
-    "Date",
-    "Bet Type",
-    "Amount",
-    "Strike Price",
-    "Timeframe",
-    "Result",
-  ];
-
-  const allHeaders = ["Date", "Wallet", "Bet Type", "Amount", "Result"];
-
-  //headers to be displayed in small screen devices
-  const smallScreenHeaders = ["Time", "Amount Won"];
-  const allSmallScreenHeaders = ["Time", "Amount Won"];
 
   useEffect(() => {
     if (refresh) {
@@ -69,10 +52,6 @@ export default function Bets({ refresh }: { refresh: boolean }) {
     <Table
       all={all}
       setAll={setAll}
-      myHeaders={myHeaders}
-      allHeaders={allHeaders}
-      smallScreenHeaders={smallScreenHeaders}
-      allSmallScreenHeaders={allSmallScreenHeaders}
       page={page}
       setPage={setPage}
       maxPages={maxPages}
@@ -89,7 +68,8 @@ export default function Bets({ refresh }: { refresh: boolean }) {
               key={index}
               className="mb-2.5 flex w-full flex-row items-center gap-2 rounded-[5px] bg-[#121418] py-3"
             >
-              <span className="w-full text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
+              <BetRow bet={bet} all={all}/>
+              {/* <span className="w-full text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
                 {bet.betTime
                   ? new Date(bet.betTime).toLocaleDateString("en-GB", {
                       day: "2-digit",
@@ -148,7 +128,7 @@ export default function Bets({ refresh }: { refresh: boolean }) {
                 {bet.result === "Pending"
                   ? "-"
                   : (bet.result === "Lost" ? 0 : bet.amount).toFixed(4)}
-              </span>
+              </span> */}
             </div>
           ))
       ) : (

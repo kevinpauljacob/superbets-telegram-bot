@@ -8,7 +8,7 @@ import RollDiceProvablyFairModal, {
 } from "./DiceProvablyFairModal";
 import { useGlobalContext } from "@/components/GlobalContext";
 import { FaRegCopy } from "react-icons/fa6";
-import { MdCancel } from "react-icons/md";
+import { MdClose } from "react-icons/md";
 
 interface ModalData {
   bet: Dice;
@@ -320,7 +320,7 @@ export default function VerifyDiceModal({ isOpen, onClose, modalData }: Props) {
                 </div>
               )}
             </div>
-            <MdCancel
+            <MdClose
               onClick={() => {
                 onClose();
               }}

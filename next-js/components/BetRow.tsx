@@ -31,7 +31,7 @@ const BetRow: React.FC<BetRowProps> = ({ bet, all }) => {
             : "text-[#F0F0F0]"
         }`}
       >
-        {bet.amountWon.toFixed(4)} SOL
+        {bet.amountWon?.toFixed(4)} SOL
       </span>
     </>
   );

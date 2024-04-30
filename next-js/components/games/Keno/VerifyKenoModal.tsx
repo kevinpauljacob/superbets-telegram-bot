@@ -5,7 +5,7 @@ import { Keno } from "./HistoryTable";
 import KenoProvablyFairModal, { PFModalData } from "./KenoProvablyFairModal";
 import { useGlobalContext } from "@/components/GlobalContext";
 import { FaRegCopy } from "react-icons/fa6";
-import { MdCancel } from "react-icons/md";
+import { MdClose } from "react-icons/md";
 
 interface ModalData {
   bet: Keno;
@@ -287,7 +287,7 @@ export default function VerifyDice2Modal({
                 </div>
               )}
             </div>
-            <MdCancel
+            <MdClose
               onClick={() => {
                 onClose();
               }}
