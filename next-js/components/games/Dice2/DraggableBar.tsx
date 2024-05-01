@@ -1,4 +1,16 @@
+import { soundAlert } from "@/utils/soundUtils";
 import React, { useState, useEffect, useRef, RefObject } from "react";
+
+function debounce(func: any, timeout = 100) {
+  let timer: any;
+  return (...args: any[]) => {
+    clearTimeout(timer);
+    timer = setTimeout(() => {
+      //@ts-ignore
+      func.apply(this, args);
+    }, timeout);
+  };
+}
 
 type ProgressBarProps = {
   choice: number;
@@ -60,6 +72,11 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
     }
   };
 
+  const debouncedSoundAlert = debounce(() => {
+    soundAlert("/sounds/slider.wav");
+    console.log("debounced");
+  });
+
   // const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
   //   let newValue = parseFloat(e.target.value);
   //   newValue = Math.max(2, Math.min(newValue, 98));
@@ -104,6 +121,7 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
               id="min-slider"
               type="range"
               onChange={(e) => {
+                debouncedSoundAlert();
                 const value = parseInt(e.currentTarget.value);
                 //@ts-ignore
                 document.getElementById("min-slider")!.value =

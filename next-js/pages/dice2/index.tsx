@@ -21,6 +21,7 @@ import BetAmount from "@/components/games/BetAmountInput";
 import BetButton from "@/components/games/BetButton";
 import ResultsSlider from "@/components/ResultsSlider";
 import showInfoToast from "@/components/games/toasts/toasts";
+import { loopSound, soundAlert } from "@/utils/soundUtils";
 
 export default function Dice2() {
   const wallet = useWallet();
@@ -178,10 +179,11 @@ export default function Dice2() {
           throw new Error(message);
         }
 
-        if (result === "Won") toast.success(message, { duration: 2000 });
-        else toast.error(message, { duration: 2000 });
-
         const win = result === "Won";
+        if (win) {
+          toast.success(message, { duration: 2000 });
+          soundAlert("/sounds/win.wav");
+        } else toast.error(message, { duration: 2000 });
         const newBetResult = { result: strikeNumber, win };
 
         setBetResults((prevResults) => {
@@ -195,6 +197,7 @@ export default function Dice2() {
         setStrikeNumber(strikeNumber);
         setResult(win);
         setRefresh(true);
+        loopSound("/sounds/diceshake.wav", 0.3);
 
         // auto options
         if (betType === "auto") {
@@ -482,7 +485,8 @@ export default function Dice2() {
                   Multiplier
                 </span>
                 <input
-                  className="bg-[#202329] text-xs text-white font-chakra rounded-md px-2 md:px-5 py-3"
+                  id={"amount-input"}
+                  className={`bg-[#202329] w-full min-w-0 font-chakra text-xs text-white rounded-md px-2 md:px-5 py-3 placeholder-[#94A3B8] placeholder-opacity-40 outline-none`}
                   value={multiplier}
                   type="number"
                   maxLength={1}
@@ -527,8 +531,8 @@ export default function Dice2() {
                     Chance
                   </span>
                   <input
-                    className="bg-[#202329] text-xs text-white font-chakra rounded-md px-2 md:px-5 py-3"
-                    value={chance.toPrecision(4)}
+                    className={`bg-[#202329] w-full min-w-0 font-chakra text-xs text-white rounded-md px-2 md:px-5 py-3 placeholder-[#94A3B8] placeholder-opacity-40 outline-none`}
+                    value={chance}
                     type="number"
                     maxLength={1}
                     step={1}

@@ -31,6 +31,7 @@ import LimboProvablyFairModal from "./games/Limbo/LimboProvablyFairModal";
 import WheelProvablyFairModal from "./games/Wheel/WheelProvablyFairModal";
 import KenoProvablyFairModal from "./games/Keno/KenoProvablyFairModal";
 import { useWallet } from "@solana/wallet-adapter-react";
+import { soundAlert } from "@/utils/soundUtils";
 
 interface LayoutProps {
   children: ReactNode;
@@ -81,6 +82,39 @@ export default function Layout({ children }: LayoutProps) {
     },
   });
 
+  // function resetHeight() {
+  //   if (typeof window !== "undefined") {
+  //     console.log("resetting height");
+  //     const container = document.getElementById("main-parent");
+  //     if (container) container.style.height = window.innerHeight + "px";
+  //   }
+  // }
+
+  // useEffect(() => {
+  //   if (typeof window !== "undefined") {
+  //     window.addEventListener("resize", () => {
+  //       console.log("resizing", window.innerHeight);
+  //       resetHeight();
+  //     });
+  //   }
+
+  //   return () => {
+  //     if (typeof window !== "undefined") {
+  //       window.removeEventListener("resize", () => {});
+  //     }
+  //   };
+  // }, []);
+
+  // resetHeight();
+
+  useEffect(() => {
+    //sound pre-loader
+    soundAlert("/sounds/betbutton.wav", true);
+    soundAlert("/sounds/diceshake.wav", true);
+    soundAlert("/sounds/slider.wav", true);
+    soundAlert("/sounds/win.wav", true);
+  }, []);
+
   useEffect(() => {
     (async () => {
       if (wallet?.publicKey && session?.user) {
@@ -117,14 +151,14 @@ export default function Layout({ children }: LayoutProps) {
     <>
       <InfoBar />
       <Header sidebar={sidebar} toggleSidebar={toggleSidebar} />
-      <section className="relative flex flex-1 max-h-[calc(100vh-6.25rem)]">
+      <section className="relative flex flex-1 max-h-[calc(100%-6.25rem)]">
         <Sidebar sidebar={sidebar} setSidebar={setSidebar} />
         <section className="w-full relative overflow-hidden">
           <MobileSidebar mobileSidebar={sidebar} setSidebar={setSidebar} />
           <section className="w-full h-full">
             <SubHeader />
 
-            <main className="marker:w-full h-full md:pt-[4.5%] lg:pt-0 max-h-[calc(100vh-1rem)] lg:max-h-[calc(100vh-11rem)]">
+            <main className="marker:w-full h-full md:pt-[4.5%] lg:pt-0 max-h-[calc(100%-1rem)] lg:max-h-[calc(100%-5.5rem)]">
               <section className="w-full h-full overflow-y-auto no-scrollbar">
                 {children}
               </section>
@@ -132,7 +166,7 @@ export default function Layout({ children }: LayoutProps) {
           </section>
         </section>
       </section>
-      <div className="w-full fixed bottom-0 flex md:hidden">
+      <div className="w-full fixed bottom-0 flex md:hidden z-[1000]">
         <MobileNavbar sidebar={sidebar} toggleSidebar={toggleSidebar} />
       </div>
       {showWalletModal && <BalanceModal />}

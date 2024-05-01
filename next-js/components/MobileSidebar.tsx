@@ -15,6 +15,7 @@ import Birdeye from "@/public/assets/Birdeye";
 import Telegram from "@/public/assets/Telegram";
 import Home from "@/public/assets/Home";
 import { useRouter } from "next/router";
+import { useGlobalContext } from "./GlobalContext";
 
 export default function Sidebar({
   mobileSidebar,
@@ -25,6 +26,7 @@ export default function Sidebar({
 }) {
   const wallet = useWallet();
   const router = useRouter();
+  const { fomoPrice } = useGlobalContext();
   const [showExitTokens, setShowExitTokens] = useState(false);
   const [showPlayTokens, setShowPlayTokens] = useState(false);
 
@@ -121,7 +123,7 @@ export default function Sidebar({
     <div
       className={`${
         mobileSidebar ? "fadeIn fixed" : "fadeOutDown hidden"
-      } top-[6.6rem] z-20 md:hidden bg-[#121418] no-scrollbar overflow-y-auto text-white flex flex-col justify-between w-full h-[calc(100vh-11.2rem)]`}
+      } top-[6.6rem] z-20 md:hidden bg-[#121418] no-scrollbar overflow-y-auto text-white flex flex-col justify-between w-full h-[calc(100dvh-11.2rem)]`}
     >
       <div className="w-full">
         <div
@@ -144,7 +146,7 @@ export default function Sidebar({
             </span>
             <div className="flex items-center gap-1">
               <span className="text-sm text-[#94A3B8] font-medium font-chakra leading-3">
-                $0.3113
+                ${fomoPrice.toFixed(3)}
               </span>
               <span
                 className={`text-xs text-[#72F238] font-medium pt-[0.1px] leading-[0.6rem]`}
@@ -159,7 +161,7 @@ export default function Sidebar({
             mobileSidebar ? "fadeInUp" : "fadeOutDown"
           } w-full flex flex-col p-4`}
         >
-          <SidebarOpenElement text={"Home"} Icon={Home} />
+          <SidebarOpenElement text={"Home"} Icon={Home} link="/"/>
           <div className={`mt-0`}>
             <div className="w-full transition-all cursor-pointer rounded-md flex items-center justify-between gap-2 pl-4 pr-2 py-2 bg-transparent hover:bg-[#1f2024] focus:bg-[#1f2024] group">
               <div className="flex items-center gap-2">

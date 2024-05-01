@@ -36,6 +36,7 @@ export default function Sidebar({
 }) {
   const wallet = useWallet();
   const router = useRouter();
+  const { fomoPrice } = useGlobalContext();
   const [showExitTokens, setShowExitTokens] = useState<boolean>(false);
   const [showPlayTokens, setShowPlayTokens] = useState<boolean>(false);
 
@@ -163,7 +164,7 @@ export default function Sidebar({
     <div
       className={`${
         sidebar ? "min-w-[15rem] justify-between" : "w-[4.15rem]"
-      } z-50 relative transition-width hidden bg-[#121418] text-white md:flex flex-col items-center pb-3.5 h-[calc(100vh-6.25rem)]`}
+      } z-50 relative transition-width hidden bg-[#121418] text-white md:flex flex-col items-center pb-3.5 no-scrollbar overflow-y-auto h-[calc(100dvh-6.25rem)]`}
     >
       {sidebar ? (
         <>
@@ -188,7 +189,7 @@ export default function Sidebar({
                 </span>
                 <div className="flex items-center gap-1">
                   <span className="text-sm text-[#94A3B8] font-medium font-chakra leading-3">
-                    $0.3113
+                    ${fomoPrice.toFixed(3)}
                   </span>
                   <span
                     className={`text-xs text-[#72F238] font-medium pt-[0.1px] leading-[0.6rem]`}
@@ -203,7 +204,7 @@ export default function Sidebar({
                 sidebar ? "fadeInUp" : "fadeOutDown"
               } w-full flex flex-col p-4`}
             >
-              <SidebarOpenElement text={"Home"} Icon={Home} />
+              <SidebarOpenElement text={"Home"} Icon={Home} link="/"/>
               <div className={`mt-0`}>
                 <div className="w-full transition-all cursor-pointer rounded-md flex items-center justify-between gap-2 pl-4 pr-2 py-2 bg-transparent hover:bg-[#1f2024] focus:bg-[#1f2024] group">
                   <div className="flex items-center gap-2">
@@ -246,7 +247,9 @@ export default function Sidebar({
                         {/* <Image src={token.src} alt="" width={15} height={15} /> */}
                         <span
                           className={`font-changa transition-all ${
-                            token.active ? "text-white/90" : "text-white/50 group-hover:text-white/90"
+                            token.active
+                              ? "text-white/90"
+                              : "text-white/50 group-hover:text-white/90"
                           }`}
                         >
                           {token.token}
@@ -297,7 +300,9 @@ export default function Sidebar({
                         {/* <Image src={token.src} alt="" width={15} height={15} /> */}
                         <span
                           className={`font-changa transition-all ${
-                            token.active ? "text-white/90" : "text-white/50 group-hover:text-white/90"
+                            token.active
+                              ? "text-white/90"
+                              : "text-white/50 group-hover:text-white/90"
                           }`}
                         >
                           {token.token}
@@ -418,12 +423,15 @@ export default function Sidebar({
 export const SidebarOpenElement = ({
   text,
   Icon,
+  link
 }: {
   text: string;
   Icon: any;
+  link?:string
 }) => {
+  const router = useRouter()
   return (
-    <div className="w-full transition-all cursor-pointer rounded-md flex items-center gap-2 pl-4 py-2 bg-transparent hover:bg-[#1f2024] focus:bg-[#1f2024] group">
+    <div onClick={() => {link && router.push(link)}} className="w-full transition-all cursor-pointer rounded-md flex items-center gap-2 pl-4 py-2 bg-transparent hover:bg-[#1f2024] focus:bg-[#1f2024] group">
       <Icon className="w-4 h-4 transition-all text-[#ababac] group-hover:text-[#9945FF] group-focus:text-[#9945FF]" />
       <span className="transition-all text-base font-changa font-light text-white text-opacity-75 group-hover:text-opacity-100 group-focus:text-opacity-100">
         {text}

@@ -29,6 +29,7 @@ import BetAmount from "@/components/games/BetAmountInput";
 import BetButton from "@/components/games/BetButton";
 import ResultsSlider from "@/components/ResultsSlider";
 import showInfoToast from "@/components/games/toasts/toasts";
+import { loopSound, soundAlert } from "@/utils/soundUtils";
 
 export default function Dice() {
   const wallet = useWallet();
@@ -81,6 +82,8 @@ export default function Dice() {
     { face: number; win: boolean }[]
   >([]);
   const [showPointer, setShowPointer] = useState<boolean>(false);
+
+  const pointerAudioRef = useRef<HTMLAudioElement | null>(null);
 
   const handleDiceClick = (newFace: number) => {
     if (!startAuto && !isRolling) {
@@ -176,6 +179,7 @@ export default function Dice() {
         if (res.success) {
           const { strikeNumber, result } = res.data;
           const isWin = result === "Won";
+          if (isWin) soundAlert("/sounds/win.wav");
           const newBetResults = [
             ...(betResults.length <= 4 ? betResults : betResults.slice(-4)),
             { face: strikeNumber, win: isWin },
@@ -184,6 +188,7 @@ export default function Dice() {
           setShowPointer(true);
           setStrikeFace(strikeNumber);
           setRefresh(true);
+          loopSound("/sounds/diceshake.wav", 0.3);
 
           // auto options
           if (rollType === "auto") {
@@ -651,7 +656,12 @@ function DiceFace({
   Icon: any;
 }) {
   return (
-    <div onClick={() => handleClick(diceNumber)}>
+    <div
+      onClick={() => {
+        handleClick(diceNumber);
+        soundAlert("/sounds/betbutton.wav");
+      }}
+    >
       <Icon
         className={`${
           selectedFaces[diceNumber]

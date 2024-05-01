@@ -1,9 +1,16 @@
 import { User } from "@/context/transactions";
 import { useWallet } from "@solana/wallet-adapter-react";
-import { createContext, useContext, useState, ReactNode } from "react";
+import {
+  createContext,
+  useContext,
+  useState,
+  ReactNode,
+  useEffect,
+} from "react";
 import toast from "react-hot-toast";
 import { connection } from "../context/gameTransactions";
-import { LAMPORTS_PER_SOL } from "@solana/web3.js";
+import { LAMPORTS_PER_SOL, PublicKey } from "@solana/web3.js";
+import { TOKEN_PROGRAM_ID } from "@solana/spl-token";
 
 interface PointTier {
   index: number;
@@ -59,6 +66,9 @@ interface GlobalContextProps {
 
   livePrice: number;
   setLivePrice: (amount: number) => void;
+
+  fomoPrice: number;
+  setFomoPrice: (amount: number) => void;
 
   globalInfo: { users: number; stakedTotal: number; totalVolume: number };
   setGlobalInfo: (amount: {
@@ -181,6 +191,32 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
   const [useAutoConfig, setUseAutoConfig] = useState<boolean>(false);
   const [autoBetCount, setAutoBetCount] = useState<number | string>(0);
   const [autoBetProfit, setAutoBetProfit] = useState<number>(0);
+
+  // fomo live price
+  const [fomoPrice, setFomoPrice] = useState<number>(0);
+  useEffect(() => {
+    const fetchFomoPrice = async () => {
+      try {
+        let data = await fetch(
+          "https://price.jup.ag/v4/price?ids=FOMO&vsToken=USDC",
+        ).then((res) => res.json());
+        // console.log(data);
+        setFomoPrice(data?.data?.FOMO?.price ?? 0);
+      } catch (e) {
+        console.log(e);
+        setFomoPrice(0);
+        toast.error("Could not fetch fomo live price.");
+      }
+    };
+
+    fetchFomoPrice();
+
+    let intervalId = setInterval(async () => {
+      fetchFomoPrice();
+    }, 60000);
+
+    return () => clearInterval(intervalId);
+  }, []);
 
   const openVerifyModal = () => {
     setIsVerifyModalOpen(true);
@@ -316,6 +352,8 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
         setSolBal,
         livePrice,
         setLivePrice,
+        fomoPrice,
+        setFomoPrice,
         globalInfo,
         setGlobalInfo,
         pointTier,

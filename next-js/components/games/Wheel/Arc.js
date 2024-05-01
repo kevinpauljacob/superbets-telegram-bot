@@ -21,7 +21,7 @@ export default function Arc({ index, rotationAngle, risk, segments }) {
     x: 150,
     y: 150,
     R: 140,
-    r: 100,
+    r: 114,
     start: index * rotationAngle,
     end: (index + 1) * rotationAngle,
   });
