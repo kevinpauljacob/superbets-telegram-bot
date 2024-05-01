@@ -1,68 +1,65 @@
-import React from "react";
+import React, { useState } from "react";
 import Image from "next/image";
+import { useGlobalContext } from "./GlobalContext";
+import Telegram from "@/public/assets/Telegram.svg";
+import Twitter from "@/public/assets/Twitter.svg";
+import logo from "@/public/assets/logowhite.svg";
+import { MdOutlineLanguage } from "react-icons/md";
+import { FaChevronDown } from "react-icons/fa6";
 
 function Footer() {
+  const { language, setLanguage } = useGlobalContext();
+  const [langSelect, setLangSelect] = useState(false);
   return (
-    <div className="w-full h-full bg-[#121519] flex flex-col px-[3.5rem]">
-      <div className="w-full flex items-center justify-items-start">
-        <div className="w-[1/3] flex gap-1">
+    <div className="w-full h-full flex flex-col md:px-[3.5rem] px-[3rem]">
+      <div className="w-full h-full flex lg:flex-row flex-col lg:items-center items-start pt-10 gap-2">
+        <div className="w-[1/3] flex items-center lg:pb-24 pb-5">
           <Image
-            src={"/assets/logowhite.svg"}
+            src={logo}
             width={50}
             height={40}
             alt={"FOMO"}
-            className="mb-32"
           ></Image>
           <span className="items-center font-medium text-[1.6rem] text-white">
             FOMO
           </span>
         </div>
-        <div className="w-full flex items-start justify-items-start mt-20 mb-20 gap-5 mx-24">
-          <div className="px-10">
-            <h3 className="font-semibold font-changa text-white text-lg leading-[18px] mb-4 text-opacity-90">
-              Support
-            </h3>
-            <div className="text-[#94A3B8] font-chakra flex flex-col items-start justify-start gap-5 text-sm leading-[14px] font-medium text-opacity-80">
-              <span>Live Support</span>
-              <span>Help Center</span>
-              <span>Game Responsibily</span>
+        <div className="w-[2/3] flex lg:flex-row flex-col items-start lg:pt-20 lg:pb-20 lg:mx-24 mx-2 md:gap-8 gap-5">
+          <div className="flex">
+            <div className="lg:px-10">
+              <h3 className="font-semibold font-changa text-white text-lg leading-[18px] pb-4 text-opacity-90">
+                Services
+              </h3>
+              <div className="text-[#94A3B8] font-chakra flex flex-col items-start justify-start gap-5 text-sm leading-[14px] font-medium text-opacity-80">
+                <span>DCA</span>
+                <span>Roadmap</span>
+                <span>Game Responsibily</span>
+              </div>
+            </div>
+            <div className="px-10">
+              <h3 className="font-semibold font-changa text-white text-lg leading-[18px] pb-4 text-opacity-90">
+                Support
+              </h3>
+              <div className="text-[#94A3B8] font-chakra flex flex-col items-start justify-start gap-5 text-sm leading-[14px] font-medium text-opacity-80">
+                <span>Provably Fair</span>
+                <span>Affiliate Program</span>
+                <span>Redeem Code</span>
+              </div>
             </div>
           </div>
-          <div className="px-10">
-            <h3 className="font-semibold font-changa text-white text-lg leading-[18px] mb-4 text-opacity-90">
-              Platform
-            </h3>
-            <div className="text-[#94A3B8] font-chakra flex flex-col items-start justify-start gap-5 text-sm leading-[14px] font-medium text-opacity-80">
-              <span>Provably Fair</span>
-              <span>Affiliate Program</span>
-              <span>Redeem Code</span>
-            </div>
-          </div>
-          <div className="px-10">
-            <h3 className="font-semibold font-changa text-white text-lg leading-[18px] mb-4 text-opacity-90">
-              Policy
-            </h3>
-            <div className="text-[#94A3B8] font-chakra flex flex-col items-start justify-start gap-5 text-sm leading-[14px] font-medium text-opacity-80">
-              <span>Terms Of Service</span>
-              <span>Privacy Policy</span>
-              <span>AML Policy</span>
-              <span>License</span>
-            </div>
-          </div>
-          <div className="px-10">
-            <h3 className="font-semibold font-changa text-white text-lg leading-[18px] mb-4 text-opacity-90">
+          <div className="lg:px-10">
+            <h3 className="font-semibold font-changa text-white text-lg leading-[18px] b-3 text-opacity-90">
               Community
             </h3>
-            <div className="text-[#94A3B8] font-chakra flex flex-col items-start justify-start gap-5 text-sm leading-[14px] font-medium text-opacity-80">
-              <span>Twitter</span>
-              <span>Telegram</span>
-              <span>BUY FOMO</span>
+            <div className="flex flex-row items-start justify-start gap-2 pt-2">
+              <p className="p-2 border-2 border-[#FFFFFF] rounded-full border-opacity-5"><Image src={Twitter} alt="" width={12} height={12} /></p>
+              <p className="p-2 border-2 border-[#FFFFFF] rounded-full border-opacity-5"><Image src={Telegram} alt="" width={12} height={12} /></p>
             </div>
           </div>
         </div>
       </div>
       <div>
-        <p className="text-[#94A3B8] font-medium font-chakra text-sm leading-6 mt-10 text-opacity-80">
+        <p className="text-[#94A3B8] font-medium font-chakra text-sm leading-6 pt-10 text-opacity-80 md:px-2 md:mx-2">
           Shuffle is owned and operated by Natural Nine B.V., Curaçao company
           registration number 160998, with its registered address at
           Korporaalweg 10, Willemstad, Curaçao. Shuffle is authorized and
@@ -73,7 +70,73 @@ function Footer() {
           Floor 6, 6057 Larnaca, Cyprus. Contact us at support@shuffle.com.
         </p>
       </div>
-      <div className="w-full h-[1px] bg-[#94A3B8] bg-opacity-20 rounded-full mb-20 mt-8" />
+      <div className="w-full h-[1px] bg-[#94A3B8] bg-opacity-20 rounded-full mt-8 md:px-2 md:mx-2"/>
+      <div className="w-full flex lg:flex-row flex-col lg:items-center lg:justify-between lg:pb-36 pb-40 pt-5 font-inter md:px-2 md:mx-2">
+        <span className="text-sm font-normal text-[#FFFFFF] text-opacity-50">@2024 Fomo.com  All rights reserved</span>
+        <div className="flex items-center lg:justify-center gap-5">
+          <span className="font-changa text-[#FFFFFF] text-opacity-25 text-4xl font-semibold md:pt-2">18+</span>
+          <button
+            onClick={() => {
+              setLangSelect(!langSelect);
+            }}
+            className="relative hidden md:flex items-center hover:bg-[#0000009f] transition-all px-5 py-2 rounded-md"
+          >
+            <MdOutlineLanguage className="w-5 h-5 mr-3 text-white text-opacity-50" />
+            <span className="text-white text-sm mr-5 text-start text-opacity-50">
+              {language === "en"
+                ? "English"
+                : language === "ru"
+                  ? "Русский"
+                  : language === "ko"
+                    ? "한국인"
+                    : language === "ch"
+                      ? "中国人"
+                      : ""}
+            </span>
+            <FaChevronDown className="w-3 h-3 text-white" />
+            {langSelect && (
+              <div className="w-full transition-all absolute top-full right-[1px] rounded px-1 py-2 gap-0.5 z-[100] flex flex-col bg-black">
+                <span
+                  onClick={() => {
+                    setLanguage("en");
+                    setLangSelect(false);
+                  }}
+                  className="text-white text-sm py-1 text-opacity-50 hover:bg-[#ffffff21] transition-all rounded"
+                >
+                  English
+                </span>
+                <span
+                  onClick={() => {
+                    setLanguage("ru");
+                    setLangSelect(false);
+                  }}
+                  className="text-white text-sm py-1 text-opacity-50 hover:bg-[#ffffff21] transition-all rounded"
+                >
+                  Русский
+                </span>
+                <span
+                  onClick={() => {
+                    setLanguage("ko");
+                    setLangSelect(false);
+                  }}
+                  className="text-white text-sm py-1 text-opacity-50 hover:bg-[#ffffff21] transition-all rounded"
+                >
+                  한국인
+                </span>
+                <span
+                  onClick={() => {
+                    setLanguage("ch");
+                    setLangSelect(false);
+                  }}
+                  className="text-white text-sm py-1 text-opacity-50 hover:bg-[#ffffff21] transition-all rounded"
+                >
+                  中国人
+                </span>
+              </div>
+            )}
+          </button>
+        </div>
+      </div>
     </div>
   );
 }
