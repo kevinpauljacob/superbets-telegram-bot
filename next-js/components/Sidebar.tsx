@@ -45,19 +45,19 @@ export default function Sidebar({
   const [exitGames, setExitGames] = useState<Game[]>([
     {
       src: "",
-      token: "SOL",
+      token: "$SOL",
       link: "",
       active: false,
     },
     {
       src: "",
-      token: "JUP",
+      token: "$JUP",
       link: "",
       active: false,
     },
     {
       src: "",
-      token: "USDT",
+      token: "$USDT",
       link: "",
       active: false,
     },
@@ -88,6 +88,36 @@ export default function Sidebar({
       link: "/options", // Update the links to include "/"
       active: false,
     },
+    {
+      src: "",
+      token: "Limbo",
+      link: "/limbo", // Update the links to include "/"
+      active: false,
+    },
+    {
+      src: "",
+      token: "Mines",
+      link: "/mines", // Update the links to include "/"
+      active: false,
+    },
+    {
+      src: "",
+      token: "BlackJack",
+      link: "/blackjack", // Update the links to include "/"
+      active: false,
+    },
+    {
+      src: "",
+      token: "Keno",
+      link: "/keno", // Update the links to include "/"
+      active: false,
+    },
+    {
+      src: "",
+      token: "Wheel",
+      link: "/wheel", // Update the links to include "/"
+      active: false,
+    },
   ]);
 
   const toggleExitToken: ToggleGameToken = (index) => {
@@ -106,34 +136,6 @@ export default function Sidebar({
     setCasinoGames(updatedCasinoGames);
   };
 
-  // useEffect(() => {
-  //   // Function to update active state based on current path
-  //   const updateActiveState = (path: string) => {
-  //     // Update the active state for exit games
-  //     setExitGames((prevExitGames) =>
-  //       prevExitGames.map((game) => ({
-  //         ...game,
-  //         active: game.link === path,
-  //       })),
-  //     );
-
-  //     // Update the active state for casino games
-  //     setCasinoGames((prevCasinoGames) =>
-  //       prevCasinoGames.map((game) => ({
-  //         ...game,
-  //         active: game.link === path,
-  //       })),
-  //     );
-  //   };
-
-  //   // Call the function initially with the current pathname
-  //   updateActiveState(router.pathname);
-
-  //   // Return a cleanup function
-  //   return () => {
-  //     // Cleanup code here (if any)
-  //   };
-  // }, [router.pathname]);
 
   useEffect(() => {
     // Function to check if any game link matches the current pathname
@@ -141,10 +143,6 @@ export default function Sidebar({
       return games.some((game) => game.link === router.pathname);
     };
 
-    // Update showExitTokens based on exit game links
-    // setShowExitTokens(isGameActive(exitGames));
-
-    // Update showPlayTokens based on casino game links
     setShowPlayTokens(isGameActive(casinoGames));
   }, [router.pathname, exitGames, casinoGames]);
 
@@ -202,21 +200,21 @@ export default function Sidebar({
             <div
               className={`${
                 sidebar ? "fadeInUp" : "fadeOutDown"
-              } w-full flex flex-col p-4`}
+              } w-full flex flex-col p-4 gap-1.5`}
             >
               <SidebarOpenElement text={"Home"} Icon={Home} link="/"/>
               <div className={`mt-0`}>
                 <div className="w-full transition-all cursor-pointer rounded-md flex items-center justify-between gap-2 pl-4 pr-2 py-2 bg-transparent hover:bg-[#1f2024] focus:bg-[#1f2024] group">
-                  <div className="flex items-center gap-2">
-                    <FomoExitIcon className="min-w-[1rem] min-h-[1rem] transition-all text-[#ababac] group-hover:text-[#9945FF] group-focus:text-[#9945FF]" />
-                    <span className="mt-0.5 transition-all text-base font-changa font-light text-white text-opacity-75 group-hover:text-opacity-100 group-focus:text-opacity-100">
+                  <div className="flex items-center gap-3">
+                    <FomoExitIcon className="min-w-[1.25rem] min-h-[1.25rem] transition-all text-[#ababac] group-hover:text-[#9945FF] group-focus:text-[#9945FF]" />
+                    <span className="mt-0.5 transition-all text-[0.85rem] font-chakra font-medium text-white text-opacity-90 group-hover:text-opacity-100 group-focus:text-opacity-100">
                       FOMO: Exit
                     </span>
                   </div>
                   <button
                     className={`${
-                      showExitTokens ? "bg-[#47484A]" : "bg-[#292C32]"
-                    } hover:bg-[#47484A] transition duration-300 ease-in-out hover:transition hover:duration-300 hover:ease-in-out rounded-md p-3`}
+                      showExitTokens ? "bg-[#47484A]" : "bg-white bg-opacity-5"
+                    } hover:bg-[#47484A] transition duration-300 ease-in-out hover:transition hover:duration-300 hover:ease-in-out rounded-md w-8 h-6 flex justify-center items-center`}
                     onClick={() => setShowExitTokens(!showExitTokens)}
                   >
                     <Image
@@ -226,8 +224,8 @@ export default function Sidebar({
                           : "/assets/downArrow.png"
                       }
                       alt=""
-                      width={10}
-                      height={10}
+                      width={9}
+                      height={9}
                       className=""
                     />
                   </button>
@@ -246,7 +244,7 @@ export default function Sidebar({
                       >
                         {/* <Image src={token.src} alt="" width={15} height={15} /> */}
                         <span
-                          className={`font-changa transition-all ${
+                          className={`text-[0.85rem] font-chakra font-medium transition-all ${
                             token.active
                               ? "text-white/90"
                               : "text-white/50 group-hover:text-white/90"
@@ -261,16 +259,16 @@ export default function Sidebar({
               </div>
               <div className={`mt-0`}>
                 <div className="w-full transition-all cursor-pointer rounded-md flex items-center justify-between gap-2 pl-4 pr-2 py-2 bg-transparent hover:bg-[#1f2024] focus:bg-[#1f2024] group">
-                  <div className="flex items-center gap-2">
-                    <FomoPlayIcon className="min-w-[1rem] min-h-[1rem] transition-all text-[#ababac] group-hover:text-[#9945FF] group-focus:text-[#9945FF]" />
-                    <span className="mt-0.5 transition-all text-base font-changa font-light text-white text-opacity-75 group-hover:text-opacity-100 group-focus:text-opacity-100">
+                  <div className="flex items-center gap-3">
+                    <FomoPlayIcon className="min-w-[1.25rem] min-h-[1.25rem] transition-all text-[#ababac] group-hover:text-[#9945FF] group-focus:text-[#9945FF]" />
+                    <span className="mt-0.5 transition-all text-[0.85rem] font-chakra font-medium text-white text-opacity-90 group-hover:text-opacity-100 group-focus:text-opacity-100">
                       FOMO: Play
                     </span>
                   </div>
                   <button
                     className={`${
-                      showPlayTokens ? "bg-[#47484A]" : "bg-[#292C32]"
-                    } hover:bg-[#47484A] transition duration-300 ease-in-out hover:transition hover:duration-300 hover:ease-in-out rounded-md p-3`}
+                      showPlayTokens ? "bg-[#47484A]" : "bg-white bg-opacity-5"
+                    } hover:bg-[#47484A] transition duration-300 ease-in-out hover:transition hover:duration-300 hover:ease-in-out rounded-md w-8 h-6 flex justify-center items-center`}
                     onClick={() => setShowPlayTokens(!showPlayTokens)}
                   >
                     <Image
@@ -280,8 +278,8 @@ export default function Sidebar({
                           : "/assets/downArrow.png"
                       }
                       alt=""
-                      width={10}
-                      height={10}
+                      width={9}
+                      height={9}
                       className=""
                     />
                   </button>
@@ -299,7 +297,7 @@ export default function Sidebar({
                       >
                         {/* <Image src={token.src} alt="" width={15} height={15} /> */}
                         <span
-                          className={`font-changa transition-all ${
+                          className={`text-[0.85rem] font-chakra font-medium transition-all ${
                             token.active
                               ? "text-white/90"
                               : "text-white/50 group-hover:text-white/90"
@@ -314,7 +312,6 @@ export default function Sidebar({
               </div>
               <SidebarOpenElement text={"DCA"} Icon={Dollar} />
               <SidebarOpenElement text={"Roadmap"} Icon={Flag} />
-              <SidebarOpenElement text={"Buy FOMO"} Icon={Fomo} />
             </div>
           </div>
 
@@ -324,15 +321,15 @@ export default function Sidebar({
             } w-full flex flex-col p-4 mb-0`}
           >
             <Link href="/" className={`${openLinkCss}`}>
-              <Twitter className="w-4 h-4" />
+              <Twitter className="w-5 h-5" />
               Twitter
             </Link>
             <Link href="/" className={`${openLinkCss}`}>
-              <Birdeye className="w-4 h-4" />
+              <Birdeye className="w-5 h-5" />
               Birdeye
             </Link>
             <Link href="/" className={`${openLinkCss}`}>
-              <Telegram className="w-4 h-4" />
+              <Telegram className="w-5 h-5" />
               Telegram
             </Link>
 
@@ -373,7 +370,7 @@ export default function Sidebar({
               }}
               className={`${topIconCss}`}
             >
-              <Home className="w-4 h-4" />
+              <Home className="w-5 h-5" />
             </div>
             <div
               onClick={() => {
@@ -382,7 +379,7 @@ export default function Sidebar({
               }}
               className={`${topIconCss}`}
             >
-              <FomoExitIcon className="w-4 h-4" />
+              <FomoExitIcon className="w-5 h-5" />
             </div>
             <div
               onClick={() => {
@@ -391,27 +388,27 @@ export default function Sidebar({
               }}
               className={`${topIconCss}`}
             >
-              <FomoPlayIcon className="w-4 h-4" />
+              <FomoPlayIcon className="w-5 h-5" />
             </div>
             <div className={`${topIconCss}`}>
-              <Dollar className="w-4 h-4" />
+              <Dollar className="w-5 h-5" />
             </div>
             <div className={`${topIconCss}`}>
-              <Flag className="w-4 h-4" />
+              <Flag className="w-5 h-5" />
             </div>
             <div className={`${topIconCss}`}>
-              <Fomo className="w-4 h-4" />
+              <Fomo className="w-5 h-5" />
             </div>
           </div>
           <div className="w-full flex flex-col items-center mb-2">
             <div className={`${bottomIconCss}`}>
-              <Twitter className="w-4 h-4" />
+              <Twitter className="w-5 h-5" />
             </div>
             <div className={`${bottomIconCss}`}>
-              <Birdeye className="w-4 h-4" />
+              <Birdeye className="w-5 h-5" />
             </div>
             <div className={`${bottomIconCss}`}>
-              <Telegram className="w-4 h-4" />
+              <Telegram className="w-5 h-5" />
             </div>
           </div>
         </div>
@@ -431,9 +428,9 @@ export const SidebarOpenElement = ({
 }) => {
   const router = useRouter()
   return (
-    <div onClick={() => {link && router.push(link)}} className="w-full transition-all cursor-pointer rounded-md flex items-center gap-2 pl-4 py-2 bg-transparent hover:bg-[#1f2024] focus:bg-[#1f2024] group">
-      <Icon className="w-4 h-4 transition-all text-[#ababac] group-hover:text-[#9945FF] group-focus:text-[#9945FF]" />
-      <span className="transition-all text-base font-changa font-light text-white text-opacity-75 group-hover:text-opacity-100 group-focus:text-opacity-100">
+    <div onClick={() => {link && router.push(link)}} className="w-full transition-all cursor-pointer rounded-md flex items-end gap-3 pl-4 py-2 bg-transparent hover:bg-[#1f2024] focus:bg-[#1f2024] group">
+      <Icon className="w-5 h-5 transition-all text-[#ababac] group-hover:text-[#9945FF] group-focus:text-[#9945FF]" />
+      <span className="transition-all text-[0.85rem] mt-1 leading-[1rem] font-chakra font-medium tracking-wider text-white text-opacity-90 group-hover:text-opacity-100 group-focus:text-opacity-100">
         {text}
       </span>
     </div>

@@ -14,11 +14,11 @@ import { useRouter } from "next/router";
 import { translator } from "@/context/transactions";
 import Menu from "/public/assets/menu.svg";
 import ActiveMenu from "/public/assets/activeMenu.svg";
-import Staking from "/public/assets/staking.svg";
+import Staking from "/public/assets/Stake1.svg";
 import ActiveStaking from "/public/assets/activeStaking.svg";
-import Leaderboard from "/public/assets/leaderboard.svg";
+import Leaderboard from "/public/assets/Leaderboard1.svg";
 import ActiveLeaderboard from "/public/assets/activeLeaderboard.svg";
-import Store from "/public/assets/store.svg";
+import Store from "/public/assets/store1.svg";
 import ActiveStore from "/public/assets/activeStore.svg";
 import Dashboard from "/public/assets/dashboard.svg";
 import ActiveDashboard from "/public/assets/activeDashboard.svg";
@@ -39,8 +39,8 @@ export function Header({
     <div className={`${sidebar ? "" : ""} z-[100] sticky top-0 w-full flex flex-col`}>
       <div
         className={`${
-          sidebar ? "z-20" : ""
-        } w-full bg-[#121418] flex flex-col items-center py-4 px-4 border-b border-[#1E2220]`}
+          sidebar ? "" : ""
+        } z-[100] sticky top-0 w-full flex flex-col`}
       >
         <div className="w-full flex flex-row items-center justify-between">
           {/* right */}
@@ -158,25 +158,36 @@ export function Header({
                 onClick={() => {
                   router.push("store");
                 }}
-                className={`hidden sm:flex items-center text-white text-opacity-50 hover:text-opacity-90 focus:text-opacity-90 rounded-full border-2 border-[rgba(255,255,255,0.05)] ${router.pathname.includes('store') ? "bg-[#7839C5]" : ""} hover:bg-[#555555] focus:bg-[#7839C5] transition-all font-medium text-sm p-2`}
+                className={`hidden sm:flex items-center text-white text-opacity-50 hover:text-opacity-90 focus:text-opacity-90 rounded-full border-2 border-[rgba(255,255,255,0.05)] ${
+                  router.pathname.includes("store") ? "bg-[#7839C5]" : ""
+                } hover:bg-[#555555] focus:bg-[#7839C5] transition-all font-medium text-sm p-2`}
               >
-                <IoCartSharp className="w-4 h-4" />
+              <Image src={Store} alt="Store" width={20} height={20} />
               </button>
               <button
                 onClick={() => {
                   router.push("leaderboard");
                 }}
-                className={`hidden sm:flex items-center text-white text-opacity-50 hover:text-opacity-90 focus:text-opacity-90 rounded-full border-2 border-[rgba(255,255,255,0.05)] ${router.pathname.includes('leaderboard') ? "bg-[#7839C5]" : ""} hover:bg-[#555555] focus:bg-[#7839C5] transition-all font-medium text-sm p-2`}
+                className={`hidden sm:flex items-center text-white text-opacity-50 hover:text-opacity-90 focus:text-opacity-90 rounded-full border-2 border-[rgba(255,255,255,0.05)] ${
+                  router.pathname.includes("leaderboard") ? "bg-[#7839C5]" : ""
+                } hover:bg-[#555555] focus:bg-[#7839C5] transition-all font-medium text-sm p-2`}
               >
-                <FaTrophy className="w-4 h-4" />
+                <Image
+                  src={Leaderboard}
+                  alt="Leaderboard"
+                  width={20}
+                  height={20}
+                />
               </button>
               <button
                 onClick={() => {
                   router.push("stake");
                 }}
-                className={`hidden sm:flex items-center text-white text-opacity-50 hover:text-opacity-90 focus:text-opacity-90 rounded-full border-2 border-[rgba(255,255,255,0.05)] ${router.pathname.includes('stake') ? "bg-[#7839C5]" : ""} hover:bg-[#555555] focus:bg-[#7839C5] transition-all font-medium text-sm p-2`}
+                className={`hidden sm:flex items-center text-white text-opacity-50 hover:text-opacity-90 focus:text-opacity-90 rounded-full border-2 border-[rgba(255,255,255,0.05)] ${
+                  router.pathname.includes("stake") ? "bg-[#7839C5]" : ""
+                } hover:bg-[#555555] focus:bg-[#7839C5] transition-all font-medium text-sm p-2`}
               >
-                <BsFillLightningFill className="w-4 h-4" />
+              <Image src={Staking} alt="Staking" width={20} height={20} />
               </button>
               <ConnectWallet />
             </div>
