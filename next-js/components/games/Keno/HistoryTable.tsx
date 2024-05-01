@@ -1,9 +1,9 @@
 import { useWallet } from "@solana/wallet-adapter-react";
 import { useState, useEffect } from "react";
 import { useGlobalContext } from "@/components/GlobalContext";
+import { obfuscatePubKey } from "@/context/transactions";
 import { GameType, seedStatus } from "@/utils/provably-fair";
 import { Table } from "@/components/table/Table";
-import BetRow from "@/components/BetRow";
 
 export interface Keno {
   createdAt: string;
@@ -86,14 +86,13 @@ export default function HistoryTable({ refresh }: { refresh: boolean }) {
                 onClick={() => {
                   //fetch flipDetails and verification details here
                   
-                  // if (!all) {
+                  if (!all) {
                     setVerifyModalData(bet);
                     openModal();
-                  // }
+                  }
                 }}
               >
-                <BetRow bet={bet} all={all} />
-                {/* <span className="w-full text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
+                <span className="w-full text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
                   {bet.createdAt
                     ? new Date(bet.createdAt).toLocaleDateString("en-GB", {
                         day: "2-digit",
@@ -125,7 +124,7 @@ export default function HistoryTable({ refresh }: { refresh: boolean }) {
                   }`}
                 >
                   {bet.amountWon.toFixed(4)} SOL
-                </span> */}
+                </span>
               </div>
             </>
           ))

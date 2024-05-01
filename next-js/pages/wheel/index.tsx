@@ -21,6 +21,7 @@ import showInfoToast from "@/components/games/toasts/toasts";
 import ResultsSlider from "@/components/ResultsSlider";
 import Arc from "@/components/games/Wheel/Arc";
 import { riskToChance } from "@/components/games/Wheel/Segments";
+import Bets from "../../components/games/Bets";
 
 export default function Wheel() {
   const wallet = useWallet();
@@ -653,7 +654,8 @@ export default function Wheel() {
         </div>
       </GameDisplay>
       <GameTable>
-        <HistoryTable refresh={refresh} />
+        {/* <HistoryTable refresh={refresh} /> */}
+        <Bets refresh={refresh} game={"wheel"} />
       </GameTable>
     </GameLayout>
   );

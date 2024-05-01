@@ -22,6 +22,7 @@ import BetButton from "@/components/games/BetButton";
 import ResultsSlider from "@/components/ResultsSlider";
 import showInfoToast from "@/components/games/toasts/toasts";
 import BalanceAlert from "@/components/games/BalanceAlert";
+import Bets from "../../components/games/Bets";
 
 const Timer = dynamic(() => import("../../components/games/Timer"), {
   ssr: false,
@@ -527,7 +528,8 @@ export default function Flip() {
         </>
       </GameDisplay>
       <GameTable>
-        <HistoryTable refresh={refresh} />
+        {/* <HistoryTable refresh={refresh} /> */}
+        <Bets refresh={refresh} game={"coinflip"} />
       </GameTable>
     </GameLayout>
   );

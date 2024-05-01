@@ -4,7 +4,8 @@ import toast from "react-hot-toast";
 import { obfuscatePubKey } from "@/context/transactions";
 import { GameType } from "@/utils/provably-fair";
 import { Table } from "../table/Table";
-import BetRow from "../BetRow";
+import BetRow from "./BetRow";
+
 interface Bet {
   wallet: string;
   betTime?: string;
@@ -18,7 +19,7 @@ interface Bet {
   tokenMint?: string;
 }
 
-export default function Bets({ refresh }: { refresh: boolean }) {
+export default function Bets({ refresh, game }: { refresh: boolean, game: any }) {
   const wallet = useWallet();
   const transactionsPerPage = 10;
   const [all, setAll] = useState(wallet.publicKey ? false : true);
@@ -29,10 +30,8 @@ export default function Bets({ refresh }: { refresh: boolean }) {
   useEffect(() => {
     if (refresh) {
       const route = all
-        ? `/api/games/global/getHistory?game=${GameType.options}`
-        : `/api/games/global/getUserHistory?game=${
-            GameType.options
-          }&wallet=${wallet.publicKey?.toBase58()}`;
+        ? `/api/games/global/getHistory?game=${game}`
+        : `/api/games/global/getUserHistory?game=${game}&wallet=${wallet.publicKey?.toBase58()}`;
 
       fetch(`${route}`)
         .then((res) => res.json())

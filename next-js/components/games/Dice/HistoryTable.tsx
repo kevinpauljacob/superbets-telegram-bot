@@ -5,7 +5,6 @@ import Image from "next/image";
 import { useGlobalContext } from "@/components/GlobalContext";
 import { GameType, seedStatus } from "@/utils/provably-fair";
 import { Table } from "@/components/table/Table";
-import BetRow from "@/components/BetRow";
 
 export interface Dice {
   createdAt: string;
@@ -37,7 +36,6 @@ export default function HistoryTable({ refresh }: { refresh: boolean }) {
     setVerifyModalData,
   } = useGlobalContext();
 
-
   const [page, setPage] = useState(1);
   const [bets, setBets] = useState<Dice[]>([]);
   const transactionsPerPage = 10;
@@ -46,8 +44,9 @@ export default function HistoryTable({ refresh }: { refresh: boolean }) {
   useEffect(() => {
     const route = all
       ? `/api/games/global/getHistory?game=${GameType.dice}`
-      : `/api/games/global/getUserHistory?game=${GameType.dice
-      }&wallet=${wallet.publicKey?.toBase58()}`;
+      : `/api/games/global/getUserHistory?game=${
+          GameType.dice
+        }&wallet=${wallet.publicKey?.toBase58()}`;
 
     fetch(`${route}`)
       .then((res) => res.json())
@@ -84,13 +83,68 @@ export default function HistoryTable({ refresh }: { refresh: boolean }) {
               onClick={() => {
                 //fetch flipDetails and verification details here
 
-                // if (!all) {
-                setVerifyModalData(bet);
-                openModal();
-                // }
+                if (!all) {
+                  setVerifyModalData(bet);
+                  openModal();
+                }
               }}
             >
-              <BetRow bet={bet} all={all} />
+              <span className="w-full text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
+                {bet.createdAt
+                  ? new Date(bet.createdAt).toLocaleDateString("en-GB", {
+                      day: "2-digit",
+                      month: "2-digit",
+                      year: "2-digit",
+                    })
+                  : "-"}{" "}
+                {bet.createdAt
+                  ? new Date(bet.createdAt).toLocaleTimeString("en-GB", {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })
+                  : "-"}
+              </span>
+              {all && (
+                <span className="w-full hidden md:block text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
+                  {obfuscatePubKey(bet.wallet)}
+                </span>
+              )}
+              <span className="w-full hidden md:block text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
+                {bet.chosenNumbers.map((face, index) => (
+                  <span key={index} className="mr-2 mt-2 inline-block">
+                    <Image
+                      src={`/assets/selectedDiceFace${face}.png`}
+                      width={30}
+                      height={30}
+                      alt=""
+                    />
+                  </span>
+                ))}
+              </span>
+              <span className="w-full hidden md:block text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
+                {(bet.amount ?? 0).toFixed(4)}
+              </span>
+              <span className="w-full hidden md:block text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
+                <span className="mr-2 mt-2 inline-block">
+                  <Image
+                    src={`/assets/selectedDiceFace${bet.strikeNumber}.png`}
+                    width={30}
+                    height={30}
+                    alt=""
+                  />
+                </span>
+              </span>
+              <span
+                className={`w-full text-center font-changa text-sm text-opacity-75 ${
+                  bet.result === "Lost"
+                    ? "text-[#CF304A]"
+                    : bet.result === "Won"
+                    ? "text-[#03A66D]"
+                    : "text-[#F0F0F0]"
+                }`}
+              >
+                {bet.amountWon.toFixed(4)} SOL
+              </span>
             </div>
           ))
       ) : (

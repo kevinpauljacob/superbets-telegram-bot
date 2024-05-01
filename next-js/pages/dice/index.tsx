@@ -30,6 +30,7 @@ import BetButton from "@/components/games/BetButton";
 import ResultsSlider from "@/components/ResultsSlider";
 import showInfoToast from "@/components/games/toasts/toasts";
 import { loopSound, soundAlert } from "@/utils/soundUtils";
+import Bets from "../../components/games/Bets";
 
 export default function Dice() {
   const wallet = useWallet();
@@ -632,7 +633,8 @@ export default function Dice() {
         </>
       </GameDisplay>
       <GameTable>
-        <HistoryTable refresh={refresh} />
+        {/* <HistoryTable refresh={refresh} /> */}
+        <Bets refresh={refresh} game={"dice"}/>
       </GameTable>
     </GameLayout>
   );
