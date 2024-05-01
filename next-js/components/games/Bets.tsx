@@ -1,8 +1,6 @@
 import { useWallet } from "@solana/wallet-adapter-react";
+import { useGlobalContext } from "../GlobalContext";
 import { useState, useEffect } from "react";
-import toast from "react-hot-toast";
-import { obfuscatePubKey } from "@/context/transactions";
-import { GameType } from "@/utils/provably-fair";
 import { Table } from "../table/Table";
 import BetRow from "./BetRow";
 
@@ -26,6 +24,14 @@ export default function Bets({ refresh, game }: { refresh: boolean, game: any })
   const [page, setPage] = useState(1);
   const [maxPages, setMaxPages] = useState(0);
   const [bets, setBets] = useState<Bet[]>([]);
+  
+  const {
+    isVerifyModalOpen: isOpen,
+    setIsVerifyModalOpen: setIsOpen,
+    openVerifyModal: openModal,
+    closeVerifyModal: closeModal,
+    setVerifyModalData,
+  } = useGlobalContext();
 
   useEffect(() => {
     if (refresh) {
@@ -47,6 +53,58 @@ export default function Bets({ refresh, game }: { refresh: boolean, game: any })
     }
   }, [all, refresh]);
 
+  const dummyBets = [
+    {
+      wallet: "57oQaJeLmnyMXj3QRxuU53BVHerWGmRx7ATvwWHhZXTJ",
+      game: "coinflip",
+      amount: 0.01,
+      multiplier: 1.5,
+      amountWon: 0.015,
+    },
+    {
+      wallet: "3WZ8eABzLuR8PWrFFhURCQcrNupmRtWkZsDLNqayrUyP",
+      game: "dice",
+      amount: 0.02,
+      multiplier: 2.0,
+      amountWon: 0.04,
+    },
+    {
+      wallet: "6GTsRDJwD7pyeNmWqkYb2qhwG26R7MnEvAqZpbUhSUT3",
+      game: "dice2",
+      amount: 0.03,
+      multiplier: 2.5,
+      amountWon: 0.075,
+    },
+    {
+      wallet: "9Atq9QmqbBg6dNX34KPETVFkU5qScZVgsVR47h92MHyR",
+      game: "limbo",
+      amount: 0.04,
+      multiplier: 3.0,
+      amountWon: 0.12,
+    },
+    {
+      wallet: "8KrZhywFq8xGav7DQ2wwFCKn2Jx3XZksUDqKGnvHUJJR",
+      game: "wheel",
+      amount: 0.05,
+      multiplier: 3.5,
+      amountWon: 0.175,
+    },
+    {
+      wallet: "2NrMQB9Epxdrkbgm9gWseEU1qf3xzNM8YHmgWJ3p4njn",
+      game: "keno",
+      amount: 0.06,
+      multiplier: 4.0,
+      amountWon: 0.24,
+    },
+    {
+      wallet: "4g3RrSMy9VQK6pXVzC3fegQMHjvT2r3jgwWGx3fK3UKc",
+      game: "options",
+      amount: 0.07,
+      multiplier: 4.5,
+      amountWon: 0.315,
+    },
+  ];
+
   return (
     <Table
       all={all}
@@ -56,8 +114,8 @@ export default function Bets({ refresh, game }: { refresh: boolean, game: any })
       maxPages={maxPages}
       bets={bets}
     >
-      {bets.length > 0 ? (
-        bets
+      {dummyBets.length > 0 ? (
+        dummyBets
           .slice(
             page * transactionsPerPage - transactionsPerPage,
             page * transactionsPerPage,
@@ -67,67 +125,7 @@ export default function Bets({ refresh, game }: { refresh: boolean, game: any })
               key={index}
               className="mb-2.5 flex w-full flex-row items-center gap-2 rounded-[5px] bg-[#121418] py-3"
             >
-              <BetRow bet={bet} all={all}/>
-              {/* <span className="w-full text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
-                {bet.betTime
-                  ? new Date(bet.betTime).toLocaleDateString("en-GB", {
-                      day: "2-digit",
-                      month: "2-digit",
-                      year: "2-digit",
-                    })
-                  : "-"}{" "}
-                {bet.betTime
-                  ? new Date(bet.betTime).toLocaleTimeString("en-GB", {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })
-                  : "-"}
-              </span>
-              {all && (
-                <span className="w-full hidden md:block text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
-                  {obfuscatePubKey(bet.wallet)}
-                </span>
-              )}
-              <span className="w-full hidden md:block text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
-                {bet.betType === "betUp" ? "UP" : "DOWN"}
-              </span>
-              <span className="w-full hidden md:block text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
-                {bet.amount.toFixed(4)}
-              </span>
-              {!all && (
-                <span className="w-full hidden md:block text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
-                  {bet.strikePrice?.toFixed(4)}
-                </span>
-              )}
-              {!all && (
-                <span className="w-full hidden md:block text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
-                  {bet.timeFrame}
-                </span>
-              )}
-              <span
-                className={`w-full hidden md:block text-center font-changa text-sm text-opacity-75 ${
-                  bet.result === "Lost"
-                    ? "text-[#CF304A]"
-                    : bet.result === "Won"
-                    ? "text-[#03A66D]"
-                    : "text-[#F0F0F0]"
-                }`}
-              >
-                {bet.result}
-              </span>
-              <span
-                className={`w-full block md:hidden text-center  font-changa text-sm text-opacity-75 ${
-                  bet.result === "Lost"
-                    ? "text-[#CF304A]"
-                    : bet.result === "Won"
-                    ? "text-[#03A66D]"
-                    : "text-[#F0F0F0]"
-                }`}
-              >
-                {bet.result === "Pending"
-                  ? "-"
-                  : (bet.result === "Lost" ? 0 : bet.amount).toFixed(4)}
-              </span> */}
+              <BetRow bet={bet} all={all} openModal={openModal} setVerifyModalData={setVerifyModalData}/>
             </div>
           ))
       ) : (

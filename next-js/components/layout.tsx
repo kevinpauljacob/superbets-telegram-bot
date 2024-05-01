@@ -60,6 +60,8 @@ export default function Layout({ children }: LayoutProps) {
     openPFModal,
     setOpenPFModal,
     getProvablyFairData,
+    currentGame,
+    setCurrentGame
   } = useGlobalContext();
 
   const [modalData, setModalData] = useState({
@@ -111,7 +113,8 @@ export default function Layout({ children }: LayoutProps) {
       getBalance();
       getWalletBalance();
     }
-  }, [session?.user, showWalletModal]);
+    setCurrentGame(game)
+  }, [session?.user, showWalletModal, game]);
 
   return (
     <>
@@ -138,37 +141,37 @@ export default function Layout({ children }: LayoutProps) {
       {showWalletModal && <BalanceModal />}
 
       {/* verify modals  */}
-      {game === GameType.coin ? (
+      {currentGame === GameType.coin ? (
         <VerifyFlipModal
           isOpen={isVerifyModalOpen}
           onClose={closeVerifyModal}
           modalData={{ flip: (verifyModalData as Flip)! }}
         />
-      ) : game === GameType.dice ? (
+      ) : currentGame === GameType.dice ? (
         <VerifyDiceModal
           isOpen={isVerifyModalOpen}
           onClose={closeVerifyModal}
           modalData={{ bet: (verifyModalData as Dice)! }}
         />
-      ) : game === GameType.dice2 ? (
+      ) : currentGame === GameType.dice2 ? (
         <VerifyDice2Modal
           isOpen={isVerifyModalOpen}
           onClose={closeVerifyModal}
           modalData={{ bet: (verifyModalData as Dice2)! }}
         />
-      ) : game === GameType.limbo ? (
+      ) : currentGame === GameType.limbo ? (
         <VerifyLimboModal
           isOpen={isVerifyModalOpen}
           onClose={closeVerifyModal}
           modalData={{ flip: (verifyModalData as Limbo)! }}
         />
-      ) : game === GameType.wheel ? (
+      ) : currentGame === GameType.wheel ? (
         <VerifyWheelModal
           isOpen={isVerifyModalOpen}
           onClose={closeVerifyModal}
           modalData={{ bet: (verifyModalData as Wheel)! }}
         />
-      ) : game === GameType.keno ? (
+      ) : currentGame === GameType.keno ? (
         <VerifyKenoModal
           isOpen={isVerifyModalOpen}
           onClose={closeVerifyModal}

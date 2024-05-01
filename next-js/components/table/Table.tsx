@@ -109,11 +109,6 @@ interface TableNodeProps {
   children: ReactNode;
 }
 
-// interface TableHeaderProps extends TableButtonProps {
-//   smallScreenHeaders: string[];
-//   allSmallScreenHeaders: string[];
-// }
-
 export const TableHeader = ({
   all,
   setAll,
@@ -147,7 +142,6 @@ export const TableHeader = ({
       </div>
       <div className="mb-5 flex md:hidden w-full flex-row items-center bg-[#121418] rounded-md py-1 gap-2">
         {
-        // !all ? 
           smallScreenHeaders.map((header, index) => (
             <span
               key={index}
@@ -155,14 +149,6 @@ export const TableHeader = ({
             >
               {header}
             </span>
-          // ))
-          // : allSmallScreenHeaders.map((header, index) => (
-          //   <span
-          //     key={index}
-          //     className="w-full text-center font-changa text-[#F0F0F080]"
-          //   >
-          //     {header}
-          //   </span>
           ))}
       </div>
     </>

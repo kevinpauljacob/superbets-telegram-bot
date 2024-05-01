@@ -160,7 +160,7 @@ export default function VerifyLimboModal({
                   <input
                     type="text"
                     name="chance"
-                    value={flip.chance.toFixed(8)}
+                    value={flip.chance?.toFixed(8)}
                     className="bg-[#202329] text-white font-chakra text-xs font-medium mt-1 rounded-md p-3 w-full relative"
                     readOnly
                   />

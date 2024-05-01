@@ -137,19 +137,19 @@ export default function VerifyDice2Modal({
                       <div
                         key={number}
                         className={`flex items-center justify-center cursor-pointer ${
-                          bet.strikeNumbers.length === 0 &&
-                          bet.chosenNumbers.includes(number)
+                          bet.strikeNumbers?.length === 0 &&
+                          bet.chosenNumbers?.includes(number)
                             ? "bg-[#7839C5]"
-                            : bet.strikeNumbers.includes(number) &&
-                              bet.chosenNumbers.includes(number)
+                            : bet.strikeNumbers?.includes(number) &&
+                              bet.chosenNumbers?.includes(number)
                             ? "bg-black border-2 border-fomo-green"
-                            : bet.chosenNumbers.includes(number)
+                            : bet.chosenNumbers?.includes(number)
                             ? "bg-black border-2 border-fomo-red text-fomo-red"
                             : "bg-[#202329]"
                         } rounded-md text-center transition-all duration-300 ease-in-out w-[45px] h-[45px]`}
                       >
-                        {bet.strikeNumbers.includes(number) &&
-                        bet.chosenNumbers.includes(number) ? (
+                        {bet.strikeNumbers?.includes(number) &&
+                        bet.chosenNumbers?.includes(number) ? (
                           <div className="flex justify-center items-center bg-[#FFD100] text-black rounded-full w-[32px] h-[32px]">
                             {number}
                           </div>

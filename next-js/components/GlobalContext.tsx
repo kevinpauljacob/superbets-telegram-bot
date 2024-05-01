@@ -133,6 +133,9 @@ interface GlobalContextProps {
   getWalletBalance: () => Promise<void>;
   getBalance: () => Promise<void>;
   getProvablyFairData: () => Promise<ProvablyFairData | null>;
+
+  currentGame: string | null;
+  setCurrentGame: (currentGame: string | null) => void;
 }
 
 const GlobalContext = createContext<GlobalContextProps | undefined>(undefined);
@@ -194,6 +197,8 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
 
   // fomo live price
   const [fomoPrice, setFomoPrice] = useState<number>(0);
+  const [currentGame, setCurrentGame] = useState<string | null>(null);
+
   useEffect(() => {
     const fetchFomoPrice = async () => {
       try {
@@ -401,6 +406,8 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
         getWalletBalance,
         getBalance,
         getProvablyFairData,
+        currentGame,
+        setCurrentGame
       }}
     >
       {children}
