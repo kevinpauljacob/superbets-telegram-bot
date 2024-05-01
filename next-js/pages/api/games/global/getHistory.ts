@@ -6,19 +6,17 @@ import { gameModelMap } from "@/models/games";
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === "GET") {
     try {
-      // Get the game type from the query
-      const game = req.query.game as string;
-
-      if (!Object.entries(GameType).some(([_, value]) => value === game))
-        return res
-          .status(400)
-          .json({ success: false, message: "Invalid game type" });
-
       await connectDatabase();
 
-      const model = gameModelMap[game as keyof typeof gameModelMap];
+      const data: any[] = [];
 
-      const data = await model.find({}).sort({ createdAt: -1 }).limit(1000);
+      for (const [_, value] of Object.entries(GameType)) {
+        const game = value;
+        const model = gameModelMap[game as keyof typeof gameModelMap];
+
+        const records = await model.find({}).sort({ createdAt: -1 }).limit(200);
+        data.concat(records);
+      }
 
       return res.json({
         success: true,
