@@ -28,10 +28,9 @@ export default function Birdeye({ className }: { className: string }) {
             stroke="currentColor"
             strokeWidth="10"
             d="M10.658 13.259a7.105 7.105 0 112.457-2.364L10.711 9.38a4.263 4.263 0 10-1.474 1.418l1.42 2.462z"
-            ></path>
-            </g>
-
-            <path
+          ></path>
+        </g>
+        <path
           fill="currentColor"
           d="M7.105 9.886a2.78 2.78 0 100-5.561 2.78 2.78 0 000 5.56z"
         ></path>
@@ -43,4 +42,4 @@ export default function Birdeye({ className }: { className: string }) {
       </defs>
     </svg>
   );
-}  
+}

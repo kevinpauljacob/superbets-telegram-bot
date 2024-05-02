@@ -8,7 +8,7 @@ export default function Flag({ className }: { className: string }) {
       viewBox="0 0 20 20"
       className={`${className ?? "text-white"}`}
     >
-    <path fill="currentColor" stroke="#fff" d="M5 10h10l-3.75-3.75L15 2.5H5v15"></path>
+    <path stroke="currentColor" d="M5 10h10l-3.75-3.75L15 2.5H5v15"></path>
     </svg>
   );
 }

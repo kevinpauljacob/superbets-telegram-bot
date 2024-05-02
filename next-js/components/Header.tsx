@@ -40,7 +40,7 @@ export function Header({
       <div
         className={`${
           sidebar ? "" : ""
-        } z-[100] sticky top-0 w-full flex flex-col`}
+        } w-full bg-[#121418] flex flex-col items-center py-4 px-4 border-b border-[#1E2220]`}
       >
         <div className="w-full flex flex-row items-center justify-between">
           {/* right */}
