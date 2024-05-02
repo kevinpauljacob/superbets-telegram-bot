@@ -2,13 +2,29 @@ import { GameType, seedStatus } from "@/utils/provably-fair";
 import Image from "next/image";
 import { useState } from "react";
 import { IoIosArrowDown, IoMdCopy } from "react-icons/io";
-import { Flip } from "./HistoryTable";
 import CoinFlipProvablyFairModal, {
   PFModalData,
 } from "./CoinFlipProvablyFairModal";
 import { useGlobalContext } from "@/components/GlobalContext";
 import { FaRegCopy } from "react-icons/fa6";
-import { MdCancel } from "react-icons/md";
+import { MdClose } from "react-icons/md";
+
+export interface Flip {
+  flipType: "heads" | "tails";
+  createdAt: string;
+  wallet: string;
+  amount: number;
+  result: "Won" | "Lost";
+  amountWon: number;
+  nonce?: number;
+  gameSeed?: {
+    status: seedStatus;
+    clientSeed: string;
+    nonce: number;
+    serverSeed?: string;
+    serverSeedHash: string;
+  };
+}
 
 interface ModalData {
   flip: Flip;
@@ -287,7 +303,7 @@ export default function VerifyFlipModal({ isOpen, onClose, modalData }: Props) {
                 </div>
               )}
             </div>
-            <MdCancel
+            <MdClose
               onClick={() => {
                 onClose();
               }}

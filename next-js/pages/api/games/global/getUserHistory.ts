@@ -1,40 +1,64 @@
 import connectDatabase from "../../../../utils/database";
 import { NextApiRequest, NextApiResponse } from "next";
-import { gameModelMap } from "@/models/games";
+import { gameModelMap, User } from "@/models/games";
 import { GameType, seedStatus } from "@/utils/provably-fair";
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === "GET") {
     try {
-      // Get the game type from the query
-      const game = req.query.game as string;
+      const wallet = req.query.wallet;
 
-      if (!Object.entries(GameType).some(([_, value]) => value === game))
+      if (!wallet)
         return res
           .status(400)
-          .json({ success: false, message: "Invalid game type" });
+          .json({ success: false, message: "Invalid wallet" });
 
       await connectDatabase();
 
-      const wallet = req.query.wallet;
+      const user = await User.findOne({ wallet });
+      if (!user)
+        return res.json({ success: true, data: [], message: "No data found" });
 
-      const model = gameModelMap[game as keyof typeof gameModelMap];
+      const data: any[] = [];
 
-      let nonExpired = await model.find(
-        { wallet, "gameSeed.status": { $ne: seedStatus.EXPIRED } },
-        { "gameSeed.serverSeed": 0 },
-        { populate: { path: "gameSeed" } },
-      );
+      for (const [_, value] of Object.entries(GameType)) {
+        const game = value;
+        if (game === GameType.options) continue;
 
-      let expired = await model.find(
-        { wallet, "gameSeed.status": seedStatus.EXPIRED },
-        {},
-        { populate: { path: "gameSeed" } },
-      );
+        const model = gameModelMap[game as keyof typeof gameModelMap];
 
-      const data = [...nonExpired, ...expired].sort(
-        (a: any, b: any) => b.createdAt - a.createdAt,
-      );
+        const nonExpired = await model
+          .find(
+            { wallet, "gameSeed.status": { $ne: seedStatus.EXPIRED } },
+            { "gameSeed.serverSeed": 0, createdAt: -1 },
+            { populate: { path: "gameSeed" } },
+          )
+          .limit(100);
+
+        const nonExpiredWithGame = nonExpired.map((record) => ({
+          ...record._doc,
+          game,
+        }));
+
+        const expired = await model
+          .find(
+            { wallet, "gameSeed.status": seedStatus.EXPIRED },
+            { createdAt: -1 },
+            { populate: { path: "gameSeed" } },
+          )
+          .limit(100);
+
+        const expiredWithGame = expired.map((record) => ({
+          ...record._doc,
+          game,
+        }));
+
+        data.push(...nonExpiredWithGame, ...expiredWithGame);
+      }
+
+      data.sort((a: any, b: any) => {
+        return b.createdAt.getTime() - a.createdAt.getTime();
+      });
 
       return res.json({
         success: true,

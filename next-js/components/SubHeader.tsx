@@ -13,7 +13,7 @@ export default function SubHeader() {
   type Card = {
     game: GameType;
     wallet: string;
-    absAmount: number;
+    amountWon: number;
     result: "Won" | "Lost";
     userTier: string;
   };
@@ -52,7 +52,7 @@ export default function SubHeader() {
       const response = JSON.parse(event.data.toString());
 
       console.log("Received message from server:", response);
-      if (!response.payload) return;
+      if (!response.payload || response.result === "Lost") return;
 
       const payload = response.payload;
       setCards((prev) => {
@@ -109,15 +109,9 @@ export default function SubHeader() {
                     {trimStringToLength(card.wallet, 3)}
                   </span>
                 </div>
-                {card.result === "Won" ? (
-                  <p className="text-[#72F238] font-changa text-sm mt-1">
-                    +${(card.absAmount ?? 0).toFixed(2)}
-                  </p>
-                ) : (
-                  <p className="text-[#F23838] font-change text-sm mt-1">
-                    -${(card.absAmount ?? 0).toFixed(2)}
-                  </p>
-                )}
+                <p className="text-[#72F238] font-changa text-sm mt-1">
+                  +${(card.amountWon ?? 0).toFixed(2)}
+                </p>
               </div>
             </Link>
           ))}

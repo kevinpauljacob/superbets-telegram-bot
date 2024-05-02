@@ -277,28 +277,30 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         gameSeed: activeGameSeed._id,
       });
 
-      if (result === "Won") {
-        const socket = new WebSocket(wsEndpoint);
+      const socket = new WebSocket(wsEndpoint);
 
-        socket.onopen = () => {
-          socket.send(
-            JSON.stringify({
-              clientType: "api-client",
-              channel: "fomo-casino_games-channel",
-              authKey: process.env.FOMO_CHANNEL_AUTH_KEY!,
-              payload: {
-                game: GameType.roulette1,
-                wallet,
-                absAmount: amountWon.sub(amount).toNumber(),
-                result,
-                userTier,
-              },
-            }),
-          );
+      socket.onopen = () => {
+        socket.send(
+          JSON.stringify({
+            clientType: "api-client",
+            channel: "fomo-casino_games-channel",
+            authKey: process.env.FOMO_CHANNEL_AUTH_KEY!,
+            payload: {
+              game: GameType.roulette1,
+              wallet,
+              result,
+              userTier,
+              time: new Date(),
+              //TODO:
+              strikeMultiplier: 1,
+              amount,
+              amountWon: amountWon.toNumber(),
+            },
+          }),
+        );
 
-          socket.close();
-        };
-      }
+        socket.close();
+      };
 
       return res.status(201).json({
         success: true,

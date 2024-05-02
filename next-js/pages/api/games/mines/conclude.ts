@@ -57,7 +57,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           .status(400)
           .json({ success: false, message: "Game does not exist !" });
 
-      let { nonce, gameSeed, minesCount, amountWon } = gameInfo;
+      let { nonce, gameSeed, minesCount, amount, amountWon, strikeMultiplier } =
+        gameInfo;
 
       const userData = await StakingUser.findOne({ wallet });
       let points = userData?.points ?? 0;
@@ -124,9 +125,12 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
             payload: {
               game: GameType.mines,
               wallet,
-              absAmount: amountWon,
               result,
               userTier,
+              time: new Date(),
+              strikeMultiplier,
+              amount,
+              amountWon,
             },
           }),
         );

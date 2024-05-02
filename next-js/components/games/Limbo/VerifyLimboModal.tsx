@@ -1,11 +1,28 @@
 import { seedStatus } from "@/utils/provably-fair";
 import { useState } from "react";
 import { IoIosArrowDown, IoMdCopy } from "react-icons/io";
-import { Limbo } from "./HistoryTable";
 import LimboProvablyFairModal, { PFModalData } from "./LimboProvablyFairModal";
 import { useGlobalContext } from "@/components/GlobalContext";
 import { FaRegCopy } from "react-icons/fa6";
-import { MdCancel } from "react-icons/md";
+import { MdClose } from "react-icons/md";
+
+export interface Limbo {
+  chance: number;
+  createdAt: string;
+  wallet: string;
+  amount: number;
+  result: "Won" | "Lost";
+  strikeNumber: number;
+  amountWon: number;
+  nonce?: number;
+  gameSeed?: {
+    status: seedStatus;
+    clientSeed: string;
+    nonce: number;
+    serverSeed?: string;
+    serverSeedHash: string;
+  };
+}
 
 interface ModalData {
   flip: Limbo;
@@ -160,7 +177,7 @@ export default function VerifyLimboModal({
                   <input
                     type="text"
                     name="chance"
-                    value={flip.chance.toFixed(8)}
+                    value={flip.chance?.toFixed(8)}
                     className="bg-[#202329] text-white font-chakra text-xs font-medium mt-1 rounded-md p-3 w-full relative"
                     readOnly
                   />
@@ -280,7 +297,7 @@ export default function VerifyLimboModal({
                 </div>
               )}
             </div>
-            <MdCancel
+            <MdClose
               onClick={() => {
                 onClose();
               }}

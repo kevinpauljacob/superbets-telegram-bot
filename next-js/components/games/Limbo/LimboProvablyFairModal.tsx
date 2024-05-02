@@ -4,11 +4,11 @@ import {
   generateGameResult,
 } from "@/utils/provably-fair";
 import { useEffect, useState } from "react";
-import { Limbo } from "./HistoryTable";
+import { Limbo } from "./VerifyLimboModal";
 import Image from "next/image";
 import toast from "react-hot-toast";
 import { FaRegCopy } from "react-icons/fa6";
-import { MdCancel } from "react-icons/md";
+import { MdClose } from "react-icons/md";
 import CheckPF from "@/public/assets/CheckPF.svg";
 
 export interface PFModalData {
@@ -170,7 +170,7 @@ export default function LimboProvablyFairModal({
                 PROVABLY FAIR
               </div>
               <div className="hover:cursor-pointer">
-                <MdCancel
+                <MdClose
                   size={25}
                   color="#F0F0F0"
                   onClick={() => {

@@ -3,7 +3,7 @@ import dynamic from "next/dynamic";
 import { useWallet } from "@solana/wallet-adapter-react";
 import toast from "react-hot-toast";
 import { placeFlip } from "../../context/gameTransactions";
-import HistoryTable from "../../components/games/CoinFlip/HistoryTable";
+import HistoryTable from "../../components/games/CoinFlip/VerifyFlipModal";
 import Image from "next/image";
 import { FormProvider, useForm } from "react-hook-form";
 import { useGlobalContext } from "@/components/GlobalContext";
@@ -22,6 +22,7 @@ import BetButton from "@/components/games/BetButton";
 import ResultsSlider from "@/components/ResultsSlider";
 import showInfoToast from "@/components/games/toasts/toasts";
 import BalanceAlert from "@/components/games/BalanceAlert";
+import Bets from "../../components/games/Bets";
 import { soundAlert } from "@/utils/soundUtils";
 
 const Timer = dynamic(() => import("../../components/games/Timer"), {
@@ -494,13 +495,17 @@ export default function Flip() {
               className={`absolute ${
                 betType && loading
                   ? "translateZ1"
-                  : result === "Won"
-                  ? betType === "Tails"
-                    ? "z-[100]"
-                    : "z-[10]"
+                  : result
+                  ? result === "Won"
+                    ? betType === "Tails"
+                      ? "z-[100]"
+                      : "z-[10]"
+                    : betType === "Tails"
+                    ? "z-[10]"
+                    : "z-[100]"
                   : betType === "Tails"
-                  ? "z-[10]"
-                  : "z-[100]"
+                  ? "z-[100]"
+                  : "z-[10]"
               }`}
             />
             <Image
@@ -512,13 +517,17 @@ export default function Flip() {
               className={`absolute ${
                 betType && loading
                   ? "z-[10]"
-                  : result === "Won"
-                  ? betType === "Heads"
-                    ? "z-[100]"
-                    : "z-[1]"
+                  : result
+                  ? result === "Won"
+                    ? betType === "Heads"
+                      ? "z-[100]"
+                      : "z-[1]"
+                    : betType === "Heads"
+                    ? "z-[1]"
+                    : "z-[100]"
                   : betType === "Heads"
-                  ? "z-[1]"
-                  : "z-[100]"
+                  ? "z-[100]"
+                  : "z-[10]"
               }`}
             />
           </div>
@@ -531,7 +540,8 @@ export default function Flip() {
         </>
       </GameDisplay>
       <GameTable>
-        <HistoryTable refresh={refresh} />
+        {/* <HistoryTable refresh={refresh} /> */}
+        <Bets refresh={refresh} game={"coinflip"} />
       </GameTable>
     </GameLayout>
   );

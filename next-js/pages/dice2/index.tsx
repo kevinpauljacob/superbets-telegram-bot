@@ -13,7 +13,7 @@ import {
   GameOptions,
   GameTable,
 } from "@/components/GameLayout";
-import HistoryTable from "@/components/games/Dice2/HistoryTable";
+import HistoryTable from "@/components/games/Dice2/VerifyDice2Modal";
 import { FormProvider, useForm } from "react-hook-form";
 import { BsInfinity } from "react-icons/bs";
 import Loader from "@/components/games/Loader";
@@ -22,6 +22,7 @@ import BetButton from "@/components/games/BetButton";
 import ResultsSlider from "@/components/ResultsSlider";
 import showInfoToast from "@/components/games/toasts/toasts";
 import { loopSound, soundAlert } from "@/utils/soundUtils";
+import Bets from "../../components/games/Bets";
 
 export default function Dice2() {
   const wallet = useWallet();
@@ -560,7 +561,8 @@ export default function Dice2() {
         </div>
       </GameDisplay>
       <GameTable>
-        <HistoryTable refresh={refresh} />
+        {/* <HistoryTable refresh={refresh} /> */}
+        <Bets refresh={refresh} game={"dice2"}/>
       </GameTable>
     </GameLayout>
   );
