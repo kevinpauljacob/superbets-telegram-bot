@@ -113,7 +113,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         wallet,
         amount,
         minesCount,
-        userBets: [],
+        strikeMultiplier: 1,
         result,
         tokenMint,
         amountWon: 0,

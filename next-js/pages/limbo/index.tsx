@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from "react";
+import Bets from "../../components/games/Bets";
 import { useWallet } from "@solana/wallet-adapter-react";
 import toast from "react-hot-toast";
-import HistoryTable from "@/components/games/Limbo/HistoryTable";
+import HistoryTable from "@/components/games/Limbo/VerifyLimboModal";
 import { FormProvider, useForm } from "react-hook-form";
 import { useGlobalContext } from "@/components/GlobalContext";
 import BetSetting from "@/components/BetSetting";
@@ -514,7 +515,8 @@ export default function Limbo() {
         </div>
       </GameDisplay>
       <GameTable>
-        <HistoryTable refresh={refresh} />
+        {/* <HistoryTable refresh={refresh} /> */}
+        <Bets refresh={refresh} game={"limbo"}/>
       </GameTable>
     </GameLayout>
   );

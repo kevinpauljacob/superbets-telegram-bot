@@ -11,7 +11,7 @@ import {
   GameOptions,
   GameTable,
 } from "@/components/GameLayout";
-import HistoryTable from "@/components/games/Wheel/HistoryTable";
+import HistoryTable from "@/components/games/Wheel/VerifyWheelModal";
 import { FormProvider, useForm } from "react-hook-form";
 import { BsInfinity } from "react-icons/bs";
 import Loader from "@/components/games/Loader";
@@ -21,6 +21,7 @@ import showInfoToast from "@/components/games/toasts/toasts";
 import ResultsSlider from "@/components/ResultsSlider";
 import Arc from "@/components/games/Wheel/Arc";
 import { riskToChance } from "@/components/games/Wheel/Segments";
+import Bets from "../../components/games/Bets";
 import { soundAlert } from "@/utils/soundUtils";
 
 export default function Wheel() {
@@ -635,7 +636,8 @@ export default function Wheel() {
         </div>
       </GameDisplay>
       <GameTable>
-        <HistoryTable refresh={refresh} />
+        {/* <HistoryTable refresh={refresh} /> */}
+        <Bets refresh={refresh} game={"wheel"} />
       </GameTable>
     </GameLayout>
   );

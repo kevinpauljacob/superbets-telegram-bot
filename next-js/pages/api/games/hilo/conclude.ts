@@ -57,7 +57,14 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           .status(400)
           .json({ success: false, message: "Game does not exist !" });
 
-      let { nonce, gameSeed, startNumber, amountWon, amount } = gameInfo;
+      let {
+        nonce,
+        gameSeed,
+        startNumber,
+        amountWon,
+        amount,
+        strikeMultiplier,
+      } = gameInfo;
 
       const strikeNumbers = generateGameResult(
         gameSeed.serverSeed,
@@ -124,9 +131,12 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
             payload: {
               game: GameType.mines,
               wallet,
-              absAmount: Decimal.sub(amountWon, amount).toNumber(),
               result,
               userTier,
+              time: new Date(),
+              strikeMultiplier,
+              amount,
+              amountWon,
             },
           }),
         );

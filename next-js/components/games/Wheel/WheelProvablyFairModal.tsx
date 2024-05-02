@@ -5,10 +5,10 @@ import {
 } from "@/utils/provably-fair";
 import Image from "next/image";
 import { useEffect, useState, useRef } from "react";
-import { Wheel } from "./HistoryTable";
+import { Wheel } from "./VerifyWheelModal";
 import toast from "react-hot-toast";
 import { FaRegCopy } from "react-icons/fa6";
-import { MdCancel } from "react-icons/md";
+import { MdClose } from "react-icons/md";
 import Arc from "@/components/games/Wheel/Arc";
 import { riskToChance } from "@/components/games/Wheel/Segments";
 import { verify } from "tweetnacl";
@@ -210,8 +210,8 @@ export default function WheelProvablyFairModal({
                 PROVABLY FAIR
               </div>
               <div className="hover:cursor-pointer">
-                <MdCancel
-                  size={30}
+                <MdClose
+                  size={25}
                   color="#F0F0F0"
                   onClick={() => {
                     onClose();

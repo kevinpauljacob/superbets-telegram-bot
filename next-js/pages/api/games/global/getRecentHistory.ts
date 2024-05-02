@@ -12,9 +12,10 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
       const allGames: {
         game: GameType;
-        wallet: any;
-        absAmount: number;
-        result: any;
+        wallet: string;
+        amount: number;
+        amountWon: number;
+        result: string;
         createdAt: any;
       }[] = [];
 
@@ -24,13 +25,17 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
         const gameInfo = (
           await model.find({ result: "Won" }).sort({ createdAt: -1 }).limit(10)
-        ).map((record) => ({
-          game,
-          wallet: record.wallet,
-          absAmount: Math.abs(record.amountWon - record.amountLost),
-          result: record.result,
-          createdAt: record.createdAt,
-        }));
+        ).map((record) => {
+          const { wallet, amount, amountWon, result, createdAt } = record;
+          return {
+            game,
+            wallet,
+            amount,
+            amountWon,
+            result,
+            createdAt,
+          };
+        });
 
         allGames.push(...gameInfo);
       }

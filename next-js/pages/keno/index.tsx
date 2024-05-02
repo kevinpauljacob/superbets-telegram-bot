@@ -11,7 +11,7 @@ import {
   GameOptions,
   GameTable,
 } from "@/components/GameLayout";
-import HistoryTable from "@/components/games/Keno/HistoryTable";
+import HistoryTable from "@/components/games/Keno/VerifyKenoModal";
 import { FormProvider, useForm } from "react-hook-form";
 import { BsInfinity } from "react-icons/bs";
 import Loader from "@/components/games/Loader";
@@ -19,6 +19,7 @@ import BetAmount from "@/components/games/BetAmountInput";
 import BetButton from "@/components/games/BetButton";
 import showInfoToast from "@/components/games/toasts/toasts";
 import { riskToChance } from "@/components/games/Keno/RiskToChance";
+import Bets from "../../components/games/Bets";
 import { soundAlert } from "@/utils/soundUtils";
 import ConfigureAutoButton from "@/components/ConfigureAutoButton";
 import AutoCount from "@/components/AutoCount";
@@ -614,7 +615,8 @@ export default function Keno() {
         </div>
       </GameDisplay>
       <GameTable>
-        <HistoryTable refresh={refresh} />
+        {/* <HistoryTable refresh={refresh} /> */}
+        <Bets refresh={refresh} game={"keno"}/>
       </GameTable>
     </GameLayout>
   );

@@ -1,12 +1,32 @@
 import { seedStatus } from "@/utils/provably-fair";
 import { useState, useEffect, useRef } from "react";
 import { IoIosArrowDown } from "react-icons/io";
-import { Wheel } from "./HistoryTable";
 import Image from "next/image";
 import WheelProvablyFairModal, { PFModalData } from "./WheelProvablyFairModal";
 import { useGlobalContext } from "@/components/GlobalContext";
 import { FaRegCopy } from "react-icons/fa6";
 import Arc from "@/components/games/Wheel/Arc";
+import { MdClose } from "react-icons/md";
+
+export interface Wheel {
+  createdAt: string;
+  wallet: string;
+  amount: number;
+  risk: string;
+  segments: number;
+  result: string;
+  strikeNumber: number;
+  strikeMultiplier: number;
+  amountWon: number;
+  nonce?: number;
+  gameSeed?: {
+    status: seedStatus;
+    clientSeed: string;
+    nonce: number;
+    serverSeed?: string;
+    serverSeedHash: string;
+  };
+}
 
 interface ModalData {
   bet: Wheel;
@@ -63,14 +83,14 @@ export default function VerifyWheelModal({
   //to handle dropodown
   const [openDropDown, setOpenDropDown] = useState<boolean>(false);
 
-  const handleClose = () => {
-    //@ts-ignore
-    document.addEventListener("click", function (event) {
-      //@ts-ignore
-      var targetId = event.target.id;
-      if (targetId && targetId === "modal-bg") onClose();
-    });
-  };
+  // const handleClose = () => {
+  //   //@ts-ignore
+  //   document.addEventListener("click", function (event) {
+  //     //@ts-ignore
+  //     var targetId = event.target.id;
+  //     if (targetId && targetId === "modal-bg") onClose();
+  //   });
+  // };
 
   const copyToClipboard = (text?: string) => {
     if (text) navigator.clipboard.writeText(text);
@@ -104,13 +124,13 @@ export default function VerifyWheelModal({
     <>
       {isOpen && (
         <div
-          onClick={() => {
-            handleClose();
-          }}
-          id="modal-bg"
+          // onClick={() => {
+          //   handleClose();
+          // }}
+          // id="modal-bg"
           className="absolute z-[150] left-0 top-0 flex h-full w-full items-center justify-center bg-[#33314680] backdrop-blur-[0px] transition-all"
         >
-          <div className="bg-[#121418] max-h-[80dvh] modalscrollbar overflow-y-auto p-4 md:p-11 rounded-lg z-10 w-11/12 sm:w-[600px] ">
+          <div className="relative bg-[#121418] max-h-[80dvh] modalscrollbar overflow-y-scroll p-8 rounded-lg z-10 w-11/12 sm:w-[34rem]">
             <div className="flex flex-wrap justify-between items-center mb-4 sm:mb-5">
               <div className="font-changa text-2xl font-semibold text-white mr-4 text-opacity-90">
                 Dice
@@ -322,6 +342,14 @@ export default function VerifyWheelModal({
                 </div>
               )}
             </div>
+            <MdClose
+              onClick={() => {
+                onClose();
+              }}
+              size={22}
+              className="absolute top-3 right-3 hover:cursor-pointer"
+              color="#F0F0F0"
+            />
           </div>
           <WheelProvablyFairModal
             isOpen={isPFModalOpen}

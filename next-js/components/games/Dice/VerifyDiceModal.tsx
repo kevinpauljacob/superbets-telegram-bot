@@ -2,12 +2,30 @@ import { seedStatus } from "@/utils/provably-fair";
 import Image from "next/image";
 import { useState } from "react";
 import { IoIosArrowDown } from "react-icons/io";
-import { Dice } from "./HistoryTable";
 import RollDiceProvablyFairModal, {
   PFModalData,
 } from "./DiceProvablyFairModal";
 import { useGlobalContext } from "@/components/GlobalContext";
 import { FaRegCopy } from "react-icons/fa6";
+import { MdClose } from "react-icons/md";
+
+export interface Dice {
+  createdAt: string;
+  wallet: string;
+  chosenNumbers: number[];
+  amount: number;
+  result: "Won" | "Lost";
+  strikeNumber: number;
+  amountWon: number;
+  nonce?: number;
+  gameSeed?: {
+    status: seedStatus;
+    clientSeed: string;
+    nonce: number;
+    serverSeed?: string;
+    serverSeedHash: string;
+  };
+}
 
 interface ModalData {
   bet: Dice;
@@ -23,7 +41,6 @@ export default function VerifyDiceModal({ isOpen, onClose, modalData }: Props) {
   //handling dice
   const { bet } = modalData;
   const { getProvablyFairData } = useGlobalContext();
-
   const [isPFModalOpen, setIsPFModalOpen] = useState(false);
 
   const openPFModal = () => {
@@ -56,14 +73,14 @@ export default function VerifyDiceModal({ isOpen, onClose, modalData }: Props) {
 
   const [openDropDown, setOpenDropDown] = useState<boolean>(false);
 
-  const handleClose = () => {
-    //@ts-ignore
-    document.addEventListener("click", function (event) {
-      //@ts-ignore
-      var targetId = event.target.id;
-      if (targetId && targetId === "modal-bg") onClose();
-    });
-  };
+  // const handleClose = () => {
+  //   //@ts-ignore
+  //   document.addEventListener("click", function (event) {
+  //     //@ts-ignore
+  //     var targetId = event.target.id;
+  //     if (targetId && targetId === "modal-bg") onClose();
+  //   });
+  // };
 
   const copyToClipboard = (text?: string) => {
     if (text) navigator.clipboard.writeText(text);
@@ -84,13 +101,13 @@ export default function VerifyDiceModal({ isOpen, onClose, modalData }: Props) {
     <>
       {isOpen && (
         <div
-          onClick={() => {
-            handleClose();
-          }}
-          id="modal-bg"
+          // onClick={() => {
+          //   handleClose();
+          // }}
+          // id="modal-bg"
           className="absolute z-[150] left-0 top-0 flex h-full w-full items-center justify-center bg-[#33314680] backdrop-blur-[0px] transition-all"
         >
-          <div className="bg-[#121418] max-h-[80dvh] modalscrollbar overflow-y-auto p-4 md:p-11 rounded-lg z-10 w-11/12 sm:w-[600px] ">
+          <div className="relative bg-[#121418] max-h-[80dvh] modalscrollbar overflow-y-scroll p-8 rounded-lg z-10 w-11/12 sm:w-[34rem]">
             <div className="flex flex-wrap justify-between items-center mb-4 sm:mb-5">
               <div className="font-changa text-2xl font-semibold text-white mr-4 text-opacity-90">
                 Dice
@@ -113,7 +130,7 @@ export default function VerifyDiceModal({ isOpen, onClose, modalData }: Props) {
                   Multiplier
                 </div>
                 <div className="text-white font-chakra text-xs font-medium">
-                  {(6 / bet.chosenNumbers.length).toFixed(2)} x
+                  {(6 / bet.chosenNumbers?.length).toFixed(2)} x
                 </div>
               </button>
               <button className="px-1 py-3 flex flex-col items-center justify-center w-full text-white rounded-md bg-[#202329]">
@@ -141,7 +158,7 @@ export default function VerifyDiceModal({ isOpen, onClose, modalData }: Props) {
                       key={face}
                       className="flex flex-col items-center mr-2 sm:mr-0"
                     >
-                      {bet.chosenNumbers.includes(face) &&
+                      {bet.chosenNumbers?.includes(face) &&
                         bet.strikeNumber === face && (
                           <Image
                             src="/assets/pointer-green.png"
@@ -161,10 +178,10 @@ export default function VerifyDiceModal({ isOpen, onClose, modalData }: Props) {
                       <Image
                         src={
                           bet.strikeNumber === face
-                            ? bet.chosenNumbers.includes(face)
+                            ? bet.chosenNumbers?.includes(face)
                               ? `/assets/winDiceFace${face}.png`
                               : `/assets/lossDiceFace${face}.png`
-                            : bet.chosenNumbers.includes(face)
+                            : bet.chosenNumbers?.includes(face)
                             ? `/assets/selectedDiceFace${face}.png`
                             : `/assets/diceFace${face}.png`
                         }
@@ -172,7 +189,7 @@ export default function VerifyDiceModal({ isOpen, onClose, modalData }: Props) {
                         height={50}
                         alt=""
                         className={`inline-block mt-6 ${
-                          bet.chosenNumbers.includes(face)
+                          bet.chosenNumbers?.includes(face)
                             ? "selected-face"
                             : ""
                         }`}
@@ -189,7 +206,7 @@ export default function VerifyDiceModal({ isOpen, onClose, modalData }: Props) {
                   <input
                     type="text"
                     name="multiplier"
-                    value={(6 / bet.chosenNumbers.length).toFixed(2)}
+                    value={(6 / bet.chosenNumbers?.length).toFixed(2)}
                     className="bg-[#202329] text-white font-chakra text-xs font-medium mt-1 rounded-md p-3 w-full relative"
                     readOnly
                   />
@@ -201,7 +218,7 @@ export default function VerifyDiceModal({ isOpen, onClose, modalData }: Props) {
                   <input
                     type="text"
                     name="chance"
-                    value={((bet.chosenNumbers.length / 6) * 100).toFixed(2)}
+                    value={((bet.chosenNumbers?.length / 6) * 100).toFixed(2)}
                     className="bg-[#202329] text-white font-chakra text-xs font-medium mt-1 rounded-md p-3 w-full relative"
                     readOnly
                   />
@@ -319,6 +336,14 @@ export default function VerifyDiceModal({ isOpen, onClose, modalData }: Props) {
                 </div>
               )}
             </div>
+            <MdClose
+              onClick={() => {
+                onClose();
+              }}
+              size={22}
+              className="absolute top-3 right-3 hover:cursor-pointer"
+              color="#F0F0F0"
+            />
           </div>
           <RollDiceProvablyFairModal
             isOpen={isPFModalOpen}

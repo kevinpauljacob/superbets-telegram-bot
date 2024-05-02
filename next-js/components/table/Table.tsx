@@ -1,6 +1,8 @@
 import { useWallet } from "@solana/wallet-adapter-react";
 import { ReactNode } from "react";
 import toast from "react-hot-toast";
+import BetRow from "../games/BetRow";
+import { useGlobalContext } from "../GlobalContext";
 
 interface PaginationProps {
   page: number;
@@ -112,26 +114,17 @@ interface TableNodeProps {
   children: ReactNode;
 }
 
-interface TableHeaderProps extends TableButtonProps {
-  myHeaders: string[];
-  allHeaders: string[];
-  smallScreenHeaders: string[];
-  allSmallScreenHeaders: string[];
-}
+export const TableHeader = ({ all, setAll }: TableButtonProps) => {
+  const headers = ["Game", "Bet Amount", "Multiplier", "Payout"];
+  const allHeaders = ["Wallet", ...headers];
 
-export const TableHeader: React.FC<TableHeaderProps> = ({
-  all,
-  setAll,
-  myHeaders,
-  allHeaders,
-  smallScreenHeaders,
-  allSmallScreenHeaders,
-}) => {
+  const smallScreenHeaders = ["Game", "Payout"];
+
   return (
     <>
       <div className="mb-5 hidden md:flex w-full flex-row items-center gap-2 bg-[#121418] py-1 rounded-[5px]">
         {!all
-          ? myHeaders.map((header, index) => (
+          ? headers.map((header, index) => (
               <span
                 key={index}
                 className="w-full text-center font-changa text-[#F0F0F080]"
@@ -149,23 +142,14 @@ export const TableHeader: React.FC<TableHeaderProps> = ({
             ))}
       </div>
       <div className="mb-5 flex md:hidden w-full flex-row items-center bg-[#121418] rounded-md py-1 gap-2">
-        {!all
-          ? smallScreenHeaders.map((header, index) => (
-              <span
-                key={index}
-                className="w-full text-center font-changa text-[#F0F0F080]"
-              >
-                {header}
-              </span>
-            ))
-          : allSmallScreenHeaders.map((header, index) => (
-              <span
-                key={index}
-                className="w-full text-center font-changa text-[#F0F0F080]"
-              >
-                {header}
-              </span>
-            ))}
+        {smallScreenHeaders.map((header, index) => (
+          <span
+            key={index}
+            className="w-full text-center font-changa text-[#F0F0F080]"
+          >
+            {header}
+          </span>
+        ))}
       </div>
     </>
   );
@@ -175,11 +159,7 @@ export const TableRow: React.FC<TableNodeProps> = ({ children }) => {
   return children;
 };
 
-interface TableProps
-  extends TableButtonProps,
-    TableHeaderProps,
-    TableNodeProps,
-    PaginationProps {}
+interface TableProps extends TableButtonProps, PaginationProps {}
 
 export const Table: React.FC<TableProps> = ({
   all,
@@ -188,28 +168,44 @@ export const Table: React.FC<TableProps> = ({
   setPage,
   bets,
   maxPages,
-  myHeaders,
-  allHeaders,
-  smallScreenHeaders,
-  allSmallScreenHeaders,
-  children,
 }) => {
   const transactionsPerPage = 10;
+  const {
+    isVerifyModalOpen: isOpen,
+    setIsVerifyModalOpen: setIsOpen,
+    openVerifyModal: openModal,
+    closeVerifyModal: closeModal,
+    setVerifyModalData,
+  } = useGlobalContext();
   return (
     <div className="flex w-full flex-col pb-10">
       <TableButtons all={all} setAll={setAll} />
       <div className="scrollbar mt-8 w-full md:overflow-x-auto pb-8">
         <div className="flex w-full md:min-w-[50rem] flex-col items-center">
-          <TableHeader
-            all={all}
-            setAll={setAll}
-            myHeaders={myHeaders}
-            allHeaders={allHeaders}
-            smallScreenHeaders={smallScreenHeaders}
-            allSmallScreenHeaders={allSmallScreenHeaders}
-          />
+          <TableHeader all={all} setAll={setAll} />
 
-          {children}
+          {bets.length ? (
+            bets
+              .slice(
+                page * transactionsPerPage - transactionsPerPage,
+                page * transactionsPerPage,
+              )
+              .map((bet, index) => (
+                <div
+                  key={index}
+                  className="mb-2.5 flex w-full flex-row items-center gap-2 rounded-[5px] bg-[#121418] py-3"
+                >
+                  <BetRow
+                    bet={bet}
+                    all={all}
+                    openModal={openModal}
+                    setVerifyModalData={setVerifyModalData}
+                  />
+                </div>
+              ))
+          ) : (
+            <span className="font-changa text-[#F0F0F080]">No Bets made.</span>
+          )}
         </div>
       </div>
       <TablePagination

@@ -16,6 +16,10 @@ const hiloSchema = new mongoose.Schema(
     },
     userBets: Array<"Higher" | "Lower">,
     strikeNumbers: Array<Number>,
+    strikeMultiplier: {
+      type: Number,
+      required: true,
+    },
     tokenMint: {
       type: String,
       required: false,

@@ -5,12 +5,12 @@ import {
 } from "@/utils/provably-fair";
 import Image from "next/image";
 import { useEffect, useState } from "react";
-import { Dice2 } from "./HistoryTable";
+import { Dice2 } from "./VerifyDice2Modal";
 import toast from "react-hot-toast";
 import DraggableBar from "@/components/games/Dice2/DraggableBar";
 import { FaRegCopy } from "react-icons/fa6";
 import CheckPF from "@/public/assets/CheckPF.svg";
-import { MdCancel } from "react-icons/md";
+import { MdClose } from "react-icons/md";
 
 export interface PFModalData {
   activeGameSeed: {
@@ -154,8 +154,8 @@ export default function RollDiceProvablyFairModal({
                 PROVABLY FAIR
               </div>
               <div className="hover:cursor-pointer">
-                <MdCancel
-                  size={30}
+                <MdClose
+                  size={25}
                   color="#F0F0F0"
                   onClick={() => {
                     onClose();

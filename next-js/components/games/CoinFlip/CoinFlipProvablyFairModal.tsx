@@ -4,10 +4,10 @@ import {
   generateGameResult,
 } from "@/utils/provably-fair";
 import { useEffect, useState } from "react";
-import { Flip } from "./HistoryTable";
+import { Flip } from "./VerifyFlipModal";
 import toast from "react-hot-toast";
 import { FaRegCopy } from "react-icons/fa6";
-import { MdCancel } from "react-icons/md";
+import { MdClose } from "react-icons/md";
 import Image from "next/image";
 import CheckPF from "@/public/assets/CheckPF.svg";
 
@@ -167,8 +167,8 @@ export default function CoinFlipProvablyFairModal({
                 PROVABLY FAIR
               </div>
               <div className="hover:cursor-pointer">
-                <MdCancel
-                  size={30}
+                <MdClose
+                  size={25}
                   color="#F0F0F0"
                   onClick={() => {
                     onClose();
