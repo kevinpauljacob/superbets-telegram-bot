@@ -109,11 +109,11 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         throw new Error("Insufficient balance for action!!");
       }
 
-      await Mines.create({
+      const minesGame = await Mines.create({
         wallet,
         amount,
         minesCount,
-        userBets: [],
+        strikeMultiplier: 1,
         result,
         tokenMint,
         amountWon: 0,
@@ -124,6 +124,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
       return res.status(201).json({
         success: true,
+        gameId: minesGame._id,
         message: "Mines game created",
       });
     } catch (e: any) {

@@ -63,8 +63,15 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           .status(400)
           .json({ success: false, message: "Game does not exist !" });
 
-      let { nonce, gameSeed, minesCount, userBets, amountWon, amount } =
-        gameInfo;
+      let {
+        nonce,
+        gameSeed,
+        minesCount,
+        userBets,
+        amountWon,
+        amount,
+        strikeMultiplier,
+      } = gameInfo;
 
       const strikeNumbers = generateGameResult(
         gameSeed.serverSeed,
@@ -76,6 +83,17 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
       let result = "Pending";
       const numBets = userBets.length;
+      strikeMultiplier = Decimal.div(
+        25 - numBets,
+        25 - numBets - minesCount,
+      ).mul(strikeMultiplier).toNumber();
+
+      const userData = await StakingUser.findOne({ wallet });
+      let points = userData?.points ?? 0;
+      const userTier = Object.entries(pointTiers).reduce((prev, next) => {
+        return points >= next[1]?.limit ? next : prev;
+      })[0];
+      const houseEdge = houseEdgeTiers[parseInt(userTier)];
 
       if (strikeNumbers[userBet] === 1) {
         result = "Lost";
@@ -89,20 +107,13 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
             result,
             userBets,
             strikeNumbers,
+            strikeMultiplier,
             amountWon: 0,
             amountLost: gameInfo.amount,
           },
         );
       } else {
-        const userData = await StakingUser.findOne({ wallet });
-        let points = userData?.points ?? 0;
-        const userTier = Object.entries(pointTiers).reduce((prev, next) => {
-          return points >= next[1]?.limit ? next : prev;
-        })[0];
-        const houseEdge = houseEdgeTiers[parseInt(userTier)];
-
-        amountWon = Decimal.mul(Math.max(amount, amountWon), 25 - minesCount)
-          .div(25 - minesCount - numBets + 1)
+        amountWon = Decimal.mul(Math.max(amount, amountWon), strikeMultiplier)
           .mul(Decimal.sub(1, houseEdge))
           .toNumber();
 
@@ -141,31 +152,11 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
               result,
               houseEdge,
               strikeNumbers,
+              strikeMultiplier,
               amountWon,
               $push: { userBets: userBet },
             },
           );
-
-          const socket = new WebSocket(wsEndpoint);
-
-          socket.onopen = () => {
-            socket.send(
-              JSON.stringify({
-                clientType: "api-client",
-                channel: "fomo-casino_games-channel",
-                authKey: process.env.FOMO_CHANNEL_AUTH_KEY!,
-                payload: {
-                  game: GameType.mines,
-                  wallet,
-                  absAmount: amountWon,
-                  result,
-                  userTier,
-                },
-              }),
-            );
-
-            socket.close();
-          };
         } else {
           await Mines.findOneAndUpdate(
             {
@@ -175,9 +166,36 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
             {
               $push: { userBets: userBet },
               amountWon,
+              strikeMultiplier,
             },
           );
         }
+      }
+
+      if (result !== "Pending") {
+        const socket = new WebSocket(wsEndpoint);
+
+        socket.onopen = () => {
+          socket.send(
+            JSON.stringify({
+              clientType: "api-client",
+              channel: "fomo-casino_games-channel",
+              authKey: process.env.FOMO_CHANNEL_AUTH_KEY!,
+              payload: {
+                game: GameType.mines,
+                wallet,
+                result,
+                userTier,
+                time: new Date(),
+                strikeMultiplier,
+                amount,
+                amountWon,
+              },
+            }),
+          );
+
+          socket.close();
+        };
       }
 
       return res.status(201).json({

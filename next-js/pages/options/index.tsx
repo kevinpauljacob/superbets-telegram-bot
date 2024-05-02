@@ -18,6 +18,7 @@ import {
 import BetAmount from "@/components/games/BetAmountInput";
 import BetButton from "@/components/games/BetButton";
 import BalanceAlert from "@/components/games/BalanceAlert";
+import { soundAlert } from "@/utils/soundUtils";
 
 const Timer = dynamic(() => import("../../components/games/Timer"), {
   ssr: false,
@@ -72,9 +73,10 @@ export default function Options() {
       // console.log("Checking Result");
       checkResultAPI(wallet).then((res) => {
         if (res.success) {
-          res?.data?.result == "Won"
-            ? toast.success(res?.message)
-            : toast.error(res?.message);
+          if (res?.data?.result == "Won") {
+            toast.success(res?.message);
+            soundAlert("/sounds/win.wav");
+          } else toast.error(res?.message);
           setResult(res?.data?.result);
           setResultAmt(
             res?.data?.result == "Won"
@@ -571,10 +573,7 @@ export default function Options() {
               ))}
             </div>
           </div>
-          <GameFooterInfo
-            multiplier={2.0}
-            amount={betAmt ? betAmt: 0.0}
-          />
+          <GameFooterInfo multiplier={2.0} amount={betAmt ? betAmt : 0.0} />
         </>
       </GameDisplay>
       <GameTable>

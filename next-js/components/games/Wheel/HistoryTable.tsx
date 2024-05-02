@@ -61,7 +61,7 @@ export default function HistoryTable({ refresh }: { refresh: boolean }) {
         }
       });
 
-    console.log("bets", bets);
+    // console.log("bets", bets);
   }, [all, refresh]);
 
   return (
