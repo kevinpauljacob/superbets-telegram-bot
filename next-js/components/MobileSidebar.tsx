@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { useWallet } from "@solana/wallet-adapter-react";
 import { obfuscatePubKey } from "@/context/transactions";
@@ -15,9 +15,17 @@ import Birdeye from "@/public/assets/Birdeye";
 import Telegram from "@/public/assets/Telegram";
 import Home from "@/public/assets/Home";
 import { useGlobalContext } from "./GlobalContext";
+import { useRouter } from "next/router";
 
-export default function Sidebar({ mobileSidebar }: { mobileSidebar: boolean }) {
+export default function Sidebar({
+  mobileSidebar,
+  setSidebar,
+}: {
+  mobileSidebar: boolean;
+  setSidebar: React.Dispatch<React.SetStateAction<boolean>>;
+}) {
   const wallet = useWallet();
+  const router = useRouter();
   const { fomoPrice } = useGlobalContext();
   const [showExitTokens, setShowExitTokens] = useState(false);
   const [showPlayTokens, setShowPlayTokens] = useState(false);
@@ -134,9 +142,12 @@ export default function Sidebar({ mobileSidebar }: { mobileSidebar: boolean }) {
     setCasinoGames(updatedCasinoGames);
   };
 
-
   const openLinkCss =
     "w-full gap-2 flex items-center justify-center text-sm font-semibold text-white text-opacity-50 hover:bg-white/10 transition duration-300 ease-in-out hover:transition hover:duration-300 hover:ease-in-out bg-[#191A1D] rounded-md text-center py-2 mb-2";
+
+  useEffect(() => {
+    setSidebar(false);
+  }, [router.pathname]);
 
   return (
     <div
@@ -180,7 +191,7 @@ export default function Sidebar({ mobileSidebar }: { mobileSidebar: boolean }) {
             mobileSidebar ? "fadeInUp" : "fadeOutDown"
           } w-full flex flex-col p-4`}
         >
-          <SidebarOpenElement text={"Home"} Icon={Home} link="/"/>
+          <SidebarOpenElement text={"Home"} Icon={Home} link="/" />
           <div className={`mt-0`}>
             <div className="w-full transition-all cursor-pointer rounded-md flex items-center justify-between gap-2 pl-4 pr-2 py-2 bg-transparent hover:bg-[#1f2024] focus:bg-[#1f2024] group">
               <div className="flex items-center gap-3">
