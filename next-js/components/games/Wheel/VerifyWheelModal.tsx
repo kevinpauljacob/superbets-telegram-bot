@@ -1,13 +1,32 @@
 import { seedStatus } from "@/utils/provably-fair";
 import { useState, useEffect, useRef } from "react";
 import { IoIosArrowDown } from "react-icons/io";
-import { Wheel } from "./HistoryTable";
 import Image from "next/image";
 import WheelProvablyFairModal, { PFModalData } from "./WheelProvablyFairModal";
 import { useGlobalContext } from "@/components/GlobalContext";
 import { FaRegCopy } from "react-icons/fa6";
 import Arc from "@/components/games/Wheel/Arc";
 import { MdClose } from "react-icons/md";
+
+export interface Wheel {
+  createdAt: string;
+  wallet: string;
+  amount: number;
+  risk: string;
+  segments: number;
+  result: string;
+  strikeNumber: number;
+  strikeMultiplier: number;
+  amountWon: number;
+  nonce?: number;
+  gameSeed?: {
+    status: seedStatus;
+    clientSeed: string;
+    nonce: number;
+    serverSeed?: string;
+    serverSeedHash: string;
+  };
+}
 
 interface ModalData {
   bet: Wheel;

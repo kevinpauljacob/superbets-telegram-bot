@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { rollDice } from "../../context/gameTransactions";
-import HistoryTable from "../../components/games/Dice/HistoryTable";
+import HistoryTable from "../../components/games/Dice/VerifyDiceModal";
 import { toast } from "react-hot-toast";
 import { ROLL_TAX } from "../../context/config";
 import BetSetting from "@/components/BetSetting";

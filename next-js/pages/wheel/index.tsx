@@ -11,7 +11,7 @@ import {
   GameOptions,
   GameTable,
 } from "@/components/GameLayout";
-import HistoryTable from "@/components/games/Wheel/HistoryTable";
+import HistoryTable from "@/components/games/Wheel/VerifyWheelModal";
 import { FormProvider, useForm } from "react-hook-form";
 import { BsInfinity } from "react-icons/bs";
 import Loader from "@/components/games/Loader";

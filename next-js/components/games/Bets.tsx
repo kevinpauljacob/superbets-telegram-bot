@@ -24,12 +24,11 @@ export default function Bets({
   const transactionsPerPage = 10;
   const [all, setAll] = useState(wallet.publicKey ? false : true);
   const [page, setPage] = useState(1);
+  const [loading, setLoading] = useState(false);
 
-  const [allBetMaxPages, setAllBetMaxPages] = useState(0);
-  const [myBetMaxPages, setMyBetMaxPages] = useState(0);
+  const [maxPages, setMaxPages] = useState(0);
 
-  const [allBets, setAllBets] = useState<Bet[]>([]);
-  const [myBets, setMyBets] = useState<Bet[]>([]);
+  const [bets, setBets] = useState<Bet[]>([]);
 
   const {
     isVerifyModalOpen: isOpen,
@@ -40,35 +39,33 @@ export default function Bets({
   } = useGlobalContext();
 
   useEffect(() => {
-    const route = `/api/games/global/getHistory`;
+    setLoading(true);
+    if (!all && !wallet) return;
+    const route = all
+      ? `/api/games/global/getHistory`
+      : `/api/games/global/getUserHistory?wallet=${wallet.publicKey?.toBase58()}`;
 
     fetch(`${route}`)
       .then((res) => res.json())
       .then((history) => {
         if (history.success) {
-          setAllBets(history?.data ?? []);
-          setAllBetMaxPages(
-            Math.ceil(history?.data.length / transactionsPerPage),
-          );
+          setLoading(false);
+          if (all) {
+            setBets(history?.data ?? []);
+            setMaxPages(Math.ceil(history?.data.length / transactionsPerPage));
+          } else if (wallet.publicKey) {
+            setBets(history?.data ?? []);
+            setMaxPages(Math.ceil(history?.data.length / transactionsPerPage));
+          } else {
+            setBets([]);
+            setMaxPages(1);
+          }
+        } else {
+          setBets([]);
+          setMaxPages(1);
         }
       });
-  }, []);
-
-  useEffect(() => {
-    if (!wallet) return;
-    const route = `/api/games/global/getUserHistory?wallet=${wallet.publicKey?.toBase58()}`;
-
-    fetch(`${route}`)
-      .then((res) => res.json())
-      .then((history) => {
-        if (history.success) {
-          setMyBets(history?.data ?? []);
-          setMyBetMaxPages(
-            Math.ceil(history?.data.length / transactionsPerPage),
-          );
-        }
-      });
-  }, [wallet.publicKey]);
+  }, [refresh, all]);
 
   return (
     <Table
@@ -76,31 +73,9 @@ export default function Bets({
       setAll={setAll}
       page={page}
       setPage={setPage}
-      maxPages={all ? allBetMaxPages : myBetMaxPages}
-      bets={all ? allBets : myBets}
-    >
-      {(all ? allBets.length : myBets.length) ? (
-        (all ? allBets : myBets)
-          .slice(
-            page * transactionsPerPage - transactionsPerPage,
-            page * transactionsPerPage,
-          )
-          .map((bet, index) => (
-            <div
-              key={index}
-              className="mb-2.5 flex w-full flex-row items-center gap-2 rounded-[5px] bg-[#121418] py-3"
-            >
-              <BetRow
-                bet={bet}
-                all={all}
-                openModal={openModal}
-                setVerifyModalData={setVerifyModalData}
-              />
-            </div>
-          ))
-      ) : (
-        <span className="font-changa text-[#F0F0F080]">No Bets made.</span>
-      )}
-    </Table>
+      maxPages={maxPages}
+      bets={bets}
+      // loading={loading}
+    />
   );
 }

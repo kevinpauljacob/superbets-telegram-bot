@@ -27,7 +27,7 @@ const BetRow: React.FC<BetRowProps> = ({
         (!all ? "hover:cursor-pointer" : "")
       }
       onClick={() => {
-        if (all) return;
+        // if (all) return;
         setCurrentGame(bet.game);
         setVerifyModalData(bet);
         openModal();

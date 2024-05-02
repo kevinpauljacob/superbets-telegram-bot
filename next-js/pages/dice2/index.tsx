@@ -13,7 +13,7 @@ import {
   GameOptions,
   GameTable,
 } from "@/components/GameLayout";
-import HistoryTable from "@/components/games/Dice2/HistoryTable";
+import HistoryTable from "@/components/games/Dice2/VerifyDice2Modal";
 import { FormProvider, useForm } from "react-hook-form";
 import { BsInfinity } from "react-icons/bs";
 import Loader from "@/components/games/Loader";

@@ -1,12 +1,31 @@
 import { seedStatus } from "@/utils/provably-fair";
 import { useState } from "react";
 import { IoIosArrowDown, IoMdCopy } from "react-icons/io";
-import { Dice2 } from "./HistoryTable";
 import DiceProvablyFairModal, { PFModalData } from "./Dice2ProvablyFairModal";
 import { useGlobalContext } from "@/components/GlobalContext";
 import DraggableBar from "./DraggableBar";
 import { FaRegCopy } from "react-icons/fa6";
 import { MdClose } from "react-icons/md";
+
+export interface Dice2 {
+  createdAt: string;
+  wallet: string;
+  rollOver: number;
+  direction: string;
+  amount: number;
+  result: string;
+  strikeNumber: number;
+  amountWon: number;
+  chance: number;
+  nonce?: number;
+  gameSeed?: {
+    status: seedStatus;
+    clientSeed: string;
+    nonce: number;
+    serverSeed?: string;
+    serverSeedHash: string;
+  };
+}
 
 interface ModalData {
   bet: Dice2;

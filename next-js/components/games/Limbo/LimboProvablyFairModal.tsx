@@ -4,7 +4,7 @@ import {
   generateGameResult,
 } from "@/utils/provably-fair";
 import { useEffect, useState } from "react";
-import { Limbo } from "./HistoryTable";
+import { Limbo } from "./VerifyLimboModal";
 import Image from "next/image";
 import toast from "react-hot-toast";
 import { FaRegCopy } from "react-icons/fa6";

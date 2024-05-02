@@ -4,7 +4,7 @@ import {
   generateGameResult,
 } from "@/utils/provably-fair";
 import { useEffect, useState } from "react";
-import { Flip } from "./HistoryTable";
+import { Flip } from "./VerifyFlipModal";
 import toast from "react-hot-toast";
 import { FaRegCopy } from "react-icons/fa6";
 import { MdClose } from "react-icons/md";

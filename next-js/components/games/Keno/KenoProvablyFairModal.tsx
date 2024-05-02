@@ -5,7 +5,7 @@ import {
 } from "@/utils/provably-fair";
 import Image from "next/image";
 import { useEffect, useState } from "react";
-import { Keno } from "./HistoryTable";
+import { Keno } from "./VerifyKenoModal";
 import toast from "react-hot-toast";
 import { FaRegCopy } from "react-icons/fa6";
 import { MdClose } from "react-icons/md";

@@ -1,6 +1,8 @@
 import { useWallet } from "@solana/wallet-adapter-react";
 import { ReactNode } from "react";
 import toast from "react-hot-toast";
+import BetRow from "../games/BetRow";
+import { useGlobalContext } from "../GlobalContext";
 
 interface PaginationProps {
   page: number;
@@ -35,8 +37,9 @@ export const TablePagination: React.FC<PaginationProps> = ({
               onClick={() => {
                 setPage(i);
               }}
-              className={`${page === i ? "text-opacity-75" : "text-opacity-50"
-                } text-[#F0F0F0] transition-all`}
+              className={`${
+                page === i ? "text-opacity-75" : "text-opacity-50"
+              } text-[#F0F0F0] transition-all`}
             >
               {i}
             </span>
@@ -54,8 +57,9 @@ export const TablePagination: React.FC<PaginationProps> = ({
               onClick={() => {
                 setPage(i);
               }}
-              className={`${page === i ? "text-opacity-75" : "text-opacity-50"
-                } text-[#F0F0F0] transition-all`}
+              className={`${
+                page === i ? "text-opacity-75" : "text-opacity-50"
+              } text-[#F0F0F0] transition-all`}
             >
               {i}
             </span>
@@ -83,12 +87,12 @@ export const TableButtons: React.FC<TableButtonProps> = ({ all, setAll }) => {
     <div className="mt-[1rem] md:mt-[3.5rem] flex w-full items-center justify-center gap-4 md:justify-start">
       <button
         onClick={() => {
-          if (wallet.publicKey) 
-            setAll(false);
+          if (wallet.publicKey) setAll(false);
           else toast.error("Wallet not connected");
         }}
-        className={`${all ? "bg-[#202329] hover:bg-[#47484A]" : "bg-[#7839C5]"
-          } w-full transform rounded-[5px] px-8 py-2 font-changa text-xl text-white transition duration-200 md:w-fit`}
+        className={`${
+          all ? "bg-[#202329] hover:bg-[#47484A]" : "bg-[#7839C5]"
+        } w-full transform rounded-[5px] px-8 py-2 font-changa text-xl text-white transition duration-200 md:w-fit`}
       >
         My Bets
       </button>
@@ -96,8 +100,9 @@ export const TableButtons: React.FC<TableButtonProps> = ({ all, setAll }) => {
         onClick={() => {
           setAll(true);
         }}
-        className={`${all ? "bg-[#7839C5]" : "bg-[#202329] hover:bg-[#47484A]"
-          } w-full transform rounded-[5px] px-8 py-2 font-changa text-xl text-white transition duration-200 md:w-fit`}
+        className={`${
+          all ? "bg-[#7839C5]" : "bg-[#202329] hover:bg-[#47484A]"
+        } w-full transform rounded-[5px] px-8 py-2 font-changa text-xl text-white transition duration-200 md:w-fit`}
       >
         All Bets
       </button>
@@ -109,12 +114,8 @@ interface TableNodeProps {
   children: ReactNode;
 }
 
-export const TableHeader = ({
-  all,
-  setAll,
-} : TableButtonProps) => {
-
-  const headers = ["Game", "Bet Amount", "Multiplier", "Payout"]
+export const TableHeader = ({ all, setAll }: TableButtonProps) => {
+  const headers = ["Game", "Bet Amount", "Multiplier", "Payout"];
   const allHeaders = ["Wallet", ...headers];
 
   const smallScreenHeaders = ["Game", "Payout"];
@@ -124,32 +125,31 @@ export const TableHeader = ({
       <div className="mb-5 hidden md:flex w-full flex-row items-center gap-2 bg-[#121418] py-1 rounded-[5px]">
         {!all
           ? headers.map((header, index) => (
-            <span
-              key={index}
-              className="w-full text-center font-changa text-[#F0F0F080]"
-            >
-              {header}
-            </span>
-          ))
+              <span
+                key={index}
+                className="w-full text-center font-changa text-[#F0F0F080]"
+              >
+                {header}
+              </span>
+            ))
           : allHeaders.map((header, index) => (
-            <span
-              key={index}
-              className="w-full text-center font-changa text-[#F0F0F080]"
-            >
-              {header}
-            </span>
-          ))}
+              <span
+                key={index}
+                className="w-full text-center font-changa text-[#F0F0F080]"
+              >
+                {header}
+              </span>
+            ))}
       </div>
       <div className="mb-5 flex md:hidden w-full flex-row items-center bg-[#121418] rounded-md py-1 gap-2">
-        {
-          smallScreenHeaders.map((header, index) => (
-            <span
-              key={index}
-              className="w-full text-center font-changa text-[#F0F0F080]"
-            >
-              {header}
-            </span>
-          ))}
+        {smallScreenHeaders.map((header, index) => (
+          <span
+            key={index}
+            className="w-full text-center font-changa text-[#F0F0F080]"
+          >
+            {header}
+          </span>
+        ))}
       </div>
     </>
   );
@@ -159,10 +159,7 @@ export const TableRow: React.FC<TableNodeProps> = ({ children }) => {
   return children;
 };
 
-interface TableProps
-  extends TableButtonProps,
-  TableNodeProps,
-  PaginationProps { }
+interface TableProps extends TableButtonProps, PaginationProps {}
 
 export const Table: React.FC<TableProps> = ({
   all,
@@ -171,20 +168,44 @@ export const Table: React.FC<TableProps> = ({
   setPage,
   bets,
   maxPages,
-  children,
 }) => {
   const transactionsPerPage = 10;
+  const {
+    isVerifyModalOpen: isOpen,
+    setIsVerifyModalOpen: setIsOpen,
+    openVerifyModal: openModal,
+    closeVerifyModal: closeModal,
+    setVerifyModalData,
+  } = useGlobalContext();
   return (
     <div className="flex w-full flex-col pb-10">
       <TableButtons all={all} setAll={setAll} />
       <div className="scrollbar mt-8 w-full md:overflow-x-auto pb-8">
         <div className="flex w-full md:min-w-[50rem] flex-col items-center">
-          <TableHeader
-            all={all}
-            setAll={setAll}
-          />
+          <TableHeader all={all} setAll={setAll} />
 
-          {children}
+          {bets.length ? (
+            bets
+              .slice(
+                page * transactionsPerPage - transactionsPerPage,
+                page * transactionsPerPage,
+              )
+              .map((bet, index) => (
+                <div
+                  key={index}
+                  className="mb-2.5 flex w-full flex-row items-center gap-2 rounded-[5px] bg-[#121418] py-3"
+                >
+                  <BetRow
+                    bet={bet}
+                    all={all}
+                    openModal={openModal}
+                    setVerifyModalData={setVerifyModalData}
+                  />
+                </div>
+              ))
+          ) : (
+            <span className="font-changa text-[#F0F0F080]">No Bets made.</span>
+          )}
         </div>
       </div>
       <TablePagination

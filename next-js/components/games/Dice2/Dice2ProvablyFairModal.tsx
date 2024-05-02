@@ -5,7 +5,7 @@ import {
 } from "@/utils/provably-fair";
 import Image from "next/image";
 import { useEffect, useState } from "react";
-import { Dice2 } from "./HistoryTable";
+import { Dice2 } from "./VerifyDice2Modal";
 import toast from "react-hot-toast";
 import DraggableBar from "@/components/games/Dice2/DraggableBar";
 import { FaRegCopy } from "react-icons/fa6";

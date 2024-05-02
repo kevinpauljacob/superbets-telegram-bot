@@ -1,11 +1,30 @@
 import { seedStatus } from "@/utils/provably-fair";
 import { useState } from "react";
 import { IoIosArrowDown } from "react-icons/io";
-import { Keno } from "./HistoryTable";
 import KenoProvablyFairModal, { PFModalData } from "./KenoProvablyFairModal";
 import { useGlobalContext } from "@/components/GlobalContext";
 import { FaRegCopy } from "react-icons/fa6";
 import { MdClose } from "react-icons/md";
+
+export interface Keno {
+  createdAt: string;
+  wallet: string;
+  amount: number;
+  result: string;
+  risk: string;
+  strikeNumbers: number[];
+  chosenNumbers: number[];
+  strikeMultiplier: number;
+  amountWon: number;
+  nonce?: number;
+  gameSeed?: {
+    status: seedStatus;
+    clientSeed: string;
+    nonce: number;
+    serverSeed?: string;
+    serverSeedHash: string;
+  };
+}
 
 interface ModalData {
   bet: Keno;
