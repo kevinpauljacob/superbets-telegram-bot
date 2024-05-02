@@ -145,12 +145,14 @@ export default function SubHeader() {
       >
         <Image src={"/assets/wallet2.png"} alt="" width={30} height={30} />
         <div className="flex items-center gap-2">
+          {/* balance */}
           <div className="flex items-center h-[2.3rem] px-4 gap-1.5 border-2 border-white border-opacity-5 rounded-[5px]">
             <Image src={"/assets/sol.png"} alt="" width={14} height={14} />
             <span className="text-base font-chakra leading-3 mt-0.5 text-[#94A3B8]">
               {(coinData ? coinData[0].amount : 0).toFixed(3)}
             </span>
           </div>
+          {/* wallet button  */}
           <div
             onClick={() => {
               setShowWalletModal(true);
