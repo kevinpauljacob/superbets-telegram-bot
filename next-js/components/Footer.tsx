@@ -12,19 +12,14 @@ function Footer() {
   const [langSelect, setLangSelect] = useState(false);
   return (
     <div className="w-full h-full flex flex-col md:px-[3.5rem] px-[3rem]">
-      <div className="w-full h-full flex lg:flex-row flex-col lg:items-center items-start pt-10 gap-2">
+      <div className="w-full h-full flex lg:flex-row flex-col lg:items-center items-start pt-10 gap-2 lg:min-w-[1100px]">
         <div className="w-[1/3] flex items-center lg:pb-24 pb-5">
-          <Image
-            src={logo}
-            width={50}
-            height={40}
-            alt={"FOMO"}
-          ></Image>
+          <Image src={logo} width={50} height={40} alt={"FOMO"}></Image>
           <span className="items-center font-medium text-[1.6rem] text-white">
             FOMO
           </span>
         </div>
-        <div className="w-[2/3] flex lg:flex-row flex-col items-start lg:pt-20 lg:pb-20 lg:mx-24 mx-2 md:gap-8 gap-5">
+        <div className="w-[2/3] flex lg:flex-row flex-col items-start lg:pt-16 lg:pb-16 lg:mx-24 mx-2 md:gap-8 gap-5">
           <div className="flex">
             <div className="lg:px-10">
               <h3 className="font-semibold font-changa text-white text-lg leading-[18px] pb-4 text-opacity-90">
@@ -52,14 +47,18 @@ function Footer() {
               Community
             </h3>
             <div className="flex flex-row items-start justify-start gap-2 pt-2">
-              <p className="p-2 border-2 border-[#FFFFFF] rounded-full border-opacity-5"><Image src={Twitter} alt="" width={12} height={12} /></p>
-              <p className="p-2 border-2 border-[#FFFFFF] rounded-full border-opacity-5"><Image src={Telegram} alt="" width={12} height={12} /></p>
+              <p className="p-2 border-2 border-[#FFFFFF] rounded-full border-opacity-5 hover:bg-[#121519] hover:cursor-pointer">
+                <Image src={Twitter} alt="" width={12} height={12} />
+              </p>
+              <p className="p-2 border-2 border-[#FFFFFF] rounded-full border-opacity-5 hover:bg-[#121519] hover:cursor-pointer">
+                <Image src={Telegram} alt="" width={12} height={12} />
+              </p>
             </div>
           </div>
         </div>
       </div>
       <div>
-        <p className="text-[#94A3B8] font-medium font-chakra text-sm leading-6 pt-10 text-opacity-80 md:px-2 md:mx-2">
+        <p className="text-[#94A3B8] font-medium font-chakra text-sm leading-6 pt-10 text-opacity-80 md:px-2 mx-2">
           Shuffle is owned and operated by Natural Nine B.V., Curaçao company
           registration number 160998, with its registered address at
           Korporaalweg 10, Willemstad, Curaçao. Shuffle is authorized and
@@ -70,28 +69,33 @@ function Footer() {
           Floor 6, 6057 Larnaca, Cyprus. Contact us at support@shuffle.com.
         </p>
       </div>
-      <div className="w-full h-[1px] bg-[#94A3B8] bg-opacity-20 rounded-full mt-8 md:px-2 md:mx-2"/>
-      <div className="w-full flex lg:flex-row flex-col lg:items-center lg:justify-between lg:pb-36 pb-40 pt-5 font-inter md:px-2 md:mx-2">
-        <span className="text-sm font-normal text-[#FFFFFF] text-opacity-50">@2024 Fomo.com  All rights reserved</span>
+      <div className="w-full h-[1px] bg-[#94A3B8] bg-opacity-20 rounded-full mt-8 md:px-2 mx-2" />
+      <div className="w-full flex lg:flex-row flex-col lg:items-center lg:justify-between lg:pb-32 pb-36 pt-5 font-inter md:px-2 mx-2">
+        <p className="flex text-sm font-normal text-[#FFFFFF] text-opacity-50 font-sans gap-2">
+          <span>@2024 Fomo.com</span>
+          <span>All rights reserved</span>
+        </p>
         <div className="flex items-center lg:justify-center gap-5">
-          <span className="font-changa text-[#FFFFFF] text-opacity-25 text-4xl font-semibold md:pt-2">18+</span>
+          <span className="font-changa text-[#FFFFFF] text-opacity-25 text-4xl font-semibold">
+            18+
+          </span>
           <button
             onClick={() => {
               setLangSelect(!langSelect);
             }}
-            className="relative hidden md:flex items-center hover:bg-[#0000009f] transition-all px-5 py-2 rounded-md"
+            className="relative hidden lg:flex items-center hover:bg-[#0000009f] transition-all px-5 py-2 rounded-md font-sans"
           >
             <MdOutlineLanguage className="w-5 h-5 mr-3 text-white text-opacity-50" />
             <span className="text-white text-sm mr-5 text-start text-opacity-50">
               {language === "en"
                 ? "English"
                 : language === "ru"
-                  ? "Русский"
-                  : language === "ko"
-                    ? "한국인"
-                    : language === "ch"
-                      ? "中国人"
-                      : ""}
+                ? "Русский"
+                : language === "ko"
+                ? "한국인"
+                : language === "ch"
+                ? "中国人"
+                : ""}
             </span>
             <FaChevronDown className="w-3 h-3 text-white" />
             {langSelect && (
