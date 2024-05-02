@@ -166,7 +166,7 @@ export default function RollDiceProvablyFairModal({
               </div>
               <div className="hover:cursor-pointer">
                 <MdCancel
-                  size={30}
+                  size={25}
                   color="#F0F0F0"
                   onClick={() => {
                     onClose();

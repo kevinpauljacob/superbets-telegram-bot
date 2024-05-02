@@ -4,6 +4,7 @@ import { obfuscatePubKey } from "@/context/transactions";
 import { GameType, seedStatus } from "@/utils/provably-fair";
 import { useGlobalContext } from "@/components/GlobalContext";
 import { Table } from "@/components/table/Table";
+import BetRow from "@/components/BetRow";
 
 export interface Limbo {
   chance: number;
@@ -39,20 +40,6 @@ export default function StatsHistory({ refresh }: { refresh: boolean }) {
   const transactionsPerPage = 10;
   const [maxPages, setMaxPages] = useState(0);
 
-  const headers = ["Time", "Multiplier", "Bet Amount", "Result", "Amount Won"];
-  const allHeaders = [
-    "Time",
-    "Wallet",
-    "Multiplier",
-    "Bet Amount",
-    "Result",
-    "Amount Won",
-  ];
-
-  //headers to be displayed in small screen devices
-  const smallScreenHeaders = ["Time", "Amount Won"];
-  const allSmallScreenHeaders = ["Time", "Amount Won"];
-
   useEffect(() => {
     const route = all
       ? `/api/games/global/getHistory?game=${GameType.limbo}`
@@ -77,10 +64,6 @@ export default function StatsHistory({ refresh }: { refresh: boolean }) {
     <Table
       all={all}
       setAll={setAll}
-      myHeaders={headers}
-      allHeaders={allHeaders}
-      smallScreenHeaders={smallScreenHeaders}
-      allSmallScreenHeaders={allSmallScreenHeaders}
       page={page}
       setPage={setPage}
       maxPages={maxPages}
@@ -96,18 +79,18 @@ export default function StatsHistory({ refresh }: { refresh: boolean }) {
             <Fragment key={index}>
               <div
                 key={index}
-                className={`mb-2.5 ml-2.5 mr-2.5 flex w-full flex-row items-center gap-2 rounded-[5px] bg-[#121418] py-3 ${
-                  !all && "cursor-pointer"
-                }`}
+                className={`mb-2.5 ml-2.5 mr-2.5 flex w-full flex-row items-center gap-2 rounded-[5px] bg-[#121418] py-3 cursor-pointer`}
                 onClick={() => {
                   //fetch flipDetails and verification details here
-                  if (!all) {
+                  
+                  // if (!all) {
                     setVerifyModalData(flip);
                     openModal();
-                  }
+                  // }
                 }}
               >
-                <span className="w-full text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
+                <BetRow bet={flip} all={all} />
+                {/* <span className="w-full text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
                   {flip.createdAt
                     ? new Date(flip.createdAt).toLocaleDateString("en-GB", {
                         day: "2-digit",
@@ -157,7 +140,7 @@ export default function StatsHistory({ refresh }: { refresh: boolean }) {
                 </span>
                 <span className="w-full hidden md:block text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
                   {flip.amountWon > 0 ? flip.amountWon.toFixed(4) : "-"}
-                </span>
+                </span> */}
               </div>
             </Fragment>
           ))

@@ -35,9 +35,8 @@ export const TablePagination: React.FC<PaginationProps> = ({
               onClick={() => {
                 setPage(i);
               }}
-              className={`${
-                page === i ? "text-opacity-75" : "text-opacity-50"
-              } text-[#F0F0F0] transition-all`}
+              className={`${page === i ? "text-opacity-75" : "text-opacity-50"
+                } text-[#F0F0F0] transition-all`}
             >
               {i}
             </span>
@@ -55,9 +54,8 @@ export const TablePagination: React.FC<PaginationProps> = ({
               onClick={() => {
                 setPage(i);
               }}
-              className={`${
-                page === i ? "text-opacity-75" : "text-opacity-50"
-              } text-[#F0F0F0] transition-all`}
+              className={`${page === i ? "text-opacity-75" : "text-opacity-50"
+                } text-[#F0F0F0] transition-all`}
             >
               {i}
             </span>
@@ -85,12 +83,12 @@ export const TableButtons: React.FC<TableButtonProps> = ({ all, setAll }) => {
     <div className="mt-[1rem] md:mt-[3.5rem] flex w-full items-center justify-center gap-4 md:justify-start">
       <button
         onClick={() => {
-          if (wallet.publicKey) setAll(false);
+          if (wallet.publicKey) 
+            setAll(false);
           else toast.error("Wallet not connected");
         }}
-        className={`${
-          all ? "bg-[#202329] hover:bg-[#47484A]" : "bg-[#7839C5]"
-        } w-full transform rounded-[5px] px-8 py-2 font-changa text-xl text-white transition duration-200 md:w-fit`}
+        className={`${all ? "bg-[#202329] hover:bg-[#47484A]" : "bg-[#7839C5]"
+          } w-full transform rounded-[5px] px-8 py-2 font-changa text-xl text-white transition duration-200 md:w-fit`}
       >
         My Bets
       </button>
@@ -98,9 +96,8 @@ export const TableButtons: React.FC<TableButtonProps> = ({ all, setAll }) => {
         onClick={() => {
           setAll(true);
         }}
-        className={`${
-          all ? "bg-[#7839C5]" : "bg-[#202329] hover:bg-[#47484A]"
-        } w-full transform rounded-[5px] px-8 py-2 font-changa text-xl text-white transition duration-200 md:w-fit`}
+        className={`${all ? "bg-[#7839C5]" : "bg-[#202329] hover:bg-[#47484A]"
+          } w-full transform rounded-[5px] px-8 py-2 font-changa text-xl text-white transition duration-200 md:w-fit`}
       >
         All Bets
       </button>
@@ -112,60 +109,61 @@ interface TableNodeProps {
   children: ReactNode;
 }
 
-interface TableHeaderProps extends TableButtonProps {
-  myHeaders: string[];
-  allHeaders: string[];
-  smallScreenHeaders: string[];
-  allSmallScreenHeaders: string[];
-}
+// interface TableHeaderProps extends TableButtonProps {
+//   smallScreenHeaders: string[];
+//   allSmallScreenHeaders: string[];
+// }
 
-export const TableHeader: React.FC<TableHeaderProps> = ({
+export const TableHeader = ({
   all,
   setAll,
-  myHeaders,
-  allHeaders,
-  smallScreenHeaders,
-  allSmallScreenHeaders,
-}) => {
+} : TableButtonProps) => {
+
+  const headers = ["Game", "Bet Amount", "Multiplier", "Payout"]
+  const allHeaders = ["Wallet", ...headers];
+
+  const smallScreenHeaders = ["Game", "Payout"];
+
   return (
     <>
       <div className="mb-5 hidden md:flex w-full flex-row items-center gap-2 bg-[#121418] py-1 rounded-[5px]">
         {!all
-          ? myHeaders.map((header, index) => (
-              <span
-                key={index}
-                className="w-full text-center font-changa text-[#F0F0F080]"
-              >
-                {header}
-              </span>
-            ))
+          ? headers.map((header, index) => (
+            <span
+              key={index}
+              className="w-full text-center font-changa text-[#F0F0F080]"
+            >
+              {header}
+            </span>
+          ))
           : allHeaders.map((header, index) => (
-              <span
-                key={index}
-                className="w-full text-center font-changa text-[#F0F0F080]"
-              >
-                {header}
-              </span>
-            ))}
+            <span
+              key={index}
+              className="w-full text-center font-changa text-[#F0F0F080]"
+            >
+              {header}
+            </span>
+          ))}
       </div>
       <div className="mb-5 flex md:hidden w-full flex-row items-center bg-[#121418] rounded-md py-1 gap-2">
-        {!all
-          ? smallScreenHeaders.map((header, index) => (
-              <span
-                key={index}
-                className="w-full text-center font-changa text-[#F0F0F080]"
-              >
-                {header}
-              </span>
-            ))
-          : allSmallScreenHeaders.map((header, index) => (
-              <span
-                key={index}
-                className="w-full text-center font-changa text-[#F0F0F080]"
-              >
-                {header}
-              </span>
-            ))}
+        {
+        // !all ? 
+          smallScreenHeaders.map((header, index) => (
+            <span
+              key={index}
+              className="w-full text-center font-changa text-[#F0F0F080]"
+            >
+              {header}
+            </span>
+          // ))
+          // : allSmallScreenHeaders.map((header, index) => (
+          //   <span
+          //     key={index}
+          //     className="w-full text-center font-changa text-[#F0F0F080]"
+          //   >
+          //     {header}
+          //   </span>
+          ))}
       </div>
     </>
   );
@@ -177,9 +175,8 @@ export const TableRow: React.FC<TableNodeProps> = ({ children }) => {
 
 interface TableProps
   extends TableButtonProps,
-    TableHeaderProps,
-    TableNodeProps,
-    PaginationProps {}
+  TableNodeProps,
+  PaginationProps { }
 
 export const Table: React.FC<TableProps> = ({
   all,
@@ -188,10 +185,6 @@ export const Table: React.FC<TableProps> = ({
   setPage,
   bets,
   maxPages,
-  myHeaders,
-  allHeaders,
-  smallScreenHeaders,
-  allSmallScreenHeaders,
   children,
 }) => {
   const transactionsPerPage = 10;
@@ -203,10 +196,6 @@ export const Table: React.FC<TableProps> = ({
           <TableHeader
             all={all}
             setAll={setAll}
-            myHeaders={myHeaders}
-            allHeaders={allHeaders}
-            smallScreenHeaders={smallScreenHeaders}
-            allSmallScreenHeaders={allSmallScreenHeaders}
           />
 
           {children}

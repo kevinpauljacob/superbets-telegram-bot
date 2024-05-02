@@ -8,6 +8,7 @@ import RollDiceProvablyFairModal, {
 } from "./DiceProvablyFairModal";
 import { useGlobalContext } from "@/components/GlobalContext";
 import { FaRegCopy } from "react-icons/fa6";
+import { MdCancel } from "react-icons/md";
 
 interface ModalData {
   bet: Dice;
@@ -56,14 +57,14 @@ export default function VerifyDiceModal({ isOpen, onClose, modalData }: Props) {
 
   const [openDropDown, setOpenDropDown] = useState<boolean>(false);
 
-  const handleClose = () => {
-    //@ts-ignore
-    document.addEventListener("click", function (event) {
-      //@ts-ignore
-      var targetId = event.target.id;
-      if (targetId && targetId === "modal-bg") onClose();
-    });
-  };
+  // const handleClose = () => {
+  //   //@ts-ignore
+  //   document.addEventListener("click", function (event) {
+  //     //@ts-ignore
+  //     var targetId = event.target.id;
+  //     if (targetId && targetId === "modal-bg") onClose();
+  //   });
+  // };
 
   const copyToClipboard = (text?: string) => {
     if (text) navigator.clipboard.writeText(text);
@@ -84,13 +85,13 @@ export default function VerifyDiceModal({ isOpen, onClose, modalData }: Props) {
     <>
       {isOpen && (
         <div
-          onClick={() => {
-            handleClose();
-          }}
-          id="modal-bg"
+          // onClick={() => {
+          //   handleClose();
+          // }}
+          // id="modal-bg"
           className="absolute z-[150] left-0 top-0 flex h-full w-full items-center justify-center bg-[#33314680] backdrop-blur-[0px] transition-all"
         >
-          <div className="bg-[#121418] max-h-[80vh] no-scrollbar overflow-y-auto p-4 md:p-11 rounded-lg z-10 w-11/12 sm:w-[600px] ">
+          <div className="relative bg-[#121418] max-h-[80vh] no-scrollbar overflow-y-auto p-4 md:p-11 rounded-lg z-10 w-11/12 sm:w-[34rem] ">
             <div className="flex flex-wrap justify-between items-center mb-4 sm:mb-5">
               <div className="font-changa text-2xl font-semibold text-white mr-4 text-opacity-90">
                 Dice
@@ -319,6 +320,14 @@ export default function VerifyDiceModal({ isOpen, onClose, modalData }: Props) {
                 </div>
               )}
             </div>
+            <MdCancel
+              onClick={() => {
+                onClose();
+              }}
+              size={22}
+              className="absolute top-3 right-3 hover:cursor-pointer"
+              color="#F0F0F0"
+            />
           </div>
           <RollDiceProvablyFairModal
             isOpen={isPFModalOpen}

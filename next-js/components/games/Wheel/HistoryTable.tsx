@@ -4,6 +4,7 @@ import { obfuscatePubKey } from "@/context/transactions";
 import { useGlobalContext } from "@/components/GlobalContext";
 import { GameType, seedStatus } from "@/utils/provably-fair";
 import { Table } from "@/components/table/Table";
+import BetRow from "@/components/BetRow";
 
 export interface Wheel {
   createdAt: string;
@@ -42,28 +43,6 @@ export default function HistoryTable({ refresh }: { refresh: boolean }) {
   const transactionsPerPage = 10;
   const [maxPages, setMaxPages] = useState(0);
 
-  const headers = [
-    "Time",
-    "Risk",
-    "Segments",
-    "Bet Amount",
-    "Result",
-    "Amount Won",
-  ];
-  const allHeaders = [
-    "Time",
-    "Wallet",
-    "Risk",
-    "Segments",
-    "Bet Amount",
-    "Result",
-    "Amount Won",
-  ];
-
-  //headers to be displayed in small screen devices
-  const smallScreenHeaders = ["Time", "Amount Won"];
-  const allSmallScreenHeaders = ["Time", "Amount Won"];
-
   useEffect(() => {
     const route = all
       ? `/api/games/global/getHistory?game=${GameType.wheel}`
@@ -90,10 +69,6 @@ export default function HistoryTable({ refresh }: { refresh: boolean }) {
     <Table
       all={all}
       setAll={setAll}
-      myHeaders={headers}
-      allHeaders={allHeaders}
-      smallScreenHeaders={smallScreenHeaders}
-      allSmallScreenHeaders={allSmallScreenHeaders}
       page={page}
       setPage={setPage}
       maxPages={maxPages}
@@ -108,18 +83,18 @@ export default function HistoryTable({ refresh }: { refresh: boolean }) {
           .map((bet, index) => (
             <div
               key={index}
-              className={`mb-2.5 ml-2.5 mr-2.5 flex w-full flex-row items-center gap-2 rounded-[5px] bg-[#121418] py-3 ${
-                !all && "cursor-pointer"
-              }`}
+              className={`mb-2.5 ml-2.5 mr-2.5 flex w-full flex-row items-center gap-2 rounded-[5px] bg-[#121418] py-3 cursor-pointer`}
               onClick={() => {
                 //fetch flipDetails and verification details here
-                if (!all) {
+                
+                // if (!all) {
                   setVerifyModalData(bet);
                   openModal();
-                }
+                // }
               }}
             >
-              <span className="w-full text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
+              <BetRow bet={bet} all={all} />
+              {/* <span className="w-full text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
                 {bet.createdAt
                   ? new Date(bet.createdAt).toLocaleDateString("en-GB", {
                       day: "2-digit",
@@ -157,7 +132,7 @@ export default function HistoryTable({ refresh }: { refresh: boolean }) {
                 }`}
               >
                 {bet.amountWon.toFixed(4)} SOL
-              </span>
+              </span> */}
             </div>
           ))
       ) : (
