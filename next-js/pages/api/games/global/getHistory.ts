@@ -12,11 +12,22 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
       for (const [_, value] of Object.entries(GameType)) {
         const game = value;
+        if (game === GameType.options) continue;
+
         const model = gameModelMap[game as keyof typeof gameModelMap];
 
-        const records = await model.find({}).sort({ createdAt: -1 }).limit(200);
-        data.concat(records);
+        const records = await model.find({}).sort({ createdAt: -1 }).limit(5);
+        const recordsWithGame = records.map((record) => ({
+          ...record._doc,
+          game,
+        }));
+
+        data.push(...recordsWithGame);
       }
+
+      data.sort((a: any, b: any) => {
+        return b.createdAt.getTime() - a.createdAt.getTime();
+      });
 
       return res.json({
         success: true,

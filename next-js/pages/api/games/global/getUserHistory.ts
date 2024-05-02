@@ -23,21 +23,37 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
       for (const [_, value] of Object.entries(GameType)) {
         const game = value;
+        if (game === GameType.options) continue;
+
         const model = gameModelMap[game as keyof typeof gameModelMap];
 
-        let nonExpired = await model.find(
-          { wallet, "gameSeed.status": { $ne: seedStatus.EXPIRED } },
-          { "gameSeed.serverSeed": 0 },
-          { populate: { path: "gameSeed" } },
-        );
+        const nonExpired = await model
+          .find(
+            { wallet, "gameSeed.status": { $ne: seedStatus.EXPIRED } },
+            { "gameSeed.serverSeed": 0, createdAt: -1 },
+            { populate: { path: "gameSeed" } },
+          )
+          .limit(100);
 
-        let expired = await model.find(
-          { wallet, "gameSeed.status": seedStatus.EXPIRED },
-          {},
-          { populate: { path: "gameSeed" } },
-        );
+        const nonExpiredWithGame = nonExpired.map((record) => ({
+          ...record._doc,
+          game,
+        }));
 
-        data.concat(nonExpired, expired);
+        const expired = await model
+          .find(
+            { wallet, "gameSeed.status": seedStatus.EXPIRED },
+            { createdAt: -1 },
+            { populate: { path: "gameSeed" } },
+          )
+          .limit(100);
+
+        const expiredWithGame = expired.map((record) => ({
+          ...record._doc,
+          game,
+        }));
+
+        data.push(...nonExpiredWithGame, ...expiredWithGame);
       }
 
       data.sort((a: any, b: any) => {

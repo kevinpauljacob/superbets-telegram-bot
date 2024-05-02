@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { obfuscatePubKey } from "@/context/transactions";
 import { useGlobalContext } from "../GlobalContext";
 
@@ -23,8 +22,12 @@ const BetRow: React.FC<BetRowProps> = ({
 
   return (
     <div
-      className="w-full flex items-center justify-between hover:cursor-pointer"
+      className={
+        "w-full flex items-center justify-between " +
+        (!all ? "hover:cursor-pointer" : "")
+      }
       onClick={() => {
+        if (all) return;
         setCurrentGame(bet.game);
         setVerifyModalData(bet);
         openModal();
@@ -43,7 +46,7 @@ const BetRow: React.FC<BetRowProps> = ({
         {(bet.amount ?? 0).toFixed(4)}
       </span>
       <span className="w-full hidden md:block text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
-        {bet.multiplier}
+        {bet.strikeMultiplier}
       </span>
       <span
         className={`w-full text-center font-changa text-sm text-opacity-75 ${
