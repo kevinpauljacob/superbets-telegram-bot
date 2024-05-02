@@ -66,7 +66,7 @@ export default function FomoPlay() {
       <div className="flex justify-between items-center mb-1">
         <div className="flex items-center">
           <Image src={Dollar} alt="" width={26} height={26} />
-          <span className="font-semibold font-changa text-xl text-opacity-90 pl-3">
+          <span className="font-medium font-changa text-xl text-opacity-90 pl-3">
             <span className="hidden sm:inline">
               FOMO: Play - The best casino games
             </span>
