@@ -11,7 +11,7 @@ function Footer() {
   const { language, setLanguage } = useGlobalContext();
   const [langSelect, setLangSelect] = useState(false);
   return (
-    <div className="w-full h-full flex flex-col md:px-[3.5rem] px-[3rem]">
+    <div className="w-full h-full flex flex-col px-5 md:px-[3.5rem]">
       <div className="w-full h-full flex lg:flex-row flex-col lg:items-center items-start pt-10 gap-2 lg:min-w-[1100px]">
         <div className="w-[1/3] flex items-center lg:pb-24 pb-5">
           <Image src={logo} width={50} height={40} alt={"FOMO"}></Image>
@@ -19,10 +19,10 @@ function Footer() {
             FOMO
           </span>
         </div>
-        <div className="w-[2/3] flex lg:flex-row flex-col items-start lg:pt-16 lg:pb-16 lg:mx-24 mx-2 md:gap-8 gap-5">
+        <div className="w-[2/3] flex lg:flex-row flex-col items-start lg:pt-16 lg:pb-16 lg:mx-24 mx-2 gap-10 md:gap-8">
           <div className="flex">
             <div className="lg:px-10">
-              <h3 className="font-semibold font-changa text-white text-lg leading-[18px] pb-4 text-opacity-90">
+              <h3 className="font-semibold font-changa text-white text-base leading-[18px] pb-4 text-opacity-90">
                 Services
               </h3>
               <div className="text-[#94A3B8] font-chakra flex flex-col items-start justify-start gap-5 text-sm leading-[14px] font-medium text-opacity-80">
@@ -32,7 +32,7 @@ function Footer() {
               </div>
             </div>
             <div className="px-10">
-              <h3 className="font-semibold font-changa text-white text-lg leading-[18px] pb-4 text-opacity-90">
+              <h3 className="font-semibold font-changa text-white text-base leading-[18px] pb-4 text-opacity-90">
                 Support
               </h3>
               <div className="text-[#94A3B8] font-chakra flex flex-col items-start justify-start gap-5 text-sm leading-[14px] font-medium text-opacity-80">
@@ -43,15 +43,15 @@ function Footer() {
             </div>
           </div>
           <div className="lg:px-10">
-            <h3 className="font-semibold font-changa text-white text-lg leading-[18px] b-3 text-opacity-90">
+            <h3 className="font-semibold font-changa text-white text-base leading-[18px] b-3 text-opacity-90">
               Community
             </h3>
-            <div className="flex flex-row items-start justify-start gap-2 pt-2">
+            <div className="flex flex-row items-start justify-start gap-2 pt-4">
               <p className="p-2 border-2 border-[#FFFFFF] rounded-full border-opacity-5 hover:bg-[#121519] hover:cursor-pointer">
-                <Image src={Twitter} alt="" width={12} height={12} />
+                <Image src={Twitter} alt="" width={16} height={16} />
               </p>
               <p className="p-2 border-2 border-[#FFFFFF] rounded-full border-opacity-5 hover:bg-[#121519] hover:cursor-pointer">
-                <Image src={Telegram} alt="" width={12} height={12} />
+                <Image src={Telegram} alt="" width={16} height={16} />
               </p>
             </div>
           </div>
