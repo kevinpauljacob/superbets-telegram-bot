@@ -12,6 +12,7 @@ import {
 import toast from "react-hot-toast";
 import { WalletContextState } from "@solana/wallet-adapter-react";
 import { translationsMap } from "@/components/GlobalContext";
+import { GameType } from "@/utils/provably-fair";
 
 export const connection = new Connection(process.env.NEXT_PUBLIC_RPC!);
 
@@ -135,6 +136,21 @@ export const houseEdgeTiers: Record<number, number> = {
   5: 0.0035,
   6: 0.0015,
   7: 0,
+};
+
+export const maxPayouts: Record<GameType, number> = {
+  [GameType.dice]: 100,
+  [GameType.coin]: 100,
+  [GameType.options]: 100,
+  [GameType.dice2]: 100,
+  [GameType.wheel]: 100,
+  [GameType.plinko]: 100,
+  [GameType.limbo]: 100,
+  [GameType.roulette1]: 100,
+  [GameType.roulette2]: 100,
+  [GameType.keno]: 100,
+  [GameType.mines]: 100,
+  [GameType.hilo]: 100,
 };
 
 export const obfuscatePubKey = (address: string) => {

@@ -9,7 +9,7 @@ import {
   seedStatus,
 } from "@/utils/provably-fair";
 import StakingUser from "@/models/staking/user";
-import { houseEdgeTiers, pointTiers } from "@/context/transactions";
+import { houseEdgeTiers, maxPayouts, pointTiers } from "@/context/transactions";
 import { Decimal } from "decimal.js";
 Decimal.set({ precision: 9 });
 
@@ -65,6 +65,13 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           .status(400)
           .json({ success: false, message: "Invalid chosen numbers" });
 
+      const strikeMultiplier = new Decimal(6 / chosenNumbers.length);
+      const maxPayout = Decimal.mul(amount, strikeMultiplier);
+      if (!(maxPayout.toNumber() < maxPayouts.dice))
+        return res
+          .status(400)
+          .json({ success: false, message: "Max payout exceeded" });
+
       await connectDatabase();
 
       let user = await User.findOne({ wallet });
@@ -118,7 +125,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       let result = "Lost";
       let amountWon = new Decimal(0);
       let amountLost = amount;
-      const strikeMultiplier = new Decimal(6 / chosenNumbers.length);
 
       if (chosenNumbers.includes(strikeNumber)) {
         result = "Won";

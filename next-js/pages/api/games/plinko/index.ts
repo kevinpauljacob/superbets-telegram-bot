@@ -8,7 +8,7 @@ import {
   seedStatus,
 } from "@/utils/provably-fair";
 import StakingUser from "@/models/staking/user";
-import { houseEdgeTiers, pointTiers } from "@/context/transactions";
+import { houseEdgeTiers, maxPayouts, pointTiers } from "@/context/transactions";
 import { minGameAmount, wsEndpoint } from "@/context/gameTransactions";
 import { Decimal } from "decimal.js";
 Decimal.set({ precision: 9 });
@@ -100,6 +100,15 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           .status(400)
           .json({ success: false, message: "Invalid parameters" });
 
+      const multiplier = riskToChance[risk][rows];
+      const maxStrikeMultiplier = multiplier.at(-1)!;
+      const maxPayout = Decimal.mul(amount, maxStrikeMultiplier);
+
+      if (!(maxPayout.toNumber() < maxPayouts.plinko))
+        return res
+          .status(400)
+          .json({ success: false, message: "Max payout exceeded" });
+
       await connectDatabase();
 
       let user = await User.findOne({ wallet });
@@ -154,7 +163,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
       if (!strikeNumber) throw new Error("Invalid strike number!");
 
-      const multiplier = riskToChance[risk][rows];
       let strikeMultiplier = 1;
       for (
         let i = 1, chance = 1, totalChance = chance;

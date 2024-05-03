@@ -8,7 +8,7 @@ import {
   seedStatus,
 } from "@/utils/provably-fair";
 import StakingUser from "@/models/staking/user";
-import { houseEdgeTiers, pointTiers } from "@/context/transactions";
+import { houseEdgeTiers, maxPayouts, pointTiers } from "@/context/transactions";
 import { minGameAmount, wsEndpoint } from "@/context/gameTransactions";
 import { Decimal } from "decimal.js";
 Decimal.set({ precision: 9 });
@@ -60,6 +60,14 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         return res
           .status(400)
           .json({ success: false, message: "Invalid parameters" });
+
+      const strikeMultiplier = new Decimal(100).dividedBy(chance).toDP(2);
+      const maxPayout = Decimal.mul(amount, strikeMultiplier);
+
+      if (!(maxPayout.toNumber() < maxPayouts.dice2))
+        return res
+          .status(400)
+          .json({ success: false, message: "Max payout exceeded" });
 
       await connectDatabase();
 
@@ -116,7 +124,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       let result = "Lost";
       let amountWon = new Decimal(0);
       let amountLost = amount;
-      const strikeMultiplier = new Decimal(100).dividedBy(chance).toDP(2);
 
       if (
         (direction === "over" && strikeNumber > 100 - chance) ||

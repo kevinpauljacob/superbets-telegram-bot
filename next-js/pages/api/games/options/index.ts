@@ -3,6 +3,9 @@ import { User, Option } from "../../../../models/games";
 import { getToken } from "next-auth/jwt";
 import { NextApiRequest, NextApiResponse } from "next";
 import { minGameAmount } from "@/context/gameTransactions";
+import { Decimal } from "decimal.js";
+import { maxPayouts } from "@/context/transactions";
+Decimal.set({ precision: 9 });
 
 const secret = process.env.NEXTAUTH_SECRET;
 
@@ -43,6 +46,14 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           success: false,
           message: "Invalid bet timeframe",
         });
+
+      const strikeMultiplier = new Decimal(2);
+      const maxPayout = Decimal.mul(amount, strikeMultiplier);
+
+      if (!(maxPayout.toNumber() < maxPayouts.options))
+        return res
+          .status(400)
+          .json({ success: false, message: "Max payout exceeded" });
 
       await connectDatabase();
 
@@ -125,6 +136,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         betEndTime,
         amount,
         betType,
+        strikeMultiplier,
         strikePrice,
         timeFrame: 60 * timeFrame,
         result: "Pending",
