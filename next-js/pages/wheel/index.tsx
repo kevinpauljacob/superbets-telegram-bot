@@ -69,6 +69,9 @@ export default function Wheel() {
   );
 
   const multipliers = riskToChance[risk];
+  console.log("multipliers", multipliers);
+  const maxMultiplier = multipliers[multipliers.length - 1].multiplier;
+  console.log("maxMultiplier", maxMultiplier);
   const sortedMultipliers = multipliers
     .slice()
     .sort((a, b) => a.multiplier - b.multiplier);
@@ -333,7 +336,12 @@ export default function Wheel() {
                 onSubmit={methods.handleSubmit(onSubmit)}
               >
                 {/* amt input  */}
-                <BetAmount betAmt={userInput} setBetAmt={setUserInput} />
+                <BetAmount
+                  betAmt={userInput}
+                  setBetAmt={setUserInput}
+                  multiplier={maxMultiplier}
+                  game="wheel"
+                />
                 <div className="mb-6 w-full">
                   <div className="flex justify-between text-xs mb-2">
                     <p className="font-medium font-changa text-[#F0F0F0] text-opacity-90">

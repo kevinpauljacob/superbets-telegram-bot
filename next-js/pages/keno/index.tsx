@@ -62,6 +62,7 @@ export default function Keno() {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
 
   const multipliers = riskToChance[risk][chosenNumbers.length];
+  const maxMultiplier = multipliers[multipliers.length - 1];
   const commonNumbers = strikeNumbers.filter((num) =>
     chosenNumbers.includes(num),
   );
@@ -379,7 +380,12 @@ export default function Keno() {
                 onSubmit={methods.handleSubmit(onSubmit)}
               >
                 {/* amt input  */}
-                <BetAmount betAmt={userInput} setBetAmt={setUserInput} />
+                <BetAmount
+                  betAmt={userInput}
+                  setBetAmt={setUserInput}
+                  multiplier={maxMultiplier}
+                  game="keno"
+                />
                 <div className="mb-6 w-full">
                   <div className="flex justify-between text-xs mb-2">
                     <p className="font-medium font-changa text-[#F0F0F0] text-opacity-90">

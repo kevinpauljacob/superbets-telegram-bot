@@ -1,10 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
-import Image from "next/image";
 import { useWallet } from "@solana/wallet-adapter-react";
-import { rollDice } from "../../context/gameTransactions";
-import HistoryTable from "../../components/games/Dice/VerifyDiceModal";
+import { rollDice } from "@/context/gameTransactions";
 import { toast } from "react-hot-toast";
-import { ROLL_TAX } from "../../context/config";
 import BetSetting from "@/components/BetSetting";
 import { useGlobalContext } from "@/components/GlobalContext";
 import {
@@ -27,7 +24,6 @@ import Dice5 from "@/public/assets/Dice5";
 import Dice6 from "@/public/assets/Dice6";
 import BetAmount from "@/components/games/BetAmountInput";
 import BetButton from "@/components/games/BetButton";
-import ResultsSlider from "@/components/ResultsSlider";
 import showInfoToast from "@/components/games/toasts/toasts";
 import { loopSound, soundAlert } from "@/utils/soundUtils";
 import Bets from "../../components/games/Bets";
@@ -387,7 +383,12 @@ export default function Dice() {
                 onSubmit={methods.handleSubmit(onSubmit)}
               >
                 {/* amt input  */}
-                <BetAmount betAmt={userInput} setBetAmt={setUserInput} />
+                <BetAmount
+                  betAmt={userInput}
+                  setBetAmt={setUserInput}
+                  multiplier={winningPays}
+                  game="dice"
+                />
                 {rollType === "manual" ? (
                   <></>
                 ) : (
