@@ -70,7 +70,7 @@ export default function BalanceModal() {
     >
       <div
         id="modal-box"
-        className="relative flex w-[95%] max-w-[30rem] flex-col rounded-md bg-[#121418] p-7"
+        className="relative modalscrollbar overflow-y-auto flex w-[95%] max-w-[30rem] flex-col rounded-md bg-[#121418] p-7"
       >
         <div
           className="flex items-center w-full mb-7 gap-2 mt-2"

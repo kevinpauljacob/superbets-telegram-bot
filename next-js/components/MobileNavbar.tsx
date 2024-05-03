@@ -2,12 +2,14 @@ import Image from "next/image";
 import { useRouter } from "next/router";
 import Menu from "/public/assets/menu.svg";
 import ActiveMenu from "/public/assets/activeMenu.svg";
+// import Staking from "@/public/assets/Staking";
 import Staking from "/public/assets/staking.svg";
 import ActiveStaking from "/public/assets/activeStaking.svg";
 import Leaderboard from "/public/assets/Leaderboard1.svg";
 import ActiveLeaderboard from "/public/assets/activeLeaderboard.svg";
 import Store from "/public/assets/store1.svg";
 import ActiveStore from "/public/assets/activeStore.svg";
+// import Dashboard from "@/public/assets/dashboard";
 import Dashboard from "/public/assets/dashboard.svg";
 import ActiveDashboard from "/public/assets/activeDashboard.svg";
 import Link from "next/link";
@@ -63,8 +65,8 @@ export default function MobileNavbar({
             <Image
               src={router.pathname === "/stake" ? ActiveStaking : Staking}
               alt="Menu"
-              width={12}
-              height={20}
+              width={30}
+              height={30}
             />
             <p
               className={`text-[10px] text-white/60 ${
