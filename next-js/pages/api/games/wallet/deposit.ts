@@ -20,7 +20,7 @@ import { NextApiRequest, NextApiResponse } from "next";
 
 const secret = process.env.NEXTAUTH_SECRET;
 
-const connection = new Connection(process.env.BACKEND_RPC!);
+const connection = new Connection(process.env.BACKEND_RPC!, "confirmed");
 
 export const config = {
   maxDuration: 60,
