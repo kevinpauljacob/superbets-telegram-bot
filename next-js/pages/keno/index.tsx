@@ -439,7 +439,7 @@ export default function Keno() {
                 ) : (
                   <div className="w-full flex flex-row items-end gap-3">
                     <AutoCount
-                      loading={isRolling}
+                      loading={isRolling || startAuto}
                       onChange={handleCountChange}
                     />
                     <div className="w-full hidden lg:flex">
@@ -616,7 +616,7 @@ export default function Keno() {
       </GameDisplay>
       <GameTable>
         {/* <HistoryTable refresh={refresh} /> */}
-        <Bets refresh={refresh} game={"keno"}/>
+        <Bets refresh={refresh} game={"keno"} />
       </GameTable>
     </GameLayout>
   );

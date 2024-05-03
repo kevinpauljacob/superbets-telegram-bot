@@ -1,4 +1,4 @@
-import { User } from "@/context/transactions";
+import { User, houseEdgeTiers, pointTiers } from "@/context/transactions";
 import { useWallet } from "@solana/wallet-adapter-react";
 import {
   createContext,
@@ -254,10 +254,12 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
         console.log("User: ", user);
         if (success) {
           setUserData(user);
-          setHouseEdge(0);
-        }
-        // else toast.error(message);
-        // getWalletBalance();
+        } else console.error(message);
+        let points = user?.points ?? 0;
+        const userTier = Object.entries(pointTiers).reduce((prev, next) => {
+          return points >= next[1]?.limit ? next : prev;
+        })[0];
+        setHouseEdge(houseEdgeTiers[parseInt(userTier)]);
       } catch (e) {
         // toast.error("Unable to fetch balance.");
         console.error(e);

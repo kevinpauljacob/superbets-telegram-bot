@@ -89,20 +89,20 @@ export default function Sidebar({
             <div
               onClick={() => {
                 setSidebar(true);
-                setShowExitTokens(true);
-              }}
-              className={`${topIconCss}`}
-            >
-              <FomoExitIcon className={`${closedIconCss}`} />
-            </div>
-            <div
-              onClick={() => {
-                setSidebar(true);
                 setShowPlayTokens(true);
               }}
               className={`${topIconCss}`}
             >
               <FomoPlayIcon className={`${closedIconCss}`} />
+            </div>
+            <div
+              onClick={() => {
+                setSidebar(true);
+                setShowExitTokens(true);
+              }}
+              className={`${topIconCss}`}
+            >
+              <FomoExitIcon className={`${closedIconCss}`} />
             </div>
             <div className={`${topIconCss}`}>
               <Dollar className={`${closedIconCss}`} />
@@ -224,18 +224,6 @@ export const OpenSidebar = ({
     },
     {
       src: "",
-      token: "Mines",
-      link: "/mines", // Update the links to include "/"
-      active: false,
-    },
-    {
-      src: "",
-      token: "BlackJack",
-      link: "/blackjack", // Update the links to include "/"
-      active: false,
-    },
-    {
-      src: "",
       token: "Keno",
       link: "/keno", // Update the links to include "/"
       active: false,
@@ -322,6 +310,59 @@ export const OpenSidebar = ({
           <div className={`mt-0`}>
             <div className="w-full transition-all cursor-pointer rounded-md flex items-center justify-between gap-2 pl-4 pr-2 py-2 bg-transparent hover:bg-[#1f2024] focus:bg-[#1f2024] group">
               <div className="flex items-center gap-3">
+                <FomoPlayIcon className="min-w-[1.25rem] min-h-[1.25rem] transition-all text-white group-hover:text-[#9945FF] group-focus:text-[#9945FF]" />
+                <span className="mt-0.5 transition-all text-[0.85rem] font-chakra font-medium text-white text-opacity-90 group-hover:text-opacity-100 group-focus:text-opacity-100">
+                  FOMO: Play
+                </span>
+              </div>
+              <button
+                className={`${
+                  showPlayTokens ? "bg-[#47484A]" : "bg-white bg-opacity-5"
+                } hover:bg-[#47484A] transition duration-300 ease-in-out hover:transition hover:duration-300 hover:ease-in-out rounded-md w-8 h-6 flex justify-center items-center`}
+                onClick={() => setShowPlayTokens(!showPlayTokens)}
+              >
+                <Image
+                  src={
+                    showPlayTokens
+                      ? "/assets/upArrow.png"
+                      : "/assets/downArrow.png"
+                  }
+                  alt=""
+                  width={9}
+                  height={9}
+                  className=""
+                />
+              </button>
+            </div>
+            {showPlayTokens && (
+              <ul className="mt-1">
+                {casinoGames.map((token, index) => (
+                  <Link
+                    href={token.link}
+                    key={index}
+                    onClick={() => toggleCasinoToken(index)}
+                    className={`${
+                      token.active ? "bg-white/10" : "hover:bg-[#191a1d]"
+                    } group flex transition-all items-center rounded-md p-2 pl-12 gap-2`}
+                  >
+                    {/* <Image src={token.src} alt="" width={15} height={15} /> */}
+                    <span
+                      className={`text-[0.85rem] font-chakra font-medium transition-all ${
+                        token.active
+                          ? "text-white/90"
+                          : "text-white/50 group-hover:text-white/90"
+                      }`}
+                    >
+                      {token.token}
+                    </span>
+                  </Link>
+                ))}
+              </ul>
+            )}
+          </div>
+          <div className={`mt-0`}>
+            <div className="w-full transition-all cursor-pointer rounded-md flex items-center justify-between gap-2 pl-4 pr-2 py-2 bg-transparent hover:bg-[#1f2024] focus:bg-[#1f2024] group">
+              <div className="flex items-center gap-3">
                 <FomoExitIcon className="min-w-[1.25rem] min-h-[1.25rem] transition-all text-white group-hover:text-[#9945FF] group-focus:text-[#9945FF]" />
                 <span className="mt-0.5 transition-all text-[0.85rem] font-chakra font-medium text-white text-opacity-90 group-hover:text-opacity-100 group-focus:text-opacity-100">
                   FOMO: Exit
@@ -354,59 +395,6 @@ export const OpenSidebar = ({
                     href={token.link}
                     key={index}
                     onClick={() => toggleExitToken(index)}
-                    className={`${
-                      token.active ? "bg-white/10" : "hover:bg-[#191a1d]"
-                    } group flex transition-all items-center rounded-md p-2 pl-12 gap-2`}
-                  >
-                    {/* <Image src={token.src} alt="" width={15} height={15} /> */}
-                    <span
-                      className={`text-[0.85rem] font-chakra font-medium transition-all ${
-                        token.active
-                          ? "text-white/90"
-                          : "text-white/50 group-hover:text-white/90"
-                      }`}
-                    >
-                      {token.token}
-                    </span>
-                  </Link>
-                ))}
-              </ul>
-            )}
-          </div>
-          <div className={`mt-0`}>
-            <div className="w-full transition-all cursor-pointer rounded-md flex items-center justify-between gap-2 pl-4 pr-2 py-2 bg-transparent hover:bg-[#1f2024] focus:bg-[#1f2024] group">
-              <div className="flex items-center gap-3">
-                <FomoPlayIcon className="min-w-[1.25rem] min-h-[1.25rem] transition-all text-white group-hover:text-[#9945FF] group-focus:text-[#9945FF]" />
-                <span className="mt-0.5 transition-all text-[0.85rem] font-chakra font-medium text-white text-opacity-90 group-hover:text-opacity-100 group-focus:text-opacity-100">
-                  FOMO: Play
-                </span>
-              </div>
-              <button
-                className={`${
-                  showPlayTokens ? "bg-[#47484A]" : "bg-white bg-opacity-5"
-                } hover:bg-[#47484A] transition duration-300 ease-in-out hover:transition hover:duration-300 hover:ease-in-out rounded-md w-8 h-6 flex justify-center items-center`}
-                onClick={() => setShowPlayTokens(!showPlayTokens)}
-              >
-                <Image
-                  src={
-                    showPlayTokens
-                      ? "/assets/upArrow.png"
-                      : "/assets/downArrow.png"
-                  }
-                  alt=""
-                  width={9}
-                  height={9}
-                  className=""
-                />
-              </button>
-            </div>
-            {showPlayTokens && (
-              <ul className="mt-1">
-                {casinoGames.map((token, index) => (
-                  <Link
-                    href={token.link}
-                    key={index}
-                    onClick={() => toggleCasinoToken(index)}
                     className={`${
                       token.active ? "bg-white/10" : "hover:bg-[#191a1d]"
                     } group flex transition-all items-center rounded-md p-2 pl-12 gap-2`}

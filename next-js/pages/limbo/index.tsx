@@ -71,6 +71,7 @@ export default function Limbo() {
     setAutoBetProfit,
     useAutoConfig,
     setUseAutoConfig,
+    houseEdge,
   } = useGlobalContext();
 
   const multiplierLimits = [1.02, 50];
@@ -477,11 +478,14 @@ export default function Limbo() {
 
               <div className="flex flex-col w-full">
                 <span className="text-[#F0F0F0] font-changa font-sembiold text-xs mb-1">
-                  Winning
+                  Profit
                 </span>
                 <span className="bg-[#202329] font-chakra text-xs text-white rounded-md px-2 md:px-5 py-3">
                   {betAmt && inputMultiplier
-                    ? (inputMultiplier * betAmt).toFixed(4)
+                    ? (
+                        betAmt *
+                        (inputMultiplier * (1 - houseEdge) - 1)
+                      ).toFixed(4)
                     : 0.0}{" "}
                   $SOL
                 </span>
@@ -516,7 +520,7 @@ export default function Limbo() {
       </GameDisplay>
       <GameTable>
         {/* <HistoryTable refresh={refresh} /> */}
-        <Bets refresh={refresh} game={"limbo"}/>
+        <Bets refresh={refresh} game={"limbo"} />
       </GameTable>
     </GameLayout>
   );

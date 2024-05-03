@@ -31,6 +31,8 @@ import ResultsSlider from "@/components/ResultsSlider";
 import showInfoToast from "@/components/games/toasts/toasts";
 import { loopSound, soundAlert } from "@/utils/soundUtils";
 import Bets from "../../components/games/Bets";
+import AutoCount from "@/components/AutoCount";
+import ConfigureAutoButton from "@/components/ConfigureAutoButton";
 
 export default function Dice() {
   const wallet = useWallet();
@@ -56,6 +58,7 @@ export default function Dice() {
     setAutoBetProfit,
     useAutoConfig,
     setUseAutoConfig,
+    houseEdge,
   } = useGlobalContext();
 
   const [userInput, setUserInput] = useState<number | undefined>();
@@ -63,7 +66,7 @@ export default function Dice() {
 
   const [isRolling, setIsRolling] = useState(false);
   const [winningPays, setWinningPays] = useState(0.0);
-  const [winningAmount, setWinningAmount] = useState(0.0);
+  const [profit, setProfit] = useState(0.0);
   const [winningProbability, setWinningProbability] = useState(0.0);
   const [refresh, setRefresh] = useState(true);
   const [selectedFace, setSelectedFace] = useState<number[]>([]);
@@ -104,19 +107,21 @@ export default function Dice() {
         if (!selectedFace.includes(newFace)) {
           setSelectedFace([...selectedFace, newFace]);
           const newLength = selectedFace.length + 1;
-          setWinningPays(6 / newLength);
-          setWinningAmount((betAmt * 6) / newLength);
+          const multiplier = 6 / newLength;
+          setWinningPays(multiplier);
+          setProfit(betAmt * (multiplier * (1 - houseEdge) - 1));
           setWinningProbability((newLength * 100) / 6);
         } else {
           setSelectedFace(selectedFace.filter((face) => face !== newFace));
           const newLength = selectedFace.length - 1;
           if (newLength === 0) {
             setWinningPays(6);
-            setWinningAmount(betAmt * 6);
+            setProfit(betAmt * (6 * (1 - houseEdge) - 1));
             setWinningProbability(0);
           } else {
-            setWinningPays(6 / newLength);
-            setWinningAmount((betAmt * 6) / newLength);
+            const multiplier = 6 / newLength;
+            setWinningPays(multiplier);
+            setProfit(betAmt * (multiplier * (1 - houseEdge) - 1));
             setWinningProbability((newLength * 100) / 6);
           }
         }
@@ -128,11 +133,12 @@ export default function Dice() {
     const newLength = selectedFace.length;
     if (newLength === 0) {
       setWinningPays(0.0);
-      setWinningAmount(0.0);
+      setProfit(0.0);
       setWinningProbability(0.0);
     } else {
-      setWinningPays(6 / newLength);
-      setWinningAmount((betAmt * 6) / newLength);
+      const multiplier = 6 / newLength;
+      setWinningPays(multiplier);
+      setProfit(betAmt * (multiplier * (1 - houseEdge) - 1));
       setWinningProbability((newLength * 100) / 6);
     }
   }, [betAmt]);
@@ -332,6 +338,10 @@ export default function Dice() {
     } else if (wallet.connected && selectedFace.length > 0) diceRoll();
   };
 
+  useEffect(() => {
+    console.log(profit, betAmt, 6 / selectedFace.length, houseEdge);
+  }, [profit]);
+
   return (
     <GameLayout title="FOMO - Dice">
       <GameOptions>
@@ -382,76 +392,12 @@ export default function Dice() {
                   <></>
                 ) : (
                   <div className="w-full flex flex-row items-end gap-3">
-                    <div className="mb-0 flex w-full flex-col">
-                      <div className="mb-1 flex w-full items-center justify-between text-xs font-changa text-opacity-90">
-                        <label className="text-white/90 font-changa">
-                          Number of Bets
-                        </label>
-                      </div>
-
-                      <div
-                        className={`group flex h-11 w-full cursor-pointer items-center rounded-[8px] bg-[#202329] px-4`}
-                      >
-                        <input
-                          id={"count-input"}
-                          {...methods.register("betCount", {
-                            required: "Bet count is required",
-                          })}
-                          type={"number"}
-                          step={"any"}
-                          autoComplete="off"
-                          onChange={handleCountChange}
-                          placeholder={
-                            autoBetCount.toString().includes("inf")
-                              ? "Infinity"
-                              : "00"
-                          }
-                          disabled={isRolling || startAuto}
-                          value={autoBetCount}
-                          className={`flex w-full min-w-0 bg-transparent text-base text-[#94A3B8] placeholder-[#94A3B8] font-chakra ${
-                            autoBetCount.toString().includes("inf")
-                              ? "placeholder-opacity-100"
-                              : "placeholder-opacity-40"
-                          } placeholder-opacity-40 outline-none`}
-                        />
-                        <span
-                          className={`text-2xl font-medium text-white text-opacity-50 ${
-                            autoBetCount.toString().includes("inf")
-                              ? "bg-[#47484A]"
-                              : "bg-[#292C32]"
-                          } hover:bg-[#47484A] focus:bg-[#47484A] transition-all rounded-[5px] py-0.5 px-3`}
-                          onClick={() => setAutoBetCount("inf")}
-                        >
-                          <BsInfinity />
-                        </span>
-                      </div>
-
-                      <span
-                        className={`${
-                          methods.formState.errors["amount"]
-                            ? "opacity-100"
-                            : "opacity-0"
-                        } mt-1.5 flex items-center gap-1 text-xs text-[#D92828]`}
-                      >
-                        {methods.formState.errors["amount"]
-                          ? methods.formState.errors[
-                              "amount"
-                            ]!.message!.toString()
-                          : "NONE"}
-                      </span>
-                    </div>
-                    <div
-                      onClick={() => {
-                        setShowAutoModal(true);
-                      }}
-                      className="relative mb-[1.4rem] rounded-md w-full h-11 flex items-center justify-center opacity-75 cursor-pointer font-sans font-medium text-sm text-white text-opacity-90 border-2 border-white bg-white bg-opacity-0 hover:bg-opacity-5"
-                    >
-                      Configure Auto
-                      <div
-                        className={`${
-                          useAutoConfig ? "bg-fomo-green" : "bg-fomo-red"
-                        } absolute top-0 right-0 m-1.5 bg-fomo-green w-2 h-2 rounded-full`}
-                      />
+                    <AutoCount
+                      loading={isRolling || startAuto}
+                      onChange={handleCountChange}
+                    />
+                    <div className="w-full hidden lg:flex">
+                      <ConfigureAutoButton />
                     </div>
                   </div>
                 )}
@@ -627,14 +573,14 @@ export default function Dice() {
 
           <GameFooterInfo
             multiplier={winningPays}
-            amount={winningAmount ? winningAmount * (1 - ROLL_TAX) : 0.0}
+            amount={betAmt ? betAmt : 0}
             chance={winningProbability}
           />
         </>
       </GameDisplay>
       <GameTable>
         {/* <HistoryTable refresh={refresh} /> */}
-        <Bets refresh={refresh} game={"dice"}/>
+        <Bets refresh={refresh} game={"dice"} />
       </GameTable>
     </GameLayout>
   );
