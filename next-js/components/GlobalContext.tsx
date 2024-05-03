@@ -136,6 +136,9 @@ interface GlobalContextProps {
 
   currentGame: string | null;
   setCurrentGame: (currentGame: string | null) => void;
+
+  houseEdge: number;
+  setHouseEdge: (currentGame: number) => void;
 }
 
 const GlobalContext = createContext<GlobalContextProps | undefined>(undefined);
@@ -199,6 +202,8 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
   const [fomoPrice, setFomoPrice] = useState<number>(0);
   const [currentGame, setCurrentGame] = useState<string | null>(null);
 
+  const [houseEdge, setHouseEdge] = useState<number>(0);
+
   useEffect(() => {
     const fetchFomoPrice = async () => {
       try {
@@ -246,8 +251,11 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
         });
 
         const { success, message, user } = await res.json();
-        // console.log("User: ", user);
-        if (success) setUserData(user);
+        console.log("User: ", user);
+        if (success) {
+          setUserData(user);
+          setHouseEdge(0);
+        }
         // else toast.error(message);
         // getWalletBalance();
       } catch (e) {
@@ -397,6 +405,10 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
         setAutoBetProfit,
         useAutoConfig,
         setUseAutoConfig,
+        currentGame,
+        setCurrentGame,
+        houseEdge,
+        setHouseEdge,
         openVerifyModal,
         closeVerifyModal,
         setShowWalletModal,
@@ -406,8 +418,6 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
         getWalletBalance,
         getBalance,
         getProvablyFairData,
-        currentGame,
-        setCurrentGame
       }}
     >
       {children}
