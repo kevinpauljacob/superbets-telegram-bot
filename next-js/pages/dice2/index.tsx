@@ -348,7 +348,12 @@ export default function Dice2() {
                 onSubmit={methods.handleSubmit(onSubmit)}
               >
                 {/* amt input  */}
-                <BetAmount betAmt={userInput} setBetAmt={setUserInput} />
+                <BetAmount
+                  betAmt={userInput}
+                  setBetAmt={setUserInput}
+                  multiplier={multiplier}
+                  game="dice2"
+                />
                 {betType === "manual" ? (
                   <></>
                 ) : (
@@ -562,7 +567,7 @@ export default function Dice2() {
       </GameDisplay>
       <GameTable>
         {/* <HistoryTable refresh={refresh} /> */}
-        <Bets refresh={refresh} game={"dice2"}/>
+        <Bets refresh={refresh} game={"dice2"} />
       </GameTable>
     </GameLayout>
   );

@@ -357,7 +357,12 @@ export default function Options() {
               </BetButton>
             </div>
 
-            <BetAmount betAmt={betAmt} setBetAmt={setBetAmt} />
+            <BetAmount
+              betAmt={betAmt}
+              setBetAmt={setBetAmt}
+              multiplier={2.0}
+              game="options"
+            />
 
             {/* select interval  */}
             <div className="mb-4 flex w-full flex-col rounded-lg bg-transparent bg-opacity-10">
@@ -577,7 +582,7 @@ export default function Options() {
         </>
       </GameDisplay>
       <GameTable>
-        <Bets refresh={refresh} game={"options"}/>
+        <Bets refresh={refresh} game={"options"} />
       </GameTable>
     </GameLayout>
   );

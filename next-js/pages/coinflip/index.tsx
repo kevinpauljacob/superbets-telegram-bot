@@ -277,7 +277,12 @@ export default function Flip() {
                 onSubmit={methods.handleSubmit(onSubmit)}
               >
                 {/* amt input  */}
-                <BetAmount betAmt={userInput} setBetAmt={setUserInput} />
+                <BetAmount
+                  betAmt={userInput}
+                  setBetAmt={setUserInput}
+                  multiplier={2.0}
+                  game="coinflip"
+                />
 
                 {betSetting === "manual" ? (
                   <></>
