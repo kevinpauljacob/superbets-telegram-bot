@@ -27,19 +27,19 @@ const BetRow: React.FC<BetRowProps> = ({
         (!all ? "hover:cursor-pointer" : "")
       }
       onClick={() => {
-        // if (all) return;
+        if (all) return;
         setCurrentGame(bet.game);
         setVerifyModalData(bet);
         openModal();
       }}
     >
       {all && (
-        <span className="w-full hidden md:block text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
+        <span className="w-full hidden text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
           {obfuscatePubKey(bet.wallet)}
         </span>
       )}
 
-      <span className="w-full hidden md:block text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
+      <span className="w-full md:block text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
         {Capitalize(bet.game)}
       </span>
       <span className="w-full hidden md:block text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">

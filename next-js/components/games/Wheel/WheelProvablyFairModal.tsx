@@ -112,6 +112,14 @@ export default function WheelProvablyFairModal({
     setState(newState);
   };
 
+  const handleClose = () => {
+    //@ts-ignore
+    document.addEventListener("click", function (event) {
+      //@ts-ignore
+      var targetId = event.target.id;
+      if (targetId && targetId === "pf-modal-bg") onClose();
+    });
+  };
 
   useEffect(() => {
     if (modalData.tab) handleToggleState(modalData.tab);
@@ -197,10 +205,10 @@ export default function WheelProvablyFairModal({
     <>
       {isOpen && (
         <div
-          // onClick={() => {
-          //   handleClose();
-          // }}
-          // id="modal-bg"
+          onClick={() => {
+            handleClose();
+          }}
+          id="pf-modal-bg"
           className="absolute z-[150] left-0 top-0 flex h-full w-full items-center justify-center bg-[#33314680] backdrop-blur-[0px] transition-all"
         >
           <div className="bg-[#121418] max-h-[80dvh] modalscrollbar overflow-y-scroll p-8 rounded-lg z-10 w-11/12 sm:w-[32rem] -mt-[4.7rem] md:mt-0">

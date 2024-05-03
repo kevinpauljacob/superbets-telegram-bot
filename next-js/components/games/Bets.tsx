@@ -24,9 +24,7 @@ export default function Bets({
   const [all, setAll] = useState(wallet.publicKey ? false : true);
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(false);
-
   const [maxPages, setMaxPages] = useState(0);
-
   const [bets, setBets] = useState<Bet[]>([]);
 
   useEffect(() => {

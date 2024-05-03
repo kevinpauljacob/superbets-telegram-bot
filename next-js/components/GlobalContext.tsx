@@ -251,7 +251,7 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
         });
 
         const { success, message, user } = await res.json();
-        console.log("User: ", user);
+
         if (success) {
           setUserData(user);
         } else console.error(message);
