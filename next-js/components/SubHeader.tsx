@@ -51,7 +51,6 @@ export default function SubHeader() {
     socket.onmessage = async (event) => {
       const response = JSON.parse(event.data.toString());
 
-      console.log("Received message from server:", response);
       if (!response.payload || response.result === "Lost") return;
 
       const payload = response.payload;
@@ -61,16 +60,7 @@ export default function SubHeader() {
       });
     };
 
-    socket.onclose = (event) => {
-      console.log("WebSocket connection closed:", event);
-    };
-
-    socket.onerror = (error) => {
-      console.error("WebSocket error:", error);
-    };
-
     return () => {
-      console.log("Cleaning up WebSocket connection");
       socket.close();
     };
   }, []);

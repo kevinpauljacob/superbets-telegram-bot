@@ -1,8 +1,7 @@
 import { useWallet } from "@solana/wallet-adapter-react";
-import { useGlobalContext } from "../GlobalContext";
 import { useState, useEffect } from "react";
 import { Table } from "../table/Table";
-import BetRow from "./BetRow";
+import { wsEndpoint } from "@/context/gameTransactions";
 
 interface Bet {
   wallet: string;
@@ -30,13 +29,34 @@ export default function Bets({
 
   const [bets, setBets] = useState<Bet[]>([]);
 
-  const {
-    isVerifyModalOpen: isOpen,
-    setIsVerifyModalOpen: setIsOpen,
-    openVerifyModal: openModal,
-    closeVerifyModal: closeModal,
-    setVerifyModalData,
-  } = useGlobalContext();
+  useEffect(() => {
+    const socket = new WebSocket(wsEndpoint);
+
+    socket.onopen = () => {
+      socket.send(
+        JSON.stringify({
+          clientType: "listener-client",
+          channel: "fomo-casino_games-channel",
+        }),
+      );
+    };
+
+    socket.onmessage = async (event) => {
+      const response = JSON.parse(event.data.toString());
+
+      if (!response.payload) return;
+
+      const payload = response.payload;
+      if (all && payload.wallet !== wallet.publicKey?.toBase58())
+        setBets((prev) => {
+          return [payload, ...prev];
+        });
+    };
+
+    return () => {
+      socket.close();
+    };
+  }, []);
 
   useEffect(() => {
     setLoading(true);
