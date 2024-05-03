@@ -8,7 +8,7 @@ import {
   seedStatus,
 } from "@/utils/provably-fair";
 import StakingUser from "@/models/staking/user";
-import { houseEdgeTiers, pointTiers } from "@/context/transactions";
+import { houseEdgeTiers, maxPayouts, pointTiers } from "@/context/transactions";
 import { minGameAmount, wsEndpoint } from "@/context/gameTransactions";
 import { riskToChance } from "@/components/games/Wheel/Segments";
 import { Decimal } from "decimal.js";
@@ -60,6 +60,18 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         return res
           .status(400)
           .json({ success: false, message: "Invalid parameters" });
+
+      const item = riskToChance[risk];
+      const maxStrikeMultiplier = item.reduce(
+        (acc, next) => Math.max(acc, next.multiplier),
+        0,
+      );
+      const maxPayout = Decimal.mul(amount, maxStrikeMultiplier);
+
+      if (!(maxPayout.toNumber() < maxPayouts.wheel))
+        return res
+          .status(400)
+          .json({ success: false, message: "Max payout exceeded" });
 
       await connectDatabase();
 
@@ -117,7 +129,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       let amountWon = new Decimal(0);
       let amountLost = amount;
 
-      const item = riskToChance[risk];
       let strikeMultiplier = 0;
 
       for (let i = 0, isFound = false; i < 100 && !isFound; ) {

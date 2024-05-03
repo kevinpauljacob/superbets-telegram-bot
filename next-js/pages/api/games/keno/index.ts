@@ -8,7 +8,7 @@ import {
   seedStatus,
 } from "@/utils/provably-fair";
 import StakingUser from "@/models/staking/user";
-import { houseEdgeTiers, pointTiers } from "@/context/transactions";
+import { houseEdgeTiers, maxPayouts, pointTiers } from "@/context/transactions";
 import { minGameAmount, wsEndpoint } from "@/context/gameTransactions";
 import { riskToChance } from "@/components/games/Keno/RiskToChance";
 import { Decimal } from "decimal.js";
@@ -71,6 +71,15 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           .status(400)
           .json({ success: false, message: "Invalid parameters" });
 
+      const multiplier = riskToChance[risk][chosenNumbers.length];
+      const maxStrikeMultiplier = multiplier.at(-1)!;
+
+      const maxPayout = Decimal.mul(amount, maxStrikeMultiplier);
+
+      if (!(maxPayout.toNumber() < maxPayouts.keno))
+        return res
+          .status(400)
+          .json({ success: false, message: "Max payout exceeded" });
       await connectDatabase();
 
       let user = await User.findOne({ wallet });
@@ -122,8 +131,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       );
 
       if (!strikeNumbers) throw new Error("Invalid strike number!");
-
-      const multiplier = riskToChance[risk][chosenNumbers.length];
 
       //find the number of matches in strikeNumbers and chosenNumbers
       let matches = 0;
