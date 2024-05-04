@@ -394,7 +394,7 @@ export default function Keno() {
                       Risk
                     </p>
                   </div>
-                  <div className="grid grid-cols-4 gap-3 w-full items-center rounded-[8px] text-white font-chakra text-sm font-semibold bg-[#0C0F16] p-4">
+                  <div className="grid lg:grid-cols-4 grid-cols-2 gap-3 w-full items-center rounded-[8px] text-white font-chakra text-sm font-semibold bg-[#0C0F16] p-4">
                     <div
                       onClick={() => setRisk("classic")}
                       className={`text-center w-full rounded-[5px] border-[2px] bg-[#202329] py-2 text-xs font-chakra text-white text-opacity-90 transition duration-200 ${
@@ -417,7 +417,7 @@ export default function Keno() {
                     </div>
                     <div
                       onClick={() => setRisk("medium")}
-                      className={`text-center w-full rounded-[5px] border-[2px] bg-[#202329] py-2 text-xs font-chakra text-white text-opacity-90 transition duration-200 ${
+                      className={`text-center w-full block m-auto rounded-[5px] border-[2px] bg-[#202329] py-2 text-xs font-chakra text-white text-opacity-90 transition duration-200 ${
                         risk === "medium"
                           ? "border-[#7839C5]"
                           : "border-transparent hover:border-[#7839C580]"

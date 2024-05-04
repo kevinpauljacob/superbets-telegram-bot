@@ -333,7 +333,7 @@ export default function Wheel() {
           </div>
           <div className="w-full hidden lg:flex">
             <BetSetting betSetting={betType} setBetSetting={setBetType} />
-          </div>          
+          </div>
           <div className="w-full flex flex-col no-scrollbar overflow-y-auto">
             <FormProvider {...methods}>
               <form
@@ -354,30 +354,32 @@ export default function Wheel() {
                       Risk
                     </p>
                   </div>
-                  <div className="group flex gap-2.5 w-full items-center rounded-[8px] text-white font-chakra text-sm font-semibold bg-[#0C0F16] p-4">
-                    <div
-                      onClick={() => setRisk("low")}
-                      className={`text-center w-full rounded-[5px] border-[2px] bg-[#202329] py-2 text-xs font-chakra text-white text-opacity-90 transition duration-200 ${
-                        risk === "low"
-                          ? "border-[#7839C5]"
-                          : "border-transparent hover:border-[#7839C580]"
-                      }`}
-                    >
-                      Low
-                    </div>
-                    <div
-                      onClick={() => setRisk("medium")}
-                      className={`text-center w-full rounded-[5px] border-[2px] bg-[#202329] py-2 text-xs font-chakra text-white text-opacity-90 transition duration-200 ${
-                        risk === "medium"
-                          ? "border-[#7839C5]"
-                          : "border-transparent hover:border-[#7839C580]"
-                      }`}
-                    >
-                      Medium
+                  <div className="flex lg:flex-row flex-col gap-2.5 w-full items-center justify-evenly rounded-[8px] text-white font-chakra text-sm font-semibold bg-[#0C0F16] p-4">
+                    <div className="flex lg:w-[66.66%] w-full gap-2.5">
+                      <div
+                        onClick={() => setRisk("low")}
+                        className={`text-center w-full rounded-[5px] border-[2px] bg-[#202329] py-2 text-xs font-chakra text-white text-opacity-90 transition duration-200 ${
+                          risk === "low"
+                            ? "border-[#7839C5]"
+                            : "border-transparent hover:border-[#7839C580]"
+                        }`}
+                      >
+                        Low
+                      </div>
+                      <div
+                        onClick={() => setRisk("medium")}
+                        className={`text-center w-full rounded-[5px] border-[2px] bg-[#202329] py-2 text-xs font-chakra text-white text-opacity-90 transition duration-200 ${
+                          risk === "medium"
+                            ? "border-[#7839C5]"
+                            : "border-transparent hover:border-[#7839C580]"
+                        }`}
+                      >
+                        Medium
+                      </div>
                     </div>
                     <div
                       onClick={() => setRisk("high")}
-                      className={`text-center w-full rounded-[5px] border-[2px] bg-[#202329] py-2 text-xs font-chakra text-white text-opacity-90 transition duration-200 ${
+                      className={`text-center lg:w-[33.33%] w-full rounded-[5px] border-[2px] bg-[#202329] py-2 text-xs font-chakra text-white text-opacity-90 transition duration-200 ${
                         risk === "high"
                           ? "border-[#7839C5]"
                           : "border-transparent hover:border-[#7839C580]"

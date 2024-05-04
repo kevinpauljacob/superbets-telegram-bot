@@ -369,33 +369,35 @@ export default function Options() {
               <span className="mb-1 text-sm text-white/90 font-medium font-changa">
                 Select Interval
               </span>
-              <div className="flex flex-row items-center gap-2.5 md:flex-row bg-[#0C0F16] p-2 md:p-4 rounded-lg">
-                <button
-                  type="button"
-                  onClick={() => {
-                    !loading && setBetInterval(3);
-                  }}
-                  className={`${
-                    betInterval === 3
-                      ? "border-[#7839C5]"
-                      : "border-transparent hover:border-[#7839C580]"
-                  } w-full rounded-[5px] border-[2px] bg-[#202329] py-2 text-xs font-chakra text-white text-opacity-90 transition duration-200`}
-                >
-                  3 Min
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    !loading && setBetInterval(4);
-                  }}
-                  className={`${
-                    betInterval === 4
-                      ? "border-[#7839C5]"
-                      : "border-transparent hover:border-[#7839C580]"
-                  } w-full rounded-[5px] border-[2px] bg-[#202329] py-2 text-xs font-chakra text-white text-opacity-90 transition duration-200`}
-                >
-                  4 Min
-                </button>
+              <div className="flex lg:flex-row flex-col items-center gap-2.5 bg-[#0C0F16] p-2 md:p-4 rounded-lg">
+                <div className="flex lg:w-[66.66%] w-full gap-2.5">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      !loading && setBetInterval(3);
+                    }}
+                    className={`${
+                      betInterval === 3
+                        ? "border-[#7839C5]"
+                        : "border-transparent hover:border-[#7839C580]"
+                    } w-full rounded-[5px] border-[2px] bg-[#202329] py-2 text-xs font-chakra text-white text-opacity-90 transition duration-200`}
+                  >
+                    3 Min
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      !loading && setBetInterval(4);
+                    }}
+                    className={`${
+                      betInterval === 4
+                        ? "border-[#7839C5]"
+                        : "border-transparent hover:border-[#7839C580]"
+                    } w-full rounded-[5px] border-[2px] bg-[#202329] py-2 text-xs font-chakra text-white text-opacity-90 transition duration-200`}
+                  >
+                    4 Min
+                  </button>
+                </div>
                 <button
                   type="button"
                   onClick={() => {
@@ -405,7 +407,7 @@ export default function Options() {
                     betInterval === 5
                       ? "border-[#7839C5]"
                       : "border-transparent hover:border-[#7839C580]"
-                  } w-full rounded-[5px] border-[2px] bg-[#202329] py-2 text-xs font-chakra text-white text-opacity-90 transition duration-200`}
+                  } lg:w-[33.33%] w-full rounded-[5px] border-[2px] bg-[#202329] py-2 text-xs font-chakra text-white text-opacity-90 transition duration-200`}
                 >
                   5 Min
                 </button>
