@@ -11,7 +11,6 @@ import {
   GameOptions,
   GameTable,
 } from "@/components/GameLayout";
-import HistoryTable from "@/components/games/Keno/VerifyKenoModal";
 import { FormProvider, useForm } from "react-hook-form";
 import { BsInfinity } from "react-icons/bs";
 import Loader from "@/components/games/Loader";
@@ -624,8 +623,7 @@ export default function Keno() {
         </div>
       </GameDisplay>
       <GameTable>
-        {/* <HistoryTable refresh={refresh} /> */}
-        <Bets refresh={refresh} game={"keno"} />
+        <Bets refresh={refresh} />
       </GameTable>
     </GameLayout>
   );

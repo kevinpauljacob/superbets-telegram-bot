@@ -374,7 +374,12 @@ export default function Dice() {
               {isRolling ? <Loader /> : "BET"}
             </BetButton>
           </div>
-          <BetSetting betSetting={rollType} setBetSetting={setRollType} />
+          <div className="w-full flex lg:hidden">
+            <ConfigureAutoButton />
+          </div>
+          <div className="w-full hidden lg:flex">
+            <BetSetting betSetting={rollType} setBetSetting={setRollType} />
+          </div>
           <div className="w-full flex flex-col">
             <FormProvider {...methods}>
               <form
@@ -436,6 +441,9 @@ export default function Dice() {
                 </div>
               </form>
             </FormProvider>
+            <div className="w-full flex lg:hidden md:mt-4">
+              <BetSetting betSetting={rollType} setBetSetting={setRollType} />
+            </div>
           </div>
         </>
       </GameOptions>
@@ -580,8 +588,7 @@ export default function Dice() {
         </>
       </GameDisplay>
       <GameTable>
-        {/* <HistoryTable refresh={refresh} /> */}
-        <Bets refresh={refresh} game={"dice"} />
+        <Bets refresh={refresh} />
       </GameTable>
     </GameLayout>
   );
