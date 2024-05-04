@@ -38,6 +38,7 @@ export default function Options() {
     getBalance,
     coinData,
     setShowWalletModal,
+    maxBetAmt,
   } = useGlobalContext();
 
   const [livePrice, setLivePrice] = useState(0);
@@ -340,6 +341,9 @@ export default function Options() {
                   !betType ||
                   !coinData ||
                   (coinData && coinData[0].amount < 0.0001) ||
+                  (betAmt !== undefined &&
+                    maxBetAmt !== undefined &&
+                    betAmt > maxBetAmt) ||
                   loading ||
                   (strikePrice > 0 && !result)
                     ? true
@@ -449,6 +453,9 @@ export default function Options() {
                   !betType ||
                   !coinData ||
                   (coinData && coinData[0].amount < 0.0001) ||
+                  (betAmt !== undefined &&
+                    maxBetAmt !== undefined &&
+                    betAmt > maxBetAmt) ||
                   loading ||
                   (strikePrice > 0 && !result)
                     ? true

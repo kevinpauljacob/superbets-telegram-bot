@@ -1,6 +1,6 @@
 import { User, houseEdgeTiers, pointTiers } from "@/context/transactions";
 import { useWallet } from "@solana/wallet-adapter-react";
-import {
+import React, {
   createContext,
   useContext,
   useState,
@@ -139,6 +139,9 @@ interface GlobalContextProps {
 
   houseEdge: number;
   setHouseEdge: (currentGame: number) => void;
+
+  maxBetAmt: number | undefined;
+  setMaxBetAmt: React.Dispatch<React.SetStateAction<number>>;
 }
 
 const GlobalContext = createContext<GlobalContextProps | undefined>(undefined);
@@ -203,6 +206,7 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
   const [currentGame, setCurrentGame] = useState<string | null>(null);
 
   const [houseEdge, setHouseEdge] = useState<number>(0);
+  const [maxBetAmt, setMaxBetAmt] = useState<number>(0);
 
   useEffect(() => {
     const fetchFomoPrice = async () => {
@@ -411,6 +415,8 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
         setCurrentGame,
         houseEdge,
         setHouseEdge,
+        maxBetAmt,
+        setMaxBetAmt,
         openVerifyModal,
         closeVerifyModal,
         setShowWalletModal,
