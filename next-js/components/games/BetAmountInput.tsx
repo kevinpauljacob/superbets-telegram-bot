@@ -20,10 +20,10 @@ export default function BetAmount({
   const tempBetAmt = betAmt === undefined ? 0 : betAmt;
   let max_bet: number | undefined;
   const min_bet = parseFloat(process.env.MINIMUM_BET_AMOUNT ?? "0.0001");
-  // console.log("game", game);
-  // console.log("maxBetAmtMultiplier", multiplier);
-  // console.log("betAmt", betAmt);
-  // console.log("tempBetAmt", tempBetAmt);
+  console.log("game", game);
+  console.log("maxBetAmtMultiplier", multiplier);
+  console.log("betAmt", betAmt);
+  console.log("tempBetAmt", tempBetAmt);
 
   if (tempBetAmt !== undefined && multiplier !== undefined) {
     const potentialMaxBet = maxPayouts[game as GameType] / multiplier;
@@ -33,9 +33,12 @@ export default function BetAmount({
       });
     }
 
-    max_bet = Number.isFinite(potentialMaxBet) ? potentialMaxBet : 0;
-    // console.log("max_bet", max_bet);
-    // console.log("maxPayouts", maxPayouts[game as GameType]);
+    max_bet = Number.isFinite(potentialMaxBet)
+      ? Number(potentialMaxBet.toFixed(4))
+      : 0;
+
+    console.log("max_bet", max_bet);
+    console.log("maxPayouts", maxPayouts[game as GameType]);
   }
 
   const handleSetMaxBet = () => {
@@ -46,6 +49,8 @@ export default function BetAmount({
     if (betAmt || coinData) {
       let newBetAmt =
         betAmt === 0 ? (coinData ? coinData[0]?.amount / 2 : 0) : betAmt! / 2;
+
+      newBetAmt = parseFloat(newBetAmt.toFixed(4));
 
       if (newBetAmt < min_bet) {
         newBetAmt = min_bet;
@@ -60,9 +65,9 @@ export default function BetAmount({
       const newBetAmt =
         betAmt === 0
           ? coinData
-            ? coinData[0]?.amount * 2
+            ? parseFloat((coinData[0]?.amount * 2).toFixed(4))
             : 0
-          : (betAmt ?? 0) * 2;
+          : parseFloat(((betAmt ?? 0) * 2).toFixed(4));
 
       const finalBetAmt = max_bet
         ? newBetAmt > max_bet
