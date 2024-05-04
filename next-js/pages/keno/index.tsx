@@ -62,7 +62,10 @@ export default function Keno() {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
 
   const multipliers = riskToChance[risk][chosenNumbers.length];
-  const maxMultiplier = multipliers[multipliers.length - 1];
+  let maxMultiplier = 0;
+  if (multipliers && multipliers.length > 0) {
+    maxMultiplier = multipliers[multipliers.length - 1];
+  }
   const commonNumbers = strikeNumbers.filter((num) =>
     chosenNumbers.includes(num),
   );
