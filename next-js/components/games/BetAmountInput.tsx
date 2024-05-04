@@ -94,7 +94,7 @@ export default function BetAmount({
           onClick={handleSetMaxBet}
           className="text-[#94A3B8] text-opacity-90 cursor-pointer font-changa text-xs"
         >
-          {maxBetAmt} $SOL
+          Max Bet: {maxBetAmt} $SOL
         </span>
       </div>
 
@@ -114,7 +114,7 @@ export default function BetAmount({
             if (maxBetAmt !== undefined && enteredAmount > maxBetAmt) {
               methods.setError("amount", {
                 type: "manual",
-                message: "Bet amount cannot exceed the maximum bet",
+                message: "Bet amount cannot exceed the maximum bet!",
               });
             } else {
               methods.clearErrors("amount");
@@ -129,21 +129,21 @@ export default function BetAmount({
         />
         <span
           className="text-xs font-medium text-white text-opacity-50 bg-[#292C32] hover:bg-[#47484A] focus:bg-[#47484A] transition-all hover:duration-75 rounded-[5px] py-1.5 px-4"
-          onClick={handleSetMaxBet}
-        >
-          Max
-        </span>
-        <span
-          className="text-xs mx-2 font-medium text-white text-opacity-50 bg-[#292C32] hover:bg-[#47484A] focus:bg-[#47484A] transition-all hover:duration-75 rounded-[5px] py-1.5 px-4"
           onClick={handleHalfBet}
         >
           1/2
         </span>
         <span
-          className="text-xs font-medium text-white text-opacity-50 bg-[#292C32] hover:bg-[#47484A] focus:bg-[#47484A] transition-all hover:duration-75 rounded-[5px] py-1.5 px-4"
+          className="text-xs mx-2 font-medium text-white text-opacity-50 bg-[#292C32] hover:bg-[#47484A] focus:bg-[#47484A] transition-all hover:duration-75 rounded-[5px] py-1.5 px-4"
           onClick={handleDoubleBet}
         >
           2x
+        </span>
+        <span
+          className="text-xs font-medium text-white text-opacity-50 bg-[#292C32] hover:bg-[#47484A] focus:bg-[#47484A] transition-all hover:duration-75 rounded-[5px] py-1.5 px-4"
+          onClick={handleSetMaxBet}
+        >
+          Max
         </span>
       </div>
 
