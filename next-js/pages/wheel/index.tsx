@@ -69,8 +69,12 @@ export default function Wheel() {
   );
 
   const multipliers = riskToChance[risk];
+  console.log("multipliers", multipliers);
+  const maxMultiplier = multipliers.reduce((max, item) => {
+    return Math.max(max, item.multiplier);
+  }, 0);
 
-  const maxMultiplier = multipliers[multipliers.length - 1].multiplier;
+  console.log("Maximum Multiplier:", maxMultiplier);
 
   const sortedMultipliers = multipliers
     .slice()
