@@ -589,7 +589,7 @@ export default function Options() {
         </>
       </GameDisplay>
       <GameTable>
-        <Bets refresh={refresh} game={"options"} />
+        <Bets refresh={refresh} />
       </GameTable>
     </GameLayout>
   );
