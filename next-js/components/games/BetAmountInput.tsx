@@ -16,9 +16,9 @@ export default function BetAmount({
   game: string | undefined;
 }) {
   const methods = useForm();
-  const { coinData } = useGlobalContext();
+  const { coinData, maxBetAmt, setMaxBetAmt } = useGlobalContext();
   const tempBetAmt = betAmt === undefined ? 0 : betAmt;
-  let max_bet: number | undefined;
+  let tempMaxBetAmt: number | undefined;
   const min_bet = parseFloat(process.env.MINIMUM_BET_AMOUNT ?? "0.0001");
   console.log("game", game);
   console.log("maxBetAmtMultiplier", multiplier);
@@ -28,21 +28,28 @@ export default function BetAmount({
   if (tempBetAmt !== undefined && multiplier !== undefined) {
     const potentialMaxBet = maxPayouts[game as GameType] / multiplier;
     if (tempBetAmt * multiplier > maxPayouts[game as GameType]) {
-      toast.error("The maximum multiplier value has been exceeded!", {
-        position: "top-right",
-      });
     }
 
-    max_bet = Number.isFinite(potentialMaxBet)
+    tempMaxBetAmt = Number.isFinite(potentialMaxBet)
       ? Number(potentialMaxBet.toFixed(4))
       : 0;
+    setMaxBetAmt(tempMaxBetAmt);
 
-    console.log("max_bet", max_bet);
+    console.log("original maxBetAmt", tempMaxBetAmt);
+    if (coinData && coinData[0].amount) {
+      tempMaxBetAmt = Math.min(
+        tempMaxBetAmt,
+        parseFloat(coinData[0].amount.toFixed(4)),
+      );
+      setMaxBetAmt(tempMaxBetAmt);
+    }
+
+    console.log("final maxBetAmt", maxBetAmt);
     console.log("maxPayouts", maxPayouts[game as GameType]);
   }
 
   const handleSetMaxBet = () => {
-    setBetAmt(max_bet);
+    setBetAmt(maxBetAmt);
   };
 
   const handleHalfBet = () => {
@@ -69,9 +76,9 @@ export default function BetAmount({
             : 0
           : parseFloat(((betAmt ?? 0) * 2).toFixed(4));
 
-      const finalBetAmt = max_bet
-        ? newBetAmt > max_bet
-          ? max_bet
+      const finalBetAmt = maxBetAmt
+        ? newBetAmt > maxBetAmt
+          ? maxBetAmt
           : newBetAmt
         : newBetAmt;
 
@@ -87,7 +94,7 @@ export default function BetAmount({
           onClick={handleSetMaxBet}
           className="text-[#94A3B8] text-opacity-90 cursor-pointer font-changa text-xs"
         >
-          {max_bet} $SOL
+          {maxBetAmt} $SOL
         </span>
       </div>
 
@@ -103,7 +110,16 @@ export default function BetAmount({
           step={"any"}
           autoComplete="off"
           onChange={(e) => {
-            setBetAmt(parseFloat(e.target.value));
+            let enteredAmount = parseFloat(e.target.value);
+            if (maxBetAmt !== undefined && enteredAmount > maxBetAmt) {
+              methods.setError("amount", {
+                type: "manual",
+                message: "Bet amount cannot exceed the maximum bet",
+              });
+            } else {
+              methods.clearErrors("amount");
+            }
+            setBetAmt(enteredAmount);
           }}
           placeholder={"0.0"}
           min={0.0001}
