@@ -3,6 +3,7 @@ import { ReactNode } from "react";
 import toast from "react-hot-toast";
 import BetRow from "../games/BetRow";
 import { useGlobalContext } from "../GlobalContext";
+import { FaChevronLeft, FaChevronRight } from "react-icons/fa6";
 
 interface PaginationProps {
   page: number;
@@ -10,71 +11,114 @@ interface PaginationProps {
   bets: any[];
   maxPages: number;
 }
+
 export const TablePagination: React.FC<PaginationProps> = ({
   page,
   setPage,
   bets,
   maxPages,
 }) => {
+  const renderPageNumbers = () => {
+    const visiblePages = 5; 
+    const currentPage = page;
+
+    if (maxPages <= visiblePages) {
+      return [...Array(maxPages)].map((_, i) => {
+        const pageNumber = i + 1;
+        return (
+          <span
+            key={i}
+            onClick={() => setPage(pageNumber)}
+            className={`${
+              currentPage === pageNumber ? "text-opacity-75" : "text-opacity-50"
+            } text-[#F0F0F0] transition-all cursor-pointer`}
+          >
+            {pageNumber}
+          </span>
+        );
+      });
+    }
+
+    if (currentPage <= visiblePages) {
+      return [...Array(visiblePages)].map((_, i) => {
+        const pageNumber = i + 1;
+        return (
+          <span
+            key={i}
+            onClick={() => setPage(pageNumber)}
+            className={`${
+              currentPage === pageNumber ? "text-opacity-75" : "text-opacity-50"
+            } text-[#F0F0F0] transition-all cursor-pointer`}
+          >
+            {pageNumber}
+          </span>
+        );
+      });
+    }
+
+    if (currentPage > maxPages - visiblePages) {
+      return [...Array(visiblePages)].map((_, i) => {
+        const pageNumber = maxPages - visiblePages + i + 1;
+        return (
+          <span
+            key={i}
+            onClick={() => setPage(pageNumber)}
+            className={`${
+              currentPage === pageNumber ? "text-opacity-75" : "text-opacity-50"
+            } text-[#F0F0F0] transition-all cursor-pointer`}
+          >
+            {pageNumber}
+          </span>
+        );
+      });
+    }
+
+    const middlePage = Math.floor(visiblePages / 2);
+    const startPage = currentPage - middlePage;
+    const endPage = currentPage + middlePage;
+    return [...Array(visiblePages)].map((_, i) => {
+      const pageNumber = startPage + i;
+      return (
+        <span
+          key={i}
+          onClick={() => setPage(pageNumber)}
+          className={`${
+            currentPage === pageNumber ? "text-opacity-75" : "text-opacity-50"
+          } text-[#F0F0F0] transition-all cursor-pointer`}
+        >
+          {pageNumber}
+        </span>
+      );
+    });
+  };
+
   return (
-    <div className="pb-[10rem] mt-4 flex w-full cursor-pointer items-center justify-center gap-6 font-changa">
+    <div className="pb-5 mt-4 flex w-full cursor-pointer items-center justify-center gap-6 font-changa">
       <span
         onClick={() => {
           if (page > 1) setPage(page - 1);
         }}
-        className="cursor-pointer text-[#F0F0F0]"
+        className={`cursor-pointer text-[#F0F0F0] ${
+          page > 1 ? "" : "opacity-50 pointer-events-none"
+        }`}
       >
-        &lt;
+        <FaChevronLeft />
       </span>
-      {bets &&
-        bets.length > 0 &&
-        [...Array(maxPages)]
-          .map((_, i) => ++i)
-          .slice(0, 3)
-          .map((i, index) => (
-            <span
-              key={index}
-              onClick={() => {
-                setPage(i);
-              }}
-              className={`${
-                page === i ? "text-opacity-75" : "text-opacity-50"
-              } text-[#F0F0F0] transition-all`}
-            >
-              {i}
-            </span>
-          ))}
-      <span className="text-[#F0F0F0]">. . .</span>
-
-      {bets &&
-        bets.length > 0 &&
-        [...Array(maxPages)]
-          .map((_, i) => ++i)
-          .slice(maxPages - 3, maxPages)
-          .map((i, index) => (
-            <span
-              key={index}
-              onClick={() => {
-                setPage(i);
-              }}
-              className={`${
-                page === i ? "text-opacity-75" : "text-opacity-50"
-              } text-[#F0F0F0] transition-all`}
-            >
-              {i}
-            </span>
-          ))}
+      {bets && bets.length > 0 && renderPageNumbers()}
       <span
         onClick={() => {
-          if (page != maxPages) setPage(page + 1);
+          if (page < maxPages) setPage(page + 1);
         }}
-        className="cursor-pointer text-[#F0F0F0]"
+        className={`cursor-pointer text-[#F0F0F0] ${
+          page < maxPages ? "" : "opacity-50 pointer-events-none"
+        }`}
       >
-        &gt;
+        <FaChevronRight />
       </span>
     </div>
   );
 };
+
 
 interface TableButtonProps {
   all: boolean;
