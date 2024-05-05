@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useGlobalContext } from "../GlobalContext";
 import { GameType } from "@/utils/provably-fair";
@@ -24,49 +24,39 @@ export default function BetAmount({
   const methods = useForm();
   const { coinData, maxBetAmt, setMaxBetAmt } = useGlobalContext();
   const [betAmountsModal, setBetAmountsModal] = useState(false);
-  const [highestBetAmt, setHighestBetAmt] = useState(0);
 
-  const tempBetAmt = betAmt === undefined ? 0 : betAmt;
-  let tempMaxBetAmt = 0;
-  let potentialMaxBetAmt = 0;
-  let highestMaxBetAmt =
+  const minBetAmt = parseFloat(process.env.MINIMUM_BET_AMOUNT ?? "0");
+  const highestMaxBetAmt =
     leastMultiplier !== undefined &&
     (maxPayouts[game as GameType] / leastMultiplier).toFixed(2);
-  const minBetAmt = parseFloat(process.env.MINIMUM_BET_AMOUNT ?? "0");
-  // console.log("game", game);
-  // console.log("maxBetAmtMultiplier", multiplier);
-  // console.log("betAmt", betAmt);
+  // console.log("highestMaxBetAmt", highestMaxBetAmt);
+
+  const tempBetAmt = betAmt ?? 0;
   // console.log("tempBetAmt", tempBetAmt);
-  console.log("least multiplier", leastMultiplier);
-  console.log("highestMaxBetAmt", highestMaxBetAmt);
 
-  if (tempBetAmt !== undefined && currentMultiplier !== undefined) {
-    potentialMaxBetAmt = isFinite(
-      maxPayouts[game as GameType] / currentMultiplier,
-    )
-      ? maxPayouts[game as GameType] / currentMultiplier
-      : 0;
-    console.log("potentialMaxBetAmt", potentialMaxBetAmt);
-    if (tempBetAmt * currentMultiplier > maxPayouts[game as GameType]) {
-    }
+  const [currentMaxBetAmt, setCurrentMaxBetAmt] = useState(0);
 
-    tempMaxBetAmt = Number.isFinite(highestMaxBetAmt)
-      ? Number(potentialMaxBetAmt.toFixed(2))
-      : 0;
-    setMaxBetAmt(tempMaxBetAmt);
-
-    // console.log("original maxBetAmt", tempMaxBetAmt);
-    if (coinData && coinData[0].amount) {
-      tempMaxBetAmt = Math.min(
-        tempMaxBetAmt,
-        parseFloat(coinData[0].amount.toFixed(4)),
+  useEffect(() => {
+    if (tempBetAmt !== undefined && currentMultiplier !== undefined) {
+      let calculatedMaxBetAmt =
+        maxPayouts[game as GameType] / currentMultiplier;
+      setCurrentMaxBetAmt(
+        isFinite(calculatedMaxBetAmt) ? calculatedMaxBetAmt : 0,
       );
-      setMaxBetAmt(tempMaxBetAmt);
     }
+  }, [tempBetAmt, currentMultiplier, game]);
 
-    // console.log("final maxBetAmt", maxBetAmt);
-    // console.log("maxPayouts", maxPayouts[game as GameType]);
-  }
+  useEffect(() => {
+    // console.log("currentMaxBetAmt", currentMaxBetAmt);
+    setMaxBetAmt(
+      Math.min(
+        Number(currentMaxBetAmt.toFixed(4)),
+        coinData && coinData[0]?.amount
+          ? parseFloat(coinData[0].amount.toFixed(4))
+          : Number(currentMaxBetAmt.toFixed(4)),
+      ),
+    );
+  }, [currentMaxBetAmt, coinData]);
 
   const handleSetMaxBet = () => {
     setBetAmt(maxBetAmt);
@@ -146,14 +136,14 @@ export default function BetAmount({
                 className="absolute rounded-full h-[5px] bg-[#8795A8] z-10"
                 style={{
                   width: `${
-                    (potentialMaxBetAmt / Number(highestMaxBetAmt)) * 100
+                    (currentMaxBetAmt / Number(highestMaxBetAmt)) * 100
                   }%`,
                 }}
               >
                 <div className="relative">
                   <div className="absolute text-[#94A3B8] text-[11px] font-semibold font-chakra -top-5 -right-[14px] w-max">
                     <span className="text-white">
-                      {potentialMaxBetAmt.toFixed(2)}
+                      {currentMaxBetAmt.toFixed(2)}
                     </span>
                   </div>
                 </div>
@@ -173,7 +163,7 @@ export default function BetAmount({
                   </span>
                   ) is{" "}
                   <span className="text-white/80 font-medium">
-                    {potentialMaxBetAmt.toFixed(2)} SOL
+                    {currentMaxBetAmt.toFixed(2)} SOL
                   </span>
                   . The maximum amount you can bet in this game is{" "}
                   <span className="text-white/80 font-medium">
@@ -190,7 +180,9 @@ export default function BetAmount({
             </span>
             <span>
               <span>
-                {isNaN(currentMultiplier) ? "0" : `${currentMultiplier.toFixed(2) ?? 0.00}x`}
+                {isNaN(currentMultiplier)
+                  ? "0"
+                  : `${currentMultiplier.toFixed(2) ?? 0.0}x`}
               </span>
             </span>
           </div>
@@ -223,8 +215,8 @@ export default function BetAmount({
           autoComplete="off"
           onChange={(e) => {
             let enteredAmount = parseFloat(e.target.value);
-            console.log(enteredAmount, potentialMaxBetAmt);
-            if (maxBetAmt !== undefined && enteredAmount > potentialMaxBetAmt) {
+            // console.log(enteredAmount, currentMaxBetAmt);
+            if (maxBetAmt !== undefined && enteredAmount > currentMaxBetAmt) {
               methods.setError("amount", {
                 type: "manual",
                 message: "Bet amount cannot exceed the maximum bet!",
@@ -270,7 +262,7 @@ export default function BetAmount({
           ? methods.formState.errors["amount"]!.message!.toString()
           : "NONE"}
       </span>
-      
+
       <BalanceAlert />
     </div>
   );
