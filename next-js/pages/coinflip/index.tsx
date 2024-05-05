@@ -56,6 +56,7 @@ export default function Flip() {
     setAutoBetProfit,
     useAutoConfig,
     setUseAutoConfig,
+    houseEdge,
     maxBetAmt,
   } = useGlobalContext();
 

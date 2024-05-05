@@ -47,6 +47,7 @@ export default function Wheel() {
     setAutoBetProfit,
     useAutoConfig,
     setUseAutoConfig,
+    houseEdge,
     maxBetAmt,
   } = useGlobalContext();
   const [betAmt, setBetAmt] = useState(0);
@@ -237,7 +238,8 @@ export default function Wheel() {
           }
           // update profit / loss
           setAutoBetProfit(
-            autoBetProfit + (win ? strikeMultiplier - 1 : -1) * betAmt,
+            autoBetProfit +
+              (win ? strikeMultiplier * (1 - houseEdge) - 1 : -1) * betAmt,
           );
           // update count
           if (typeof autoBetCount === "number")
