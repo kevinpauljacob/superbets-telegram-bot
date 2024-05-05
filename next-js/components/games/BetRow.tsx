@@ -35,7 +35,6 @@ const BetRow: React.FC<BetRowProps> = ({
     >
       {all && (
         <span className="w-full hidden md:block text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
-
           {obfuscatePubKey(bet.wallet)}
         </span>
       )}
@@ -49,17 +48,19 @@ const BetRow: React.FC<BetRowProps> = ({
       <span className="w-full hidden md:block text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
         {bet.strikeMultiplier ?? 0}
       </span>
-      <span
-        className={`w-full text-center font-changa text-sm text-opacity-75 ${
-          bet.result === "Lost"
-            ? "text-fomo-red"
-            : bet.result === "Won"
-            ? "text-fomo-green"
-            : "text-[#F0F0F0]"
-        }`}
-      >
-        {bet.amountWon?.toFixed(4)} SOL
-      </span>
+      {bet.result === "Pending" ? (
+        <span className="w-full text-center font-changa text-sm text-opacity-75 text-[#F0F0F0]">
+          Pending
+        </span>
+      ) : bet.amountWon > bet.amount ? (
+        <span className="w-full text-center font-changa text-sm text-opacity-75 text-fomo-green">
+          +{(bet.amountWon - bet.amount).toFixed(4)} SOL
+        </span>
+      ) : (
+        <span className="w-full text-center font-changa text-sm text-opacity-75 text-fomo-red">
+          {(bet.amountWon - bet.amount).toFixed(4)} SOL
+        </span>
+      )}
     </div>
   );
 };
