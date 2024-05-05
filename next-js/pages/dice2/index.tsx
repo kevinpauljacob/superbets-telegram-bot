@@ -47,6 +47,7 @@ export default function Dice2() {
     setAutoBetProfit,
     useAutoConfig,
     setUseAutoConfig,
+    houseEdge,
     maxBetAmt,
   } = useGlobalContext();
   const [betAmt, setBetAmt] = useState(0);
@@ -220,7 +221,8 @@ export default function Dice2() {
           }
           // update profit / loss
           setAutoBetProfit(
-            autoBetProfit + (win ? multiplier - 1 : -1) * betAmt,
+            autoBetProfit +
+              (win ? multiplier * (1 - houseEdge) - 1 : -1) * betAmt,
           );
           // update count
           if (typeof autoBetCount === "number")

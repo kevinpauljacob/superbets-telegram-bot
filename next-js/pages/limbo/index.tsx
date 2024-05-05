@@ -145,7 +145,8 @@ export default function Limbo() {
             }
             // update profit / loss
             setAutoBetProfit(
-              autoBetProfit + (win ? multiplier - 1 : -1) * betAmt,
+              autoBetProfit +
+                (win ? multiplier * (1 - houseEdge) - 1 : -1) * betAmt,
             );
             // update count
             if (typeof autoBetCount === "number")

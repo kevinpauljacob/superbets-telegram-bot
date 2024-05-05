@@ -212,7 +212,8 @@ export default function Dice() {
             }
             // update profit / loss
             setAutoBetProfit(
-              autoBetProfit + (isWin ? winningPays - 1 : -1) * betAmt,
+              autoBetProfit +
+                (isWin ? winningPays * (1 - houseEdge) - 1 : -1) * betAmt,
             );
             // update count
             if (typeof autoBetCount === "number")
