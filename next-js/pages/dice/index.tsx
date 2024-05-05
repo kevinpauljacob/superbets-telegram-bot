@@ -112,9 +112,9 @@ export default function Dice() {
           setSelectedFace(selectedFace.filter((face) => face !== newFace));
           const newLength = selectedFace.length - 1;
           if (newLength === 0) {
-            setWinningPays(6);
-            setProfit(betAmt * (6 * (1 - houseEdge) - 1));
-            setWinningProbability(0);
+            setWinningPays(0.0);
+            setProfit(0.0);
+            setWinningProbability(0.0);
           } else {
             const multiplier = 6 / newLength;
             setWinningPays(multiplier);
@@ -336,10 +336,6 @@ export default function Dice() {
       setStartAuto(true);
     } else if (wallet.connected && selectedFace.length > 0) diceRoll();
   };
-
-  useEffect(() => {
-    console.log(profit, betAmt, 6 / selectedFace.length, houseEdge);
-  }, [profit]);
 
   return (
     <GameLayout title="FOMO - Dice">

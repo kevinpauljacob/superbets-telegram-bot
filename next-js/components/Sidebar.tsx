@@ -286,11 +286,11 @@ export const OpenSidebar = ({
             />
           </div>
           <div className="flex flex-col items-start">
-            <span className="text-base font-semibold text-white text-opacity-90 font-changa">
+            <span className="text-base font-semibold text-white text-opacity-90 font-chakra">
               $FOMO
             </span>
             <div className="flex items-center gap-1">
-              <span className="text-sm text-[#94A3B8] font-medium font-changa leading-3">
+              <span className="text-sm text-[#94A3B8] font-medium font-chakra leading-3">
                 ${fomoPrice.toFixed(3)}
               </span>
               <span

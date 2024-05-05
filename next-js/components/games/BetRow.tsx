@@ -52,9 +52,9 @@ const BetRow: React.FC<BetRowProps> = ({
       <span
         className={`w-full text-center font-changa text-sm text-opacity-75 ${
           bet.result === "Lost"
-            ? "text-[#CF304A]"
+            ? "text-fomo-red"
             : bet.result === "Won"
-            ? "text-[#03A66D]"
+            ? "text-fomo-green"
             : "text-[#F0F0F0]"
         }`}
       >
