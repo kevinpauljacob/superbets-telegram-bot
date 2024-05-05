@@ -1,9 +1,10 @@
 import { useWallet } from "@solana/wallet-adapter-react";
-import { ReactNode } from "react";
+import { ReactNode, useEffect, useRef } from "react";
 import toast from "react-hot-toast";
 import BetRow from "../games/BetRow";
 import { useGlobalContext } from "../GlobalContext";
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa6";
+import Loader from "../games/Loader";
 
 interface PaginationProps {
   page: number;
@@ -254,7 +255,9 @@ export const TableRow: React.FC<TableNodeProps> = ({ children }) => {
   return children;
 };
 
-interface TableProps extends TableButtonProps, PaginationProps {}
+interface TableProps extends TableButtonProps, PaginationProps {
+  loading: boolean;
+}
 
 export const Table: React.FC<TableProps> = ({
   all,
@@ -263,8 +266,10 @@ export const Table: React.FC<TableProps> = ({
   setPage,
   bets,
   maxPages,
+  loading,
 }) => {
   const transactionsPerPage = 10;
+
   const {
     isVerifyModalOpen: isOpen,
     setIsVerifyModalOpen: setIsOpen,
@@ -272,13 +277,38 @@ export const Table: React.FC<TableProps> = ({
     closeVerifyModal: closeModal,
     setVerifyModalData,
   } = useGlobalContext();
-  return (
-    <div className="flex w-full flex-col pb-[10rem] lg:pb-10">
+
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (containerRef.current) {
+      containerRef.current.style.height = `${containerRef.current.scrollHeight}px`;
+    }
+  }, [loading]);
+
+  const loadingContent = (
+    <div
+      className="flex w-full flex-col pb-[10rem] lg:pb-10"
+      ref={containerRef}
+    >
+      <TableButtons all={all} setAll={setAll} />
+      <div className="scrollbar mt-8 w-full md:overflow-x-auto pb-8">
+        <div className="flex w-full md:min-w-[50rem] flex-col items-center">
+          <Loader />
+        </div>
+      </div>
+    </div>
+  );
+
+  const tableContent = (
+    <div
+      className="flex w-full flex-col pb-[10rem] lg:pb-10"
+      ref={containerRef}
+    >
       <TableButtons all={all} setAll={setAll} />
       <div className="scrollbar mt-8 w-full md:overflow-x-auto pb-8">
         <div className="flex w-full md:min-w-[50rem] flex-col items-center">
           <TableHeader all={all} setAll={setAll} />
-
           {bets.length ? (
             bets
               .slice(
@@ -311,4 +341,6 @@ export const Table: React.FC<TableProps> = ({
       />
     </div>
   );
+
+  return loading ? loadingContent : tableContent;
 };
