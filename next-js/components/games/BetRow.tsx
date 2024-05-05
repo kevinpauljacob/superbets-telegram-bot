@@ -54,7 +54,7 @@ const BetRow: React.FC<BetRowProps> = ({
         </span>
       ) : bet.amountWon > bet.amount ? (
         <span className="w-full text-center font-changa text-sm text-opacity-75 text-fomo-green">
-          +{(bet.amountWon - bet.amount).toFixed(4)} SOL
+          {bet.amountWon.toFixed(4)} SOL
         </span>
       ) : (
         <span className="w-full text-center font-changa text-sm text-opacity-75 text-fomo-red">

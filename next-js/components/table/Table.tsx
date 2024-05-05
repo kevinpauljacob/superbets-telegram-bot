@@ -286,61 +286,55 @@ export const Table: React.FC<TableProps> = ({
     }
   }, [loading]);
 
-  const loadingContent = (
+  return (
     <div
       className="flex w-full flex-col pb-[10rem] lg:pb-10"
       ref={containerRef}
     >
       <TableButtons all={all} setAll={setAll} />
-      <div className="scrollbar mt-8 w-full md:overflow-x-auto pb-8">
-        <div className="flex w-full md:min-w-[50rem] flex-col items-center">
+      {loading ? (
+        <div className="h-20">
           <Loader />
         </div>
-      </div>
+      ) : (
+        <>
+          <div className="scrollbar mt-8 w-full pb-8">
+            <div className="flex w-full md:min-w-[50rem] flex-col items-center">
+              <TableHeader all={all} setAll={setAll} />
+              {bets.length ? (
+                bets
+                  .slice(
+                    page * transactionsPerPage - transactionsPerPage,
+                    page * transactionsPerPage,
+                  )
+                  .map((bet, index) => (
+                    <div
+                      key={index}
+                      className="mb-2.5 flex w-full flex-row items-center gap-2 rounded-[5px] bg-[#121418] py-3"
+                    >
+                      <BetRow
+                        bet={bet}
+                        all={all}
+                        openModal={openModal}
+                        setVerifyModalData={setVerifyModalData}
+                      />
+                    </div>
+                  ))
+              ) : (
+                <span className="font-changa text-[#F0F0F080]">
+                  No Bets made.
+                </span>
+              )}
+            </div>
+          </div>
+          <TablePagination
+            page={page}
+            setPage={setPage}
+            maxPages={maxPages}
+            bets={bets}
+          />
+        </>
+      )}
     </div>
   );
-
-  const tableContent = (
-    <div
-      className="flex w-full flex-col pb-[10rem] lg:pb-10"
-      ref={containerRef}
-    >
-      <TableButtons all={all} setAll={setAll} />
-      <div className="scrollbar mt-8 w-full md:overflow-x-auto pb-8">
-        <div className="flex w-full md:min-w-[50rem] flex-col items-center">
-          <TableHeader all={all} setAll={setAll} />
-          {bets.length ? (
-            bets
-              .slice(
-                page * transactionsPerPage - transactionsPerPage,
-                page * transactionsPerPage,
-              )
-              .map((bet, index) => (
-                <div
-                  key={index}
-                  className="mb-2.5 flex w-full flex-row items-center gap-2 rounded-[5px] bg-[#121418] py-3"
-                >
-                  <BetRow
-                    bet={bet}
-                    all={all}
-                    openModal={openModal}
-                    setVerifyModalData={setVerifyModalData}
-                  />
-                </div>
-              ))
-          ) : (
-            <span className="font-changa text-[#F0F0F080]">No Bets made.</span>
-          )}
-        </div>
-      </div>
-      <TablePagination
-        page={page}
-        setPage={setPage}
-        maxPages={maxPages}
-        bets={bets}
-      />
-    </div>
-  );
-
-  return loading ? loadingContent : tableContent;
 };
