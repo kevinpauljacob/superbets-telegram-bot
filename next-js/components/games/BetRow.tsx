@@ -47,7 +47,7 @@ const BetRow: React.FC<BetRowProps> = ({
         {(bet.amount ?? 0).toFixed(4)}
       </span>
       <span className="w-full hidden md:block text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
-        {bet.strikeMultiplier}
+        {bet.strikeMultiplier ?? 0}
       </span>
       <span
         className={`w-full text-center font-changa text-sm text-opacity-75 ${

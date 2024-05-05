@@ -69,7 +69,7 @@ export default function Bets({
           if (all) {
             setBets(history?.data ?? []);
             setMaxPages(Math.ceil(history?.data.length / transactionsPerPage));
-          } else if (wallet.publicKey) {
+          } else if (!all && wallet.publicKey) {
             setBets(history?.data ?? []);
             setMaxPages(Math.ceil(history?.data.length / transactionsPerPage));
           } else {
