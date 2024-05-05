@@ -188,7 +188,7 @@ export default function BetAmount({
           : "NONE"}
       </span>
       {betAmountsModal && game !== "keno" && game !== "wheel" ? (
-        <div className="fadeInDown relative flex items-center gap-3 bg-[#0C0F16] rounded-[5px] p-2 mb-4 mt-2 h-[69px]">
+        <div className="fadeInDown relative flex items-center gap-3 bg-[#0C0F16] rounded-[5px] p-2 mt-2 h-[69px]">
           <div className="flex items-center border-r border-white/10 h-11 w-[80%] pl-6 pr-8">
             <div className="relative h-[4px] rounded-full bg-[#2A2E38] w-full">
               <input
@@ -236,7 +236,7 @@ export default function BetAmount({
         </div>
       ) : null}
       {betAmountsModal && (game === "keno" || game === "wheel") ? (
-        <div className="fadeInDown relative flex items-center gap-3 bg-[#0C0F16] rounded-[5px] p-2 mb-4 mt-2">
+        <div className="fadeInDown relative flex items-center gap-3 bg-[#0C0F16] rounded-[5px] p-2 mt-2">
           <div className="flex items-center border-r border-white/10 text-[#94A3B8] text-chakra text-[11px] font-medium h-11 w-[80%] p-6">
             The more you stake, the less fees you pay and the bigger your points
             multiplier
