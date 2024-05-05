@@ -19,14 +19,14 @@ export const TablePagination: React.FC<PaginationProps> = ({
   maxPages,
 }) => {
   const renderPageNumbers = () => {
-    const visiblePages = 5; 
+    const visiblePages = 3;
     const currentPage = page;
 
-    if (maxPages <= visiblePages) {
-      return [...Array(maxPages)].map((_, i) => {
-        const pageNumber = i + 1;
+    if (maxPages < 7)
+      return [...Array(maxPages - visiblePages - 1)].map((_, i) => {
+        const pageNumber = i + 3;
         return (
-          <span
+          <button
             key={i}
             onClick={() => setPage(pageNumber)}
             className={`${
@@ -34,16 +34,15 @@ export const TablePagination: React.FC<PaginationProps> = ({
             } text-[#F0F0F0] transition-all cursor-pointer`}
           >
             {pageNumber}
-          </span>
+          </button>
         );
       });
-    }
 
     if (currentPage <= visiblePages) {
       return [...Array(visiblePages)].map((_, i) => {
-        const pageNumber = i + 1;
+        const pageNumber = i + 3;
         return (
-          <span
+          <button
             key={i}
             onClick={() => setPage(pageNumber)}
             className={`${
@@ -51,16 +50,16 @@ export const TablePagination: React.FC<PaginationProps> = ({
             } text-[#F0F0F0] transition-all cursor-pointer`}
           >
             {pageNumber}
-          </span>
+          </button>
         );
       });
     }
 
-    if (currentPage > maxPages - visiblePages) {
+    if (currentPage >= maxPages - 2) {
       return [...Array(visiblePages)].map((_, i) => {
-        const pageNumber = maxPages - visiblePages + i + 1;
+        const pageNumber = maxPages - 4 + i;
         return (
-          <span
+          <button
             key={i}
             onClick={() => setPage(pageNumber)}
             className={`${
@@ -68,7 +67,7 @@ export const TablePagination: React.FC<PaginationProps> = ({
             } text-[#F0F0F0] transition-all cursor-pointer`}
           >
             {pageNumber}
-          </span>
+          </button>
         );
       });
     }
@@ -79,7 +78,7 @@ export const TablePagination: React.FC<PaginationProps> = ({
     return [...Array(visiblePages)].map((_, i) => {
       const pageNumber = startPage + i;
       return (
-        <span
+        <button
           key={i}
           onClick={() => setPage(pageNumber)}
           className={`${
@@ -87,14 +86,14 @@ export const TablePagination: React.FC<PaginationProps> = ({
           } text-[#F0F0F0] transition-all cursor-pointer`}
         >
           {pageNumber}
-        </span>
+        </button>
       );
     });
   };
 
   return (
     <div className="pb-5 mt-4 flex w-full cursor-pointer items-center justify-center gap-6 font-changa">
-      <span
+      <button
         onClick={() => {
           if (page > 1) setPage(page - 1);
         }}
@@ -103,9 +102,62 @@ export const TablePagination: React.FC<PaginationProps> = ({
         }`}
       >
         <FaChevronLeft />
-      </span>
-      {bets && bets.length > 0 && renderPageNumbers()}
-      <span
+      </button>
+      {bets && bets.length > 0 && (
+        <>
+          <button
+            onClick={() => setPage(1)}
+            className={`${
+              page === 1 ? "text-opacity-75" : "text-opacity-50"
+            } text-[#F0F0F0] transition-all cursor-pointer`}
+          >
+            1
+          </button>
+          {maxPages > 1 && (
+            <button
+              onClick={() => {
+                (page === 1 || page === 2 || page === 3) && setPage(1);
+              }}
+              className={`${
+                page === 2 ? "text-opacity-75" : "text-opacity-50"
+              } text-[#F0F0F0] transition-all cursor-pointer`}
+            >
+              {page === 2 || page === 1 || page === 3 ? "2" : ". . . "}
+            </button>
+          )}
+          {maxPages > 4 && renderPageNumbers()}
+          {maxPages > 3 && (
+            <button
+              onClick={() => {
+                (page === maxPages - 2 ||
+                  page === maxPages - 1 ||
+                  page === maxPages) &&
+                  setPage(maxPages - 1);
+              }}
+              className={`${
+                page === maxPages - 1 ? "text-opacity-75" : "text-opacity-50"
+              } text-[#F0F0F0] transition-all cursor-pointer`}
+            >
+              {page === maxPages - 2 ||
+              page === maxPages - 1 ||
+              page === maxPages
+                ? maxPages - 1
+                : ". . ."}
+            </button>
+          )}
+          {maxPages > 2 && (
+            <button
+              onClick={() => setPage(maxPages)}
+              className={`${
+                page === maxPages ? "text-opacity-75" : "text-opacity-50"
+              } text-[#F0F0F0] transition-all cursor-pointer`}
+            >
+              {maxPages}
+            </button>
+          )}
+        </>
+      )}
+      <button
         onClick={() => {
           if (page < maxPages) setPage(page + 1);
         }}
@@ -114,11 +166,10 @@ export const TablePagination: React.FC<PaginationProps> = ({
         }`}
       >
         <FaChevronRight />
-      </span>
+      </button>
     </div>
   );
 };
-
 
 interface TableButtonProps {
   all: boolean;
