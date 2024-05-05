@@ -23,7 +23,7 @@ export default function BetAmount({
   const [highestBetAmt, setHighestBetAmt] = useState(0);
 
   const tempBetAmt = betAmt === undefined ? 0 : betAmt;
-  let tempMaxBetAmt: number | undefined;
+  let tempMaxBetAmt = 0;
   let potentialMaxBetAmt = 0;
   let highestMaxBetAmt =
     leastMultiplier !== undefined &&
@@ -37,7 +37,11 @@ export default function BetAmount({
   console.log("highestMaxBetAmt", highestMaxBetAmt);
 
   if (tempBetAmt !== undefined && currentMultiplier !== undefined) {
-    potentialMaxBetAmt = maxPayouts[game as GameType] / currentMultiplier || 0;
+    potentialMaxBetAmt = isFinite(
+      maxPayouts[game as GameType] / currentMultiplier,
+    )
+      ? maxPayouts[game as GameType] / currentMultiplier
+      : 0;
     console.log("potentialMaxBetAmt", potentialMaxBetAmt);
     if (tempBetAmt * currentMultiplier > maxPayouts[game as GameType]) {
     }
@@ -123,7 +127,6 @@ export default function BetAmount({
           </span>
         </span>
       </div>
-
       <div
         className={`group flex h-11 w-full cursor-pointer items-center rounded-[8px] bg-[#202329] px-4`}
       >
@@ -172,7 +175,6 @@ export default function BetAmount({
           Max
         </span>
       </div>
-
       <span
         className={`${
           methods.formState.errors["amount"] ? "opacity-100" : "opacity-0"
@@ -182,8 +184,7 @@ export default function BetAmount({
           ? methods.formState.errors["amount"]!.message!.toString()
           : "NONE"}
       </span>
-
-      {betAmountsModal && (
+      {betAmountsModal && game !== "keno" && game !== "wheel" ? (
         <div className="fadeInDown relative flex items-center gap-3 bg-[#0C0F16] rounded-[5px] p-2 mb-4">
           <div className="flex items-center border-r border-white/10 h-11 w-[80%] pl-6 pr-8">
             <div className="relative h-[5px] rounded-full bg-[#2A2E38] w-full">
@@ -230,7 +231,21 @@ export default function BetAmount({
             </span>
           </div>
         </div>
-      )}
+      ) : null}
+      {betAmountsModal && (game === "keno" || game === "wheel") ? (
+        <div className="fadeInDown relative flex items-center gap-3 bg-[#0C0F16] rounded-[5px] p-2 mb-4">
+          <div className="flex items-center border-r border-white/10 text-[#94A3B8] text-chakra text-[11px] font-medium h-11 w-[80%] p-6">
+            The more you stake, the less fees you pay and the bigger your points
+            multiplier
+          </div>
+          <div className="flex flex-col items-center text-white font-chakra font-medium w-[20%]">
+            <span className="text-[10px] text-white text-opacity-50">
+              Max Bet
+            </span>
+            <span>20 $SOL</span>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }
