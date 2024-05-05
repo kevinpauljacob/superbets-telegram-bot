@@ -14,10 +14,8 @@ interface Bet {
 
 export default function Bets({
   refresh,
-  game,
 }: {
   refresh: boolean;
-  game: any;
 }) {
   const wallet = useWallet();
   const transactionsPerPage = 10;

@@ -35,6 +35,7 @@ const BetRow: React.FC<BetRowProps> = ({
     >
       {all && (
         <span className="w-full hidden md:block text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
+
           {obfuscatePubKey(bet.wallet)}
         </span>
       )}

@@ -134,7 +134,7 @@ function Leaderboard() {
             <div className="flex w-full flex-col items-center">
               {/* header  */}
               {data.length > 0 && (
-                <div className="mb-5 flex w-full flex-row items-center gap-2">
+                <div className="mb-[1.4rem] flex w-full flex-row items-center gap-2">
                   {headers.map((header, index) => (
                     <span
                       key={index}

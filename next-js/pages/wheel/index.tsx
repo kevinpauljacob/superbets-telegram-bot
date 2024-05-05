@@ -11,7 +11,6 @@ import {
   GameOptions,
   GameTable,
 } from "@/components/GameLayout";
-import HistoryTable from "@/components/games/Wheel/VerifyWheelModal";
 import { FormProvider, useForm } from "react-hook-form";
 import { BsInfinity } from "react-icons/bs";
 import Loader from "@/components/games/Loader";
@@ -23,6 +22,8 @@ import Arc from "@/components/games/Wheel/Arc";
 import { riskToChance } from "@/components/games/Wheel/Segments";
 import Bets from "../../components/games/Bets";
 import { soundAlert } from "@/utils/soundUtils";
+import ConfigureAutoButton from "@/components/ConfigureAutoButton";
+import AutoCount from "@/components/AutoCount";
 
 export default function Wheel() {
   const wallet = useWallet();
@@ -309,7 +310,7 @@ export default function Wheel() {
     <GameLayout title="FOMO - Wheel">
       <GameOptions>
         <>
-          <div className="relative w-full flex md:hidden mb-5">
+          <div className="relative w-full flex lg:hidden mb-[1.4rem]">
             {startAuto && (
               <div
                 onClick={() => {
@@ -337,7 +338,12 @@ export default function Wheel() {
               {isRolling ? <Loader /> : "BET"}
             </BetButton>
           </div>
-          <BetSetting betSetting={betType} setBetSetting={setBetType} />
+          <div className="w-full flex lg:hidden">
+            <ConfigureAutoButton />
+          </div>
+          <div className="w-full hidden lg:flex">
+            <BetSetting betSetting={betType} setBetSetting={setBetType} />
+          </div>
           <div className="w-full flex flex-col no-scrollbar overflow-y-auto">
             <FormProvider {...methods}>
               <form
@@ -359,30 +365,32 @@ export default function Wheel() {
                       Risk
                     </p>
                   </div>
-                  <div className="group flex gap-2.5 w-full items-center rounded-[8px] text-white font-chakra text-sm font-semibold bg-[#0C0F16] p-4">
-                    <div
-                      onClick={() => setRisk("low")}
-                      className={`text-center w-full rounded-[5px] border-[2px] bg-[#202329] py-2 text-xs font-chakra text-white text-opacity-90 transition duration-200 ${
-                        risk === "low"
-                          ? "border-[#7839C5]"
-                          : "border-transparent hover:border-[#7839C580]"
-                      }`}
-                    >
-                      Low
-                    </div>
-                    <div
-                      onClick={() => setRisk("medium")}
-                      className={`text-center w-full rounded-[5px] border-[2px] bg-[#202329] py-2 text-xs font-chakra text-white text-opacity-90 transition duration-200 ${
-                        risk === "medium"
-                          ? "border-[#7839C5]"
-                          : "border-transparent hover:border-[#7839C580]"
-                      }`}
-                    >
-                      Medium
+                  <div className="flex lg:flex-row flex-col gap-2.5 w-full items-center justify-evenly rounded-[8px] text-white font-chakra text-sm font-semibold bg-[#0C0F16] p-4">
+                    <div className="flex lg:w-[66.66%] w-full gap-2.5">
+                      <div
+                        onClick={() => setRisk("low")}
+                        className={`text-center w-full rounded-[5px] border-[2px] bg-[#202329] py-2 text-xs font-chakra text-white text-opacity-90 transition duration-200 ${
+                          risk === "low"
+                            ? "border-[#7839C5]"
+                            : "border-transparent hover:border-[#7839C580]"
+                        }`}
+                      >
+                        Low
+                      </div>
+                      <div
+                        onClick={() => setRisk("medium")}
+                        className={`text-center w-full rounded-[5px] border-[2px] bg-[#202329] py-2 text-xs font-chakra text-white text-opacity-90 transition duration-200 ${
+                          risk === "medium"
+                            ? "border-[#7839C5]"
+                            : "border-transparent hover:border-[#7839C580]"
+                        }`}
+                      >
+                        Medium
+                      </div>
                     </div>
                     <div
                       onClick={() => setRisk("high")}
-                      className={`text-center w-full rounded-[5px] border-[2px] bg-[#202329] py-2 text-xs font-chakra text-white text-opacity-90 transition duration-200 ${
+                      className={`text-center lg:w-[33.33%] w-full rounded-[5px] border-[2px] bg-[#202329] py-2 text-xs font-chakra text-white text-opacity-90 transition duration-200 ${
                         risk === "high"
                           ? "border-[#7839C5]"
                           : "border-transparent hover:border-[#7839C580]"
@@ -419,81 +427,17 @@ export default function Wheel() {
                   <></>
                 ) : (
                   <div className="w-full flex flex-row items-end gap-3">
-                    <div className="mb-0 flex w-full flex-col">
-                      <div className="mb-1 flex w-full items-center justify-between text-xs font-changa text-opacity-90">
-                        <label className="text-white/90 font-changa">
-                          Number of Bets
-                        </label>
-                      </div>
-
-                      <div
-                        className={`group flex h-11 w-full cursor-pointer items-center rounded-[8px] bg-[#202329] px-4`}
-                      >
-                        <input
-                          id={"count-input"}
-                          {...methods.register("betCount", {
-                            required: "Bet count is required",
-                          })}
-                          type={"number"}
-                          step={"any"}
-                          autoComplete="off"
-                          onChange={handleCountChange}
-                          placeholder={
-                            autoBetCount.toString().includes("inf")
-                              ? "Infinity"
-                              : "00"
-                          }
-                          disabled={isRolling || startAuto}
-                          value={autoBetCount}
-                          className={`flex w-full min-w-0 bg-transparent text-base text-[#94A3B8] placeholder-[#94A3B8] font-chakra ${
-                            autoBetCount.toString().includes("inf")
-                              ? "placeholder-opacity-100"
-                              : "placeholder-opacity-40"
-                          } placeholder-opacity-40 outline-none`}
-                        />
-                        <span
-                          className={`text-2xl font-medium text-white text-opacity-50 ${
-                            autoBetCount.toString().includes("inf")
-                              ? "bg-[#47484A]"
-                              : "bg-[#292C32]"
-                          } hover:bg-[#47484A] focus:bg-[#47484A] transition-all rounded-[5px] py-0.5 px-3`}
-                          onClick={() => setAutoBetCount("inf")}
-                        >
-                          <BsInfinity />
-                        </span>
-                      </div>
-
-                      <span
-                        className={`${
-                          methods.formState.errors["amount"]
-                            ? "opacity-100"
-                            : "opacity-0"
-                        } mt-1.5 flex items-center gap-1 text-xs text-[#D92828]`}
-                      >
-                        {methods.formState.errors["amount"]
-                          ? methods.formState.errors[
-                              "amount"
-                            ]!.message!.toString()
-                          : "NONE"}
-                      </span>
-                    </div>
-                    <div
-                      onClick={() => {
-                        setShowAutoModal(true);
-                      }}
-                      className="relative mb-[1.4rem] rounded-md w-full h-11 flex items-center justify-center opacity-75 cursor-pointer font-sans font-medium text-sm text-white text-opacity-90 border-2 border-white bg-white bg-opacity-0 hover:bg-opacity-5"
-                    >
-                      Configure Auto
-                      <div
-                        className={`${
-                          useAutoConfig ? "bg-fomo-green" : "bg-fomo-red"
-                        } absolute top-0 right-0 m-1.5 bg-fomo-green w-2 h-2 rounded-full`}
-                      />
+                    <AutoCount
+                      loading={isRolling || startAuto}
+                      onChange={handleCountChange}
+                    />
+                    <div className="w-full hidden lg:flex">
+                      <ConfigureAutoButton />
                     </div>
                   </div>
                 )}
 
-                <div className="relative w-full hidden md:flex mt-2">
+                <div className="relative w-full hidden lg:flex mt-2">
                   {startAuto && (
                     <div
                       onClick={() => {
@@ -523,6 +467,9 @@ export default function Wheel() {
                 </div>
               </form>
             </FormProvider>
+            <div className="w-full flex lg:hidden">
+              <BetSetting betSetting={betType} setBetSetting={setBetType} />
+            </div>
           </div>
         </>
       </GameOptions>
@@ -658,8 +605,7 @@ export default function Wheel() {
         </div>
       </GameDisplay>
       <GameTable>
-        {/* <HistoryTable refresh={refresh} /> */}
-        <Bets refresh={refresh} game={"wheel"} />
+        <Bets refresh={refresh} />
       </GameTable>
     </GameLayout>
   );

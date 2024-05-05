@@ -335,7 +335,7 @@ export default function Options() {
             onSubmit={methods.handleSubmit(onSubmit)}
           >
             {/* mobile button  */}
-            <div className="w-full flex md:hidden mb-5">
+            <div className="w-full flex lg:hidden mb-[1.4rem]">
               <BetButton
                 disabled={
                   !betType ||
@@ -370,37 +370,39 @@ export default function Options() {
             />
 
             {/* select interval  */}
-            <div className="mb-4 flex w-full flex-col rounded-lg bg-transparent bg-opacity-10">
+            <div className="mb-[1.4rem] flex w-full flex-col rounded-lg bg-transparent bg-opacity-10">
               <span className="mb-1 text-sm text-white/90 font-medium font-changa">
                 Select Interval
               </span>
-              <div className="flex flex-row items-center gap-2.5 md:flex-row bg-[#0C0F16] p-2 md:p-4 rounded-lg">
-                <button
-                  type="button"
-                  onClick={() => {
-                    !loading && setBetInterval(3);
-                  }}
-                  className={`${
-                    betInterval === 3
-                      ? "border-[#7839C5]"
-                      : "border-transparent hover:border-[#7839C580]"
-                  } w-full rounded-[5px] border-[2px] bg-[#202329] py-2 text-xs font-chakra text-white text-opacity-90 transition duration-200`}
-                >
-                  3 Min
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    !loading && setBetInterval(4);
-                  }}
-                  className={`${
-                    betInterval === 4
-                      ? "border-[#7839C5]"
-                      : "border-transparent hover:border-[#7839C580]"
-                  } w-full rounded-[5px] border-[2px] bg-[#202329] py-2 text-xs font-chakra text-white text-opacity-90 transition duration-200`}
-                >
-                  4 Min
-                </button>
+              <div className="flex lg:flex-row flex-col items-center gap-2.5 bg-[#0C0F16] p-2 md:p-4 rounded-lg">
+                <div className="flex lg:w-[66.66%] w-full gap-2.5">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      !loading && setBetInterval(3);
+                    }}
+                    className={`${
+                      betInterval === 3
+                        ? "border-[#7839C5]"
+                        : "border-transparent hover:border-[#7839C580]"
+                    } w-full rounded-[5px] border-[2px] bg-[#202329] py-2 text-xs font-chakra text-white text-opacity-90 transition duration-200`}
+                  >
+                    3 Min
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      !loading && setBetInterval(4);
+                    }}
+                    className={`${
+                      betInterval === 4
+                        ? "border-[#7839C5]"
+                        : "border-transparent hover:border-[#7839C580]"
+                    } w-full rounded-[5px] border-[2px] bg-[#202329] py-2 text-xs font-chakra text-white text-opacity-90 transition duration-200`}
+                  >
+                    4 Min
+                  </button>
+                </div>
                 <button
                   type="button"
                   onClick={() => {
@@ -410,16 +412,16 @@ export default function Options() {
                     betInterval === 5
                       ? "border-[#7839C5]"
                       : "border-transparent hover:border-[#7839C580]"
-                  } w-full rounded-[5px] border-[2px] bg-[#202329] py-2 text-xs font-chakra text-white text-opacity-90 transition duration-200`}
+                  } lg:w-[33.33%] w-full rounded-[5px] border-[2px] bg-[#202329] py-2 text-xs font-chakra text-white text-opacity-90 transition duration-200`}
                 >
                   5 Min
                 </button>
               </div>
             </div>
 
-            <BalanceAlert />
+            {/* <BalanceAlert /> */}
 
-            <div className="flex w-full flex-row mb-4 gap-3">
+            <div className="flex w-full flex-row lg:mb-[1.4rem] gap-3">
               {/* buttons  */}
               <div
                 onClick={() => {
@@ -448,7 +450,7 @@ export default function Options() {
             </div>
 
             {/* lap  button  */}
-            <div className="w-full hidden md:flex mt-2">
+            <div className="w-full hidden lg:flex">
               <BetButton
                 disabled={
                   !betType ||
@@ -513,7 +515,7 @@ export default function Options() {
           {/* central loader  */}
           <div className="flex flex-1 flex-col justify-center items-center relative py-4 mb-6 md:mb-6">
             <div className="flex flex-col items-center absolute w-[14rem] h-[14rem] justify-start pt-14">
-              <span className="font-chakra text-sm text-[#94A3B8] text-opacity-75 mb-5">
+              <span className="font-chakra text-sm text-[#94A3B8] text-opacity-75 mb-[1.4rem]">
                 $SOL
               </span>
               <span className="font-chakra text-2xl text-white font-semibold text-opacity-90 mb-2">
@@ -590,7 +592,7 @@ export default function Options() {
         </>
       </GameDisplay>
       <GameTable>
-        <Bets refresh={refresh} game={"options"} />
+        <Bets refresh={refresh} />
       </GameTable>
     </GameLayout>
   );
