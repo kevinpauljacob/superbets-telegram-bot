@@ -286,7 +286,8 @@ export default function Flip() {
                 <BetAmount
                   betAmt={userInput}
                   setBetAmt={setUserInput}
-                  multiplier={2.0}
+                  currentMultiplier={2.0}
+                  leastMultiplier={2.0}
                   game="coinflip"
                 />
 

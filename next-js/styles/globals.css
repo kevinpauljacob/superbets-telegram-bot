@@ -555,3 +555,11 @@ input[type="range"] {
   cursor: pointer;
   border-radius: 100%;
 }
+
+.maxBetsSlider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 21px; /* Set thumb width as desired */
+  height: 21px; /* Set thumb height as desired */
+  cursor: pointer;
+  border-radius: 100%;
+}

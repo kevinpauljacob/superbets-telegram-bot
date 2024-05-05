@@ -364,7 +364,8 @@ export default function Options() {
             <BetAmount
               betAmt={betAmt}
               setBetAmt={setBetAmt}
-              multiplier={2.0}
+              currentMultiplier={2.0}
+              leastMultiplier={2.0}
               game="options"
             />
 

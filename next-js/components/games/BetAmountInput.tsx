@@ -1,37 +1,49 @@
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useGlobalContext } from "../GlobalContext";
 import { GameType } from "@/utils/provably-fair";
 import { maxPayouts } from "@/context/transactions";
-import { toast } from "react-hot-toast";
 
 export default function BetAmount({
   betAmt,
   setBetAmt,
-  multiplier,
+  currentMultiplier,
+  leastMultiplier,
   game,
 }: {
   betAmt: number | undefined;
   setBetAmt: React.Dispatch<React.SetStateAction<number | undefined>>;
-  multiplier: number | undefined;
-  game: string | undefined;
+  currentMultiplier: number;
+  leastMultiplier: number;
+  game: string;
 }) {
   const methods = useForm();
   const { coinData, maxBetAmt, setMaxBetAmt } = useGlobalContext();
+  const [betAmountsModal, setBetAmountsModal] = useState(false);
+  const [highestBetAmt, setHighestBetAmt] = useState(0);
+
   const tempBetAmt = betAmt === undefined ? 0 : betAmt;
   let tempMaxBetAmt: number | undefined;
-  const min_bet = parseFloat(process.env.MINIMUM_BET_AMOUNT ?? "0.0001");
+  let potentialMaxBetAmt = 0;
+  let highestMaxBetAmt =
+    leastMultiplier !== undefined &&
+    (maxPayouts[game as GameType] / leastMultiplier).toFixed(2);
+  const minBetAmt = parseFloat(process.env.MINIMUM_BET_AMOUNT ?? "0.0001");
   // console.log("game", game);
   // console.log("maxBetAmtMultiplier", multiplier);
   // console.log("betAmt", betAmt);
   // console.log("tempBetAmt", tempBetAmt);
+  console.log("least multiplier", leastMultiplier);
+  console.log("highestMaxBetAmt", highestMaxBetAmt);
 
-  if (tempBetAmt !== undefined && multiplier !== undefined) {
-    const potentialMaxBet = maxPayouts[game as GameType] / multiplier;
-    if (tempBetAmt * multiplier > maxPayouts[game as GameType]) {
+  if (tempBetAmt !== undefined && currentMultiplier !== undefined) {
+    potentialMaxBetAmt = maxPayouts[game as GameType] / currentMultiplier || 0;
+    console.log("potentialMaxBetAmt", potentialMaxBetAmt);
+    if (tempBetAmt * currentMultiplier > maxPayouts[game as GameType]) {
     }
 
-    tempMaxBetAmt = Number.isFinite(potentialMaxBet)
-      ? Number(potentialMaxBet.toFixed(4))
+    tempMaxBetAmt = Number.isFinite(highestMaxBetAmt)
+      ? Number(potentialMaxBetAmt.toFixed(2))
       : 0;
     setMaxBetAmt(tempMaxBetAmt);
 
@@ -59,8 +71,8 @@ export default function BetAmount({
 
       newBetAmt = parseFloat(newBetAmt.toFixed(4));
 
-      if (newBetAmt < min_bet) {
-        newBetAmt = min_bet;
+      if (newBetAmt < minBetAmt) {
+        newBetAmt = minBetAmt;
       }
 
       setBetAmt(newBetAmt);
@@ -86,6 +98,10 @@ export default function BetAmount({
     }
   };
 
+  const handleBetAmountsModal = () => {
+    setBetAmountsModal(!betAmountsModal);
+  };
+
   return (
     <div className="mb-0 flex w-full flex-col">
       <div className="mb-1 flex w-full items-center justify-between text-xs font-changa text-opacity-90">
@@ -94,7 +110,17 @@ export default function BetAmount({
           onClick={handleSetMaxBet}
           className="text-[#94A3B8] text-opacity-90 cursor-pointer font-changa text-xs"
         >
-          Max Bet: {maxBetAmt} $SOL
+          <span>
+            Max Bet: {maxBetAmt} $SOL {"  "}
+          </span>
+          <span
+            className={`font-chakra font-medium underline text-white ${
+              betAmountsModal ? "text-opacity-100" : "text-opacity-50"
+            }`}
+            onClick={() => handleBetAmountsModal()}
+          >
+            why?
+          </span>
         </span>
       </div>
 
@@ -156,6 +182,55 @@ export default function BetAmount({
           ? methods.formState.errors["amount"]!.message!.toString()
           : "NONE"}
       </span>
+
+      {betAmountsModal && (
+        <div className="fadeInDown relative flex items-center gap-3 bg-[#0C0F16] rounded-[5px] p-2 mb-4">
+          <div className="flex items-center border-r border-white/10 h-11 w-[80%] pl-6 pr-8">
+            <div className="relative h-[5px] rounded-full bg-[#2A2E38] w-full">
+              <input
+                type="range"
+                min={minBetAmt}
+                max={maxBetAmt}
+                value={maxBetAmt}
+                className="maxBetsSlider absolute top-[-8px] w-full bg-transparent appearance-none z-20"
+              />
+              <div
+                className="absolute rounded-l-full h-[5px] bg-[#8795A8] z-10"
+                style={{
+                  width: `${
+                    (potentialMaxBetAmt / Number(highestMaxBetAmt)) * 100
+                  }%`,
+                }}
+              >
+                <div className="relative">
+                  <div
+                    className="absolute text-white text-[11px] font-semibold font-chakra -top-5 -right-[30px] w-max"
+                    // style={{ left: `${potentialMaxBetAmt / highestMaxBetAmt}%` }}
+                  >
+                    Max {potentialMaxBetAmt.toFixed(2)}
+                  </div>
+                </div>
+              </div>
+              <div className="absolute text-white text-opacity-50 text-[10px] font-medium font-chakra top-2 -left-4">
+                {minBetAmt}
+              </div>
+              <div className="absolute text-white text-opacity-50 text-[10px] font-medium font-chakra top-2 -right-3">
+                {highestMaxBetAmt}
+              </div>
+            </div>
+          </div>
+          <div className="flex flex-col items-center text-white font-chakra font-medium w-[20%]">
+            <span className="text-[10px] text-white text-opacity-50">
+              Multiplier
+            </span>
+            <span>
+              <span>
+                {isNaN(currentMultiplier) ? "0" : `${currentMultiplier ?? 0}x`}
+              </span>
+            </span>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

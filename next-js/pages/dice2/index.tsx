@@ -355,7 +355,8 @@ export default function Dice2() {
                 <BetAmount
                   betAmt={userInput}
                   setBetAmt={setUserInput}
-                  multiplier={multiplier}
+                  currentMultiplier={multiplier}
+                  leastMultiplier={1}
                   game="dice2"
                 />
                 {betType === "manual" ? (

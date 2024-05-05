@@ -64,8 +64,10 @@ export default function Keno() {
 
   const multipliers = riskToChance[risk][chosenNumbers.length];
   let maxMultiplier = 0;
+  let leastMultiplier = 0;
   if (multipliers && multipliers.length > 0) {
     maxMultiplier = multipliers[multipliers.length - 1];
+    leastMultiplier = multipliers[1];
   }
   const commonNumbers = strikeNumbers.filter((num) =>
     chosenNumbers.includes(num),
@@ -390,7 +392,10 @@ export default function Keno() {
                 <BetAmount
                   betAmt={userInput}
                   setBetAmt={setUserInput}
-                  multiplier={maxMultiplier}
+                  currentMultiplier={
+                    maxMultiplier !== undefined ? maxMultiplier : 0
+                  }
+                  leastMultiplier={leastMultiplier}
                   game="keno"
                 />
                 <div className="mb-6 w-full">

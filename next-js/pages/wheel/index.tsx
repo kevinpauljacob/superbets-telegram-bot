@@ -85,7 +85,9 @@ export default function Wheel() {
     (segment, index, self) =>
       index === 0 || self[index - 1].multiplier !== segment.multiplier,
   );
-
+  const minMultiplier = uniqueSegments[1].multiplier;
+  console.log("Minimum Multiplier:", minMultiplier);
+  console.log("uniqueSegments", uniqueSegments);
   const segmentFill =
     segments === 10
       ? 0
@@ -347,7 +349,8 @@ export default function Wheel() {
                 <BetAmount
                   betAmt={userInput}
                   setBetAmt={setUserInput}
-                  multiplier={maxMultiplier}
+                  currentMultiplier={maxMultiplier}
+                  leastMultiplier={minMultiplier}
                   game="wheel"
                 />
                 <div className="mb-6 w-full">

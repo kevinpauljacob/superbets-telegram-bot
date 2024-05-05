@@ -318,7 +318,8 @@ export default function Limbo() {
                 <BetAmount
                   betAmt={userInput}
                   setBetAmt={setUserInput}
-                  multiplier={inputMultiplier}
+                  currentMultiplier={inputMultiplier}
+                  leastMultiplier={1.02}
                   game="limbo"
                 />
 
