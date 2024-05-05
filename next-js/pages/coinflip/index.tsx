@@ -57,6 +57,7 @@ export default function Flip() {
     setAutoBetProfit,
     useAutoConfig,
     setUseAutoConfig,
+    maxBetAmt,
   } = useGlobalContext();
 
   const [betAmt, setBetAmt] = useState(0);
@@ -258,7 +259,12 @@ export default function Flip() {
             )}
             <BetButton
               disabled={
-                !betType || loading || (coinData && coinData[0].amount < 0.0001)
+                !betType ||
+                loading ||
+                (coinData && coinData[0].amount < 0.0001) ||
+                (betAmt !== undefined &&
+                  maxBetAmt !== undefined &&
+                  betAmt > maxBetAmt)
                   ? true
                   : false
               }
@@ -286,7 +292,8 @@ export default function Flip() {
                 <BetAmount
                   betAmt={userInput}
                   setBetAmt={setUserInput}
-                  multiplier={2.0}
+                  currentMultiplier={2.0}
+                  leastMultiplier={2.0}
                   game="coinflip"
                 />
 
@@ -370,7 +377,10 @@ export default function Flip() {
                       disabled={
                         !betType ||
                         loading ||
-                        (coinData && coinData[0].amount < 0.0001)
+                        (coinData && coinData[0].amount < 0.0001) ||
+                        (betAmt !== undefined &&
+                          maxBetAmt !== undefined &&
+                          betAmt > maxBetAmt)
                           ? true
                           : false
                       }

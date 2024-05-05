@@ -47,6 +47,7 @@ export default function Dice2() {
     setAutoBetProfit,
     useAutoConfig,
     setUseAutoConfig,
+    maxBetAmt,
   } = useGlobalContext();
   const [betAmt, setBetAmt] = useState(0);
   const [userInput, setUserInput] = useState<number | undefined>();
@@ -331,7 +332,10 @@ export default function Dice2() {
               disabled={
                 !wallet ||
                 isRolling ||
-                (coinData && coinData[0].amount < 0.0001)
+                (coinData && coinData[0].amount < 0.0001) ||
+                (betAmt !== undefined &&
+                  maxBetAmt !== undefined &&
+                  betAmt > maxBetAmt)
                   ? true
                   : false
               }
@@ -357,7 +361,8 @@ export default function Dice2() {
                 <BetAmount
                   betAmt={userInput}
                   setBetAmt={setUserInput}
-                  multiplier={multiplier}
+                  currentMultiplier={multiplier}
+                  leastMultiplier={1}
                   game="dice2"
                 />
                 {betType === "manual" ? (
@@ -390,7 +395,10 @@ export default function Dice2() {
                     disabled={
                       !wallet ||
                       isRolling ||
-                      (coinData && coinData[0].amount < 0.0001)
+                      (coinData && coinData[0].amount < 0.0001) ||
+                      (betAmt !== undefined &&
+                        maxBetAmt !== undefined &&
+                        betAmt > maxBetAmt)
                         ? true
                         : false
                     }

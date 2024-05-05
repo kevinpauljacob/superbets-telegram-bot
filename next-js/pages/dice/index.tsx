@@ -55,6 +55,7 @@ export default function Dice() {
     useAutoConfig,
     setUseAutoConfig,
     houseEdge,
+    maxBetAmt,
   } = useGlobalContext();
 
   const [userInput, setUserInput] = useState<number | undefined>();
@@ -158,6 +159,7 @@ export default function Dice() {
       autoBetCount,
       autoBetProfit,
       betAmt,
+      maxBetAmt,
     );
     if (wallet.connected) {
       if (!wallet.publicKey) {
@@ -363,9 +365,12 @@ export default function Dice() {
             <BetButton
               disabled={
                 !wallet ||
-                selectedFace.length == 0 ||
+                selectedFace.length === 0 ||
                 isRolling ||
-                (coinData && coinData[0].amount < 0.0001)
+                (coinData && coinData[0].amount < 0.0001) ||
+                (betAmt !== undefined &&
+                  maxBetAmt !== undefined &&
+                  betAmt > maxBetAmt)
                   ? true
                   : false
               }
@@ -391,7 +396,8 @@ export default function Dice() {
                 <BetAmount
                   betAmt={userInput}
                   setBetAmt={setUserInput}
-                  multiplier={winningPays}
+                  currentMultiplier={winningPays}
+                  leastMultiplier={6 / 5}
                   game="dice"
                 />
                 {rollType === "manual" ? (
@@ -428,9 +434,12 @@ export default function Dice() {
                   <BetButton
                     disabled={
                       !wallet ||
-                      selectedFace.length == 0 ||
+                      selectedFace.length === 0 ||
                       isRolling ||
-                      (coinData && coinData[0].amount < 0.0001)
+                      (coinData && coinData[0].amount < 0.0001) ||
+                      (betAmt !== undefined &&
+                        maxBetAmt !== undefined &&
+                        betAmt > maxBetAmt)
                         ? true
                         : false
                     }

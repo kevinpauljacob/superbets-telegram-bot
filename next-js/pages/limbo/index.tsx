@@ -74,6 +74,7 @@ export default function Limbo() {
     useAutoConfig,
     setUseAutoConfig,
     houseEdge,
+    maxBetAmt,
   } = useGlobalContext();
 
   const multiplierLimits = [1.02, 50];
@@ -293,7 +294,11 @@ export default function Limbo() {
             )}
             <BetButton
               disabled={
-                loading || (coinData && coinData[0].amount < 0.0001)
+                loading ||
+                (coinData && coinData[0].amount < 0.0001) ||
+                (betAmt !== undefined &&
+                  maxBetAmt !== undefined &&
+                  betAmt > maxBetAmt)
                   ? true
                   : false
               }
@@ -321,7 +326,8 @@ export default function Limbo() {
                 <BetAmount
                   betAmt={userInput}
                   setBetAmt={setUserInput}
-                  multiplier={inputMultiplier}
+                  currentMultiplier={inputMultiplier}
+                  leastMultiplier={1.02}
                   game="limbo"
                 />
 
@@ -355,7 +361,11 @@ export default function Limbo() {
                   )}
                   <BetButton
                     disabled={
-                      loading || (coinData && coinData[0].amount < 0.0001)
+                      loading ||
+                      (coinData && coinData[0].amount < 0.0001) ||
+                      (betAmt !== undefined &&
+                        maxBetAmt !== undefined &&
+                        betAmt > maxBetAmt)
                         ? true
                         : false
                     }

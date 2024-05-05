@@ -48,6 +48,7 @@ export default function Wheel() {
     setAutoBetProfit,
     useAutoConfig,
     setUseAutoConfig,
+    maxBetAmt,
   } = useGlobalContext();
   const [betAmt, setBetAmt] = useState(0);
   const [userInput, setUserInput] = useState<number | undefined>(0);
@@ -71,8 +72,12 @@ export default function Wheel() {
 
   const multipliers = riskToChance[risk];
   console.log("multipliers", multipliers);
-  const maxMultiplier = multipliers[multipliers.length - 1].multiplier;
-  console.log("maxMultiplier", maxMultiplier);
+  const maxMultiplier = multipliers.reduce((max, item) => {
+    return Math.max(max, item.multiplier);
+  }, 0);
+
+  console.log("Maximum Multiplier:", maxMultiplier);
+
   const sortedMultipliers = multipliers
     .slice()
     .sort((a, b) => a.multiplier - b.multiplier);
@@ -81,7 +86,9 @@ export default function Wheel() {
     (segment, index, self) =>
       index === 0 || self[index - 1].multiplier !== segment.multiplier,
   );
-
+  const minMultiplier = uniqueSegments[1].multiplier;
+  console.log("Minimum Multiplier:", minMultiplier);
+  console.log("uniqueSegments", uniqueSegments);
   const segmentFill =
     segments === 10
       ? 0
@@ -319,7 +326,10 @@ export default function Wheel() {
               disabled={
                 !wallet ||
                 isRolling ||
-                (coinData && coinData[0].amount < 0.0001)
+                (coinData && coinData[0].amount < 0.0001) ||
+                (betAmt !== undefined &&
+                  maxBetAmt !== undefined &&
+                  betAmt > maxBetAmt)
                   ? true
                   : false
               }
@@ -345,7 +355,8 @@ export default function Wheel() {
                 <BetAmount
                   betAmt={userInput}
                   setBetAmt={setUserInput}
-                  multiplier={maxMultiplier}
+                  currentMultiplier={maxMultiplier}
+                  leastMultiplier={minMultiplier}
                   game="wheel"
                 />
                 <div className="mb-6 w-full">
@@ -442,7 +453,10 @@ export default function Wheel() {
                     disabled={
                       !wallet ||
                       isRolling ||
-                      (coinData && coinData[0].amount < 0.0001)
+                      (coinData && coinData[0].amount < 0.0001) ||
+                      (betAmt !== undefined &&
+                        maxBetAmt !== undefined &&
+                        betAmt > maxBetAmt)
                         ? true
                         : false
                     }

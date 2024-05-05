@@ -145,8 +145,8 @@ export const SidebarOpenElement = ({
       }}
       className="w-full transition-all cursor-pointer rounded-md flex items-end gap-3 pl-4 py-2 bg-transparent hover:bg-[#1f2024] focus:bg-[#1f2024] group"
     >
-      <Icon className="w-5 h-5 transition-all text-white group-hover:text-[#9945FF] group-focus:text-[#9945FF]" />
-      <span className="transition-all text-[0.85rem] mt-1 leading-[1rem] font-chakra font-medium tracking-wider text-white text-opacity-90 group-hover:text-opacity-100 group-focus:text-opacity-100">
+      <Icon className="w-5 h-5 transition-all text-white/90" />
+      <span className="transition-all text-sm leading-[1rem] font-changa font-medium tracking-wider text-white text-opacity-90 group-hover:text-opacity-100 group-focus:text-opacity-100">
         {text}
       </span>
     </div>
@@ -286,11 +286,11 @@ export const OpenSidebar = ({
             />
           </div>
           <div className="flex flex-col items-start">
-            <span className="text-base font-semibold text-white text-opacity-90 font-chakra">
+            <span className="text-base font-semibold text-white text-opacity-90 font-changa">
               $FOMO
             </span>
             <div className="flex items-center gap-1">
-              <span className="text-sm text-[#94A3B8] font-medium font-chakra leading-3">
+              <span className="text-sm text-[#94A3B8] font-medium font-changa leading-3">
                 ${fomoPrice.toFixed(3)}
               </span>
               <span
@@ -311,14 +311,14 @@ export const OpenSidebar = ({
             <div className="w-full transition-all cursor-pointer rounded-md flex items-center justify-between gap-2 pl-4 pr-2 py-2 bg-transparent hover:bg-[#1f2024] focus:bg-[#1f2024] group">
               <div className="flex items-center gap-3">
                 <FomoPlayIcon className="min-w-[1.25rem] min-h-[1.25rem] transition-all text-white group-hover:text-[#9945FF] group-focus:text-[#9945FF]" />
-                <span className="mt-0.5 transition-all text-[0.85rem] font-chakra font-medium text-white text-opacity-90 group-hover:text-opacity-100 group-focus:text-opacity-100">
+                <span className="mt-0.5 transition-all text-sm font-changa font-medium text-white text-opacity-90 group-hover:text-opacity-100 group-focus:text-opacity-100">
                   FOMO: Play
                 </span>
               </div>
               <button
                 className={`${
                   showPlayTokens ? "bg-[#47484A]" : "bg-white bg-opacity-5"
-                } hover:bg-[#47484A] transition duration-300 ease-in-out hover:transition hover:duration-300 hover:ease-in-out rounded-md w-8 h-6 flex justify-center items-center`}
+                } hover:bg-[#47484A]transition text-sm duration-300 ease-in-out hover:transition hover:duration-300 hover:ease-in-out rounded-md w-8 h-6 flex justify-center items-center`}
                 onClick={() => setShowPlayTokens(!showPlayTokens)}
               >
                 <Image
@@ -347,7 +347,7 @@ export const OpenSidebar = ({
                   >
                     {/* <Image src={token.src} alt="" width={15} height={15} /> */}
                     <span
-                      className={`text-[0.85rem] font-chakra font-medium transition-all ${
+                      className={`text-sm font-changa font-medium transition-all ${
                         token.active
                           ? "text-white/90"
                           : "text-white/50 group-hover:text-white/90"
@@ -364,7 +364,7 @@ export const OpenSidebar = ({
             <div className="w-full transition-all cursor-pointer rounded-md flex items-center justify-between gap-2 pl-4 pr-2 py-2 bg-transparent hover:bg-[#1f2024] focus:bg-[#1f2024] group">
               <div className="flex items-center gap-3">
                 <FomoExitIcon className="min-w-[1.25rem] min-h-[1.25rem] transition-all text-white group-hover:text-[#9945FF] group-focus:text-[#9945FF]" />
-                <span className="mt-0.5 transition-all text-[0.85rem] font-chakra font-medium text-white text-opacity-90 group-hover:text-opacity-100 group-focus:text-opacity-100">
+                <span className="mt-0.5 transition-all text-sm font-changa font-medium text-white text-opacity-90 group-hover:text-opacity-100 group-focus:text-opacity-100">
                   FOMO: Exit
                 </span>
               </div>
@@ -401,7 +401,7 @@ export const OpenSidebar = ({
                   >
                     {/* <Image src={token.src} alt="" width={15} height={15} /> */}
                     <span
-                      className={`text-[0.85rem] font-chakra font-medium transition-all ${
+                      className={`text-sm font-changa font-medium transition-all ${
                         token.active
                           ? "text-white/90"
                           : "text-white/50 group-hover:text-white/90"

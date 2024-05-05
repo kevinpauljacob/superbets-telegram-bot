@@ -45,6 +45,7 @@ export default function Keno() {
     setAutoBetProfit,
     useAutoConfig,
     setUseAutoConfig,
+    maxBetAmt,
   } = useGlobalContext();
   const [betAmt, setBetAmt] = useState(0);
   const [userInput, setUserInput] = useState<number | undefined>();
@@ -62,8 +63,10 @@ export default function Keno() {
 
   const multipliers = riskToChance[risk][chosenNumbers.length];
   let maxMultiplier = 0;
+  let leastMultiplier = 0;
   if (multipliers && multipliers.length > 0) {
     maxMultiplier = multipliers[multipliers.length - 1];
+    leastMultiplier = multipliers[1];
   }
   const commonNumbers = strikeNumbers.filter((num) =>
     chosenNumbers.includes(num),
@@ -356,7 +359,10 @@ export default function Keno() {
               disabled={
                 !wallet ||
                 isRolling ||
-                (coinData && coinData[0].amount < 0.0001)
+                (coinData && coinData[0].amount < 0.0001) ||
+                (betAmt !== undefined &&
+                  maxBetAmt !== undefined &&
+                  betAmt > maxBetAmt)
                   ? true
                   : false
               }
@@ -385,7 +391,10 @@ export default function Keno() {
                 <BetAmount
                   betAmt={userInput}
                   setBetAmt={setUserInput}
-                  multiplier={maxMultiplier}
+                  currentMultiplier={
+                    maxMultiplier !== undefined ? maxMultiplier : 0
+                  }
+                  leastMultiplier={leastMultiplier}
                   game="keno"
                 />
                 <div className="mb-6 w-full">
@@ -472,7 +481,10 @@ export default function Keno() {
                     disabled={
                       !wallet ||
                       isRolling ||
-                      (coinData && coinData[0].amount < 0.0001)
+                      (coinData && coinData[0].amount < 0.0001) ||
+                      (betAmt !== undefined &&
+                        maxBetAmt !== undefined &&
+                        betAmt > maxBetAmt)
                         ? true
                         : false
                     }
