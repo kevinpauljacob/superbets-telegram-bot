@@ -376,7 +376,10 @@ export const OpenSidebar = ({
           <div className={`mt-0`}>
             <div className="w-full transition-all cursor-pointer rounded-md flex items-center justify-between gap-2 pl-4 pr-2 py-2 bg-transparent hover:bg-[#1f2024] focus:bg-[#1f2024] group">
               <div className="flex items-center gap-3">
-                <FomoPlayIcon className="min-w-[1.25rem] min-h-[1.25rem] transition-all text-white group-hover:text-[#9945FF] group-focus:text-[#9945FF]" />
+                {/* <FomoPlayIcon className=" min-w-[1.25rem] min-h-[1.25rem] transition-all text-white group-hover:text-[#9945FF] group-focus:text-[#9945FF]" /> */}
+                <FomoPlayIcon
+                className="hover:bg-[#9945ff] min-w-[1.25rem] min-h-[1.25rem] transition-colors text-white group-hover:text-[#9945FF] group-focus:text-[#9945FF]"
+                />
                 <span className="mt-0.5 transition-all text-[0.85rem] font-chakra font-medium text-white text-opacity-90 group-hover:text-opacity-100 group-focus:text-opacity-100">
                   FOMO: Play
                 </span>
