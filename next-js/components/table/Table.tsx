@@ -217,7 +217,7 @@ export const TableHeader = ({ all, setAll }: TableButtonProps) => {
 
   return (
     <>
-      <div className="mb-5 hidden md:flex w-full flex-row items-center gap-2 bg-[#121418] py-1 rounded-[5px]">
+      <div className="mb-[1.4rem] hidden md:flex w-full flex-row items-center gap-2 bg-[#121418] py-1 rounded-[5px]">
         {!all
           ? headers.map((header, index) => (
               <span
@@ -236,7 +236,7 @@ export const TableHeader = ({ all, setAll }: TableButtonProps) => {
               </span>
             ))}
       </div>
-      <div className="mb-5 flex md:hidden w-full flex-row items-center bg-[#121418] rounded-md py-1 gap-2">
+      <div className="mb-[1.4rem] flex md:hidden w-full flex-row items-center bg-[#121418] rounded-md py-1 gap-2">
         {smallScreenHeaders.map((header, index) => (
           <span
             key={index}

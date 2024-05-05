@@ -280,7 +280,7 @@ export default function Limbo() {
     <GameLayout title="FOMO - Limbo">
       <GameOptions>
         <>
-          <div className="flex md:hidden flex-col w-full gap-4 mb-5">
+          <div className="flex lg:hidden flex-col w-full gap-4 mb-[1.4rem]">
             {startAuto && (
               <div
                 onClick={() => {
@@ -307,10 +307,11 @@ export default function Limbo() {
               {loading ? <Loader /> : "BET"}
             </BetButton>
           </div>
-
-          <div className="w-full flex lg:hidden">
-            <ConfigureAutoButton />
-          </div>
+          {betSetting === "auto" && (
+            <div className="w-full flex lg:hidden">
+              <ConfigureAutoButton />
+            </div>
+          )}
           <div className="w-full hidden lg:flex">
             <BetSetting betSetting={betSetting} setBetSetting={setBetSetting} />
           </div>
@@ -326,7 +327,8 @@ export default function Limbo() {
                 <BetAmount
                   betAmt={userInput}
                   setBetAmt={setUserInput}
-                  multiplier={inputMultiplier}
+                  currentMultiplier={inputMultiplier}
+                  leastMultiplier={1.02}
                   game="limbo"
                 />
 
@@ -344,9 +346,9 @@ export default function Limbo() {
                   </div>
                 )}
                 {/* balance alert  */}
-                <BalanceAlert />
+                {/* <BalanceAlert /> */}
 
-                <div className="relative w-full hidden md:flex mt-2">
+                <div className="relative w-full hidden lg:flex">
                   {startAuto && (
                     <div
                       onClick={() => {
@@ -376,8 +378,11 @@ export default function Limbo() {
               </form>
               {/* choosing bet options  */}
             </FormProvider>
-            <div className="w-full flex lg:hidden mt-4">
-              <BetSetting betSetting={betSetting} setBetSetting={setBetSetting} />
+            <div className="w-full flex lg:hidden">
+              <BetSetting
+                betSetting={betSetting}
+                setBetSetting={setBetSetting}
+              />
             </div>
           </div>
         </>
@@ -412,7 +417,7 @@ export default function Limbo() {
           </div>
         </div>
 
-        <div className="flex px-0 xl:px-4 mb-0 md:mb-5 gap-4 flex-row w-full justify-between">
+        <div className="flex px-0 xl:px-4 mb-0 md:mb-[1.4rem] gap-4 flex-row w-full justify-between">
           {coinData && coinData[0].amount > 0.0001 && (
             <>
               <div className="flex flex-col w-full">

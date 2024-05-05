@@ -245,7 +245,7 @@ export default function Flip() {
     <GameLayout title="FOMO - Coin Flip">
       <GameOptions>
         <>
-          <div className="relative w-full flex md:hidden mb-5">
+          <div className="relative w-full flex lg:hidden mb-[1.4rem]">
             {startAuto && (
               <div
                 onClick={() => {
@@ -273,10 +273,11 @@ export default function Flip() {
               {loading ? <Loader /> : "BET"}
             </BetButton>
           </div>
-          
-          <div className="w-full flex lg:hidden">
-            <ConfigureAutoButton />
-          </div>
+          {betSetting === "auto" && (
+            <div className="w-full flex lg:hidden">
+              <ConfigureAutoButton />
+            </div>
+          )}
           <div className="w-full hidden lg:flex">
             <BetSetting betSetting={betSetting} setBetSetting={setBetSetting} />
           </div>
@@ -292,7 +293,8 @@ export default function Flip() {
                 <BetAmount
                   betAmt={userInput}
                   setBetAmt={setUserInput}
-                  multiplier={2.0}
+                  currentMultiplier={2.0}
+                  leastMultiplier={2.0}
                   game="coinflip"
                 />
 
@@ -311,88 +313,89 @@ export default function Flip() {
                 )}
 
                 {/* balance alert  */}
-                <BalanceAlert />
+                {/* <BalanceAlert /> */}
 
                 {/* choosing bet options  */}
-                <div className="flex flex-col w-full gap-4">
-                  <div className="flex w-full flex-row gap-3">
-                    {/* buttons  */}
+                <div className="flex w-full flex-row gap-3 mb-[1.4rem]">
+                  {/* buttons  */}
+                  <div
+                    onClick={() => {
+                      setBetType("Heads");
+                    }}
+                    className={`${
+                      betType === "Heads"
+                        ? "border-[#7839C5] text-opacity-100"
+                        : "border-transparent hover:border-[#7839C580] text-opacity-80"
+                    } w-full flex items-center justify-center gap-2 rounded-lg text-center cursor-pointer border-2 bg-[#202329] py-2.5 font-changa text-xl text-white font-semibold`}
+                  >
+                    <Image
+                      src={"/assets/coin.png"}
+                      width={23}
+                      height={23}
+                      alt=""
+                      className={``}
+                    />
+                    <span className="mt-0.5 font-chakra text-xl font-semibold">
+                      Heads
+                    </span>
+                  </div>
+                  <div
+                    onClick={() => {
+                      setBetType("Tails");
+                    }}
+                    className={`${
+                      betType === "Tails"
+                        ? "border-[#7839C5] text-opacity-100"
+                        : "border-transparent hover:border-[#7839C580] text-opacity-80"
+                    } w-full flex items-center justify-center gap-2 rounded-lg text-center cursor-pointer border-2 bg-[#202329] py-2.5 font-changa text-xl text-white font-semibold`}
+                  >
+                    <Image
+                      src={"/assets/tails.png"}
+                      width={23}
+                      height={23}
+                      alt=""
+                      className={``}
+                    />
+                    <span className="mt-0.5 font-chakra text-xl font-semibold">
+                      Tails
+                    </span>
+                  </div>
+                </div>
+                <div className="relative w-full hidden lg:flex mb-[1.4rem]">
+                  {startAuto && (
                     <div
                       onClick={() => {
-                        setBetType("Heads");
+                        setAutoBetCount(0);
+                        setStartAuto(false);
                       }}
-                      className={`${
-                        betType === "Heads"
-                          ? "border-[#7839C5] text-opacity-100"
-                          : "border-transparent hover:border-[#7839C580] text-opacity-80"
-                      } w-full flex items-center justify-center gap-2 rounded-lg text-center cursor-pointer border-2 bg-[#202329] py-2.5 font-changa text-xl text-white font-semibold`}
+                      className="cursor-pointer rounded-lg absolute w-full h-full z-20 bg-[#442c62] hover:bg-[#7653A2] focus:bg-[#53307E] flex items-center justify-center font-chakra font-semibold text-2xl tracking-wider text-white"
                     >
-                      <Image
-                        src={"/assets/coin.png"}
-                        width={23}
-                        height={23}
-                        alt=""
-                        className={``}
-                      />
-                      <span className="mt-0.5 font-chakra text-xl font-semibold">
-                        Heads
-                      </span>
+                      STOP
                     </div>
-                    <div
-                      onClick={() => {
-                        setBetType("Tails");
-                      }}
-                      className={`${
-                        betType === "Tails"
-                          ? "border-[#7839C5] text-opacity-100"
-                          : "border-transparent hover:border-[#7839C580] text-opacity-80"
-                      } w-full flex items-center justify-center gap-2 rounded-lg text-center cursor-pointer border-2 bg-[#202329] py-2.5 font-changa text-xl text-white font-semibold`}
-                    >
-                      <Image
-                        src={"/assets/tails.png"}
-                        width={23}
-                        height={23}
-                        alt=""
-                        className={``}
-                      />
-                      <span className="mt-0.5 font-chakra text-xl font-semibold">
-                        Tails
-                      </span>
-                    </div>
-                  </div>
-                  <div className="relative w-full hidden md:flex mb-5">
-                    {startAuto && (
-                      <div
-                        onClick={() => {
-                          setAutoBetCount(0);
-                          setStartAuto(false);
-                        }}
-                        className="cursor-pointer rounded-lg absolute w-full h-full z-20 bg-[#442c62] hover:bg-[#7653A2] focus:bg-[#53307E] flex items-center justify-center font-chakra font-semibold text-2xl tracking-wider text-white"
-                      >
-                        STOP
-                      </div>
-                    )}
-                    <BetButton
-                      disabled={
-                        !betType ||
-                        loading ||
-                        (coinData && coinData[0].amount < 0.0001) ||
-                        (betAmt !== undefined &&
-                          maxBetAmt !== undefined &&
-                          betAmt > maxBetAmt)
-                          ? true
-                          : false
-                      }
-                      onClickFunction={onSubmit}
-                    >
-                      {loading ? <Loader /> : "BET"}
-                    </BetButton>
-                  </div>
+                  )}
+                  <BetButton
+                    disabled={
+                      !betType ||
+                      loading ||
+                      (coinData && coinData[0].amount < 0.0001) ||
+                      (betAmt !== undefined &&
+                        maxBetAmt !== undefined &&
+                        betAmt > maxBetAmt)
+                        ? true
+                        : false
+                    }
+                    onClickFunction={onSubmit}
+                  >
+                    {loading ? <Loader /> : "BET"}
+                  </BetButton>
                 </div>
               </form>
             </FormProvider>
-            <div className="w-full flex lg:hidden mt-4">
-              <BetSetting betSetting={betSetting} setBetSetting={setBetSetting} />
+            <div className="w-full flex lg:hidden">
+              <BetSetting
+                betSetting={betSetting}
+                setBetSetting={setBetSetting}
+              />
             </div>
           </div>
         </>
