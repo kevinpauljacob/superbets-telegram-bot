@@ -66,16 +66,16 @@ export default function BalanceModal() {
         handleClose();
       }}
       id="modal-bg"
-      className="absolute z-[150] left-0 top-0 flex h-full w-full items-start pt-[11rem] justify-center bg-[#33314680] backdrop-blur-[0px] transition-all"
+      className="absolute z-[150] left-0 top-0 flex h-full w-full items-center justify-center bg-[#33314680] backdrop-blur-[0px] transition-all"
     >
-      <div
-        id="modal-box"
-        className="relative flex w-[95%] max-w-[30rem] flex-col rounded-md bg-[#121418] p-7"
-      >
-        <div
-          className="flex items-center w-full mb-7 gap-2 mt-2"
-        >
-          <Image src={"/assets/wallet_color.png"} alt="" width={24} height={24} />
+      <div className="relative bg-[#121418] -mt-16 md:mt-0 max-h-[80vh] no-scrollbar overflow-y-scroll p-8 rounded-lg z-10 w-11/12 sm:w-[34rem]">
+        <div className="flex items-center w-full mb-7 gap-2 mt-2">
+          <Image
+            src={"/assets/wallet_color.png"}
+            alt=""
+            width={24}
+            height={24}
+          />
           <span className=" text-[1.5rem] leading-5 mt-1 font-changa font-black text-[#e7e7e7]">
             Wallet
           </span>
@@ -144,7 +144,7 @@ export default function BalanceModal() {
                     {actionType} amount
                   </label>
                   <span className="font-changa font-medium text-sm text-[#94A3B8] text-opacity-90">
-                  {(coinData ? coinData[0]?.amount : 0).toFixed(3)} $SOL
+                    {(coinData ? coinData[0]?.amount : 0).toFixed(3)} $SOL
                   </span>
                 </div>
 
@@ -164,7 +164,7 @@ export default function BalanceModal() {
                     value={amount}
                     className={`flex w-full min-w-0 bg-transparent text-sm text-[#94A3B8] placeholder-[#94A3B8]  placeholder-opacity-40 outline-none`}
                   />
-                    <span
+                  <span
                     className="text-xs font-medium text-white text-opacity-50 bg-[#292C32] hover:bg-[#47484A] focus:bg-[#47484A] transition-all rounded-[5px] mr-2 py-1.5 px-4"
                     onClick={() =>
                       setAmount(coinData ? coinData[0]?.amount / 2 : 0)

@@ -273,7 +273,7 @@ export const Table: React.FC<TableProps> = ({
     setVerifyModalData,
   } = useGlobalContext();
   return (
-    <div className="flex w-full flex-col pb-10">
+    <div className="flex w-full flex-col pb-[10rem] lg:pb-10">
       <TableButtons all={all} setAll={setAll} />
       <div className="scrollbar mt-8 w-full md:overflow-x-auto pb-8">
         <div className="flex w-full md:min-w-[50rem] flex-col items-center">
