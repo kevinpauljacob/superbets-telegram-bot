@@ -124,7 +124,9 @@ export default function Flip() {
                 );
               }
               // update profit / loss
-              setAutoBetProfit(autoBetProfit + (win ? 1 : -1) * betAmt);
+              setAutoBetProfit(
+                autoBetProfit + (win ? 2 * (1 - houseEdge) - 1 : -1) * betAmt,
+              );
               // update count
               if (typeof autoBetCount === "number")
                 setAutoBetCount(autoBetCount - 1);
