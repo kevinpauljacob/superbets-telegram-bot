@@ -310,7 +310,7 @@ export default function Wheel() {
     <GameLayout title="FOMO - Wheel">
       <GameOptions>
         <>
-          <div className="relative w-full flex md:hidden mb-5">
+          <div className="relative w-full flex lg:hidden mb-[1.4rem]">
             {startAuto && (
               <div
                 onClick={() => {
@@ -437,7 +437,7 @@ export default function Wheel() {
                   </div>
                 )}
 
-                <div className="relative w-full hidden md:flex mt-2">
+                <div className="relative w-full hidden lg:flex mt-2">
                   {startAuto && (
                     <div
                       onClick={() => {
@@ -467,7 +467,7 @@ export default function Wheel() {
                 </div>
               </form>
             </FormProvider>
-            <div className="w-full flex lg:hidden md:mt-4">
+            <div className="w-full flex lg:hidden">
               <BetSetting betSetting={betType} setBetSetting={setBetType} />
             </div>
           </div>

@@ -343,7 +343,7 @@ export default function Keno() {
     <GameLayout title="FOMO - Keno">
       <GameOptions>
         <>
-          <div className="relative w-full flex lg:hidden mb-5">
+          <div className="relative w-full flex lg:hidden mb-[1.4rem]">
             {startAuto && (
               <div
                 onClick={() => {
@@ -371,12 +371,14 @@ export default function Keno() {
               {isRolling ? <Loader /> : "BET"}
             </BetButton>
           </div>
-          <div className="flex lg:hidden w-full flex-row gap-3 mb-5">
+          <div className="flex lg:hidden w-full flex-row gap-3 mb-[1.4rem]">
             <Autopick />
           </div>
-          <div className="w-full flex lg:hidden">
-            <ConfigureAutoButton />
-          </div>
+          {betType === "auto" && (
+            <div className="w-full flex lg:hidden">
+              <ConfigureAutoButton />
+            </div>
+          )}
           <div className="w-full hidden lg:flex">
             <BetSetting betSetting={betType} setBetSetting={setBetType} />
           </div>
@@ -397,7 +399,7 @@ export default function Keno() {
                   leastMultiplier={leastMultiplier}
                   game="keno"
                 />
-                <div className="mb-6 w-full">
+                <div className="mb-[1.4rem] w-full">
                   <div className="flex justify-between text-xs mb-2">
                     <p className="font-medium font-changa text-[#F0F0F0] text-opacity-90">
                       Risk
@@ -447,7 +449,7 @@ export default function Keno() {
                   </div>
                 </div>
 
-                <div className="hidden lg:flex w-full flex-row gap-3 mb-5">
+                <div className="hidden lg:flex w-full flex-row gap-3 mb-[1.4rem]">
                   <Autopick />
                 </div>
 
@@ -511,7 +513,7 @@ export default function Keno() {
             ) : null}
           </div>
         </div>
-        <div className="flex justify-center items-center w-full mb-5 sm:my-5">
+        <div className="flex justify-center items-center w-full mb-[1.4rem] sm:my-5">
           <div className="grid grid-cols-8 gap-2 text-white text-sm md:text-xl font-chakra">
             {Array.from({ length: 40 }, (_, index) => index + 1).map(
               (number) => (

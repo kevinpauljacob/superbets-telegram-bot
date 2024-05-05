@@ -51,7 +51,7 @@ function Balance() {
               <Loader />
             ) : coinData ? (
               <div className="flex w-full flex-col">
-                <div className="mb-5 mt-5 hidden w-full items-center gap-2 px-14 font-changa text-[#f0f0f0] text-opacity-50 md:flex">
+                <div className="mb-[1.4rem] mt-5 hidden w-full items-center gap-2 px-14 font-changa text-[#f0f0f0] text-opacity-50 md:flex">
                   <span className="flex w-[16%]">Coin</span>
                   <span className="flex flex-1">Wallet Balance</span>
                   <span className="flex basis-[30%]">Actions</span>

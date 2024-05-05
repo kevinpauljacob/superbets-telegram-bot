@@ -3,6 +3,7 @@ import { useForm } from "react-hook-form";
 import { useGlobalContext } from "../GlobalContext";
 import { GameType } from "@/utils/provably-fair";
 import { maxPayouts } from "@/context/transactions";
+import BalanceAlert from "./BalanceAlert";
 
 export default function BetAmount({
   betAmt,
@@ -107,7 +108,7 @@ export default function BetAmount({
   };
 
   return (
-    <div className="flex w-full flex-col">
+    <div className="flex w-full flex-col mb-[1.4rem]">
       <div className="mb-1 flex w-full items-center justify-between text-xs font-changa text-opacity-90">
         <label className="text-white/90 font-changa">Bet Amount</label>
         <span
@@ -248,6 +249,7 @@ export default function BetAmount({
           </div>
         </div>
       ) : null}
+      <BalanceAlert />
     </div>
   );
 }

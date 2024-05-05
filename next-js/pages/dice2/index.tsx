@@ -316,7 +316,7 @@ export default function Dice2() {
     <GameLayout title="FOMO - Dice 2">
       <GameOptions>
         <>
-          <div className="relative w-full flex md:hidden mb-5">
+          <div className="relative w-full flex lg:hidden mb-[1.4rem]">
             {startAuto && (
               <div
                 onClick={() => {
@@ -344,9 +344,11 @@ export default function Dice2() {
               {isRolling ? <Loader /> : "BET"}
             </BetButton>
           </div>
-          <div className="w-full flex lg:hidden">
-            <ConfigureAutoButton />
-          </div>
+          {betType === "auto" && (
+            <div className="w-full flex lg:hidden">
+              <ConfigureAutoButton />
+            </div>
+          )}
           <div className="w-full hidden lg:flex">
             <BetSetting betSetting={betType} setBetSetting={setBetType} />
           </div>
@@ -379,7 +381,7 @@ export default function Dice2() {
                   </div>
                 )}
 
-                <div className="relative w-full hidden md:flex mt-2">
+                <div className="relative w-full hidden lg:flex mt-2">
                   {startAuto && (
                     <div
                       onClick={() => {
@@ -409,7 +411,7 @@ export default function Dice2() {
                 </div>
               </form>
             </FormProvider>
-            <div className="w-full flex lg:hidden md:mt-4">
+            <div className="w-full flex lg:hidden">
               <BetSetting betSetting={betType} setBetSetting={setBetType} />
             </div>
           </div>
@@ -436,7 +438,7 @@ export default function Dice2() {
             draggable={startAuto || isRolling ? false : true}
           />
         </div>
-        <div className="flex px-0 xl:px-4 mb-0 md:mb-5 gap-4 flex-row w-full justify-between">
+        <div className="flex px-0 xl:px-4 mb-0 md:mb-[1.4rem] gap-4 flex-row w-full justify-between">
           {coinData && coinData[0].amount > 0.0001 && (
             <>
               <div className="flex flex-col w-full">

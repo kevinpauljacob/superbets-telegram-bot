@@ -36,7 +36,7 @@ export const GameFooterInfo: React.FC<GameFooterProps> = ({
 }) => {
   const { coinData, setShowWalletModal, houseEdge } = useGlobalContext();
   return (
-    <div className="flex px-0 xl:px-4 mb-0 md:mb-5 gap-4 flex-row w-full justify-between">
+    <div className="flex px-0 xl:px-4 mb-0 md:mb-[1.4rem] gap-4 flex-row w-full justify-between">
       {coinData && coinData[0].amount > 0.0001 && (
         <>
           {multiplier !== undefined ? (
