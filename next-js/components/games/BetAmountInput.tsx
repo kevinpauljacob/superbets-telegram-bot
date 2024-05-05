@@ -3,6 +3,7 @@ import { useForm } from "react-hook-form";
 import { useGlobalContext } from "../GlobalContext";
 import { GameType } from "@/utils/provably-fair";
 import { maxPayouts } from "@/context/transactions";
+import BalanceAlert from "./BalanceAlert";
 
 export default function BetAmount({
   betAmt,
@@ -107,7 +108,7 @@ export default function BetAmount({
   };
 
   return (
-    <div className="flex w-full flex-col">
+    <div className="flex w-full flex-col mb-[1.4rem]">
       <div className="mb-1 flex w-full items-center justify-between text-xs font-changa text-opacity-90">
         <label className="text-white/90 font-changa">Bet Amount</label>
         <span
@@ -187,7 +188,7 @@ export default function BetAmount({
           : "NONE"}
       </span>
       {betAmountsModal && game !== "keno" && game !== "wheel" ? (
-        <div className="fadeInDown relative flex items-center gap-3 bg-[#0C0F16] rounded-[5px] p-2 mb-4 mt-2 h-[69px]">
+        <div className="fadeInDown relative flex items-center gap-3 bg-[#0C0F16] rounded-[5px] p-2 mt-2 h-[69px]">
           <div className="flex items-center border-r border-white/10 h-11 w-[80%] pl-6 pr-8">
             <div className="relative h-[4px] rounded-full bg-[#2A2E38] w-full">
               <input
@@ -235,7 +236,7 @@ export default function BetAmount({
         </div>
       ) : null}
       {betAmountsModal && (game === "keno" || game === "wheel") ? (
-        <div className="fadeInDown relative flex items-center gap-3 bg-[#0C0F16] rounded-[5px] p-2 mb-4 mt-2">
+        <div className="fadeInDown relative flex items-center gap-3 bg-[#0C0F16] rounded-[5px] p-2 mt-2">
           <div className="flex items-center border-r border-white/10 text-[#94A3B8] text-chakra text-[11px] font-medium h-11 w-[80%] p-6">
             The more you stake, the less fees you pay and the bigger your points
             multiplier
@@ -248,6 +249,7 @@ export default function BetAmount({
           </div>
         </div>
       ) : null}
+      <BalanceAlert />
     </div>
   );
 }

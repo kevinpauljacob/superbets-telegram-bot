@@ -345,7 +345,7 @@ export default function Dice() {
     <GameLayout title="FOMO - Dice">
       <GameOptions>
         <>
-          <div className="w-full relative flex md:hidden mb-5">
+          <div className="w-full relative flex lg:hidden mb-[1.4rem]">
             {selectedFace.length === 0 && (
               <div
                 onClick={handleBlink}
@@ -380,7 +380,14 @@ export default function Dice() {
               {isRolling ? <Loader /> : "BET"}
             </BetButton>
           </div>
-          <BetSetting betSetting={rollType} setBetSetting={setRollType} />
+          {rollType === "auto" && (
+            <div className="w-full flex lg:hidden">
+              <ConfigureAutoButton />
+            </div>
+          )}
+          <div className="w-full hidden lg:flex">
+            <BetSetting betSetting={rollType} setBetSetting={setRollType} />
+          </div>
           <div className="w-full flex flex-col">
             <FormProvider {...methods}>
               <form
@@ -409,7 +416,7 @@ export default function Dice() {
                     </div>
                   </div>
                 )}
-                <div className="w-full relative hidden md:flex mt-2">
+                <div className="w-full relative hidden lg:flex">
                   {selectedFace.length === 0 && (
                     <div
                       onClick={handleBlink}
@@ -446,6 +453,9 @@ export default function Dice() {
                 </div>
               </form>
             </FormProvider>
+            <div className="w-full flex lg:hidden">
+              <BetSetting betSetting={rollType} setBetSetting={setRollType} />
+            </div>
           </div>
         </>
       </GameOptions>
@@ -590,8 +600,7 @@ export default function Dice() {
         </>
       </GameDisplay>
       <GameTable>
-        {/* <HistoryTable refresh={refresh} /> */}
-        <Bets refresh={refresh} game={"dice"} />
+        <Bets refresh={refresh} />
       </GameTable>
     </GameLayout>
   );

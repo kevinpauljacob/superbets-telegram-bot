@@ -9,7 +9,7 @@ interface StoreCardProps {
 
 export default function StoreCard({ src, name, points }: StoreCardProps) {
   return (
-    <div className="bg-[#171717] rounded-md w-full mb-5">
+    <div className="bg-[#171717] rounded-md w-full mb-[1.4rem]">
       <div>
         <Image
           className="rounded-md w-full"

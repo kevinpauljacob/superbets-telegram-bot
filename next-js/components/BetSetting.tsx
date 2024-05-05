@@ -6,7 +6,7 @@ export default function BetSetting({
   setBetSetting: any;
 }) {
   return (
-    <div className="w-full flex md:mb-6">
+    <div className="w-full flex lg:mb-6">
       <button
         className={`w-full border-2 hover:duration-75 rounded-md py-2 mr-1 text-white font-semibold text-sm transition duration-300 ease-in-out ${
           betSetting === "manual"
