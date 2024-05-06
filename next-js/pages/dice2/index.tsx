@@ -24,6 +24,7 @@ import { loopSound, soundAlert } from "@/utils/soundUtils";
 import Bets from "../../components/games/Bets";
 import ConfigureAutoButton from "@/components/ConfigureAutoButton";
 import AutoCount from "@/components/AutoCount";
+import ProfitBox from "@/components/ProfitBox";
 
 export default function Dice2() {
   const wallet = useWallet();
@@ -369,6 +370,7 @@ export default function Dice2() {
                   leastMultiplier={1}
                   game="dice2"
                 />
+                <ProfitBox amount={betAmt} multiplier={multiplier} />
                 {betType === "manual" ? (
                   <></>
                 ) : (
@@ -508,7 +510,6 @@ export default function Dice2() {
               )}
             </>
           )}
-
           {!coinData ||
             (coinData[0].amount < 0.0001 && (
               <div className="w-full rounded-lg bg-[#d9d9d90d] bg-opacity-10 flex items-center px-3 py-3 text-white md:px-6">

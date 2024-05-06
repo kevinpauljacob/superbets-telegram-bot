@@ -330,7 +330,9 @@ export const OpenSidebar = ({
                     key={index}
                     onClick={() => toggleCasinoToken(index)}
                     className={`${
-                      router.pathname.includes(token.link) ? "bg-white/10" : "hover:bg-[#191a1d]"
+                      router.pathname === token.link
+                        ? "bg-white/10"
+                        : "hover:bg-[#191a1d]"
                     } group flex transition-all items-center rounded-md p-2 pl-12 gap-2`}
                   >
                     {/* <Image src={token.src} alt="" width={15} height={15} /> */}

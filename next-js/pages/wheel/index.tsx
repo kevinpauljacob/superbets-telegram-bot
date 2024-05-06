@@ -24,6 +24,7 @@ import Bets from "../../components/games/Bets";
 import { soundAlert } from "@/utils/soundUtils";
 import ConfigureAutoButton from "@/components/ConfigureAutoButton";
 import AutoCount from "@/components/AutoCount";
+import ProfitBox from "@/components/ProfitBox";
 
 export default function Wheel() {
   const wallet = useWallet();
@@ -361,6 +362,9 @@ export default function Wheel() {
                   leastMultiplier={minMultiplier}
                   game="wheel"
                 />
+                <div className="mb-4">
+                  <ProfitBox multiplier={maxMultiplier} amount={userInput!} />
+                </div>
                 <div className="mb-6 w-full">
                   <div className="flex justify-between text-xs mb-2">
                     <p className="font-medium font-changa text-[#F0F0F0] text-opacity-90">
