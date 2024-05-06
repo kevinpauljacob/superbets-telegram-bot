@@ -177,18 +177,6 @@ export const OpenSidebar = ({
       link: "",
       active: false,
     },
-    {
-      src: "",
-      token: "$JUP",
-      link: "",
-      active: false,
-    },
-    {
-      src: "",
-      token: "$USDT",
-      link: "",
-      active: false,
-    },
   ]);
 
   const [casinoGames, setCasinoGames] = useState<Game[]>([
