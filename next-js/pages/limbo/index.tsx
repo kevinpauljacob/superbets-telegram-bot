@@ -447,9 +447,9 @@ export default function Limbo() {
                 </span>
                 <span className="bg-[#202329] font-chakra text-xs text-white rounded-md px-2 md:px-5 py-3">
                   {betAmt && inputMultiplier
-                    ? (
-                        betAmt *
-                        (inputMultiplier * (1 - houseEdge) - 1)
+                    ? Math.max(
+                        0,
+                        betAmt * (inputMultiplier * (1 - houseEdge) - 1),
                       ).toFixed(4)
                     : 0.0}{" "}
                   $SOL
