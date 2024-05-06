@@ -123,6 +123,7 @@ export default function Keno() {
       await new Promise((resolve) => setTimeout(resolve, 100));
 
       setChosenNumbers((prevNumbers) => [...prevNumbers, randomNumber]);
+      soundAlert("/sounds/betbutton.wav");
       randomNumbers.push(randomNumber);
       ++randomCount;
     }
@@ -521,7 +522,10 @@ export default function Keno() {
               (number) => (
                 <div
                   key={number}
-                  onClick={() => handleChosenNumber(number)}
+                  onClick={() => {
+                    handleChosenNumber(number);
+                    soundAlert("/sounds/betbutton.wav");
+                  }}
                   className={`flex items-center justify-center cursor-pointer ${
                     !isRolling &&
                     strikeNumbers.length === 0 &&
