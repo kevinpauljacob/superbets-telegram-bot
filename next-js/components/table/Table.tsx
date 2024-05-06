@@ -1,5 +1,5 @@
 import { useWallet } from "@solana/wallet-adapter-react";
-import { ReactNode, useEffect, useRef } from "react";
+import { ReactNode } from "react";
 import toast from "react-hot-toast";
 import BetRow from "../games/BetRow";
 import { useGlobalContext } from "../GlobalContext";
@@ -278,18 +278,12 @@ export const Table: React.FC<TableProps> = ({
     setVerifyModalData,
   } = useGlobalContext();
 
-  const containerRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (containerRef.current) {
-      containerRef.current.style.height = `${containerRef.current.scrollHeight}px`;
-    }
-  }, [loading]);
-
   return (
     <div
-      className="flex w-full flex-col pb-[10rem] lg:pb-10"
-      ref={containerRef}
+      className={
+        "flex w-full flex-col pb-[10rem] lg:pb-10" +
+        (loading ? " h-[50rem]" : "")
+      }
     >
       <TableButtons all={all} setAll={setAll} />
       {loading ? (
