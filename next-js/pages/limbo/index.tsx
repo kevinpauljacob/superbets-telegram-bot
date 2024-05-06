@@ -25,6 +25,8 @@ import BalanceAlert from "@/components/games/BalanceAlert";
 import showInfoToast from "@/components/games/toasts/toasts";
 import Link from "next/link";
 import { soundAlert } from "@/utils/soundUtils";
+import ConfigureAutoButton from "@/components/ConfigureAutoButton";
+import AutoCount from "@/components/AutoCount";
 
 function useInterval(callback: Function, delay: number | null) {
   const savedCallback = useRef<Function | null>(null);
@@ -71,6 +73,8 @@ export default function Limbo() {
     setAutoBetProfit,
     useAutoConfig,
     setUseAutoConfig,
+    houseEdge,
+    maxBetAmt,
   } = useGlobalContext();
 
   const multiplierLimits = [1.02, 50];
@@ -141,7 +145,8 @@ export default function Limbo() {
             }
             // update profit / loss
             setAutoBetProfit(
-              autoBetProfit + (win ? multiplier - 1 : -1) * betAmt,
+              autoBetProfit +
+                (win ? multiplier * (1 - houseEdge) - 1 : -1) * betAmt,
             );
             // update count
             if (typeof autoBetCount === "number")
@@ -276,7 +281,7 @@ export default function Limbo() {
     <GameLayout title="FOMO - Limbo">
       <GameOptions>
         <>
-          <div className="flex md:hidden flex-col w-full gap-4 mb-5">
+          <div className="flex lg:hidden flex-col w-full gap-4 mb-[1.4rem]">
             {startAuto && (
               <div
                 onClick={() => {
@@ -290,7 +295,11 @@ export default function Limbo() {
             )}
             <BetButton
               disabled={
-                loading || (coinData && coinData[0].amount < 0.0001)
+                loading ||
+                (coinData && coinData[0].amount < 0.0001) ||
+                (betAmt !== undefined &&
+                  maxBetAmt !== undefined &&
+                  betAmt > maxBetAmt)
                   ? true
                   : false
               }
@@ -299,7 +308,14 @@ export default function Limbo() {
               {loading ? <Loader /> : "BET"}
             </BetButton>
           </div>
-          <BetSetting betSetting={betSetting} setBetSetting={setBetSetting} />
+          {betSetting === "auto" && (
+            <div className="w-full flex lg:hidden">
+              <ConfigureAutoButton />
+            </div>
+          )}
+          <div className="w-full hidden lg:flex">
+            <BetSetting betSetting={betSetting} setBetSetting={setBetSetting} />
+          </div>
 
           <div className="w-full flex flex-col">
             <FormProvider {...methods}>
@@ -309,91 +325,31 @@ export default function Limbo() {
                 onSubmit={methods.handleSubmit(onSubmit)}
               >
                 {/* amt input  */}
-                <BetAmount betAmt={userInput} setBetAmt={setUserInput} />
+                <BetAmount
+                  betAmt={userInput}
+                  setBetAmt={setUserInput}
+                  currentMultiplier={inputMultiplier}
+                  leastMultiplier={1.02}
+                  game="limbo"
+                />
 
                 {betSetting == "manual" ? (
                   <></>
                 ) : (
-                  <>
-                    <div className="w-full flex flex-row items-end gap-3">
-                      <div className="mb-0 flex w-full flex-col">
-                        <div className="mb-1 flex w-full items-center justify-between text-xs font-changa text-opacity-90">
-                          <label className="text-white/90 font-changa">
-                            Number of Bets
-                          </label>
-                        </div>
-
-                        <div
-                          className={`group flex h-11 w-full cursor-pointer items-center rounded-[8px] bg-[#202329] px-4`}
-                        >
-                          <input
-                            id={"count-input"}
-                            {...methods.register("betCount", {
-                              required: "Bet count is required",
-                            })}
-                            type={"number"}
-                            step={"any"}
-                            autoComplete="off"
-                            onChange={handleCountChange}
-                            placeholder={
-                              autoBetCount.toString().includes("inf")
-                                ? "Infinity"
-                                : "00"
-                            }
-                            disabled={startAuto || loading}
-                            value={autoBetCount}
-                            className={`flex w-full min-w-0 bg-transparent text-base text-[#94A3B8] placeholder-[#94A3B8] font-chakra ${
-                              autoBetCount.toString().includes("inf")
-                                ? "placeholder-opacity-100"
-                                : "placeholder-opacity-40"
-                            } placeholder-opacity-40 outline-none`}
-                          />
-                          <span
-                            className={`text-2xl font-medium text-white text-opacity-50 ${
-                              autoBetCount.toString().includes("inf")
-                                ? "bg-[#47484A]"
-                                : "bg-[#292C32]"
-                            } hover:bg-[#47484A] focus:bg-[#47484A] transition-all rounded-[5px] py-0.5 px-3`}
-                            onClick={() => setAutoBetCount("inf")}
-                          >
-                            <BsInfinity />
-                          </span>
-                        </div>
-
-                        <span
-                          className={`${
-                            methods.formState.errors["amount"]
-                              ? "opacity-100"
-                              : "opacity-0"
-                          } mt-1.5 flex items-center gap-1 text-xs text-[#D92828]`}
-                        >
-                          {methods.formState.errors["amount"]
-                            ? methods.formState.errors[
-                                "amount"
-                              ]!.message!.toString()
-                            : "NONE"}
-                        </span>
-                      </div>
-                      <div
-                        onClick={() => {
-                          setShowAutoModal(true);
-                        }}
-                        className="relative mb-[1.4rem] rounded-md w-full h-11 flex items-center justify-center opacity-75 cursor-pointer font-sans font-medium text-sm text-white text-opacity-90 border-2 border-white bg-white bg-opacity-0 hover:bg-opacity-5"
-                      >
-                        Configure Auto
-                        <div
-                          className={`${
-                            useAutoConfig ? "bg-fomo-green" : "bg-fomo-red"
-                          } absolute top-0 right-0 m-1.5 bg-fomo-green w-2 h-2 rounded-full`}
-                        />
-                      </div>
+                  <div className="w-full flex flex-row items-end gap-3">
+                    <AutoCount
+                      loading={flipping || startAuto}
+                      onChange={handleCountChange}
+                    />
+                    <div className="w-full hidden lg:flex">
+                      <ConfigureAutoButton />
                     </div>
-                  </>
+                  </div>
                 )}
                 {/* balance alert  */}
-                <BalanceAlert />
+                {/* <BalanceAlert /> */}
 
-                <div className="relative w-full hidden md:flex mt-2">
+                <div className="relative w-full hidden lg:flex">
                   {startAuto && (
                     <div
                       onClick={() => {
@@ -407,7 +363,11 @@ export default function Limbo() {
                   )}
                   <BetButton
                     disabled={
-                      loading || (coinData && coinData[0].amount < 0.0001)
+                      loading ||
+                      (coinData && coinData[0].amount < 0.0001) ||
+                      (betAmt !== undefined &&
+                        maxBetAmt !== undefined &&
+                        betAmt > maxBetAmt)
                         ? true
                         : false
                     }
@@ -419,6 +379,12 @@ export default function Limbo() {
               </form>
               {/* choosing bet options  */}
             </FormProvider>
+            <div className="w-full flex lg:hidden">
+              <BetSetting
+                betSetting={betSetting}
+                setBetSetting={setBetSetting}
+              />
+            </div>
           </div>
         </>
       </GameOptions>
@@ -452,7 +418,7 @@ export default function Limbo() {
           </div>
         </div>
 
-        <div className="flex px-0 xl:px-4 mb-0 md:mb-5 gap-4 flex-row w-full justify-between">
+        <div className="flex px-0 xl:px-4 mb-0 md:mb-[1.4rem] gap-4 flex-row w-full justify-between">
           {coinData && coinData[0].amount > 0.0001 && (
             <>
               <div className="flex flex-col w-full">
@@ -477,11 +443,14 @@ export default function Limbo() {
 
               <div className="flex flex-col w-full">
                 <span className="text-[#F0F0F0] font-changa font-sembiold text-xs mb-1">
-                  Winning
+                  Profit
                 </span>
                 <span className="bg-[#202329] font-chakra text-xs text-white rounded-md px-2 md:px-5 py-3">
                   {betAmt && inputMultiplier
-                    ? (inputMultiplier * betAmt).toFixed(4)
+                    ? Math.max(
+                        0,
+                        betAmt * (inputMultiplier * (1 - houseEdge) - 1),
+                      ).toFixed(4)
                     : 0.0}{" "}
                   $SOL
                 </span>
@@ -515,8 +484,7 @@ export default function Limbo() {
         </div>
       </GameDisplay>
       <GameTable>
-        {/* <HistoryTable refresh={refresh} /> */}
-        <Bets refresh={refresh} game={"limbo"}/>
+        <Bets refresh={refresh} />
       </GameTable>
     </GameLayout>
   );

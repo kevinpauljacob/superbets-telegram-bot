@@ -3,6 +3,8 @@ import { ReactNode } from "react";
 import toast from "react-hot-toast";
 import BetRow from "../games/BetRow";
 import { useGlobalContext } from "../GlobalContext";
+import { FaChevronLeft, FaChevronRight } from "react-icons/fa6";
+import Loader from "../games/Loader";
 
 interface PaginationProps {
   page: number;
@@ -10,68 +12,162 @@ interface PaginationProps {
   bets: any[];
   maxPages: number;
 }
+
 export const TablePagination: React.FC<PaginationProps> = ({
   page,
   setPage,
   bets,
   maxPages,
 }) => {
+  const renderPageNumbers = () => {
+    const visiblePages = 3;
+    const currentPage = page;
+
+    if (maxPages < 7)
+      return [...Array(maxPages - visiblePages - 1)].map((_, i) => {
+        const pageNumber = i + 3;
+        return (
+          <button
+            key={i}
+            onClick={() => setPage(pageNumber)}
+            className={`${
+              currentPage === pageNumber ? "text-opacity-75" : "text-opacity-50"
+            } text-[#F0F0F0] transition-all cursor-pointer`}
+          >
+            {pageNumber}
+          </button>
+        );
+      });
+
+    if (currentPage <= visiblePages) {
+      return [...Array(visiblePages)].map((_, i) => {
+        const pageNumber = i + 3;
+        return (
+          <button
+            key={i}
+            onClick={() => setPage(pageNumber)}
+            className={`${
+              currentPage === pageNumber ? "text-opacity-75" : "text-opacity-50"
+            } text-[#F0F0F0] transition-all cursor-pointer`}
+          >
+            {pageNumber}
+          </button>
+        );
+      });
+    }
+
+    if (currentPage >= maxPages - 2) {
+      return [...Array(visiblePages)].map((_, i) => {
+        const pageNumber = maxPages - 4 + i;
+        return (
+          <button
+            key={i}
+            onClick={() => setPage(pageNumber)}
+            className={`${
+              currentPage === pageNumber ? "text-opacity-75" : "text-opacity-50"
+            } text-[#F0F0F0] transition-all cursor-pointer`}
+          >
+            {pageNumber}
+          </button>
+        );
+      });
+    }
+
+    const middlePage = Math.floor(visiblePages / 2);
+    const startPage = currentPage - middlePage;
+    const endPage = currentPage + middlePage;
+    return [...Array(visiblePages)].map((_, i) => {
+      const pageNumber = startPage + i;
+      return (
+        <button
+          key={i}
+          onClick={() => setPage(pageNumber)}
+          className={`${
+            currentPage === pageNumber ? "text-opacity-75" : "text-opacity-50"
+          } text-[#F0F0F0] transition-all cursor-pointer`}
+        >
+          {pageNumber}
+        </button>
+      );
+    });
+  };
+
   return (
-    <div className="mb-8 mt-4 flex w-full cursor-pointer items-center justify-center gap-6 font-changa">
-      <span
+    <div className="pb-5 mt-4 flex w-full cursor-pointer items-center justify-center gap-6 font-changa">
+      <button
         onClick={() => {
           if (page > 1) setPage(page - 1);
         }}
-        className="cursor-pointer text-[#F0F0F0]"
+        className={`cursor-pointer text-[#F0F0F0] ${
+          page > 1 ? "" : "opacity-50 pointer-events-none"
+        }`}
       >
-        &lt;
-      </span>
-      {bets &&
-        bets.length > 0 &&
-        [...Array(maxPages)]
-          .map((_, i) => ++i)
-          .slice(0, 3)
-          .map((i, index) => (
-            <span
-              key={index}
+        <FaChevronLeft />
+      </button>
+      {bets && bets.length > 0 && (
+        <>
+          <button
+            onClick={() => setPage(1)}
+            className={`${
+              page === 1 ? "text-opacity-75" : "text-opacity-50"
+            } text-[#F0F0F0] transition-all cursor-pointer`}
+          >
+            1
+          </button>
+          {maxPages > 1 && (
+            <button
               onClick={() => {
-                setPage(i);
+                (page === 1 || page === 2 || page === 3) && setPage(1);
               }}
               className={`${
-                page === i ? "text-opacity-75" : "text-opacity-50"
-              } text-[#F0F0F0] transition-all`}
+                page === 2 ? "text-opacity-75" : "text-opacity-50"
+              } text-[#F0F0F0] transition-all cursor-pointer`}
             >
-              {i}
-            </span>
-          ))}
-      <span className="text-[#F0F0F0]">. . .</span>
-
-      {bets &&
-        bets.length > 0 &&
-        [...Array(maxPages)]
-          .map((_, i) => ++i)
-          .slice(maxPages - 3, maxPages)
-          .map((i, index) => (
-            <span
-              key={index}
+              {page === 2 || page === 1 || page === 3 ? "2" : ". . . "}
+            </button>
+          )}
+          {maxPages > 4 && renderPageNumbers()}
+          {maxPages > 3 && (
+            <button
               onClick={() => {
-                setPage(i);
+                (page === maxPages - 2 ||
+                  page === maxPages - 1 ||
+                  page === maxPages) &&
+                  setPage(maxPages - 1);
               }}
               className={`${
-                page === i ? "text-opacity-75" : "text-opacity-50"
-              } text-[#F0F0F0] transition-all`}
+                page === maxPages - 1 ? "text-opacity-75" : "text-opacity-50"
+              } text-[#F0F0F0] transition-all cursor-pointer`}
             >
-              {i}
-            </span>
-          ))}
-      <span
+              {page === maxPages - 2 ||
+              page === maxPages - 1 ||
+              page === maxPages
+                ? maxPages - 1
+                : ". . ."}
+            </button>
+          )}
+          {maxPages > 2 && (
+            <button
+              onClick={() => setPage(maxPages)}
+              className={`${
+                page === maxPages ? "text-opacity-75" : "text-opacity-50"
+              } text-[#F0F0F0] transition-all cursor-pointer`}
+            >
+              {maxPages}
+            </button>
+          )}
+        </>
+      )}
+      <button
         onClick={() => {
-          if (page != maxPages) setPage(page + 1);
+          if (page < maxPages) setPage(page + 1);
         }}
-        className="cursor-pointer text-[#F0F0F0]"
+        className={`cursor-pointer text-[#F0F0F0] ${
+          page < maxPages ? "" : "opacity-50 pointer-events-none"
+        }`}
       >
-        &gt;
-      </span>
+        <FaChevronRight />
+      </button>
     </div>
   );
 };
@@ -122,7 +218,7 @@ export const TableHeader = ({ all, setAll }: TableButtonProps) => {
 
   return (
     <>
-      <div className="mb-5 hidden md:flex w-full flex-row items-center gap-2 bg-[#121418] py-1 rounded-[5px]">
+      <div className="mb-[1.4rem] hidden md:flex w-full flex-row items-center gap-2 bg-[#121418] py-1 rounded-[5px]">
         {!all
           ? headers.map((header, index) => (
               <span
@@ -141,7 +237,7 @@ export const TableHeader = ({ all, setAll }: TableButtonProps) => {
               </span>
             ))}
       </div>
-      <div className="mb-5 flex md:hidden w-full flex-row items-center bg-[#121418] rounded-md py-1 gap-2">
+      <div className="mb-[1.4rem] flex md:hidden w-full flex-row items-center bg-[#121418] rounded-md py-1 gap-2">
         {smallScreenHeaders.map((header, index) => (
           <span
             key={index}
@@ -159,7 +255,9 @@ export const TableRow: React.FC<TableNodeProps> = ({ children }) => {
   return children;
 };
 
-interface TableProps extends TableButtonProps, PaginationProps {}
+interface TableProps extends TableButtonProps, PaginationProps {
+  loading: boolean;
+}
 
 export const Table: React.FC<TableProps> = ({
   all,
@@ -168,8 +266,10 @@ export const Table: React.FC<TableProps> = ({
   setPage,
   bets,
   maxPages,
+  loading,
 }) => {
   const transactionsPerPage = 10;
+
   const {
     isVerifyModalOpen: isOpen,
     setIsVerifyModalOpen: setIsOpen,
@@ -177,43 +277,58 @@ export const Table: React.FC<TableProps> = ({
     closeVerifyModal: closeModal,
     setVerifyModalData,
   } = useGlobalContext();
-  return (
-    <div className="flex w-full flex-col pb-10">
-      <TableButtons all={all} setAll={setAll} />
-      <div className="scrollbar mt-8 w-full md:overflow-x-auto pb-8">
-        <div className="flex w-full md:min-w-[50rem] flex-col items-center">
-          <TableHeader all={all} setAll={setAll} />
 
-          {bets.length ? (
-            bets
-              .slice(
-                page * transactionsPerPage - transactionsPerPage,
-                page * transactionsPerPage,
-              )
-              .map((bet, index) => (
-                <div
-                  key={index}
-                  className="mb-2.5 flex w-full flex-row items-center gap-2 rounded-[5px] bg-[#121418] py-3"
-                >
-                  <BetRow
-                    bet={bet}
-                    all={all}
-                    openModal={openModal}
-                    setVerifyModalData={setVerifyModalData}
-                  />
-                </div>
-              ))
-          ) : (
-            <span className="font-changa text-[#F0F0F080]">No Bets made.</span>
-          )}
+  return (
+    <div
+      className={
+        "flex w-full flex-col pb-[10rem] lg:pb-10" +
+        (loading ? " h-[50rem]" : "")
+      }
+    >
+      <TableButtons all={all} setAll={setAll} />
+      {loading ? (
+        <div className="h-20">
+          <Loader />
         </div>
-      </div>
-      <TablePagination
-        page={page}
-        setPage={setPage}
-        maxPages={maxPages}
-        bets={bets}
-      />
+      ) : (
+        <>
+          <div className="scrollbar mt-8 w-full pb-8">
+            <div className="flex w-full md:min-w-[50rem] flex-col items-center">
+              <TableHeader all={all} setAll={setAll} />
+              {bets.length ? (
+                bets
+                  .slice(
+                    page * transactionsPerPage - transactionsPerPage,
+                    page * transactionsPerPage,
+                  )
+                  .map((bet, index) => (
+                    <div
+                      key={index}
+                      className="mb-2.5 flex w-full flex-row items-center gap-2 rounded-[5px] bg-[#121418] py-3"
+                    >
+                      <BetRow
+                        bet={bet}
+                        all={all}
+                        openModal={openModal}
+                        setVerifyModalData={setVerifyModalData}
+                      />
+                    </div>
+                  ))
+              ) : (
+                <span className="font-changa text-[#F0F0F080]">
+                  No Bets made.
+                </span>
+              )}
+            </div>
+          </div>
+          <TablePagination
+            page={page}
+            setPage={setPage}
+            maxPages={maxPages}
+            bets={bets}
+          />
+        </>
+      )}
     </div>
   );
 };

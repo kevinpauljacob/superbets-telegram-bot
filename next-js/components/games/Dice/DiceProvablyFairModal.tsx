@@ -8,8 +8,8 @@ import { useEffect, useState } from "react";
 import { Dice } from "./VerifyDiceModal";
 import toast from "react-hot-toast";
 import { FaRegCopy } from "react-icons/fa6";
-import {MdClose} from "react-icons/md";
-import CheckPF from "@/public/assets/CheckPF.svg"
+import { MdClose } from "react-icons/md";
+import CheckPF from "@/public/assets/CheckPF.svg";
 
 export interface PFModalData {
   activeGameSeed: {
@@ -60,15 +60,15 @@ export default function RollDiceProvablyFairModal({
   }>(
     bet?.gameSeed
       ? {
-        clientSeed: bet.gameSeed?.clientSeed,
-        serverSeed: bet.gameSeed?.serverSeed ?? "",
-        nonce: bet.nonce?.toString() ?? "",
-      }
+          clientSeed: bet.gameSeed?.clientSeed,
+          serverSeed: bet.gameSeed?.serverSeed ?? "",
+          nonce: bet.nonce?.toString() ?? "",
+        }
       : {
-        clientSeed: "",
-        serverSeed: "",
-        nonce: "",
-      },
+          clientSeed: "",
+          serverSeed: "",
+          nonce: "",
+        },
   );
 
   useEffect(() => {
@@ -86,6 +86,15 @@ export default function RollDiceProvablyFairModal({
 
   const handleToggleState = (newState: "seeds" | "verify") => {
     setState(newState);
+  };
+
+  const handleClose = () => {
+    //@ts-ignore
+    document.addEventListener("click", function (event) {
+      //@ts-ignore
+      var targetId = event.target.id;
+      if (targetId && targetId === "pf-modal-bg") onClose();
+    });
   };
 
   useEffect(() => {
@@ -143,14 +152,14 @@ export default function RollDiceProvablyFairModal({
     <>
       {isOpen && (
         <div
-          // onClick={() => {
-          //   handleClose();
-          // }}
-          // id="pf-modal-bg"
+          onClick={() => {
+            handleClose();
+          }}
+          id="pf-modal-bg"
           className="absolute z-[150] left-0 top-0 flex h-full w-full items-center justify-center bg-[#33314680] backdrop-blur-[0px] transition-all"
         >
-          <div className="bg-[#121418] max-h-[80dvh] modalscrollbar overflow-y-scroll p-8 rounded-lg z-10 w-11/12 sm:w-[32rem]">
-          <div className="flex font-chakra tracking-wider text-2xl font-semibold text-[#F0F0F0] items-center justify-between">
+          <div className="bg-[#121418] max-h-[80dvh] modalscrollbar overflow-y-scroll p-8 rounded-lg z-10 w-11/12 sm:w-[32rem] -mt-[4.7rem] md:mt-0">
+            <div className="flex font-chakra tracking-wider text-2xl font-semibold text-[#F0F0F0] items-center justify-between">
               <div className="flex items-center gap-2">
                 <Image src={CheckPF} alt="" />
                 PROVABLY FAIR
@@ -167,19 +176,21 @@ export default function RollDiceProvablyFairModal({
             </div>
             <div className="w-full flex mt-8 mb-6">
               <button
-                className={`w-full border-2 hover:duration-75 rounded-md py-2 mr-1 text-white font-semibold text-sm transition duration-300 ease-in-out ${state === "seeds"
+                className={`w-full border-2 hover:duration-75 rounded-md py-2 mr-1 text-white font-semibold text-sm transition duration-300 ease-in-out ${
+                  state === "seeds"
                     ? "bg-[#d9d9d90d] border-transparent text-opacity-90"
                     : "border-[#d9d9d90d] hover:bg-[#9361d1] focus:bg-[#602E9E] text-opacity-50 hover:text-opacity-90"
-                  }`}
+                }`}
                 onClick={() => handleToggleState("seeds")}
               >
                 Seeds
               </button>
               <button
-                className={`w-full border-2 hover:duration-75 rounded-md py-2 ml-1 text-white font-semibold text-sm transition-all duration-300 ease-in-out ${state === "verify"
+                className={`w-full border-2 hover:duration-75 rounded-md py-2 ml-1 text-white font-semibold text-sm transition-all duration-300 ease-in-out ${
+                  state === "verify"
                     ? "bg-[#d9d9d90d] border-transparent text-opacity-90"
                     : "border-[#d9d9d90d] hover:bg-[#9361d1] focus:bg-[#602E9E] text-opacity-50 hover:text-opacity-90"
-                  }`}
+                }`}
                 onClick={() => handleToggleState("verify")}
               >
                 Verify
@@ -327,8 +338,9 @@ export default function RollDiceProvablyFairModal({
                                   width={50}
                                   height={50}
                                   alt=""
-                                  className={`inline-block mt-6 ${wonDiceFace === face ? "selected-face" : ""
-                                    }`}
+                                  className={`inline-block mt-6 ${
+                                    wonDiceFace === face ? "selected-face" : ""
+                                  }`}
                                 />
                               </div>
                             ),

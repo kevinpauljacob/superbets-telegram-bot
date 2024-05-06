@@ -1,6 +1,6 @@
-import { User } from "@/context/transactions";
+import { User, houseEdgeTiers, pointTiers } from "@/context/transactions";
 import { useWallet } from "@solana/wallet-adapter-react";
-import {
+import React, {
   createContext,
   useContext,
   useState,
@@ -136,6 +136,12 @@ interface GlobalContextProps {
 
   currentGame: string | null;
   setCurrentGame: (currentGame: string | null) => void;
+
+  houseEdge: number;
+  setHouseEdge: (currentGame: number) => void;
+
+  maxBetAmt: number | undefined;
+  setMaxBetAmt: React.Dispatch<React.SetStateAction<number>>;
 }
 
 const GlobalContext = createContext<GlobalContextProps | undefined>(undefined);
@@ -199,6 +205,9 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
   const [fomoPrice, setFomoPrice] = useState<number>(0);
   const [currentGame, setCurrentGame] = useState<string | null>(null);
 
+  const [houseEdge, setHouseEdge] = useState<number>(0);
+  const [maxBetAmt, setMaxBetAmt] = useState<number>(0);
+
   useEffect(() => {
     const fetchFomoPrice = async () => {
       try {
@@ -246,10 +255,15 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
         });
 
         const { success, message, user } = await res.json();
-        // console.log("User: ", user);
-        if (success) setUserData(user);
-        // else toast.error(message);
-        // getWalletBalance();
+
+        if (success) {
+          setUserData(user);
+        } else console.error(message);
+        let points = user?.points ?? 0;
+        const userTier = Object.entries(pointTiers).reduce((prev, next) => {
+          return points >= next[1]?.limit ? next : prev;
+        })[0];
+        setHouseEdge(houseEdgeTiers[parseInt(userTier)]);
       } catch (e) {
         // toast.error("Unable to fetch balance.");
         console.error(e);
@@ -397,6 +411,12 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
         setAutoBetProfit,
         useAutoConfig,
         setUseAutoConfig,
+        currentGame,
+        setCurrentGame,
+        houseEdge,
+        setHouseEdge,
+        maxBetAmt,
+        setMaxBetAmt,
         openVerifyModal,
         closeVerifyModal,
         setShowWalletModal,
@@ -406,8 +426,6 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
         getWalletBalance,
         getBalance,
         getProvablyFairData,
-        currentGame,
-        setCurrentGame
       }}
     >
       {children}

@@ -7,19 +7,19 @@ export default function StoreBanner() {
   const games = [
     {
       href: "/",
-      src: "/assets/f1game.webp",
+      src: "/assets/banners/raffle.png",
     },
     {
       href: "/",
-      src: "/assets/clrgame.webp",
+      src: "/assets/banners/leaderboard.png",
     },
     {
       href: "/",
-      src: "/assets/odrgame.webp",
+      src: "/assets/banners/staking.png",
     },
   ];
   return (
-    <div className="relative w-full flex flex-row overflow-x-auto no-scrollbar min-h-[185px] overflow-hidden">
+    <div className="relative w-full flex flex-row overflow-x-auto no-scrollbar overflow-hidden">
       {games.map((game, index) => (
         <div
           key={index}

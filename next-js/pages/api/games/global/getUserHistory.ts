@@ -30,9 +30,10 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         const nonExpired = await model
           .find(
             { wallet, "gameSeed.status": { $ne: seedStatus.EXPIRED } },
-            { "gameSeed.serverSeed": 0, createdAt: -1 },
+            { "gameSeed.serverSeed": 0 },
             { populate: { path: "gameSeed" } },
           )
+          .sort({ createdAt: -1 })
           .limit(100);
 
         const nonExpiredWithGame = nonExpired.map((record) => ({
@@ -43,9 +44,10 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         const expired = await model
           .find(
             { wallet, "gameSeed.status": seedStatus.EXPIRED },
-            { createdAt: -1 },
+            {},
             { populate: { path: "gameSeed" } },
           )
+          .sort({ createdAt: -1 })
           .limit(100);
 
         const expiredWithGame = expired.map((record) => ({

@@ -24,6 +24,10 @@ const OptionSchema = new Schema(
       enum: ["betUp", "betDown"],
       required: true,
     },
+    strikeMultiplier: {
+      type: Number,
+      required: true,
+    },
     strikePrice: {
       type: Number,
       required: false,

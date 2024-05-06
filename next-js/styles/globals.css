@@ -454,6 +454,10 @@ button.dark-bg {
   animation: fadeInDown 0.8s ease forwards;
 }
 
+.fadeInDown_04 {
+  animation: fadeInDown 0.4s ease forwards;
+}
+
 @keyframes fadeOutDown {
   0% {
     opacity: 1;
@@ -552,6 +556,14 @@ input[type="range"] {
   width: 21px; /* Set thumb width as desired */
   height: 21px; /* Set thumb height as desired */
   background-color: white;
+  cursor: pointer;
+  border-radius: 100%;
+}
+
+.maxBetsSlider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 21px; /* Set thumb width as desired */
+  height: 21px; /* Set thumb height as desired */
   cursor: pointer;
   border-radius: 100%;
 }

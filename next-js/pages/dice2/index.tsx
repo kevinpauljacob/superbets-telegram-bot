@@ -13,7 +13,6 @@ import {
   GameOptions,
   GameTable,
 } from "@/components/GameLayout";
-import HistoryTable from "@/components/games/Dice2/VerifyDice2Modal";
 import { FormProvider, useForm } from "react-hook-form";
 import { BsInfinity } from "react-icons/bs";
 import Loader from "@/components/games/Loader";
@@ -23,6 +22,9 @@ import ResultsSlider from "@/components/ResultsSlider";
 import showInfoToast from "@/components/games/toasts/toasts";
 import { loopSound, soundAlert } from "@/utils/soundUtils";
 import Bets from "../../components/games/Bets";
+import ConfigureAutoButton from "@/components/ConfigureAutoButton";
+import AutoCount from "@/components/AutoCount";
+import ProfitBox from "@/components/ProfitBox";
 
 export default function Dice2() {
   const wallet = useWallet();
@@ -46,6 +48,8 @@ export default function Dice2() {
     setAutoBetProfit,
     useAutoConfig,
     setUseAutoConfig,
+    houseEdge,
+    maxBetAmt,
   } = useGlobalContext();
   const [betAmt, setBetAmt] = useState(0);
   const [userInput, setUserInput] = useState<number | undefined>();
@@ -218,7 +222,8 @@ export default function Dice2() {
           }
           // update profit / loss
           setAutoBetProfit(
-            autoBetProfit + (win ? multiplier - 1 : -1) * betAmt,
+            autoBetProfit +
+              (win ? multiplier * (1 - houseEdge) - 1 : -1) * betAmt,
           );
           // update count
           if (typeof autoBetCount === "number")
@@ -314,7 +319,7 @@ export default function Dice2() {
     <GameLayout title="FOMO - Dice 2">
       <GameOptions>
         <>
-          <div className="relative w-full flex md:hidden mb-5">
+          <div className="relative w-full flex lg:hidden mb-[1.4rem]">
             {startAuto && (
               <div
                 onClick={() => {
@@ -330,7 +335,10 @@ export default function Dice2() {
               disabled={
                 !wallet ||
                 isRolling ||
-                (coinData && coinData[0].amount < 0.0001)
+                (coinData && coinData[0].amount < 0.0001) ||
+                (betAmt !== undefined &&
+                  maxBetAmt !== undefined &&
+                  betAmt > maxBetAmt)
                   ? true
                   : false
               }
@@ -339,7 +347,14 @@ export default function Dice2() {
               {isRolling ? <Loader /> : "BET"}
             </BetButton>
           </div>
-          <BetSetting betSetting={betType} setBetSetting={setBetType} />
+          {betType === "auto" && (
+            <div className="w-full flex lg:hidden">
+              <ConfigureAutoButton />
+            </div>
+          )}
+          <div className="w-full hidden lg:flex">
+            <BetSetting betSetting={betType} setBetSetting={setBetType} />
+          </div>
           <div className="w-full flex flex-col">
             <FormProvider {...methods}>
               <form
@@ -348,86 +363,31 @@ export default function Dice2() {
                 onSubmit={methods.handleSubmit(onSubmit)}
               >
                 {/* amt input  */}
-                <BetAmount betAmt={userInput} setBetAmt={setUserInput} />
+                <BetAmount
+                  betAmt={userInput}
+                  setBetAmt={setUserInput}
+                  currentMultiplier={multiplier}
+                  leastMultiplier={1}
+                  game="dice2"
+                />
+                <div className="mb-4">
+                  <ProfitBox amount={betAmt} multiplier={multiplier} />
+                </div>
                 {betType === "manual" ? (
                   <></>
                 ) : (
                   <div className="w-full flex flex-row items-end gap-3">
-                    <div className="mb-0 flex w-full flex-col">
-                      <div className="mb-1 flex w-full items-center justify-between text-xs font-changa text-opacity-90">
-                        <label className="text-white/90 font-medium font-changa">
-                          Number of Bets
-                        </label>
-                      </div>
-
-                      <div
-                        className={`group flex h-11 w-full cursor-pointer items-center rounded-[8px] bg-[#202329] px-4`}
-                      >
-                        <input
-                          id={"count-input"}
-                          {...methods.register("betCount", {
-                            required: "Bet count is required",
-                          })}
-                          type={"number"}
-                          step={"any"}
-                          autoComplete="off"
-                          onChange={handleCountChange}
-                          placeholder={
-                            autoBetCount.toString().includes("inf")
-                              ? "Infinity"
-                              : "00"
-                          }
-                          disabled={startAuto || isRolling}
-                          value={autoBetCount}
-                          className={`flex w-full min-w-0 bg-transparent text-base text-[#94A3B8] placeholder-[#94A3B8] font-chakra ${
-                            autoBetCount.toString().includes("inf")
-                              ? "placeholder-opacity-100"
-                              : "placeholder-opacity-40"
-                          } placeholder-opacity-40 outline-none`}
-                        />
-                        <span
-                          className={`text-2xl font-medium text-white text-opacity-50 ${
-                            autoBetCount.toString().includes("inf")
-                              ? "bg-[#47484A]"
-                              : "bg-[#292C32]"
-                          } hover:bg-[#47484A] focus:bg-[#47484A] transition-all rounded-[5px] py-0.5 px-3`}
-                          onClick={() => setAutoBetCount("inf")}
-                        >
-                          <BsInfinity />
-                        </span>
-                      </div>
-
-                      <span
-                        className={`${
-                          methods.formState.errors["amount"]
-                            ? "opacity-100"
-                            : "opacity-0"
-                        } mt-1.5 flex items-center gap-1 text-xs text-[#D92828]`}
-                      >
-                        {methods.formState.errors["amount"]
-                          ? methods.formState.errors[
-                              "amount"
-                            ]!.message!.toString()
-                          : "NONE"}
-                      </span>
-                    </div>
-                    <div
-                      onClick={() => {
-                        setShowAutoModal(true);
-                      }}
-                      className="relative mb-[1.4rem] rounded-md w-full h-11 flex items-center justify-center opacity-75 cursor-pointer font-sans font-medium text-sm text-white text-opacity-90 border-2 border-white bg-white bg-opacity-0 hover:bg-opacity-5"
-                    >
-                      Configure Auto
-                      <div
-                        className={`${
-                          useAutoConfig ? "bg-fomo-green" : "bg-fomo-red"
-                        } absolute top-0 right-0 m-1.5 bg-fomo-green w-2 h-2 rounded-full`}
-                      />
+                    <AutoCount
+                      loading={isRolling || startAuto}
+                      onChange={handleCountChange}
+                    />
+                    <div className="w-full hidden lg:flex">
+                      <ConfigureAutoButton />
                     </div>
                   </div>
                 )}
 
-                <div className="relative w-full hidden md:flex mt-2">
+                <div className="relative w-full hidden lg:flex mt-2">
                   {startAuto && (
                     <div
                       onClick={() => {
@@ -443,7 +403,10 @@ export default function Dice2() {
                     disabled={
                       !wallet ||
                       isRolling ||
-                      (coinData && coinData[0].amount < 0.0001)
+                      (coinData && coinData[0].amount < 0.0001) ||
+                      (betAmt !== undefined &&
+                        maxBetAmt !== undefined &&
+                        betAmt > maxBetAmt)
                         ? true
                         : false
                     }
@@ -454,6 +417,9 @@ export default function Dice2() {
                 </div>
               </form>
             </FormProvider>
+            <div className="w-full flex lg:hidden">
+              <BetSetting betSetting={betType} setBetSetting={setBetType} />
+            </div>
           </div>
         </>
       </GameOptions>
@@ -478,7 +444,7 @@ export default function Dice2() {
             draggable={startAuto || isRolling ? false : true}
           />
         </div>
-        <div className="flex px-0 xl:px-4 mb-0 md:mb-5 gap-4 flex-row w-full justify-between">
+        <div className="flex px-0 xl:px-4 mb-0 md:mb-[1.4rem] gap-4 flex-row w-full justify-between">
           {coinData && coinData[0].amount > 0.0001 && (
             <>
               <div className="flex flex-col w-full">
@@ -546,7 +512,6 @@ export default function Dice2() {
               )}
             </>
           )}
-
           {!coinData ||
             (coinData[0].amount < 0.0001 && (
               <div className="w-full rounded-lg bg-[#d9d9d90d] bg-opacity-10 flex items-center px-3 py-3 text-white md:px-6">
@@ -561,8 +526,7 @@ export default function Dice2() {
         </div>
       </GameDisplay>
       <GameTable>
-        {/* <HistoryTable refresh={refresh} /> */}
-        <Bets refresh={refresh} game={"dice2"}/>
+        <Bets refresh={refresh} />
       </GameTable>
     </GameLayout>
   );

@@ -22,7 +22,7 @@ import { NextApiRequest, NextApiResponse } from "next";
 
 const secret = process.env.NEXTAUTH_SECRET;
 
-const connection = new Connection(process.env.BACKEND_RPC!);
+const connection = new Connection(process.env.BACKEND_RPC!, "confirmed");
 
 let devWalletKey = Keypair.fromSecretKey(bs58.decode(process.env.DEV_KEYPAIR!));
 

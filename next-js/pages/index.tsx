@@ -63,9 +63,9 @@ export default function Home() {
           <div className="mb-7">
             <FomoPlay />
           </div>
-          <div className="mb-7">
+          {/* <div className="mb-7">
             <FomoExit />
-          </div>
+          </div> */}
         </div>
         {/* <div className="lg:ml-4">
         <FomoSupply />

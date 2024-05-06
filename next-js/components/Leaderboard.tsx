@@ -76,7 +76,7 @@ function Leaderboard() {
           <div className="flex w-full flex-col items-center">
             {/* header  */}
             {data.length > 0 && (
-              <div className="mb-5 flex w-full flex-row items-center gap-2 pr-10">
+              <div className="mb-[1.4rem] flex w-full flex-row items-center gap-2 pr-10">
                 <span className="w-[10%] text-right font-medium text-[#F0F0F080]">
                   {headers[0]}
                 </span>

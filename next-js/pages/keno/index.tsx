@@ -11,7 +11,6 @@ import {
   GameOptions,
   GameTable,
 } from "@/components/GameLayout";
-import HistoryTable from "@/components/games/Keno/VerifyKenoModal";
 import { FormProvider, useForm } from "react-hook-form";
 import { BsInfinity } from "react-icons/bs";
 import Loader from "@/components/games/Loader";
@@ -46,6 +45,8 @@ export default function Keno() {
     setAutoBetProfit,
     useAutoConfig,
     setUseAutoConfig,
+    houseEdge,
+    maxBetAmt,
   } = useGlobalContext();
   const [betAmt, setBetAmt] = useState(0);
   const [userInput, setUserInput] = useState<number | undefined>();
@@ -62,6 +63,12 @@ export default function Keno() {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
 
   const multipliers = riskToChance[risk][chosenNumbers.length];
+  let maxMultiplier = 0;
+  let leastMultiplier = 0;
+  if (multipliers && multipliers.length > 0) {
+    maxMultiplier = multipliers[multipliers.length - 1];
+    leastMultiplier = multipliers[1];
+  }
   const commonNumbers = strikeNumbers.filter((num) =>
     chosenNumbers.includes(num),
   );
@@ -116,6 +123,7 @@ export default function Keno() {
       await new Promise((resolve) => setTimeout(resolve, 100));
 
       setChosenNumbers((prevNumbers) => [...prevNumbers, randomNumber]);
+      soundAlert("/sounds/betbutton.wav");
       randomNumbers.push(randomNumber);
       ++randomCount;
     }
@@ -232,7 +240,8 @@ export default function Keno() {
           }
           // update profit / loss
           setAutoBetProfit(
-            autoBetProfit + (win ? strikeMultiplier - 1 : -1) * betAmt,
+            autoBetProfit +
+              (win ? strikeMultiplier * (1 - houseEdge) - 1 : -1) * betAmt,
           );
           // update count
           if (typeof autoBetCount === "number")
@@ -337,7 +346,7 @@ export default function Keno() {
     <GameLayout title="FOMO - Keno">
       <GameOptions>
         <>
-          <div className="relative w-full flex lg:hidden mb-5">
+          <div className="relative w-full flex lg:hidden mb-[1.4rem]">
             {startAuto && (
               <div
                 onClick={() => {
@@ -353,7 +362,10 @@ export default function Keno() {
               disabled={
                 !wallet ||
                 isRolling ||
-                (coinData && coinData[0].amount < 0.0001)
+                (coinData && coinData[0].amount < 0.0001) ||
+                (betAmt !== undefined &&
+                  maxBetAmt !== undefined &&
+                  betAmt > maxBetAmt)
                   ? true
                   : false
               }
@@ -362,12 +374,14 @@ export default function Keno() {
               {isRolling ? <Loader /> : "BET"}
             </BetButton>
           </div>
-          <div className="flex lg:hidden w-full flex-row gap-3 mb-5">
+          <div className="flex lg:hidden w-full flex-row gap-3 mb-[1.4rem]">
             <Autopick />
           </div>
-          <div className="w-full flex lg:hidden">
-            <ConfigureAutoButton />
-          </div>
+          {betType === "auto" && (
+            <div className="w-full flex lg:hidden">
+              <ConfigureAutoButton />
+            </div>
+          )}
           <div className="w-full hidden lg:flex">
             <BetSetting betSetting={betType} setBetSetting={setBetType} />
           </div>
@@ -379,14 +393,22 @@ export default function Keno() {
                 onSubmit={methods.handleSubmit(onSubmit)}
               >
                 {/* amt input  */}
-                <BetAmount betAmt={userInput} setBetAmt={setUserInput} />
-                <div className="mb-6 w-full">
+                <BetAmount
+                  betAmt={userInput}
+                  setBetAmt={setUserInput}
+                  currentMultiplier={
+                    maxMultiplier !== undefined ? maxMultiplier : 0
+                  }
+                  leastMultiplier={leastMultiplier}
+                  game="keno"
+                />
+                <div className="mb-[1.4rem] w-full">
                   <div className="flex justify-between text-xs mb-2">
                     <p className="font-medium font-changa text-[#F0F0F0] text-opacity-90">
                       Risk
                     </p>
                   </div>
-                  <div className="grid grid-cols-4 gap-3 w-full items-center rounded-[8px] text-white font-chakra text-sm font-semibold bg-[#0C0F16] p-4">
+                  <div className="grid lg:grid-cols-4 grid-cols-2 gap-3 w-full items-center rounded-[8px] text-white font-chakra text-sm font-semibold bg-[#0C0F16] p-4">
                     <div
                       onClick={() => setRisk("classic")}
                       className={`text-center w-full rounded-[5px] border-[2px] bg-[#202329] py-2 text-xs font-chakra text-white text-opacity-90 transition duration-200 ${
@@ -409,7 +431,7 @@ export default function Keno() {
                     </div>
                     <div
                       onClick={() => setRisk("medium")}
-                      className={`text-center w-full rounded-[5px] border-[2px] bg-[#202329] py-2 text-xs font-chakra text-white text-opacity-90 transition duration-200 ${
+                      className={`text-center w-full block m-auto rounded-[5px] border-[2px] bg-[#202329] py-2 text-xs font-chakra text-white text-opacity-90 transition duration-200 ${
                         risk === "medium"
                           ? "border-[#7839C5]"
                           : "border-transparent hover:border-[#7839C580]"
@@ -430,7 +452,7 @@ export default function Keno() {
                   </div>
                 </div>
 
-                <div className="hidden lg:flex w-full flex-row gap-3 mb-5">
+                <div className="hidden lg:flex w-full flex-row gap-3 mb-[1.4rem]">
                   <Autopick />
                 </div>
 
@@ -439,7 +461,7 @@ export default function Keno() {
                 ) : (
                   <div className="w-full flex flex-row items-end gap-3">
                     <AutoCount
-                      loading={isRolling}
+                      loading={isRolling || startAuto}
                       onChange={handleCountChange}
                     />
                     <div className="w-full hidden lg:flex">
@@ -464,7 +486,10 @@ export default function Keno() {
                     disabled={
                       !wallet ||
                       isRolling ||
-                      (coinData && coinData[0].amount < 0.0001)
+                      (coinData && coinData[0].amount < 0.0001) ||
+                      (betAmt !== undefined &&
+                        maxBetAmt !== undefined &&
+                        betAmt > maxBetAmt)
                         ? true
                         : false
                     }
@@ -491,13 +516,16 @@ export default function Keno() {
             ) : null}
           </div>
         </div>
-        <div className="flex justify-center items-center w-full mb-5 sm:my-5">
+        <div className="flex justify-center items-center w-full mb-[1.4rem] sm:my-5">
           <div className="grid grid-cols-8 gap-2 text-white text-sm md:text-xl font-chakra">
             {Array.from({ length: 40 }, (_, index) => index + 1).map(
               (number) => (
                 <div
                   key={number}
-                  onClick={() => handleChosenNumber(number)}
+                  onClick={() => {
+                    handleChosenNumber(number);
+                    soundAlert("/sounds/betbutton.wav");
+                  }}
                   className={`flex items-center justify-center cursor-pointer ${
                     !isRolling &&
                     strikeNumbers.length === 0 &&
@@ -615,8 +643,7 @@ export default function Keno() {
         </div>
       </GameDisplay>
       <GameTable>
-        {/* <HistoryTable refresh={refresh} /> */}
-        <Bets refresh={refresh} game={"keno"}/>
+        <Bets refresh={refresh} />
       </GameTable>
     </GameLayout>
   );

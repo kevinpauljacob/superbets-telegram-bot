@@ -24,50 +24,28 @@ const GameTable: React.FC<LayoutProps> = ({ children }) => {
 };
 
 interface GameFooterProps {
-  multiplier?: number;
-  setMultiplier?: React.Dispatch<React.SetStateAction<number>>;
+  multiplier: number;
   amount: number;
   chance?: number;
 }
 
 export const GameFooterInfo: React.FC<GameFooterProps> = ({
   multiplier,
-  setMultiplier,
   amount,
   chance,
 }) => {
-  const { coinData, setShowWalletModal } = useGlobalContext();
+  const { coinData, setShowWalletModal, houseEdge } = useGlobalContext();
   return (
-    <div className="flex px-0 xl:px-4 mb-0 md:mb-5 gap-4 flex-row w-full justify-between">
+    <div className="flex px-0 xl:px-4 mb-0 md:mb-[1.4rem] gap-4 flex-row w-full justify-between">
       {coinData && coinData[0].amount > 0.0001 && (
         <>
-          {setMultiplier ? (
-            <div className="flex flex-col w-full">
-              <span className="text-[#F0F0F0] font-changa font-semibold text-xs mb-1">
-                Multiplier
-              </span>
-              <input
-                id={"amount-input"}
-                type={"number"}
-                step={"any"}
-                autoComplete="off"
-                onChange={(e) => {
-                  setMultiplier(Math.max(1, parseFloat(e.target.value)));
-                }}
-                placeholder={"0.0"}
-                min={1}
-                value={multiplier}
-                lang="en"
-                className={`bg-[#202329] w-full min-w-0 font-chakra text-xs text-white rounded-md px-2 md:px-5 py-3 placeholder-[#94A3B8] placeholder-opacity-40 outline-none`}
-              />
-            </div>
-          ) : multiplier !== undefined ? (
+          {multiplier !== undefined ? (
             <div className="flex flex-col w-full">
               <span className="text-[#F0F0F0] font-changa font-semibold text-xs mb-1">
                 Multiplier
               </span>
               <span className="bg-[#202329] font-chakra text-xs text-white rounded-md px-2 md:px-5 py-3">
-                {multiplier.toFixed(2)}x
+                {(multiplier ?? 0).toFixed(2)}x
               </span>
             </div>
           ) : (
@@ -76,10 +54,10 @@ export const GameFooterInfo: React.FC<GameFooterProps> = ({
 
           <div className="flex flex-col w-full">
             <span className="text-[#F0F0F0] font-changa font-sembiold text-xs mb-1">
-              Winning
+              Profit
             </span>
             <span className="bg-[#202329] font-chakra text-xs text-white rounded-md px-2 md:px-5 py-3">
-              {amount.toFixed(4)} $SOL
+              {(amount * (multiplier * (1 - houseEdge) - 1)).toFixed(4)} $SOL
             </span>
           </div>
 

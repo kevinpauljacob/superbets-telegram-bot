@@ -27,7 +27,7 @@ const BetRow: React.FC<BetRowProps> = ({
         (!all ? "hover:cursor-pointer" : "")
       }
       onClick={() => {
-        // if (all) return;
+        if (all) return;
         setCurrentGame(bet.game);
         setVerifyModalData(bet);
         openModal();
@@ -39,26 +39,28 @@ const BetRow: React.FC<BetRowProps> = ({
         </span>
       )}
 
-      <span className="w-full hidden md:block text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
+      <span className="w-full md:block text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
         {Capitalize(bet.game)}
       </span>
       <span className="w-full hidden md:block text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
         {(bet.amount ?? 0).toFixed(4)}
       </span>
       <span className="w-full hidden md:block text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
-        {bet.strikeMultiplier}
+        {bet.strikeMultiplier ?? 0}
       </span>
-      <span
-        className={`w-full text-center font-changa text-sm text-opacity-75 ${
-          bet.result === "Lost"
-            ? "text-[#CF304A]"
-            : bet.result === "Won"
-            ? "text-[#03A66D]"
-            : "text-[#F0F0F0]"
-        }`}
-      >
-        {bet.amountWon?.toFixed(4)} SOL
-      </span>
+      {bet.result === "Pending" ? (
+        <span className="w-full text-center font-changa text-sm text-opacity-75 text-[#F0F0F0]">
+          Pending
+        </span>
+      ) : bet.amountWon > bet.amount ? (
+        <span className="w-full text-center font-changa text-sm text-opacity-75 text-fomo-green">
+          {bet.amountWon.toFixed(4)} SOL
+        </span>
+      ) : (
+        <span className="w-full text-center font-changa text-sm text-opacity-75 text-fomo-red">
+          {(bet.amountWon - bet.amount).toFixed(4)} SOL
+        </span>
+      )}
     </div>
   );
 };
