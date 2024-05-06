@@ -370,7 +370,9 @@ export default function Dice2() {
                   leastMultiplier={1}
                   game="dice2"
                 />
-                <ProfitBox amount={betAmt} multiplier={multiplier} />
+                <div className="mb-4">
+                  <ProfitBox amount={betAmt} multiplier={multiplier} />
+                </div>
                 {betType === "manual" ? (
                   <></>
                 ) : (
