@@ -213,6 +213,11 @@ export default function Keno() {
           for (const number of strikeNumbers) {
             await new Promise((resolve) => setTimeout(resolve, 200));
 
+            if (chosenNumbers.includes(number)) {
+              soundAlert("/sounds/win3.wav");
+            } else {
+              soundAlert("/sounds/betbutton.wav");
+            }
             setStrikeNumbers((prevNumbers) => [...prevNumbers, number]);
           }
         }
