@@ -4,7 +4,11 @@ import { NextApiRequest, NextApiResponse } from "next";
 import { Mines, User } from "@/models/games";
 import { generateGameResult, GameType } from "@/utils/provably-fair";
 import StakingUser from "@/models/staking/user";
-import { houseEdgeTiers, pointTiers } from "@/context/transactions";
+import {
+  houseEdgeTiers,
+  launchPromoEdge,
+  pointTiers,
+} from "@/context/transactions";
 import { wsEndpoint } from "@/context/gameTransactions";
 import Decimal from "decimal.js";
 Decimal.set({ precision: 9 });
@@ -83,18 +87,18 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
       let result = "Pending";
       const numBets = userBets.length;
-      strikeMultiplier = Decimal.div(
-        25 - numBets,
-        25 - numBets - minesCount,
-      ).mul(strikeMultiplier).toNumber();
+      strikeMultiplier = Decimal.div(25 - numBets, 25 - numBets - minesCount)
+        .mul(strikeMultiplier)
+        .toNumber();
 
       const userData = await StakingUser.findOne({ wallet });
       let points = userData?.points ?? 0;
       const userTier = Object.entries(pointTiers).reduce((prev, next) => {
         return points >= next[1]?.limit ? next : prev;
       })[0];
-      const houseEdge = houseEdgeTiers[parseInt(userTier)];
-
+      const houseEdge = launchPromoEdge
+        ? 0
+        : houseEdgeTiers[parseInt(userTier)];
       if (strikeNumbers[userBet] === 1) {
         result = "Lost";
 

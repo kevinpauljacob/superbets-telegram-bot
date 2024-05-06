@@ -3,7 +3,11 @@ import { Option, User } from "../../../../models/games";
 import { NextApiRequest, NextApiResponse } from "next";
 import { getToken } from "next-auth/jwt";
 import StakingUser from "@/models/staking/user";
-import { houseEdgeTiers, pointTiers } from "@/context/transactions";
+import {
+  houseEdgeTiers,
+  launchPromoEdge,
+  pointTiers,
+} from "@/context/transactions";
 import { GameType } from "@/utils/provably-fair";
 import { wsEndpoint } from "@/context/gameTransactions";
 import { Decimal } from "decimal.js";
@@ -52,7 +56,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       const userTier = Object.entries(pointTiers).reduce((prev, next) => {
         return points >= next[1]?.limit ? next : prev;
       })[0];
-      const houseEdge = houseEdgeTiers[parseInt(userTier)];
+      const houseEdge = launchPromoEdge
+        ? 0
+        : houseEdgeTiers[parseInt(userTier)];
 
       await new Promise((r) => setTimeout(r, 2000));
 
