@@ -11,7 +11,6 @@ export default function AutoCount({
 }) {
   const methods = useForm();
   const { houseEdge } = useGlobalContext();
-  console.log("houseEdge", houseEdge);
   return (
     <div className="mb-0 flex w-full flex-col">
       <div className="mb-1 flex w-full items-center justify-between text-xs font-changa text-opacity-90">
