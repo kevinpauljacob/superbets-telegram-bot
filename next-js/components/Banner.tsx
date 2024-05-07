@@ -6,15 +6,15 @@ import Link from "next/link";
 export default function StoreBanner() {
   const games = [
     {
-      href: "/",
+      href: "/store",
       src: "/assets/banners/raffle.png",
     },
     {
-      href: "/",
+      href: "/leaderboard",
       src: "/assets/banners/leaderboard.png",
     },
     {
-      href: "/",
+      href: "/stake",
       src: "/assets/banners/staking.png",
     },
   ];
