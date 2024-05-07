@@ -304,7 +304,7 @@ export const Table: React.FC<TableProps> = ({
                   .map((bet, index) => (
                     <div
                       key={index}
-                      className="mb-2.5 flex w-full flex-row items-center gap-2 rounded-[5px] bg-[#121418] py-3"
+                      className="hover:bg-gray-900 mb-2.5 flex w-full flex-row items-center gap-2 rounded-[5px] bg-[#121418] py-3"
                     >
                       <BetRow
                         bet={bet}
