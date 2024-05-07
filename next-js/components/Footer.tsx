@@ -14,77 +14,85 @@ function Footer() {
   const router = useRouter();
 
   return (
-    <div className="w-full h-full flex flex-col px-5 md:px-[3.5rem]">
-      <div className="w-full h-full flex lg:flex-row flex-col lg:items-center items-start justify-start pt-5 gap-2">
-        <div className="w-full lg:w-[45%] flex flex-col items-start">
-          <span className="flex items-center font-medium text-[1.6rem] text-white">
+    <div className="w-full h-full flex flex-col items-center justify-center px-5 lg:px-[4rem] md:px-[3rem]">
+      <div className="w-full h-full flex lg:flex-row flex-col lg:items-center items-start  lg:pt-10 lg:pb-16 pt-5 pb-5 gap-5">
+        <div className="lg:w-[30%] md:w-[60%] w-[90%] lg:mr-10">
+          <h3 className="flex items-center font-medium text-[1.6rem] text-white">
             <Image src={logo} width={40} alt={"FOMO"} />
             FOMO
-          </span>
-          <p className="w-full flex flex-col text-[#94A3B8] font-medium font-chakra text-sm leading-6 text-opacity-80 lg:pt-4 pt-2 md:mx-0">
-            <span className="mx-2">
-              FOMO wtf casino games are currently in beta and will
-              be undergoing audit shortly. FOMO wtf EXIT games
-              has gone through audit performed by OtterSec
-              in December 2023.
+          </h3>
+          <p className="flex flex-col text-[#94A3B8] font-medium font-chakra text-sm leading-6 text-opacity-80 md:mx-0 md:mt-2 mb-2">
+            <span className="md:mt-2 mx-2">
+              FOMO wtf casino games are currently in beta and will be undergoing
+              audit shortly. FOMO wtf EXIT games has gone through audit
+              performed by OtterSec in December 2023.
             </span>
           </p>
         </div>
-        <div className="lg:w-[55%] w-full flex lg:flex-row flex-col items-start justify-start lg:pt-16 lg:pb-16 lg:px-24 pt-5 mx-2 gap-10 md:gap-8">
-          <div className="flex gap-5">
-            <div className="">
-              <h3 className="font-semibold font-changa text-white text-base leading-[18px] pb-4 text-opacity-90">
-                Services
-              </h3>
-              <div className="text-[#94A3B8] font-chakra flex flex-col items-start justify-start gap-5 text-sm leading-[14px] font-medium text-opacity-80">
-                <span className="hover:cursor-pointer hover:underline decoration-1" onClick={() => router.push('/')}>
-                  DCA
-                </span>
-                <span className="hover:cursor-pointer hover:underline decoration-1" onClick={() => router.push('/')}>
-                  Docs
-                </span>
-                <span className="hover:cursor-pointer hover:underline decoration-1" onClick={() => router.push('/')}>
-                  Wallet
-                </span>
-              </div>
-            </div>
-            <div className="px-10">
-              <h3 className="font-semibold font-changa text-white text-base leading-[18px] pb-4 text-opacity-90">
-                Platform
-              </h3>
-              <div className="text-[#94A3B8] font-chakra flex flex-col items-start justify-start gap-5 text-sm leading-[14px] font-medium text-opacity-80">
-                <span
-                  className="hover:cursor-pointer hover:underline decoration-1"
-                  onClick={() => router.push("/leaderboard")}
-                >
-                  Leaderboard
-                </span>
-                <span
-                  className="hover:cursor-pointer hover:underline decoration-1"
-                  onClick={() => router.push("/staking")}
-                >
-                  Staking
-                </span>
-                <span
-                  className="hover:cursor-pointer hover:underline decoration-1"
-                  onClick={() => router.push("/store")}
-                >
-                  Store
-                </span>
-              </div>
+        <div className="flex items-start justify-start gap-20 lg:pl-16">
+          <div className="mx-2">
+            <h3 className="font-semibold font-changa text-white text-base leading-[18px] pb-4 text-opacity-90">
+              Services
+            </h3>
+            <div className="text-[#94A3B8] font-chakra flex flex-col items-start justify-start gap-5 text-sm leading-[14px] font-medium text-opacity-80">
+              <span
+                className="hover:cursor-pointer hover:underline decoration-1"
+                onClick={() => router.push("/")}
+              >
+                DCA
+              </span>
+              <span
+                className="hover:cursor-pointer hover:underline decoration-1"
+                onClick={() => router.push("/")}
+              >
+                Docs
+              </span>
+              <span
+                className="hover:cursor-pointer hover:underline decoration-1"
+                onClick={() => router.push("/")}
+              >
+                Wallet
+              </span>
             </div>
           </div>
-          <div className="">
-            <h3 className="font-semibold font-changa text-white text-base leading-[18px] b-3 text-opacity-90">
+          <div className="mx-2">
+            <h3 className="font-semibold font-changa text-white text-base leading-[18px] pb-4 text-opacity-90">
+              Platform
+            </h3>
+            <div className="text-[#94A3B8] font-chakra flex flex-col items-start justify-start gap-5 text-sm leading-[14px] font-medium text-opacity-80">
+              <span
+                className="hover:cursor-pointer hover:underline decoration-1"
+                onClick={() => router.push("/leaderboard")}
+              >
+                Leaderboard
+              </span>
+              <span
+                className="hover:cursor-pointer hover:underline decoration-1"
+                onClick={() => router.push("/stake")}
+              >
+                Staking
+              </span>
+              <span
+                className="hover:cursor-pointer hover:underline decoration-1"
+                onClick={() => router.push("/store")}
+              >
+                Store
+              </span>
+            </div>
+          </div>
+        </div>
+        <div className="lg:pl-12 lg:mb-12">
+          <div className="mx-2">
+            <h3 className="font-semibold font-changa text-white text-base leading-[18px] text-opacity-90">
               Community
             </h3>
             <div className="flex flex-row items-start justify-start gap-2 pt-4">
-              <p className="p-2 border-2 border-[#FFFFFF] rounded-full border-opacity-5 hover:bg-[#121519] hover:cursor-pointer">
+              <div className="p-2 border-2 border-[#FFFFFF] rounded-full border-opacity-5 hover:bg-[#121519] hover:cursor-pointer" onClick={() => router.push('')}>
                 <Image src={Twitter} alt="" width={16} height={16} />
-              </p>
-              <p className="p-2 border-2 border-[#FFFFFF] rounded-full border-opacity-5 hover:bg-[#121519] hover:cursor-pointer">
+              </div>
+              <div className="p-2 border-2 border-[#FFFFFF] rounded-full border-opacity-5 hover:bg-[#121519] hover:cursor-pointer" onClick={() => router.push('')}>
                 <Image src={Telegram} alt="" width={16} height={16} />
-              </p>
+              </div>
             </div>
           </div>
         </div>
