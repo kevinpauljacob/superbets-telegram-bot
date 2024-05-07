@@ -145,7 +145,7 @@ export const SidebarOpenElement = ({
       }}
       className="w-full transition-all cursor-pointer rounded-md flex items-end gap-3 pl-4 py-2 bg-transparent hover:bg-[#1f2024] focus:bg-[#1f2024] group"
     >
-      <Icon className="w-5 h-5 transition-all text-white/90" />
+      <Icon className="group-hover:text-[#9945FF] group-focus:text-[#9945FF] w-5 h-5 transition-all text-white/90" />
       <span className="transition-all text-sm leading-[1rem] font-changa font-medium tracking-wider text-white text-opacity-90 group-hover:text-opacity-100 group-focus:text-opacity-100">
         {text}
       </span>
