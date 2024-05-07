@@ -55,7 +55,7 @@ export default function Home() {
 
   return (
     <>
-      <div className="flex flex-col lg:flex-row text-white w-full overflow-hidden min-h-screen relative overflow-x-hidden p-4 xl:p-6">
+      <div className="flex flex-col lg:flex-row text-white w-full overflow-hidden relative overflow-x-hidden p-4 xl:p-6">
         <div className="flex flex-1 flex-col md:px-[2.5%]">
           <div className="">
             <StoreBanner />

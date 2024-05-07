@@ -1,48 +1,80 @@
-import React, { useState } from "react";
 import Image from "next/image";
+import { useRouter } from "next/router";
+import React, { useState } from "react";
 import { useGlobalContext } from "./GlobalContext";
 import Telegram from "@/public/assets/Telegram.svg";
 import Twitter from "@/public/assets/Twitter.svg";
 import logo from "@/public/assets/logowhite.svg";
 import { MdOutlineLanguage } from "react-icons/md";
-import { FaChevronDown } from "react-icons/fa6";
+import { FaChevronUp } from "react-icons/fa6";
 
 function Footer() {
   const { language, setLanguage } = useGlobalContext();
   const [langSelect, setLangSelect] = useState(false);
+  const router = useRouter();
+
   return (
     <div className="w-full h-full flex flex-col px-5 md:px-[3.5rem]">
-      <div className="w-full h-full flex lg:flex-row flex-col lg:items-center items-start pt-10 gap-2 lg:min-w-[1100px]">
-        <div className="w-[1/3] flex items-center lg:pb-24 pb-5">
-          <Image src={logo} width={50} height={40} alt={"FOMO"}></Image>
-          <span className="items-center font-medium text-[1.6rem] text-white">
+      <div className="w-full h-full flex lg:flex-row flex-col lg:items-center items-start justify-start pt-5 gap-2">
+        <div className="w-full lg:w-[45%] flex flex-col items-start">
+          <span className="flex items-center font-medium text-[1.6rem] text-white">
+            <Image src={logo} width={40} alt={"FOMO"} />
             FOMO
           </span>
+          <p className="w-full flex flex-col text-[#94A3B8] font-medium font-chakra text-sm leading-6 text-opacity-80 lg:pt-4 pt-2 md:mx-0">
+            <span className="mx-2">
+              FOMO wtf casino games are currently in beta and will
+              be undergoing audit shortly. FOMO wtf EXIT games
+              has gone through audit performed by OtterSec
+              in December 2023.
+            </span>
+          </p>
         </div>
-        <div className="w-[2/3] flex lg:flex-row flex-col items-start lg:pt-16 lg:pb-16 lg:mx-24 mx-2 gap-10 md:gap-8">
-          <div className="flex">
-            <div className="lg:px-10">
+        <div className="lg:w-[55%] w-full flex lg:flex-row flex-col items-start justify-start lg:pt-16 lg:pb-16 lg:px-24 pt-5 mx-2 gap-10 md:gap-8">
+          <div className="flex gap-5">
+            <div className="">
               <h3 className="font-semibold font-changa text-white text-base leading-[18px] pb-4 text-opacity-90">
                 Services
               </h3>
               <div className="text-[#94A3B8] font-chakra flex flex-col items-start justify-start gap-5 text-sm leading-[14px] font-medium text-opacity-80">
-                <span>DCA</span>
-                <span>Roadmap</span>
-                <span>Game Responsibily</span>
+                <span className="hover:cursor-pointer hover:underline decoration-1" onClick={() => router.push('/')}>
+                  DCA
+                </span>
+                <span className="hover:cursor-pointer hover:underline decoration-1" onClick={() => router.push('/')}>
+                  Docs
+                </span>
+                <span className="hover:cursor-pointer hover:underline decoration-1" onClick={() => router.push('/')}>
+                  Wallet
+                </span>
               </div>
             </div>
             <div className="px-10">
               <h3 className="font-semibold font-changa text-white text-base leading-[18px] pb-4 text-opacity-90">
-                Support
+                Platform
               </h3>
               <div className="text-[#94A3B8] font-chakra flex flex-col items-start justify-start gap-5 text-sm leading-[14px] font-medium text-opacity-80">
-                <span>Provably Fair</span>
-                <span>Affiliate Program</span>
-                <span>Redeem Code</span>
+                <span
+                  className="hover:cursor-pointer hover:underline decoration-1"
+                  onClick={() => router.push("/leaderboard")}
+                >
+                  Leaderboard
+                </span>
+                <span
+                  className="hover:cursor-pointer hover:underline decoration-1"
+                  onClick={() => router.push("/staking")}
+                >
+                  Staking
+                </span>
+                <span
+                  className="hover:cursor-pointer hover:underline decoration-1"
+                  onClick={() => router.push("/store")}
+                >
+                  Store
+                </span>
               </div>
             </div>
           </div>
-          <div className="lg:px-10">
+          <div className="">
             <h3 className="font-semibold font-changa text-white text-base leading-[18px] b-3 text-opacity-90">
               Community
             </h3>
@@ -57,22 +89,10 @@ function Footer() {
           </div>
         </div>
       </div>
-      <div>
-        <p className="text-[#94A3B8] font-medium font-chakra text-sm leading-6 pt-10 text-opacity-80 md:px-2 mx-2">
-          Shuffle is owned and operated by Natural Nine B.V., Curaçao company
-          registration number 160998, with its registered address at
-          Korporaalweg 10, Willemstad, Curaçao. Shuffle is authorized and
-          regulated by the Government of Curaçao and operates under License No.
-          8048/JAZ issued to Antillephone. Shuffle’s payment agent company is
-          River Card Limited, Cyprus company registration number HE 431566, with
-          its registered address at 50 Spyrou Kyprianou Avenue, Irida Tower 3,
-          Floor 6, 6057 Larnaca, Cyprus. Contact us at support@shuffle.com.
-        </p>
-      </div>
-      <div className="w-full h-[1px] bg-[#94A3B8] bg-opacity-20 rounded-full mt-8 md:px-2 mx-2" />
-      <div className="w-full flex lg:flex-row flex-col lg:items-center lg:justify-between lg:pb-32 pb-36 pt-5 font-inter md:px-2 mx-2">
+      <div className="w-full h-[1px] bg-[#94A3B8] bg-opacity-20 rounded-full mt-5 md:px-2 mx-2" />
+      <div className="w-full font-inter flex lg:flex-row flex-col lg:items-center lg:justify-between lg:pb-10 pb-[150px] pt-5 md:px-2 mx-2">
         <p className="flex text-sm font-normal text-[#FFFFFF] text-opacity-50 font-sans gap-2">
-          <span>@2024 Fomo.com</span>
+          <span>@2024 fomowtf.com</span>
           <span>All rights reserved</span>
         </p>
         <div className="flex items-center lg:justify-center gap-5">
@@ -97,9 +117,9 @@ function Footer() {
                 ? "中国人"
                 : ""}
             </span>
-            <FaChevronDown className="w-3 h-3 text-white" />
+            <FaChevronUp className="w-3 h-3 text-white" />
             {langSelect && (
-              <div className="w-full transition-all absolute top-full right-[1px] rounded px-1 py-2 gap-0.5 z-[100] flex flex-col bg-black">
+              <div className="w-full transition-all absolute bottom-full right-[1px] rounded px-1 py-2 gap-0.5 z-[100] flex flex-col bg-black">
                 <span
                   onClick={() => {
                     setLanguage("en");
