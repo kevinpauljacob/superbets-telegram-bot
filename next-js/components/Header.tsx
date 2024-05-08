@@ -46,7 +46,7 @@ export function Header({
             <div
               onClick={() => {
                 router.push("/");
-                setMobileSidebar(false);
+                // setMobileSidebar(false);
               }}
               className="flex sm:hidden relative"
             >
