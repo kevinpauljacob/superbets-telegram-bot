@@ -45,8 +45,7 @@ export function Header({
           <div className="flex flex-row items-center cursor-pointer gap-2">
             <div
               onClick={() => {
-                // router.push("/");
-                toggleSidebar();
+                router.push("/");
               }}
               className="flex sm:hidden relative"
             >
