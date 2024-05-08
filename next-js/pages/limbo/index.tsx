@@ -27,6 +27,7 @@ import Link from "next/link";
 import { soundAlert } from "@/utils/soundUtils";
 import ConfigureAutoButton from "@/components/ConfigureAutoButton";
 import AutoCount from "@/components/AutoCount";
+import MultiplierInput from "@/components/games/MultiplierInput";
 
 function useInterval(callback: Function, delay: number | null) {
   const savedCallback = useRef<Function | null>(null);
@@ -346,6 +347,16 @@ export default function Limbo() {
                   game="limbo"
                 />
 
+                <MultiplierInput
+                  inputMultiplier={inputMultiplier}
+                  setInputMultiplier={setInputMultiplier}
+                  disabled={startAuto || loading}
+                  minVal={1.02}
+                  maxVal={50}
+                  step={1}
+                  maxLength={2}
+                />
+
                 {betSetting == "manual" ? (
                   <></>
                 ) : (
@@ -434,26 +445,6 @@ export default function Limbo() {
         <div className="flex px-0 xl:px-4 mb-0 md:mb-[1.4rem] gap-4 flex-row w-full justify-between">
           {coinData && coinData[0].amount > 0.0001 && (
             <>
-              <div className="flex flex-col w-full">
-                <span className="text-[#F0F0F0] font-changa font-semibold text-xs mb-1">
-                  Multiplier
-                </span>
-                <input
-                  id={"amount-input"}
-                  className={`bg-[#202329] w-full min-w-0 font-chakra text-xs text-white rounded-md px-2 md:px-5 py-3 placeholder-[#94A3B8] placeholder-opacity-40 outline-none`}
-                  value={inputMultiplier}
-                  type="number"
-                  maxLength={1}
-                  step={1}
-                  min={1.02}
-                  max={50}
-                  disabled={startAuto || loading}
-                  onChange={(e) => {
-                    setInputMultiplier(parseFloat(e.target.value));
-                  }}
-                />
-              </div>
-
               <div className="flex flex-col w-full">
                 <span className="text-[#F0F0F0] font-changa font-sembiold text-xs mb-1">
                   Profit
