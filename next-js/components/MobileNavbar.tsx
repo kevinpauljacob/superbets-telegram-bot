@@ -13,19 +13,18 @@ import ActiveStore from "/public/assets/activeStore.svg";
 import Dashboard from "/public/assets/dashboard.svg";
 import ActiveDashboard from "/public/assets/activeDashboard.svg";
 import Link from "next/link";
+import { useGlobalContext } from "./GlobalContext";
 
-export default function MobileNavbar({
-  sidebar,
-  toggleSidebar,
-}: {
-  sidebar: boolean;
-  toggleSidebar: () => void;
-}) {
+export default function MobileNavbar() {
   const router = useRouter();
+  const { mobileSidebar, setMobileSidebar } = useGlobalContext();
+  const toggleSidebar = () => {
+    setMobileSidebar(!mobileSidebar);
+  };
   return (
     <div
       className={`${
-        sidebar ? "z-50" : ""
+        mobileSidebar ? "z-50" : ""
       } md:hidden text-white bg-[#121418] border-b border-white/10 py-2 w-full`}
     >
       <ul className="flex flex-1">
@@ -35,18 +34,18 @@ export default function MobileNavbar({
         >
           <li
             className={`${
-              sidebar ? "bg-[#1E2024]" : ""
+              mobileSidebar ? "bg-[#1E2024]" : ""
             } hover:bg-[#1E2024] flex flex-col items-center rounded-md px-4 pt-1.5 pb-1`}
           >
             <Image
-              src={sidebar ? ActiveMenu : Menu}
+              src={mobileSidebar ? ActiveMenu : Menu}
               alt="Menu"
               width={23}
               height={20}
             />
             <p
               className={`text-[10px] text-white/60 ${
-                sidebar ? "text-[#8033D7]" : "text-white/60"
+                mobileSidebar ? "text-[#8033D7]" : "text-white/60"
               } mt-1.5`}
             >
               Menu

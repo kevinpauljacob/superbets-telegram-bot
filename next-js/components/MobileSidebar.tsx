@@ -22,20 +22,14 @@ import Home from "@/public/assets/Home";
 import { useGlobalContext } from "./GlobalContext";
 import { useRouter } from "next/router";
 
-export default function Sidebar({
-  mobileSidebar,
-  setSidebar,
-}: {
-  mobileSidebar: boolean;
-  setSidebar: React.Dispatch<React.SetStateAction<boolean>>;
-}) {
+export default function Sidebar() {
   const router = useRouter();
-
+  const { mobileSidebar, setMobileSidebar } = useGlobalContext();
   const [showExitTokens, setShowExitTokens] = useState(false);
   const [showPlayTokens, setShowPlayTokens] = useState(false);
 
   useEffect(() => {
-    setSidebar(false);
+    setMobileSidebar(false);
   }, [router.pathname]);
 
   return (

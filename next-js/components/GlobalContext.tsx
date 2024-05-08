@@ -98,6 +98,9 @@ interface GlobalContextProps {
   sidebar: boolean;
   setSidebar: React.Dispatch<React.SetStateAction<boolean>>;
 
+  mobileSidebar: boolean;
+  setMobileSidebar: React.Dispatch<React.SetStateAction<boolean>>;
+
   openPFModal: boolean;
   setOpenPFModal: React.Dispatch<React.SetStateAction<boolean>>;
 
@@ -185,6 +188,7 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
   const [verifyModalData, setVerifyModalData] = useState({});
 
   const [sidebar, setSidebar] = useState<boolean>(false);
+  const [mobileSidebar, setMobileSidebar] = useState<boolean>(false);
 
   const [openPFModal, setOpenPFModal] = useState<boolean>(false);
 
@@ -387,6 +391,8 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
         setVerifyModalData,
         sidebar,
         setSidebar,
+        mobileSidebar,
+        setMobileSidebar,
         openPFModal,
         setOpenPFModal,
         showAutoModal,
