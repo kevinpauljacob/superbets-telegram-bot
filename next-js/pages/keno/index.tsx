@@ -552,7 +552,9 @@ export default function Keno() {
                       : strikeNumbers.includes(number)
                       ? chosenNumbers.includes(number)
                         ? "bg-black border-fomo-green"
-                        : "bg-black border-fomo-red text-fomo-red"
+                        : chosenNumbers.length === 0
+                          ? "bg-[#202329] border-transparent"
+                          : "bg-black border-fomo-red text-fomo-red"
                       : chosenNumbers.includes(number)
                       ? "bg-[#7839C5] border-transparent"
                       : "bg-[#202329] border-transparent"

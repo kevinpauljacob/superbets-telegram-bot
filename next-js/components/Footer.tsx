@@ -14,9 +14,9 @@ function Footer() {
   const router = useRouter();
 
   return (
-    <div className="w-full h-full flex flex-col items-center justify-center px-5 lg:px-[4rem] md:px-[3rem]">
-      <div className="w-full h-full flex lg:flex-row flex-col lg:items-center items-start  lg:pt-10 lg:pb-16 pt-5 pb-5 gap-5">
-        <div className="lg:w-[30%] md:w-[60%] w-[90%] lg:mr-10">
+    <div className="w-full h-full flex flex-col items-center justify-center px-5 lg2:px-[4rem] md:px-[3rem]">
+      <div className="w-full h-full flex lg2:flex-row flex-col lg2:items-center items-start lg2:pt-10 lg2:pb-16 pt-5 pb-5 gap-5">
+        <div className="lg2:w-[30%] md:w-[60%] w-[90%]">
           <h3 className="flex items-center font-medium text-[1.6rem] text-white">
             <Image src={logo} width={40} alt={"FOMO"} />
             FOMO
@@ -29,7 +29,7 @@ function Footer() {
             </span>
           </p>
         </div>
-        <div className="flex items-start justify-start gap-20 lg:pl-16">
+        <div className="flex items-start justify-start gap-20 lg2:pl-16">
           <div className="mx-2">
             <h3 className="font-semibold font-changa text-white text-base leading-[18px] pb-4 text-opacity-90">
               Services
@@ -81,29 +81,29 @@ function Footer() {
             </div>
           </div>
         </div>
-        <div className="lg:pl-12 lg:mb-12">
+        <div className="lg2:pl-12 lg2:mb-12">
           <div className="mx-2">
             <h3 className="font-semibold font-changa text-white text-base leading-[18px] text-opacity-90">
               Community
             </h3>
             <div className="flex flex-row items-start justify-start gap-2 pt-4">
               <div className="p-2 border-2 border-[#FFFFFF] rounded-full border-opacity-5 hover:bg-[#121519] hover:cursor-pointer" onClick={() => router.push('')}>
-                <Image src={Twitter} alt="" width={16} height={16} />
+                <Image src={Twitter} alt="" width={15} height={15} />
               </div>
               <div className="p-2 border-2 border-[#FFFFFF] rounded-full border-opacity-5 hover:bg-[#121519] hover:cursor-pointer" onClick={() => router.push('')}>
-                <Image src={Telegram} alt="" width={16} height={16} />
+                <Image src={Telegram} alt="" width={15} height={15} />
               </div>
             </div>
           </div>
         </div>
       </div>
       <div className="w-full h-[1px] bg-[#94A3B8] bg-opacity-20 rounded-full mt-5 md:px-2 mx-2" />
-      <div className="w-full font-inter flex lg:flex-row flex-col lg:items-center lg:justify-between lg:pb-10 pb-[150px] pt-5 md:px-2 mx-2">
+      <div className="w-full font-inter flex lg2:flex-row flex-col lg2:items-center lg2:justify-between lg2:pb-10 pb-[150px] pt-5 md:px-2 mx-2">
         <p className="flex text-sm font-normal text-[#FFFFFF] text-opacity-50 font-sans gap-2">
           <span>@2024 fomowtf.com</span>
           <span>All rights reserved</span>
         </p>
-        <div className="flex items-center lg:justify-center gap-5">
+        <div className="flex items-center lg2:justify-center gap-5">
           <span className="font-changa text-[#FFFFFF] text-opacity-25 text-4xl font-semibold">
             18+
           </span>
@@ -111,7 +111,7 @@ function Footer() {
             onClick={() => {
               setLangSelect(!langSelect);
             }}
-            className="relative hidden lg:flex items-center hover:bg-[#0000009f] transition-all px-5 py-2 rounded-md font-sans"
+            className="relative hidden lg2:flex items-center hover:bg-[#0000009f] transition-all px-5 py-2 rounded-md font-sans"
           >
             <MdOutlineLanguage className="w-5 h-5 mr-3 text-white text-opacity-50" />
             <span className="text-white text-sm mr-5 text-start text-opacity-50">
