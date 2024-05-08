@@ -67,7 +67,12 @@ export default function Sidebar({
           } flex flex-col items-center justify-between w-full h-full`}
         >
           <div className="w-full flex flex-col items-center">
-            <div className="h-[4.4rem] w-full flex items-center justify-center">
+            <div
+              onClick={() => {
+                setSidebar(true);
+              }}
+              className="h-[4.4rem] w-full flex items-center justify-center"
+            >
               <div className="cursor-pointer transition-all flex items-center justify-center rounded-md w-12 h-12 bg-[#212121] hover:bg-[#1E2024] focus:bg-[#1E2024] text-[#ababac] hover:text-[#9945FF] focus:text-[#9945FF]">
                 <Image
                   src={"/assets/logowhite.svg"}
