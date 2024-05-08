@@ -238,9 +238,9 @@ export default function ConfigureAutoModal() {
                 <label className="text-white/90 font-medium font-changa">
                   Stop On Profit
                 </label>
-                <span className="text-[#94A3B8] text-opacity-90 font-changa font-medium text-sm">
+                {/* <span className="text-[#94A3B8] text-opacity-90 font-changa font-medium text-sm">
                   {coinData ? coinData[0]?.amount.toFixed(4) : 0} $SOL
-                </span>
+                </span> */}
               </div>
 
               <div
@@ -294,9 +294,9 @@ export default function ConfigureAutoModal() {
                 <label className="text-white/90 font-medium font-changa">
                   Stop On Loss
                 </label>
-                <span className="text-[#94A3B8] text-opacity-90 font-changa font-medium text-sm">
+                {/* <span className="text-[#94A3B8] text-opacity-90 font-changa font-medium text-sm">
                   {coinData ? coinData[0]?.amount.toFixed(4) : 0} $SOL
-                </span>
+                </span> */}
               </div>
 
               <div

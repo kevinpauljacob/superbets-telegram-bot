@@ -307,11 +307,21 @@ export default function Dice() {
       ((typeof autoBetCount === "string" && autoBetCount.includes("inf")) ||
         (typeof autoBetCount === "number" && autoBetCount > 0))
     ) {
-      if (useAutoConfig && autoStopProfit && autoBetProfit <= autoStopProfit) {
+      if (
+        useAutoConfig &&
+        autoStopProfit &&
+        autoBetProfit > 0 &&
+        autoBetProfit >= autoStopProfit
+      ) {
         showInfoToast("Profit limit reached.");
         return;
       }
-      if (useAutoConfig && autoStopLoss && autoBetProfit >= -1 * autoStopLoss) {
+      if (
+        useAutoConfig &&
+        autoStopLoss &&
+        autoBetProfit < 0 &&
+        autoBetProfit <= -autoStopLoss
+      ) {
         showInfoToast("Loss limit reached.");
         return;
       }
@@ -363,6 +373,9 @@ export default function Dice() {
               disabled={
                 !wallet ||
                 selectedFace.length === 0 ||
+                (typeof autoBetCount === "number" && autoBetCount <= 0) ||
+                (typeof autoBetCount === "string" &&
+                  !autoBetCount.includes("inf")) ||
                 isRolling ||
                 (coinData && coinData[0].amount < 0.0001) ||
                 (betAmt !== undefined &&

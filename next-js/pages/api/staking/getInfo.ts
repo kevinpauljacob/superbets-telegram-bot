@@ -26,12 +26,17 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           const userInfo = await user.findOne({ wallet: wallet });
 
           if (!userInfo)
-            return res.status(400).json({
-              success: false,
+            return res.json({
+              success: true,
+              user: null,
               message: "User not found",
             });
 
-          return res.json({ success: true, user: userInfo });
+          return res.json({
+            success: true,
+            user: userInfo,
+            message: "User found",
+          });
         }
         // 2 - get leaderboard
         case 2: {
