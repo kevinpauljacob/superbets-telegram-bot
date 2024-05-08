@@ -65,7 +65,7 @@ export default function MobileNavbar({
             <Image
               src={router.pathname === "/stake" ? ActiveStaking : Staking}
               alt="Menu"
-              width={30}
+              width={23}
               height={30}
             />
             <p
