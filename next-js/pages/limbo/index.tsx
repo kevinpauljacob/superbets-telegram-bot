@@ -151,7 +151,7 @@ export default function Limbo() {
             );
             // update count
             if (typeof autoBetCount === "number")
-              setAutoBetCount(autoBetCount - 1);
+              setAutoBetCount(autoBetCount > 0 ? autoBetCount - 1 : 0);
             else setAutoBetCount(autoBetCount + 1);
           }
         } else {

@@ -227,7 +227,7 @@ export default function Dice2() {
           );
           // update count
           if (typeof autoBetCount === "number")
-            setAutoBetCount(autoBetCount - 1);
+            setAutoBetCount(autoBetCount > 0 ? autoBetCount - 1 : 0);
           else setAutoBetCount(autoBetCount + 1);
         }
       } catch (error) {
