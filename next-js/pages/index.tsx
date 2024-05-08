@@ -22,7 +22,6 @@ import StoreBanner from "@/components/Banner";
 import FomoExit from "@/components/FomoExit";
 import FomoPlay from "@/components/FomoPlay";
 import FomoSupply from "@/components/FomoSupply";
-import Footer from "@/components/Footer";
 
 const inter = Inter({ subsets: ["latin"] });
 
