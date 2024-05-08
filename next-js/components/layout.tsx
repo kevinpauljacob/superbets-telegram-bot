@@ -30,6 +30,7 @@ import CoinFlipProvablyFairModal from "./games/CoinFlip/CoinFlipProvablyFairModa
 import LimboProvablyFairModal from "./games/Limbo/LimboProvablyFairModal";
 import WheelProvablyFairModal from "./games/Wheel/WheelProvablyFairModal";
 import KenoProvablyFairModal from "./games/Keno/KenoProvablyFairModal";
+import Footer from "./Footer";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { soundAlert } from "@/utils/soundUtils";
 
@@ -62,7 +63,7 @@ export default function Layout({ children }: LayoutProps) {
     setOpenPFModal,
     getProvablyFairData,
     currentGame,
-    setCurrentGame
+    setCurrentGame,
   } = useGlobalContext();
 
   const [modalData, setModalData] = useState({
@@ -83,7 +84,6 @@ export default function Layout({ children }: LayoutProps) {
       status: "",
     },
   });
-
 
   useEffect(() => {
     //sound pre-loader
@@ -123,7 +123,7 @@ export default function Layout({ children }: LayoutProps) {
       getBalance();
       getWalletBalance();
     }
-    setCurrentGame(game)
+    setCurrentGame(game);
   }, [session?.user, showWalletModal, game]);
 
   return (
@@ -139,6 +139,9 @@ export default function Layout({ children }: LayoutProps) {
             <main className="marker:w-full h-full md:pt-[4.5%] lg:pt-0 max-h-[calc(100%-1rem)] lg:max-h-[calc(100%-5.5rem)]">
               <section className="w-full h-full overflow-y-auto no-scrollbar">
                 {children}
+                <div className="w-full">
+                  <Footer />
+                </div>
               </section>
             </main>
           </section>

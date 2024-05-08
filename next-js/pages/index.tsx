@@ -24,7 +24,6 @@ import FomoPlay from "@/components/FomoPlay";
 import FomoSupply from "@/components/FomoSupply";
 import Footer from "@/components/Footer";
 
-
 const inter = Inter({ subsets: ["latin"] });
 
 export default function Home() {
@@ -70,9 +69,6 @@ export default function Home() {
         {/* <div className="lg:ml-4">
         <FomoSupply />
       </div> */}
-      </div>
-      <div className="w-full">
-        <Footer />
       </div>
     </>
   );
