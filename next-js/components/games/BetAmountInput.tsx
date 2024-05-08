@@ -117,7 +117,7 @@ export default function BetAmount({
             }`}
             onClick={() => handleBetAmountsModal()}
           >
-            why?
+            Why?
           </span>
         </span>
       </div>

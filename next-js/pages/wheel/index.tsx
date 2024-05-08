@@ -277,11 +277,21 @@ export default function Wheel() {
       ((typeof autoBetCount === "string" && autoBetCount.includes("inf")) ||
         (typeof autoBetCount === "number" && autoBetCount > 0))
     ) {
-      if (useAutoConfig && autoStopProfit && autoBetProfit <= autoStopProfit) {
+      if (
+        useAutoConfig &&
+        autoStopProfit &&
+        autoBetProfit > 0 &&
+        autoBetProfit >= autoStopProfit
+      ) {
         showInfoToast("Profit limit reached.");
         return;
       }
-      if (useAutoConfig && autoStopLoss && autoBetProfit >= -1 * autoStopLoss) {
+      if (
+        useAutoConfig &&
+        autoStopLoss &&
+        autoBetProfit < 0 &&
+        autoBetProfit <= -autoStopLoss
+      ) {
         showInfoToast("Loss limit reached.");
         return;
       }
@@ -329,6 +339,9 @@ export default function Wheel() {
               disabled={
                 !wallet ||
                 isRolling ||
+                (typeof autoBetCount === "number" && autoBetCount <= 0) ||
+                (typeof autoBetCount === "string" &&
+                  !autoBetCount.includes("inf")) ||
                 (coinData && coinData[0].amount < 0.0001) ||
                 (betAmt !== undefined &&
                   maxBetAmt !== undefined &&
