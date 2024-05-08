@@ -81,6 +81,7 @@ export default function Sidebar({
             <div
               onClick={() => {
                 router.push("/");
+                setSidebar(true);
               }}
               className={`${topIconCss}`}
             >
@@ -104,10 +105,22 @@ export default function Sidebar({
             >
               <FomoExitIcon className={`${closedIconCss}`} />
             </div>
-            <div className={`${topIconCss}`}>
+            <div
+              onClick={() => {
+                // router.push("/");
+                setSidebar(true);
+              }}
+              className={`${topIconCss}`}
+            >
               <Dollar className={`${closedIconCss}`} />
             </div>
-            <div className={`${topIconCss}`}>
+            <div
+              onClick={() => {
+                // router.push("/");
+                setSidebar(true);
+              }}
+              className={`${topIconCss}`}
+            >
               <Flag className={`${closedIconCss}`} />
             </div>
           </div>
@@ -167,8 +180,6 @@ export const OpenSidebar = ({
   const wallet = useWallet();
   const router = useRouter();
   const { fomoPrice, sidebar } = useGlobalContext();
-
-  const { userData, getUserDetails } = useGlobalContext();
 
   const [exitGames, setExitGames] = useState<Game[]>([
     {
@@ -248,10 +259,6 @@ export const OpenSidebar = ({
 
     setShowPlayTokens(isGameActive(casinoGames));
   }, [router.pathname, exitGames, casinoGames]);
-
-  useEffect(() => {
-    if (!userData && wallet?.publicKey) getUserDetails();
-  }, [wallet.publicKey]);
 
   const openLinkCss =
     "w-full gap-2 flex items-center justify-center text-sm font-semibold text-white text-opacity-50 hover:bg-white/10 transition duration-300 ease-in-out hover:transition hover:duration-300 hover:ease-in-out bg-[#191A1D] rounded-md text-center py-2 mb-2";
@@ -403,7 +410,7 @@ export const OpenSidebar = ({
                 ))}
               </ul>
             )}
-          </div> 
+          </div>
           <SidebarOpenElement text={"DCA"} Icon={Dollar} />
           <SidebarOpenElement text={"Roadmap"} Icon={Flag} />
         </div>
