@@ -21,7 +21,7 @@ export function Header({
 }) {
   const wallet = useWallet();
   const router = useRouter();
-  const { language, setLanguage, userData, getUserDetails } =
+  const { language, setLanguage, userData, getUserDetails, setMobileSidebar } =
     useGlobalContext();
   const [langSelect, setLangSelect] = useState(false);
 
@@ -46,6 +46,7 @@ export function Header({
             <div
               onClick={() => {
                 router.push("/");
+                setMobileSidebar(false);
               }}
               className="flex sm:hidden relative"
             >
