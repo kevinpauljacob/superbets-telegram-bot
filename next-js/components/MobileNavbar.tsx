@@ -115,7 +115,7 @@ export default function MobileNavbar({
         >
           <li
             className={`${
-              router.pathname === "/store" ? "bg-[#1E2024]" : ""
+              router.pathname === "/ActiveStore" ? "bg-[#1E2024]" : ""
             } hover:bg-[#1E2024] flex flex-col items-center rounded-md px-4 pt-1.5 pb-1`}
           >
             <Image
