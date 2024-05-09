@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { rollDice } from "@/context/gameTransactions";
 import { toast } from "react-hot-toast";
@@ -78,7 +78,7 @@ export default function Dice() {
     6: false,
   });
   const [strikeFace, setStrikeFace] = useState<number>(0);
-  const [rollType, setRollType] = useState<"manual" | "auto">("manual");
+  const [betType, setbetType] = useState<"manual" | "auto">("manual");
   const [betResults, setBetResults] = useState<
     { face: number; win: boolean }[]
   >([]);
@@ -196,7 +196,7 @@ export default function Dice() {
           loopSound("/sounds/diceshake.wav", 0.3);
 
           // auto options
-          if (rollType === "auto") {
+          if (betType === "auto") {
             if (useAutoConfig && autoWinChange && isWin) {
               setBetAmt(
                 autoWinChangeReset
@@ -217,7 +217,7 @@ export default function Dice() {
             );
             // update count
             if (typeof autoBetCount === "number")
-              setAutoBetCount(autoBetCount - 1);
+              setAutoBetCount(autoBetCount > 0 ? autoBetCount - 1 : 0);
             else setAutoBetCount(autoBetCount + 1);
           }
         } else {
@@ -295,14 +295,14 @@ export default function Dice() {
 
   useEffect(() => {
     console.log(
-      rollType,
+      betType,
       startAuto,
       autoBetCount,
       typeof autoBetCount === "string" &&
         autoBetCount.toString().includes("inf"),
     );
     if (
-      rollType === "auto" &&
+      betType === "auto" &&
       startAuto &&
       ((typeof autoBetCount === "string" && autoBetCount.includes("inf")) ||
         (typeof autoBetCount === "number" && autoBetCount > 0))
@@ -334,7 +334,7 @@ export default function Dice() {
 
   const onSubmit = async (data: any) => {
     if (
-      rollType === "auto" &&
+      betType === "auto" &&
       ((typeof autoBetCount === "string" && autoBetCount.includes("inf")) ||
         (typeof autoBetCount === "number" && autoBetCount > 0))
     ) {
@@ -346,6 +346,10 @@ export default function Dice() {
       setStartAuto(true);
     } else if (wallet.connected && selectedFace.length > 0) diceRoll();
   };
+
+  const disableInput = useMemo(() => {
+    return betType === "auto" && startAuto ? true : false;
+  }, [betType, startAuto]);
 
   return (
     <GameLayout title="FOMO - Dice">
@@ -389,13 +393,13 @@ export default function Dice() {
               {isRolling ? <Loader /> : "BET"}
             </BetButton>
           </div>
-          {rollType === "auto" && (
+          {betType === "auto" && (
             <div className="w-full flex lg:hidden">
               <ConfigureAutoButton />
             </div>
           )}
           <div className="w-full hidden lg:flex">
-            <BetSetting betSetting={rollType} setBetSetting={setRollType} />
+            <BetSetting betSetting={betType} setBetSetting={setbetType} disabled={disableInput} />
           </div>
           <div className="w-full flex flex-col">
             <FormProvider {...methods}>
@@ -411,8 +415,9 @@ export default function Dice() {
                   currentMultiplier={winningPays}
                   leastMultiplier={6 / 5}
                   game="dice"
+                  disabled={disableInput}
                 />
-                {rollType === "manual" ? (
+                {betType === "manual" ? (
                   <></>
                 ) : (
                   <div className="w-full flex flex-row items-end gap-3">
@@ -463,7 +468,7 @@ export default function Dice() {
               </form>
             </FormProvider>
             <div className="w-full flex lg:hidden">
-              <BetSetting betSetting={rollType} setBetSetting={setRollType} />
+              <BetSetting betSetting={betType} setBetSetting={setbetType} />
             </div>
           </div>
         </>

@@ -21,8 +21,14 @@ export function Header({
 }) {
   const wallet = useWallet();
   const router = useRouter();
-  const { language, setLanguage, userData, getUserDetails } =
-    useGlobalContext();
+  const {
+    language,
+    setLanguage,
+    userData,
+    getUserDetails,
+    mobileSidebar,
+    setMobileSidebar,
+  } = useGlobalContext();
   const [langSelect, setLangSelect] = useState(false);
 
   useEffect(() => {
@@ -45,8 +51,8 @@ export function Header({
           <div className="flex flex-row items-center cursor-pointer gap-2">
             <div
               onClick={() => {
-                // router.push("/");
-                toggleSidebar();
+                if (mobileSidebar === true) setMobileSidebar(false);
+                else router.push("/");
               }}
               className="flex sm:hidden relative"
             >
@@ -60,7 +66,7 @@ export function Header({
             </div>
             <RiMenuLine
               onClick={() => toggleSidebar()}
-              className="hidden sm:flex text-white w-7 h-7"
+              className={`hidden sm:flex text-white w-7 h-7 hover:text-[#8033D7] ${sidebar ? 'text-[#8033d7]':'text-white'}`}
             />
             <span
               onClick={() => {

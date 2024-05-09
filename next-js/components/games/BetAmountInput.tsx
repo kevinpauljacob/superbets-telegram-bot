@@ -14,12 +14,14 @@ export default function BetAmount({
   currentMultiplier,
   leastMultiplier,
   game,
+  disabled = false,
 }: {
   betAmt: number | undefined;
   setBetAmt: React.Dispatch<React.SetStateAction<number | undefined>>;
   currentMultiplier: number;
   leastMultiplier: number;
   game: string;
+  disabled?: boolean;
 }) {
   const methods = useForm();
   const { coinData, maxBetAmt, setMaxBetAmt } = useGlobalContext();
@@ -130,7 +132,8 @@ export default function BetAmount({
                 min={minBetAmt}
                 max={maxBetAmt}
                 value={maxBetAmt}
-                className="maxBetsSlider absolute top-[-8px] w-full bg-transparent appearance-none z-20"
+                disabled={disabled}
+                className="maxBetsSlider absolute top-[-8px] w-full bg-transparent appearance-none z-20 disabled:cursor-not-allowed disabled:opacity-50"
               />
               <div
                 className="absolute rounded-full h-[5px] bg-[#8795A8] z-10"
@@ -227,29 +230,36 @@ export default function BetAmount({
             setBetAmt(enteredAmount);
           }}
           placeholder={"0.0"}
+          disabled={disabled}
           min={0.0001}
           value={betAmt}
           lang="en"
-          className={`flex w-full min-w-0 bg-transparent text-base text-[#94A3B8] placeholder-[#94A3B8] font-chakra placeholder-opacity-40 outline-none`}
+          className={`flex w-full min-w-0 bg-transparent text-base text-[#94A3B8] placeholder-[#94A3B8] font-chakra placeholder-opacity-40 outline-none disabled:cursor-not-allowed disabled:opacity-50`}
         />
-        <span
-          className="text-xs font-medium text-white text-opacity-50 bg-[#292C32] hover:bg-[#47484A] focus:bg-[#47484A] transition-all hover:duration-75 rounded-[5px] py-1.5 px-4"
+        <button
+          type="button"
+          className="text-xs font-medium text-white text-opacity-50 disabled:cursor-not-allowed disabled:opacity-50 bg-[#292C32] hover:bg-[#47484A] focus:bg-[#47484A] transition-all hover:duration-75 rounded-[5px] py-1.5 px-4"
           onClick={handleHalfBet}
+          disabled={disabled}
         >
           1/2
-        </span>
-        <span
-          className="text-xs mx-2 font-medium text-white text-opacity-50 bg-[#292C32] hover:bg-[#47484A] focus:bg-[#47484A] transition-all hover:duration-75 rounded-[5px] py-1.5 px-4"
+        </button>
+        <button
+          type="button"
+          className="text-xs mx-2 font-medium text-white text-opacity-50 disabled:cursor-not-allowed disabled:opacity-50 bg-[#292C32] hover:bg-[#47484A] focus:bg-[#47484A] transition-all hover:duration-75 rounded-[5px] py-1.5 px-4"
           onClick={handleDoubleBet}
+          disabled={disabled}
         >
           2x
-        </span>
-        <span
-          className="text-xs font-medium text-white text-opacity-50 bg-[#292C32] hover:bg-[#47484A] focus:bg-[#47484A] transition-all hover:duration-75 rounded-[5px] py-1.5 px-4"
+        </button>
+        <button
+          type="button"
+          className="text-xs font-medium text-white text-opacity-50 disabled:cursor-not-allowed disabled:opacity-50 bg-[#292C32] hover:bg-[#47484A] focus:bg-[#47484A] transition-all hover:duration-75 rounded-[5px] py-1.5 px-4"
           onClick={handleSetMaxBet}
+          disabled={disabled}
         >
           Max
-        </span>
+        </button>
       </div>
       <span
         className={`${
