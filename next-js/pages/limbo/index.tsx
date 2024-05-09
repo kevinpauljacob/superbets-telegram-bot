@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Bets from "../../components/games/Bets";
 import { useWallet } from "@solana/wallet-adapter-react";
 import toast from "react-hot-toast";
@@ -288,6 +288,10 @@ export default function Limbo() {
     }
   };
 
+  const disableInput = useMemo(() => {
+    return betSetting === "auto" && startAuto ? true : false;
+  }, [betSetting, startAuto]);
+
   return (
     <GameLayout title="FOMO - Limbo">
       <GameOptions>
@@ -328,7 +332,11 @@ export default function Limbo() {
             </div>
           )}
           <div className="w-full hidden lg:flex">
-            <BetSetting betSetting={betSetting} setBetSetting={setBetSetting} />
+            <BetSetting
+              betSetting={betSetting}
+              setBetSetting={setBetSetting}
+              disabled={disableInput}
+            />
           </div>
 
           <div className="w-full flex flex-col">
@@ -345,12 +353,13 @@ export default function Limbo() {
                   currentMultiplier={inputMultiplier}
                   leastMultiplier={1.02}
                   game="limbo"
+                  disabled={disableInput}
                 />
 
                 <MultiplierInput
                   inputMultiplier={inputMultiplier}
                   setInputMultiplier={setInputMultiplier}
-                  disabled={startAuto || loading}
+                  disabled={startAuto || loading || disableInput}
                   minVal={1.02}
                   maxVal={50}
                   step={1}

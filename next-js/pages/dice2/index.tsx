@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useWallet } from "@solana/wallet-adapter-react";
@@ -240,6 +240,10 @@ export default function Dice2() {
     }
   };
 
+  const disableInput = useMemo(() => {
+    return betType === "auto" && startAuto ? true : false;
+  }, [betType, startAuto]);
+
   useEffect(() => {
     const calculateMultiplier = () => {
       if (rollType === "over") {
@@ -366,7 +370,7 @@ export default function Dice2() {
             </div>
           )}
           <div className="w-full hidden lg:flex">
-            <BetSetting betSetting={betType} setBetSetting={setBetType} />
+            <BetSetting betSetting={betType} setBetSetting={setBetType} disabled={disableInput}/>
           </div>
           <div className="w-full flex flex-col">
             <FormProvider {...methods}>
@@ -382,6 +386,7 @@ export default function Dice2() {
                   currentMultiplier={multiplier}
                   leastMultiplier={1}
                   game="dice2"
+                  disabled={disableInput}
                 />
                 <div className="mb-4">
                   <ProfitBox amount={betAmt} multiplier={multiplier} />

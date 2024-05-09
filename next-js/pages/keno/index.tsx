@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useWallet } from "@solana/wallet-adapter-react";
@@ -131,6 +131,7 @@ export default function Keno() {
 
   const handleClear = () => {
     setChosenNumbers([]);
+    setStrikeNumbers([]);
     setAutoPick((prevAutoPick) => !prevAutoPick);
   };
 
@@ -264,6 +265,10 @@ export default function Keno() {
     }
   };
 
+  const disableInput = useMemo(() => {
+    return betType === "auto" && startAuto ? true : false;
+  }, [betType, startAuto]);
+
   useEffect(() => {
     if (refresh && wallet?.publicKey) {
       getBalance();
@@ -329,30 +334,32 @@ export default function Keno() {
   const Autopick = () => {
     return (
       <>
-        <div
+        <button
           onClick={() => {
             handleAutoPick();
           }}
+          disabled={disableInput}
           className={`${
             autoPick === true
               ? "border-[#7839C5] text-opacity-100"
               : "border-transparent hover:border-[#7839C580] text-opacity-80"
-          } w-full flex items-center justify-center gap-1 rounded-lg text-center cursor-pointer border-2 bg-[#202329] h-[3.75rem] lg:h-11 font-chakra text-base tracking-wider text-white font-semibold`}
+          } w-full flex items-center justify-center disabled:opacity-50 gap-1 rounded-lg text-center cursor-pointer border-2 bg-[#202329] h-[3.75rem] lg:h-11 font-chakra text-base tracking-wider text-white font-semibold`}
         >
           AUTOPICK
-        </div>
-        <div
+        </button>
+        <button
           onClick={() => {
             handleClear();
           }}
+          disabled={disableInput}
           className={`${
             autoPick === false
               ? "border-transparent hover:border-[#7839C580] text-opacity-80"
               : "border-transparent hover:border-[#7839C580] text-opacity-80"
-          } w-full flex items-center justify-center gap-1 rounded-lg text-center cursor-pointer border-2 bg-[#202329] h-[3.75rem] lg:h-11 font-chakra text-base tracking-wider text-white font-semibold`}
+          } w-full flex items-center justify-center disabled:opacity-50 gap-1 rounded-lg text-center cursor-pointer border-2 bg-[#202329] h-[3.75rem] lg:h-11 font-chakra text-base tracking-wider text-white font-semibold`}
         >
           CLEAR
-        </div>
+        </button>
       </>
     );
   };
@@ -401,7 +408,11 @@ export default function Keno() {
             </div>
           )}
           <div className="w-full hidden lg:flex">
-            <BetSetting betSetting={betType} setBetSetting={setBetType} />
+            <BetSetting
+              betSetting={betType}
+              setBetSetting={setBetType}
+              disabled={disableInput}
+            />
           </div>
           <div className="w-full flex flex-col no-scrollbar overflow-y-auto">
             <FormProvider {...methods}>
@@ -419,6 +430,7 @@ export default function Keno() {
                   }
                   leastMultiplier={leastMultiplier}
                   game="keno"
+                  disabled={disableInput}
                 />
                 <div className="mb-[1.4rem] w-full">
                   <div className="flex justify-between text-xs mb-2">
@@ -427,46 +439,54 @@ export default function Keno() {
                     </p>
                   </div>
                   <div className="grid lg:grid-cols-4 grid-cols-2 gap-3 w-full items-center rounded-[8px] text-white font-chakra text-sm font-semibold bg-[#0C0F16] p-4">
-                    <div
+                    <button
+                      type="button"
                       onClick={() => setRisk("classic")}
-                      className={`text-center w-full rounded-[5px] border-[2px] bg-[#202329] py-2 text-xs font-chakra text-white text-opacity-90 transition duration-200 ${
+                      className={`text-center w-full rounded-[5px] border-[2px] bg-[#202329] py-2 text-xs font-chakra disabled:opacity-50 text-white text-opacity-90 transition duration-200 ${
                         risk === "classic"
                           ? "border-[#7839C5]"
                           : "border-transparent hover:border-[#7839C580]"
                       }`}
+                      disabled={disableInput}
                     >
                       Classic
-                    </div>
-                    <div
+                    </button>
+                    <button
+                      type="button"
                       onClick={() => setRisk("low")}
-                      className={`text-center w-full rounded-[5px] border-[2px] bg-[#202329] py-2 text-xs font-chakra text-white text-opacity-90 transition duration-200 ${
+                      className={`text-center w-full rounded-[5px] border-[2px] bg-[#202329] py-2 text-xs font-chakra disabled:opacity-50 text-white text-opacity-90 transition duration-200 ${
                         risk === "low"
                           ? "border-[#7839C5]"
                           : "border-transparent hover:border-[#7839C580]"
                       }`}
+                      disabled={disableInput}
                     >
                       Low
-                    </div>
-                    <div
+                    </button>
+                    <button
+                      type="button"
                       onClick={() => setRisk("medium")}
-                      className={`text-center w-full block m-auto rounded-[5px] border-[2px] bg-[#202329] py-2 text-xs font-chakra text-white text-opacity-90 transition duration-200 ${
+                      className={`text-center w-full block m-auto rounded-[5px] border-[2px] bg-[#202329] py-2 text-xs font-chakra disabled:opacity-50 text-white text-opacity-90 transition duration-200 ${
                         risk === "medium"
                           ? "border-[#7839C5]"
                           : "border-transparent hover:border-[#7839C580]"
                       }`}
+                      disabled={disableInput}
                     >
                       Medium
-                    </div>
-                    <div
+                    </button>
+                    <button
+                      type="button"
                       onClick={() => setRisk("high")}
-                      className={`text-center w-full rounded-[5px] border-[2px] bg-[#202329] py-2 text-xs font-chakra text-white text-opacity-90 transition duration-200 ${
+                      className={`text-center w-full rounded-[5px] border-[2px] bg-[#202329] py-2 text-xs font-chakra disabled:opacity-50 text-white text-opacity-90 transition duration-200 ${
                         risk === "high"
                           ? "border-[#7839C5]"
                           : "border-transparent hover:border-[#7839C580]"
                       }`}
+                      disabled={disableInput}
                     >
                       High
-                    </div>
+                    </button>
                   </div>
                 </div>
 

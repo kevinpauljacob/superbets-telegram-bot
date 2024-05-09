@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import dynamic from "next/dynamic";
 import { useWallet } from "@solana/wallet-adapter-react";
 import toast from "react-hot-toast";
@@ -260,6 +260,10 @@ export default function Flip() {
     setAutoBetCount(parseFloat(e.target.value));
   };
 
+  const disableInput = useMemo(() => {
+    return betSetting === "auto" && startAuto ? true : false;
+  }, [betSetting, startAuto]);
+
   return (
     <GameLayout title="FOMO - Coin Flip">
       <GameOptions>
@@ -298,7 +302,7 @@ export default function Flip() {
             </div>
           )}
           <div className="w-full hidden lg:flex">
-            <BetSetting betSetting={betSetting} setBetSetting={setBetSetting} />
+            <BetSetting betSetting={betSetting} setBetSetting={setBetSetting} disabled={disableInput} />
           </div>
 
           <div className="w-full flex flex-col">
@@ -315,6 +319,7 @@ export default function Flip() {
                   currentMultiplier={2.0}
                   leastMultiplier={2.0}
                   game="coinflip"
+                  disabled={disableInput}
                 />
 
                 {betSetting === "manual" ? (
@@ -337,15 +342,17 @@ export default function Flip() {
                 {/* choosing bet options  */}
                 <div className="flex w-full flex-row gap-3 mb-[1.4rem]">
                   {/* buttons  */}
-                  <div
+                  <button
                     onClick={() => {
                       setBetType("Heads");
                     }}
+                    type="button"
+                    disabled={disableInput}
                     className={`${
                       betType === "Heads"
                         ? "border-[#7839C5] text-opacity-100"
                         : "border-transparent hover:border-[#7839C580] text-opacity-80"
-                    } w-full flex items-center justify-center gap-2 rounded-lg text-center cursor-pointer border-2 bg-[#202329] py-2.5 font-changa text-xl text-white font-semibold`}
+                    } w-full flex items-center disabled:opacity-50 disabled:cursor-not-allowed justify-center gap-2 rounded-lg text-center cursor-pointer border-2 bg-[#202329] py-2.5 font-changa text-xl text-white font-semibold`}
                   >
                     <Image
                       src={"/assets/coin.png"}
@@ -357,16 +364,18 @@ export default function Flip() {
                     <span className="mt-0.5 font-chakra text-xl font-semibold">
                       Heads
                     </span>
-                  </div>
-                  <div
+                  </button>
+                  <button
                     onClick={() => {
                       setBetType("Tails");
                     }}
+                    type="button"
+                    disabled={disableInput}
                     className={`${
                       betType === "Tails"
                         ? "border-[#7839C5] text-opacity-100"
                         : "border-transparent hover:border-[#7839C580] text-opacity-80"
-                    } w-full flex items-center justify-center gap-2 rounded-lg text-center cursor-pointer border-2 bg-[#202329] py-2.5 font-changa text-xl text-white font-semibold`}
+                    } w-full flex items-center disabled:opacity-50 disabled:cursor-not-allowed justify-center gap-2 rounded-lg text-center cursor-pointer border-2 bg-[#202329] py-2.5 font-changa text-xl text-white font-semibold`}
                   >
                     <Image
                       src={"/assets/tails.png"}
@@ -378,7 +387,7 @@ export default function Flip() {
                     <span className="mt-0.5 font-chakra text-xl font-semibold">
                       Tails
                     </span>
-                  </div>
+                  </button>
                 </div>
                 <div className="relative w-full hidden lg:flex mb-[1.4rem]">
                   {startAuto && (

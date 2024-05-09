@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useWallet } from "@solana/wallet-adapter-react";
@@ -319,6 +319,10 @@ export default function Wheel() {
     } else if (wallet.connected) handleBet();
   };
 
+  const disableInput = useMemo(() => {
+    return betType === "auto" && startAuto ? true : false;
+  }, [betType, startAuto]);
+
   return (
     <GameLayout title="FOMO - Wheel">
       <GameOptions>
@@ -358,7 +362,11 @@ export default function Wheel() {
             <ConfigureAutoButton />
           </div>
           <div className="w-full hidden lg:flex">
-            <BetSetting betSetting={betType} setBetSetting={setBetType} />
+            <BetSetting
+              betSetting={betType}
+              setBetSetting={setBetType}
+              disabled={disableInput}
+            />
           </div>
           <div className="w-full flex flex-col no-scrollbar overflow-y-auto">
             <FormProvider {...methods}>
@@ -374,6 +382,7 @@ export default function Wheel() {
                   currentMultiplier={maxMultiplier}
                   leastMultiplier={minMultiplier}
                   game="wheel"
+                  disabled={disableInput}
                 />
                 <div className="mb-4">
                   <ProfitBox multiplier={maxMultiplier} amount={userInput!} />
@@ -386,37 +395,43 @@ export default function Wheel() {
                   </div>
                   <div className="flex lg:flex-row flex-col gap-2.5 w-full items-center justify-evenly rounded-[8px] text-white font-chakra text-sm font-semibold bg-[#0C0F16] p-4">
                     <div className="flex lg:w-[66.66%] w-full gap-2.5">
-                      <div
+                      <button
                         onClick={() => setRisk("low")}
-                        className={`text-center w-full rounded-[5px] border-[2px] bg-[#202329] py-2 text-xs font-chakra text-white text-opacity-90 transition duration-200 ${
+                        type="button"
+                        className={`text-center w-full rounded-[5px] border-[2px] disabled:cursor-not-allowed disabled:opacity-50 bg-[#202329] py-2 text-xs font-chakra text-white text-opacity-90 transition duration-200 ${
                           risk === "low"
                             ? "border-[#7839C5]"
                             : "border-transparent hover:border-[#7839C580]"
                         }`}
+                        disabled={disableInput}
                       >
                         Low
-                      </div>
-                      <div
+                      </button>
+                      <button
                         onClick={() => setRisk("medium")}
-                        className={`text-center w-full rounded-[5px] border-[2px] bg-[#202329] py-2 text-xs font-chakra text-white text-opacity-90 transition duration-200 ${
+                        type="button"
+                        className={`text-center w-full rounded-[5px] border-[2px] disabled:cursor-not-allowed disabled:opacity-50 bg-[#202329] py-2 text-xs font-chakra text-white text-opacity-90 transition duration-200 ${
                           risk === "medium"
                             ? "border-[#7839C5]"
                             : "border-transparent hover:border-[#7839C580]"
                         }`}
+                        disabled={disableInput}
                       >
                         Medium
-                      </div>
+                      </button>
                     </div>
-                    <div
+                    <button
                       onClick={() => setRisk("high")}
-                      className={`text-center lg:w-[33.33%] w-full rounded-[5px] border-[2px] bg-[#202329] py-2 text-xs font-chakra text-white text-opacity-90 transition duration-200 ${
+                      type="button"
+                      className={`text-center lg:w-[33.33%] w-full rounded-[5px] border-[2px] disabled:cursor-not-allowed disabled:opacity-50 bg-[#202329] py-2 text-xs font-chakra text-white text-opacity-90 transition duration-200 ${
                         risk === "high"
                           ? "border-[#7839C5]"
                           : "border-transparent hover:border-[#7839C580]"
                       }`}
+                      disabled={disableInput}
                     >
                       High
-                    </div>
+                    </button>
                   </div>
                 </div>
 
@@ -431,10 +446,10 @@ export default function Wheel() {
                       min={10}
                       max={50}
                       step={10}
-                      disabled={isRolling || startAuto}
+                      disabled={isRolling || startAuto || disableInput}
                       value={segments}
                       onChange={(e) => setSegments(parseInt(e.target.value))}
-                      className="defaultSlider absolute top-[-8px] w-full bg-transparent appearance-none z-20"
+                      className="defaultSlider absolute top-[-8px] w-full bg-transparent appearance-none z-20 disabled:cursor-not-allowed disabled:opacity-50"
                     />
                     <div
                       className="absolute rounded-l-full h-[5px] bg-[#9945ff] z-10"
