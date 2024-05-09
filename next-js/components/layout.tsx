@@ -59,6 +59,7 @@ export default function Layout({ children }: LayoutProps) {
     verifyModalData,
     sidebar,
     setSidebar,
+    setAutoBetCount,
     setStartAuto,
     openPFModal,
     setOpenPFModal,
@@ -85,6 +86,13 @@ export default function Layout({ children }: LayoutProps) {
       status: "",
     },
   });
+
+  const scrollToTop = () => {
+    const scrollElement = document.querySelector("#scroll-element");
+    if (scrollElement) {
+      scrollElement.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  };
 
   useEffect(() => {
     //sound pre-loader
@@ -116,6 +124,8 @@ export default function Layout({ children }: LayoutProps) {
   };
 
   useEffect(() => {
+    scrollToTop();
+    setAutoBetCount(0);
     setStartAuto(false);
   }, [router.pathname]);
 
@@ -126,7 +136,6 @@ export default function Layout({ children }: LayoutProps) {
     }
     setCurrentGame(game);
   }, [session?.user, showWalletModal, game]);
-
 
   return (
     <>
@@ -140,6 +149,10 @@ export default function Layout({ children }: LayoutProps) {
             <SubHeader />
             <main className="marker:w-full h-full md:pt-[4.5%] lg:pt-0 max-h-[calc(100%-1rem)] lg:max-h-[calc(100%-5.5rem)]">
               <section className="w-full h-full overflow-y-auto no-scrollbar">
+                <div
+                  id="scroll-element"
+                  className="w-full min-h-[1px] bg-transparent"
+                />
                 {children}
                 <div className="w-full">
                   <Footer />
