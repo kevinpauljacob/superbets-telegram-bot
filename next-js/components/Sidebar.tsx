@@ -117,7 +117,7 @@ export default function Sidebar({
             </div>
             <div
               onClick={() => {
-                // router.push("/");
+                router.push("/");
                 setSidebar(true);
               }}
               className={`${topIconCss}`}
@@ -126,7 +126,7 @@ export default function Sidebar({
             </div>
             <div
               onClick={() => {
-                // router.push("/");
+                router.push("/");
                 setSidebar(true);
               }}
               className={`${topIconCss}`}
@@ -135,13 +135,22 @@ export default function Sidebar({
             </div>
           </div>
           <div className="w-full flex flex-col items-center mb-2">
-            <div className={`${bottomIconCss}`}>
+            <div
+              className={`${bottomIconCss}`}
+              onClick={() => router.push("/")}
+            >
               <Twitter className={`${closedIconCss}`} />
             </div>
-            <div className={`${bottomIconCss}`}>
+            <div
+              className={`${bottomIconCss}`}
+              onClick={() => router.push("/")}
+            >
               <Birdeye className={`${closedIconCss}`} />
             </div>
-            <div className={`${bottomIconCss}`}>
+            <div
+              className={`${bottomIconCss}`}
+              onClick={() => router.push("/")}
+            >
               <Telegram className={`${closedIconCss}`} />
             </div>
           </div>
@@ -432,8 +441,8 @@ export const OpenSidebar = ({
               </ul>
             )}
           </div>
-          <SidebarOpenElement text={"DCA"} Icon={Dollar} />
-          <SidebarOpenElement text={"Roadmap"} Icon={Flag} />
+          <SidebarOpenElement text={"DCA"} Icon={Dollar} link="/" />
+          <SidebarOpenElement text={"Roadmap"} Icon={Flag} link="/" />
         </div>
       </div>
 
@@ -442,15 +451,27 @@ export const OpenSidebar = ({
           sidebar ? "fadeInUp" : "fadeOutDown"
         } w-full flex flex-col p-4 mb-0`}
       >
-        <Link href="/" className={`${openLinkCss}`}>
+        <Link
+          href="https://twitter.com/"
+          className={`${openLinkCss}`}
+          target="_blank"
+        >
           <Twitter className="w-5 h-5" />
           Twitter
         </Link>
-        <Link href="/" className={`${openLinkCss}`}>
+        <Link
+          href="https://birdeye.so/"
+          className={`${openLinkCss}`}
+          target="_blank"
+        >
           <Birdeye className="w-5 h-5 text-white" />
           Birdeye
         </Link>
-        <Link href="/" className={`${openLinkCss}`}>
+        <Link
+          href="https://web.telegram.org/a/"
+          className={`${openLinkCss}`}
+          target="_blank"
+        >
           <Telegram className="w-5 h-5" />
           Telegram
         </Link>
