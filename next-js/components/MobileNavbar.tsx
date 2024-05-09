@@ -154,7 +154,7 @@ export default function MobileNavbar() {
                 router.pathname === "/" ? "text-[#8033D7]" : "text-white/60"
               } mt-1.5`}
             >
-              Dashboard
+              Home
             </p>
           </li>
         </Link>
