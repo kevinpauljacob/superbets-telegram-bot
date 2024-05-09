@@ -21,8 +21,14 @@ export function Header({
 }) {
   const wallet = useWallet();
   const router = useRouter();
-  const { language, setLanguage, userData, getUserDetails, setMobileSidebar } =
-    useGlobalContext();
+  const {
+    language,
+    setLanguage,
+    userData,
+    getUserDetails,
+    mobileSidebar,
+    setMobileSidebar,
+  } = useGlobalContext();
   const [langSelect, setLangSelect] = useState(false);
 
   useEffect(() => {
@@ -45,8 +51,8 @@ export function Header({
           <div className="flex flex-row items-center cursor-pointer gap-2">
             <div
               onClick={() => {
-                router.push("/");
-                // setMobileSidebar(false);
+                if (mobileSidebar === true) setMobileSidebar(false);
+                else router.push("/");
               }}
               className="flex sm:hidden relative"
             >
