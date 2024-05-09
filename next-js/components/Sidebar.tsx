@@ -55,6 +55,7 @@ export default function Sidebar({
     >
       {sidebar ? (
         <OpenSidebar
+          sidebar={sidebar}
           showExitTokens={showExitTokens}
           setShowExitTokens={setShowExitTokens}
           showPlayTokens={showPlayTokens}
@@ -67,7 +68,12 @@ export default function Sidebar({
           } flex flex-col items-center justify-between w-full h-full`}
         >
           <div className="w-full flex flex-col items-center">
-            <div className="h-[4.4rem] w-full flex items-center justify-center">
+            <div
+              onClick={() => {
+                setSidebar(true);
+              }}
+              className="h-[4.4rem] w-full flex items-center justify-center"
+            >
               <div className="cursor-pointer transition-all flex items-center justify-center rounded-md w-12 h-12 bg-[#212121] hover:bg-[#1E2024] focus:bg-[#1E2024] text-[#ababac] hover:text-[#9945FF] focus:text-[#9945FF]">
                 <Image
                   src={"/assets/logowhite.svg"}
@@ -80,8 +86,12 @@ export default function Sidebar({
             </div>
             <div
               onClick={() => {
-                router.push("/");
-                setSidebar(true);
+                if (router.pathname === "/") {
+                  setSidebar(true);
+                } else {
+                  router.push("/");
+                  setSidebar(false);
+                }
               }}
               className={`${topIconCss}`}
             >
@@ -167,7 +177,7 @@ export const SidebarOpenElement = ({
       }}
       className="w-full transition-all cursor-pointer rounded-md flex items-end gap-3 pl-4 py-2 bg-transparent hover:bg-[#1f2024] focus:bg-[#1f2024] group"
     >
-      <Icon className="w-5 h-5 transition-all text-white/90" />
+      <Icon className="group-hover:text-[#9945FF] group-focus:text-[#9945FF] w-5 h-5 transition-all text-white/90" />
       <span className="transition-all text-sm leading-[1rem] font-changa font-medium tracking-wider text-white text-opacity-90 group-hover:text-opacity-100 group-focus:text-opacity-100">
         {text}
       </span>
@@ -176,11 +186,13 @@ export const SidebarOpenElement = ({
 };
 
 export const OpenSidebar = ({
+  sidebar,
   showExitTokens,
   setShowExitTokens,
   showPlayTokens,
   setShowPlayTokens,
 }: {
+  sidebar: boolean;
   showExitTokens: boolean;
   setShowExitTokens: React.Dispatch<React.SetStateAction<boolean>>;
   showPlayTokens: boolean;
@@ -188,7 +200,7 @@ export const OpenSidebar = ({
 }) => {
   const wallet = useWallet();
   const router = useRouter();
-  const { fomoPrice, sidebar } = useGlobalContext();
+  const { fomoPrice } = useGlobalContext();
 
   const [exitGames, setExitGames] = useState<Game[]>([
     {

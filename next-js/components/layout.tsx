@@ -133,7 +133,7 @@ export default function Layout({ children }: LayoutProps) {
       <section className="relative flex flex-1 max-h-[calc(100%-6.25rem)]">
         <Sidebar sidebar={sidebar} setSidebar={setSidebar} />
         <section className="w-full relative overflow-hidden">
-          <MobileSidebar mobileSidebar={sidebar} setSidebar={setSidebar} />
+          <MobileSidebar />
           <section className="w-full h-full">
             <SubHeader />
             <main className="marker:w-full h-full md:pt-[4.5%] lg:pt-0 max-h-[calc(100%-1rem)] lg:max-h-[calc(100%-5.5rem)]">
@@ -148,7 +148,7 @@ export default function Layout({ children }: LayoutProps) {
         </section>
       </section>
       <div className="w-full fixed bottom-0 flex md:hidden z-[1000]">
-        <MobileNavbar sidebar={sidebar} toggleSidebar={toggleSidebar} />
+        <MobileNavbar />
       </div>
       {showWalletModal && <BalanceModal />}
 
