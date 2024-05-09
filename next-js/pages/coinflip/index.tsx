@@ -197,6 +197,8 @@ export default function Flip() {
         autoBetProfit >= autoStopProfit
       ) {
         showInfoToast("Profit limit reached.");
+        setAutoBetCount(0);
+        setStartAuto(false);
         return;
       }
       if (
@@ -206,6 +208,8 @@ export default function Flip() {
         autoBetProfit <= -autoStopLoss
       ) {
         showInfoToast("Loss limit reached.");
+        setAutoBetCount(0);
+        setStartAuto(false);
         return;
       }
       setTimeout(() => {
