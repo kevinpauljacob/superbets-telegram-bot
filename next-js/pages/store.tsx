@@ -61,6 +61,10 @@ export default function Store() {
     { src: "image6.jpg", name: "Product 6", points: "600" },
   ];
 
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   return (
     <div className="text-white w-full flex flex-col items-start justify-center p-5 sm:p-5 lg:pr-16 pb-10 overflow-hidden min-h-screen">
       <div className="mb-7 w-full">

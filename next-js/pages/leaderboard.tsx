@@ -20,6 +20,10 @@ export default function Leaderboard() {
   const { language, userData, pointTier, setPointTier } = useGlobalContext();
 
   useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
+  useEffect(() => {
     let points = userData?.points ?? 0;
     const tier = Object.entries(pointTiers).reduce((prev, next) => {
       return points >= next[1]?.limit ? next : prev;
@@ -32,6 +36,7 @@ export default function Leaderboard() {
       label: tier[1].label,
     });
   }, [userData]);
+
 
   return (
     <div className="flex flex-col items-center w-full overflow-hidden min-h-screen flex-1 relative">
