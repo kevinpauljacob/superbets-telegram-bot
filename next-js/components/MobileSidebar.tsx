@@ -35,10 +35,11 @@ export default function Sidebar() {
   return (
     <div
       className={`${
-        mobileSidebar ? "fadeIn fixed" : "fadeOutDown hidden"
-      } top-[6.6rem] z-20 md:hidden bg-[#121418] no-scrollbar overflow-y-auto text-white flex flex-col justify-between w-full h-[calc(100vh-11rem)]`}
+        mobileSidebar ? "top-[6.6rem]" : "fadeOutDown top-[1000px]"
+      } fixed transition-all duration-500 ease-in-out z-20 md:hidden bg-[#121418] no-scrollbar overflow-y-auto text-white flex flex-col justify-between w-full h-[calc(100vh-11rem)]`}
     >
       <OpenSidebar
+        sidebar={mobileSidebar}
         showExitTokens={showExitTokens}
         setShowExitTokens={setShowExitTokens}
         showPlayTokens={showPlayTokens}

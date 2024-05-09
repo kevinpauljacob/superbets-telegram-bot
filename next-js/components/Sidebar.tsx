@@ -55,6 +55,7 @@ export default function Sidebar({
     >
       {sidebar ? (
         <OpenSidebar
+          sidebar={sidebar}
           showExitTokens={showExitTokens}
           setShowExitTokens={setShowExitTokens}
           showPlayTokens={showPlayTokens}
@@ -176,11 +177,13 @@ export const SidebarOpenElement = ({
 };
 
 export const OpenSidebar = ({
+  sidebar,
   showExitTokens,
   setShowExitTokens,
   showPlayTokens,
   setShowPlayTokens,
 }: {
+  sidebar: boolean;
   showExitTokens: boolean;
   setShowExitTokens: React.Dispatch<React.SetStateAction<boolean>>;
   showPlayTokens: boolean;
@@ -188,7 +191,7 @@ export const OpenSidebar = ({
 }) => {
   const wallet = useWallet();
   const router = useRouter();
-  const { fomoPrice, sidebar } = useGlobalContext();
+  const { fomoPrice } = useGlobalContext();
 
   const [exitGames, setExitGames] = useState<Game[]>([
     {
