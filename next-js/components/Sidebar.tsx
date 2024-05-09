@@ -85,8 +85,12 @@ export default function Sidebar({
             </div>
             <div
               onClick={() => {
-                router.push("/");
-                setSidebar(true);
+                if (router.pathname === "/") {
+                  setSidebar(true);
+                } else {
+                  router.push("/");
+                  setSidebar(false);
+                }
               }}
               className={`${topIconCss}`}
             >
