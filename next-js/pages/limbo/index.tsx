@@ -28,6 +28,7 @@ import { soundAlert } from "@/utils/soundUtils";
 import ConfigureAutoButton from "@/components/ConfigureAutoButton";
 import AutoCount from "@/components/AutoCount";
 import MultiplierInput from "@/components/games/MultiplierInput";
+import { errorCustom, warningCustom } from "@/components/toasts/ToastGroup";
 
 function useInterval(callback: Function, delay: number | null) {
   const savedCallback = useRef<Function | null>(null);
@@ -160,7 +161,12 @@ export default function Limbo() {
             // update count
             if (typeof autoBetCount === "number")
               setAutoBetCount(autoBetCount > 0 ? autoBetCount - 1 : 0);
-            else setAutoBetCount(autoBetCount + 1);
+            else
+              setAutoBetCount(
+                autoBetCount.length > 12
+                  ? autoBetCount.slice(0, 5)
+                  : autoBetCount + 1,
+              );
           }
         } else {
           setDisplayMultiplier(currentMultiplier);
@@ -174,19 +180,19 @@ export default function Limbo() {
 
   const bet = async () => {
     if (!wallet.publicKey) {
-      toast.error("Wallet not connected");
+      errorCustom("Wallet not connected");
       return;
     }
     if (betAmt === 0) {
-      toast.error("Set Amount.");
+      errorCustom("Set Amount.");
       return;
     }
     if (inputMultiplier < multiplierLimits[0]) {
-      toast.error("Multiplier should be at least 1.02");
+      errorCustom("Multiplier should be at least 1.02");
       return;
     }
     if (inputMultiplier > multiplierLimits[1]) {
-      toast.error("Multiplier cannot be greater than 50");
+      errorCustom("Multiplier cannot be greater than 50");
       return;
     }
     setLoading(true);
@@ -214,7 +220,7 @@ export default function Limbo() {
       setRefresh(true);
       //auto options are in the useEffect to modify displayMultiplier
     } catch (e) {
-      toast.error("Could not make Bet.");
+      errorCustom("Could not make Bet.");
       setFlipping(false);
       setLoading(false);
       setResult(null);
@@ -289,7 +295,7 @@ export default function Limbo() {
         (typeof autoBetCount === "number" && autoBetCount > 0))
     ) {
       if (betAmt === 0) {
-        toast.error("Set Amount.");
+        errorCustom("Set Amount.");
         return;
       }
       console.log("Auto betting. config: ", useAutoConfig);
@@ -312,6 +318,8 @@ export default function Limbo() {
             {startAuto && (
               <div
                 onClick={() => {
+                  soundAlert("/sounds/betbutton.wav");
+                  warningCustom("Auto bet stopped");
                   setAutoBetCount(0);
                   setStartAuto(false);
                 }}
@@ -398,6 +406,8 @@ export default function Limbo() {
                   {startAuto && (
                     <div
                       onClick={() => {
+                        soundAlert("/sounds/betbutton.wav");
+                        warningCustom("Auto bet stopped");
                         setAutoBetCount(0);
                         setStartAuto(false);
                       }}

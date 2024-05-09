@@ -22,6 +22,11 @@ import Bets from "../../components/games/Bets";
 import { soundAlert } from "@/utils/soundUtils";
 import ConfigureAutoButton from "@/components/ConfigureAutoButton";
 import AutoCount from "@/components/AutoCount";
+import {
+  errorCustom,
+  successCustom,
+  warningCustom,
+} from "@/components/toasts/ToastGroup";
 
 export default function Keno() {
   const wallet = useWallet();
@@ -91,7 +96,7 @@ export default function Keno() {
       if (chosenNumbers.length < 10) {
         setChosenNumbers((prevNumbers) => [...prevNumbers, number]);
       } else {
-        toast.error("10 numbers can be selected at max");
+        errorCustom("10 numbers can be selected at max");
       }
     }
   };
@@ -172,15 +177,15 @@ export default function Keno() {
   const handleBet = async () => {
     if (wallet.connected) {
       if (!wallet.publicKey) {
-        toast.error("Wallet not connected");
+        errorCustom("Wallet not connected");
         return;
       }
       if (coinData && coinData[0].amount < betAmt) {
-        toast.error("Insufficient balance for bet !");
+        errorCustom("Insufficient balance for bet !");
         return;
       }
       if (betAmt === 0) {
-        toast.error("Set Amount.");
+        errorCustom("Set Amount.");
         return;
       }
       setIsRolling(true);
@@ -204,7 +209,7 @@ export default function Keno() {
           await response.json();
 
         if (success != true) {
-          toast.error(message);
+          errorCustom(message);
           throw new Error(message);
         }
 
@@ -223,8 +228,8 @@ export default function Keno() {
             setStrikeNumbers((prevNumbers) => [...prevNumbers, number]);
           }
         }
-        if (result == "Won") toast.success(message, { duration: 2000 });
-        else toast.error(message, { duration: 2000 });
+        if (result == "Won") successCustom(message);
+        else errorCustom(message);
 
         const win = result === "Won";
         if (win) soundAlert("/sounds/win.wav");
@@ -253,7 +258,12 @@ export default function Keno() {
           // update count
           if (typeof autoBetCount === "number")
             setAutoBetCount(autoBetCount > 0 ? autoBetCount - 1 : 0);
-          else setAutoBetCount(autoBetCount + 1);
+          else
+            setAutoBetCount(
+              autoBetCount.length > 12
+                ? autoBetCount.slice(0, 5)
+                : autoBetCount + 1,
+            );
         }
       } catch (error) {
         setIsRolling(false);
@@ -324,7 +334,7 @@ export default function Keno() {
         (typeof autoBetCount === "number" && autoBetCount > 0))
     ) {
       if (betAmt === 0) {
-        toast.error("Set Amount.");
+        errorCustom("Set Amount.");
         return;
       }
       console.log("Auto betting. config: ", useAutoConfig);
@@ -373,6 +383,8 @@ export default function Keno() {
             {startAuto && (
               <div
                 onClick={() => {
+                  soundAlert("/sounds/betbutton.wav");
+                  warningCustom("Auto bet stopped");
                   setAutoBetCount(0);
                   setStartAuto(false);
                 }}
@@ -513,6 +525,8 @@ export default function Keno() {
                   {startAuto && (
                     <div
                       onClick={() => {
+                        soundAlert("/sounds/betbutton.wav");
+                        warningCustom("Auto bet stopped");
                         setAutoBetCount(0);
                         setStartAuto(false);
                       }}

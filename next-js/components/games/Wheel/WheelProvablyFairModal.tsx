@@ -13,6 +13,7 @@ import Arc from "@/components/games/Wheel/Arc";
 import { riskToChance } from "@/components/games/Wheel/Segments";
 import { verify } from "tweetnacl";
 import CheckPF from "@/public/assets/CheckPF.svg";
+import { errorCustom } from "@/components/toasts/ToastGroup";
 
 export interface PFModalData {
   activeGameSeed: {
@@ -149,7 +150,7 @@ export default function WheelProvablyFairModal({
 
   const handleSetClientSeed = async () => {
     if (!/^[\x00-\x7F]*$/.test(newClientSeed) || newClientSeed.trim() === "")
-      return toast.error("Invalid client seed");
+      return errorCustom("Invalid client seed");
 
     let data = await fetch(`/api/games/gameSeed/change`, {
       method: "POST",

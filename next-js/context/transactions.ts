@@ -13,6 +13,7 @@ import toast from "react-hot-toast";
 import { WalletContextState } from "@solana/wallet-adapter-react";
 import { translationsMap } from "@/components/GlobalContext";
 import { GameType } from "@/utils/provably-fair";
+import { errorCustom, successCustom } from "@/components/toasts/ToastGroup";
 
 export const connection = new Connection(process.env.NEXT_PUBLIC_RPC!);
 
@@ -191,12 +192,12 @@ export const stakeFOMO = async (
   tokenMint: string,
 ) => {
   if (amount == 0) {
-    toast.error("Please enter an amount greater than 0");
+    errorCustom("Please enter an amount greater than 0");
     return { success: true, message: "Please enter an amount greater than 0" };
   }
 
   if (!wallet.publicKey) {
-    toast.error("Wallet not connected");
+    errorCustom("Wallet not connected");
     return { success: true, message: "Wallet not connected" };
   }
 
@@ -234,18 +235,18 @@ export const stakeFOMO = async (
 
     if (success === false) {
       toast.dismiss(toastId);
-      toast.error(message);
+      errorCustom(message);
       throw new Error(message);
     }
 
     toast.dismiss(toastId);
 
-    toast.success("Stake successfull!");
+    successCustom("Stake successfull!");
 
     return { success: true, message };
   } catch (error) {
     toast.dismiss(toastId);
-    toast.error("Unexpected error!");
+    errorCustom("Unexpected error!");
     return { success: false, message: error };
   }
 };
@@ -256,12 +257,12 @@ export const unstakeFOMO = async (
   tokenMint: string,
 ) => {
   if (amount == 0) {
-    toast.error("Please enter an amount greater than 0");
+    errorCustom("Please enter an amount greater than 0");
     return { success: true, message: "Please enter an amount greater than 0" };
   }
 
   if (!wallet.publicKey) {
-    toast.error("Wallet not connected");
+    errorCustom("Wallet not connected");
     return { success: true, message: "Wallet not connected" };
   }
 
@@ -299,19 +300,19 @@ export const unstakeFOMO = async (
 
     if (success === false) {
       toast.dismiss(toastId);
-      toast.error(message);
+      errorCustom(message);
       throw new Error(message);
     }
 
     toast.dismiss(toastId);
 
-    toast.success("Unstake successfull!");
+    successCustom("Unstake successfull!");
 
     return { success: true, message };
   } catch (error) {
     toast.dismiss(toastId);
 
-    toast.error("Unexpected error!");
+    errorCustom("Unexpected error!");
 
     return { success: true, message: error };
   }

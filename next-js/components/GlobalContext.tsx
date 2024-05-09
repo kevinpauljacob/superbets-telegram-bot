@@ -11,6 +11,7 @@ import toast from "react-hot-toast";
 import { connection } from "../context/gameTransactions";
 import { LAMPORTS_PER_SOL, PublicKey } from "@solana/web3.js";
 import { TOKEN_PROGRAM_ID } from "@solana/spl-token";
+import { errorCustom } from "./toasts/ToastGroup";
 
 interface PointTier {
   index: number;
@@ -223,7 +224,7 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
       } catch (e) {
         console.log(e);
         setFomoPrice(0);
-        toast.error("Could not fetch fomo live price.");
+        errorCustom("Could not fetch fomo live price.");
       }
     };
 
@@ -269,7 +270,7 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
         })[0];
         setHouseEdge(houseEdgeTiers[parseInt(userTier)]);
       } catch (e) {
-        // toast.error("Unable to fetch balance.");
+        // errorCustom("Unable to fetch balance.");
         console.error(e);
       }
   };
@@ -290,9 +291,9 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
       const { success, message, data } = await res.json();
       // console.log("Data: ", data);
       if (success) setGlobalInfo(data);
-      // else toast.error(message);
+      // else errorCustom(message);
     } catch (e) {
-      // toast.error("Unable to fetch balance.");
+      // errorCustom("Unable to fetch balance.");
       console.error(e);
     }
   };
@@ -304,7 +305,7 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
           (await connection.getBalance(wallet.publicKey)) / LAMPORTS_PER_SOL,
         );
       } catch (e) {
-        toast.error("Unable to fetch balance.");
+        errorCustom("Unable to fetch balance.");
         console.error(e);
       }
   };
@@ -353,7 +354,7 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
         if (data.success) return data;
         else return null;
       } catch (e) {
-        toast.error("Unable to fetch provably fair data.");
+        errorCustom("Unable to fetch provably fair data.");
         return null;
       }
   };

@@ -33,6 +33,7 @@ import KenoProvablyFairModal from "./games/Keno/KenoProvablyFairModal";
 import Footer from "./Footer";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { soundAlert } from "@/utils/soundUtils";
+import { errorCustom, successCustom, warningCustom } from "./toasts/ToastGroup";
 
 interface LayoutProps {
   children: ReactNode;
@@ -125,6 +126,7 @@ export default function Layout({ children }: LayoutProps) {
     }
     setCurrentGame(game);
   }, [session?.user, showWalletModal, game]);
+
 
   return (
     <>
