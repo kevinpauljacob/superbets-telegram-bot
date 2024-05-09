@@ -244,17 +244,22 @@ export default function Flip() {
       return;
     }
     if (betType) {
-      if (
-        betSetting === "auto" &&
-        ((typeof autoBetCount === "string" && autoBetCount.includes("inf")) ||
-          (typeof autoBetCount === "number" && autoBetCount > 0))
-      ) {
+      if (betSetting === "auto") {
         if (betAmt === 0) {
           errorCustom("Set Amount.");
           return;
         }
-        console.log("Auto betting. config: ", useAutoConfig);
-        setStartAuto(true);
+        if (typeof autoBetCount === "number" && autoBetCount <= 0) {
+          errorCustom("Set Bet Count.");
+          return;
+        }
+        if (
+          (typeof autoBetCount === "string" && autoBetCount.includes("inf")) ||
+          (typeof autoBetCount === "number" && autoBetCount > 0)
+        ) {
+          console.log("Auto betting. config: ", useAutoConfig);
+          setStartAuto(true);
+        }
       } else {
         setLoading(true);
         setFlipping(true);
@@ -431,11 +436,6 @@ export default function Flip() {
                     disabled={
                       !betType ||
                       loading ||
-                      (betSetting === "auto" &&
-                        ((typeof autoBetCount === "number" &&
-                          autoBetCount <= 0) ||
-                          (typeof autoBetCount === "string" &&
-                            !autoBetCount.includes("inf")))) ||
                       (coinData && coinData[0].amount < 0.0001) ||
                       (betAmt !== undefined &&
                         maxBetAmt !== undefined &&
