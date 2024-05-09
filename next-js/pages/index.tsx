@@ -22,8 +22,6 @@ import StoreBanner from "@/components/Banner";
 import FomoExit from "@/components/FomoExit";
 import FomoPlay from "@/components/FomoPlay";
 import FomoSupply from "@/components/FomoSupply";
-import Footer from "@/components/Footer";
-
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -55,7 +53,7 @@ export default function Home() {
 
   return (
     <>
-      <div className="flex flex-col lg:flex-row text-white w-full overflow-hidden min-h-screen relative overflow-x-hidden p-4 xl:p-6">
+      <div className="flex flex-col lg:flex-row text-white w-full overflow-hidden relative overflow-x-hidden p-4 xl:p-6">
         <div className="flex flex-1 flex-col md:px-[2.5%]">
           <div className="">
             <StoreBanner />
@@ -70,9 +68,6 @@ export default function Home() {
         {/* <div className="lg:ml-4">
         <FomoSupply />
       </div> */}
-      </div>
-      <div className="w-full">
-        <Footer />
       </div>
     </>
   );

@@ -81,7 +81,7 @@ export default function Limbo() {
   const multiplierLimits = [1.02, 50];
 
   const [userInput, setUserInput] = useState<number | undefined>();
-  const [betAmt, setBetAmt] = useState(0.2);
+  const [betAmt, setBetAmt] = useState<number | undefined>();
 
   const [flipping, setFlipping] = useState(false);
   const [result, setResult] = useState<string | null>(null);
@@ -129,19 +129,27 @@ export default function Limbo() {
           });
 
           // auto options
-          if (betSetting === "auto") {
+          if (betSetting === "auto" && betAmt !== undefined) {
             if (useAutoConfig && autoWinChange && win) {
               setBetAmt(
                 autoWinChangeReset
                   ? userInput!
-                  : betAmt + (autoWinChange * betAmt) / 100.0,
+                  : parseFloat(
+                      (betAmt + (autoWinChange * betAmt) / 100.0).toPrecision(
+                        2,
+                      ),
+                    ),
               );
             } else if (useAutoConfig && autoLossChange && !win) {
               setAutoBetProfit(autoBetProfit - betAmt);
               setBetAmt(
                 autoLossChangeReset
                   ? userInput!
-                  : betAmt + (autoLossChange * betAmt) / 100.0,
+                  : parseFloat(
+                      (betAmt + (autoLossChange * betAmt) / 100.0).toPrecision(
+                        2,
+                      ),
+                    ),
               );
             }
             // update profit / loss
@@ -189,7 +197,7 @@ export default function Limbo() {
       // function to place bet
       const response = await limboBet(
         wallet,
-        betAmt,
+        betAmt!,
         parseFloat((100 / inputMultiplier).toFixed(8)),
       );
 
@@ -230,7 +238,7 @@ export default function Limbo() {
   };
 
   useEffect(() => {
-    setBetAmt(userInput ?? 0);
+    setBetAmt(userInput);
   }, [userInput]);
 
   useEffect(() => {
@@ -248,6 +256,8 @@ export default function Limbo() {
         autoBetProfit >= autoStopProfit
       ) {
         showInfoToast("Profit limit reached.");
+        setAutoBetCount(0);
+        setStartAuto(false);
         return;
       }
       if (
@@ -257,6 +267,8 @@ export default function Limbo() {
         autoBetProfit <= -autoStopLoss
       ) {
         showInfoToast("Loss limit reached.");
+        setAutoBetCount(0);
+        setStartAuto(false);
         return;
       }
       setTimeout(() => {
@@ -348,7 +360,7 @@ export default function Limbo() {
               >
                 {/* amt input  */}
                 <BetAmount
-                  betAmt={userInput}
+                  betAmt={betAmt}
                   setBetAmt={setUserInput}
                   currentMultiplier={inputMultiplier}
                   leastMultiplier={1.02}

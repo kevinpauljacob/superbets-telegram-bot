@@ -197,6 +197,8 @@ export default function Flip() {
         autoBetProfit >= autoStopProfit
       ) {
         showInfoToast("Profit limit reached.");
+        setAutoBetCount(0);
+        setStartAuto(false);
         return;
       }
       if (
@@ -206,6 +208,8 @@ export default function Flip() {
         autoBetProfit <= -autoStopLoss
       ) {
         showInfoToast("Loss limit reached.");
+        setAutoBetCount(0);
+        setStartAuto(false);
         return;
       }
       setTimeout(() => {
@@ -284,6 +288,10 @@ export default function Flip() {
               disabled={
                 !betType ||
                 loading ||
+                (betSetting === "auto" &&
+                  ((typeof autoBetCount === "number" && autoBetCount <= 0) ||
+                    (typeof autoBetCount === "string" &&
+                      !autoBetCount.includes("inf")))) ||
                 (coinData && coinData[0].amount < 0.0001) ||
                 (betAmt !== undefined &&
                   maxBetAmt !== undefined &&
@@ -405,9 +413,11 @@ export default function Flip() {
                     disabled={
                       !betType ||
                       loading ||
-                      (typeof autoBetCount === "number" && autoBetCount <= 0) ||
-                      (typeof autoBetCount === "string" &&
-                        !autoBetCount.includes("inf")) ||
+                      (betSetting === "auto" &&
+                        ((typeof autoBetCount === "number" &&
+                          autoBetCount <= 0) ||
+                          (typeof autoBetCount === "string" &&
+                            !autoBetCount.includes("inf")))) ||
                       (coinData && coinData[0].amount < 0.0001) ||
                       (betAmt !== undefined &&
                         maxBetAmt !== undefined &&
