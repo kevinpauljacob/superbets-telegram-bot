@@ -280,6 +280,10 @@ export default function Flip() {
               disabled={
                 !betType ||
                 loading ||
+                (betSetting === "auto" &&
+                  ((typeof autoBetCount === "number" && autoBetCount <= 0) ||
+                    (typeof autoBetCount === "string" &&
+                      !autoBetCount.includes("inf")))) ||
                 (coinData && coinData[0].amount < 0.0001) ||
                 (betAmt !== undefined &&
                   maxBetAmt !== undefined &&
@@ -396,9 +400,11 @@ export default function Flip() {
                     disabled={
                       !betType ||
                       loading ||
-                      (typeof autoBetCount === "number" && autoBetCount <= 0) ||
-                      (typeof autoBetCount === "string" &&
-                        !autoBetCount.includes("inf")) ||
+                      (betSetting === "auto" &&
+                        ((typeof autoBetCount === "number" &&
+                          autoBetCount <= 0) ||
+                          (typeof autoBetCount === "string" &&
+                            !autoBetCount.includes("inf")))) ||
                       (coinData && coinData[0].amount < 0.0001) ||
                       (betAmt !== undefined &&
                         maxBetAmt !== undefined &&
