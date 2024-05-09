@@ -129,7 +129,7 @@ export default function Sidebar({
                 router.push("/");
                 setSidebar(true);
               }}
-              className={`${topIconCss}`}
+              className={`${topIconCss} opacity-50`}
             >
               <Flag className={`${closedIconCss}`} />
             </div>
@@ -200,7 +200,7 @@ export const OpenSidebar = ({
 }) => {
   const wallet = useWallet();
   const router = useRouter();
-  const { fomoPrice,setSidebar ,setMobileSidebar} = useGlobalContext();
+  const { fomoPrice, setSidebar, setMobileSidebar } = useGlobalContext();
 
   const [exitGames, setExitGames] = useState<Game[]>([
     {
@@ -322,16 +322,16 @@ export const OpenSidebar = ({
             sidebar ? "fadeInUp" : "fadeOutDown"
           } w-full flex flex-col p-4 gap-1.5`}
         >
-        <div
-        onClick={()=>{
-          if(router.pathname === '/'){
-            setSidebar(false)
-            setMobileSidebar(false)
-          }
-        }}>
-        <SidebarOpenElement text={"Home"} Icon={Home} link="/" />
-
-        </div>
+          <div
+            onClick={() => {
+              if (router.pathname === "/") {
+                setSidebar(false);
+                setMobileSidebar(false);
+              }
+            }}
+          >
+            <SidebarOpenElement text={"Home"} Icon={Home} link="/" />
+          </div>
           <div className={`mt-0`}>
             <div className="w-full transition-all cursor-pointer rounded-md flex items-center justify-between gap-2 pl-4 pr-2 py-2 bg-transparent hover:bg-[#1f2024] focus:bg-[#1f2024] group">
               <div className="flex items-center gap-3">
@@ -442,7 +442,9 @@ export const OpenSidebar = ({
             )}
           </div>
           <SidebarOpenElement text={"DCA"} Icon={Dollar} link="/" />
-          <SidebarOpenElement text={"Roadmap"} Icon={Flag} link="/" />
+          <div className="opacity-50">
+            <SidebarOpenElement text={"Roadmap"} Icon={Flag} link="/" />
+          </div>
         </div>
       </div>
 

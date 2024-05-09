@@ -7,6 +7,7 @@ import BalanceAlert from "./BalanceAlert";
 import { FaInfo } from "react-icons/fa6";
 import { InfoCircle } from "iconsax-react";
 import { BsInfoCircleFill } from "react-icons/bs";
+import DicePointer from "@/public/assets/DicePointer";
 
 export default function BetAmount({
   betAmt,
@@ -144,10 +145,13 @@ export default function BetAmount({
                 }}
               >
                 <div className="relative">
-                  <div className="absolute text-[#94A3B8] text-[11px] font-semibold font-chakra -top-5 -right-[14px] w-max">
+                  <div className="absolute text-[#94A3B8] text-[11px] font-semibold font-chakra -top-7 -right-[14px] w-max">
                     <span className="text-white">
                       {currentMaxBetAmt.toFixed(2)}
                     </span>
+                    <DicePointer
+                      className="relative w-2 h-2 left-1/2 -translate-x-1/2 text-white"
+                    />
                   </div>
                 </div>
               </div>

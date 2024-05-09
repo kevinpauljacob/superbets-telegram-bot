@@ -66,7 +66,7 @@ export function Header({
             </div>
             <RiMenuLine
               onClick={() => toggleSidebar()}
-              className={`hidden sm:flex text-white w-7 h-7 hover:text-[#8033D7] ${sidebar ? 'text-[#8033d7]':'text-white'}`}
+              className={`hidden sm:flex text-white w-7 h-7 hover:text-[#8033D7] transition-all duration-75 ${sidebar ? 'text-[#8033d7]':'text-white'}`}
             />
             <span
               onClick={() => {
