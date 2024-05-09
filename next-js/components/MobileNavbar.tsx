@@ -2,8 +2,7 @@ import Image from "next/image";
 import { useRouter } from "next/router";
 import Menu from "/public/assets/menu.svg";
 import ActiveMenu from "/public/assets/activeMenu.svg";
-// import Staking from "@/public/assets/Staking";
-import Staking from "/public/assets/staking.svg";
+import Staking from "@/public/assets/Staking";
 import ActiveStaking from "/public/assets/activeStaking.svg";
 import Leaderboard from "/public/assets/Leaderboard1.svg";
 import ActiveLeaderboard from "/public/assets/activeLeaderboard.svg";
@@ -29,13 +28,13 @@ export default function MobileNavbar() {
     >
       <ul className="flex flex-1">
         <button
-          className="flex flex-col items-center justify-center border-r border-white/10 w-1/5"
+          className="flex flex-col items-center justify-center border-r border-white/10 w-full"
           onClick={() => toggleSidebar()}
         >
           <li
             className={`${
               mobileSidebar ? "bg-[#1E2024]" : ""
-            } hover:bg-[#1E2024] flex flex-col items-center rounded-md px-4 pt-1.5 pb-1`}
+            } hover:bg-[#1E2024] flex flex-col items-center rounded-md w-[4.7rem] pt-1.5 pb-1`}
           >
             <Image
               src={mobileSidebar ? ActiveMenu : Menu}
@@ -54,18 +53,19 @@ export default function MobileNavbar() {
         </button>
         <Link
           href="/stake"
-          className="flex flex-col items-center justify-center border-r border-white/10 w-1/5"
+          className="flex flex-col items-center justify-center border-r border-white/10 w-full"
         >
           <li
             className={`${
               router.pathname === "/stake" ? "bg-[#1E2024]" : ""
-            } hover:bg-[#1E2024] flex flex-col items-center rounded-md px-4 pt-1.5 pb-1`}
+            } hover:bg-[#1E2024] flex flex-col items-center rounded-md w-[4.7rem] pt-1.5 pb-1`}
           >
-            <Image
-              src={router.pathname === "/stake" ? ActiveStaking : Staking}
-              alt="Menu"
-              width={23}
-              height={30}
+            <Staking
+              className={`w-5 h-5 ${
+                router.pathname === "/stake"
+                  ? "text-[#8033D7]"
+                  : "text-white/60"
+              }`}
             />
             <p
               className={`text-[10px] text-white/60 ${
@@ -80,12 +80,12 @@ export default function MobileNavbar() {
         </Link>
         <Link
           href="/leaderboard"
-          className="flex flex-col items-center justify-center border-r border-white/10 w-1/5"
+          className="flex flex-col items-center justify-center border-r border-white/10 w-full"
         >
           <li
             className={`${
               router.pathname === "/leaderboard" ? "bg-[#1E2024]" : ""
-            } hover:bg-[#1E2024] flex flex-col items-center rounded-md px-2 pt-1.5 pb-1`}
+            } hover:bg-[#1E2024] flex flex-col items-center rounded-md w-[4.7rem] pt-1.5 pb-1`}
           >
             <Image
               src={
@@ -110,12 +110,12 @@ export default function MobileNavbar() {
         </Link>
         <Link
           href="/store"
-          className="flex flex-col items-center justify-center border-r border-white/10 w-1/5"
+          className="flex flex-col items-center justify-center border-r border-white/10 w-full"
         >
           <li
             className={`${
               router.pathname === "/store" ? "bg-[#1E2024]" : ""
-            } hover:bg-[#1E2024] flex flex-col items-center rounded-md px-4 pt-1.5 pb-1`}
+            } hover:bg-[#1E2024] flex flex-col items-center rounded-md w-[4.7rem] pt-1.5 pb-1`}
           >
             <Image
               src={router.pathname === "/store" ? ActiveStore : Store}
@@ -136,12 +136,12 @@ export default function MobileNavbar() {
         </Link>
         <Link
           href="/"
-          className="flex flex-col items-center justify-center w-1/5"
+          className="flex flex-col items-center justify-center w-full"
         >
           <li
             className={`${
               router.pathname === "/" ? "bg-[#1E2024]" : ""
-            } hover:bg-[#1E2024] flex flex-col items-center rounded-md px-3 pt-1.5 pb-1`}
+            } hover:bg-[#1E2024] flex flex-col items-center rounded-md w-[4.7rem] pt-1.5 pb-1`}
           >
             <Image
               src={router.pathname === "/" ? ActiveDashboard : Dashboard}
