@@ -460,6 +460,51 @@ export const translationsMap = {
     ko: "OtterSec의 감사",
     ch: "OtterSec的审计",
   },
+  Coinflip:{
+    ru: "Орел и решка",
+    ko: "동전 던지기",
+    ch: "抛硬币",
+  },
+  Dice:{
+    ru: "Кости",
+    ko: "주사위",
+    ch: "骰子",
+  },
+  Dice2: {
+    ru: "Кости 2",
+    ko: "주사위 2",
+    ch: "骰子2",
+  },
+  Keno: {
+    ru: "Кено",
+    ko: "키노",
+    ch: "Keno",
+  },
+  Limbo: {
+    ru: "Лимбо",
+    ko: "라임보",
+    ch: "Limbo",
+  },
+  Options:{
+    ru: "Опции",
+    ko: "옵션",
+    ch: "选项",
+  },
+  Wheel: {
+    ru: "Колесо",
+    ko: "바퀴",
+    ch: "轮子",
+  },
+  Mines: {
+    ru: "Шахты",
+    ko: "광산",
+    ch: "矿山",
+  },
+  Hilo: {
+    ru: "Хайло",
+    ko: "하이로",
+    ch: "Hilo",
+  },
   English: {
     ru: "Английский",
     ko: "영어",
@@ -665,5 +710,210 @@ export const translationsMap = {
     ru: "FOMO Бог - Упускать возможность - это для смертных, а не для вас.",
     ko: "FOMO 신 - 놓치는 것은 죽었는 사람들을 위한 것입니다, 당신은 아닙니다.",
     ch: "FOMO之神 - 错过是为凡人，而不是你。",
+  },
+  Manual: {
+    ru: "Руководство",
+    ko: "수동",
+    ch: "手动"
+  },
+  Auto: {
+    ru: "Авто",
+    ko: "자동",
+    ch: "自动",
+  },
+  "Bet Amount": {
+    ru: "Сумма ставки",
+    ko: "배팅 금액",
+    ch: "投注金额",
+  },
+  Why: {
+    ru: "Почему",
+    ko: "왜",
+    ch: "为什么",
+  },
+  Max:{
+    ru: "Макс",
+    ko: "최대",
+    ch: "最大",
+  },
+  Bet: {
+    ru: "Ставка",
+    ko: "배팅",
+    ch: "投注",
+  },
+  "Max Bet": {
+    ru: "Максимальная ставка",
+    ko: "최대 베팅",
+    ch: "最大投注",
+  },
+  BET:{
+    ru: "Ставка",
+    ko: "배팅",
+    ch: "投注",
+  },
+  Profit: {
+    ru: "Прибыль",
+    ko: "이익",
+    ch: "盈利",
+  },
+  Chance: {
+    ru: "Шанс",
+    ko: "기회",
+    ch: "机会",
+  },
+  "Rolling the dice": {
+    ru: "Бросок костей",
+    ko: "주사위 굴리는 중",
+    ch: "滚动骰子",
+  },
+  STOP: {
+    ru: "СТОП",
+    ko: "중지",
+    ch: "停止",
+  },
+  "Configure Auto": {
+    ru: "Настроить авто",
+    ko: "자동 설정",
+    ch: "配置自动",
+  },
+  "Number of Bets": {
+    ru: "Количество ставок",
+    ko: "베팅 횟수",
+    ch: "投注次数",
+  },
+  "The maximum amount you can bet with the current multiplier":{
+    ru: "Максимальная сумма, которую вы можете поставить с текущим множителем",
+    ko: "현재 배수로 베팅할 수 있는 최대 금액",
+    ch: "您可以使用当前乘数下注的最大金额",
+  },
+  "The maximum amount you can bet in this game is":{
+    ru: "Максимальная сумма, которую вы можете поставить в этой игре, составляет",
+    ko: "이 게임에서 베팅할 수 있는 최대 금액은",
+    ch: "您可以在此游戏中下注的最高金额为",
+  },
+  "The more you stake, the less fees you pay and the bigger your points multiplier":{
+    ru: "Чем больше вы ставите, тем меньше вы платите комиссий и тем выше ваш множитель очков",
+    ko: "더 많이 걸수록 수수료가 적게 들고 포인트 배수가 커집니다",
+    ch: "投注金额越大，您支付的费用越少，积分乘数越大",
+  }, 
+  "WALLET": {
+    ru: "КОШЕЛЕК",
+    ko: "지갑",
+    ch: "钱包",
+  },
+  "Please deposit funds to start playing. View": {
+    ru: "Пожалуйста, внесите средства, чтобы начать играть. Просмотр",
+    ko: "게임을 시작하려면 자금을 입금하십시오. 보기",
+    ch: "请存入资金开始游戏。查看",
+  },
+  "Choose Upto 5 Faces": {
+    ru: "Выберите до 5 лиц",
+    ko: "최대 5개의 얼굴 선택",
+    ch: "选择最多5张脸",
+  },
+  "5 Faces": {
+    ru: "5 лиц",
+    ko: "5개의 얼굴",
+    ch: "5张脸",
+  },
+  "On Win": {
+    ru: "При победе",
+    ko: "이기면",
+    ch: "赢了",
+  },
+  "Increase by": {
+    ru: "Увеличить на",
+    ko: "증가",
+    ch: "增加",
+  },
+  Reset: {
+    ru: "Сброс",
+    ko: "리셋",
+    ch: "重置",
+  },
+  "On Loss": {
+    ru: "При проигрыше",
+    ko: "패배하면",
+    ch: "失败",
+  },
+  "Stop On Profit": {
+    ru: "Остановиться при прибыли",
+    ko: "이익 중지",
+    ch: "停止盈利",
+  },
+  "Stop On Loss": {
+    ru: "Остановиться при убытке",
+    ko: "손실 중지",
+    ch: "停止损失",
+  },
+  APPLY: {
+    ru: "ПРИМЕНИТЬ",
+    ko: "적용",
+    ch: "应用",
+  },
+  "Reset All": {
+    ru: "СБРОСИТЬ ВСЕ",
+    ko: "모두 리셋",
+    ch: "重置全部",
+  },
+  "All Bets": {
+    ru: "Все ставки",
+    ko: "모든 베팅",
+    ch: "所有投注",
+  },
+  "My Bets": {
+    ru: "Мои ставки",
+    ko: "내 베팅",
+    ch: "我的投注",
+  },
+  Game: {
+    ru: "Игра",
+    ko: "게임",
+    ch: "游戏",
+  },
+  Payout: {
+    ru: "Выплата",
+    ko: "지급",
+    ch: "支付",
+  },
+  Pending: {
+    ru: "В ожидании",
+    ko: "보류 중",
+    ch: "待定",
+  },
+  "FOMO wtf casino games are currently in beta and will be undergoing audit shortly. FOMO wtf EXIT games has gone through audit performed by OtterSec in December 2023.": {
+    ru: "Игры казино FOMO wtf находятся в бета-тестировании и вскоре будут проходить аудит. Игры FOMO wtf EXIT прошли аудит, проведенный OtterSec в декабре 2023 года.",
+    ko: "FOMO wtf 카지노 게임은 현재 베타 버전이며 곧 감사를 받을 예정입니다. FOMO wtf EXIT 게임은 2023년 12월 OtterSec에 의해 감사를 받았습니다.",
+    ch: "FOMO wtf赌场游戏目前处于测试阶段，将很快进行审计。 FOMO wtf EXIT游戏已于2023年12月由OtterSec进行了审计。",
+  },
+  Services:{
+    ru: "Услуги",
+    ko: "서비스",
+    ch: "服务",
+  },
+  Platform: {
+    ru: "Платформа",
+    ko: "플랫폼",
+    ch: "平台",
+  },
+  Community: {
+    ru: "Сообщество",
+    ko: "커뮤니티",
+    ch: "社区",
+  },
+  Docs: {
+    ru: "Документы",
+    ko: "문서",
+    ch: "文档",
+  },
+  Wallet: {
+    ru: "Кошелек",
+    ko: "지갑",
+    ch: "钱包",
+  },
+  "All rights reserved": {
+    ru: "Все права защищены",
+    ko: "모든 권리 보유",
+    ch: "保留所有权利",
   },
 };

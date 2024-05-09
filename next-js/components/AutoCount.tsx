@@ -1,6 +1,7 @@
 import { useForm } from "react-hook-form";
 import { useGlobalContext } from "./GlobalContext";
 import { BsInfinity } from "react-icons/bs";
+import { translator } from "@/context/transactions";
 
 export default function AutoCount({
   loading,
@@ -16,11 +17,12 @@ export default function AutoCount({
     autoBetCount,
     startAuto,
     setAutoBetCount,
+    language
   } = useGlobalContext();
   return (
     <div className="mb-0 flex w-full flex-col">
       <div className="mb-1 flex w-full items-center justify-between text-xs font-changa text-opacity-90">
-        <label className="text-white/90 font-changa">Number of Bets</label>
+        <label className="text-white/90 font-changa">{translator("Number of Bets", language)}</label>
       </div>
 
       <div

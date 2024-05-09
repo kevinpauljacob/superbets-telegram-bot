@@ -1,7 +1,8 @@
 import { useGlobalContext } from "./GlobalContext";
+import { translator } from "@/context/transactions";
 
 export default function ConfigureAutoButton() {
-  const { useAutoConfig, setShowAutoModal } = useGlobalContext();
+  const { useAutoConfig, setShowAutoModal, language } = useGlobalContext();
   return (
     <div
       onClick={() => {
@@ -9,7 +10,7 @@ export default function ConfigureAutoButton() {
       }}
       className={`flex relative mb-[1.4rem] rounded-md w-full h-[3.75rem] lg:h-11 items-center justify-center opacity-75 cursor-pointer text-white text-opacity-90 border-2 border-white bg-white bg-opacity-0 hover:bg-opacity-5`}
     >
-      Configure Auto
+      {translator("Configure Auto", language)}
       <div
         className={`${
           useAutoConfig ? "bg-fomo-green" : "bg-fomo-red"

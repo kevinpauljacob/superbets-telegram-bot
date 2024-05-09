@@ -7,6 +7,7 @@ import Twitter from "@/public/assets/Twitter.svg";
 import logo from "@/public/assets/logowhite.svg";
 import { MdOutlineLanguage } from "react-icons/md";
 import { FaChevronUp } from "react-icons/fa6";
+import {translator} from "@/context/transactions";
 
 function Footer() {
   const { language, setLanguage } = useGlobalContext();
@@ -23,16 +24,14 @@ function Footer() {
           </h3>
           <p className="flex flex-col text-[#94A3B8] font-medium font-chakra text-sm leading-6 text-opacity-80 md:mx-0 md:mt-2 mb-2">
             <span className="md:mt-2 mx-2">
-              FOMO wtf casino games are currently in beta and will be undergoing
-              audit shortly. FOMO wtf EXIT games has gone through audit
-              performed by OtterSec in December 2023.
+              {translator("FOMO wtf casino games are currently in beta and will be undergoing audit shortly. FOMO wtf EXIT games has gone through audit performed by OtterSec in December 2023.", language)}
             </span>
           </p>
         </div>
         <div className="flex items-start justify-start gap-20 lg2:pl-16">
           <div className="mx-2">
             <h3 className="font-semibold font-changa text-white text-base leading-[18px] pb-4 text-opacity-90">
-              Services
+              {translator("Services", language)}
             </h3>
             <div className="text-[#94A3B8] font-chakra flex flex-col items-start justify-start gap-5 text-sm leading-[14px] font-medium text-opacity-80">
               <span
@@ -45,38 +44,38 @@ function Footer() {
                 className="hover:cursor-pointer hover:underline decoration-1"
                 onClick={() => router.push("/")}
               >
-                Docs
+                {translator("Docs", language)}
               </span>
               <span
                 className="hover:cursor-pointer hover:underline decoration-1"
                 onClick={() => router.push("/")}
               >
-                Wallet
+                {translator("Wallet", language)}
               </span>
             </div>
           </div>
           <div className="mx-2">
             <h3 className="font-semibold font-changa text-white text-base leading-[18px] pb-4 text-opacity-90">
-              Platform
+              {translator("Platform", language)}
             </h3>
             <div className="text-[#94A3B8] font-chakra flex flex-col items-start justify-start gap-5 text-sm leading-[14px] font-medium text-opacity-80">
               <span
                 className="hover:cursor-pointer hover:underline decoration-1"
                 onClick={() => router.push("/leaderboard")}
               >
-                Leaderboard
+                {translator("Leaderboard", language)}
               </span>
               <span
                 className="hover:cursor-pointer hover:underline decoration-1"
                 onClick={() => router.push("/stake")}
               >
-                Staking
+                {translator("Staking", language)}
               </span>
               <span
                 className="hover:cursor-pointer hover:underline decoration-1"
                 onClick={() => router.push("/store")}
               >
-                Store
+                {translator("Store", language)}
               </span>
             </div>
           </div>
@@ -84,7 +83,7 @@ function Footer() {
         <div className="lg2:pl-12 lg2:mb-12">
           <div className="mx-2">
             <h3 className="font-semibold font-changa text-white text-base leading-[18px] text-opacity-90">
-              Community
+              {translator("Community", language)}
             </h3>
             <div className="flex flex-row items-start justify-start gap-2 pt-4">
               <div className="p-2 border-2 border-[#FFFFFF] rounded-full border-opacity-5 hover:bg-[#121519] hover:cursor-pointer" onClick={() => router.push('')}>
@@ -101,7 +100,7 @@ function Footer() {
       <div className="w-full font-inter flex lg2:flex-row flex-col lg2:items-center lg2:justify-between lg2:pb-10 pb-[150px] pt-5 md:px-2 mx-2">
         <p className="flex text-sm font-normal text-[#FFFFFF] text-opacity-50 font-sans gap-2">
           <span>@2024 fomowtf.com</span>
-          <span>All rights reserved</span>
+          <span>{translator("All rights reserved", language)}</span>
         </p>
         <div className="flex items-center lg2:justify-center gap-5">
           <span className="font-changa text-[#FFFFFF] text-opacity-25 text-4xl font-semibold">

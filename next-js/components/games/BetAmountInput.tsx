@@ -8,6 +8,7 @@ import { FaInfo } from "react-icons/fa6";
 import { InfoCircle } from "iconsax-react";
 import { BsInfoCircleFill } from "react-icons/bs";
 import DicePointer from "@/public/assets/DicePointer";
+import { translator } from "@/context/transactions";
 
 export default function BetAmount({
   betAmt,
@@ -25,7 +26,7 @@ export default function BetAmount({
   disabled?: boolean;
 }) {
   const methods = useForm();
-  const { coinData, maxBetAmt, setMaxBetAmt } = useGlobalContext();
+  const { coinData, maxBetAmt, setMaxBetAmt, language } = useGlobalContext();
   const [betAmountsModal, setBetAmountsModal] = useState(false);
 
   const minBetAmt = parseFloat(process.env.MINIMUM_BET_AMOUNT ?? "0");
@@ -106,7 +107,7 @@ export default function BetAmount({
   return (
     <div className="flex w-full flex-col mb-[1.4rem] z-10">
       <div className="flex w-full items-center justify-between text-xs font-changa text-opacity-90">
-        <label className="text-white/90 font-changa">Bet Amount</label>
+        <label className="text-white/90 font-changa">{translator("Bet Amount", language)}</label>
         <span
           onClick={handleSetMaxBet}
           className="text-[#94A3B8] text-opacity-90 cursor-pointer font-changa text-xs"
@@ -120,7 +121,7 @@ export default function BetAmount({
             }`}
             onClick={() => handleBetAmountsModal()}
           >
-            Why?
+            {translator("Why", language)}?
           </span>
         </span>
       </div>
@@ -159,8 +160,8 @@ export default function BetAmount({
               <div className="absolute group cursor-pointer text-white text-opacity-50 text-[11px] font-medium font-chakra top-2.5 -right-2.5">
                 {highestMaxBetAmt}
                 <BsInfoCircleFill className="text-white text-opacity-50 w-3 h-3 absolute top-1/2 -translate-y-1/2 -right-3.5" />
-                <span className="absolute hidden group-hover:block transition-all z-[1000] text-justify w-80 p-2 rounded-[5px] top-5 right-0 translate-x-[30%] md:translate-x-1/4 bg-[#080808] text-white/50 text-xs text-regular font-changa">
-                  The maximum amount you can bet with the current multiplier (
+                <span className="absolute hidden group-hover:block transition-all z-[1000] w-80 p-2 rounded-[5px] top-5 right-0 translate-x-[30%] md:translate-x-1/4 bg-[#080808] text-white/50 text-xs text-regular font-changa">
+                  {translator("The maximum amount you can bet with the current multiplier", language)} (
                   <span className="text-white/80 font-medium">
                     {isNaN(currentMultiplier)
                       ? "0"
@@ -170,13 +171,13 @@ export default function BetAmount({
                   <span className="text-white/80 font-medium">
                     {currentMaxBetAmt.toFixed(2)} SOL
                   </span>
-                  . Your current wallet balance is{" "}
+                  . {translator("Your current wallet balance is", language)}{" "}
                   <span className="text-white/80 font-medium">
                     {coinData && coinData[0]?.amount
                       ? parseFloat(coinData[0].amount.toFixed(4))
                       : 0.0}
                   </span>{" "}
-                  The maximum amount you can bet in this game is{" "}
+                  . {translator("The maximum amount you can bet in this game is", language)}{" "}
                   <span className="text-white/80 font-medium">
                     {highestMaxBetAmt} SOL
                   </span>
@@ -187,7 +188,7 @@ export default function BetAmount({
           </div>
           <div className="flex flex-col items-center text-white font-chakra font-medium w-[20%]">
             <span className="text-[10px] text-white text-opacity-50">
-              Multiplier
+              {translator("Multiplier", language)}
             </span>
             <span>
               <span>
@@ -202,12 +203,11 @@ export default function BetAmount({
       {betAmountsModal && (game === "keno" || game === "wheel") ? (
         <div className="fadeInDow_04 relative flex items-center gap-3 bg-[#0C0F16] rounded-[5px] p-2 mt-2 mb-1.5">
           <div className="flex items-center border-r border-white/10 text-[#94A3B8] text-chakra text-[11px] font-medium h-11 w-[80%] p-6">
-            The more you stake, the less fees you pay and the bigger your points
-            multiplier
+            {translator("The more you stake, the less fees you pay and the bigger your points multiplier", language)}
           </div>
           <div className="flex flex-col items-center text-white font-chakra font-medium w-[20%]">
             <span className="text-[10px] text-white text-opacity-50">
-              Max Bet
+              {translator("Max Bet", language)}
             </span>
             <span>20 $SOL</span>
           </div>
@@ -266,7 +266,7 @@ export default function BetAmount({
           onClick={handleSetMaxBet}
           disabled={disabled}
         >
-          Max
+          {translator("Max", language)}
         </button>
       </div>
       <span
