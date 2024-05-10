@@ -359,8 +359,8 @@ export default function Dice() {
   };
 
   const disableInput = useMemo(() => {
-    return betType === "auto" && startAuto ? true : false;
-  }, [betType, startAuto]);
+    return betType === "auto" && startAuto ? true : false || isRolling;
+  }, [betType, startAuto, isRolling]);
 
   return (
     <GameLayout title="FOMO - Dice">
