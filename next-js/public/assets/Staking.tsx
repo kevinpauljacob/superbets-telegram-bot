@@ -1,5 +1,5 @@
 export default function Staking({ className }: { className: string }) {
-    return (
+  return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
       width="20"
@@ -9,10 +9,13 @@ export default function Staking({ className }: { className: string }) {
       className={`${className ?? "text-white"}`}
     >
       <path
-        stroke="#9945FF"
-        d="M16.25 11.5c0-6-6.25-9-6.25-9s-6.25 3-6.25 9c0 3.313 2.813 6 6.25 6 3.438 0 6.25-2.688 6.25-6zM6.875 11.5a3.066 3.066 0 003.125 3"
-      ></path>
+        d="M16.25 11.5C16.25 5.5 10 2.5 10 2.5C10 2.5 3.75 5.5 3.75 11.5C3.75 14.8125 6.5625 17.5 10 17.5C13.4375 17.5 16.25 14.8125 16.25 11.5Z"
+        stroke="currentColor"
+      />
+      <path
+        d="M6.875 11.5C6.89223 12.312 7.23099 13.084 7.81689 13.6465C8.4028 14.2089 9.18796 14.5159 10 14.5"
+        stroke="currentColor"
+      />
     </svg>
   );
 }
-

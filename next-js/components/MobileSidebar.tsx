@@ -22,29 +22,24 @@ import Home from "@/public/assets/Home";
 import { useGlobalContext } from "./GlobalContext";
 import { useRouter } from "next/router";
 
-export default function Sidebar({
-  mobileSidebar,
-  setSidebar,
-}: {
-  mobileSidebar: boolean;
-  setSidebar: React.Dispatch<React.SetStateAction<boolean>>;
-}) {
+export default function Sidebar() {
   const router = useRouter();
-
+  const { mobileSidebar, setMobileSidebar } = useGlobalContext();
   const [showExitTokens, setShowExitTokens] = useState(false);
   const [showPlayTokens, setShowPlayTokens] = useState(false);
 
   useEffect(() => {
-    setSidebar(false);
+    setMobileSidebar(false);
   }, [router.pathname]);
 
   return (
     <div
       className={`${
-        mobileSidebar ? "fadeIn fixed" : "fadeOutDown hidden"
-      } top-[6.6rem] z-20 md:hidden bg-[#121418] no-scrollbar overflow-y-auto text-white flex flex-col justify-between w-full h-[calc(100vh-11rem)]`}
+        mobileSidebar ? "top-[6.3rem]" : "fadeOutDown top-[1000px]"
+      } fixed transition-all duration-500 ease-in-out z-20 md:hidden bg-[#121418] no-scrollbar overflow-y-auto text-white flex flex-col justify-between w-full h-[calc(100dvh-10rem)]`}
     >
       <OpenSidebar
+        sidebar={mobileSidebar}
         showExitTokens={showExitTokens}
         setShowExitTokens={setShowExitTokens}
         showPlayTokens={showPlayTokens}

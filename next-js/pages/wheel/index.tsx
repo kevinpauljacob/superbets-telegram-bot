@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useWallet } from "@solana/wallet-adapter-react";
@@ -25,6 +25,11 @@ import { soundAlert } from "@/utils/soundUtils";
 import ConfigureAutoButton from "@/components/ConfigureAutoButton";
 import AutoCount from "@/components/AutoCount";
 import ProfitBox from "@/components/ProfitBox";
+import {
+  errorCustom,
+  successCustom,
+  warningCustom,
+} from "@/components/toasts/ToastGroup";
 
 export default function Wheel() {
   const wallet = useWallet();
@@ -53,7 +58,7 @@ export default function Wheel() {
     maxBetAmt,
   } = useGlobalContext();
   const [betAmt, setBetAmt] = useState(0);
-  const [userInput, setUserInput] = useState<number | undefined>(0);
+  const [userInput, setUserInput] = useState<number | undefined>();
   const [isRolling, setIsRolling] = useState(false);
   const [refresh, setRefresh] = useState(true);
   const [betType, setBetType] = useState<"manual" | "auto">("manual");
@@ -155,15 +160,15 @@ export default function Wheel() {
   const handleBet = async () => {
     if (wallet.connected) {
       if (!wallet.publicKey) {
-        toast.error("Wallet not connected");
+        errorCustom("Wallet not connected");
         return;
       }
       if (coinData && coinData[0].amount < betAmt) {
-        toast.error("Insufficient balance for bet !");
+        errorCustom("Insufficient balance for bet !");
         return;
       }
       if (betAmt === 0) {
-        toast.error("Set Amount.");
+        errorCustom("Set Amount.");
         return;
       }
       setIsRolling(true);
@@ -189,7 +194,7 @@ export default function Wheel() {
         spinWheel(strikeNumber);
         await new Promise((resolve) => setTimeout(resolve, 3000));
         if (success != true) {
-          toast.error(message);
+          errorCustom(message);
           throw new Error(message);
         }
         setIsRolling(false);
@@ -200,9 +205,9 @@ export default function Wheel() {
         );
         setStrikeMultiplierColor(riskObject ? riskObject.color : "#ffffff");
         if (result == "Won") {
-          toast.success(message, { duration: 2000 });
+          successCustom(message);
           soundAlert("/sounds/win.wav");
-        } else toast.error(message, { duration: 2000 });
+        } else errorCustom(message);
 
         const win = result === "Won";
         const newBetResult = { result: strikeMultiplier, win };
@@ -245,8 +250,13 @@ export default function Wheel() {
           );
           // update count
           if (typeof autoBetCount === "number")
-            setAutoBetCount(autoBetCount - 1);
-          else setAutoBetCount(autoBetCount + 1);
+            setAutoBetCount(autoBetCount > 0 ? autoBetCount - 1 : 0);
+          else
+            setAutoBetCount(
+              autoBetCount.length > 12
+                ? autoBetCount.slice(0, 5)
+                : autoBetCount + 1,
+            );
         }
       } catch (error) {
         setIsRolling(false);
@@ -277,11 +287,21 @@ export default function Wheel() {
       ((typeof autoBetCount === "string" && autoBetCount.includes("inf")) ||
         (typeof autoBetCount === "number" && autoBetCount > 0))
     ) {
-      if (useAutoConfig && autoStopProfit && autoBetProfit <= autoStopProfit) {
+      if (
+        useAutoConfig &&
+        autoStopProfit &&
+        autoBetProfit > 0 &&
+        autoBetProfit >= autoStopProfit
+      ) {
         showInfoToast("Profit limit reached.");
         return;
       }
-      if (useAutoConfig && autoStopLoss && autoBetProfit >= -1 * autoStopLoss) {
+      if (
+        useAutoConfig &&
+        autoStopLoss &&
+        autoBetProfit < 0 &&
+        autoBetProfit <= -autoStopLoss
+      ) {
         showInfoToast("Loss limit reached.");
         return;
       }
@@ -295,19 +315,28 @@ export default function Wheel() {
   }, [startAuto, autoBetCount]);
 
   const onSubmit = async (data: any) => {
-    if (
-      betType === "auto" &&
-      ((typeof autoBetCount === "string" && autoBetCount.includes("inf")) ||
-        (typeof autoBetCount === "number" && autoBetCount > 0))
-    ) {
+    if (betType === "auto") {
       if (betAmt === 0) {
-        toast.error("Set Amount.");
+        errorCustom("Set Amount.");
         return;
       }
-      console.log("Auto betting. config: ", useAutoConfig);
-      setStartAuto(true);
+      if (typeof autoBetCount === "number" && autoBetCount <= 0) {
+        errorCustom("Set Bet Count.");
+        return;
+      }
+      if (
+        (typeof autoBetCount === "string" && autoBetCount.includes("inf")) ||
+        (typeof autoBetCount === "number" && autoBetCount > 0)
+      ) {
+        console.log("Auto betting. config: ", useAutoConfig);
+        setStartAuto(true);
+      }
     } else if (wallet.connected) handleBet();
   };
+
+  const disableInput = useMemo(() => {
+    return betType === "auto" && startAuto ? true : false;
+  }, [betType, startAuto]);
 
   return (
     <GameLayout title="FOMO - Wheel">
@@ -317,6 +346,8 @@ export default function Wheel() {
             {startAuto && (
               <div
                 onClick={() => {
+                  soundAlert("/sounds/betbutton.wav");
+                  warningCustom("Auto bet stopped");
                   setAutoBetCount(0);
                   setStartAuto(false);
                 }}
@@ -329,6 +360,9 @@ export default function Wheel() {
               disabled={
                 !wallet ||
                 isRolling ||
+                (typeof autoBetCount === "number" && autoBetCount <= 0) ||
+                (typeof autoBetCount === "string" &&
+                  !autoBetCount.includes("inf")) ||
                 (coinData && coinData[0].amount < 0.0001) ||
                 (betAmt !== undefined &&
                   maxBetAmt !== undefined &&
@@ -345,7 +379,11 @@ export default function Wheel() {
             <ConfigureAutoButton />
           </div>
           <div className="w-full hidden lg:flex">
-            <BetSetting betSetting={betType} setBetSetting={setBetType} />
+            <BetSetting
+              betSetting={betType}
+              setBetSetting={setBetType}
+              disabled={disableInput}
+            />
           </div>
           <div className="w-full flex flex-col no-scrollbar overflow-y-auto">
             <FormProvider {...methods}>
@@ -361,10 +399,8 @@ export default function Wheel() {
                   currentMultiplier={maxMultiplier}
                   leastMultiplier={minMultiplier}
                   game="wheel"
+                  disabled={disableInput}
                 />
-                <div className="mb-4">
-                  <ProfitBox multiplier={maxMultiplier} amount={userInput!} />
-                </div>
                 <div className="mb-6 w-full">
                   <div className="flex justify-between text-xs mb-2">
                     <p className="font-medium font-changa text-[#F0F0F0] text-opacity-90">
@@ -373,37 +409,43 @@ export default function Wheel() {
                   </div>
                   <div className="flex lg:flex-row flex-col gap-2.5 w-full items-center justify-evenly rounded-[8px] text-white font-chakra text-sm font-semibold bg-[#0C0F16] p-4">
                     <div className="flex lg:w-[66.66%] w-full gap-2.5">
-                      <div
+                      <button
                         onClick={() => setRisk("low")}
-                        className={`text-center w-full rounded-[5px] border-[2px] bg-[#202329] py-2 text-xs font-chakra text-white text-opacity-90 transition duration-200 ${
+                        type="button"
+                        className={`text-center w-full rounded-[5px] border-[2px] disabled:cursor-not-allowed disabled:opacity-50 bg-[#202329] py-2 text-xs font-chakra text-white text-opacity-90 transition duration-200 ${
                           risk === "low"
                             ? "border-[#7839C5]"
                             : "border-transparent hover:border-[#7839C580]"
                         }`}
+                        disabled={disableInput}
                       >
                         Low
-                      </div>
-                      <div
+                      </button>
+                      <button
                         onClick={() => setRisk("medium")}
-                        className={`text-center w-full rounded-[5px] border-[2px] bg-[#202329] py-2 text-xs font-chakra text-white text-opacity-90 transition duration-200 ${
+                        type="button"
+                        className={`text-center w-full rounded-[5px] border-[2px] disabled:cursor-not-allowed disabled:opacity-50 bg-[#202329] py-2 text-xs font-chakra text-white text-opacity-90 transition duration-200 ${
                           risk === "medium"
                             ? "border-[#7839C5]"
                             : "border-transparent hover:border-[#7839C580]"
                         }`}
+                        disabled={disableInput}
                       >
                         Medium
-                      </div>
+                      </button>
                     </div>
-                    <div
+                    <button
                       onClick={() => setRisk("high")}
-                      className={`text-center lg:w-[33.33%] w-full rounded-[5px] border-[2px] bg-[#202329] py-2 text-xs font-chakra text-white text-opacity-90 transition duration-200 ${
+                      type="button"
+                      className={`text-center lg:w-[33.33%] w-full rounded-[5px] border-[2px] disabled:cursor-not-allowed disabled:opacity-50 bg-[#202329] py-2 text-xs font-chakra text-white text-opacity-90 transition duration-200 ${
                         risk === "high"
                           ? "border-[#7839C5]"
                           : "border-transparent hover:border-[#7839C580]"
                       }`}
+                      disabled={disableInput}
                     >
                       High
-                    </div>
+                    </button>
                   </div>
                 </div>
 
@@ -418,10 +460,10 @@ export default function Wheel() {
                       min={10}
                       max={50}
                       step={10}
-                      disabled={isRolling || startAuto}
+                      disabled={isRolling || startAuto || disableInput}
                       value={segments}
                       onChange={(e) => setSegments(parseInt(e.target.value))}
-                      className="defaultSlider absolute top-[-8px] w-full bg-transparent appearance-none z-20"
+                      className="defaultSlider absolute top-[-8px] w-full bg-transparent appearance-none z-20 disabled:cursor-not-allowed disabled:opacity-50"
                     />
                     <div
                       className="absolute rounded-l-full h-[5px] bg-[#9945ff] z-10"
@@ -447,6 +489,8 @@ export default function Wheel() {
                   {startAuto && (
                     <div
                       onClick={() => {
+                        soundAlert("/sounds/betbutton.wav");
+                        warningCustom("Auto bet stopped");
                         setAutoBetCount(0);
                         setStartAuto(false);
                       }}

@@ -55,6 +55,7 @@ export default function Sidebar({
     >
       {sidebar ? (
         <OpenSidebar
+          sidebar={sidebar}
           showExitTokens={showExitTokens}
           setShowExitTokens={setShowExitTokens}
           showPlayTokens={showPlayTokens}
@@ -67,7 +68,12 @@ export default function Sidebar({
           } flex flex-col items-center justify-between w-full h-full`}
         >
           <div className="w-full flex flex-col items-center">
-            <div className="h-[4.4rem] w-full flex items-center justify-center">
+            <div
+              onClick={() => {
+                setSidebar(true);
+              }}
+              className="h-[4.4rem] w-full flex items-center justify-center"
+            >
               <div className="cursor-pointer transition-all flex items-center justify-center rounded-md w-12 h-12 bg-[#212121] hover:bg-[#1E2024] focus:bg-[#1E2024] text-[#ababac] hover:text-[#9945FF] focus:text-[#9945FF]">
                 <Image
                   src={"/assets/logowhite.svg"}
@@ -80,7 +86,12 @@ export default function Sidebar({
             </div>
             <div
               onClick={() => {
-                router.push("/");
+                if (router.pathname === "/") {
+                  setSidebar(true);
+                } else {
+                  router.push("/");
+                  setSidebar(false);
+                }
               }}
               className={`${topIconCss}`}
             >
@@ -104,21 +115,42 @@ export default function Sidebar({
             >
               <FomoExitIcon className={`${closedIconCss}`} />
             </div>
-            <div className={`${topIconCss}`}>
+            <div
+              onClick={() => {
+                router.push("/");
+                setSidebar(true);
+              }}
+              className={`${topIconCss}`}
+            >
               <Dollar className={`${closedIconCss}`} />
             </div>
-            <div className={`${topIconCss}`}>
+            <div
+              onClick={() => {
+                router.push("/");
+                setSidebar(true);
+              }}
+              className={`${topIconCss} opacity-50`}
+            >
               <Flag className={`${closedIconCss}`} />
             </div>
           </div>
           <div className="w-full flex flex-col items-center mb-2">
-            <div className={`${bottomIconCss}`}>
+            <div
+              className={`${bottomIconCss}`}
+              onClick={() => router.push("/")}
+            >
               <Twitter className={`${closedIconCss}`} />
             </div>
-            <div className={`${bottomIconCss}`}>
+            <div
+              className={`${bottomIconCss}`}
+              onClick={() => router.push("/")}
+            >
               <Birdeye className={`${closedIconCss}`} />
             </div>
-            <div className={`${bottomIconCss}`}>
+            <div
+              className={`${bottomIconCss}`}
+              onClick={() => router.push("/")}
+            >
               <Telegram className={`${closedIconCss}`} />
             </div>
           </div>
@@ -154,11 +186,13 @@ export const SidebarOpenElement = ({
 };
 
 export const OpenSidebar = ({
+  sidebar,
   showExitTokens,
   setShowExitTokens,
   showPlayTokens,
   setShowPlayTokens,
 }: {
+  sidebar: boolean;
   showExitTokens: boolean;
   setShowExitTokens: React.Dispatch<React.SetStateAction<boolean>>;
   showPlayTokens: boolean;
@@ -166,9 +200,7 @@ export const OpenSidebar = ({
 }) => {
   const wallet = useWallet();
   const router = useRouter();
-  const { fomoPrice, sidebar } = useGlobalContext();
-
-  const { userData, getUserDetails } = useGlobalContext();
+  const { fomoPrice, setSidebar, setMobileSidebar } = useGlobalContext();
 
   const [exitGames, setExitGames] = useState<Game[]>([
     {
@@ -249,10 +281,6 @@ export const OpenSidebar = ({
     setShowPlayTokens(isGameActive(casinoGames));
   }, [router.pathname, exitGames, casinoGames]);
 
-  useEffect(() => {
-    if (!userData && wallet?.publicKey) getUserDetails();
-  }, [wallet.publicKey]);
-
   const openLinkCss =
     "w-full gap-2 flex items-center justify-center text-sm font-semibold text-white text-opacity-50 hover:bg-white/10 transition duration-300 ease-in-out hover:transition hover:duration-300 hover:ease-in-out bg-[#191A1D] rounded-md text-center py-2 mb-2";
 
@@ -294,7 +322,16 @@ export const OpenSidebar = ({
             sidebar ? "fadeInUp" : "fadeOutDown"
           } w-full flex flex-col p-4 gap-1.5`}
         >
-          <SidebarOpenElement text={"Home"} Icon={Home} link="/" />
+          <div
+            onClick={() => {
+              if (router.pathname === "/") {
+                setSidebar(false);
+                setMobileSidebar(false);
+              }
+            }}
+          >
+            <SidebarOpenElement text={"Home"} Icon={Home} link="/" />
+          </div>
           <div className={`mt-0`}>
             <div className="w-full transition-all cursor-pointer rounded-md flex items-center justify-between gap-2 pl-4 pr-2 py-2 bg-transparent hover:bg-[#1f2024] focus:bg-[#1f2024] group">
               <div className="flex items-center gap-3">
@@ -404,61 +441,10 @@ export const OpenSidebar = ({
               </ul>
             )}
           </div>
-          <div className={`mt-0`}>
-            <div className="w-full transition-all cursor-pointer rounded-md flex items-center justify-between gap-2 pl-4 pr-2 py-2 bg-transparent hover:bg-[#1f2024] focus:bg-[#1f2024] group">
-              <div className="flex items-center gap-3">
-                <FomoPlayIcon className="min-w-[1.25rem] min-h-[1.25rem] transition-all text-white group-hover:text-[#9945FF] group-focus:text-[#9945FF]" />
-                <span className="mt-0.5 transition-all text-[0.85rem] font-chakra font-medium text-white text-opacity-90 group-hover:text-opacity-100 group-focus:text-opacity-100">
-                  FOMO: Play
-                </span>
-              </div>
-              <button
-                className={`${
-                  showPlayTokens ? "bg-[#47484A]" : "bg-white bg-opacity-5"
-                } hover:bg-[#47484A] transition duration-300 ease-in-out hover:transition hover:duration-300 hover:ease-in-out rounded-md w-8 h-6 flex justify-center items-center`}
-                onClick={() => setShowPlayTokens(!showPlayTokens)}
-              >
-                <Image
-                  src={
-                    showPlayTokens
-                      ? "/assets/upArrow.png"
-                      : "/assets/downArrow.png"
-                  }
-                  alt=""
-                  width={9}
-                  height={9}
-                  className=""
-                />
-              </button>
-            </div>
-            {showPlayTokens && (
-              <ul className="mt-1">
-                {casinoGames.map((token, index) => (
-                  <Link
-                    href={token.link}
-                    key={index}
-                    onClick={() => toggleCasinoToken(index)}
-                    className={`${
-                      token.active ? "bg-white/10" : "hover:bg-[#191a1d]"
-                    } group flex transition-all items-center rounded-md p-2 pl-12 gap-2`}
-                  >
-                    {/* <Image src={token.src} alt="" width={15} height={15} /> */}
-                    <span
-                      className={`text-[0.85rem] font-chakra font-medium transition-all ${
-                        token.active
-                          ? "text-white/90"
-                          : "text-white/50 group-hover:text-white/90"
-                      }`}
-                    >
-                      {token.token}
-                    </span>
-                  </Link>
-                ))}
-              </ul>
-            )}
+          <SidebarOpenElement text={"DCA"} Icon={Dollar} link="/" />
+          <div className="opacity-50">
+            <SidebarOpenElement text={"Roadmap"} Icon={Flag} link="/" />
           </div>
-          <SidebarOpenElement text={"DCA"} Icon={Dollar} />
-          <SidebarOpenElement text={"Roadmap"} Icon={Flag} />
         </div>
       </div>
 
@@ -467,15 +453,27 @@ export const OpenSidebar = ({
           sidebar ? "fadeInUp" : "fadeOutDown"
         } w-full flex flex-col p-4 mb-0`}
       >
-        <Link href="/" className={`${openLinkCss}`}>
+        <Link
+          href="https://twitter.com/"
+          className={`${openLinkCss}`}
+          target="_blank"
+        >
           <Twitter className="w-5 h-5" />
           Twitter
         </Link>
-        <Link href="/" className={`${openLinkCss}`}>
+        <Link
+          href="https://birdeye.so/"
+          className={`${openLinkCss}`}
+          target="_blank"
+        >
           <Birdeye className="w-5 h-5 text-white" />
           Birdeye
         </Link>
-        <Link href="/" className={`${openLinkCss}`}>
+        <Link
+          href="https://web.telegram.org/a/"
+          className={`${openLinkCss}`}
+          target="_blank"
+        >
           <Telegram className="w-5 h-5" />
           Telegram
         </Link>

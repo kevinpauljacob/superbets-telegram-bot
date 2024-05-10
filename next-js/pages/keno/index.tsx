@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useWallet } from "@solana/wallet-adapter-react";
@@ -22,6 +22,11 @@ import Bets from "../../components/games/Bets";
 import { soundAlert } from "@/utils/soundUtils";
 import ConfigureAutoButton from "@/components/ConfigureAutoButton";
 import AutoCount from "@/components/AutoCount";
+import {
+  errorCustom,
+  successCustom,
+  warningCustom,
+} from "@/components/toasts/ToastGroup";
 
 export default function Keno() {
   const wallet = useWallet();
@@ -91,7 +96,7 @@ export default function Keno() {
       if (chosenNumbers.length < 10) {
         setChosenNumbers((prevNumbers) => [...prevNumbers, number]);
       } else {
-        toast.error("10 numbers can be selected at max");
+        errorCustom("10 numbers can be selected at max");
       }
     }
   };
@@ -130,8 +135,10 @@ export default function Keno() {
   };
 
   const handleClear = () => {
-    setChosenNumbers([]);
-    setAutoPick((prevAutoPick) => !prevAutoPick);
+    if (chosenNumbers.length !== 0) {
+      setChosenNumbers([]);
+      setAutoPick(false);
+    }
   };
 
   const calculateChance = (index: number) => {
@@ -170,15 +177,15 @@ export default function Keno() {
   const handleBet = async () => {
     if (wallet.connected) {
       if (!wallet.publicKey) {
-        toast.error("Wallet not connected");
+        errorCustom("Wallet not connected");
         return;
       }
       if (coinData && coinData[0].amount < betAmt) {
-        toast.error("Insufficient balance for bet !");
+        errorCustom("Insufficient balance for bet !");
         return;
       }
       if (betAmt === 0) {
-        toast.error("Set Amount.");
+        errorCustom("Set Amount.");
         return;
       }
       setIsRolling(true);
@@ -202,7 +209,7 @@ export default function Keno() {
           await response.json();
 
         if (success != true) {
-          toast.error(message);
+          errorCustom(message);
           throw new Error(message);
         }
 
@@ -213,11 +220,16 @@ export default function Keno() {
           for (const number of strikeNumbers) {
             await new Promise((resolve) => setTimeout(resolve, 200));
 
+            if (chosenNumbers.includes(number)) {
+              soundAlert("/sounds/win3.wav");
+            } else {
+              soundAlert("/sounds/betbutton.wav");
+            }
             setStrikeNumbers((prevNumbers) => [...prevNumbers, number]);
           }
         }
-        if (result == "Won") toast.success(message, { duration: 2000 });
-        else toast.error(message, { duration: 2000 });
+        if (result == "Won") successCustom(message);
+        else errorCustom(message);
 
         const win = result === "Won";
         if (win) soundAlert("/sounds/win.wav");
@@ -245,8 +257,13 @@ export default function Keno() {
           );
           // update count
           if (typeof autoBetCount === "number")
-            setAutoBetCount(autoBetCount - 1);
-          else setAutoBetCount(autoBetCount + 1);
+            setAutoBetCount(autoBetCount > 0 ? autoBetCount - 1 : 0);
+          else
+            setAutoBetCount(
+              autoBetCount.length > 12
+                ? autoBetCount.slice(0, 5)
+                : autoBetCount + 1,
+            );
         }
       } catch (error) {
         setIsRolling(false);
@@ -258,6 +275,10 @@ export default function Keno() {
       }
     }
   };
+
+  const disableInput = useMemo(() => {
+    return betType === "auto" && startAuto ? true : false;
+  }, [betType, startAuto]);
 
   useEffect(() => {
     if (refresh && wallet?.publicKey) {
@@ -279,11 +300,21 @@ export default function Keno() {
       ((typeof autoBetCount === "string" && autoBetCount.includes("inf")) ||
         (typeof autoBetCount === "number" && autoBetCount > 0))
     ) {
-      if (useAutoConfig && autoStopProfit && autoBetProfit <= autoStopProfit) {
+      if (
+        useAutoConfig &&
+        autoStopProfit &&
+        autoBetProfit > 0 &&
+        autoBetProfit >= autoStopProfit
+      ) {
         showInfoToast("Profit limit reached.");
         return;
       }
-      if (useAutoConfig && autoStopLoss && autoBetProfit >= -1 * autoStopLoss) {
+      if (
+        useAutoConfig &&
+        autoStopLoss &&
+        autoBetProfit < 0 &&
+        autoBetProfit <= -autoStopLoss
+      ) {
         showInfoToast("Loss limit reached.");
         return;
       }
@@ -297,47 +328,54 @@ export default function Keno() {
   }, [startAuto, autoBetCount]);
 
   const onSubmit = async (data: any) => {
-    if (
-      betType === "auto" &&
-      ((typeof autoBetCount === "string" && autoBetCount.includes("inf")) ||
-        (typeof autoBetCount === "number" && autoBetCount > 0))
-    ) {
+    if (betType === "auto") {
       if (betAmt === 0) {
-        toast.error("Set Amount.");
+        errorCustom("Set Amount.");
         return;
       }
-      console.log("Auto betting. config: ", useAutoConfig);
-      setStartAuto(true);
+      if (typeof autoBetCount === "number" && autoBetCount <= 0) {
+        errorCustom("Set Bet Count.");
+        return;
+      }
+      if (
+        (typeof autoBetCount === "string" && autoBetCount.includes("inf")) ||
+        (typeof autoBetCount === "number" && autoBetCount > 0)
+      ) {
+        console.log("Auto betting. config: ", useAutoConfig);
+        setStartAuto(true);
+      }
     } else if (wallet.connected) handleBet();
   };
 
   const Autopick = () => {
     return (
       <>
-        <div
+        <button
           onClick={() => {
             handleAutoPick();
           }}
+          disabled={disableInput}
           className={`${
             autoPick === true
               ? "border-[#7839C5] text-opacity-100"
               : "border-transparent hover:border-[#7839C580] text-opacity-80"
-          } w-full flex items-center justify-center gap-1 rounded-lg text-center cursor-pointer border-2 bg-[#202329] h-[3.75rem] lg:h-11 font-chakra text-base tracking-wider text-white font-semibold`}
+          } w-full flex items-center justify-center disabled:opacity-50 gap-1 rounded-lg text-center cursor-pointer border-2 bg-[#202329] h-[3.75rem] lg:h-11 font-chakra text-base tracking-wider text-white font-semibold`}
         >
           AUTOPICK
-        </div>
-        <div
+        </button>
+        <button
           onClick={() => {
             handleClear();
           }}
+          disabled={disableInput}
           className={`${
             autoPick === false
               ? "border-transparent hover:border-[#7839C580] text-opacity-80"
               : "border-transparent hover:border-[#7839C580] text-opacity-80"
-          } w-full flex items-center justify-center gap-1 rounded-lg text-center cursor-pointer border-2 bg-[#202329] h-[3.75rem] lg:h-11 font-chakra text-base tracking-wider text-white font-semibold`}
+          } w-full flex items-center justify-center disabled:opacity-50 gap-1 rounded-lg text-center cursor-pointer border-2 bg-[#202329] h-[3.75rem] lg:h-11 font-chakra text-base tracking-wider text-white font-semibold`}
         >
           CLEAR
-        </div>
+        </button>
       </>
     );
   };
@@ -350,6 +388,8 @@ export default function Keno() {
             {startAuto && (
               <div
                 onClick={() => {
+                  soundAlert("/sounds/betbutton.wav");
+                  warningCustom("Auto bet stopped");
                   setAutoBetCount(0);
                   setStartAuto(false);
                 }}
@@ -362,6 +402,9 @@ export default function Keno() {
               disabled={
                 !wallet ||
                 isRolling ||
+                (typeof autoBetCount === "number" && autoBetCount <= 0) ||
+                (typeof autoBetCount === "string" &&
+                  !autoBetCount.includes("inf")) ||
                 (coinData && coinData[0].amount < 0.0001) ||
                 (betAmt !== undefined &&
                   maxBetAmt !== undefined &&
@@ -383,7 +426,11 @@ export default function Keno() {
             </div>
           )}
           <div className="w-full hidden lg:flex">
-            <BetSetting betSetting={betType} setBetSetting={setBetType} />
+            <BetSetting
+              betSetting={betType}
+              setBetSetting={setBetType}
+              disabled={disableInput}
+            />
           </div>
           <div className="w-full flex flex-col no-scrollbar overflow-y-auto">
             <FormProvider {...methods}>
@@ -401,6 +448,7 @@ export default function Keno() {
                   }
                   leastMultiplier={leastMultiplier}
                   game="keno"
+                  disabled={disableInput}
                 />
                 <div className="mb-[1.4rem] w-full">
                   <div className="flex justify-between text-xs mb-2">
@@ -409,46 +457,54 @@ export default function Keno() {
                     </p>
                   </div>
                   <div className="grid lg:grid-cols-4 grid-cols-2 gap-3 w-full items-center rounded-[8px] text-white font-chakra text-sm font-semibold bg-[#0C0F16] p-4">
-                    <div
+                    <button
+                      type="button"
                       onClick={() => setRisk("classic")}
-                      className={`text-center w-full rounded-[5px] border-[2px] bg-[#202329] py-2 text-xs font-chakra text-white text-opacity-90 transition duration-200 ${
+                      className={`text-center w-full rounded-[5px] border-[2px] bg-[#202329] py-2 text-xs font-chakra disabled:opacity-50 text-white text-opacity-90 transition duration-200 ${
                         risk === "classic"
                           ? "border-[#7839C5]"
                           : "border-transparent hover:border-[#7839C580]"
                       }`}
+                      disabled={disableInput}
                     >
                       Classic
-                    </div>
-                    <div
+                    </button>
+                    <button
+                      type="button"
                       onClick={() => setRisk("low")}
-                      className={`text-center w-full rounded-[5px] border-[2px] bg-[#202329] py-2 text-xs font-chakra text-white text-opacity-90 transition duration-200 ${
+                      className={`text-center w-full rounded-[5px] border-[2px] bg-[#202329] py-2 text-xs font-chakra disabled:opacity-50 text-white text-opacity-90 transition duration-200 ${
                         risk === "low"
                           ? "border-[#7839C5]"
                           : "border-transparent hover:border-[#7839C580]"
                       }`}
+                      disabled={disableInput}
                     >
                       Low
-                    </div>
-                    <div
+                    </button>
+                    <button
+                      type="button"
                       onClick={() => setRisk("medium")}
-                      className={`text-center w-full block m-auto rounded-[5px] border-[2px] bg-[#202329] py-2 text-xs font-chakra text-white text-opacity-90 transition duration-200 ${
+                      className={`text-center w-full block m-auto rounded-[5px] border-[2px] bg-[#202329] py-2 text-xs font-chakra disabled:opacity-50 text-white text-opacity-90 transition duration-200 ${
                         risk === "medium"
                           ? "border-[#7839C5]"
                           : "border-transparent hover:border-[#7839C580]"
                       }`}
+                      disabled={disableInput}
                     >
                       Medium
-                    </div>
-                    <div
+                    </button>
+                    <button
+                      type="button"
                       onClick={() => setRisk("high")}
-                      className={`text-center w-full rounded-[5px] border-[2px] bg-[#202329] py-2 text-xs font-chakra text-white text-opacity-90 transition duration-200 ${
+                      className={`text-center w-full rounded-[5px] border-[2px] bg-[#202329] py-2 text-xs font-chakra disabled:opacity-50 text-white text-opacity-90 transition duration-200 ${
                         risk === "high"
                           ? "border-[#7839C5]"
                           : "border-transparent hover:border-[#7839C580]"
                       }`}
+                      disabled={disableInput}
                     >
                       High
-                    </div>
+                    </button>
                   </div>
                 </div>
 
@@ -474,6 +530,8 @@ export default function Keno() {
                   {startAuto && (
                     <div
                       onClick={() => {
+                        soundAlert("/sounds/betbutton.wav");
+                        warningCustom("Auto bet stopped");
                         setAutoBetCount(0);
                         setStartAuto(false);
                       }}
@@ -534,6 +592,8 @@ export default function Keno() {
                       : strikeNumbers.includes(number)
                       ? chosenNumbers.includes(number)
                         ? "bg-black border-fomo-green"
+                        : chosenNumbers.length === 0
+                        ? "bg-[#202329] border-transparent"
                         : "bg-black border-fomo-red text-fomo-red"
                       : chosenNumbers.includes(number)
                       ? "bg-[#7839C5] border-transparent"

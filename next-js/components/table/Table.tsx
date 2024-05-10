@@ -5,6 +5,7 @@ import BetRow from "../games/BetRow";
 import { useGlobalContext } from "../GlobalContext";
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa6";
 import Loader from "../games/Loader";
+import { errorCustom } from "../toasts/ToastGroup";
 
 interface PaginationProps {
   page: number;
@@ -184,7 +185,7 @@ export const TableButtons: React.FC<TableButtonProps> = ({ all, setAll }) => {
       <button
         onClick={() => {
           if (wallet.publicKey) setAll(false);
-          else toast.error("Wallet not connected");
+          else errorCustom("Wallet not connected");
         }}
         className={`${
           all ? "bg-[#202329] hover:bg-[#47484A]" : "bg-[#7839C5]"
@@ -304,7 +305,7 @@ export const Table: React.FC<TableProps> = ({
                   .map((bet, index) => (
                     <div
                       key={index}
-                      className="hover:bg-gray-900 mb-2.5 flex w-full flex-row items-center gap-2 rounded-[5px] bg-[#121418] py-3"
+                      className="mb-2.5 flex w-full flex-row items-center gap-2 rounded-[5px] bg-[#121418] hover:bg-[#1f2024] py-3"
                     >
                       <BetRow
                         bet={bet}

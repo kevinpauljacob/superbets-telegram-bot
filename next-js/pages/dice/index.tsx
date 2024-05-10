@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { rollDice } from "@/context/gameTransactions";
 import { toast } from "react-hot-toast";
@@ -29,6 +29,7 @@ import { loopSound, soundAlert } from "@/utils/soundUtils";
 import Bets from "../../components/games/Bets";
 import AutoCount from "@/components/AutoCount";
 import ConfigureAutoButton from "@/components/ConfigureAutoButton";
+import { errorCustom, warningCustom } from "@/components/toasts/ToastGroup";
 
 export default function Dice() {
   const wallet = useWallet();
@@ -78,7 +79,7 @@ export default function Dice() {
     6: false,
   });
   const [strikeFace, setStrikeFace] = useState<number>(0);
-  const [rollType, setRollType] = useState<"manual" | "auto">("manual");
+  const [betType, setbetType] = useState<"manual" | "auto">("manual");
   const [betResults, setBetResults] = useState<
     { face: number; win: boolean }[]
   >([]);
@@ -91,7 +92,7 @@ export default function Dice() {
       setStrikeFace(0);
       setShowPointer(false);
       if (selectedFace.length >= 5 && !selectedFace.includes(newFace)) {
-        toast.error("You can only select up to 5 faces");
+        errorCustom("You can only select up to 5 faces");
         return;
       }
 
@@ -163,19 +164,19 @@ export default function Dice() {
     );
     if (wallet.connected) {
       if (!wallet.publicKey) {
-        toast.error("Wallet not connected");
+        errorCustom("Wallet not connected");
         return;
       }
       if (coinData && coinData[0].amount < betAmt) {
-        toast.error("Insufficient balance for bet !");
+        errorCustom("Insufficient balance for bet !");
         return;
       }
       if (betAmt === 0) {
-        toast.error("Set Amount.");
+        errorCustom("Set Amount.");
         return;
       }
       if (selectedFace.length === 0) {
-        toast.error("Choose at least 1 face.");
+        errorCustom("Choose at least 1 face.");
         return;
       }
       setIsRolling(true);
@@ -196,7 +197,7 @@ export default function Dice() {
           loopSound("/sounds/diceshake.wav", 0.3);
 
           // auto options
-          if (rollType === "auto") {
+          if (betType === "auto") {
             if (useAutoConfig && autoWinChange && isWin) {
               setBetAmt(
                 autoWinChangeReset
@@ -217,8 +218,13 @@ export default function Dice() {
             );
             // update count
             if (typeof autoBetCount === "number")
-              setAutoBetCount(autoBetCount - 1);
-            else setAutoBetCount(autoBetCount + 1);
+              setAutoBetCount(autoBetCount > 0 ? autoBetCount - 1 : 0);
+            else
+              setAutoBetCount(
+                autoBetCount.length > 12
+                  ? autoBetCount.slice(0, 5)
+                  : autoBetCount + 1,
+              );
           }
         } else {
           setAutoBetCount(0);
@@ -295,23 +301,33 @@ export default function Dice() {
 
   useEffect(() => {
     console.log(
-      rollType,
+      betType,
       startAuto,
       autoBetCount,
       typeof autoBetCount === "string" &&
         autoBetCount.toString().includes("inf"),
     );
     if (
-      rollType === "auto" &&
+      betType === "auto" &&
       startAuto &&
       ((typeof autoBetCount === "string" && autoBetCount.includes("inf")) ||
         (typeof autoBetCount === "number" && autoBetCount > 0))
     ) {
-      if (useAutoConfig && autoStopProfit && autoBetProfit <= autoStopProfit) {
+      if (
+        useAutoConfig &&
+        autoStopProfit &&
+        autoBetProfit > 0 &&
+        autoBetProfit >= autoStopProfit
+      ) {
         showInfoToast("Profit limit reached.");
         return;
       }
-      if (useAutoConfig && autoStopLoss && autoBetProfit >= -1 * autoStopLoss) {
+      if (
+        useAutoConfig &&
+        autoStopLoss &&
+        autoBetProfit < 0 &&
+        autoBetProfit <= -autoStopLoss
+      ) {
         showInfoToast("Loss limit reached.");
         return;
       }
@@ -323,19 +339,28 @@ export default function Dice() {
   }, [startAuto, autoBetCount]);
 
   const onSubmit = async (data: any) => {
-    if (
-      rollType === "auto" &&
-      ((typeof autoBetCount === "string" && autoBetCount.includes("inf")) ||
-        (typeof autoBetCount === "number" && autoBetCount > 0))
-    ) {
+    if (betType === "auto") {
       if (betAmt === 0) {
-        toast.error("Set Amount.");
+        errorCustom("Set Amount.");
         return;
       }
-      console.log("Auto betting. config: ", useAutoConfig);
-      setStartAuto(true);
+      if (typeof autoBetCount === "number" && autoBetCount <= 0) {
+        errorCustom("Set Bet Count.");
+        return;
+      }
+      if (
+        (typeof autoBetCount === "string" && autoBetCount.includes("inf")) ||
+        (typeof autoBetCount === "number" && autoBetCount > 0)
+      ) {
+        console.log("Auto betting. config: ", useAutoConfig);
+        setStartAuto(true);
+      }
     } else if (wallet.connected && selectedFace.length > 0) diceRoll();
   };
+
+  const disableInput = useMemo(() => {
+    return betType === "auto" && startAuto ? true : false;
+  }, [betType, startAuto]);
 
   return (
     <GameLayout title="FOMO - Dice">
@@ -351,6 +376,8 @@ export default function Dice() {
             {startAuto && (
               <div
                 onClick={() => {
+                  soundAlert("/sounds/betbutton.wav");
+                  warningCustom("Auto bet stopped");
                   setAutoBetCount(0);
                   setStartAuto(false);
                 }}
@@ -363,6 +390,9 @@ export default function Dice() {
               disabled={
                 !wallet ||
                 selectedFace.length === 0 ||
+                (typeof autoBetCount === "number" && autoBetCount <= 0) ||
+                (typeof autoBetCount === "string" &&
+                  !autoBetCount.includes("inf")) ||
                 isRolling ||
                 (coinData && coinData[0].amount < 0.0001) ||
                 (betAmt !== undefined &&
@@ -376,13 +406,17 @@ export default function Dice() {
               {isRolling ? <Loader /> : "BET"}
             </BetButton>
           </div>
-          {rollType === "auto" && (
+          {betType === "auto" && (
             <div className="w-full flex lg:hidden">
               <ConfigureAutoButton />
             </div>
           )}
           <div className="w-full hidden lg:flex">
-            <BetSetting betSetting={rollType} setBetSetting={setRollType} />
+            <BetSetting
+              betSetting={betType}
+              setBetSetting={setbetType}
+              disabled={disableInput}
+            />
           </div>
           <div className="w-full flex flex-col">
             <FormProvider {...methods}>
@@ -398,8 +432,9 @@ export default function Dice() {
                   currentMultiplier={winningPays}
                   leastMultiplier={6 / 5}
                   game="dice"
+                  disabled={disableInput}
                 />
-                {rollType === "manual" ? (
+                {betType === "manual" ? (
                   <></>
                 ) : (
                   <div className="w-full flex flex-row items-end gap-3">
@@ -422,6 +457,8 @@ export default function Dice() {
                   {startAuto && (
                     <div
                       onClick={() => {
+                        soundAlert("/sounds/betbutton.wav");
+                        warningCustom("Auto bet stopped");
                         setAutoBetCount(0);
                         setStartAuto(false);
                       }}
@@ -450,7 +487,7 @@ export default function Dice() {
               </form>
             </FormProvider>
             <div className="w-full flex lg:hidden">
-              <BetSetting betSetting={rollType} setBetSetting={setRollType} />
+              <BetSetting betSetting={betType} setBetSetting={setbetType} />
             </div>
           </div>
         </>

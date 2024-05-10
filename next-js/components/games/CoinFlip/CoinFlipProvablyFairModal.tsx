@@ -10,6 +10,7 @@ import { FaRegCopy } from "react-icons/fa6";
 import { MdClose } from "react-icons/md";
 import Image from "next/image";
 import CheckPF from "@/public/assets/CheckPF.svg";
+import { errorCustom } from "@/components/toasts/ToastGroup";
 
 export interface PFModalData {
   activeGameSeed: {
@@ -130,7 +131,7 @@ export default function CoinFlipProvablyFairModal({
 
   const handleSetClientSeed = async () => {
     if (!/^[\x00-\x7F]*$/.test(newClientSeed) || newClientSeed.trim() === "")
-      return toast.error("Invalid client seed");
+      return errorCustom("Invalid client seed");
 
     let data = await fetch(`/api/games/gameSeed/change`, {
       method: "POST",

@@ -19,6 +19,7 @@ import BetAmount from "@/components/games/BetAmountInput";
 import BetButton from "@/components/games/BetButton";
 import BalanceAlert from "@/components/games/BalanceAlert";
 import { soundAlert } from "@/utils/soundUtils";
+import { errorCustom, successCustom } from "@/components/toasts/ToastGroup";
 
 const Timer = dynamic(() => import("../../components/games/Timer"), {
   ssr: false,
@@ -75,9 +76,9 @@ export default function Options() {
       checkResultAPI(wallet).then((res) => {
         if (res.success) {
           if (res?.data?.result == "Won") {
-            toast.success(res?.message);
+            successCustom(res?.message);
             soundAlert("/sounds/win.wav");
-          } else toast.error(res?.message);
+          } else errorCustom(res?.message);
           setResult(res?.data?.result);
           setResultAmt(
             res?.data?.result == "Won"
@@ -102,12 +103,12 @@ export default function Options() {
         } else {
           setResult(null);
           setCheckResult(false);
-          res?.message && toast.error(res?.message);
+          res?.message && errorCustom(res?.message);
         }
         setLoading(false);
       });
     } catch (e) {
-      toast.error("Could not fetch result.");
+      errorCustom("Could not fetch result.");
       setResult(null);
       setCheckResult(false);
       setLoading(false);
@@ -120,12 +121,12 @@ export default function Options() {
     try {
       // console.log("Placing bet");
       if (betAmt === undefined) {
-        toast.error("Invalid amount");
+        errorCustom("Invalid amount");
         return;
       }
 
       if (betAmt > coinData![0].amount) {
-        toast.error("Insufficient balance to place bet");
+        errorCustom("Insufficient balance to place bet");
         setBetType(null);
         setCheckResult(false);
         setBetEnd(false);
@@ -140,7 +141,7 @@ export default function Options() {
         betInterval,
       );
       if (res.success) {
-        toast.success(res?.message ?? "Bet placed");
+        successCustom(res?.message ?? "Bet placed");
         setRefresh(true);
         setStrikePrice(res?.data?.strikePrice);
         setBetTime(res?.data?.betTime);
@@ -170,10 +171,10 @@ export default function Options() {
         setCheckResult(false);
         setBetEnd(false);
         setLoading(false);
-        res?.message && toast.error(res?.message);
+        res?.message && errorCustom(res?.message);
       }
     } catch (e) {
-      toast.error("Could not place bet.");
+      errorCustom("Could not place bet.");
       setBetType(null);
       setCheckResult(false);
       setBetEnd(false);
@@ -253,7 +254,7 @@ export default function Options() {
         let price = data[0].price.price * Math.pow(10, data[0].price.expo);
         setLivePrice(price);
       } catch (e) {
-        toast.error("Could not fetch live price.");
+        errorCustom("Could not fetch live price.");
         setLivePrice(0);
       }
     }, 1000);
@@ -293,7 +294,7 @@ export default function Options() {
       setBetEndPrice(0);
       return;
     } else {
-      if (!wallet.publicKey) toast.error("Wallet not connected");
+      if (!wallet.publicKey) errorCustom("Wallet not connected");
       else {
         if (
           betType &&
@@ -303,7 +304,7 @@ export default function Options() {
         ) {
           // setBetType("up");
           await bet(betType);
-        } else toast.error("Choose amount, interval and type.");
+        } else errorCustom("Choose amount, interval and type.");
       }
     }
   };
@@ -563,8 +564,8 @@ export default function Options() {
                         ? loading && !result
                           ? "blink_1_50 bg-white"
                           : result === "Won"
-                          ? "bg-[#72F238] bg-opacity-20 blink_3"
-                          : "bg-[#CF304A] bg-opacity-20 blink_3"
+                          ? "bg-[#72F238] bg-opacity-40 blink_3"
+                          : "bg-[#CF304A] bg-opacity-40 blink_3"
                         : betEnd
                         ? "blink_1_50 bg-white"
                         : index >= (timeLeft * 50) / (betInterval * 60000)

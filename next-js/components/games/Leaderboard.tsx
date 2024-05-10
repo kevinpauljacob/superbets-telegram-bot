@@ -3,6 +3,7 @@ import { useWallet } from "@solana/wallet-adapter-react";
 import toast from "react-hot-toast";
 import { obfuscatePubKey } from "@/context/transactions";
 import Head from "next/head";
+import { errorCustom } from "../toasts/ToastGroup";
 
 function Leaderboard() {
   const wallet = useWallet();
@@ -44,7 +45,7 @@ function Leaderboard() {
             console.log("sss");
           } else {
             setData([]);
-            toast.error("Could not fetch history.");
+            errorCustom("Could not fetch history.");
           }
         });
     else
@@ -72,7 +73,7 @@ function Leaderboard() {
             setData(users);
           } else {
             setData([]);
-            toast.error("Could not fetch history.");
+            errorCustom("Could not fetch history.");
           }
         });
   }, [isWeekly]);

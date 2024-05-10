@@ -7,6 +7,7 @@ import BalanceAlert from "./BalanceAlert";
 import { FaInfo } from "react-icons/fa6";
 import { InfoCircle } from "iconsax-react";
 import { BsInfoCircleFill } from "react-icons/bs";
+import DicePointer from "@/public/assets/DicePointer";
 
 export default function BetAmount({
   betAmt,
@@ -14,12 +15,14 @@ export default function BetAmount({
   currentMultiplier,
   leastMultiplier,
   game,
+  disabled = false,
 }: {
   betAmt: number | undefined;
   setBetAmt: React.Dispatch<React.SetStateAction<number | undefined>>;
   currentMultiplier: number;
   leastMultiplier: number;
   game: string;
+  disabled?: boolean;
 }) {
   const methods = useForm();
   const { coinData, maxBetAmt, setMaxBetAmt } = useGlobalContext();
@@ -117,7 +120,7 @@ export default function BetAmount({
             }`}
             onClick={() => handleBetAmountsModal()}
           >
-            why?
+            Why?
           </span>
         </span>
       </div>
@@ -130,7 +133,8 @@ export default function BetAmount({
                 min={minBetAmt}
                 max={maxBetAmt}
                 value={maxBetAmt}
-                className="maxBetsSlider absolute top-[-8px] w-full bg-transparent appearance-none z-20"
+                disabled={disabled}
+                className="maxBetsSlider absolute top-[-8px] w-full bg-transparent appearance-none z-20 disabled:cursor-not-allowed disabled:opacity-50"
               />
               <div
                 className="absolute rounded-full h-[5px] bg-[#8795A8] z-10"
@@ -141,10 +145,11 @@ export default function BetAmount({
                 }}
               >
                 <div className="relative">
-                  <div className="absolute text-[#94A3B8] text-[11px] font-semibold font-chakra -top-5 -right-[14px] w-max">
+                  <div className="absolute text-[#94A3B8] text-[11px] font-semibold font-chakra -top-7 -right-[14px] w-max">
                     <span className="text-white">
                       {currentMaxBetAmt.toFixed(2)}
                     </span>
+                    <DicePointer className="relative w-2 h-2 left-1/2 -translate-x-1/2 text-white" />
                   </div>
                 </div>
               </div>
@@ -154,7 +159,7 @@ export default function BetAmount({
               <div className="absolute group cursor-pointer text-white text-opacity-50 text-[11px] font-medium font-chakra top-2.5 -right-2.5">
                 {highestMaxBetAmt}
                 <BsInfoCircleFill className="text-white text-opacity-50 w-3 h-3 absolute top-1/2 -translate-y-1/2 -right-3.5" />
-                <span className="absolute hidden group-hover:block transition-all z-[1000] w-80 p-2 rounded-[5px] top-5 right-0 translate-x-[30%] md:translate-x-1/4 bg-[#080808] text-white/50 text-xs text-regular font-changa">
+                <span className="absolute hidden group-hover:block transition-all z-[1000] text-justify w-80 p-2 rounded-[5px] top-5 right-0 translate-x-[30%] md:translate-x-1/4 bg-[#080808] text-white/50 text-xs text-regular font-changa">
                   The maximum amount you can bet with the current multiplier (
                   <span className="text-white/80 font-medium">
                     {isNaN(currentMultiplier)
@@ -165,7 +170,13 @@ export default function BetAmount({
                   <span className="text-white/80 font-medium">
                     {currentMaxBetAmt.toFixed(2)} SOL
                   </span>
-                  . The maximum amount you can bet in this game is{" "}
+                  . Your current wallet balance is{" "}
+                  <span className="text-white/80 font-medium">
+                    {coinData && coinData[0]?.amount
+                      ? parseFloat(coinData[0].amount.toFixed(4))
+                      : 0.0}
+                  </span>{" "}
+                  The maximum amount you can bet in this game is{" "}
                   <span className="text-white/80 font-medium">
                     {highestMaxBetAmt} SOL
                   </span>
@@ -227,29 +238,36 @@ export default function BetAmount({
             setBetAmt(enteredAmount);
           }}
           placeholder={"0.0"}
+          disabled={disabled}
           min={0.0001}
           value={betAmt}
           lang="en"
-          className={`flex w-full min-w-0 bg-transparent text-base text-[#94A3B8] placeholder-[#94A3B8] font-chakra placeholder-opacity-40 outline-none`}
+          className={`flex w-full min-w-0 bg-transparent text-base text-[#94A3B8] placeholder-[#94A3B8] font-chakra placeholder-opacity-40 outline-none disabled:cursor-not-allowed disabled:opacity-50`}
         />
-        <span
-          className="text-xs font-medium text-white text-opacity-50 bg-[#292C32] hover:bg-[#47484A] focus:bg-[#47484A] transition-all hover:duration-75 rounded-[5px] py-1.5 px-4"
+        <button
+          type="button"
+          className="text-xs font-medium text-white text-opacity-50 disabled:cursor-not-allowed disabled:opacity-50 bg-[#292C32] hover:bg-[#47484A] focus:bg-[#47484A] transition-all hover:duration-75 rounded-[5px] py-1.5 px-4"
           onClick={handleHalfBet}
+          disabled={disabled}
         >
           1/2
-        </span>
-        <span
-          className="text-xs mx-2 font-medium text-white text-opacity-50 bg-[#292C32] hover:bg-[#47484A] focus:bg-[#47484A] transition-all hover:duration-75 rounded-[5px] py-1.5 px-4"
+        </button>
+        <button
+          type="button"
+          className="text-xs mx-2 font-medium text-white text-opacity-50 disabled:cursor-not-allowed disabled:opacity-50 bg-[#292C32] hover:bg-[#47484A] focus:bg-[#47484A] transition-all hover:duration-75 rounded-[5px] py-1.5 px-4"
           onClick={handleDoubleBet}
+          disabled={disabled}
         >
           2x
-        </span>
-        <span
-          className="text-xs font-medium text-white text-opacity-50 bg-[#292C32] hover:bg-[#47484A] focus:bg-[#47484A] transition-all hover:duration-75 rounded-[5px] py-1.5 px-4"
+        </button>
+        <button
+          type="button"
+          className="text-xs font-medium text-white text-opacity-50 disabled:cursor-not-allowed disabled:opacity-50 bg-[#292C32] hover:bg-[#47484A] focus:bg-[#47484A] transition-all hover:duration-75 rounded-[5px] py-1.5 px-4"
           onClick={handleSetMaxBet}
+          disabled={disabled}
         >
           Max
-        </span>
+        </button>
       </div>
       <span
         className={`${

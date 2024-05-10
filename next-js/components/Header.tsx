@@ -1,28 +1,16 @@
-import React, { useState } from "react";
-import { IoCartSharp } from "react-icons/io5";
-import Sidebar from "./Sidebar";
+import React, { useState, useEffect } from "react";
 import { useGlobalContext } from "./GlobalContext";
-import Spinner from "./Spinner";
 import Image from "next/image";
-import Link from "next/link";
-import Key from "@/public/assets/Key";
 import { RiMenuLine } from "react-icons/ri";
-import { MdMenu, MdOutlineLanguage } from "react-icons/md";
-import { FaChevronDown, FaTrophy } from "react-icons/fa6";
+import { MdOutlineLanguage } from "react-icons/md";
+import { FaChevronDown } from "react-icons/fa6";
 import ConnectWallet from "./ConnectWallet";
 import { useRouter } from "next/router";
 import { translator } from "@/context/transactions";
-import Menu from "/public/assets/menu.svg";
-import ActiveMenu from "/public/assets/activeMenu.svg";
 import Staking from "/public/assets/Stake1.svg";
-import ActiveStaking from "/public/assets/activeStaking.svg";
 import Leaderboard from "/public/assets/Leaderboard1.svg";
-import ActiveLeaderboard from "/public/assets/activeLeaderboard.svg";
 import Store from "/public/assets/store1.svg";
-import ActiveStore from "/public/assets/activeStore.svg";
-import Dashboard from "/public/assets/dashboard.svg";
-import ActiveDashboard from "/public/assets/activeDashboard.svg";
-import { BsFillLightningFill } from "react-icons/bs";
+import { useWallet } from "@solana/wallet-adapter-react";
 
 export function Header({
   sidebar,
@@ -31,12 +19,28 @@ export function Header({
   sidebar: boolean;
   toggleSidebar: () => void;
 }) {
+  const wallet = useWallet();
   const router = useRouter();
-  const { language, setLanguage } = useGlobalContext();
+  const {
+    language,
+    setLanguage,
+    userData,
+    getUserDetails,
+    mobileSidebar,
+    setMobileSidebar,
+  } = useGlobalContext();
   const [langSelect, setLangSelect] = useState(false);
 
+  useEffect(() => {
+    if (!userData && wallet && wallet.publicKey) getUserDetails();
+  }, [wallet.publicKey]);
+
   return (
-    <div className={`${sidebar ? "" : ""} z-[100] sticky top-0 w-full flex flex-col`}>
+    <div
+      className={`${
+        sidebar ? "" : ""
+      } z-[100] sticky top-0 w-full flex flex-col`}
+    >
       <div
         className={`${
           sidebar ? "" : ""
@@ -47,7 +51,8 @@ export function Header({
           <div className="flex flex-row items-center cursor-pointer gap-2">
             <div
               onClick={() => {
-                router.push("/");
+                if (mobileSidebar === true) setMobileSidebar(false);
+                else router.push("/");
               }}
               className="flex sm:hidden relative"
             >
@@ -61,7 +66,7 @@ export function Header({
             </div>
             <RiMenuLine
               onClick={() => toggleSidebar()}
-              className="hidden sm:flex text-white w-7 h-7"
+              className={`hidden sm:flex text-white w-7 h-7 hover:text-[#8033D7] transition-all duration-75 ${sidebar ? 'text-[#8033d7]':'text-white'}`}
             />
             <span
               onClick={() => {
@@ -162,7 +167,7 @@ export function Header({
                   router.pathname.includes("store") ? "bg-[#7839C5]" : ""
                 } hover:bg-[#555555] focus:bg-[#7839C5] transition-all font-medium text-sm p-2`}
               >
-              <Image src={Store} alt="Store" width={20} height={20} />
+                <Image src={Store} alt="Store" width={20} height={20} />
               </button>
               <button
                 onClick={() => {
@@ -187,7 +192,7 @@ export function Header({
                   router.pathname.includes("stake") ? "bg-[#7839C5]" : ""
                 } hover:bg-[#555555] focus:bg-[#7839C5] transition-all font-medium text-sm p-2`}
               >
-              <Image src={Staking} alt="Staking" width={20} height={20} />
+                <Image src={Staking} alt="Staking" width={20} height={20} />
               </button>
               <ConnectWallet />
             </div>

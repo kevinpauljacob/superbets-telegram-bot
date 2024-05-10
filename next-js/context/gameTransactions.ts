@@ -13,6 +13,7 @@ import {
 import { SPL_TOKENS } from "./config";
 import toast from "react-hot-toast";
 import { WalletContextState } from "@solana/wallet-adapter-react";
+import { errorCustom, successCustom } from "@/components/toasts/ToastGroup";
 
 export const connection = new Connection(
   process.env.NEXT_PUBLIC_RPC!,
@@ -53,19 +54,19 @@ export const placeBet = async (
 
     if (success === false) {
       // toast.dismiss(toastId);
-      toast.error(message);
+      errorCustom(message);
       throw new Error(message);
     }
 
     // toast.dismiss(toastId);
 
-    toast.success("Bet placed successfully!", { duration: 2000 });
+    successCustom("Bet placed successfully!");
 
     return { success, message, data };
   } catch (error) {
     // toast.dismiss(toastId);
 
-    // toast.error("error placing bet!");
+    // errorCustom("error placing bet!");
 
     return { success: false, message: "Unexpected error", data: null };
   }
@@ -109,12 +110,12 @@ export const deposit = async (
   tokenMint: string,
 ) => {
   if (amount == 0) {
-    toast.error("Please enter an amount greater than 0");
+    errorCustom("Please enter an amount greater than 0");
     return { success: true, message: "Please enter an amount greater than 0" };
   }
 
   if (!wallet.publicKey) {
-    toast.error("Wallet not connected");
+    errorCustom("Wallet not connected");
     return { success: true, message: "Wallet not connected" };
   }
 
@@ -149,18 +150,18 @@ export const deposit = async (
 
     if (success === false) {
       toast.dismiss(toastId);
-      toast.error(message);
+      errorCustom(message);
       throw new Error(message);
     }
 
     toast.dismiss(toastId);
 
-    toast.success("Deposit successfull!");
+    successCustom("Deposit successfull!");
 
     return { success: true, message };
   } catch (error) {
     toast.dismiss(toastId);
-    toast.error("Unexpected error!");
+    errorCustom("Unexpected error!");
     return { success: false, message: error };
   }
 };
@@ -171,12 +172,12 @@ export const withdraw = async (
   tokenMint: string,
 ) => {
   if (amount == 0) {
-    toast.error("Please enter an amount greater than 0");
+    errorCustom("Please enter an amount greater than 0");
     return { success: true, message: "Please enter an amount greater than 0" };
   }
 
   if (!wallet.publicKey) {
-    toast.error("Wallet not connected");
+    errorCustom("Wallet not connected");
     return { success: true, message: "Wallet not connected" };
   }
 
@@ -211,19 +212,19 @@ export const withdraw = async (
 
     if (success === false) {
       toast.dismiss(toastId);
-      toast.error(message);
+      errorCustom(message);
       throw new Error(message);
     }
 
     toast.dismiss(toastId);
 
-    toast.success("Withdrawal successfull!");
+    successCustom("Withdrawal successfull!");
 
     return { success: true, message };
   } catch (error) {
     toast.dismiss(toastId);
 
-    toast.error("Unexpected error!");
+    errorCustom("Unexpected error!");
 
     return { success: true, message: error };
   }
@@ -247,7 +248,7 @@ export const checkResult = async (wallet: WalletContextState) => {
 
     if (success === false) {
       toast.dismiss(toastId);
-      toast.error(message);
+      errorCustom(message);
       throw new Error(message);
     }
 
@@ -257,7 +258,7 @@ export const checkResult = async (wallet: WalletContextState) => {
   } catch (error: any) {
     toast.dismiss(toastId);
 
-    toast.error("Unexpected error! Please try again.");
+    errorCustom("Unexpected error! Please try again.");
 
     return {
       success: false,
@@ -453,12 +454,12 @@ export const rollDice = async (
     const { success, message, data } = await res.json();
 
     if (success != true) {
-      toast.error(message);
+      errorCustom(message);
       throw new Error(message);
     }
 
-    if (data.result == "Won") toast.success(message, { duration: 2000 });
-    else toast.error(message, { duration: 2000 });
+    if (data.result == "Won") successCustom(message);
+    else errorCustom(message);
 
     return { success, message, data };
   } catch (error) {
