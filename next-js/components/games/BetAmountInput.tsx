@@ -135,7 +135,7 @@ export default function BetAmount({
                 value={maxBetAmt}
                 disabled={disabled}
                 className="maxBetsSlider absolute top-[-8px] w-full bg-transparent appearance-none z-20 disabled:cursor-not-allowed disabled:opacity-50"
-              />
+              /> 
               <div
                 className="absolute rounded-full h-[5px] bg-[#8795A8] z-10"
                 style={{
@@ -236,7 +236,7 @@ export default function BetAmount({
           placeholder={"0.0"}
           disabled={disabled}
           min={0.0001}
-          value={betAmt}
+          value={betAmt||''}
           lang="en"
           className={`flex w-full min-w-0 bg-transparent text-base text-[#94A3B8] placeholder-[#94A3B8] font-chakra placeholder-opacity-40 outline-none disabled:cursor-not-allowed disabled:opacity-50`}
         />

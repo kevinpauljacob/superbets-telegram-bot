@@ -301,8 +301,8 @@ export default function Limbo() {
   };
 
   const disableInput = useMemo(() => {
-    return betSetting === "auto" && startAuto ? true : false;
-  }, [betSetting, startAuto]);
+    return betSetting === "auto" && startAuto ? true : false || loading;
+  }, [betSetting, startAuto,loading]);
 
   return (
     <GameLayout title="FOMO - Limbo">
