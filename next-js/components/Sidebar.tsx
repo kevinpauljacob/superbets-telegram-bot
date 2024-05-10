@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 
 import { useWallet } from "@solana/wallet-adapter-react";
-import { obfuscatePubKey, pointTiers } from "@/context/transactions";
+import { obfuscatePubKey, pointTiers, translator } from "@/context/transactions";
 import { useGlobalContext } from "./GlobalContext";
 import Home from "@/public/assets/Home";
 import FomoExitIcon from "@/public/assets/FomoExitIcon";
@@ -36,7 +36,7 @@ export default function Sidebar({
 }) {
   const wallet = useWallet();
   const router = useRouter();
-
+  const {language} = useGlobalContext();
   const [showExitTokens, setShowExitTokens] = useState<boolean>(false);
   const [showPlayTokens, setShowPlayTokens] = useState<boolean>(false);
 
@@ -170,6 +170,7 @@ export const SidebarOpenElement = ({
   link?: string;
 }) => {
   const router = useRouter();
+  const {language} = useGlobalContext();
   return (
     <div
       onClick={() => {
@@ -179,7 +180,7 @@ export const SidebarOpenElement = ({
     >
       <Icon className="group-hover:text-[#9945FF] group-focus:text-[#9945FF] w-5 h-5 transition-all text-white/90" />
       <span className="transition-all text-sm leading-[1rem] font-changa font-medium tracking-wider text-white text-opacity-90 group-hover:text-opacity-100 group-focus:text-opacity-100">
-        {text}
+        {translator(text, language)}
       </span>
     </div>
   );
@@ -272,6 +273,8 @@ export const OpenSidebar = ({
     setCasinoGames(updatedCasinoGames);
   };
 
+  const {language} = useGlobalContext();
+
   useEffect(() => {
     // Function to check if any game link matches the current pathname
     const isGameActive = (games: Game[]) => {
@@ -337,7 +340,7 @@ export const OpenSidebar = ({
               <div className="flex items-center gap-3">
                 <FomoPlayIcon className="min-w-[1.25rem] min-h-[1.25rem] transition-all text-white group-hover:text-[#9945FF] group-focus:text-[#9945FF]" />
                 <span className="mt-0.5 transition-all text-sm font-changa font-medium text-white text-opacity-90 group-hover:text-opacity-100 group-focus:text-opacity-100">
-                  FOMO: Play
+                  FOMO: {translator("Play", language)}
                 </span>
               </div>
               <button
@@ -380,7 +383,7 @@ export const OpenSidebar = ({
                           : "text-white/50 group-hover:text-white/90"
                       }`}
                     >
-                      {token.token}
+                      {translator(token.token, language)}
                     </span>
                   </Link>
                 ))}
@@ -392,7 +395,7 @@ export const OpenSidebar = ({
               <div className="flex items-center gap-3">
                 <FomoExitIcon className="min-w-[1.25rem] min-h-[1.25rem] transition-all text-white group-hover:text-[#9945FF] group-focus:text-[#9945FF]" />
                 <span className="mt-0.5 transition-all text-sm font-changa font-medium text-white text-opacity-90 group-hover:text-opacity-100 group-focus:text-opacity-100">
-                  FOMO: Exit
+                  FOMO: {translator("Exit", language)}
                 </span>
               </div>
               <button
@@ -459,7 +462,7 @@ export const OpenSidebar = ({
           target="_blank"
         >
           <Twitter className="w-5 h-5" />
-          Twitter
+          {translator("Twitter", language)}
         </Link>
         <Link
           href="https://birdeye.so/"
@@ -475,7 +478,7 @@ export const OpenSidebar = ({
           target="_blank"
         >
           <Telegram className="w-5 h-5" />
-          Telegram
+          {translator("Telegram", language)}
         </Link>
 
         <div className="flex items-center justify-center my-2">

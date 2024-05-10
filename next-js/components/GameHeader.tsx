@@ -93,7 +93,8 @@ export default function GameHeader() {
             height={30}
           />
           <p className="uppercase font-changa font-bold text-opacity-90 text-3xl min-w-[150px] ml-2">
-            {selectedGame.name}
+            {translator(selectedGame.name, language)}
+            {/* {selectedGame.name} */}
           </p>
         </div>
         <div className="flex flex-wrap mt-1 justify-end">
