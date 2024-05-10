@@ -27,6 +27,7 @@ import {
   successCustom,
   warningCustom,
 } from "@/components/toasts/ToastGroup";
+import { translator } from "@/context/transactions";
 
 export default function Keno() {
   const wallet = useWallet();
@@ -52,6 +53,7 @@ export default function Keno() {
     setUseAutoConfig,
     houseEdge,
     maxBetAmt,
+    language,
   } = useGlobalContext();
   const [betAmt, setBetAmt] = useState(0);
   const [userInput, setUserInput] = useState<number | undefined>();
@@ -365,7 +367,7 @@ export default function Keno() {
               : "border-transparent hover:border-[#7839C580] text-opacity-80"
           } w-full flex items-center justify-center disabled:opacity-50 gap-1 rounded-lg text-center cursor-pointer border-2 bg-[#202329] h-[3.75rem] lg:h-11 font-chakra text-base tracking-wider text-white font-semibold`}
         >
-          AUTOPICK
+          {translator("AUTOPICK", language)}
         </button>
         <button
           onClick={() => {
@@ -378,7 +380,7 @@ export default function Keno() {
               : "border-transparent hover:border-[#7839C580] text-opacity-80"
           } w-full flex items-center justify-center disabled:opacity-50 gap-1 rounded-lg text-center cursor-pointer border-2 bg-[#202329] h-[3.75rem] lg:h-11 font-chakra text-base tracking-wider text-white font-semibold`}
         >
-          CLEAR
+          {translator("CLEAR", language)}
         </button>
       </>
     );
@@ -399,7 +401,7 @@ export default function Keno() {
                 }}
                 className="cursor-pointer rounded-lg absolute w-full h-full z-20 bg-[#442c62] hover:bg-[#7653A2] focus:bg-[#53307E] flex items-center justify-center font-chakra font-semibold text-2xl tracking-wider text-white"
               >
-                STOP
+                {translator("STOP", language)}
               </div>
             )}
             <BetButton
@@ -471,10 +473,9 @@ export default function Keno() {
                       }`}
                       disabled={disableInput}
                     >
-                      Classic
+                      {translator("Classic", language)}
                     </button>
                     <button
-                      type="button"
                       onClick={() => setRisk("low")}
                       className={`text-center w-full rounded-[5px] border-[2px] bg-[#202329] py-2 text-xs font-chakra disabled:opacity-50 text-white text-opacity-90 transition duration-200 ${
                         risk === "low"
@@ -483,10 +484,9 @@ export default function Keno() {
                       }`}
                       disabled={disableInput}
                     >
-                      Low
+                      {translator("Low", language)}
                     </button>
                     <button
-                      type="button"
                       onClick={() => setRisk("medium")}
                       className={`text-center w-full block m-auto rounded-[5px] border-[2px] bg-[#202329] py-2 text-xs font-chakra disabled:opacity-50 text-white text-opacity-90 transition duration-200 ${
                         risk === "medium"
@@ -495,7 +495,7 @@ export default function Keno() {
                       }`}
                       disabled={disableInput}
                     >
-                      Medium
+                      {translator("Medium", language)}
                     </button>
                     <button
                       type="button"
@@ -507,11 +507,10 @@ export default function Keno() {
                       }`}
                       disabled={disableInput}
                     >
-                      High
+                      {translator("High", language)}
                     </button>
                   </div>
                 </div>
-
                 <div className="hidden lg:flex w-full flex-row gap-3 mb-[1.4rem]">
                   <Autopick />
                 </div>
@@ -541,7 +540,7 @@ export default function Keno() {
                       }}
                       className="rounded-lg absolute w-full h-full z-20 bg-[#442c62] hover:bg-[#7653A2] focus:bg-[#53307E] flex items-center justify-center font-chakra font-semibold text-2xl tracking-wider text-white"
                     >
-                      STOP
+                      {translator("STOP", language)}
                     </div>
                   )}
                   <BetButton
@@ -573,7 +572,7 @@ export default function Keno() {
           <div className="hidden sm:absolute top-10 left-12">
             {isRolling ? (
               <div className="font-chakra text-sm font-medium text-white text-opacity-75">
-                Betting...
+                {translator("Betting", language)}...
               </div>
             ) : null}
           </div>
@@ -679,7 +678,7 @@ export default function Keno() {
                             </div>
                             <div className="w-1/2">
                               <div className="text-[13px] font-medium font-changa text-opacity-90 text-[#F0F0F0]">
-                                Chance
+                                {translator("Chance", language)}
                               </div>
                               <div className="border border-white/10 rounded-[5px] p-3 mt-2">
                                 {calculateChance(index).toFixed(2)} %
@@ -698,16 +697,19 @@ export default function Keno() {
             (coinData[0].amount < 0.0001 ? (
               <div className="w-full rounded-lg bg-[#d9d9d90d] bg-opacity-10 flex items-center px-3 py-3 text-white md:px-6">
                 <div className="w-full text-center font-changa font-medium text-sm md:text-base text-[#F0F0F0] text-opacity-75">
-                  Please deposit funds to start playing. View{" "}
+                  {translator(
+                    "Please deposit funds to start playing. View",
+                    language,
+                  )}{" "}
                   <Link href="/balance">
-                    <u>WALLET</u>
+                    <u>{translator("WALLET", language)}</u>
                   </Link>
                 </div>
               </div>
             ) : coinData && chosenNumbers.length === 0 ? (
               <div className="w-full rounded-lg bg-[#d9d9d90d] bg-opacity-10 flex items-center px-3 py-3 text-white md:px-6">
                 <div className="w-full text-center font-changa font-medium text-sm md:text-base text-[#F0F0F0] text-opacity-75">
-                  Pick upto 10 numbers
+                  {translator("Pick upto 10 numbers", language)}
                 </div>
               </div>
             ) : null)}

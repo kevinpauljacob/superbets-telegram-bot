@@ -10,7 +10,7 @@ import { translator } from "@/context/transactions";
 
 export default function SubHeader() {
   const router = useRouter();
-  const { coinData, showWalletModal, setShowWalletModal, language } = useGlobalContext();
+  const { coinData, showWalletModal, setShowWalletModal, setLiveBets, language } = useGlobalContext();
 
   type Card = {
     game: GameType;

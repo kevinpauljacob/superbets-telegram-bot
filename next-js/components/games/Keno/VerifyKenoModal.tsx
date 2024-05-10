@@ -95,6 +95,11 @@ export default function VerifyDice2Modal({
     if (text) navigator.clipboard.writeText(text);
   };
 
+  const Capitalize = (str: string) => {
+    return str?.charAt(0).toUpperCase() + str?.slice(1);
+  };
+
+
   function formatDate(dateString: string) {
     const date = new Date(dateString);
     const day = date.getUTCDate().toString().padStart(2, "0");
@@ -191,7 +196,7 @@ export default function VerifyDice2Modal({
                   <input
                     type="text"
                     name="multiplier"
-                    value={bet.risk}
+                    value={translator(Capitalize(bet.risk), language)}
                     className="bg-[#202329] text-white font-chakra capitalize text-xs font-medium mt-1 rounded-md p-3 w-full relative"
                     readOnly
                   />

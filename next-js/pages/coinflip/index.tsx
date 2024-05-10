@@ -30,6 +30,7 @@ import {
   successCustom,
   warningCustom,
 } from "@/components/toasts/ToastGroup";
+import { translator } from "@/context/transactions";
 
 const Timer = dynamic(() => import("../../components/games/Timer"), {
   ssr: false,
@@ -64,6 +65,7 @@ export default function Flip() {
     setUseAutoConfig,
     houseEdge,
     maxBetAmt,
+    language,
   } = useGlobalContext();
 
   const [betAmt, setBetAmt] = useState(0);
@@ -298,7 +300,7 @@ export default function Flip() {
                 }}
                 className="cursor-pointer rounded-lg absolute w-full h-full z-20 bg-[#442c62] hover:bg-[#7653A2] focus:bg-[#53307E] flex items-center justify-center font-chakra font-semibold text-2xl tracking-wider text-white"
               >
-                STOP
+                {translator("STOP", language)}
               </div>
             )}
             <BetButton
@@ -391,7 +393,7 @@ export default function Flip() {
                       className={``}
                     />
                     <span className="mt-0.5 font-chakra text-xl font-semibold">
-                      Heads
+                      {translator("Heads", language)}
                     </span>
                   </button>
                   <button
@@ -414,7 +416,7 @@ export default function Flip() {
                       className={``}
                     />
                     <span className="mt-0.5 font-chakra text-xl font-semibold">
-                      Tails
+                      {translator("Tails", language)}
                     </span>
                   </button>
                 </div>
@@ -429,7 +431,7 @@ export default function Flip() {
                       }}
                       className="cursor-pointer rounded-lg absolute w-full h-full z-20 bg-[#442c62] hover:bg-[#7653A2] focus:bg-[#53307E] flex items-center justify-center font-chakra font-semibold text-2xl tracking-wider text-white"
                     >
-                      STOP
+                      {translator("STOP", language)}
                     </div>
                   )}
                   <BetButton
@@ -467,8 +469,8 @@ export default function Flip() {
                 ? "Flipping..."
                 : result
                 ? result === "Won"
-                  ? "You Won!"
-                  : "You Lost!"
+                  ? translator("You Won!", language)
+                  : translator("You Lost!", language)
                 : ""}
             </span>
             <div className="flex items-center gap-2">

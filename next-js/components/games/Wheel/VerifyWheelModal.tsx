@@ -99,6 +99,10 @@ export default function VerifyWheelModal({
     if (text) navigator.clipboard.writeText(text);
   };
 
+  const Capitalize = (str: string) => {
+    return str?.charAt(0).toUpperCase() + str?.slice(1);
+  };
+
   function formatDate(dateString: string) {
     const date = new Date(dateString);
     const day = date.getUTCDate().toString().padStart(2, "0");
@@ -215,7 +219,7 @@ export default function VerifyWheelModal({
                   <input
                     type="text"
                     name="risk"
-                    value={bet.risk}
+                    value={translator(Capitalize(bet.risk), language)}
                     className="bg-[#202329] text-white capitalize font-chakra text-xs font-medium mt-1 rounded-md p-3 w-full relative"
                     readOnly
                   />
