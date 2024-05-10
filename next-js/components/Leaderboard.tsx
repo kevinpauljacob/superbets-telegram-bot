@@ -5,6 +5,7 @@ import Head from "next/head";
 import { User, obfuscatePubKey, pointTiers } from "@/context/transactions";
 import { useGlobalContext } from "./GlobalContext";
 import Image from "next/legacy/image";
+import { errorCustom } from "./toasts/ToastGroup";
 
 function Leaderboard() {
   const wallet = useWallet();
@@ -52,11 +53,11 @@ function Leaderboard() {
         }
       } else {
         setData([]);
-        toast.error("Could not fetch leaderboard.");
+        errorCustom("Could not fetch leaderboard.");
       }
     } catch (e) {
       setData([]);
-      toast.error("Could not fetch leaderboard.");
+      errorCustom("Could not fetch leaderboard.");
       console.error(e);
     }
   };

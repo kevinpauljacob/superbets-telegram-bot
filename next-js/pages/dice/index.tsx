@@ -29,6 +29,7 @@ import { loopSound, soundAlert } from "@/utils/soundUtils";
 import Bets from "../../components/games/Bets";
 import AutoCount from "@/components/AutoCount";
 import ConfigureAutoButton from "@/components/ConfigureAutoButton";
+import { errorCustom, warningCustom } from "@/components/toasts/ToastGroup";
 
 export default function Dice() {
   const wallet = useWallet();
@@ -91,7 +92,7 @@ export default function Dice() {
       setStrikeFace(0);
       setShowPointer(false);
       if (selectedFace.length >= 5 && !selectedFace.includes(newFace)) {
-        toast.error("You can only select up to 5 faces");
+        errorCustom("You can only select up to 5 faces");
         return;
       }
 
@@ -163,19 +164,19 @@ export default function Dice() {
     );
     if (wallet.connected) {
       if (!wallet.publicKey) {
-        toast.error("Wallet not connected");
+        errorCustom("Wallet not connected");
         return;
       }
       if (coinData && coinData[0].amount < betAmt) {
-        toast.error("Insufficient balance for bet !");
+        errorCustom("Insufficient balance for bet !");
         return;
       }
       if (betAmt === 0) {
-        toast.error("Set Amount.");
+        errorCustom("Set Amount.");
         return;
       }
       if (selectedFace.length === 0) {
-        toast.error("Choose at least 1 face.");
+        errorCustom("Choose at least 1 face.");
         return;
       }
       setIsRolling(true);
@@ -218,7 +219,12 @@ export default function Dice() {
             // update count
             if (typeof autoBetCount === "number")
               setAutoBetCount(autoBetCount > 0 ? autoBetCount - 1 : 0);
-            else setAutoBetCount(autoBetCount + 1);
+            else
+              setAutoBetCount(
+                autoBetCount.length > 12
+                  ? autoBetCount.slice(0, 5)
+                  : autoBetCount + 1,
+              );
           }
         } else {
           setAutoBetCount(0);
@@ -333,17 +339,22 @@ export default function Dice() {
   }, [startAuto, autoBetCount]);
 
   const onSubmit = async (data: any) => {
-    if (
-      betType === "auto" &&
-      ((typeof autoBetCount === "string" && autoBetCount.includes("inf")) ||
-        (typeof autoBetCount === "number" && autoBetCount > 0))
-    ) {
+    if (betType === "auto") {
       if (betAmt === 0) {
-        toast.error("Set Amount.");
+        errorCustom("Set Amount.");
         return;
       }
-      console.log("Auto betting. config: ", useAutoConfig);
-      setStartAuto(true);
+      if (typeof autoBetCount === "number" && autoBetCount <= 0) {
+        errorCustom("Set Bet Count.");
+        return;
+      }
+      if (
+        (typeof autoBetCount === "string" && autoBetCount.includes("inf")) ||
+        (typeof autoBetCount === "number" && autoBetCount > 0)
+      ) {
+        console.log("Auto betting. config: ", useAutoConfig);
+        setStartAuto(true);
+      }
     } else if (wallet.connected && selectedFace.length > 0) diceRoll();
   };
 
@@ -365,6 +376,8 @@ export default function Dice() {
             {startAuto && (
               <div
                 onClick={() => {
+                  soundAlert("/sounds/betbutton.wav");
+                  warningCustom("Auto bet stopped");
                   setAutoBetCount(0);
                   setStartAuto(false);
                 }}
@@ -399,7 +412,11 @@ export default function Dice() {
             </div>
           )}
           <div className="w-full hidden lg:flex">
-            <BetSetting betSetting={betType} setBetSetting={setbetType} disabled={disableInput} />
+            <BetSetting
+              betSetting={betType}
+              setBetSetting={setbetType}
+              disabled={disableInput}
+            />
           </div>
           <div className="w-full flex flex-col">
             <FormProvider {...methods}>
@@ -440,6 +457,8 @@ export default function Dice() {
                   {startAuto && (
                     <div
                       onClick={() => {
+                        soundAlert("/sounds/betbutton.wav");
+                        warningCustom("Auto bet stopped");
                         setAutoBetCount(0);
                         setStartAuto(false);
                       }}

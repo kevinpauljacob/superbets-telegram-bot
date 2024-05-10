@@ -16,6 +16,7 @@ import {
 import { LAMPORTS_PER_SOL, PublicKey } from "@solana/web3.js";
 import { useGlobalContext } from "@/components/GlobalContext";
 import { getAssociatedTokenAddressSync } from "@solana/spl-token";
+import { errorCustom } from "@/components/toasts/ToastGroup";
 
 export default function Stake() {
   const { data: session, status } = useSession();
@@ -45,7 +46,7 @@ export default function Stake() {
         console.log(price);
         setLivePrice(price);
       } catch (e) {
-        toast.error("Could not fetch live price.");
+        errorCustom("Could not fetch live price.");
         setLivePrice(0);
       }
     };
@@ -66,7 +67,7 @@ export default function Stake() {
 
         res.value.uiAmount ? setSolBal(res.value.uiAmount) : setSolBal(0);
       } catch (e) {
-        toast.error("Unable to fetch balance.");
+        errorCustom("Unable to fetch balance.");
         console.error(e);
       }
   };

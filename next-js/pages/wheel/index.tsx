@@ -25,6 +25,11 @@ import { soundAlert } from "@/utils/soundUtils";
 import ConfigureAutoButton from "@/components/ConfigureAutoButton";
 import AutoCount from "@/components/AutoCount";
 import ProfitBox from "@/components/ProfitBox";
+import {
+  errorCustom,
+  successCustom,
+  warningCustom,
+} from "@/components/toasts/ToastGroup";
 
 export default function Wheel() {
   const wallet = useWallet();
@@ -53,7 +58,7 @@ export default function Wheel() {
     maxBetAmt,
   } = useGlobalContext();
   const [betAmt, setBetAmt] = useState(0);
-  const [userInput, setUserInput] = useState<number | undefined>(0);
+  const [userInput, setUserInput] = useState<number | undefined>();
   const [isRolling, setIsRolling] = useState(false);
   const [refresh, setRefresh] = useState(true);
   const [betType, setBetType] = useState<"manual" | "auto">("manual");
@@ -155,15 +160,15 @@ export default function Wheel() {
   const handleBet = async () => {
     if (wallet.connected) {
       if (!wallet.publicKey) {
-        toast.error("Wallet not connected");
+        errorCustom("Wallet not connected");
         return;
       }
       if (coinData && coinData[0].amount < betAmt) {
-        toast.error("Insufficient balance for bet !");
+        errorCustom("Insufficient balance for bet !");
         return;
       }
       if (betAmt === 0) {
-        toast.error("Set Amount.");
+        errorCustom("Set Amount.");
         return;
       }
       setIsRolling(true);
@@ -189,7 +194,7 @@ export default function Wheel() {
         spinWheel(strikeNumber);
         await new Promise((resolve) => setTimeout(resolve, 3000));
         if (success != true) {
-          toast.error(message);
+          errorCustom(message);
           throw new Error(message);
         }
         setIsRolling(false);
@@ -200,9 +205,9 @@ export default function Wheel() {
         );
         setStrikeMultiplierColor(riskObject ? riskObject.color : "#ffffff");
         if (result == "Won") {
-          toast.success(message, { duration: 2000 });
+          successCustom(message);
           soundAlert("/sounds/win.wav");
-        } else toast.error(message, { duration: 2000 });
+        } else errorCustom(message);
 
         const win = result === "Won";
         const newBetResult = { result: strikeMultiplier, win };
@@ -246,7 +251,12 @@ export default function Wheel() {
           // update count
           if (typeof autoBetCount === "number")
             setAutoBetCount(autoBetCount > 0 ? autoBetCount - 1 : 0);
-          else setAutoBetCount(autoBetCount + 1);
+          else
+            setAutoBetCount(
+              autoBetCount.length > 12
+                ? autoBetCount.slice(0, 5)
+                : autoBetCount + 1,
+            );
         }
       } catch (error) {
         setIsRolling(false);
@@ -305,17 +315,22 @@ export default function Wheel() {
   }, [startAuto, autoBetCount]);
 
   const onSubmit = async (data: any) => {
-    if (
-      betType === "auto" &&
-      ((typeof autoBetCount === "string" && autoBetCount.includes("inf")) ||
-        (typeof autoBetCount === "number" && autoBetCount > 0))
-    ) {
+    if (betType === "auto") {
       if (betAmt === 0) {
-        toast.error("Set Amount.");
+        errorCustom("Set Amount.");
         return;
       }
-      console.log("Auto betting. config: ", useAutoConfig);
-      setStartAuto(true);
+      if (typeof autoBetCount === "number" && autoBetCount <= 0) {
+        errorCustom("Set Bet Count.");
+        return;
+      }
+      if (
+        (typeof autoBetCount === "string" && autoBetCount.includes("inf")) ||
+        (typeof autoBetCount === "number" && autoBetCount > 0)
+      ) {
+        console.log("Auto betting. config: ", useAutoConfig);
+        setStartAuto(true);
+      }
     } else if (wallet.connected) handleBet();
   };
 
@@ -331,6 +346,8 @@ export default function Wheel() {
             {startAuto && (
               <div
                 onClick={() => {
+                  soundAlert("/sounds/betbutton.wav");
+                  warningCustom("Auto bet stopped");
                   setAutoBetCount(0);
                   setStartAuto(false);
                 }}
@@ -384,9 +401,6 @@ export default function Wheel() {
                   game="wheel"
                   disabled={disableInput}
                 />
-                <div className="mb-4">
-                  <ProfitBox multiplier={maxMultiplier} amount={userInput!} />
-                </div>
                 <div className="mb-6 w-full">
                   <div className="flex justify-between text-xs mb-2">
                     <p className="font-medium font-changa text-[#F0F0F0] text-opacity-90">
@@ -475,6 +489,8 @@ export default function Wheel() {
                   {startAuto && (
                     <div
                       onClick={() => {
+                        soundAlert("/sounds/betbutton.wav");
+                        warningCustom("Auto bet stopped");
                         setAutoBetCount(0);
                         setStartAuto(false);
                       }}

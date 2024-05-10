@@ -149,9 +149,7 @@ export default function BetAmount({
                     <span className="text-white">
                       {currentMaxBetAmt.toFixed(2)}
                     </span>
-                    <DicePointer
-                      className="relative w-2 h-2 left-1/2 -translate-x-1/2 text-white"
-                    />
+                    <DicePointer className="relative w-2 h-2 left-1/2 -translate-x-1/2 text-white" />
                   </div>
                 </div>
               </div>
@@ -161,7 +159,7 @@ export default function BetAmount({
               <div className="absolute group cursor-pointer text-white text-opacity-50 text-[11px] font-medium font-chakra top-2.5 -right-2.5">
                 {highestMaxBetAmt}
                 <BsInfoCircleFill className="text-white text-opacity-50 w-3 h-3 absolute top-1/2 -translate-y-1/2 -right-3.5" />
-                <span className="absolute hidden group-hover:block transition-all z-[1000] w-80 p-2 rounded-[5px] top-5 right-0 translate-x-[30%] md:translate-x-1/4 bg-[#080808] text-white/50 text-xs text-regular font-changa">
+                <span className="absolute hidden group-hover:block transition-all z-[1000] text-justify w-80 p-2 rounded-[5px] top-5 right-0 translate-x-[30%] md:translate-x-1/4 bg-[#080808] text-white/50 text-xs text-regular font-changa">
                   The maximum amount you can bet with the current multiplier (
                   <span className="text-white/80 font-medium">
                     {isNaN(currentMultiplier)
@@ -172,7 +170,13 @@ export default function BetAmount({
                   <span className="text-white/80 font-medium">
                     {currentMaxBetAmt.toFixed(2)} SOL
                   </span>
-                  . The maximum amount you can bet in this game is{" "}
+                  . Your current wallet balance is{" "}
+                  <span className="text-white/80 font-medium">
+                    {coinData && coinData[0]?.amount
+                      ? parseFloat(coinData[0].amount.toFixed(4))
+                      : 0.0}
+                  </span>{" "}
+                  The maximum amount you can bet in this game is{" "}
                   <span className="text-white/80 font-medium">
                     {highestMaxBetAmt} SOL
                   </span>

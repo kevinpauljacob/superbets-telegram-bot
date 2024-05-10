@@ -25,6 +25,11 @@ import Bets from "../../components/games/Bets";
 import { soundAlert } from "@/utils/soundUtils";
 import ConfigureAutoButton from "@/components/ConfigureAutoButton";
 import AutoCount from "@/components/AutoCount";
+import {
+  errorCustom,
+  successCustom,
+  warningCustom,
+} from "@/components/toasts/ToastGroup";
 
 const Timer = dynamic(() => import("../../components/games/Timer"), {
   ssr: false,
@@ -87,8 +92,8 @@ export default function Flip() {
         () => {
           if (response.success) {
             response?.data?.result == "Won"
-              ? toast.success(response?.message)
-              : toast.error(response?.message);
+              ? successCustom(response?.message)
+              : errorCustom(response?.message);
 
             const win = response?.data?.result === "Won";
             if (win) soundAlert("/sounds/win.wav");
@@ -130,20 +135,25 @@ export default function Flip() {
               // update count
               if (typeof autoBetCount === "number")
                 setAutoBetCount(autoBetCount > 0 ? autoBetCount - 1 : 0);
-              else setAutoBetCount(autoBetCount + 1);
+              else
+                setAutoBetCount(
+                  autoBetCount.length > 12
+                    ? autoBetCount.slice(0, 5)
+                    : autoBetCount + 1,
+                );
             }
           } else {
             setBetType(null);
             setLoading(false);
             setFlipping(false);
             setResult(null);
-            response?.message && toast.error(response?.message);
+            response?.message && errorCustom(response?.message);
           }
         },
         betSetting === "auto" ? 500 : 3000,
       );
     } catch (e) {
-      toast.error("Could not make Flip.");
+      errorCustom("Could not make Flip.");
       setBetType(null);
       setFlipping(false);
       setLoading(false);
@@ -226,25 +236,30 @@ export default function Flip() {
   const onSubmit = async (data: any) => {
     console.log(data);
     if (!wallet.publicKey) {
-      toast.error("Wallet not connected");
+      errorCustom("Wallet not connected");
       return;
     }
     if (betAmt === 0) {
-      toast.error("Set Amount.");
+      errorCustom("Set Amount.");
       return;
     }
     if (betType) {
-      if (
-        betSetting === "auto" &&
-        ((typeof autoBetCount === "string" && autoBetCount.includes("inf")) ||
-          (typeof autoBetCount === "number" && autoBetCount > 0))
-      ) {
+      if (betSetting === "auto") {
         if (betAmt === 0) {
-          toast.error("Set Amount.");
+          errorCustom("Set Amount.");
           return;
         }
-        console.log("Auto betting. config: ", useAutoConfig);
-        setStartAuto(true);
+        if (typeof autoBetCount === "number" && autoBetCount <= 0) {
+          errorCustom("Set Bet Count.");
+          return;
+        }
+        if (
+          (typeof autoBetCount === "string" && autoBetCount.includes("inf")) ||
+          (typeof autoBetCount === "number" && autoBetCount > 0)
+        ) {
+          console.log("Auto betting. config: ", useAutoConfig);
+          setStartAuto(true);
+        }
       } else {
         setLoading(true);
         setFlipping(true);
@@ -276,6 +291,8 @@ export default function Flip() {
             {startAuto && (
               <div
                 onClick={() => {
+                  soundAlert("/sounds/betbutton.wav");
+                  warningCustom("Auto bet stopped");
                   setAutoBetCount(0);
                   setStartAuto(false);
                 }}
@@ -310,7 +327,11 @@ export default function Flip() {
             </div>
           )}
           <div className="w-full hidden lg:flex">
-            <BetSetting betSetting={betSetting} setBetSetting={setBetSetting} disabled={disableInput} />
+            <BetSetting
+              betSetting={betSetting}
+              setBetSetting={setBetSetting}
+              disabled={disableInput}
+            />
           </div>
 
           <div className="w-full flex flex-col">
@@ -401,6 +422,8 @@ export default function Flip() {
                   {startAuto && (
                     <div
                       onClick={() => {
+                        soundAlert("/sounds/betbutton.wav");
+                        warningCustom("Auto bet stopped");
                         setAutoBetCount(0);
                         setStartAuto(false);
                       }}
@@ -413,11 +436,6 @@ export default function Flip() {
                     disabled={
                       !betType ||
                       loading ||
-                      (betSetting === "auto" &&
-                        ((typeof autoBetCount === "number" &&
-                          autoBetCount <= 0) ||
-                          (typeof autoBetCount === "string" &&
-                            !autoBetCount.includes("inf")))) ||
                       (coinData && coinData[0].amount < 0.0001) ||
                       (betAmt !== undefined &&
                         maxBetAmt !== undefined &&

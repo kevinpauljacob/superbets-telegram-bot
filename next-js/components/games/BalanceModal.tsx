@@ -35,7 +35,7 @@ export default function BalanceModal() {
         if (response && response.success) {
           setShowWalletModal(false);
         } else {
-          //   toast.error(response.message);
+          //   errorCustom(response.message);
         }
         setLoading(false);
       } catch (e) {

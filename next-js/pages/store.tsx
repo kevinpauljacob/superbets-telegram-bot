@@ -8,6 +8,7 @@ import { useGlobalContext } from "@/components/GlobalContext";
 import { getAssociatedTokenAddressSync } from "@solana/spl-token";
 import StoreBanner from "@/components/Banner";
 import StoreCard from "@/components/StoreCard";
+import { errorCustom } from "@/components/toasts/ToastGroup";
 
 export default function Store() {
   const { data: session, status } = useSession();
@@ -39,7 +40,7 @@ export default function Store() {
 
         res.value.uiAmount ? setSolBal(res.value.uiAmount) : setSolBal(0);
       } catch (e) {
-        toast.error("Unable to fetch balance.");
+        errorCustom("Unable to fetch balance.");
         console.error(e);
       }
   };

@@ -14,6 +14,7 @@ import Spinner from "./Spinner";
 import { PublicKey } from "@solana/web3.js";
 import { getAssociatedTokenAddressSync } from "@solana/spl-token";
 import { useSession } from "next-auth/react";
+import { errorCustom } from "./toasts/ToastGroup";
 
 export default function StakeFomo() {
   const { data: session, status } = useSession();
@@ -45,7 +46,7 @@ export default function StakeFomo() {
 
         res.value.uiAmount ? setSolBal(res.value.uiAmount) : setSolBal(0);
       } catch (e) {
-        toast.error("Unable to fetch balance.");
+        errorCustom("Unable to fetch balance.");
         console.error(e);
       }
   };
@@ -56,14 +57,14 @@ export default function StakeFomo() {
     try {
       if (stake) {
         if (amount > solBal) {
-          toast.error(translator("Insufficient FOMO", language));
+          errorCustom(translator("Insufficient FOMO", language));
           setLoading(false);
           return;
         }
         response = await stakeFOMO(wallet, amount, fomoToken);
       } else {
         if (amount > (userData?.stakedAmount ?? 0)) {
-          toast.error(translator("Insufficient FOMO", language));
+          errorCustom(translator("Insufficient FOMO", language));
           setLoading(false);
           return;
         }
@@ -78,7 +79,7 @@ export default function StakeFomo() {
     } catch (e) {
       setLoading(false);
       console.error(e);
-      toast.error("Something went wrong, please try again");
+      errorCustom("Something went wrong, please try again");
     }
   };
 

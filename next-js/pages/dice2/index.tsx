@@ -25,6 +25,11 @@ import Bets from "../../components/games/Bets";
 import ConfigureAutoButton from "@/components/ConfigureAutoButton";
 import AutoCount from "@/components/AutoCount";
 import ProfitBox from "@/components/ProfitBox";
+import {
+  errorCustom,
+  successCustom,
+  warningCustom,
+} from "@/components/toasts/ToastGroup";
 
 export default function Dice2() {
   const wallet = useWallet();
@@ -149,15 +154,21 @@ export default function Dice2() {
     );
     if (wallet.connected) {
       if (!wallet.publicKey) {
-        toast.error("Wallet not connected");
+        errorCustom("Wallet not connected");
+        setAutoBetCount(0);
+        setStartAuto(false);
         return;
       }
       if (coinData && coinData[0].amount < betAmt) {
-        toast.error("Insufficient balance for bet !");
+        errorCustom("Insufficient balance for bet !");
+        setAutoBetCount(0);
+        setStartAuto(false);
         return;
       }
       if (betAmt === 0) {
-        toast.error("Set Amount.");
+        errorCustom("Set Amount.");
+        setAutoBetCount(0);
+        setStartAuto(false);
         return;
       }
       setIsRolling(true);
@@ -180,15 +191,15 @@ export default function Dice2() {
           await response.json();
 
         if (success !== true) {
-          toast.error(message);
+          errorCustom(message);
           throw new Error(message);
         }
 
         const win = result === "Won";
         if (win) {
-          toast.success(message, { duration: 2000 });
+          successCustom(message);
           soundAlert("/sounds/win.wav");
-        } else toast.error(message, { duration: 2000 });
+        } else errorCustom(message);
         const newBetResult = { result: strikeNumber, win };
 
         setBetResults((prevResults) => {
@@ -228,7 +239,12 @@ export default function Dice2() {
           // update count
           if (typeof autoBetCount === "number")
             setAutoBetCount(autoBetCount > 0 ? autoBetCount - 1 : 0);
-          else setAutoBetCount(autoBetCount + 1);
+          else
+            setAutoBetCount(
+              autoBetCount.length > 12
+                ? autoBetCount.slice(0, 5)
+                : autoBetCount + 1,
+            );
         }
       } catch (error) {
         console.error("Error occurred while betting:", error);
@@ -315,17 +331,22 @@ export default function Dice2() {
   }, [startAuto, autoBetCount]);
 
   const onSubmit = async (data: any) => {
-    if (
-      betType === "auto" &&
-      ((typeof autoBetCount === "string" && autoBetCount.includes("inf")) ||
-        (typeof autoBetCount === "number" && autoBetCount > 0))
-    ) {
+    if (betType === "auto") {
       if (betAmt === 0) {
-        toast.error("Set Amount.");
+        errorCustom("Set Amount.");
         return;
       }
-      console.log("Auto betting. config: ", useAutoConfig);
-      setStartAuto(true);
+      if (typeof autoBetCount === "number" && autoBetCount <= 0) {
+        errorCustom("Set Bet Count.");
+        return;
+      }
+      if (
+        (typeof autoBetCount === "string" && autoBetCount.includes("inf")) ||
+        (typeof autoBetCount === "number" && autoBetCount > 0)
+      ) {
+        console.log("Auto betting. config: ", useAutoConfig);
+        setStartAuto(true);
+      }
     } else if (wallet.connected) handleBet();
   };
 
@@ -337,6 +358,8 @@ export default function Dice2() {
             {startAuto && (
               <div
                 onClick={() => {
+                  soundAlert("/sounds/betbutton.wav");
+                  warningCustom("Auto bet stopped");
                   setAutoBetCount(0);
                   setStartAuto(false);
                 }}
@@ -370,7 +393,11 @@ export default function Dice2() {
             </div>
           )}
           <div className="w-full hidden lg:flex">
-            <BetSetting betSetting={betType} setBetSetting={setBetType} disabled={disableInput}/>
+            <BetSetting
+              betSetting={betType}
+              setBetSetting={setBetType}
+              disabled={disableInput}
+            />
           </div>
           <div className="w-full flex flex-col">
             <FormProvider {...methods}>
@@ -409,6 +436,8 @@ export default function Dice2() {
                   {startAuto && (
                     <div
                       onClick={() => {
+                        soundAlert("/sounds/betbutton.wav");
+                        warningCustom("Auto bet stopped");
                         setAutoBetCount(0);
                         setStartAuto(false);
                       }}
