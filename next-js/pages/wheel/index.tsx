@@ -320,8 +320,8 @@ export default function Wheel() {
   };
 
   const disableInput = useMemo(() => {
-    return betType === "auto" && startAuto ? true : false;
-  }, [betType, startAuto]);
+    return betType === "auto" && startAuto ? true : false||isRolling;
+  }, [betType, startAuto,isRolling]);
 
   return (
     <GameLayout title="FOMO - Wheel">
