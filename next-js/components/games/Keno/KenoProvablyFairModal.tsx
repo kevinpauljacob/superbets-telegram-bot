@@ -11,6 +11,8 @@ import { FaRegCopy } from "react-icons/fa6";
 import { MdClose } from "react-icons/md";
 import CheckPF from "@/public/assets/CheckPF.svg";
 import { errorCustom } from "@/components/toasts/ToastGroup";
+import { translator } from "@/context/transactions";
+import { useGlobalContext } from "@/components/GlobalContext";
 
 export interface PFModalData {
   activeGameSeed: {
@@ -54,7 +56,7 @@ export default function RollDiceProvablyFairModal({
     generateClientSeed(),
   );
   const [strikeNumbers, setStrikeNumbers] = useState<number[]>([]);
-
+  const { language } = useGlobalContext();
   const [verificationState, setVerificationState] = useState<{
     clientSeed: string;
     serverSeed: string;
@@ -162,7 +164,7 @@ export default function RollDiceProvablyFairModal({
             <div className="flex font-chakra tracking-wider text-2xl font-semibold text-[#F0F0F0] items-center justify-between">
               <div className="flex items-center gap-2">
                 <Image src={CheckPF} alt="" />
-                PROVABLY FAIR
+                {translator("PROVABLY FAIR", language)}
               </div>
               <div className="hover:cursor-pointer">
                 <MdClose
@@ -183,7 +185,7 @@ export default function RollDiceProvablyFairModal({
                 }`}
                 onClick={() => handleToggleState("seeds")}
               >
-                Seeds
+                {translator("Seeds", language)}
               </button>
               <button
                 className={`w-full border-2 hover:duration-75 rounded-md py-2 ml-1 text-white font-semibold text-sm transition-all duration-300 ease-in-out ${
@@ -193,7 +195,7 @@ export default function RollDiceProvablyFairModal({
                 }`}
                 onClick={() => handleToggleState("verify")}
               >
-                Verify
+                {translator("Verify", language)}
               </button>
             </div>
             {state === "seeds" && (
@@ -201,7 +203,7 @@ export default function RollDiceProvablyFairModal({
                 <div className="">
                   <div className="mt-3">
                     <label className="text-xs font-changa text-opacity-90 text-[#F0F0F0]">
-                      Active Client Seed
+                      {translator("Active Client Seed", language)}
                     </label>
                     <div className="bg-[#202329] mt-1 rounded-md px-5 py-4 w-full relative flex items-center justify-between">
                       <span className="truncate text-[#B9B9BA] text-xs font-semibold">
@@ -217,7 +219,7 @@ export default function RollDiceProvablyFairModal({
                   </div>
                   <div className="mt-4">
                     <label className="text-xs font-changa text-opacity-90 text-[#F0F0F0]">
-                      Active Server Seed (Hashed)
+                      {translator("Active Server Seed (Hashed)", language)}
                     </label>
                     <div className="bg-[#202329] mt-1 rounded-md px-5 py-4 w-full relative flex items-center justify-between">
                       <span className="truncate text-[#B9B9BA] text-xs font-semibold">
@@ -235,7 +237,7 @@ export default function RollDiceProvablyFairModal({
                   </div>
                   <div className="mt-4">
                     <label className="text-xs font-changa text-opacity-90 text-[#F0F0F0]">
-                      Total Bets
+                      {translator("Total Bets", language)}
                     </label>
                     <input
                       type="text"
@@ -248,12 +250,12 @@ export default function RollDiceProvablyFairModal({
                 </div>
                 <div>
                   <div className="font-chakra mt-8 tracking-wider text-xl font-semibold text-[#F0F0F0]">
-                    Rotate Seed Pair
+                    {translator("Rotate Seed Pair", language)}
                   </div>
                   <div className="mt-2">
                     <div>
                       <label className="text-xs font-changa text-opacity-90 text-[#F0F0F0]">
-                        New Client Seed *
+                        {translator("New Client Seed", language)} *
                       </label>
                       <div className="mt-1 w-full flex items-center justify-end gap-4 bg-[#202329] rounded-md">
                         <input
@@ -266,13 +268,13 @@ export default function RollDiceProvablyFairModal({
                           className="flex items-center justify-center h-full mx-2 px-5 py-1 my-auto bg-[#7839C5] text-white rounded-md font-bold text-sm"
                           onClick={handleSetClientSeed}
                         >
-                          Change
+                          {translator("Change", language)}
                         </button>
                       </div>
                     </div>
                     <div className="mt-5">
                       <label className="text-xs font-changa text-opacity-90 text-[#F0F0F0]">
-                        Next Server Seed
+                        {translator("Next Server Seed", language)}
                       </label>
                       <div className="bg-[#202329] mt-1 rounded-md px-5 py-4 w-full relative flex items-center justify-between">
                         <span className="truncate text-[#B9B9BA] text-xs font-semibold">
@@ -324,7 +326,7 @@ export default function RollDiceProvablyFairModal({
                   </div>
                   <div>
                     <label className="text-xs text-opacity-75 font-changa text-[#F0F0F0]">
-                      Game
+                      {translator("Game", language)}
                     </label>
                     <div className="flex items-center">
                       <select
@@ -338,13 +340,13 @@ export default function RollDiceProvablyFairModal({
                         }
                         className="bg-[#202329] text-white font-chakra text-xs font-medium mt-1 rounded-md px-5 py-4 w-full relative appearance-none"
                       >
-                        <option value={GameType.keno}>Keno</option>
+                        <option value={GameType.keno}>{translator("Keno", language)}</option>
                       </select>
                     </div>
                   </div>
                   <div>
                     <label className="text-xs text-opacity-75 font-changa text-[#F0F0F0]">
-                      Client Seed
+                      {translator("Client Seed", language)}
                     </label>
                     <input
                       type="text"
@@ -356,7 +358,7 @@ export default function RollDiceProvablyFairModal({
                   </div>
                   <div>
                     <label className="text-xs text-opacity-75 font-changa text-[#F0F0F0]">
-                      Server Seed
+                      {translator("Server Seed", language)}
                     </label>
                     <input
                       type="text"
@@ -368,7 +370,7 @@ export default function RollDiceProvablyFairModal({
                   </div>
                   <div>
                     <label className="text-xs text-opacity-75 font-changa text-[#F0F0F0]">
-                      Nonce
+                      {translator("Nonce", language)}
                     </label>
                     <input
                       type="text"

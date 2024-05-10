@@ -7,6 +7,7 @@ import { useGlobalContext } from "@/components/GlobalContext";
 import { FaRegCopy } from "react-icons/fa6";
 import Arc from "@/components/games/Wheel/Arc";
 import { MdClose } from "react-icons/md";
+import {translator} from "@/context/transactions";
 
 export interface Wheel {
   createdAt: string;
@@ -47,7 +48,7 @@ export default function VerifyWheelModal({
 }: Props) {
   //handling dice
   const { bet } = modalData;
-  const { getProvablyFairData } = useGlobalContext();
+  const { getProvablyFairData, language } = useGlobalContext();
   const wheelRef = useRef<HTMLDivElement>(null);
   const [rotationAngle, setRotationAngle] = useState(0);
 
@@ -135,7 +136,7 @@ export default function VerifyWheelModal({
           <div className="relative bg-[#121418] max-h-[80vh] no-scrollbar overflow-y-scroll p-8 rounded-lg z-10 w-11/12 sm:w-[34rem]">
             <div className="flex flex-wrap justify-between items-center mb-4 sm:mb-[1.4rem]">
               <div className="font-changa text-2xl font-semibold text-white mr-4 text-opacity-90">
-                Dice
+                {translator("Wheel", language)}
               </div>
               <div className="text-[#F0F0F0] text-opacity-75 font-changa text-sm">
                 {formatDate(bet.createdAt)}
@@ -144,7 +145,7 @@ export default function VerifyWheelModal({
             <div className="flex flex-row gap-3">
               <button className="px-1 py-3 flex flex-col items-center justify-center w-full text-white rounded-md bg-[#202329]">
                 <div className="font-changa text-xs text-[#94A3B8] text-opacity-75">
-                  Bet
+                  {translator("Bet", language)}
                 </div>
                 <div className="text-white font-chakra text-xs font-medium">
                   {bet.amount.toFixed(4)} $SOL
@@ -152,13 +153,13 @@ export default function VerifyWheelModal({
               </button>
               <button className="px-1 py-3 flex flex-col items-center justify-center w-full text-white rounded-md bg-[#202329]">
                 <div className="font-changa text-xs text-[#94A3B8] text-opacity-75">
-                  Multiplier
+                  {translator("Multiplier", language)}
                 </div>
                 {bet.strikeMultiplier}
               </button>
               <button className="px-1 py-3 flex flex-col items-center justify-center w-full text-white rounded-md bg-[#202329]">
                 <div className="font-changa text-xs text-[#94A3B8] text-opacity-75">
-                  Payout
+                  {translator("Payout", language)}
                 </div>
                 <div className="text-white font-chakra text-xs font-medium">
                   {bet.amountWon?.toFixed(4)} $SOL
@@ -209,7 +210,7 @@ export default function VerifyWheelModal({
               <div className="flex gap-4 pt-2 mb-8">
                 <div className="w-full">
                   <label className="text-xs text-opacity-75 font-changa text-[#F0F0F0]">
-                    Risk
+                    {translator("Risk", language)}
                   </label>
                   <input
                     type="text"
@@ -221,7 +222,7 @@ export default function VerifyWheelModal({
                 </div>
                 <div className="w-full">
                   <label className="text-xs text-opacity-75 font-changa text-[#F0F0F0]">
-                    Segments
+                    {translator("Segments", language)}
                   </label>
                   <input
                     type="text"
@@ -236,7 +237,7 @@ export default function VerifyWheelModal({
             <div className="mt-8 px-4 py-4 border-2 border-white border-opacity-5 rounded-md transition-all">
               <div className="flex items-center justify-between text-[#F0F0F0]">
                 <div className="text-base font-changa font-medium text-[#F0F0F0] text-opacity-90">
-                  Provably Fair
+                  {translator("Provably Fair", language)}
                 </div>
                 <div
                   className={`hover:cursor-pointer ${
@@ -252,7 +253,7 @@ export default function VerifyWheelModal({
                   <div className="flex flex-col sm:flex-row gap-2 w-full sm:mb-4 mt-4">
                     <div className="sm:w-1/2">
                       <label className="text-xs font-changa text-opacity-90 text-[#F0F0F0]">
-                        Client Seed
+                        {translator("Client Seed", language)}
                       </label>
                       <div className="bg-[#202329] mt-1 rounded-md px-4 py-3 w-full relative flex items-center justify-between">
                         <span className="truncate text-[#B9B9BA] text-xs font-semibold">
@@ -268,7 +269,7 @@ export default function VerifyWheelModal({
                     </div>
                     <div className="sm:w-1/2">
                       <label className="text-xs font-changa text-opacity-90 text-[#F0F0F0]">
-                        Nonce
+                        {translator("Nonce", language)}
                       </label>
                       <div className="bg-[#202329] mt-1 rounded-md px-4 py-3 w-full relative flex items-center justify-between">
                         <span className="truncate text-[#B9B9BA] text-xs font-semibold">
@@ -284,7 +285,7 @@ export default function VerifyWheelModal({
                   <div className="flex gap-2 w-full">
                     <div className="w-full">
                       <label className="text-xs font-changa text-opacity-90 text-[#F0F0F0]">
-                        Server Seed{" "}
+                        {translator("Server Seed", language)}{" "}
                         {bet.gameSeed?.status !== seedStatus.EXPIRED
                           ? "(Hashed)"
                           : ""}
@@ -323,8 +324,7 @@ export default function VerifyWheelModal({
                     ) : bet.gameSeed?.status !== seedStatus.EXPIRED ? (
                       <>
                         <div className="text-xs text-[#94A3B8] font-changa text-opacity-75 text-center">
-                          To verify this bet, you first need to rotate your seed
-                          pair.
+                          {translator("To verify this bet, you first need to rotate your seed pair.", language)}
                         </div>
                         <button
                           className="bg-[#7839C5] rounded-md w-full text-sm text-white text-opacity-90 text-semibold py-3"
@@ -336,7 +336,7 @@ export default function VerifyWheelModal({
                             openPFModal();
                           }}
                         >
-                          Rotate
+                          {translator("Rotate", language)}
                         </button>
                       </>
                     ) : (
@@ -350,7 +350,7 @@ export default function VerifyWheelModal({
                           openPFModal();
                         }}
                       >
-                        Verify
+                        {translator("Verify", language)}
                       </button>
                     )}
                   </div>
