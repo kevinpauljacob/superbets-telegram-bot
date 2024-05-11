@@ -141,9 +141,9 @@ try {
     socket.on("close", () => {
       console.log("server closed");
       // Remove the disconnected client from all channels
-      Object.values(channelClients).forEach((clients) => {
-        clients.delete(socket);
-      });
+      // Object.values(channelClients).forEach((clients) => {
+      //   clients.delete(socket);
+      // });
 
       console.log("connected clients: ", channelClients);
     });
