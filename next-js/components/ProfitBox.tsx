@@ -23,7 +23,7 @@ export default function AutoCount({
         <span
           className={`flex w-full min-w-0 bg-transparent text-base text-[#94A3B8] placeholder-[#94A3B8] font-chakra outline-none`}
         >
-          {Math.max(0, amount * (multiplier * (1 - houseEdge) - 1))}
+          {Math.max(0, amount * (multiplier * (1 - houseEdge) - 1)).toFixed(4)}
         </span>
       </div>
     </div>

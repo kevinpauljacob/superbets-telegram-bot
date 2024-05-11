@@ -5,10 +5,11 @@ import { wsEndpoint, trimStringToLength } from "@/context/gameTransactions";
 import { useEffect, useRef, useState } from "react";
 import { GameType } from "@/utils/provably-fair";
 import { useRouter } from "next/router";
+import useWebSocket from "react-use-websocket";
 
 export default function SubHeader() {
   const router = useRouter();
-  const { coinData, showWalletModal, setShowWalletModal } = useGlobalContext();
+  const { coinData, setShowWalletModal, setLiveBets } = useGlobalContext();
 
   type Card = {
     game: GameType;
@@ -29,6 +30,17 @@ export default function SubHeader() {
     });
   }, [cards]);
 
+  const { sendMessage, lastJsonMessage } = useWebSocket(wsEndpoint, {
+    onOpen: () =>
+      sendMessage(
+        JSON.stringify({
+          clientType: "listener-client",
+          channel: "fomo-casino_games-channel",
+        }),
+      ),
+    shouldReconnect: () => true,
+  });
+
   useEffect(() => {
     fetch(`/api/games/global/getRecentHistory`)
       .then((res) => res.json())
@@ -36,34 +48,23 @@ export default function SubHeader() {
         if (!data.success) return console.error(data.message);
         setCards(data.data);
       });
-
-    const socket = new WebSocket(wsEndpoint);
-
-    socket.onopen = () => {
-      socket.send(
-        JSON.stringify({
-          clientType: "listener-client",
-          channel: "fomo-casino_games-channel",
-        }),
-      );
-    };
-
-    socket.onmessage = async (event) => {
-      const response = JSON.parse(event.data.toString());
-
-      if (!response.payload || response.result === "Lost") return;
-
-      const payload = response.payload;
-      setCards((prev) => {
-        const newCards = [payload, ...prev];
-        return newCards.slice(0, 15);
-      });
-    };
-
-    return () => {
-      socket.close();
-    };
   }, []);
+
+  useEffect(() => {
+    if (lastJsonMessage !== null) {
+      const response = lastJsonMessage as any;
+
+      if (!response.payload) return;
+      const payload = response.payload;
+
+      if (payload.result === "Won")
+        setCards((prev) => {
+          const newCards = [payload, ...prev];
+          return newCards.slice(0, 15);
+        });
+      setLiveBets((prev) => [payload, ...prev]);
+    }
+  }, [lastJsonMessage]);
 
   return (
     <div className="flex flex-col w-full">

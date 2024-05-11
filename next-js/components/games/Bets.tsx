@@ -2,6 +2,7 @@ import { useWallet } from "@solana/wallet-adapter-react";
 import { useState, useEffect } from "react";
 import { Table } from "../table/Table";
 import { wsEndpoint } from "@/context/gameTransactions";
+import { useGlobalContext } from "../GlobalContext";
 
 interface Bet {
   wallet: string;
@@ -25,38 +26,29 @@ export default function Bets({ refresh }: { refresh: boolean }) {
   const [allBetMaxPages, setAllBetMaxPages] = useState(0);
   const [allBets, setAllBets] = useState<Bet[]>([]);
 
+  const { liveBets } = useGlobalContext();
+
   useEffect(() => {
-    const socket = new WebSocket(wsEndpoint);
+    if (wallet?.publicKey) {
+      const newBets = liveBets.filter((bet) => {
+        return (
+          !myBets.includes(bet) && bet.wallet === wallet.publicKey?.toBase58()
+        );
+      });
 
-    socket.onopen = () => {
-      socket.send(
-        JSON.stringify({
-          clientType: "listener-client",
-          channel: "fomo-casino_games-channel",
-        }),
-      );
-    };
+      setMyBets((prev) => {
+        return newBets.concat(prev);
+      });
+    } else {
+      const newBets = liveBets.filter((bet) => {
+        return !allBets.includes(bet);
+      });
 
-    socket.onmessage = async (event) => {
-      const response = JSON.parse(event.data.toString());
-
-      if (!response.payload) return;
-
-      const payload = response.payload;
-      if (!all && payload.wallet === wallet.publicKey?.toBase58())
-        setMyBets((prev) => {
-          return [payload, ...prev];
-        });
-      else
-        setAllBets((prev) => {
-          return [payload, ...prev];
-        });
-    };
-
-    return () => {
-      socket.close();
-    };
-  }, []);
+      setAllBets((prev) => {
+        return newBets.concat(prev);
+      });
+    }
+  }, [liveBets]);
 
   useEffect(() => {
     setPage(1);
