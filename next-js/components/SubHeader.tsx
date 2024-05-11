@@ -5,7 +5,6 @@ import { wsEndpoint, trimStringToLength } from "@/context/gameTransactions";
 import { useEffect, useRef, useState } from "react";
 import { GameType } from "@/utils/provably-fair";
 import { useRouter } from "next/router";
-import useWebSocket from "react-use-websocket";
 
 export default function SubHeader() {
   const router = useRouter();
@@ -30,17 +29,6 @@ export default function SubHeader() {
     });
   }, [cards]);
 
-  const { sendMessage, lastJsonMessage } = useWebSocket(wsEndpoint, {
-    onOpen: () =>
-      sendMessage(
-        JSON.stringify({
-          clientType: "listener-client",
-          channel: "fomo-casino_games-channel",
-        }),
-      ),
-    shouldReconnect: () => true,
-  });
-
   useEffect(() => {
     fetch(`/api/games/global/getRecentHistory`)
       .then((res) => res.json())
@@ -48,23 +36,38 @@ export default function SubHeader() {
         if (!data.success) return console.error(data.message);
         setCards(data.data);
       });
-  }, []);
 
-  useEffect(() => {
-    if (lastJsonMessage !== null) {
-      const response = lastJsonMessage as any;
+    const socket = new WebSocket(wsEndpoint);
 
-      if (!response.payload) return;
+    socket.onopen = () => {
+      socket.send(
+        JSON.stringify({
+          clientType: "listener-client",
+          channel: "fomo-casino_games-channel",
+        }),
+      );
+    };
+
+    socket.onmessage = async (event) => {
+      const response = JSON.parse(event.data.toString());
+
+      if (!response.payload || response.result === "Lost") return;
+
       const payload = response.payload;
+      setCards((prev) => {
+        const newCards = [payload, ...prev];
+        return newCards.slice(0, 15);
+      });
+    };
 
-      if (payload.result === "Won")
-        setCards((prev) => {
-          const newCards = [payload, ...prev];
-          return newCards.slice(0, 15);
-        });
-      setLiveBets((prev) => [payload, ...prev]);
-    }
-  }, [lastJsonMessage]);
+    socket.onclose = () => {
+      console.log("Socket closed");
+    };
+
+    return () => {
+      socket.close();
+    };
+  }, []);
 
   return (
     <div className="flex flex-col w-full">
