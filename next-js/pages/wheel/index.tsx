@@ -617,15 +617,14 @@ export default function Wheel() {
                         <div className="w-1/2">
                           <div className="flex justify-between text-[13px] font-medium font-changa text-opacity-90 text-[#F0F0F0]">
                             <span className="">Profit</span>
-                            <span>
-                              {/* {coinData ? coinData[0]?.amount.toFixed(4) : 0} $SOL */}
-                              SOL
-                            </span>
+                            <span>SOL</span>
                           </div>
                           <div className="border border-white/10 rounded-lg p-3 mt-2">
                             {coinData
-                              ? (
-                                  coinData[0]?.amount * segment.multiplier
+                              ? Math.max(
+                                  0,
+                                  betAmt *
+                                    (segment.multiplier * (1 - houseEdge) - 1),
                                 ).toFixed(4)
                               : 0}
                           </div>

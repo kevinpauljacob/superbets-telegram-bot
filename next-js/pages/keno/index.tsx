@@ -628,7 +628,7 @@ export default function Keno() {
                       key={index}
                       className="bg-[#202329] text-center font-chakra text-[8px] sm:text-xs font-semibold rounded-[5px] p-1 sm:py-3 sm:px-1 w-full"
                     >
-                      {multiplier.toFixed(1)}x
+                      {multiplier.toFixed(2)}x
                     </div>
                   ))}
                 </div>
@@ -667,7 +667,14 @@ export default function Keno() {
                                 <span className="">Profit</span>
                               </div>
                               <div className="border border-white/10 rounded-[5px] p-3 mt-2">
-                                {(betAmt * multiplier).toFixed(4)} SOL
+                                {coinData
+                                  ? Math.max(
+                                      0,
+                                      betAmt *
+                                        (multiplier * (1 - houseEdge) - 1),
+                                    ).toFixed(4)
+                                  : 0}{" "}
+                                SOL
                               </div>
                             </div>
                             <div className="w-1/2">
