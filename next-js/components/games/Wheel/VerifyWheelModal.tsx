@@ -36,12 +36,14 @@ interface Props {
   isOpen: boolean;
   onClose: () => void;
   modalData: ModalData;
+  wallet?: string;
 }
 
 export default function VerifyWheelModal({
   isOpen,
   onClose,
   modalData,
+  wallet,
 }: Props) {
   //handling dice
   const { bet } = modalData;
@@ -305,7 +307,20 @@ export default function VerifyWheelModal({
                     </div>
                   </div>
                   <div className="footer grid gap-1 mt-10">
-                    {bet.gameSeed?.status !== seedStatus.EXPIRED ? (
+                    {bet.wallet !== wallet ? (
+                      <>
+                        <div className="text-xs text-[#94A3B8] font-changa text-opacity-75 text-center">
+                          The bettor must first rotate their seed pairt to
+                          verify this bet.
+                        </div>
+                        <button
+                          className="bg-[#7839C5] rounded-md w-full text-sm text-white text-opacity-90 text-semibold py-3 disabled:opacity-70"
+                          disabled
+                        >
+                          Rotate
+                        </button>
+                      </>
+                    ) : bet.gameSeed?.status !== seedStatus.EXPIRED ? (
                       <>
                         <div className="text-xs text-[#94A3B8] font-changa text-opacity-75 text-center">
                           To verify this bet, you first need to rotate your seed
