@@ -101,7 +101,9 @@ try {
   handleFomoBuyEvent(fomoJupProgramId, fomoJupIDL, "jupexit");
 
   server.on("connection", (socket: WebSocket) => {
+    console.log("server connected")
     socket.on("message", (data) => {
+      console.log("server msg received")
       try {
         const message = JSON.parse(data.toString());
 
@@ -117,7 +119,10 @@ try {
       }
     });
 
+    socket.on('error', console.error);
+
     socket.on("close", () => {
+      console.log("server closed")
       // Remove the disconnected client from all channels
       Object.values(channelClients).forEach((clients) => {
         clients.delete(socket);
