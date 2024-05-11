@@ -43,7 +43,11 @@ export default function Bets({ refresh }: { refresh: boolean }) {
       if (!response.payload) return;
 
       const payload = response.payload;
-      if (all && payload.wallet !== wallet.publicKey?.toBase58())
+      if (!all && payload.wallet === wallet.publicKey?.toBase58())
+        setMyBets((prev) => {
+          return [payload, ...prev];
+        });
+      else
         setAllBets((prev) => {
           return [payload, ...prev];
         });
@@ -101,7 +105,7 @@ export default function Bets({ refresh }: { refresh: boolean }) {
         })
         .finally(() => setLoading(false));
     }
-  }, [refresh, all]);
+  }, [all]);
 
   return (
     <Table
