@@ -64,9 +64,12 @@ const handleAPIClient = (socket: WebSocket, message: any) => {
   if (channels[channel] === authKey) {
     socket.send(JSON.stringify({ success: true }));
 
+    console.log("outside");
     // Forward payload to all clients on channel
     channelClients[channel].forEach((client) => {
-      if (client !== socket && client.readyState === WebSocket.OPEN) {
+      if (client.readyState === WebSocket.OPEN) {
+        console.log("inside", channel);
+
         client.send(JSON.stringify({ channel, payload }));
       }
     });
