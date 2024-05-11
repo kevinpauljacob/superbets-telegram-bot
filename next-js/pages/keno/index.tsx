@@ -421,8 +421,8 @@ export default function Keno() {
             <Autopick />
           </div>
           {betType === "auto" && (
-            <div className="w-full flex lg:hidden">
-              <ConfigureAutoButton />
+            <div className="w-full flex lg:hidden" >
+              <ConfigureAutoButton disabled={disableInput}/>
             </div>
           )}
           <div className="w-full hidden lg:flex">
@@ -521,7 +521,7 @@ export default function Keno() {
                       onChange={handleCountChange}
                     />
                     <div className="w-full hidden lg:flex">
-                      <ConfigureAutoButton />
+                      <ConfigureAutoButton disabled={disableInput} />
                     </div>
                   </div>
                 )}

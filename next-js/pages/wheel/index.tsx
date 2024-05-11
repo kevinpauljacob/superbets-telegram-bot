@@ -376,7 +376,7 @@ export default function Wheel() {
             </BetButton>
           </div>
           <div className="w-full flex lg:hidden">
-            <ConfigureAutoButton />
+            <ConfigureAutoButton disabled={disableInput} />
           </div>
           <div className="w-full hidden lg:flex">
             <BetSetting
@@ -480,7 +480,7 @@ export default function Wheel() {
                       onChange={handleCountChange}
                     />
                     <div className="w-full hidden lg:flex">
-                      <ConfigureAutoButton />
+                      <ConfigureAutoButton disabled={disableInput} />
                     </div>
                   </div>
                 )}
