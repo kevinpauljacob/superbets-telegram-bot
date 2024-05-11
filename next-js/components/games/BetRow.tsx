@@ -22,12 +22,8 @@ const BetRow: React.FC<BetRowProps> = ({
 
   return (
     <div
-      className={
-        "w-full flex items-center justify-between" +
-        (!all ? " cursor-pointer" : "")
-      }
+      className="w-full flex items-center justify-between cursor-pointer"
       onClick={() => {
-        if (all) return;
         setCurrentGame(bet.game);
         setVerifyModalData(bet);
         openModal();
