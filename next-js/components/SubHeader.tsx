@@ -51,13 +51,16 @@ export default function SubHeader() {
     socket.onmessage = async (event) => {
       const response = JSON.parse(event.data.toString());
 
-      if (!response.payload || response.result === "Lost") return;
+      if (!response.payload) return;
 
       const payload = response.payload;
-      setCards((prev) => {
-        const newCards = [payload, ...prev];
-        return newCards.slice(0, 15);
-      });
+      if (payload.result === "Won")
+        setCards((prev) => {
+          const newCards = [payload, ...prev];
+          return newCards.slice(0, 15);
+        });
+
+      setLiveBets((prev) => [payload, ...prev]);
     };
 
     socket.onclose = () => {
