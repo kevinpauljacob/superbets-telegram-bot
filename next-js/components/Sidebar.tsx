@@ -444,9 +444,9 @@ export const OpenSidebar = ({
               </ul>
             )}
           </div>
-          <SidebarOpenElement text={"DCA"} Icon={Dollar} link="/" />
+          <SidebarOpenElement text={"DCA"} Icon={Dollar} link="https://dca.fomosolana.com/" />
           <div className="opacity-50">
-            <SidebarOpenElement text={"Roadmap"} Icon={Flag} link="/" />
+            <SidebarOpenElement text={"Roadmap"} Icon={Flag} link="" />
           </div>
         </div>
       </div>
@@ -457,15 +457,15 @@ export const OpenSidebar = ({
         } w-full flex flex-col p-4 mb-0`}
       >
         <Link
-          href="https://twitter.com/"
+          href="https://x.com/FOMO_wtf"
           className={`${openLinkCss}`}
           target="_blank"
         >
-          <Twitter className="w-5 h-5" />
+          <Twitter className="w-5 h-5"/>
           {translator("Twitter", language)}
         </Link>
         <Link
-          href="https://birdeye.so/"
+          href="https://birdeye.so/token/Cx9oLynYgC3RrgXzin7U417hNY9D6YB1eMGw4ZMbWJgw?chain=solana"
           className={`${openLinkCss}`}
           target="_blank"
         >
@@ -473,7 +473,7 @@ export const OpenSidebar = ({
           Birdeye
         </Link>
         <Link
-          href="https://web.telegram.org/a/"
+          href="t.me/FOMO_wtf"
           className={`${openLinkCss}`}
           target="_blank"
         >
@@ -484,7 +484,7 @@ export const OpenSidebar = ({
         <div className="flex items-center justify-center my-2">
           <Image src={"/assets/ottersec.png"} alt="" width={17} height={17} />
           <p className="text-xs font-light text-white/50">
-            Audited by OtterSec
+            {translator("Audited by OtterSec", language)}
           </p>
         </div>
       </div>

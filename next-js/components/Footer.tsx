@@ -1,3 +1,4 @@
+import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/router";
 import React, { useState } from "react";
@@ -7,15 +8,15 @@ import Twitter from "@/public/assets/Twitter.svg";
 import logo from "@/public/assets/logowhite.svg";
 import { MdOutlineLanguage } from "react-icons/md";
 import { FaChevronUp } from "react-icons/fa6";
-import {translator} from "@/context/transactions";
+import { translator } from "@/context/transactions";
 
 function Footer() {
-  const { language, setLanguage } = useGlobalContext();
+  const { language, setLanguage, setShowWalletModal } = useGlobalContext();
   const [langSelect, setLangSelect] = useState(false);
   const router = useRouter();
 
   return (
-    <div className="w-full h-full flex flex-col items-center justify-center px-5 lg2:px-[4rem] md:px-[3rem]">
+    <div className="w-full h-full flex flex-col items-center justify-center , px-5 lg2:px-[4rem] md:px-[3rem]">
       <div className="w-full h-full flex lg2:flex-row flex-col lg2:items-center items-start lg2:pt-10 lg2:pb-16 pt-5 pb-5 gap-5">
         <div className="lg2:w-[30%] md:w-[60%] w-[90%]">
           <h3 className="flex items-center font-medium text-[1.6rem] text-white">
@@ -24,7 +25,10 @@ function Footer() {
           </h3>
           <p className="flex flex-col text-[#94A3B8] font-medium font-chakra text-sm leading-6 text-opacity-80 md:mx-0 md:mt-2 mb-2">
             <span className="md:mt-2 mx-2">
-              {translator("FOMO wtf casino games are currently in beta and will be undergoing audit shortly. FOMO wtf EXIT games has gone through audit performed by OtterSec in December 2023.", language)}
+              {translator(
+                "FOMO wtf casino games are currently in beta and will be undergoing audit shortly. FOMO wtf EXIT games has gone through audit performed by OtterSec in December 2023.",
+                language,
+              )}
             </span>
           </p>
         </div>
@@ -34,21 +38,22 @@ function Footer() {
               {translator("Services", language)}
             </h3>
             <div className="text-[#94A3B8] font-chakra flex flex-col items-start justify-start gap-5 text-sm leading-[14px] font-medium text-opacity-80">
-              <span
+              <Link
+                href="https://dca.fomosolana.com/"
+                target="_blank"
                 className="hover:cursor-pointer hover:underline decoration-1"
-                onClick={() => router.push("/")}
               >
                 DCA
-              </span>
-              <span
+              </Link>
+              <Link
+                href="docs.fomowtf.com"
+                target="_blank"
                 className="hover:cursor-pointer hover:underline decoration-1"
-                onClick={() => router.push("/")}
               >
                 {translator("Docs", language)}
-              </span>
+              </Link>
               <span
-                className="hover:cursor-pointer hover:underline decoration-1"
-                onClick={() => router.push("/")}
+                className="hover:cursor-pointer hover:underline decoration-1" onClick={() => setShowWalletModal(true)}  
               >
                 {translator("Wallet", language)}
               </span>
@@ -86,12 +91,20 @@ function Footer() {
               {translator("Community", language)}
             </h3>
             <div className="flex flex-row items-start justify-start gap-2 pt-4">
-              <div className="p-2 border-2 border-[#FFFFFF] rounded-full border-opacity-5 hover:bg-[#121519] hover:cursor-pointer" onClick={() => router.push('')}>
+              <Link
+                href="https://x.com/FomoWtf"
+                target="_blank"
+                className="p-2 border-2 border-[#FFFFFF] rounded-full border-opacity-5 hover:bg-[#121519] hover:cursor-pointer"
+              >
                 <Image src={Twitter} alt="" width={15} height={15} />
-              </div>
-              <div className="p-2 border-2 border-[#FFFFFF] rounded-full border-opacity-5 hover:bg-[#121519] hover:cursor-pointer" onClick={() => router.push('')}>
+              </Link>
+              <Link
+                href= "https://t.me/fomowtf"
+                target="_blank"
+                className="p-2 border-2 border-[#FFFFFF] rounded-full border-opacity-5 hover:bg-[#121519] hover:cursor-pointer"
+              >
                 <Image src={Telegram} alt="" width={15} height={15} />
-              </div>
+              </Link>
             </div>
           </div>
         </div>

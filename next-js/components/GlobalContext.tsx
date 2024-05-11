@@ -1230,5 +1230,5 @@ export const translationsMap = {
     ru: "Панель",
     ko: "대시 보드",
     ch: "仪表板",
-  },
+  }
 };
