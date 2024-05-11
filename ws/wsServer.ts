@@ -104,7 +104,14 @@ try {
   server.on("connection", (socket: WebSocket) => {
     console.log("server connected");
     socket.on("message", (data) => {
-      console.log("server msg received");
+      console.log(
+        "server msg received",
+        data,
+        "connected clients: ",
+        channelClients,
+        "socket.readyState: ",
+        socket.readyState
+      );
       try {
         const message = JSON.parse(data.toString());
 
@@ -135,6 +142,8 @@ try {
       Object.values(channelClients).forEach((clients) => {
         clients.delete(socket);
       });
+
+      console.log("server msg received", "connected clients: ", channelClients);
     });
   });
 
