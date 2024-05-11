@@ -104,23 +104,22 @@ try {
   server.on("connection", (socket: WebSocket) => {
     console.log("server connected");
     socket.on("message", (data) => {
-      console.log(
-        "server msg received",
-        data,
-        "connected clients: ",
-        channelClients,
-        "socket.readyState: ",
-        socket.readyState
-      );
       try {
         const message = JSON.parse(data.toString());
 
-        if (socket.readyState == WebSocket.OPEN) {
-          if (message.clientType === "api-client") {
-            handleAPIClient(socket, message);
-          } else if (message.clientType === "listener-client") {
-            handleListenerClient(socket, message);
-          }
+        console.log(
+          "server msg received",
+          message,
+          "connected clients: ",
+          channelClients,
+          "socket.readyState: ",
+          socket.readyState
+        );
+
+        if (message.clientType === "api-client") {
+          handleAPIClient(socket, message);
+        } else if (message.clientType === "listener-client") {
+          handleListenerClient(socket, message);
         }
 
         // Handle other types of clients or messages here if needed
@@ -143,7 +142,7 @@ try {
         clients.delete(socket);
       });
 
-      console.log("server msg received", "connected clients: ", channelClients);
+      console.log("connected clients: ", channelClients);
     });
   });
 
