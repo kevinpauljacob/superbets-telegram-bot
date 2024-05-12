@@ -121,7 +121,6 @@ export default function Flip() {
                     : betAmt + (autoWinChange * betAmt) / 100.0,
                 );
               } else if (useAutoConfig && autoLossChange && !win) {
-                setAutoBetProfit(autoBetProfit - betAmt);
                 setBetAmt(
                   autoLossChangeReset
                     ? userInput!
@@ -147,6 +146,8 @@ export default function Flip() {
             setLoading(false);
             setFlipping(false);
             setResult(null);
+            setStartAuto(false);
+            setAutoBetCount(0);
             response?.message && errorCustom(response?.message);
           }
         },
@@ -158,21 +159,10 @@ export default function Flip() {
       setFlipping(false);
       setLoading(false);
       setResult(null);
+      setStartAuto(false);
+      setAutoBetCount(0);
     }
   };
-
-  // useEffect(() => {
-  //   console.log("Bet type: ", betType);
-  //   console.log("Others: ", loading, flipping, deposit);
-  // }, [betType]);
-  // useEffect(() => {
-  //   console.log("load Bet type: ", betType);
-  //   console.log("load Others: ", loading, flipping, deposit);
-  // }, [loading]);
-  // useEffect(() => {
-  //   console.log("flip Bet type: ", betType);
-  //   console.log("flip Others: ", loading, flipping, deposit);
-  // }, [flipping]);
 
   useEffect(() => {
     if (refresh && wallet?.publicKey) {
@@ -191,8 +181,9 @@ export default function Flip() {
       "Auto: ",
       startAuto,
       autoBetCount,
-      autoBetProfit,
       autoStopProfit,
+      autoStopLoss,
+      autoBetProfit,
     );
     if (
       betSetting === "auto" &&
@@ -234,7 +225,6 @@ export default function Flip() {
   }, [startAuto, autoBetCount]);
 
   const onSubmit = async (data: any) => {
-    console.log(data);
     if (!wallet.publicKey) {
       errorCustom("Wallet not connected");
       return;
@@ -266,17 +256,6 @@ export default function Flip() {
         bet();
       }
     }
-  };
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
-  ) => {
-    setBetAmt(parseFloat(e.target.value));
-  };
-
-  const handleCountChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
-  ) => {
-    setAutoBetCount(parseFloat(e.target.value));
   };
 
   const disableInput = useMemo(() => {
@@ -355,18 +334,12 @@ export default function Flip() {
                   <></>
                 ) : (
                   <div className="w-full flex flex-row items-end gap-3">
-                    <AutoCount
-                      loading={flipping || startAuto}
-                      onChange={handleCountChange}
-                    />
+                    <AutoCount loading={flipping || startAuto} />
                     <div className="w-full hidden lg:flex">
                       <ConfigureAutoButton disabled={disableInput} />
                     </div>
                   </div>
                 )}
-
-                {/* balance alert  */}
-                {/* <BalanceAlert /> */}
 
                 {/* choosing bet options  */}
                 <div className="flex w-full flex-row gap-3 mb-[1.4rem]">
@@ -443,7 +416,7 @@ export default function Flip() {
                         ? true
                         : false
                     }
-                    onClickFunction={onSubmit}
+                    // onClickFunction={onSubmit}
                   >
                     {loading ? <Loader /> : "BET"}
                   </BetButton>

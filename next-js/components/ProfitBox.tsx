@@ -2,7 +2,7 @@ import { useForm } from "react-hook-form";
 import { useGlobalContext } from "./GlobalContext";
 import { BsInfinity } from "react-icons/bs";
 
-export default function AutoCount({
+export default function ProfitBox({
   multiplier,
   amount,
 }: {

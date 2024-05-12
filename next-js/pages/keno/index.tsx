@@ -78,12 +78,6 @@ export default function Keno() {
     chosenNumbers.includes(num),
   );
 
-  const handleCountChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
-  ) => {
-    setAutoBetCount(parseFloat(e.target.value));
-  };
-
   const handleChosenNumber = (number: number) => {
     setStrikeNumbers([]);
     const numberIndex = chosenNumbers.indexOf(number);
@@ -243,7 +237,6 @@ export default function Keno() {
                 : betAmt + (autoWinChange * betAmt) / 100.0,
             );
           } else if (useAutoConfig && autoLossChange && !win) {
-            setAutoBetProfit(autoBetProfit - betAmt);
             setBetAmt(
               autoLossChangeReset
                 ? userInput!
@@ -522,7 +515,6 @@ export default function Keno() {
                   <div className="w-full flex flex-row items-end gap-3">
                     <AutoCount
                       loading={isRolling || startAuto}
-                      onChange={handleCountChange}
                     />
                     <div className="w-full hidden lg:flex">
                       <ConfigureAutoButton disabled={disableInput} />

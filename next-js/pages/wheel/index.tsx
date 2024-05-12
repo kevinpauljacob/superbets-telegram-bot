@@ -144,12 +144,6 @@ export default function Wheel() {
     }
   };
 
-  const handleCountChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
-  ) => {
-    setAutoBetCount(parseFloat(e.target.value));
-  };
-
   const handleBetAmountChange = (
     event: React.ChangeEvent<HTMLInputElement>,
   ) => {
@@ -236,7 +230,6 @@ export default function Wheel() {
                 : betAmt + (autoWinChange * betAmt) / 100.0,
             );
           } else if (useAutoConfig && autoLossChange && !win) {
-            setAutoBetProfit(autoBetProfit - betAmt);
             setBetAmt(
               autoLossChangeReset
                 ? userInput!
@@ -481,7 +474,6 @@ export default function Wheel() {
                   <div className="w-full flex flex-row items-end gap-3">
                     <AutoCount
                       loading={isRolling || startAuto}
-                      onChange={handleCountChange}
                     />
                     <div className="w-full hidden lg:flex">
                       <ConfigureAutoButton disabled={disableInput} />

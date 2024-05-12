@@ -205,7 +205,7 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
   const [autoStopLoss, setAutoStopLoss] = useState<number | null>(null);
   const [startAuto, setStartAuto] = useState<boolean>(false);
   const [useAutoConfig, setUseAutoConfig] = useState<boolean>(false);
-  const [autoBetCount, setAutoBetCount] = useState<number | string>(0);
+  const [autoBetCount, setAutoBetCount] = useState<number | string>(1);
   const [autoBetProfit, setAutoBetProfit] = useState<number>(0);
 
   const [liveBets, setLiveBets] = useState<any[]>([]);

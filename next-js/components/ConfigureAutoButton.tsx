@@ -1,19 +1,23 @@
 import { useGlobalContext } from "./GlobalContext";
 
-export default function ConfigureAutoButton({disabled=false}:{disabled?: boolean}) {
+export default function ConfigureAutoButton({
+  disabled = true,
+}: {
+  disabled: boolean;
+}) {
   const { useAutoConfig, setShowAutoModal } = useGlobalContext();
-  console.log("Configure Auto:", disabled)
   return (
     <button
+      type="button"
       onClick={() => {
         setShowAutoModal(true);
       }}
-      disabled={disabled} 
-      className={`${disabled ?"cursor-not-allowed" : "cursor-pointer"} flex relative mb-[1.4rem] rounded-md w-full h-[3.75rem] lg:h-11 items-center justify-center opacity-75 text-white text-opacity-90 border-2 border-white bg-white bg-opacity-0 hover:bg-opacity-5`}
+      disabled={disabled}
+      className={`${
+        disabled ? "cursor-default" : "cursor-pointer"
+      } disabled:opacity-50 flex relative mb-[1.4rem] rounded-md w-full h-[3.75rem] lg:h-11 items-center justify-center opacity-75 text-white text-opacity-90 border-2 border-white bg-white bg-opacity-0 hover:bg-opacity-5`}
     >
-
       Configure Auto
-    
       <div
         className={`${
           useAutoConfig ? "bg-fomo-green" : "bg-fomo-red"

@@ -142,7 +142,6 @@ export default function Limbo() {
                     ),
               );
             } else if (useAutoConfig && autoLossChange && !win) {
-              setAutoBetProfit(autoBetProfit - betAmt);
               setBetAmt(
                 autoLossChangeReset
                   ? userInput!
@@ -236,12 +235,6 @@ export default function Limbo() {
       setRefresh(false);
     }
   }, [wallet?.publicKey, refresh]);
-
-  const handleCountChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
-  ) => {
-    setAutoBetCount(parseFloat(e.target.value));
-  };
 
   useEffect(() => {
     setBetAmt(userInput);
@@ -397,15 +390,12 @@ export default function Limbo() {
                   <div className="w-full flex flex-row items-end gap-3">
                     <AutoCount
                       loading={flipping || startAuto}
-                      onChange={handleCountChange}
                     />
                     <div className="w-full hidden lg:flex">
                       <ConfigureAutoButton disabled={disableInput}/>
                     </div>
                   </div>
                 )}
-                {/* balance alert  */}
-                {/* <BalanceAlert /> */}
 
                 <div className="relative w-full hidden lg:flex">
                   {startAuto && (

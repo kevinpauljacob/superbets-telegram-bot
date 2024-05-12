@@ -141,12 +141,6 @@ export default function Dice() {
     }
   }, [betAmt]);
 
-  const handleCountChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
-  ) => {
-    setAutoBetCount(parseFloat(e.target.value));
-  };
-
   const diceRoll = async () => {
     console.log(
       "betting",
@@ -165,18 +159,30 @@ export default function Dice() {
     if (wallet.connected) {
       if (!wallet.publicKey) {
         errorCustom("Wallet not connected");
+        setIsRolling(false);
+        setAutoBetCount(0);
+        setStartAuto(false);
         return;
       }
       if (coinData && coinData[0].amount < betAmt) {
         errorCustom("Insufficient balance for bet !");
+        setIsRolling(false);
+        setAutoBetCount(0);
+        setStartAuto(false);
         return;
       }
       if (betAmt === 0) {
         errorCustom("Set Amount.");
+        setIsRolling(false);
+        setAutoBetCount(0);
+        setStartAuto(false);
         return;
       }
       if (selectedFace.length === 0) {
         errorCustom("Choose at least 1 face.");
+        setIsRolling(false);
+        setAutoBetCount(0);
+        setStartAuto(false);
         return;
       }
       setIsRolling(true);
@@ -442,10 +448,7 @@ export default function Dice() {
                   <></>
                 ) : (
                   <div className="w-full flex flex-row items-end gap-3">
-                    <AutoCount
-                      loading={isRolling || startAuto}
-                      onChange={handleCountChange}
-                    />
+                    <AutoCount loading={isRolling || startAuto} />
                     <div className="w-full hidden lg:flex">
                       <ConfigureAutoButton disabled={disableInput} />
                     </div>
