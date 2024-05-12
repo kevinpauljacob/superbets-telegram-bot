@@ -771,6 +771,11 @@ export const translationsMap = {
     ko: "배팅",
     ch: "投注",
   },
+  Bets: {
+    ru: "Ставки",
+    ko: "배팅",
+    ch: "投注",
+  },
   "Max Bet": {
     ru: "Максимальная ставка",
     ko: "최대 베팅",
