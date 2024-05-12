@@ -67,11 +67,11 @@ export default function Dice() {
   const [profit, setProfit] = useState(0.0);
   const [winningProbability, setWinningProbability] = useState(0.0);
   const [refresh, setRefresh] = useState(true);
-  const [selectedFace, setSelectedFace] = useState<number[]>([]);
+  const [selectedFace, setSelectedFace] = useState<number[]>([1]);
   const [selectedFaces, setSelectedFaces] = useState<{
     [key: number]: boolean;
   }>({
-    1: false,
+    1: true,
     2: false,
     3: false,
     4: false,
