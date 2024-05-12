@@ -5,6 +5,7 @@ import { wsEndpoint, trimStringToLength } from "@/context/gameTransactions";
 import { useEffect, useRef, useState } from "react";
 import { GameType } from "@/utils/provably-fair";
 import { useRouter } from "next/router";
+import useWebSocket from "react-use-websocket";
 
 export default function SubHeader() {
   const router = useRouter();
@@ -29,26 +30,15 @@ export default function SubHeader() {
     });
   }, [cards]);
 
-  useEffect(() => {
-    fetch(`/api/games/global/getRecentHistory`)
-      .then((res) => res.json())
-      .then((data) => {
-        if (!data.success) return console.error(data.message);
-        setCards(data.data);
+  const { sendJsonMessage } = useWebSocket(wsEndpoint, {
+    onOpen: () => {
+      console.log("Connected to ws");
+      sendJsonMessage({
+        clientType: "listener-client",
+        channel: "fomo-casino_games-channel",
       });
-
-    const socket = new WebSocket(wsEndpoint);
-
-    socket.onopen = () => {
-      socket.send(
-        JSON.stringify({
-          clientType: "listener-client",
-          channel: "fomo-casino_games-channel",
-        }),
-      );
-    };
-
-    socket.onmessage = async (event) => {
+    },
+    onMessage: (event) => {
       const response = JSON.parse(event.data.toString());
 
       if (!response.payload) return;
@@ -61,15 +51,24 @@ export default function SubHeader() {
         });
 
       setLiveBets((prev) => [payload, ...prev]);
-    };
+    },
+    shouldReconnect: () => {
+      console.log("Reconnecting to ws");
+      return true;
+    },
+    retryOnError: true,
+    reconnectInterval: (attemptNumber) =>
+      Math.min(Math.pow(2, attemptNumber) * 1000, 10000),
+    reconnectAttempts: 25,
+  });
 
-    socket.onclose = () => {
-      console.log("Socket closed");
-    };
-
-    return () => {
-      socket.close();
-    };
+  useEffect(() => {
+    fetch(`/api/games/global/getRecentHistory`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (!data.success) return console.error(data.message);
+        setCards(data.data);
+      });
   }, []);
 
   return (
