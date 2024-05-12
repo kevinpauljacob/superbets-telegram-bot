@@ -7,6 +7,7 @@ import Loader from "./Loader";
 import { useGlobalContext } from "../GlobalContext";
 import { IoClose, IoCloseOutline } from "react-icons/io5";
 import Image from "next/image";
+import { warningCustom } from "../toasts/ToastGroup";
 
 export default function ConfigureAutoModal() {
   const methods = useForm();
@@ -399,6 +400,7 @@ export default function ConfigureAutoModal() {
                 methods.clearErrors("autoLossChange");
                 methods.clearErrors("autoStopProfit");
                 methods.clearErrors("autoStopLoss");
+                warningCustom("All values reset.")
               }}
               className="text-[#94A3B8] hover:text-white/70 transition-all hover:duration-75 w-full text-center cursor-pointer text-base font-semibold font-chakra mt-8 underline underline-offset-2"
             >
