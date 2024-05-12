@@ -312,8 +312,8 @@ export default function Limbo() {
   };
 
   const disableInput = useMemo(() => {
-    return betSetting === "auto" && startAuto ? true : false;
-  }, [betSetting, startAuto]);
+    return betSetting === "auto" && startAuto ? true : false || loading;
+  }, [betSetting, startAuto,loading]);
 
   return (
     <GameLayout title="FOMO - Limbo">
@@ -353,7 +353,7 @@ export default function Limbo() {
           </div>
           {betSetting === "auto" && (
             <div className="w-full flex lg:hidden">
-              <ConfigureAutoButton />
+              <ConfigureAutoButton disabled={disableInput}/>
             </div>
           )}
           <div className="w-full hidden lg:flex">
@@ -400,7 +400,7 @@ export default function Limbo() {
                       onChange={handleCountChange}
                     />
                     <div className="w-full hidden lg:flex">
-                      <ConfigureAutoButton />
+                      <ConfigureAutoButton disabled={disableInput}/>
                     </div>
                   </div>
                 )}

@@ -135,7 +135,7 @@ export default function BetAmount({
                 value={maxBetAmt}
                 disabled={disabled}
                 className="maxBetsSlider absolute top-[-8px] w-full bg-transparent appearance-none z-20 disabled:cursor-not-allowed disabled:opacity-50"
-              />
+              /> 
               <div
                 className="absolute rounded-full h-[5px] bg-[#8795A8] z-10"
                 style={{

@@ -173,36 +173,42 @@ export default function Layout({ children }: LayoutProps) {
           isOpen={isVerifyModalOpen}
           onClose={closeVerifyModal}
           modalData={{ flip: (verifyModalData as Flip)! }}
+          wallet={wallet.publicKey?.toBase58()}
         />
       ) : currentGame === GameType.dice ? (
         <VerifyDiceModal
           isOpen={isVerifyModalOpen}
           onClose={closeVerifyModal}
           modalData={{ bet: (verifyModalData as Dice)! }}
+          wallet={wallet.publicKey?.toBase58()}
         />
       ) : currentGame === GameType.dice2 ? (
         <VerifyDice2Modal
           isOpen={isVerifyModalOpen}
           onClose={closeVerifyModal}
           modalData={{ bet: (verifyModalData as Dice2)! }}
+          wallet={wallet.publicKey?.toBase58()}
         />
       ) : currentGame === GameType.limbo ? (
         <VerifyLimboModal
           isOpen={isVerifyModalOpen}
           onClose={closeVerifyModal}
           modalData={{ flip: (verifyModalData as Limbo)! }}
+          wallet={wallet.publicKey?.toBase58()}
         />
       ) : currentGame === GameType.wheel ? (
         <VerifyWheelModal
           isOpen={isVerifyModalOpen}
           onClose={closeVerifyModal}
           modalData={{ bet: (verifyModalData as Wheel)! }}
+          wallet={wallet.publicKey?.toBase58()}
         />
       ) : currentGame === GameType.keno ? (
         <VerifyKenoModal
           isOpen={isVerifyModalOpen}
           onClose={closeVerifyModal}
           modalData={{ bet: (verifyModalData as Keno)! }}
+          wallet={wallet.publicKey?.toBase58()}
         />
       ) : null}
 

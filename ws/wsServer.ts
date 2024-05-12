@@ -12,13 +12,13 @@ const port = parseInt(process.env.PORT || "4000");
 
 const connection = new Connection(process.env.BACKEND_RPC!, "confirmed");
 const devWalletKey = Keypair.fromSecretKey(
-  Uint8Array.from(JSON.parse(process.env.DEV_KEYPAIR!)),
+  Uint8Array.from(JSON.parse(process.env.DEV_KEYPAIR!))
 );
 const fomoProgramId = new PublicKey(
-  "FoMotN3mJB5QVorWrgF7gHRoguUYRr2dApDondesrYe",
+  "FoMotN3mJB5QVorWrgF7gHRoguUYRr2dApDondesrYe"
 );
 const fomoJupProgramId = new PublicKey(
-  "3ZVntpabyX5dh71gHeyEHcqUhV7Gu3irUT25tm8eQPnJ",
+  "3ZVntpabyX5dh71gHeyEHcqUhV7Gu3irUT25tm8eQPnJ"
 );
 
 const server = new WebSocket.Server({ port });
@@ -34,7 +34,7 @@ const channelClients: { [key: string]: Set<WebSocket> } = {};
 const handleFomoBuyEvent = async (
   programId: PublicKey,
   IDL: any,
-  dbName: string,
+  dbName: string
 ) => {
   const provider = new AnchorProvider(connection, new Wallet(devWalletKey), {
     commitment: "processed",
@@ -66,7 +66,7 @@ const handleAPIClient = (socket: WebSocket, message: any) => {
 
     // Forward payload to all clients on channel
     channelClients[channel].forEach((client) => {
-      if (client !== socket && client.readyState === WebSocket.OPEN) {
+      if (client.readyState === WebSocket.OPEN) {
         client.send(JSON.stringify({ channel, payload }));
       }
     });
@@ -89,11 +89,18 @@ const handleListenerClient = (socket: WebSocket, message: any) => {
       JSON.stringify({
         success: true,
         clientsCount: channelClients[channel].size,
-      }),
+      })
     );
   } else {
     socket.send(JSON.stringify({ success: false }));
   }
+
+  socket.on("close", () => {
+    // Remove the disconnected client from all channels
+    Object.values(channelClients).forEach((clients) => {
+      clients.delete(socket);
+    });
+  });
 };
 
 try {
@@ -115,13 +122,6 @@ try {
       } catch (error) {
         console.error("Error parsing message:", error);
       }
-    });
-
-    socket.on("close", () => {
-      // Remove the disconnected client from all channels
-      Object.values(channelClients).forEach((clients) => {
-        clients.delete(socket);
-      });
     });
   });
 

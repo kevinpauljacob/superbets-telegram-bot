@@ -294,6 +294,8 @@ export default function Wheel() {
         autoBetProfit >= autoStopProfit
       ) {
         showInfoToast("Profit limit reached.");
+        setAutoBetCount(0);
+        setStartAuto(false);
         return;
       }
       if (
@@ -303,6 +305,8 @@ export default function Wheel() {
         autoBetProfit <= -autoStopLoss
       ) {
         showInfoToast("Loss limit reached.");
+        setAutoBetCount(0);
+        setStartAuto(false);
         return;
       }
       setTimeout(() => {
@@ -335,8 +339,8 @@ export default function Wheel() {
   };
 
   const disableInput = useMemo(() => {
-    return betType === "auto" && startAuto ? true : false;
-  }, [betType, startAuto]);
+    return betType === "auto" && startAuto ? true : false||isRolling;
+  }, [betType, startAuto,isRolling]);
 
   return (
     <GameLayout title="FOMO - Wheel">
@@ -376,7 +380,7 @@ export default function Wheel() {
             </BetButton>
           </div>
           <div className="w-full flex lg:hidden">
-            <ConfigureAutoButton />
+            <ConfigureAutoButton disabled={disableInput} />
           </div>
           <div className="w-full hidden lg:flex">
             <BetSetting
@@ -480,7 +484,7 @@ export default function Wheel() {
                       onChange={handleCountChange}
                     />
                     <div className="w-full hidden lg:flex">
-                      <ConfigureAutoButton />
+                      <ConfigureAutoButton disabled={disableInput} />
                     </div>
                   </div>
                 )}
@@ -613,15 +617,14 @@ export default function Wheel() {
                         <div className="w-1/2">
                           <div className="flex justify-between text-[13px] font-medium font-changa text-opacity-90 text-[#F0F0F0]">
                             <span className="">Profit</span>
-                            <span>
-                              {/* {coinData ? coinData[0]?.amount.toFixed(4) : 0} $SOL */}
-                              SOL
-                            </span>
+                            <span>SOL</span>
                           </div>
                           <div className="border border-white/10 rounded-lg p-3 mt-2">
                             {coinData
-                              ? (
-                                  coinData[0]?.amount * segment.multiplier
+                              ? Math.max(
+                                  0,
+                                  betAmt *
+                                    (segment.multiplier * (1 - houseEdge) - 1),
                                 ).toFixed(4)
                               : 0}
                           </div>

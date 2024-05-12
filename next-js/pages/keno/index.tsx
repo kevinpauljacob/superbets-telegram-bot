@@ -277,8 +277,8 @@ export default function Keno() {
   };
 
   const disableInput = useMemo(() => {
-    return betType === "auto" && startAuto ? true : false;
-  }, [betType, startAuto]);
+    return betType === "auto" && startAuto ? true : false||isRolling;
+  }, [betType, startAuto,isRolling]);
 
   useEffect(() => {
     if (refresh && wallet?.publicKey) {
@@ -307,6 +307,8 @@ export default function Keno() {
         autoBetProfit >= autoStopProfit
       ) {
         showInfoToast("Profit limit reached.");
+        setAutoBetCount(0);
+        setStartAuto(false);
         return;
       }
       if (
@@ -316,6 +318,8 @@ export default function Keno() {
         autoBetProfit <= -autoStopLoss
       ) {
         showInfoToast("Loss limit reached.");
+        setAutoBetCount(0);
+        setStartAuto(false);
         return;
       }
       setTimeout(() => {
@@ -421,8 +425,8 @@ export default function Keno() {
             <Autopick />
           </div>
           {betType === "auto" && (
-            <div className="w-full flex lg:hidden">
-              <ConfigureAutoButton />
+            <div className="w-full flex lg:hidden" >
+              <ConfigureAutoButton disabled={disableInput}/>
             </div>
           )}
           <div className="w-full hidden lg:flex">
@@ -521,7 +525,7 @@ export default function Keno() {
                       onChange={handleCountChange}
                     />
                     <div className="w-full hidden lg:flex">
-                      <ConfigureAutoButton />
+                      <ConfigureAutoButton disabled={disableInput} />
                     </div>
                   </div>
                 )}
@@ -624,7 +628,7 @@ export default function Keno() {
                       key={index}
                       className="bg-[#202329] text-center font-chakra text-[8px] sm:text-xs font-semibold rounded-[5px] p-1 sm:py-3 sm:px-1 w-full"
                     >
-                      {multiplier.toFixed(1)}x
+                      {multiplier.toFixed(2)}x
                     </div>
                   ))}
                 </div>
@@ -663,7 +667,14 @@ export default function Keno() {
                                 <span className="">Profit</span>
                               </div>
                               <div className="border border-white/10 rounded-[5px] p-3 mt-2">
-                                {(betAmt * multiplier).toFixed(4)} SOL
+                                {coinData
+                                  ? Math.max(
+                                      0,
+                                      betAmt *
+                                        (multiplier * (1 - houseEdge) - 1),
+                                    ).toFixed(4)
+                                  : 0}{" "}
+                                SOL
                               </div>
                             </div>
                             <div className="w-1/2">

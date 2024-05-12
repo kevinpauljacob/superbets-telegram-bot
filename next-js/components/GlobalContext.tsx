@@ -128,6 +128,8 @@ interface GlobalContextProps {
   setAutoBetCount: React.Dispatch<React.SetStateAction<number | string>>;
   autoBetProfit: number;
   setAutoBetProfit: React.Dispatch<React.SetStateAction<number>>;
+  liveBets: any[];
+  setLiveBets: React.Dispatch<React.SetStateAction<any[]>>;
 
   openVerifyModal: () => void;
   closeVerifyModal: () => void;
@@ -205,6 +207,8 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
   const [useAutoConfig, setUseAutoConfig] = useState<boolean>(false);
   const [autoBetCount, setAutoBetCount] = useState<number | string>(0);
   const [autoBetProfit, setAutoBetProfit] = useState<number>(0);
+
+  const [liveBets, setLiveBets] = useState<any[]>([]);
 
   // fomo live price
   const [fomoPrice, setFomoPrice] = useState<number>(0);
@@ -416,6 +420,8 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
         setAutoBetCount,
         autoBetProfit,
         setAutoBetProfit,
+        liveBets,
+        setLiveBets,
         useAutoConfig,
         setUseAutoConfig,
         currentGame,

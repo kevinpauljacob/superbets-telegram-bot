@@ -32,12 +32,14 @@ interface Props {
   isOpen: boolean;
   onClose: () => void;
   modalData: ModalData;
+  wallet?: string;
 }
 
 export default function VerifyLimboModal({
   isOpen,
   onClose,
   modalData,
+  wallet,
 }: Props) {
   const { flip } = modalData;
   const { getProvablyFairData } = useGlobalContext();
@@ -141,7 +143,7 @@ export default function VerifyLimboModal({
                   Payout
                 </div>
                 <div className="text-white font-chakra text-xs font-medium">
-                  {flip.amountWon - flip.amount} $SOL
+                  {(flip.amountWon - flip.amount).toFixed(5)} $SOL
                 </div>
               </button>
             </div>
@@ -260,7 +262,20 @@ export default function VerifyLimboModal({
                     </div>
                   </div>
                   <div className="footer grid gap-1 mt-10">
-                    {flip.gameSeed?.status !== seedStatus.EXPIRED ? (
+                    {flip.wallet !== wallet ? (
+                      <>
+                        <div className="text-xs text-[#94A3B8] font-changa text-opacity-75 text-center">
+                          The bettor must first rotate their seed pairt to
+                          verify this bet.
+                        </div>
+                        <button
+                          className="bg-[#7839C5] rounded-md w-full text-sm text-white text-opacity-90 text-semibold py-3 disabled:opacity-70"
+                          disabled
+                        >
+                          Rotate
+                        </button>
+                      </>
+                    ) : flip.gameSeed?.status !== seedStatus.EXPIRED ? (
                       <>
                         <div className="text-xs text-[#94A3B8] font-changa text-opacity-75 text-center">
                           To verify this flip, you first need to rotate your
