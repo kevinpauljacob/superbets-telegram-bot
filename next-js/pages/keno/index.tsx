@@ -277,8 +277,8 @@ export default function Keno() {
   };
 
   const disableInput = useMemo(() => {
-    return betType === "auto" && startAuto ? true : false;
-  }, [betType, startAuto]);
+    return betType === "auto" && startAuto ? true : false||isRolling;
+  }, [betType, startAuto,isRolling]);
 
   useEffect(() => {
     if (refresh && wallet?.publicKey) {
@@ -425,8 +425,8 @@ export default function Keno() {
             <Autopick />
           </div>
           {betType === "auto" && (
-            <div className="w-full flex lg:hidden">
-              <ConfigureAutoButton />
+            <div className="w-full flex lg:hidden" >
+              <ConfigureAutoButton disabled={disableInput}/>
             </div>
           )}
           <div className="w-full hidden lg:flex">
@@ -525,7 +525,7 @@ export default function Keno() {
                       onChange={handleCountChange}
                     />
                     <div className="w-full hidden lg:flex">
-                      <ConfigureAutoButton />
+                      <ConfigureAutoButton disabled={disableInput} />
                     </div>
                   </div>
                 )}

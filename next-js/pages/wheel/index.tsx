@@ -339,8 +339,8 @@ export default function Wheel() {
   };
 
   const disableInput = useMemo(() => {
-    return betType === "auto" && startAuto ? true : false;
-  }, [betType, startAuto]);
+    return betType === "auto" && startAuto ? true : false||isRolling;
+  }, [betType, startAuto,isRolling]);
 
   return (
     <GameLayout title="FOMO - Wheel">
@@ -380,7 +380,7 @@ export default function Wheel() {
             </BetButton>
           </div>
           <div className="w-full flex lg:hidden">
-            <ConfigureAutoButton />
+            <ConfigureAutoButton disabled={disableInput} />
           </div>
           <div className="w-full hidden lg:flex">
             <BetSetting
@@ -484,7 +484,7 @@ export default function Wheel() {
                       onChange={handleCountChange}
                     />
                     <div className="w-full hidden lg:flex">
-                      <ConfigureAutoButton />
+                      <ConfigureAutoButton disabled={disableInput} />
                     </div>
                   </div>
                 )}
