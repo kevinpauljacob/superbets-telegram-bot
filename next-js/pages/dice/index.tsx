@@ -363,8 +363,8 @@ export default function Dice() {
   };
 
   const disableInput = useMemo(() => {
-    return betType === "auto" && startAuto ? true : false;
-  }, [betType, startAuto]);
+    return betType === "auto" && startAuto ? true : false || isRolling;
+  }, [betType, startAuto, isRolling]);
 
   return (
     <GameLayout title="FOMO - Dice">
@@ -412,7 +412,7 @@ export default function Dice() {
           </div>
           {betType === "auto" && (
             <div className="w-full flex lg:hidden">
-              <ConfigureAutoButton />
+              <ConfigureAutoButton disabled={disableInput} />
             </div>
           )}
           <div className="w-full hidden lg:flex">
@@ -447,7 +447,7 @@ export default function Dice() {
                       onChange={handleCountChange}
                     />
                     <div className="w-full hidden lg:flex">
-                      <ConfigureAutoButton />
+                      <ConfigureAutoButton disabled={disableInput} />
                     </div>
                   </div>
                 )}

@@ -257,8 +257,8 @@ export default function Dice2() {
   };
 
   const disableInput = useMemo(() => {
-    return betType === "auto" && startAuto ? true : false;
-  }, [betType, startAuto]);
+    return betType === "auto" && startAuto ? true : false || isRolling;
+  }, [betType, startAuto, isRolling]);
 
   useEffect(() => {
     const calculateMultiplier = () => {
@@ -393,7 +393,7 @@ export default function Dice2() {
           </div>
           {betType === "auto" && (
             <div className="w-full flex lg:hidden">
-              <ConfigureAutoButton />
+              <ConfigureAutoButton disabled={disableInput} />
             </div>
           )}
           <div className="w-full hidden lg:flex">
@@ -431,7 +431,7 @@ export default function Dice2() {
                       onChange={handleCountChange}
                     />
                     <div className="w-full hidden lg:flex">
-                      <ConfigureAutoButton />
+                      <ConfigureAutoButton disabled={disableInput} />
                     </div>
                   </div>
                 )}

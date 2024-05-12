@@ -63,7 +63,6 @@ export default function Stake() {
         let address = new PublicKey(fomoToken);
         const ata = getAssociatedTokenAddressSync(address, wallet.publicKey);
         const res = await connection.getTokenAccountBalance(ata, "recent");
-        // console.log("balance : ", res.value.uiAmount ?? 0);
 
         res.value.uiAmount ? setSolBal(res.value.uiAmount) : setSolBal(0);
       } catch (e) {
@@ -84,20 +83,11 @@ export default function Stake() {
     <div className="flex flex-col items-center w-full overflow-hidden min-h-screen flex-1 relative">
       <div className="w-full flex flex-1 flex-col items-start gap-5 px-5 sm:px-10 lg:px-40 2xl:px-[15%] pb-10">
         <span className="text-white text-opacity-90 font-semibold text-[1.5rem] sm:text-[2rem] mt-[4rem]">
-          {/* {translator("You have", language)}{" "} */}
-          {/* <span className="text-[#9945FF]">{solBal.toFixed(3)} FOMO</span>{" "} */}
-          {/* {translator("available in your wallet to stake", language)} */}
+
           {translator("Stake your", language)}
           <span className="text-[#9945FF]"> FOMO </span>
           {translator("to boost your leaderboard points and more.", language)}
         </span>
-
-        {/* <span className="text-white text-opacity-50 text-base font-medium">
-          {translator(
-            "Sake your FOMO tokens to receive multipliers for your points which gets you amazing rewards from our store.",
-            language,
-          )}
-        </span> */}
 
         <div className="flex flex-col sm:flex-row items-start gap-5 w-full">
           <div className="flex w-full basis-full sm:basis-2/3">
@@ -122,21 +112,8 @@ export default function Stake() {
                 <span className="text-white text-opacity-80 text-xl sm:text-2xl font-semibold">
                   {formatNumber(globalInfo?.stakedTotal)} FOMO
                 </span>
-                {/* <span className="text-[#9945FF] text-base font-semibold text-opacity-90">
-                  (0.0%)
-                </span> */}
               </div>
             </div>
-            {/* <div className="absolute sm:relative top-2 sm:top-auto right-3 sm:right-auto w-[9rem] h-[1.5rem] sm:h-[2rem]">
-              <Image
-                src={"/assets/graphtotal.png"}
-                layout="fill"
-                objectFit="contain"
-                objectPosition="center"
-                className="flex sm:hidden"
-                alt={"FOMO"}
-              />
-            </div> */}
           </div>
         </div>
       </div>

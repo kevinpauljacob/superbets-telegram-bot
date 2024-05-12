@@ -10,7 +10,6 @@ export default function ConfigureAutoButton({disabled=false}:{disabled?: boolean
       }}
       disabled={disabled} 
       className={`${disabled ?"cursor-not-allowed" : "cursor-pointer"} flex relative mb-[1.4rem] rounded-md w-full h-[3.75rem] lg:h-11 items-center justify-center opacity-75 text-white text-opacity-90 border-2 border-white bg-white bg-opacity-0 hover:bg-opacity-5`}
-    
     >
 
       Configure Auto
