@@ -15,6 +15,8 @@ interface Bet {
 
 export default function AllBets() {
   const [allBets, setAllBets] = useState<Bet[]>([]);
+  const [loading, setLoading] = useState(false);
+
   const { liveBets } = useGlobalContext();
 
   useEffect(() => {
@@ -27,6 +29,7 @@ export default function AllBets() {
   }, [liveBets]);
 
   useEffect(() => {
+    setLoading(true);
     const route = `/api/games/global/getHistory`;
     fetch(`${route}`)
       .then((res) => res.json())
@@ -39,12 +42,15 @@ export default function AllBets() {
       })
       .catch(() => {
         setAllBets([]);
-      })
+      }).finally(() => 
+        setLoading(false)
+      );
   }, []);
 
   return (
     <TableAll
       bets={allBets}
+      loading={loading}
     />
   );
 }

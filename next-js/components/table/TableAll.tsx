@@ -1,11 +1,13 @@
-import BetRow from "../games/BetRow";
 import Image from "next/image";
+import BetRow from "../games/BetRow";
+import Loader from "../games/Loader";
+import Dollar from "@/public/assets/dollar.png";
 import { useGlobalContext } from "../GlobalContext";
 import { translator } from "@/context/transactions";
-import Dollar from "@/public/assets/dollar.png";
 
 interface TableAllProps {
   bets: any[];
+  loading: boolean;
 }
 
 export const TableHeader = () => {
@@ -39,7 +41,7 @@ export const TableHeader = () => {
   );
 };
 
-export const TableAll: React.FC<TableAllProps> = ({ bets }) => {
+export const TableAll: React.FC<TableAllProps> = ({ bets, loading }) => {
   const {
     isVerifyModalOpen: isOpen,
     setIsVerifyModalOpen: setIsOpen,
@@ -60,32 +62,40 @@ export const TableAll: React.FC<TableAllProps> = ({ bets }) => {
           <span className="sm:hidden">{translator("Bets", language)}</span>
         </span>
       </div>
-      <div className="flex w-full flex-col max-h-[540px] mt-2">
-        <TableHeader />
-        {bets.length ? (
-          <div className="scrollbar w-full overflow-y-scroll nobar">
-            <div className="flex w-full md:min-w-[50rem] flex-col items-center">
-              {bets.map((bet, index) => (
-                <div
-                  key={index}
-                  className="mb-2.5 flex w-full flex-row items-center gap-2 rounded-[5px] bg-[#121418] hover:bg-[#1f2024] py-3"
-                >
-                  <BetRow
-                    bet={bet}
-                    all={true}
-                    openModal={openModal}
-                    setVerifyModalData={setVerifyModalData}
-                  />
+      {loading ? (
+        <div className="h-20">
+          <Loader />
+        </div>
+      ) : (
+        <>
+          <div className="flex w-full flex-col max-h-[540px] mt-2">
+            <TableHeader />
+            {bets.length ? (
+              <div className="scrollbar w-full overflow-y-scroll nobar">
+                <div className="flex w-full md:min-w-[50rem] flex-col items-center">
+                  {bets.map((bet, index) => (
+                    <div
+                      key={index}
+                      className="mb-2.5 flex w-full flex-row items-center gap-2 rounded-[5px] bg-[#121418] hover:bg-[#1f2024] py-3"
+                    >
+                      <BetRow
+                        bet={bet}
+                        all={true}
+                        openModal={openModal}
+                        setVerifyModalData={setVerifyModalData}
+                      />
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
+              </div>
+            ) : (
+              <span className="font-changa text-[#F0F0F080]">
+                {translator("No Bets made.", language)}
+              </span>
+            )}
           </div>
-        ) : (
-          <span className="font-changa text-[#F0F0F080]">
-            {translator("No Bets made.", language)}
-          </span>
-        )}
-      </div>
+        </>
+      )}
       {/* Blur container at the end of the table */}
       <div
         className="absolute inset-x-0 bottom-0 h-16 backdrop-filter backdrop-blur-[12px] pointer-events-none"
