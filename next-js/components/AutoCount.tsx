@@ -4,10 +4,8 @@ import { BsInfinity } from "react-icons/bs";
 
 export default function AutoCount({
   loading,
-  onChange,
 }: {
   loading: boolean;
-  onChange: any;
 }) {
   const methods = useForm();
   const {
@@ -34,7 +32,10 @@ export default function AutoCount({
           type={"number"}
           step={"any"}
           autoComplete="off"
-          onChange={onChange}
+          onChange={(e) => {
+            const amount = parseInt(e.target.value)
+            setAutoBetCount(amount)
+          }}
           placeholder={
             autoBetCount.toString().includes("inf") ? "Infinity" : "00"
           }
