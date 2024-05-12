@@ -53,7 +53,7 @@ export default function Keno() {
     houseEdge,
     maxBetAmt,
   } = useGlobalContext();
-  const [betAmt, setBetAmt] = useState(0);
+  const [betAmt, setBetAmt] = useState<number | undefined>();
   const [userInput, setUserInput] = useState<number | undefined>();
   const [isRolling, setIsRolling] = useState(false);
   const [refresh, setRefresh] = useState(true);
@@ -169,109 +169,105 @@ export default function Keno() {
   };
 
   const handleBet = async () => {
-    if (wallet.connected) {
-      if (!wallet.publicKey) {
-        errorCustom("Wallet not connected");
-        return;
+    try {
+      if (!wallet.connected || !wallet.publicKey) {
+        throw new Error("Wallet not connected");
+      }
+      if (!betAmt || betAmt === 0) {
+        throw new Error("Set Amount.");
       }
       if (coinData && coinData[0].amount < betAmt) {
-        errorCustom("Insufficient balance for bet !");
-        return;
+        throw new Error("Insufficient balance for bet !");
       }
-      if (betAmt === 0) {
-        errorCustom("Set Amount.");
-        return;
-      }
+
       setIsRolling(true);
       setStrikeNumbers([]);
-      try {
-        const response = await fetch(`/api/games/keno`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            wallet: wallet.publicKey,
-            amount: betAmt,
-            tokenMint: "SOL",
-            chosenNumbers: chosenNumbers,
-            risk: risk,
-          }),
-        });
+      const response = await fetch(`/api/games/keno`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          wallet: wallet.publicKey,
+          amount: betAmt,
+          tokenMint: "SOL",
+          chosenNumbers: chosenNumbers,
+          risk: risk,
+        }),
+      });
 
-        const { success, message, result, strikeNumbers, strikeMultiplier } =
-          await response.json();
+      const { success, message, result, strikeNumbers, strikeMultiplier } =
+        await response.json();
 
-        if (success != true) {
-          errorCustom(message);
-          throw new Error(message);
-        }
-
-        if (success) {
-          setStrikeMultiplier(strikeMultiplier);
-          console.log("strikeNumbers", strikeNumbers);
-          setRefresh(true);
-          for (const number of strikeNumbers) {
-            await new Promise((resolve) => setTimeout(resolve, 200));
-
-            if (chosenNumbers.includes(number)) {
-              soundAlert("/sounds/win3.wav");
-            } else {
-              soundAlert("/sounds/betbutton.wav");
-            }
-            setStrikeNumbers((prevNumbers) => [...prevNumbers, number]);
-          }
-        }
-        if (result == "Won") successCustom(message);
-        else errorCustom(message);
-
-        const win = result === "Won";
-        if (win) soundAlert("/sounds/win.wav");
-
-        // auto options
-        if (betType === "auto") {
-          if (useAutoConfig && autoWinChange && win) {
-            setBetAmt(
-              autoWinChangeReset
-                ? userInput!
-                : betAmt + (autoWinChange * betAmt) / 100.0,
-            );
-          } else if (useAutoConfig && autoLossChange && !win) {
-            setBetAmt(
-              autoLossChangeReset
-                ? userInput!
-                : betAmt + (autoLossChange * betAmt) / 100.0,
-            );
-          }
-          // update profit / loss
-          setAutoBetProfit(
-            autoBetProfit +
-              (win ? strikeMultiplier * (1 - houseEdge) - 1 : -1) * betAmt,
-          );
-          // update count
-          if (typeof autoBetCount === "number")
-            setAutoBetCount(autoBetCount > 0 ? autoBetCount - 1 : 0);
-          else
-            setAutoBetCount(
-              autoBetCount.length > 12
-                ? autoBetCount.slice(0, 5)
-                : autoBetCount + 1,
-            );
-        }
-      } catch (error) {
-        setIsRolling(false);
-        setAutoBetCount(0);
-        setStartAuto(false);
-        console.error("Error occurred while betting:", error);
-      } finally {
-        setIsRolling(false);
+      if (success != true) {
+        throw new Error(message);
       }
+
+      if (success) {
+        setStrikeMultiplier(strikeMultiplier);
+        console.log("strikeNumbers", strikeNumbers);
+        setRefresh(true);
+        for (const number of strikeNumbers) {
+          await new Promise((resolve) => setTimeout(resolve, 200));
+
+          if (chosenNumbers.includes(number)) {
+            soundAlert("/sounds/win3.wav");
+          } else {
+            soundAlert("/sounds/betbutton.wav");
+          }
+          setStrikeNumbers((prevNumbers) => [...prevNumbers, number]);
+        }
+      }
+      if (result == "Won") successCustom(message);
+      else errorCustom(message);
+
+      const win = result === "Won";
+      if (win) soundAlert("/sounds/win.wav");
+
+      // auto options
+      if (betType === "auto") {
+        if (useAutoConfig && autoWinChange && win) {
+          setBetAmt(
+            autoWinChangeReset
+              ? userInput!
+              : betAmt + (autoWinChange * betAmt) / 100.0,
+          );
+        } else if (useAutoConfig && autoLossChange && !win) {
+          setBetAmt(
+            autoLossChangeReset
+              ? userInput!
+              : betAmt + (autoLossChange * betAmt) / 100.0,
+          );
+        }
+        // update profit / loss
+        setAutoBetProfit(
+          autoBetProfit +
+            (win ? strikeMultiplier * (1 - houseEdge) - 1 : -1) * betAmt,
+        );
+        // update count
+        if (typeof autoBetCount === "number")
+          setAutoBetCount(autoBetCount > 0 ? autoBetCount - 1 : 0);
+        else
+          setAutoBetCount(
+            autoBetCount.length > 12
+              ? autoBetCount.slice(0, 5)
+              : autoBetCount + 1,
+          );
+      }
+    } catch (error: any) {
+      errorCustom(error?.message ?? "Could not make the Bet.");
+      setIsRolling(false);
+      setAutoBetCount(0);
+      setStartAuto(false);
+      console.error("Error occurred while betting:", error);
+    } finally {
+      setIsRolling(false);
     }
   };
 
   const disableInput = useMemo(() => {
-    return betType === "auto" && startAuto ? true : false||isRolling;
-  }, [betType, startAuto,isRolling]);
+    return betType === "auto" && startAuto ? true : false || isRolling;
+  }, [betType, startAuto, isRolling]);
 
   useEffect(() => {
     if (refresh && wallet?.publicKey) {
@@ -282,7 +278,7 @@ export default function Keno() {
   }, [wallet?.publicKey, refresh]);
 
   useEffect(() => {
-    setBetAmt(userInput ?? 0);
+    setBetAmt(userInput);
   }, [userInput]);
 
   useEffect(() => {
@@ -321,6 +317,7 @@ export default function Keno() {
     } else {
       setStartAuto(false);
       setAutoBetProfit(0);
+      setUserInput(betAmt);
     }
   }, [startAuto, autoBetCount]);
 
@@ -418,8 +415,8 @@ export default function Keno() {
             <Autopick />
           </div>
           {betType === "auto" && (
-            <div className="w-full flex lg:hidden" >
-              <ConfigureAutoButton disabled={disableInput}/>
+            <div className="w-full flex lg:hidden">
+              <ConfigureAutoButton disabled={disableInput} />
             </div>
           )}
           <div className="w-full hidden lg:flex">
@@ -438,7 +435,7 @@ export default function Keno() {
               >
                 {/* amt input  */}
                 <BetAmount
-                  betAmt={userInput}
+                  betAmt={betAmt}
                   setBetAmt={setUserInput}
                   currentMultiplier={
                     maxMultiplier !== undefined ? maxMultiplier : 0
@@ -513,9 +510,7 @@ export default function Keno() {
                   <></>
                 ) : (
                   <div className="w-full flex flex-row items-end gap-3">
-                    <AutoCount
-                      loading={isRolling || startAuto}
-                    />
+                    <AutoCount loading={isRolling || startAuto} />
                     <div className="w-full hidden lg:flex">
                       <ConfigureAutoButton disabled={disableInput} />
                     </div>
@@ -662,7 +657,7 @@ export default function Keno() {
                                 {coinData
                                   ? Math.max(
                                       0,
-                                      betAmt *
+                                      (betAmt ?? 0) *
                                         (multiplier * (1 - houseEdge) - 1),
                                     ).toFixed(4)
                                   : 0}{" "}

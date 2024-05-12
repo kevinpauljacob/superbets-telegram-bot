@@ -47,8 +47,8 @@ export default function ConfigureAutoModal() {
 
   const onSubmit = async (data: any) => {
     if (
-      parseFloat(data.autoWinChange) > 0 ||
-      parseFloat(data.autoLossChange) > 0 ||
+      parseFloat(data.autoWinChange) ||
+      parseFloat(data.autoLossChange) ||
       parseFloat(data.autoStopProfit) > 0 ||
       parseFloat(data.autoStopLoss) > 0
     ) {
@@ -128,7 +128,7 @@ export default function ConfigureAutoModal() {
                   } text-xs font-chakra font-medium text-white transition-all rounded-[5px] py-1.5 px-4`}
                   onClick={() => {
                     setAutoWinChangeReset(true);
-                    setAutoWinChange(null);
+                    // setAutoWinChange(null);
                   }}
                 >
                   Reset
@@ -151,6 +151,7 @@ export default function ConfigureAutoModal() {
                   autoComplete="off"
                   disabled={autoWinChangeReset}
                   onChange={(e) => {
+                    console.log(e.target.value, parseFloat(e.target.value));
                     setAutoWinChange(parseFloat(e.target.value));
                   }}
                   placeholder={"00.00"}
@@ -196,7 +197,7 @@ export default function ConfigureAutoModal() {
                   } text-xs font-chakra font-medium text-white transition-all rounded-[5px] py-1.5 px-4`}
                   onClick={() => {
                     setAutoLossChangeReset(true);
-                    setAutoLossChange(null);
+                    // setAutoLossChange(null);
                   }}
                 >
                   Reset
@@ -400,7 +401,7 @@ export default function ConfigureAutoModal() {
                 methods.clearErrors("autoLossChange");
                 methods.clearErrors("autoStopProfit");
                 methods.clearErrors("autoStopLoss");
-                warningCustom("All values reset.")
+                warningCustom("All values reset.");
               }}
               className="text-[#94A3B8] hover:text-white/70 transition-all hover:duration-75 w-full text-center cursor-pointer text-base font-semibold font-chakra mt-8 underline underline-offset-2"
             >

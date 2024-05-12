@@ -56,7 +56,7 @@ export default function Dice2() {
     houseEdge,
     maxBetAmt,
   } = useGlobalContext();
-  const [betAmt, setBetAmt] = useState(0);
+  const [betAmt, setBetAmt] = useState<number | undefined>();
   const [userInput, setUserInput] = useState<number | undefined>();
   const [isRolling, setIsRolling] = useState(false);
   const [refresh, setRefresh] = useState(true);
@@ -146,106 +146,95 @@ export default function Dice2() {
       autoBetProfit,
       betAmt,
     );
-    if (wallet.connected) {
-      if (!wallet.publicKey) {
-        errorCustom("Wallet not connected");
-        setAutoBetCount(0);
-        setStartAuto(false);
-        return;
+    try {
+      if (!wallet.connected || !wallet.publicKey) {
+        throw new Error("Wallet not connected");
+      }
+      if (!betAmt || betAmt === 0) {
+        throw new Error("Set Amount.");
       }
       if (coinData && coinData[0].amount < betAmt) {
-        errorCustom("Insufficient balance for bet !");
-        setAutoBetCount(0);
-        setStartAuto(false);
-        return;
-      }
-      if (betAmt === 0) {
-        errorCustom("Set Amount.");
-        setAutoBetCount(0);
-        setStartAuto(false);
-        return;
+        throw new Error("Insufficient balance for bet !");
       }
       setIsRolling(true);
-      try {
-        const response = await fetch(`/api/games/dice2`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            wallet: wallet.publicKey,
-            amount: betAmt,
-            tokenMint: "SOL",
-            chance: chance,
-            direction: rollType === "over" ? "over" : "under",
-          }),
-        });
+      const response = await fetch(`/api/games/dice2`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          wallet: wallet.publicKey,
+          amount: betAmt,
+          tokenMint: "SOL",
+          chance: chance,
+          direction: rollType === "over" ? "over" : "under",
+        }),
+      });
 
-        const { success, message, result, strikeNumber } =
-          await response.json();
+      const { success, message, result, strikeNumber } = await response.json();
 
-        if (success !== true) {
-          errorCustom(message);
-          throw new Error(message);
-        }
-
-        const win = result === "Won";
-        if (win) {
-          successCustom(message);
-          soundAlert("/sounds/win.wav");
-        } else errorCustom(message);
-        const newBetResult = { result: strikeNumber, win };
-
-        setBetResults((prevResults) => {
-          const newResults = [...prevResults, newBetResult];
-          if (newResults.length > 6) {
-            newResults.shift();
-          }
-          return newResults;
-        });
-
-        setStrikeNumber(strikeNumber);
-        setResult(win);
-        setRefresh(true);
-        loopSound("/sounds/diceshake.wav", 0.3);
-
-        // auto options
-        if (betType === "auto") {
-          if (useAutoConfig && autoWinChange && win) {
-            setBetAmt(
-              autoWinChangeReset
-                ? userInput!
-                : betAmt + (autoWinChange * betAmt) / 100.0,
-            );
-          } else if (useAutoConfig && autoLossChange && !win) {
-            setBetAmt(
-              autoLossChangeReset
-                ? userInput!
-                : betAmt + (autoLossChange * betAmt) / 100.0,
-            );
-          }
-          // update profit / loss
-          setAutoBetProfit(
-            autoBetProfit +
-              (win ? multiplier * (1 - houseEdge) - 1 : -1) * betAmt,
-          );
-          // update count
-          if (typeof autoBetCount === "number")
-            setAutoBetCount(autoBetCount > 0 ? autoBetCount - 1 : 0);
-          else
-            setAutoBetCount(
-              autoBetCount.length > 12
-                ? autoBetCount.slice(0, 5)
-                : autoBetCount + 1,
-            );
-        }
-      } catch (error) {
-        console.error("Error occurred while betting:", error);
-        setAutoBetCount(0);
-        setStartAuto(false);
-      } finally {
-        setIsRolling(false);
+      if (success !== true) {
+        throw new Error(message);
       }
+
+      const win = result === "Won";
+      if (win) {
+        successCustom(message);
+        soundAlert("/sounds/win.wav");
+      } else errorCustom(message);
+      const newBetResult = { result: strikeNumber, win };
+
+      setBetResults((prevResults) => {
+        const newResults = [...prevResults, newBetResult];
+        if (newResults.length > 6) {
+          newResults.shift();
+        }
+        return newResults;
+      });
+
+      setStrikeNumber(strikeNumber);
+      setResult(win);
+      setRefresh(true);
+      loopSound("/sounds/diceshake.wav", 0.3);
+
+      // auto options
+      if (betType === "auto") {
+        if (useAutoConfig && autoWinChange && win) {
+          setBetAmt(
+            autoWinChangeReset
+              ? userInput!
+              : betAmt + (autoWinChange * betAmt) / 100.0,
+          );
+        } else if (useAutoConfig && autoLossChange && !win) {
+          setBetAmt(
+            autoLossChangeReset
+              ? userInput!
+              : betAmt + (autoLossChange * betAmt) / 100.0,
+          );
+        }
+        // update profit / loss
+        setAutoBetProfit(
+          autoBetProfit +
+            (win ? multiplier * (1 - houseEdge) - 1 : -1) * betAmt,
+        );
+        // update count
+        if (typeof autoBetCount === "number")
+          setAutoBetCount(autoBetCount > 0 ? autoBetCount - 1 : 0);
+        else
+          setAutoBetCount(
+            autoBetCount.length > 12
+              ? autoBetCount.slice(0, 5)
+              : autoBetCount + 1,
+          );
+      }
+    } catch (error: any) {
+      errorCustom(error?.message ?? "Could not make the bet.");
+      console.error("Error occurred while betting:", error);
+      setAutoBetCount(0);
+      setStartAuto(false);
+      setIsRolling(false);
+    } finally {
+      setIsRolling(false);
     }
   };
 
@@ -287,7 +276,7 @@ export default function Dice2() {
   }, [wallet?.publicKey, refresh]);
 
   useEffect(() => {
-    setBetAmt(userInput ?? 0);
+    setBetAmt(userInput);
   }, [userInput]);
 
   useEffect(() => {
@@ -324,6 +313,7 @@ export default function Dice2() {
     } else {
       setStartAuto(false);
       setAutoBetProfit(0);
+      setUserInput(betAmt);
     }
   }, [startAuto, autoBetCount]);
 
@@ -405,7 +395,7 @@ export default function Dice2() {
               >
                 {/* amt input  */}
                 <BetAmount
-                  betAmt={userInput}
+                  betAmt={betAmt}
                   setBetAmt={setUserInput}
                   currentMultiplier={multiplier}
                   leastMultiplier={1}
@@ -413,15 +403,13 @@ export default function Dice2() {
                   disabled={disableInput}
                 />
                 <div className="mb-4">
-                  <ProfitBox amount={betAmt} multiplier={multiplier} />
+                  <ProfitBox amount={betAmt ?? 0} multiplier={multiplier} />
                 </div>
                 {betType === "manual" ? (
                   <></>
                 ) : (
                   <div className="w-full flex flex-row items-end gap-3">
-                    <AutoCount
-                      loading={isRolling || startAuto}
-                    />
+                    <AutoCount loading={isRolling || startAuto} />
                     <div className="w-full hidden lg:flex">
                       <ConfigureAutoButton disabled={disableInput} />
                     </div>

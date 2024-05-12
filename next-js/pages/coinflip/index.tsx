@@ -66,7 +66,7 @@ export default function Flip() {
     maxBetAmt,
   } = useGlobalContext();
 
-  const [betAmt, setBetAmt] = useState(0);
+  const [betAmt, setBetAmt] = useState<number | undefined>();
   const [userInput, setUserInput] = useState<number | undefined>();
   const [betType, setBetType] = useState<string | null>(null);
   const [flipping, setFlipping] = useState(false);
@@ -82,6 +82,16 @@ export default function Flip() {
 
   const bet = async () => {
     try {
+      if (!wallet.connected || !wallet.publicKey) {
+        throw new Error("Wallet not connected");
+      }
+      if (!betAmt || betAmt === 0) {
+        throw new Error("Set Amount.");
+      }
+      if (coinData && coinData[0].amount < betAmt) {
+        throw new Error("Insufficient balance for bet !");
+      }
+
       console.log("Placing Flip");
       let response = await placeFlip(
         wallet,
@@ -142,19 +152,15 @@ export default function Flip() {
                 );
             }
           } else {
-            setBetType(null);
-            setLoading(false);
-            setFlipping(false);
-            setResult(null);
-            setStartAuto(false);
-            setAutoBetCount(0);
-            response?.message && errorCustom(response?.message);
+            throw new Error(
+              response?.message ? response?.message : "Could not make Flip.",
+            );
           }
         },
         betSetting === "auto" ? 500 : 3000,
       );
-    } catch (e) {
-      errorCustom("Could not make Flip.");
+    } catch (e: any) {
+      errorCustom(e?.message ?? "Could not make Flip.");
       setBetType(null);
       setFlipping(false);
       setLoading(false);
@@ -173,7 +179,7 @@ export default function Flip() {
   }, [wallet?.publicKey, refresh]);
 
   useEffect(() => {
-    setBetAmt(userInput ?? 0);
+    setBetAmt(userInput);
   }, [userInput]);
 
   useEffect(() => {
@@ -184,6 +190,7 @@ export default function Flip() {
       autoStopProfit,
       autoStopLoss,
       autoBetProfit,
+      betAmt,
     );
     if (
       betSetting === "auto" &&
@@ -221,6 +228,7 @@ export default function Flip() {
     } else {
       setStartAuto(false);
       setAutoBetProfit(0);
+      setUserInput(betAmt);
     }
   }, [startAuto, autoBetCount]);
 
@@ -322,7 +330,7 @@ export default function Flip() {
               >
                 {/* amt input  */}
                 <BetAmount
-                  betAmt={userInput}
+                  betAmt={betAmt}
                   setBetAmt={setUserInput}
                   currentMultiplier={2.0}
                   leastMultiplier={2.0}

@@ -178,26 +178,26 @@ export default function Limbo() {
   }, [targetMultiplier]);
 
   const bet = async () => {
-    if (!wallet.publicKey) {
-      errorCustom("Wallet not connected");
-      return;
-    }
-    if (betAmt === 0) {
-      errorCustom("Set Amount.");
-      return;
-    }
-    if (inputMultiplier < multiplierLimits[0]) {
-      errorCustom("Multiplier should be at least 1.02");
-      return;
-    }
-    if (inputMultiplier > multiplierLimits[1]) {
-      errorCustom("Multiplier cannot be greater than 50");
-      return;
-    }
-    setLoading(true);
-    setDisplayMultiplier(multiplierLimits[0]);
-    setTargetMultiplier(multiplierLimits[0]);
     try {
+      if (!wallet.publicKey) {
+        throw new Error("Wallet not connected");
+      }
+      if (!betAmt || betAmt === 0) {
+        throw new Error("Set Amount.");
+      }
+      if (coinData && coinData[0].amount < betAmt) {
+        throw new Error("Insufficient balance for bet !");
+      }
+      if (inputMultiplier < multiplierLimits[0]) {
+        throw new Error("Multiplier should be at least 1.02");
+      }
+      if (inputMultiplier > multiplierLimits[1]) {
+        throw new Error("Multiplier cannot be greater than 50");
+      }
+      setLoading(true);
+      setDisplayMultiplier(multiplierLimits[0]);
+      setTargetMultiplier(multiplierLimits[0]);
+
       console.log("Placing Flip");
       // function to place bet
       const response = await limboBet(
@@ -206,7 +206,7 @@ export default function Limbo() {
         parseFloat((100 / inputMultiplier).toFixed(8)),
       );
 
-      if (!response.success) throw response.message;
+      if (!response.success) throw new Error(response.message);
 
       const winningMultiplier = parseFloat(
         (100 / response.strikeNumber).toFixed(2),
@@ -218,8 +218,8 @@ export default function Limbo() {
       setResult(response.result);
       setRefresh(true);
       //auto options are in the useEffect to modify displayMultiplier
-    } catch (e) {
-      errorCustom("Could not make Bet.");
+    } catch (e: any) {
+      errorCustom(e?.message ?? "Could not make Bet.");
       setFlipping(false);
       setLoading(false);
       setResult(null);
@@ -241,7 +241,7 @@ export default function Limbo() {
   }, [userInput]);
 
   useEffect(() => {
-    console.log("Auto: ", startAuto, autoBetCount);
+    console.log("Auto: ", startAuto, autoBetCount, autoBetProfit);
     if (
       betSetting === "auto" &&
       startAuto &&
@@ -277,6 +277,7 @@ export default function Limbo() {
     } else {
       setStartAuto(false);
       setAutoBetProfit(0);
+      setUserInput(betAmt);
     }
   }, [startAuto, autoBetCount]);
 
@@ -306,7 +307,7 @@ export default function Limbo() {
 
   const disableInput = useMemo(() => {
     return betSetting === "auto" && startAuto ? true : false || loading;
-  }, [betSetting, startAuto,loading]);
+  }, [betSetting, startAuto, loading]);
 
   return (
     <GameLayout title="FOMO - Limbo">
@@ -346,7 +347,7 @@ export default function Limbo() {
           </div>
           {betSetting === "auto" && (
             <div className="w-full flex lg:hidden">
-              <ConfigureAutoButton disabled={disableInput}/>
+              <ConfigureAutoButton disabled={disableInput} />
             </div>
           )}
           <div className="w-full hidden lg:flex">
@@ -388,11 +389,9 @@ export default function Limbo() {
                   <></>
                 ) : (
                   <div className="w-full flex flex-row items-end gap-3">
-                    <AutoCount
-                      loading={flipping || startAuto}
-                    />
+                    <AutoCount loading={flipping || startAuto} />
                     <div className="w-full hidden lg:flex">
-                      <ConfigureAutoButton disabled={disableInput}/>
+                      <ConfigureAutoButton disabled={disableInput} />
                     </div>
                   </div>
                 )}
