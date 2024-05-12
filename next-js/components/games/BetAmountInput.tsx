@@ -46,8 +46,20 @@ export default function BetAmount({
       setCurrentMaxBetAmt(
         isFinite(calculatedMaxBetAmt) ? calculatedMaxBetAmt : 0,
       );
+
+      if (
+        betAmt &&
+        betAmt > (isFinite(calculatedMaxBetAmt) ? calculatedMaxBetAmt : 0)
+      ) {
+        methods.setError("amount", {
+          type: "manual",
+          message: "Bet amount cannot exceed the maximum bet!",
+        });
+      } else {
+        methods.clearErrors("amount");
+      }
     }
-  }, [tempBetAmt, currentMultiplier, game]);
+  }, [tempBetAmt, betAmt, currentMultiplier, game]);
 
   useEffect(() => {
     // console.log("currentMaxBetAmt", currentMaxBetAmt);
@@ -107,15 +119,12 @@ export default function BetAmount({
     <div className="flex w-full flex-col mb-[1.4rem] z-10">
       <div className="flex w-full items-center justify-between text-xs font-changa text-opacity-90">
         <label className="text-white/90 font-changa">Bet Amount</label>
-        <span
-          onClick={handleSetMaxBet}
-          className="text-[#94A3B8] text-opacity-90 cursor-pointer font-changa text-xs"
-        >
-          <span>
+        <span className="text-[#94A3B8] text-opacity-90 font-changa text-xs">
+          <span className="cursor-pointer" onClick={handleSetMaxBet}>
             {maxBetAmt} $SOL {"  "}
           </span>
           <span
-            className={`font-chakra font-medium underline text-white ${
+            className={`font-chakra font-medium cursor-pointer underline text-white ${
               betAmountsModal ? "text-opacity-100" : "text-opacity-50"
             }`}
             onClick={() => handleBetAmountsModal()}
@@ -135,7 +144,7 @@ export default function BetAmount({
                 value={maxBetAmt}
                 disabled={disabled}
                 className="maxBetsSlider absolute top-[-8px] w-full bg-transparent appearance-none z-20 disabled:cursor-default disabled:opacity-50"
-              /> 
+              />
               <div
                 className="absolute rounded-full h-[5px] bg-[#8795A8] z-10"
                 style={{
@@ -239,7 +248,7 @@ export default function BetAmount({
           }}
           placeholder={"0.0"}
           disabled={disabled}
-          value={betAmt}
+          value={betAmt ?? NaN}
           lang="en"
           className={`flex w-full min-w-0 bg-transparent text-base text-[#94A3B8] placeholder-[#94A3B8] font-chakra placeholder-opacity-40 outline-none disabled:cursor-default disabled:opacity-50`}
         />
