@@ -20,10 +20,6 @@ export default function Leaderboard() {
   const { language, userData, pointTier, setPointTier } = useGlobalContext();
 
   useEffect(() => {
-    window.scrollTo(0, 0);
-  }, []);
-
-  useEffect(() => {
     let points = userData?.points ?? 0;
     const tier = Object.entries(pointTiers).reduce((prev, next) => {
       return points >= next[1]?.limit ? next : prev;

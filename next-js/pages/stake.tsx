@@ -16,11 +16,11 @@ import {
 import { LAMPORTS_PER_SOL, PublicKey } from "@solana/web3.js";
 import { useGlobalContext } from "@/components/GlobalContext";
 import { getAssociatedTokenAddressSync } from "@solana/spl-token";
+import { errorCustom } from "@/components/toasts/ToastGroup";
 
 export default function Stake() {
   const { data: session, status } = useSession();
   const wallet = useWallet();
-  const router = useRouter();
 
   const {
     userData,
@@ -37,9 +37,6 @@ export default function Stake() {
   } = useGlobalContext();
 
   useEffect(() => {
-    
-    window.scrollTo(0, 0);
-    
     const fetchData = async () => {
       try {
         let data = await fetch(
@@ -81,18 +78,6 @@ export default function Stake() {
     }
     getGlobalInfo();
   }, [session?.user, wallet.publicKey]);
-
-  useEffect(() => {
-    const handleRouteChange = () => {
-      window.scrollTo(0, 0);
-    };
-
-    router.events.on("routeChangeComplete", handleRouteChange);
-
-    return () => {
-      router.events.off("routeChangeComplete", handleRouteChange);
-    };
-  }, [router]);
 
   return (
     <div className="flex flex-col items-center w-full overflow-hidden min-h-screen flex-1 relative">
