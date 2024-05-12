@@ -289,7 +289,7 @@ export default function BetAmount({
           : "NONE"}
       </span>
 
-      <BalanceAlert />
+      {/* <BalanceAlert /> */}
     </div>
   );
 }
