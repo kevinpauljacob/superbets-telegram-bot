@@ -33,10 +33,12 @@ export default function BetAmount({
   const [isHovered, setIsHovered] = useState<boolean>(false);
 
   const handleHover = () => {
+    console.log("enter");
     setIsHovered(true);
   };
 
   const handleMouseLeave = () => {
+    console.log("exit");
     setIsHovered(false);
   };
 
@@ -92,7 +94,11 @@ export default function BetAmount({
   const handleHalfBet = () => {
     if (betAmt || coinData) {
       let newBetAmt =
-        !betAmt || betAmt === 0 ? (coinData ? coinData[0]?.amount / 2 : 0) : betAmt! / 2;
+        !betAmt || betAmt === 0
+          ? coinData
+            ? coinData[0]?.amount / 2
+            : 0
+          : betAmt! / 2;
 
       newBetAmt = parseFloat(newBetAmt.toFixed(4));
 
@@ -128,34 +134,26 @@ export default function BetAmount({
   };
 
   return (
-    <div className="flex w-full flex-col mb-[1.4rem] z-10">
+    <div className="relative flex w-full flex-col mb-[1.4rem] z-10">
       <div className="flex w-full items-center justify-between text-xs font-changa text-opacity-90">
         <label className="text-white/90 font-changa">Bet Amount</label>
-        <span className="text-[#94A3B8] text-opacity-90 font-changa text-xs">
+        <span className="flex items-center text-[#94A3B8] text-opacity-90 font-changa text-xs gap-2">
           <span className="cursor-pointer" onClick={handleSetMaxBet}>
-            {maxBetAmt} $SOL {"  "}
+            {maxBetAmt} $SOL
           </span>
-          {game !== "keno" && game !== "wheel" && game !== "coinflip" ? (
-            <span
-              className={`group font-chakra font-medium cursor-pointer underline hover:text-opacity-100 transition-all duration-300 text-white ${
-                betAmountsModal ? "text-opacity-100" : "text-opacity-50"
-              }`}
-              onClick={() => handleBetAmountsModal()}
-            >
-              {"Why?"}
-            </span>
-          ) : null}
-          {game === "keno" || game === "wheel" || game === "coinflip" ? (
-            <span
-              className={`group font-chakra font-medium cursor-pointer underline text-white ${
-                isHovered ? "text-opacity-100" : "text-opacity-50"
-              }`}
-              onMouseEnter={handleHover}
-              onMouseLeave={handleMouseLeave}
-            >
-              {"Why?"}
-            </span>
-          ) : null}
+          <span
+            className={`group font-chakra font-medium cursor-pointer underline hover:text-opacity-100 transition-all duration-300 text-white ${
+              betAmountsModal ? "text-opacity-100" : "text-opacity-50"
+            }`}
+            onMouseEnter={() => setIsHovered(true)}
+            onMouseLeave={() => setIsHovered(false)}
+            onClick={() => {
+              if (game !== "keno" && game !== "wheel" && game !== "coinflip")
+                handleBetAmountsModal();
+            }}
+          >
+            Why?
+          </span>
         </span>
       </div>
       {betAmountsModal &&
@@ -268,9 +266,12 @@ export default function BetAmount({
           </div>
         </div>
       ) : null}
-      {betAmountsModal && game === "options" ? (
-        <div className="flex items-center gap-3 bg-[#0C0F16] rounded-[5px] p-3 mt-2 mb-1.5 ">
-          {" "}
+      {isHovered &&
+      (game === "keno" ||
+        game === "wheel" ||
+        game === "coinflip" ||
+        game === "options") ? (
+        <div className="absolute z-[1000] -top-[5.2rem] min-w-full fadeIn flex items-center gap-3 bg-[#0C0F16] rounded-[5px] p-3 mt-2 mb-1.5 ">
           <div className="flex items-center border-r lg:border-0 min-[1412px]:border-r border-white/10 text-[#94A3B8] text-chakra text-[11px] font-medium h-11 w-[80%] lg:w-full min-[1412px]:w-[80%]">
             <span className="flex items-center justify-center bg-[#202329]/50 rounded-[8px] h-[49px] min-w-[49px]">
               <Image
@@ -301,50 +302,6 @@ export default function BetAmount({
       <div
         className={`relative group flex mt-1 h-11 w-full cursor-pointer items-center rounded-[8px] bg-[#202329] px-4`}
       >
-        {game === "keno" || game === "wheel" || game === "coinflip" ? (
-          <div
-            className={`fadeInDow_04 absolute ${
-              isHovered ? "block" : "hidden"
-            } transition-all z-[1000] w-full min-w-0 -top-[115px] xl:-top-[105px] right-0`}
-          >
-            <div className="flex items-center gap-3 bg-[#0C0F16] rounded-[5px] p-3 mt-2 mb-1.5 ">
-              {" "}
-              <div className="flex items-center border-r lg:border-0 min-[1412px]:border-r border-white/10 text-[#94A3B8] text-chakra text-[11px] font-medium h-11 w-[80%] lg:w-full min-[1412px]:w-[80%]">
-                <span className="flex items-center justify-center bg-[#202329]/50 rounded-[8px] h-[49px] min-w-[49px]">
-                  <Image
-                    src="/assets/coins.svg"
-                    alt="coins"
-                    height="33"
-                    width="33"
-                  />
-                </span>
-
-                <span className="text-[11px] font-medium font-chakra mx-3 min-[1412px]:max-w-[200px]">
-                  Maximum amount for a single bet in this game is
-                  <span className="text-white/90 font-semibold">
-                    {" "}
-                    20.00 SOL
-                  </span>
-                   .
-                </span>
-              </div>
-              <div className="flex flex-col items-center text-white font-chakra font-medium w-[20%] min-[1412px]:flex lg:hidden">
-                <span className="text-[11px] text-white text-center font-semibold text-opacity-50">
-                  Max Bet
-                </span>
-                <span className="flex items-center justify-center gap-1">
-                  {20}
-                  <Image
-                    src="/assets/sol.png"
-                    alt="coins"
-                    height="11"
-                    width="14"
-                  />
-                </span>
-              </div>
-            </div>
-          </div>
-        ) : null}
         <input
           id={"amount-input"}
           {...methods.register("amount", {
