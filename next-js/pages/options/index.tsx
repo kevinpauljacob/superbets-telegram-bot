@@ -543,7 +543,7 @@ export default function Options() {
                       : "text-[#f0f0f0] test-opacity-75"
                   }`}
                 >
-                  {result ? (result === "Won" ? "You Won!" : "You Lost!") : ""}
+                  {result ? (result === "Won" ? translator("You Won!", language) : translator("You Lost!", language)) : ""}
                 </span>
               )}
             </div>

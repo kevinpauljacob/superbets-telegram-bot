@@ -119,7 +119,7 @@ export default function VerifyDice2Modal({
             handleClose();
           }}
           id="modal-bg"
-          className="absolute z-[150] left-0 top-0 flex h-full w-full items-center justify-center bg-black bg-opacity-50 backdrop-blur transition-all"
+          className="absolute z-[150] left-0 top-0 flex h-full w-full items-center justify-center bg-[#33314680] backdrop-blur-[0px] transition-all"
         >
           <div className="relative bg-[#121418] max-h-[80vh] no-scrollbar overflow-y-scroll p-8 rounded-lg z-10 w-11/12 sm:w-[34rem]">
             <div className="flex flex-wrap justify-between items-center mb-4 sm:mb-[1.4rem]">
@@ -280,14 +280,13 @@ export default function VerifyDice2Modal({
                     {bet.wallet !== wallet ? (
                       <>
                         <div className="text-xs text-[#94A3B8] font-changa text-opacity-75 text-center">
-                          The bettor must first rotate their seed pairt to
-                          verify this bet.
+                          {translator("The bettor must first rotate their seed pair to verify this bet.", language)}
                         </div>
                         <button
                           className="bg-[#7839C5] rounded-md w-full text-sm text-white text-opacity-90 text-semibold py-3 disabled:opacity-70"
                           disabled
                         >
-                          Rotate
+                          {translator("Rotate", language)}
                         </button>
                       </>
                     ) : bet.gameSeed?.status !== seedStatus.EXPIRED ? (
@@ -331,7 +330,7 @@ export default function VerifyDice2Modal({
                 onClose();
               }}
               size={22}
-              className="absolute top-3 right-3 hover:cursor-pointer"
+              className="absolute top-3 right-3 hover:cursor-pointer hover:bg-[#26282c] transition-all rounded-full p-[2px]"
               color="#F0F0F0"
             />
           </div>

@@ -38,7 +38,8 @@ export default function AllBets() {
       .then((res) => res.json())
       .then((history) => {
         if (history.success) {
-          setAllBets(history?.data ?? []);
+          const limitedBets = history.data.slice(0, 10);
+          setAllBets(limitedBets);
         } else {
           setAllBets([]);
         }
@@ -70,7 +71,7 @@ export default function AllBets() {
         loading={loading}
       />
       <div
-        className="absolute inset-x-0 bottom-12 h-[10rem] bg-[linear-gradient(0deg,#0F0F0F_0%,rgba(15,15,15,0.00)_100%)] pointer-events-none"
+        className="absolute inset-x-0 bottom-10 h-[10rem] bg-[linear-gradient(0deg,#0F0F0F_0%,rgba(15,15,15,0.00)_100%)] pointer-events-none"
         style={{ zIndex: 1 }}
       ></div>
     </div>

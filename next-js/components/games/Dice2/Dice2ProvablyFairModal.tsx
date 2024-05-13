@@ -169,7 +169,7 @@ export default function RollDiceProvablyFairModal({
                 <Image src={CheckPF} alt="" />
                 {translator("PROVABLY FAIR", language)}
               </div>
-              <div className="hover:cursor-pointer">
+              <div className="hover:cursor-pointer hover:bg-[#26282c] transition-all rounded-full p-[2px]">
                 <MdClose
                   size={25}
                   color="#F0F0F0"

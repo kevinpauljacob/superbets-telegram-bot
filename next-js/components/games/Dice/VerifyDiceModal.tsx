@@ -309,14 +309,13 @@ export default function VerifyDiceModal({
                     {bet.wallet !== wallet ? (
                       <>
                         <div className="text-xs text-[#94A3B8] font-changa text-opacity-75 text-center">
-                          The bettor must first rotate their seed pairt to
-                          verify this bet.
+                          {translator("The bettor must first rotate their seed pair to verify this bet.", language)}
                         </div>
                         <button
                           className="bg-[#7839C5] rounded-md w-full text-sm text-white text-opacity-90 text-semibold py-3 disabled:opacity-70"
                           disabled
                         >
-                          Rotate
+                          {translator("Rotate", language)}
                         </button>
                       </>
                     ) : bet.gameSeed?.status !== seedStatus.EXPIRED ? (
@@ -360,7 +359,7 @@ export default function VerifyDiceModal({
                 onClose();
               }}
               size={22}
-              className="absolute top-3 right-3 hover:cursor-pointer"
+              className="absolute top-3 right-3 hover:cursor-pointer hover:bg-[#26282c] transition-all rounded-full p-[2px]"
               color="#F0F0F0"
             />
           </div>

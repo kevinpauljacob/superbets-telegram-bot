@@ -221,7 +221,7 @@ export default function WheelProvablyFairModal({
                 <Image src={CheckPF} alt="" />
                 {translator("PROVABLY FAIR", language)}
               </div>
-              <div className="hover:cursor-pointer">
+              <div className="hover:cursor-pointer hover:bg-[#26282c] transition-all rounded-full p-[2px]">
                 <MdClose
                   size={25}
                   color="#F0F0F0"
@@ -519,7 +519,7 @@ export default function WheelProvablyFairModal({
                   </div>
                   <div>
                     <label className="text-xs text-opacity-75 font-changa text-[#F0F0F0]">
-                      Segments
+                      {translator("Segments", language)}
                     </label>
                     <div className="flex items-center">
                       <select
