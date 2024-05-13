@@ -6,10 +6,11 @@ import { useEffect, useRef, useState } from "react";
 import { GameType } from "@/utils/provably-fair";
 import { useRouter } from "next/router";
 import useWebSocket from "react-use-websocket";
+import { translator } from "@/context/transactions";
 
 export default function SubHeader() {
   const router = useRouter();
-  const { coinData, setShowWalletModal, setLiveBets } = useGlobalContext();
+  const { coinData, showWalletModal, setShowWalletModal, setLiveBets, language } = useGlobalContext();
 
   type Card = {
     game: GameType;
@@ -128,7 +129,7 @@ export default function SubHeader() {
             >
               <Image src={"/assets/wallet.png"} alt="" width={20} height={20} />
               <span className="text-sm leading-3 mt-0.5 text-white text-opacity-90">
-                Wallet
+                {translator("Wallet", language)}
               </span>
             </div>
           </div>
@@ -157,7 +158,7 @@ export default function SubHeader() {
           >
             <Image src={"/assets/wallet.png"} alt="" width={15} height={15} />
             <span className="text-xs mt-0.5 text-white text-opacity-90">
-              Wallet
+              {translator("Wallet", language)}
             </span>
           </div>
         </div>

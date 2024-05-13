@@ -6,6 +6,7 @@ import { useGlobalContext } from "../GlobalContext";
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa6";
 import Loader from "../games/Loader";
 import { errorCustom } from "../toasts/ToastGroup";
+import { translator } from "@/context/transactions";
 
 interface PaginationProps {
   page: number;
@@ -180,6 +181,7 @@ interface TableButtonProps {
 
 export const TableButtons: React.FC<TableButtonProps> = ({ all, setAll }) => {
   const wallet = useWallet();
+  const {language} = useGlobalContext();
   return (
     <div className="mt-[1rem] md:mt-[3.5rem] flex w-full items-center justify-center gap-4 md:justify-start">
       <button
@@ -191,7 +193,7 @@ export const TableButtons: React.FC<TableButtonProps> = ({ all, setAll }) => {
           all ? "bg-[#202329] hover:bg-[#47484A]" : "bg-[#7839C5]"
         } w-full transform rounded-[5px] px-8 py-2 font-changa text-xl text-white transition duration-200 md:w-fit`}
       >
-        My Bets
+        {translator("My Bets", language)}
       </button>
       <button
         onClick={() => {
@@ -201,7 +203,7 @@ export const TableButtons: React.FC<TableButtonProps> = ({ all, setAll }) => {
           all ? "bg-[#7839C5]" : "bg-[#202329] hover:bg-[#47484A]"
         } w-full transform rounded-[5px] px-8 py-2 font-changa text-xl text-white transition duration-200 md:w-fit`}
       >
-        All Bets
+        {translator("All Bets", language)}
       </button>
     </div>
   );
@@ -216,7 +218,7 @@ export const TableHeader = ({ all, setAll }: TableButtonProps) => {
   const allHeaders = ["Wallet", ...headers];
 
   const smallScreenHeaders = ["Game", "Payout"];
-
+  const {language} = useGlobalContext();
   return (
     <>
       <div className="mb-[1.4rem] hidden md:flex w-full flex-row items-center gap-2 bg-[#121418] py-1 rounded-[5px]">
@@ -226,7 +228,7 @@ export const TableHeader = ({ all, setAll }: TableButtonProps) => {
                 key={index}
                 className="w-full text-center font-changa text-[#F0F0F080]"
               >
-                {header}
+                {translator(header, language)}
               </span>
             ))
           : allHeaders.map((header, index) => (
@@ -234,7 +236,7 @@ export const TableHeader = ({ all, setAll }: TableButtonProps) => {
                 key={index}
                 className="w-full text-center font-changa text-[#F0F0F080]"
               >
-                {header}
+                {translator(header, language)}
               </span>
             ))}
       </div>
@@ -277,6 +279,7 @@ export const Table: React.FC<TableProps> = ({
     openVerifyModal: openModal,
     closeVerifyModal: closeModal,
     setVerifyModalData,
+    language
   } = useGlobalContext();
 
   return (
@@ -317,7 +320,7 @@ export const Table: React.FC<TableProps> = ({
                   ))
               ) : (
                 <span className="font-changa text-[#F0F0F080]">
-                  No Bets made.
+                  {translator("No Bets made.", language)}
                 </span>
               )}
             </div>
