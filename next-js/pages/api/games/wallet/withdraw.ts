@@ -135,8 +135,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       ]);
 
       const netTransfer =
-        (transferAgg[0]?.depositTotal -
-          transferAgg[0]?.withdrawalTotal +
+        ((transferAgg[0]?.withdrawalTotal ?? 0) -
+          (transferAgg[0]?.depositTotal ?? 0) +
           amount) /
         24;
 
@@ -149,9 +149,10 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           status: "review",
         });
 
-        return res
-          .status(400)
-          .json({ success: false, message: "Withdrawal limit exceeded" });
+        return res.status(400).json({
+          success: false,
+          message: "Withdrawal limit exceeded, added to queue for review",
+        });
       }
 
       const result = await User.findOneAndUpdate(
