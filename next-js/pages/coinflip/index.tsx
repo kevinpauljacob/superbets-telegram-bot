@@ -323,7 +323,7 @@ export default function Flip() {
             />
           </div>
 
-          <div className="w-full flex flex-col">
+          <div className="w-full flex flex-col nobar">
             <FormProvider {...methods}>
               <form
                 className="flex w-full flex-col gap-0"
