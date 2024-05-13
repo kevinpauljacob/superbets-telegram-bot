@@ -1,7 +1,7 @@
 import { useWallet } from "@solana/wallet-adapter-react";
 import React, { useState } from "react";
 import { useForm, FormProvider } from "react-hook-form";
-import { obfuscatePubKey } from "@/context/transactions";
+import { obfuscatePubKey, translator } from "@/context/transactions";
 import { deposit, withdraw } from "../../context/gameTransactions";
 import Loader from "./Loader";
 import { useGlobalContext } from "../GlobalContext";
@@ -14,7 +14,7 @@ export default function BalanceModal() {
 
   const token = "SOL";
 
-  const { showWalletModal, setShowWalletModal, walletBalance, coinData } =
+  const { showWalletModal, setShowWalletModal, walletBalance, coinData, language } =
     useGlobalContext();
 
   const [loading, setLoading] = useState(false);
@@ -77,7 +77,7 @@ export default function BalanceModal() {
         >
           <Image src={"/assets/wallet_color.png"} alt="" width={24} height={24} />
           <span className=" text-[1.5rem] leading-5 mt-1 font-changa font-black text-[#e7e7e7]">
-            Wallet
+            {translator("Wallet", language)}
           </span>
         </div>
 
@@ -97,7 +97,7 @@ export default function BalanceModal() {
             }`}
             onClick={() => setActionType("Deposit")}
           >
-            Deposit
+            {translator("Deposit", language)}
           </button>
           <button
             className={`w-full border-2 rounded-md py-2 ml-1 text-white font-semibold text-sm transition-all hover:duration-75 ease-in-out ${
@@ -107,7 +107,7 @@ export default function BalanceModal() {
             }`}
             onClick={() => setActionType("Withdraw")}
           >
-            Withdraw
+            {translator("Withdraw", language)}
           </button>
         </div>
 
@@ -119,7 +119,7 @@ export default function BalanceModal() {
           >
             <div className="mb-0 flex w-full flex-col">
               <label className="mb-1 font-changa font-medium text-xs text-white text-opacity-90">
-                Coin
+                {translator("Coin", language)}
               </label>
 
               <span className="w-full rounded-md h-11 flex items-center bg-[#202329] px-4 py-2 text-[#94A3B8] text-base font-chakra">
@@ -129,7 +129,7 @@ export default function BalanceModal() {
 
             <div className="mb-0 flex w-full flex-col">
               <label className="mb-1 font-changa font-medium text-xs text-white text-opacity-90">
-                Current Wallet
+                {translator("Current Wallet", language)}
               </label>
 
               <span className="w-full rounded-md h-11 flex items-center bg-[#202329] px-4 py-2 text-[#94A3B8] text-sm font-chakra">
@@ -141,7 +141,7 @@ export default function BalanceModal() {
               <div className="mb-0 flex w-full flex-col">
                 <div className="mb-1 flex w-full items-center justify-between">
                   <label className="mb-1 font-changa font-medium text-xs text-white text-opacity-90">
-                    {actionType} amount
+                    {translator(actionType, language)} {translator("Amount", language)}
                   </label>
                   <span className="font-changa font-medium text-sm text-[#94A3B8] text-opacity-90">
                     {(coinData ? coinData[0]?.amount : 0).toFixed(3)} $SOL
@@ -170,7 +170,7 @@ export default function BalanceModal() {
                       setAmount(coinData ? coinData[0]?.amount / 2 : 0)
                     }
                   >
-                    Half
+                    {translator("Half", language)}
                   </span>
                   <span
                     className="text-xs font-medium text-white text-opacity-50 bg-[#292C32] hover:bg-[#47484A] focus:bg-[#47484A] transition-all rounded-[5px] py-1.5 px-4"
@@ -178,7 +178,7 @@ export default function BalanceModal() {
                       setAmount(coinData ? coinData[0]?.amount : 0)
                     }
                   >
-                    Max
+                    {translator("Max", language)}
                   </span>
                 </div>
 
@@ -198,7 +198,7 @@ export default function BalanceModal() {
               <div className="mb-0 flex w-full flex-col">
                 <div className="mb-1 flex w-full items-center justify-between">
                   <label className="mb-1 font-changa font-medium text-xs text-white text-opacity-90">
-                    {actionType} amount
+                    {translator(actionType, language)} {translator("Amount", language)}
                   </label>
                   <span className="font-changa font-medium text-sm text-[#94A3B8] text-opacity-90">
                     {(walletBalance ?? 0).toFixed(3)} $SOL
@@ -225,7 +225,7 @@ export default function BalanceModal() {
                     className="text-xs font-medium text-white text-opacity-50 bg-[#292C32] hover:bg-[#47484A] focus:bg-[#47484A] transition-all rounded-[5px] py-1.5 px-4"
                     onClick={() => setAmount((walletBalance ?? 0) - 0.01)}
                   >
-                    Max
+                    {translator("Max", language)}
                   </span>
                 </div>
 
@@ -247,7 +247,7 @@ export default function BalanceModal() {
               type="submit"
               className="rounded-[5px] -mt-1 mb-4 border border-[#F200F21A] bg-[#7839C5] hover:bg-[#9361d1] focus:bg-[#602E9E] transition-all py-2.5 font-changa text-base font-medium text-[#F0F0F0] text-opacity-90"
             >
-              {loading ? <Loader /> : actionType}
+              {loading ? <Loader /> : translator(actionType, language)}
             </button>
           </form>
         </FormProvider>

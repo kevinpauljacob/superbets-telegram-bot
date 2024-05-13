@@ -4,6 +4,7 @@ import GameHeader from "./GameHeader";
 import { Table } from "./table/Table";
 import { minGameAmount } from "@/context/gameTransactions";
 import { useGlobalContext } from "./GlobalContext";
+import { translator } from "@/context/transactions";
 import Link from "next/link";
 
 interface LayoutProps {
@@ -34,7 +35,7 @@ export const GameFooterInfo: React.FC<GameFooterProps> = ({
   amount,
   chance,
 }) => {
-  const { coinData, setShowWalletModal, houseEdge } = useGlobalContext();
+  const { coinData, setShowWalletModal, houseEdge, language } = useGlobalContext();
   return (
     <div className="flex px-0 xl:px-4 mb-0 md:mb-[1.4rem] gap-4 flex-row w-full justify-between">
       {coinData && coinData[0].amount > 0.0001 && (
@@ -42,7 +43,7 @@ export const GameFooterInfo: React.FC<GameFooterProps> = ({
           {multiplier !== undefined ? (
             <div className="flex flex-col w-full">
               <span className="text-[#F0F0F0] font-changa font-semibold text-xs mb-1">
-                Multiplier
+                {translator("Multiplier", language)}
               </span>
               <span className="bg-[#202329] font-chakra text-xs text-white rounded-md px-2 md:px-5 py-3">
                 {(multiplier ?? 0).toFixed(2)}x
@@ -54,7 +55,7 @@ export const GameFooterInfo: React.FC<GameFooterProps> = ({
 
           <div className="flex flex-col w-full">
             <span className="text-[#F0F0F0] font-changa font-sembiold text-xs mb-1">
-              Profit
+              {translator("Profit", language)}
             </span>
             <span className="bg-[#202329] font-chakra text-xs text-white rounded-md px-2 md:px-5 py-3">
               {(amount * (multiplier * (1 - houseEdge) - 1)).toFixed(4)} $SOL
@@ -64,7 +65,7 @@ export const GameFooterInfo: React.FC<GameFooterProps> = ({
           {chance !== undefined && (
             <div className="flex flex-col w-full">
               <span className="text-[#F0F0F0] font-changa font-semibold text-xs mb-1">
-                Chance
+                {translator("Chance", language)}
               </span>
               <span className="bg-[#202329] font-chakra text-xs text-white rounded-md px-2 md:px-5 py-3">
                 {chance.toFixed(2)}%
@@ -78,13 +79,13 @@ export const GameFooterInfo: React.FC<GameFooterProps> = ({
         (coinData[0].amount < 0.0001 && (
           <div className="w-full rounded-lg bg-[#d9d9d90d] bg-opacity-10 flex items-center px-3 py-3 text-white md:px-6">
             <div className="w-full text-center font-changa font-medium text-sm md:text-base text-[#F0F0F0] text-opacity-75">
-              Please deposit funds to start playing. View{" "}
+              {translator("Please deposit funds to start playing. View", language)}{" "}
               <u
                 onClick={() => {
                   setShowWalletModal(true);
                 }}
               >
-                WALLET
+                {translator("WALLET", language)}
               </u>
             </div>
           </div>

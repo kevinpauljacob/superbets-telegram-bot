@@ -163,7 +163,7 @@ export default function Layout({ children }: LayoutProps) {
         </section>
       </section>
       <div className="w-full fixed bottom-0 flex md:hidden z-[1000]">
-        <MobileNavbar />
+        <MobileNavbar sidebar={sidebar} toggleSidebar={toggleSidebar} />
       </div>
       {showWalletModal && <BalanceModal />}
 

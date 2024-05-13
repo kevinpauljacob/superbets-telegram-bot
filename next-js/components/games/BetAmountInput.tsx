@@ -9,6 +9,7 @@ import { FaInfo } from "react-icons/fa6";
 import { InfoCircle } from "iconsax-react";
 import { BsInfoCircleFill } from "react-icons/bs";
 import DicePointer from "@/public/assets/DicePointer";
+import { translator } from "@/context/transactions";
 
 export default function BetAmount({
   betAmt,
@@ -26,7 +27,7 @@ export default function BetAmount({
   disabled?: boolean;
 }) {
   const methods = useForm();
-  const { coinData, maxBetAmt, setMaxBetAmt } = useGlobalContext();
+  const { coinData, maxBetAmt, setMaxBetAmt, language } = useGlobalContext();
   const [betAmountsModal, setBetAmountsModal] = useState(false);
 
   const [isHovered, setIsHovered] = useState<boolean>(false);
@@ -91,7 +92,7 @@ export default function BetAmount({
   const handleHalfBet = () => {
     if (betAmt || coinData) {
       let newBetAmt =
-        betAmt === 0 ? (coinData ? coinData[0]?.amount / 2 : 0) : betAmt! / 2;
+        !betAmt || betAmt === 0 ? (coinData ? coinData[0]?.amount / 2 : 0) : betAmt! / 2;
 
       newBetAmt = parseFloat(newBetAmt.toFixed(4));
 
@@ -237,13 +238,13 @@ export default function BetAmount({
                   <span className="text-white/80 font-medium">
                     {currentMaxBetAmt.toFixed(2)} SOL
                   </span>
-                  . Your current wallet balance is{" "}
+                  . {translator("Your current wallet balance is", language)}{" "}
                   <span className="text-white/80 font-medium">
                     {coinData && coinData[0]?.amount
                       ? parseFloat(coinData[0].amount.toFixed(4))
                       : 0.0}
                   </span>{" "}
-                  The maximum amount you can bet in this game is{" "}
+                  . {translator("The maximum amount you can bet in this game is", language)}{" "}
                   <span className="text-white/80 font-medium">
                     {highestMaxBetAmt} SOL
                   </span>
@@ -267,7 +268,6 @@ export default function BetAmount({
           </div>
         </div>
       ) : null}
-
       {betAmountsModal && game === "options" ? (
         <div className="flex items-center gap-3 bg-[#0C0F16] rounded-[5px] p-3 mt-2 mb-1.5 ">
           {" "}
@@ -394,7 +394,7 @@ export default function BetAmount({
           onClick={handleSetMaxBet}
           disabled={disabled}
         >
-          Max
+          {translator("Max", language)}
         </button>
       </div>
 

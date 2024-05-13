@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import Image from "next/image";
 import Dollar from "/public/assets/dollar.png";
 import Link from "next/link";
+import { translator } from "@/context/transactions";
+import { useGlobalContext } from "./GlobalContext";
 
 export default function FomoPlay() {
   const games = [
@@ -36,6 +38,7 @@ export default function FomoPlay() {
   ];
 
   const [currentSlide, setCurrentSlide] = useState(0);
+  const {language} = useGlobalContext();
 
   const nextSlide = () => {
     setCurrentSlide((prevSlide) =>
@@ -56,9 +59,9 @@ export default function FomoPlay() {
           <Image src={Dollar} alt="" width={26} height={26} />
           <span className="font-medium font-changa text-xl text-opacity-90 pl-3">
             <span className="hidden sm:inline">
-              FOMO: Play - The best casino games
+              FOMO: {translator("Play - The best casino games", language)}
             </span>
-            <span className="sm:hidden">FOMO: Play</span>
+            <span className="sm:hidden">FOMO: {translator("Play", language)}</span>
           </span>
         </div>
         <div className="">
