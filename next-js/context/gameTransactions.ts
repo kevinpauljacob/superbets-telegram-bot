@@ -26,6 +26,9 @@ const devPublicKey = new PublicKey(process.env.NEXT_PUBLIC_DEV_PUBLIC_KEY!);
 
 export const minGameAmount = 1e-6;
 
+export const timeWeightedAvgInterval = 24 * 60 * 60 * 1000;
+export const timeWeightedAvgLimit = 100;
+
 export const placeBet = async (
   wallet: WalletContextState,
   amount: number,

@@ -9,11 +9,12 @@ import {
   createWithdrawTxn,
   retryTxn,
   verifyFrontendTransaction,
+  timeWeightedAvgInterval,
+  timeWeightedAvgLimit,
 } from "../../../../context/gameTransactions";
 import connectDatabase from "../../../../utils/database";
 import Deposit from "../../../../models/games/deposit";
 import User from "../../../../models/games/gameUser";
-import House from "../../../../models/games/house";
 
 import { getToken } from "next-auth/jwt";
 import { bs58 } from "@project-serum/anchor/dist/cjs/utils/bytes";
@@ -24,7 +25,9 @@ const secret = process.env.NEXTAUTH_SECRET;
 
 const connection = new Connection(process.env.BACKEND_RPC!, "confirmed");
 
-let devWalletKey = Keypair.fromSecretKey(bs58.decode(process.env.DEV_KEYPAIR!));
+const devWalletKey = Keypair.fromSecretKey(
+  bs58.decode(process.env.DEV_KEYPAIR!),
+);
 
 export const config = {
   maxDuration: 60,
@@ -105,6 +108,53 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           .status(400)
           .json({ success: false, message: "Transaction verfication failed" });
 
+      //Check if the time weighted average exceeds the limit
+      const transferAgg = await Deposit.aggregate([
+        {
+          $match: {
+            createdAt: {
+              $gte: Date.now() - timeWeightedAvgInterval,
+            },
+          },
+        },
+        {
+          $group: {
+            _id: null,
+            depositTotal: {
+              $sum: {
+                $cond: [{ $eq: ["$type", true] }, "$amount", 0],
+              },
+            },
+            withdrawalTotal: {
+              $sum: {
+                $cond: [{ $eq: ["$type", false] }, "$amount", 0],
+              },
+            },
+          },
+        },
+      ]);
+
+      const netTransfer =
+        ((transferAgg[0]?.withdrawalTotal ?? 0) -
+          (transferAgg[0]?.depositTotal ?? 0) +
+          amount) /
+        24;
+
+      if (netTransfer > timeWeightedAvgLimit) {
+        await Deposit.create({
+          wallet,
+          amount,
+          type: false,
+          tokenMint,
+          status: "review",
+        });
+
+        return res.status(400).json({
+          success: false,
+          message: "Withdrawal limit exceeded, added to queue for review",
+        });
+      }
+
       const result = await User.findOneAndUpdate(
         {
           wallet,
@@ -126,13 +176,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           "Withdraw failed: insufficient funds or user not found",
         );
       }
-
-      await House.findOneAndUpdate(
-        {},
-        {
-          $inc: { houseBalance: -amount },
-        },
-      );
 
       txn.partialSign(devWalletKey);
 
