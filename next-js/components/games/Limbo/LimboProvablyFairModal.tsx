@@ -11,6 +11,7 @@ import { FaRegCopy } from "react-icons/fa6";
 import { MdClose } from "react-icons/md";
 import CheckPF from "@/public/assets/CheckPF.svg";
 import { errorCustom } from "@/components/toasts/ToastGroup";
+import ProvablyFairModal from "../ProvablyFairModal";
 
 export interface PFModalData {
   activeGameSeed: {
@@ -54,7 +55,7 @@ export default function LimboProvablyFairModal({
     generateClientSeed(),
   );
   const [multiplier, setMultiplier] = useState<string>("1.00");
-
+  const [selectedGameType, setSelectedGameType] = useState<GameType>(GameType.limbo)
   const [verificationState, setVerificationState] = useState<{
     clientSeed: string;
     serverSeed: string;
@@ -302,9 +303,9 @@ export default function LimboProvablyFairModal({
               <div className="grid w-full text-white">
                 <div className="grid gap-2">
                   <div className="border-2 border-opacity-5 border-[#FFFFFF] md:px-8">
-                    <div className="flex justify-center items-center gap-4 md:px-8 py-4 md:text-6xl font-changa">
-                      {multiplier}x
-                    </div>
+                    <ProvablyFairModal
+                    verificationState={verificationState}
+                    selectedGameType={selectedGameType}/>
                   </div>
                 </div>
                 <div>
@@ -312,21 +313,25 @@ export default function LimboProvablyFairModal({
                     Game
                   </label>
                   <div className="flex items-center">
-                    <select
-                      name="game"
-                      value={GameType.limbo}
-                      onChange={(e) =>
-                        setModalData((prevData) => ({
-                          ...prevData,
-                          game: e.target.value as GameType,
-                        }))
-                      }
-                      className="bg-[#202329] text-white font-chakra text-xs font-medium mt-1 rounded-md px-5 py-4 w-full relative appearance-none"
-                    >
-                      {/* <option value={GameType.dice}>Dice</option>
-                      <option value={GameType.coin}>Coin Flip</option> */}
-                      <option value={GameType.limbo}>Limbo</option>
-                    </select>
+                  <select
+                        name="game"
+                        value={selectedGameType}
+                        onChange={(e) =>
+                          setSelectedGameType(
+                           e.target.value as GameType
+                         )
+                        }
+                        className="bg-[#202329] text-white font-chakra text-xs font-medium mt-1 rounded-md px-5 py-4 w-full relative appearance-none"
+                      >
+                        <option value={GameType.keno}>Keno</option>
+                        <option value={GameType.dice}>Dice To Win</option>
+  <option value={GameType.coin}>Coin Flip</option>
+  <option value={GameType.options}>Options</option>
+  <option value={GameType.dice2}>Dice2</option>
+  <option value={GameType.limbo}>Limbo</option>
+  <option value={GameType.wheel}>Wheel</option>
+
+                      </select>
                   </div>
                 </div>
                 <div>

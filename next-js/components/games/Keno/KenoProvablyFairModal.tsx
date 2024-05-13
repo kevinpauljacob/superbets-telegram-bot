@@ -11,6 +11,7 @@ import { FaRegCopy } from "react-icons/fa6";
 import { MdClose } from "react-icons/md";
 import CheckPF from "@/public/assets/CheckPF.svg";
 import { errorCustom } from "@/components/toasts/ToastGroup";
+import ProvablyFairModal from "../ProvablyFairModal";
 
 export interface PFModalData {
   activeGameSeed: {
@@ -54,7 +55,7 @@ export default function RollDiceProvablyFairModal({
     generateClientSeed(),
   );
   const [strikeNumbers, setStrikeNumbers] = useState<number[]>([]);
-
+  const [selectedGameType, setSelectedGameType] = useState<GameType>(GameType.keno)
   const [verificationState, setVerificationState] = useState<{
     clientSeed: string;
     serverSeed: string;
@@ -297,29 +298,10 @@ export default function RollDiceProvablyFairModal({
                 <div className="grid gap-2">
                   <div className="border-2 border-opacity-5 border-[#FFFFFF] md:px-8">
                     <div className="p-4">
-                      <div className="grid grid-cols-8 gap-2 text-white text-xl font-chakra w-full">
-                        {Array.from(
-                          { length: 40 },
-                          (_, index) => index + 1,
-                        ).map((number) => (
-                          <div
-                            key={number}
-                            className={`flex items-center justify-center cursor-pointer ${
-                              strikeNumbers.includes(number)
-                                ? "bg-black border-2 border-fomo-green"
-                                : "bg-[#202329]"
-                            } rounded-md text-center transition-all duration-300 ease-in-out w-[45px] h-[45px]`}
-                          >
-                            {strikeNumbers.includes(number) ? (
-                              <div className="flex justify-center items-center bg-[#FFD100] text-black rounded-full w-[32px] h-[32px]">
-                                {number}
-                              </div>
-                            ) : (
-                              <div>{number}</div>
-                            )}
-                          </div>
-                        ))}
-                      </div>
+                      <ProvablyFairModal
+                    
+                       verificationState={verificationState}
+                       selectedGameType={selectedGameType}/>
                     </div>
                   </div>
                   <div>
@@ -329,16 +311,22 @@ export default function RollDiceProvablyFairModal({
                     <div className="flex items-center">
                       <select
                         name="game"
-                        value={GameType.keno}
+                        value={selectedGameType}
                         onChange={(e) =>
-                          setModalData((prevData) => ({
-                            ...prevData,
-                            game: e.target.value as GameType,
-                          }))
+                          setSelectedGameType(
+                           e.target.value as GameType
+                         )
                         }
                         className="bg-[#202329] text-white font-chakra text-xs font-medium mt-1 rounded-md px-5 py-4 w-full relative appearance-none"
                       >
                         <option value={GameType.keno}>Keno</option>
+                        <option value={GameType.dice}>Dice To Win</option>
+  <option value={GameType.coin}>Coin Flip</option>
+  <option value={GameType.options}>Options</option>
+  <option value={GameType.dice2}>Dice2</option>
+  <option value={GameType.limbo}>Limbo</option>
+  <option value={GameType.wheel}>Wheel</option>
+
                       </select>
                     </div>
                   </div>

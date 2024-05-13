@@ -11,6 +11,7 @@ import { FaRegCopy } from "react-icons/fa6";
 import { MdClose } from "react-icons/md";
 import CheckPF from "@/public/assets/CheckPF.svg";
 import { errorCustom } from "@/components/toasts/ToastGroup";
+import ProvablyFairModal from "../ProvablyFairModal";
 
 export interface PFModalData {
   activeGameSeed: {
@@ -50,6 +51,7 @@ export default function RollDiceProvablyFairModal({
   const [state, setState] = useState<"seeds" | "verify">(
     modalData.tab ?? "seeds",
   );
+  const [selectedGameType, setSelectedGameType] = useState<GameType>(GameType.dice)
   const [newClientSeed, setNewClientSeed] = useState<string>(
     generateClientSeed(),
   );
@@ -296,77 +298,33 @@ export default function RollDiceProvablyFairModal({
             {state === "verify" && (
               <div className="grid w-full text-white">
                 <div className="grid gap-2">
-                  <div className="border-2 border-opacity-5 border-[#FFFFFF] md:px-8">
-                    <div className="px-8 pt-10 pb-4">
-                      <div className="relative w-full mb-8 xl:mb-6">
-                        <div>
-                          <Image
-                            src="/assets/progressBar.png"
-                            alt="progress bar"
-                            width={900}
-                            height={100}
-                          />
-                        </div>
-                        <div className="flex justify-around md:gap-2">
-                          {Array.from({ length: 6 }, (_, i) => i + 1).map(
-                            (face) => (
-                              <div
-                                key={face}
-                                className="flex flex-col items-center"
-                              >
-                                {wonDiceFace === face && (
-                                  <Image
-                                    src="/assets/pointer-green.png"
-                                    alt="pointer green"
-                                    width={13}
-                                    height={13}
-                                    className="absolute -top-[20px]"
-                                  />
-                                )}
-                                <Image
-                                  src="/assets/progressTip.png"
-                                  alt="progress bar"
-                                  width={13}
-                                  height={13}
-                                  className="absolute top-[2px]"
-                                />
-                                <Image
-                                  src={
-                                    wonDiceFace === face
-                                      ? `/assets/winDiceFace${face}.png`
-                                      : `/assets/diceFace${face}.png`
-                                  }
-                                  width={50}
-                                  height={50}
-                                  alt=""
-                                  className={`inline-block mt-6 ${
-                                    wonDiceFace === face ? "selected-face" : ""
-                                  }`}
-                                />
-                              </div>
-                            ),
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
+                  <ProvablyFairModal 
+                   verificationState={verificationState}
+                   selectedGameType={selectedGameType}
+                   />
                   <div>
                     <label className="text-xs text-opacity-75 font-changa text-[#F0F0F0]">
                       Game
                     </label>
                     <div className="flex items-center">
-                      <select
+                    <select
                         name="game"
-                        value={GameType.dice}
+                        value={selectedGameType}
                         onChange={(e) =>
-                          setModalData((prevData) => ({
-                            ...prevData,
-                            game: e.target.value as GameType,
-                          }))
+                          setSelectedGameType(
+                           e.target.value as GameType
+                         )
                         }
                         className="bg-[#202329] text-white font-chakra text-xs font-medium mt-1 rounded-md px-5 py-4 w-full relative appearance-none"
                       >
-                        <option value={GameType.dice}>Dice</option>
+                        <option value={GameType.keno}>Keno</option>
+                        <option value={GameType.dice}>Dice To Win</option>
+  <option value={GameType.coin}>Coin Flip</option>
+  <option value={GameType.options}>Options</option>
+  <option value={GameType.dice2}>Dice2</option>
+  <option value={GameType.limbo}>Limbo</option>
+  <option value={GameType.wheel}>Wheel</option>
+
                       </select>
                     </div>
                   </div>
