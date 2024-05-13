@@ -101,8 +101,8 @@ export default function Stake() {
           {translator("Global Staking Overview", language)}
         </span>
         <div className="flex w-full sm:w-[64.8%] font-sans">
-          <div className="w-full sm:w-[50%] relative p-3 sm:p-5 flex items-center gap-10 bg-staking-bg bg-opacity-75 -mt-1">
-            <div className="flex w-full sm:w-fit flex-col items-start gap-2">
+          <div className="w-full sm:w-[50%] relative p-3 sm:p-5 flex items-center justify-between gap-10 bg-staking-bg bg-opacity-75 -mt-1">
+            <div className="flex w-full sm:w-fit flex-col items-start gap-2 just">
               <span className="text-white text-opacity-50 text-xs sm:text-sm">
                 {translator("Total FOMO Staked", language)}
               </span>
@@ -119,6 +119,7 @@ export default function Stake() {
                 </span>
               </div>
             </div>
+            <Image src={"/assets/stakeLock.svg"} width={60} height={60} />
           </div>
         </div>
       </div>
