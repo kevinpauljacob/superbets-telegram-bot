@@ -7,6 +7,7 @@ import { FaChevronLeft, FaChevronRight } from "react-icons/fa6";
 import Loader from "../games/Loader";
 import { errorCustom } from "../toasts/ToastGroup";
 import { translator } from "@/context/transactions";
+import { useRouter } from "next/router";
 
 interface PaginationProps {
   page: number;
@@ -181,7 +182,7 @@ interface TableButtonProps {
 
 export const TableButtons: React.FC<TableButtonProps> = ({ all, setAll }) => {
   const wallet = useWallet();
-  const {language} = useGlobalContext();
+  const { language } = useGlobalContext();
   return (
     <div className="mt-[1rem] md:mt-[3.5rem] flex w-full items-center justify-center gap-4 md:justify-start">
       <button
@@ -218,7 +219,7 @@ export const TableHeader = ({ all, setAll }: TableButtonProps) => {
   const allHeaders = ["Wallet", ...headers];
 
   const smallScreenHeaders = ["Game", "Payout"];
-  const {language} = useGlobalContext();
+  const { language } = useGlobalContext();
   return (
     <>
       <div className="mb-[1.4rem] hidden md:flex w-full flex-row items-center gap-2 bg-[#121418] py-1 rounded-[5px]">
@@ -272,6 +273,9 @@ export const Table: React.FC<TableProps> = ({
   loading,
 }) => {
   const transactionsPerPage = 10;
+  const router = useRouter();
+
+  const home = router.pathname.split("/")[1] === "";
 
   const {
     isVerifyModalOpen: isOpen,
@@ -279,33 +283,34 @@ export const Table: React.FC<TableProps> = ({
     openVerifyModal: openModal,
     closeVerifyModal: closeModal,
     setVerifyModalData,
-    language
+    language,
   } = useGlobalContext();
 
   return (
     <div
-      className={
-        "flex w-full flex-col pb-[10rem] lg:pb-10" +
-        (loading ? " h-[50rem]" : "")
-      }
+      className={`flex w-full flex-col
+        ${loading ? " h-[50rem]" : ""}
+        ${home ? "" : "pb-[10rem] lg:pb-10"}`}
     >
-      <TableButtons all={all} setAll={setAll} />
+      {!home && <TableButtons all={all} setAll={setAll} />}
       {loading ? (
         <div className="h-20">
           <Loader />
         </div>
       ) : (
         <>
-          <div className="scrollbar mt-8 w-full pb-8">
+          <div className={`scrollbar w-full ${home ? "" : "mt-8 pb-8"}`}>
             <div className="flex w-full md:min-w-[50rem] flex-col items-center">
               <TableHeader all={all} setAll={setAll} />
-              {bets.length ? (
-                bets
-                  .slice(
-                    page * transactionsPerPage - transactionsPerPage,
-                    page * transactionsPerPage,
-                  )
-                  .map((bet, index) => (
+              <div className="flex flex-col items-center w-full max-h-[34rem] nobar overflow-y-auto">
+                {bets.length ? (
+                  (home
+                    ? bets
+                    : bets.slice(
+                        page * transactionsPerPage - transactionsPerPage,
+                        page * transactionsPerPage,
+                      )
+                  ).map((bet, index) => (
                     <div
                       key={index}
                       className="mb-2.5 flex w-full flex-row items-center gap-2 rounded-[5px] bg-[#121418] hover:bg-[#1f2024] py-3"
@@ -318,19 +323,22 @@ export const Table: React.FC<TableProps> = ({
                       />
                     </div>
                   ))
-              ) : (
-                <span className="font-changa text-[#F0F0F080]">
-                  {translator("No Bets made.", language)}
-                </span>
-              )}
+                ) : (
+                  <span className="font-changa text-[#F0F0F080]">
+                    {translator("No Bets made.", language)}
+                  </span>
+                )}
+              </div>
             </div>
           </div>
-          <TablePagination
-            page={page}
-            setPage={setPage}
-            maxPages={maxPages}
-            bets={bets}
-          />
+          {!home && (
+            <TablePagination
+              page={page}
+              setPage={setPage}
+              maxPages={maxPages}
+              bets={bets}
+            />
+          )}
         </>
       )}
     </div>
