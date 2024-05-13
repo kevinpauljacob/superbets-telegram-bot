@@ -210,17 +210,17 @@ export default function Wheel() {
 
       // auto options
       if (betType === "auto") {
-        if (useAutoConfig && autoWinChange && win) {
+        if (useAutoConfig && win) {
           setBetAmt(
             autoWinChangeReset
               ? userInput!
-              : betAmt + (autoWinChange * betAmt) / 100.0,
+              : betAmt + ((autoWinChange ?? 0) * betAmt) / 100.0,
           );
-        } else if (useAutoConfig && autoLossChange && !win) {
+        } else if (useAutoConfig && !win) {
           setBetAmt(
             autoLossChangeReset
               ? userInput!
-              : betAmt + (autoLossChange * betAmt) / 100.0,
+              : betAmt + ((autoLossChange ?? 0) * betAmt) / 100.0,
           );
         }
         // update profit / loss

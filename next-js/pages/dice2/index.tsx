@@ -56,7 +56,7 @@ export default function Dice2() {
     setUseAutoConfig,
     houseEdge,
     maxBetAmt,
-    language
+    language,
   } = useGlobalContext();
   const [betAmt, setBetAmt] = useState<number | undefined>();
   const [userInput, setUserInput] = useState<number | undefined>();
@@ -201,17 +201,23 @@ export default function Dice2() {
 
       // auto options
       if (betType === "auto") {
-        if (useAutoConfig && autoWinChange && win) {
+        console.log(
+          autoWinChange,
+          autoLossChange,
+          autoWinChangeReset,
+          autoLossChangeReset,
+        );
+        if (useAutoConfig && win) {
           setBetAmt(
             autoWinChangeReset
               ? userInput!
-              : betAmt + (autoWinChange * betAmt) / 100.0,
+              : betAmt + ((autoWinChange ?? 0) * betAmt) / 100.0,
           );
-        } else if (useAutoConfig && autoLossChange && !win) {
+        } else if (useAutoConfig && !win) {
           setBetAmt(
             autoLossChangeReset
               ? userInput!
-              : betAmt + (autoLossChange * betAmt) / 100.0,
+              : betAmt + ((autoLossChange ?? 0) * betAmt) / 100.0,
           );
         }
         // update profit / loss
@@ -298,6 +304,7 @@ export default function Dice2() {
         showInfoToast("Profit limit reached.");
         setAutoBetCount(0);
         setStartAuto(false);
+        setUserInput(betAmt);
         return;
       }
       if (
@@ -549,7 +556,10 @@ export default function Dice2() {
             (coinData[0].amount < 0.0001 && (
               <div className="w-full rounded-lg bg-[#d9d9d90d] bg-opacity-10 flex items-center px-3 py-3 text-white md:px-6">
                 <div className="w-full text-center font-changa font-medium text-sm md:text-base text-[#F0F0F0] text-opacity-75">
-                  {translator("Please deposit funds to start playing. View", language)}{" "}
+                  {translator(
+                    "Please deposit funds to start playing. View",
+                    language,
+                  )}{" "}
                   <Link href="/balance">
                     <u>{translator("WALLET", language)}</u>
                   </Link>

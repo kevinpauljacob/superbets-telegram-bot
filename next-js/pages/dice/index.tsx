@@ -189,17 +189,17 @@ export default function Dice() {
 
         // auto options
         if (betType === "auto") {
-          if (useAutoConfig && autoWinChange && isWin) {
+          if (useAutoConfig && isWin) {
             setBetAmt(
               autoWinChangeReset
                 ? userInput!
-                : betAmt + (autoWinChange * betAmt) / 100.0,
+                : betAmt + ((autoWinChange ?? 0) * betAmt) / 100.0,
             );
-          } else if (useAutoConfig && autoLossChange && !isWin) {
+          } else if (useAutoConfig && !isWin) {
             setBetAmt(
               autoLossChangeReset
                 ? userInput!
-                : betAmt + (autoLossChange * betAmt) / 100.0,
+                : betAmt + ((autoLossChange ?? 0) * betAmt) / 100.0,
             );
           }
           // update profit / loss

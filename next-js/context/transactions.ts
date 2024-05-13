@@ -165,7 +165,11 @@ export const obfuscatePubKey = (address: string) => {
 export const translator = (text: string, language: string) => {
   let result = "";
   Object.entries(translationsMap).map((obj, value) => {
-    if (obj[0].toLowerCase() === text.toLowerCase()) {
+    if (
+      text &&
+      typeof text === "string" &&
+      obj[0].toLowerCase() === text?.toLowerCase()
+    ) {
       switch (language) {
         case "en":
           result = text;

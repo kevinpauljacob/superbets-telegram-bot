@@ -133,25 +133,17 @@ export default function Limbo() {
 
           // auto options
           if (betSetting === "auto" && betAmt !== undefined) {
-            if (useAutoConfig && autoWinChange && win) {
+            if (useAutoConfig && win) {
               setBetAmt(
                 autoWinChangeReset
                   ? userInput!
-                  : parseFloat(
-                      (betAmt + (autoWinChange * betAmt) / 100.0).toPrecision(
-                        2,
-                      ),
-                    ),
+                  : betAmt + ((autoWinChange ?? 0) * betAmt) / 100.0,
               );
-            } else if (useAutoConfig && autoLossChange && !win) {
+            } else if (useAutoConfig && !win) {
               setBetAmt(
                 autoLossChangeReset
                   ? userInput!
-                  : parseFloat(
-                      (betAmt + (autoLossChange * betAmt) / 100.0).toPrecision(
-                        2,
-                      ),
-                    ),
+                  : betAmt + ((autoLossChange ?? 0) * betAmt) / 100.0,
               );
             }
             // update profit / loss
