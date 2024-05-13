@@ -23,6 +23,8 @@ const config: Config = {
       colors: {
         "fomo-green": "#72F238",
         "fomo-red": "#F1323E",
+        "staking-secondary": "#94A3B8",
+        "staking-bg": "#121418",
       },
       fontFamily: {
         sans: ["Inter", "sans-serif"],

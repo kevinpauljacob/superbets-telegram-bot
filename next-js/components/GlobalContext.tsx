@@ -167,7 +167,7 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
   const [language, setLanguage] = useState<"en" | "ru" | "ko" | "ch">("en");
   const [userData, setUserData] = useState<User | null>(null);
   const [stake, setStake] = useState(true);
-  const [amount, setAmount] = useState(0);
+  const [amount, setAmount] = useState<number>(0);
   const [solBal, setSolBal] = useState<number>(0.0);
   const [livePrice, setLivePrice] = useState<number>(0.0);
   const [globalInfo, setGlobalInfo] = useState<{
@@ -680,10 +680,10 @@ export const translationsMap = {
     ko: "다음 티어",
     ch: "下一个层级",
   },
-  "more FOMO to reach": {
-    ru: "Еще FOMO для достижения",
-    ko: "다음 단계까지 필요한 FOMO",
-    ch: "还需要更多FOMO",
+  "more $FOMO to reach": {
+    ru: "Еще $FOMO для достижения",
+    ko: "다음 단계까지 필요한 $FOMO",
+    ch: "还需要更多$FOMO",
   },
   multiplier: {
     ru: "Мультипликатор",
@@ -740,6 +740,11 @@ export const translationsMap = {
     ru: "FOMO Бог - Упускать возможность - это для смертных, а не для вас.",
     ko: "FOMO 신 - 놓치는 것은 죽었는 사람들을 위한 것입니다, 당신은 아닙니다.",
     ch: "FOMO之神 - 错过是为凡人，而不是你。",
+  },
+  "My Current Tier": {
+    ru: "Мой текущий уровень",
+    ko: "내 현재 등급",
+    ch: "我的当前层",
   },
   Manual: {
     ru: "Руководство",
