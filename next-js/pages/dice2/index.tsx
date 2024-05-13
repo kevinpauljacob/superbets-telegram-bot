@@ -93,7 +93,7 @@ export default function Dice2() {
       setMultiplier(floatValue);
 
       const calculatedChoice =
-        rollType === "over" ? 100 - 98 / floatValue : 98 / floatValue;
+        rollType === "over" ? 100 - 100 / floatValue : 100 / floatValue;
 
       const roundedChoice = parseFloat(calculatedChoice.toFixed(2));
       setChoice(roundedChoice);
@@ -122,7 +122,7 @@ export default function Dice2() {
       setChance(floatValue);
 
       const calculatedMultiplier =
-        rollType === "over" ? 98 / (100 - floatValue) : 98 / floatValue;
+        rollType === "over" ? 100 / (100 - floatValue) : 100 / floatValue;
       const roundedMultiplier = parseFloat(calculatedMultiplier.toFixed(4));
       setMultiplier(roundedMultiplier);
 
@@ -245,10 +245,10 @@ export default function Dice2() {
   useEffect(() => {
     const calculateMultiplier = () => {
       if (rollType === "over") {
-        const calculatedMultiplier = (98 / (100 - choice)).toPrecision(4);
+        const calculatedMultiplier = (100 / (100 - choice)).toPrecision(4);
         setMultiplier(parseFloat(calculatedMultiplier));
       } else if (rollType === "under") {
-        const calculatedMultiplier = (98 / choice).toPrecision(4);
+        const calculatedMultiplier = (100 / choice).toPrecision(4);
         setMultiplier(parseFloat(calculatedMultiplier));
       }
     };
