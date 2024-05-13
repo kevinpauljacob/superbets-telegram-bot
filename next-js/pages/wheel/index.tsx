@@ -370,7 +370,7 @@ export default function Wheel() {
               disabled={disableInput}
             />
           </div>
-          <div className="w-full flex flex-col no-scrollbar overflow-y-auto">
+          <div className="w-full flex flex-col nobar">
             <FormProvider {...methods}>
               <form
                 className="flex w-full flex-col gap-0"

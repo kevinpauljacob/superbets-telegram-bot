@@ -271,7 +271,11 @@ export default function BetAmount({
         game === "wheel" ||
         game === "coinflip" ||
         game === "options") ? (
-        <div className="absolute z-[1000] -top-[5.2rem] min-w-full fadeIn flex items-center gap-3 bg-[#0C0F16] rounded-[5px] p-3 mt-2 mb-1.5 ">
+        <div
+          className={`absolute z-[1000] ${
+            game === "options" ? "top-[1rem]" : "-top-[5.2rem]"
+          } min-w-full fadeIn flex items-center gap-3 bg-[#0C0F16] rounded-[5px] p-3 mt-2 mb-1.5 `}
+        >
           <div className="flex items-center border-r lg:border-0 min-[1412px]:border-r border-white/10 text-[#94A3B8] text-chakra text-[11px] font-medium h-11 w-[80%] lg:w-full min-[1412px]:w-[80%]">
             <span className="flex items-center justify-center bg-[#202329]/50 rounded-[8px] h-[49px] min-w-[49px]">
               <Image
