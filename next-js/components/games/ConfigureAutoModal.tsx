@@ -6,6 +6,7 @@ import { deposit, withdraw } from "../../context/gameTransactions";
 import Loader from "./Loader";
 import { useGlobalContext } from "../GlobalContext";
 import { IoClose, IoCloseOutline } from "react-icons/io5";
+import {translator} from "@/context/transactions";
 import Image from "next/image";
 import { warningCustom } from "../toasts/ToastGroup";
 
@@ -34,6 +35,7 @@ export default function ConfigureAutoModal() {
     setStartAuto,
     walletBalance,
     coinData,
+    language
   } = useGlobalContext();
 
   const handleClose = () => {
@@ -92,7 +94,7 @@ export default function ConfigureAutoModal() {
       >
         <div className="flex items-center w-full mb-7 gap-2 mt-2">
           <span className=" text-[1.5rem] tracking-wide leading-5 mt-1 font-chakra font-bold text-[#e7e7e7]">
-            Configure Auto
+            {translator("Configure Auto", language)}
           </span>
         </div>
 
@@ -113,7 +115,7 @@ export default function ConfigureAutoModal() {
             <div className="mb-0 flex w-full flex-col">
               <div className="mb-1 flex w-full items-center justify-between text-sm font-changa text-opacity-90">
                 <label className="text-white/90 font-medium font-changa">
-                  On Win
+                  {translator("On Win", language)}
                 </label>
               </div>
 
@@ -131,7 +133,7 @@ export default function ConfigureAutoModal() {
                     // setAutoWinChange(null);
                   }}
                 >
-                  Reset
+                  {translator("Reset", language)}
                 </span>
                 <span
                   className={`${
@@ -141,7 +143,7 @@ export default function ConfigureAutoModal() {
                   } mx-2 whitespace-nowrap text-xs font-chakra font-medium text-white text-opacity-50 transition-all rounded-[5px] py-1.5 px-4`}
                   onClick={() => setAutoWinChangeReset(false)}
                 >
-                  Increase by
+                  {translator("Increase by", language)}
                 </span>
                 <input
                   id={"autoWinChange"}
@@ -182,7 +184,7 @@ export default function ConfigureAutoModal() {
             <div className="mb-0 flex w-full flex-col">
               <div className="mb-1 flex w-full items-center justify-between text-sm font-changa text-opacity-90">
                 <label className="text-white/90 font-medium font-changa">
-                  On Loss
+                  {translator("On Loss", language)}
                 </label>
               </div>
 
@@ -200,7 +202,7 @@ export default function ConfigureAutoModal() {
                     // setAutoLossChange(null);
                   }}
                 >
-                  Reset
+                  {translator("Reset", language)}
                 </span>
                 <span
                   className={`${
@@ -210,7 +212,7 @@ export default function ConfigureAutoModal() {
                   } mx-2 whitespace-nowrap text-xs font-chakra font-medium text-white text-opacity-50 transition-all rounded-[5px] py-1.5 px-4`}
                   onClick={() => setAutoLossChangeReset(false)}
                 >
-                  Increase by
+                  {translator("Increase by", language)}
                 </span>
                 <input
                   id={"autoLossChange"}
@@ -250,7 +252,7 @@ export default function ConfigureAutoModal() {
             <div className="mb-0 flex w-full flex-col">
               <div className="mb-1 flex w-full items-center justify-between text-sm font-changa text-opacity-90">
                 <label className="text-white/90 font-medium font-changa">
-                  Stop On Profit
+                  {translator("Stop On Profit", language)}
                 </label>
                 {/* <span className="text-[#94A3B8] text-opacity-90 font-changa font-medium text-sm">
                   {coinData ? coinData[0]?.amount.toFixed(4) : 0} $SOL
@@ -311,7 +313,7 @@ export default function ConfigureAutoModal() {
             <div className="mb-0 flex w-full flex-col">
               <div className="mb-1 flex w-full items-center justify-between text-sm font-changa text-opacity-90">
                 <label className="text-white/90 font-medium font-changa">
-                  Stop On Loss
+                  {translator("Stop On Loss", language)}
                 </label>
                 {/* <span className="text-[#94A3B8] text-opacity-90 font-changa font-medium text-sm">
                   {coinData ? coinData[0]?.amount.toFixed(4) : 0} $SOL
@@ -380,7 +382,7 @@ export default function ConfigureAutoModal() {
                 onClick={onSubmit}
                 className={`disabled:cursor-default disabled:opacity-70 hover:duration-75 hover:opacity-90 w-full h-[3.75rem] rounded-lg transition-all bg-[#7839C5] disabled:bg-[#4b2876] hover:bg-[#9361d1] focus:bg-[#602E9E] flex items-center justify-center font-chakra font-semibold text-xl tracking-wider text-white`}
               >
-                APPLY
+                {translator("APPLY", language)}
               </button>
             </div>
             <button
@@ -405,7 +407,7 @@ export default function ConfigureAutoModal() {
               }}
               className="text-[#94A3B8] hover:text-white/70 transition-all hover:duration-75 w-full text-center cursor-pointer text-base font-semibold font-chakra mt-8 underline underline-offset-2"
             >
-              Reset All
+              {translator("Reset All", language)}
             </button>
           </form>
         </FormProvider>

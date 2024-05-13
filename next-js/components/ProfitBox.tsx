@@ -1,6 +1,7 @@
 import { useForm } from "react-hook-form";
 import { useGlobalContext } from "./GlobalContext";
 import { BsInfinity } from "react-icons/bs";
+import { translator } from "@/context/transactions";
 
 export default function ProfitBox({
   multiplier,
@@ -10,11 +11,11 @@ export default function ProfitBox({
   amount: number;
 }) {
   const methods = useForm();
-  const { houseEdge } = useGlobalContext();
+  const { houseEdge, language } = useGlobalContext();
   return (
     <div className="mb-0 flex w-full flex-col">
       <div className="mb-1 flex w-full items-center justify-between text-xs font-changa text-opacity-90">
-        <label className="text-white/90 font-changa">Profit</label>
+        <label className="text-white/90 font-changa">{translator("Profit", language)}</label>
       </div>
 
       <div

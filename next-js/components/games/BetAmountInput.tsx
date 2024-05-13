@@ -9,6 +9,7 @@ import { FaInfo } from "react-icons/fa6";
 import { InfoCircle } from "iconsax-react";
 import { BsInfoCircleFill } from "react-icons/bs";
 import DicePointer from "@/public/assets/DicePointer";
+import { translator } from "@/context/transactions";
 
 export default function BetAmount({
   betAmt,
@@ -26,7 +27,7 @@ export default function BetAmount({
   disabled?: boolean;
 }) {
   const methods = useForm();
-  const { coinData, maxBetAmt, setMaxBetAmt } = useGlobalContext();
+  const { coinData, maxBetAmt, setMaxBetAmt, language } = useGlobalContext();
   const [betAmountsModal, setBetAmountsModal] = useState(false);
 
   const [isHovered, setIsHovered] = useState<boolean>(false);
@@ -91,7 +92,7 @@ export default function BetAmount({
   const handleHalfBet = () => {
     if (betAmt || coinData) {
       let newBetAmt =
-        betAmt === 0 ? (coinData ? coinData[0]?.amount / 2 : 0) : betAmt! / 2;
+        !betAmt || betAmt === 0 ? (coinData ? coinData[0]?.amount / 2 : 0) : betAmt! / 2;
 
       newBetAmt = parseFloat(newBetAmt.toFixed(4));
 
@@ -134,12 +135,9 @@ export default function BetAmount({
           <span className="cursor-pointer" onClick={handleSetMaxBet}>
             {maxBetAmt} $SOL {"  "}
           </span>
-          {game !== "keno" &&
-          game !== "wheel" &&
-          game !== "coinflip" &&
-          game !== "options" ? (
+          {game !== "keno" && game !== "wheel" && game !== "coinflip" ? (
             <span
-              className={`group font-chakra font-medium cursor-pointer underline text-white ${
+              className={`group font-chakra font-medium cursor-pointer underline hover:text-opacity-100 transition-all duration-300 text-white ${
                 betAmountsModal ? "text-opacity-100" : "text-opacity-50"
               }`}
               onClick={() => handleBetAmountsModal()}
@@ -147,10 +145,7 @@ export default function BetAmount({
               {"Why?"}
             </span>
           ) : null}
-          {game === "keno" ||
-          game === "wheel" ||
-          game === "coinflip" ||
-          game === "options" ? (
+          {game === "keno" || game === "wheel" || game === "coinflip" ? (
             <span
               className={`group font-chakra font-medium cursor-pointer underline text-white ${
                 isHovered ? "text-opacity-100" : "text-opacity-50"
@@ -218,7 +213,7 @@ export default function BetAmount({
             </div>
           </div>
           <div className="flex justify-between gap-2.5 w-full">
-            <div className="flex flex-col items-center bg-[#202329]/50 text-white font-chakra font-semibold rounded-[5px] py-3 w-full">
+            <div className="flex flex-col items-center bg-[#202329]/50 text-white font-chakra font-semibold rounded-[5px] py-1.5 w-full">
               <span className="text-[10px] text-white text-opacity-50 mb-1">
                 Multiplier
               </span>
@@ -228,10 +223,10 @@ export default function BetAmount({
                   : `${currentMultiplier.toFixed(2) ?? 0.0}x`}
               </span>
             </div>
-            <div className="flex flex-col items-center bg-[#202329]/50 text-white font-chakra font-semibold rounded-[5px] py-3 w-full">
+            <div className="flex flex-col items-center bg-[#202329]/50 text-white font-chakra font-semibold rounded-[5px] py-1.5 w-full">
               <span className="cursor-pointer group relative text-[10px] text-white text-opacity-50 mb-1">
                 {"Max Bet"}
-                <BsInfoCircleFill className="text-white text-opacity-50 w-3 h-3 absolute top-1/2 -translate-y-1/2 -right-4" />
+                {/* <BsInfoCircleFill className="text-white text-opacity-50 w-3 h-3 absolute top-1/2 -translate-y-1/2 -right-4" />
                 <span className="absolute hidden group-hover:block transition-all z-[1000] text-justify w-80 p-2 rounded-[5px] top-5 -right-16 translate-x-[30%] md:translate-x-1/4 bg-[#080808] text-white/50 text-xs text-regular font-changa">
                   The maximum amount you can bet with the current multiplier (
                   <span className="text-white/80 font-medium">
@@ -243,18 +238,18 @@ export default function BetAmount({
                   <span className="text-white/80 font-medium">
                     {currentMaxBetAmt.toFixed(2)} SOL
                   </span>
-                  . Your current wallet balance is{" "}
+                  . {translator("Your current wallet balance is", language)}{" "}
                   <span className="text-white/80 font-medium">
                     {coinData && coinData[0]?.amount
                       ? parseFloat(coinData[0].amount.toFixed(4))
                       : 0.0}
                   </span>{" "}
-                  The maximum amount you can bet in this game is{" "}
+                  . {translator("The maximum amount you can bet in this game is", language)}{" "}
                   <span className="text-white/80 font-medium">
                     {highestMaxBetAmt} SOL
                   </span>
                   .
-                </span>
+                </span> */}
               </span>
               <span className="text-xs font-medium">
                 {isNaN(currentMaxBetAmt)
@@ -262,7 +257,7 @@ export default function BetAmount({
                   : `${currentMaxBetAmt.toFixed(2) ?? 0.0}`}
               </span>
             </div>
-            <div className="flex flex-col items-center bg-[#202329]/50 text-white font-chakra font-semibold rounded-[5px] py-3 w-full">
+            <div className="flex flex-col items-center bg-[#202329]/50 text-white font-chakra font-semibold rounded-[5px] py-1.5 w-full">
               <span className="text-[10px] text-white text-opacity-50 mb-1">
                 Balance
               </span>
@@ -273,23 +268,49 @@ export default function BetAmount({
           </div>
         </div>
       ) : null}
+      {betAmountsModal && game === "options" ? (
+        <div className="flex items-center gap-3 bg-[#0C0F16] rounded-[5px] p-3 mt-2 mb-1.5 ">
+          {" "}
+          <div className="flex items-center border-r lg:border-0 min-[1412px]:border-r border-white/10 text-[#94A3B8] text-chakra text-[11px] font-medium h-11 w-[80%] lg:w-full min-[1412px]:w-[80%]">
+            <span className="flex items-center justify-center bg-[#202329]/50 rounded-[8px] h-[49px] min-w-[49px]">
+              <Image
+                src="/assets/coins.svg"
+                alt="coins"
+                height="33"
+                width="33"
+              />
+            </span>
 
+            <span className="text-[11px] font-medium font-chakra mx-3 min-[1412px]:max-w-[200px]">
+              Maximum amount for a single bet in this game is
+              <span className="text-white/90 font-semibold"> 20.00 SOL</span>
+               .
+            </span>
+          </div>
+          <div className="flex flex-col items-center text-white font-chakra font-medium w-[20%] min-[1412px]:flex lg:hidden">
+            <span className="text-[11px] text-white text-center font-semibold text-opacity-50">
+              Max Bet
+            </span>
+            <span className="flex items-center justify-center gap-1">
+              {20}
+              <Image src="/assets/sol.png" alt="coins" height="11" width="14" />
+            </span>
+          </div>
+        </div>
+      ) : null}
       <div
         className={`relative group flex mt-1 h-11 w-full cursor-pointer items-center rounded-[8px] bg-[#202329] px-4`}
       >
-        {game === "keno" ||
-        game === "wheel" ||
-        game === "coinflip" ||
-        game === "options" ? (
+        {game === "keno" || game === "wheel" || game === "coinflip" ? (
           <div
             className={`fadeInDow_04 absolute ${
               isHovered ? "block" : "hidden"
-            } transition-all text-justify w-full min-w-0 -top-[115px] xl:-top-[105px] right-0`}
+            } transition-all z-[1000] w-full min-w-0 -top-[115px] xl:-top-[105px] right-0`}
           >
             <div className="flex items-center gap-3 bg-[#0C0F16] rounded-[5px] p-3 mt-2 mb-1.5 ">
               {" "}
-              <div className="flex items-center border-r border-white/10 text-[#94A3B8] text-chakra text-[11px] font-medium h-11 w-[80%]">
-                <span className="bg-[#202329]/50 rounded-[8px] p-2">
+              <div className="flex items-center border-r lg:border-0 min-[1412px]:border-r border-white/10 text-[#94A3B8] text-chakra text-[11px] font-medium h-11 w-[80%] lg:w-full min-[1412px]:w-[80%]">
+                <span className="flex items-center justify-center bg-[#202329]/50 rounded-[8px] h-[49px] min-w-[49px]">
                   <Image
                     src="/assets/coins.svg"
                     alt="coins"
@@ -298,17 +319,20 @@ export default function BetAmount({
                   />
                 </span>
 
-                <span className="text-[11px] font-medium font-chakra mx-3">
-                  Maximum amount for a single bet in this game
-                  <br />
-                  is 20.00 SOL.
+                <span className="text-[11px] font-medium font-chakra mx-3 min-[1412px]:max-w-[200px]">
+                  Maximum amount for a single bet in this game is
+                  <span className="text-white/90 font-semibold">
+                    {" "}
+                    20.00 SOL
+                  </span>
+                   .
                 </span>
               </div>
-              <div className="flex flex-col items-center text-white font-chakra font-medium w-[20%]">
-                <span className="text-[11px] text-white font-semibold text-opacity-50">
+              <div className="flex flex-col items-center text-white font-chakra font-medium w-[20%] min-[1412px]:flex lg:hidden">
+                <span className="text-[11px] text-white text-center font-semibold text-opacity-50">
                   Max Bet
                 </span>
-                <span className="flex items-center gap-1">
+                <span className="flex items-center justify-center gap-1">
                   {20}
                   <Image
                     src="/assets/sol.png"
@@ -370,9 +394,10 @@ export default function BetAmount({
           onClick={handleSetMaxBet}
           disabled={disabled}
         >
-          Max
+          {translator("Max", language)}
         </button>
       </div>
+
       <span
         className={`${
           methods.formState.errors["amount"]

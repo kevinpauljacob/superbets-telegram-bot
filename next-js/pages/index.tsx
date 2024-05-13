@@ -22,6 +22,7 @@ import StoreBanner from "@/components/Banner";
 import FomoExit from "@/components/FomoExit";
 import FomoPlay from "@/components/FomoPlay";
 import FomoSupply from "@/components/FomoSupply";
+import AllBets from "@/components/AllBets";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -64,6 +65,9 @@ export default function Home() {
           {/* <div className="mb-7">
             <FomoExit />
           </div> */}
+          <div className="mb-5">
+            <AllBets />
+          </div>
         </div>
         {/* <div className="lg:ml-4">
         <FomoSupply />
