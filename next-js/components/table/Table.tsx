@@ -96,7 +96,7 @@ export const TablePagination: React.FC<PaginationProps> = ({
   };
 
   return (
-    <div className="pb-5 mt-4 flex w-full cursor-pointer items-center justify-center gap-6 font-changa">
+    <div className="mt-5 flex w-full cursor-pointer items-center justify-center gap-6 font-changa">
       <button
         onClick={() => {
           if (page > 1) setPage(page - 1);
