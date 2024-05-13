@@ -22,12 +22,19 @@ const DepositSchema = new Schema(
       required: true,
       default: "SOL",
     },
+    status: {
+      type: String,
+      // review -> pending -> completed
+      enum: ["review", "pending", "completed"],
+      default: "completed",
+      required: true,
+    },
     txnSignature: {
       type: String,
       unique: true,
     },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 let Deposit =
