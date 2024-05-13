@@ -3,8 +3,8 @@ import Image from "next/image";
 import { useRouter } from "next/router";
 import React, { useState } from "react";
 import { useGlobalContext } from "./GlobalContext";
-import Telegram from "@/public/assets/Telegram.svg";
-import Twitter from "@/public/assets/Twitter.svg";
+import Telegram from "@/public/assets/Telegram";
+import Twitter from "@/public/assets/Twitter";
 import logo from "@/public/assets/logowhite.svg";
 import { MdOutlineLanguage } from "react-icons/md";
 import { FaChevronUp } from "react-icons/fa6";
@@ -94,18 +94,18 @@ function Footer() {
               </h3>
               <div className="flex flex-row items-start justify-start gap-2 pt-4">
                 <Link
-                  href="https://x.com/FomoWtf"
+                  href="https://x.com/FOMO_wtf"
                   target="_blank"
                   className="p-2 border-2 border-[#FFFFFF] rounded-full border-opacity-5 hover:bg-[#121519] hover:cursor-pointer"
                 >
-                  <Image src={Twitter} alt="" width={15} height={15} />
+                   <Twitter className="w-3 h-3 text-white group-hover:text-[#9945FF] group-focus:text-[#9945FF] transition-all"/>
                 </Link>
                 <Link
-                  href="https://t.me/fomowtf"
+                  href="https://t.me/FOMO_wtf"
                   target="_blank"
                   className="p-2 border-2 border-[#FFFFFF] rounded-full border-opacity-5 hover:bg-[#121519] hover:cursor-pointer"
                 >
-                  <Image src={Telegram} alt="" width={15} height={15} />
+                  <Telegram className="w-3 h-3 text-white group-hover:text-[#9945FF] group-focus:text-[#9945FF] transition-all"/>
                 </Link>
               </div>
             </div>
