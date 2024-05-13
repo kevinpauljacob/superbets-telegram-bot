@@ -82,7 +82,7 @@ export default function Stake() {
   return (
     <div className="flex flex-col items-center w-full overflow-hidden min-h-screen flex-1 relative font-chakra">
       <div className="w-full flex flex-1 flex-col items-start gap-5 px-5 sm:px-10 lg:px-40 2xl:px-[15%] pb-10">
-        <span className="text-white text-opacity-90 font-semibold text-[1.5rem] sm:text-[2rem] mt-[4rem] flex justify-center gap-x-2">
+        <span className="text-white text-opacity-90 font-semibold text-[1.5rem] sm:text-[2rem] mt-[4rem] flex items-center justify-center gap-x-2">
           <Image src="/assets/lockIcon.svg" width={24} height={24} />
           {translator("Stake", language).toUpperCase()}
         </span>

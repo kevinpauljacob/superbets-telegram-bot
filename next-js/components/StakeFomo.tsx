@@ -139,7 +139,7 @@ export default function StakeFomo() {
           onClick={() => {
             stake ? setAmount(solBal) : setAmount(userData?.stakedAmount ?? 0);
           }}
-          className="text-sm cursor-pointer font-changa text-[#B1B1B1] text-opacity-50 transition-all"
+          className="text-sm cursor-pointer font-medium font-changa text-[#94A3B8] text-opacity-90 transition-all"
         >
           {formatNumber(stake ? solBal : userData?.stakedAmount ?? 0)} $FOMO
         </span>
@@ -200,8 +200,8 @@ export default function StakeFomo() {
       >
         {loading && <Spinner />}
         {stake
-          ? translator("Stake", language)
-          : translator("Unstake", language)}
+          ? translator("STAKE", language)
+          : translator("UNSTAKE", language)}
       </button>
     </div>
   );
