@@ -59,7 +59,7 @@ export default function Wheel() {
     maxBetAmt,
     language,
   } = useGlobalContext();
-  const [betAmt, setBetAmt] = useState(0);
+  const [betAmt, setBetAmt] = useState<number | undefined>();
   const [userInput, setUserInput] = useState<number | undefined>();
   const [isRolling, setIsRolling] = useState(false);
   const [refresh, setRefresh] = useState(true);
@@ -146,126 +146,108 @@ export default function Wheel() {
     }
   };
 
-  const handleCountChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
-  ) => {
-    setAutoBetCount(parseFloat(e.target.value));
-  };
-
-  const handleBetAmountChange = (
-    event: React.ChangeEvent<HTMLInputElement>,
-  ) => {
-    const amount = parseFloat(event.target.value); // Convert input value to float
-    setBetAmt(amount); // Update betAmt state
-  };
-
   const handleBet = async () => {
-    if (wallet.connected) {
-      if (!wallet.publicKey) {
-        errorCustom("Wallet not connected");
-        return;
+    try {
+      if (!wallet.connected || !wallet.publicKey) {
+        throw new Error("Wallet not connected");
+      }
+      if (!betAmt || betAmt === 0) {
+        throw new Error("Set Amount.");
       }
       if (coinData && coinData[0].amount < betAmt) {
-        errorCustom("Insufficient balance for bet !");
-        return;
+        throw new Error("Insufficient balance for bet !");
       }
-      if (betAmt === 0) {
-        errorCustom("Set Amount.");
-        return;
-      }
+
       setIsRolling(true);
       setStrikeNumber(0);
-      try {
-        const response = await fetch(`/api/games/wheel`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            wallet: wallet.publicKey,
-            amount: betAmt,
-            tokenMint: "SOL",
-            segments: segments,
-            risk: risk,
-          }),
-        });
+      const response = await fetch(`/api/games/wheel`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          wallet: wallet.publicKey,
+          amount: betAmt,
+          tokenMint: "SOL",
+          segments: segments,
+          risk: risk,
+        }),
+      });
 
-        const { success, message, result, strikeNumber, strikeMultiplier } =
-          await response.json();
+      const { success, message, result, strikeNumber, strikeMultiplier } =
+        await response.json();
 
-        spinWheel(strikeNumber);
-        await new Promise((resolve) => setTimeout(resolve, 3000));
-        if (success != true) {
-          errorCustom(message);
-          throw new Error(message);
-        }
-        setIsRolling(false);
-        //set strikeMultiplier color
-        const riskObjects = riskToChance[risk];
-        const riskObject = riskObjects.find(
-          (obj) => obj.multiplier === strikeMultiplier,
-        );
-        setStrikeMultiplierColor(riskObject ? riskObject.color : "#ffffff");
-        if (result == "Won") {
-          successCustom(message);
-          soundAlert("/sounds/win.wav");
-        } else errorCustom(message);
-
-        const win = result === "Won";
-        const newBetResult = { result: strikeMultiplier, win };
-
-        setBetResults((prevResults) => {
-          const newResults = [...prevResults, newBetResult];
-          if (newResults.length > 5) {
-            newResults.shift();
-          }
-          return newResults;
-        });
-
-        if (success) {
-          setStrikeNumber(strikeNumber);
-          setStrikeMultiplier(strikeMultiplier);
-          console.log("strikeNumber", strikeNumber);
-          setRefresh(true);
-        }
-
-        // auto options
-        if (betType === "auto") {
-          if (useAutoConfig && autoWinChange && win) {
-            setBetAmt(
-              autoWinChangeReset
-                ? userInput!
-                : betAmt + (autoWinChange * betAmt) / 100.0,
-            );
-          } else if (useAutoConfig && autoLossChange && !win) {
-            setAutoBetProfit(autoBetProfit - betAmt);
-            setBetAmt(
-              autoLossChangeReset
-                ? userInput!
-                : betAmt + (autoLossChange * betAmt) / 100.0,
-            );
-          }
-          // update profit / loss
-          setAutoBetProfit(
-            autoBetProfit +
-              (win ? strikeMultiplier * (1 - houseEdge) - 1 : -1) * betAmt,
-          );
-          // update count
-          if (typeof autoBetCount === "number")
-            setAutoBetCount(autoBetCount > 0 ? autoBetCount - 1 : 0);
-          else
-            setAutoBetCount(
-              autoBetCount.length > 12
-                ? autoBetCount.slice(0, 5)
-                : autoBetCount + 1,
-            );
-        }
-      } catch (error) {
-        setIsRolling(false);
-        setAutoBetCount(0);
-        setStartAuto(false);
-        console.error("Error occurred while betting:", error);
+      spinWheel(strikeNumber);
+      await new Promise((resolve) => setTimeout(resolve, 3000));
+      if (success != true) {
+        throw new Error(message);
       }
+      setIsRolling(false);
+      //set strikeMultiplier color
+      const riskObjects = riskToChance[risk];
+      const riskObject = riskObjects.find(
+        (obj) => obj.multiplier === strikeMultiplier,
+      );
+      setStrikeMultiplierColor(riskObject ? riskObject.color : "#ffffff");
+      if (result == "Won") {
+        successCustom(message);
+        soundAlert("/sounds/win.wav");
+      } else errorCustom(message);
+
+      const win = result === "Won";
+      const newBetResult = { result: strikeMultiplier, win };
+
+      setBetResults((prevResults) => {
+        const newResults = [...prevResults, newBetResult];
+        if (newResults.length > 5) {
+          newResults.shift();
+        }
+        return newResults;
+      });
+
+      if (success) {
+        setStrikeNumber(strikeNumber);
+        setStrikeMultiplier(strikeMultiplier);
+        console.log("strikeNumber", strikeNumber);
+        setRefresh(true);
+      }
+
+      // auto options
+      if (betType === "auto") {
+        if (useAutoConfig && autoWinChange && win) {
+          setBetAmt(
+            autoWinChangeReset
+              ? userInput!
+              : betAmt + (autoWinChange * betAmt) / 100.0,
+          );
+        } else if (useAutoConfig && autoLossChange && !win) {
+          setBetAmt(
+            autoLossChangeReset
+              ? userInput!
+              : betAmt + (autoLossChange * betAmt) / 100.0,
+          );
+        }
+        // update profit / loss
+        setAutoBetProfit(
+          autoBetProfit +
+            (win ? strikeMultiplier * (1 - houseEdge) - 1 : -1) * betAmt,
+        );
+        // update count
+        if (typeof autoBetCount === "number")
+          setAutoBetCount(autoBetCount > 0 ? autoBetCount - 1 : 0);
+        else
+          setAutoBetCount(
+            autoBetCount.length > 12
+              ? autoBetCount.slice(0, 5)
+              : autoBetCount + 1,
+          );
+      }
+    } catch (error: any) {
+      errorCustom(error?.message ?? "Could not make the Bet.");
+      setIsRolling(false);
+      setAutoBetCount(0);
+      setStartAuto(false);
+      console.error("Error occurred while betting:", error);
     }
   };
 
@@ -278,11 +260,11 @@ export default function Wheel() {
   }, [wallet?.publicKey, refresh]);
 
   useEffect(() => {
-    setBetAmt(userInput ?? 0);
+    setBetAmt(userInput);
   }, [userInput]);
 
   useEffect(() => {
-    console.log("Auto: ", startAuto, autoBetCount);
+    console.log("Auto: ", startAuto, autoBetCount, autoBetProfit);
     if (
       betType === "auto" &&
       startAuto &&
@@ -317,6 +299,7 @@ export default function Wheel() {
     } else {
       setStartAuto(false);
       setAutoBetProfit(0);
+      setUserInput(betAmt);
     }
   }, [startAuto, autoBetCount]);
 
@@ -341,8 +324,8 @@ export default function Wheel() {
   };
 
   const disableInput = useMemo(() => {
-    return betType === "auto" && startAuto ? true : false;
-  }, [betType, startAuto]);
+    return betType === "auto" && startAuto ? true : false || isRolling;
+  }, [betType, startAuto, isRolling]);
 
   return (
     <GameLayout title="FOMO - Wheel">
@@ -382,7 +365,7 @@ export default function Wheel() {
             </BetButton>
           </div>
           <div className="w-full flex lg:hidden">
-            <ConfigureAutoButton />
+            <ConfigureAutoButton disabled={disableInput} />
           </div>
           <div className="w-full hidden lg:flex">
             <BetSetting
@@ -400,7 +383,7 @@ export default function Wheel() {
               >
                 {/* amt input  */}
                 <BetAmount
-                  betAmt={userInput}
+                  betAmt={betAmt}
                   setBetAmt={setUserInput}
                   currentMultiplier={maxMultiplier}
                   leastMultiplier={minMultiplier}
@@ -481,12 +464,9 @@ export default function Wheel() {
                   <></>
                 ) : (
                   <div className="w-full flex flex-row items-end gap-3">
-                    <AutoCount
-                      loading={isRolling || startAuto}
-                      onChange={handleCountChange}
-                    />
+                    <AutoCount loading={isRolling || startAuto} />
                     <div className="w-full hidden lg:flex">
-                      <ConfigureAutoButton />
+                      <ConfigureAutoButton disabled={disableInput} />
                     </div>
                   </div>
                 )}
@@ -630,7 +610,7 @@ export default function Wheel() {
                             {coinData
                               ? Math.max(
                                   0,
-                                  betAmt *
+                                  (betAmt ?? 0) *
                                     (segment.multiplier * (1 - houseEdge) - 1),
                                 ).toFixed(4)
                               : 0}

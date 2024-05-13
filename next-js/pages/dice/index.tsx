@@ -62,18 +62,18 @@ export default function Dice() {
   } = useGlobalContext();
 
   const [userInput, setUserInput] = useState<number | undefined>();
-  const [betAmt, setBetAmt] = useState(0);
+  const [betAmt, setBetAmt] = useState<number | undefined>();
 
   const [isRolling, setIsRolling] = useState(false);
   const [winningPays, setWinningPays] = useState(0.0);
   const [profit, setProfit] = useState(0.0);
   const [winningProbability, setWinningProbability] = useState(0.0);
   const [refresh, setRefresh] = useState(true);
-  const [selectedFace, setSelectedFace] = useState<number[]>([]);
+  const [selectedFace, setSelectedFace] = useState<number[]>([1]);
   const [selectedFaces, setSelectedFaces] = useState<{
     [key: number]: boolean;
   }>({
-    1: false,
+    1: true,
     2: false,
     3: false,
     4: false,
@@ -109,7 +109,7 @@ export default function Dice() {
           const newLength = selectedFace.length + 1;
           const multiplier = 6 / newLength;
           setWinningPays(multiplier);
-          setProfit(betAmt * (multiplier * (1 - houseEdge) - 1));
+          setProfit((betAmt ?? 0) * (multiplier * (1 - houseEdge) - 1));
           setWinningProbability((newLength * 100) / 6);
         } else {
           setSelectedFace(selectedFace.filter((face) => face !== newFace));
@@ -121,7 +121,7 @@ export default function Dice() {
           } else {
             const multiplier = 6 / newLength;
             setWinningPays(multiplier);
-            setProfit(betAmt * (multiplier * (1 - houseEdge) - 1));
+            setProfit((betAmt ?? 0) * (multiplier * (1 - houseEdge) - 1));
             setWinningProbability((newLength * 100) / 6);
           }
         }
@@ -138,16 +138,10 @@ export default function Dice() {
     } else {
       const multiplier = 6 / newLength;
       setWinningPays(multiplier);
-      setProfit(betAmt * (multiplier * (1 - houseEdge) - 1));
+      setProfit((betAmt ?? 0) * (multiplier * (1 - houseEdge) - 1));
       setWinningProbability((newLength * 100) / 6);
     }
   }, [betAmt]);
-
-  const handleCountChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
-  ) => {
-    setAutoBetCount(parseFloat(e.target.value));
-  };
 
   const diceRoll = async () => {
     console.log(
@@ -164,82 +158,76 @@ export default function Dice() {
       betAmt,
       maxBetAmt,
     );
-    if (wallet.connected) {
-      if (!wallet.publicKey) {
-        errorCustom("Wallet not connected");
-        return;
+    try {
+      if (!wallet.connected || !wallet.publicKey) {
+        throw new Error("Wallet not connected");
+      }
+      if (!betAmt || betAmt === 0) {
+        throw new Error("Set Amount.");
       }
       if (coinData && coinData[0].amount < betAmt) {
-        errorCustom("Insufficient balance for bet !");
-        return;
-      }
-      if (betAmt === 0) {
-        errorCustom("Set Amount.");
-        return;
+        throw new Error("Insufficient balance for bet !");
       }
       if (selectedFace.length === 0) {
-        errorCustom("Choose at least 1 face.");
-        return;
+        throw new Error("Choose at least 1 face.");
       }
       setIsRolling(true);
-      try {
-        const res = await rollDice(wallet, betAmt, selectedFace);
-        if (res.success) {
-          const { strikeNumber, result } = res.data;
-          const isWin = result === "Won";
-          if (isWin) soundAlert("/sounds/win.wav");
-          const newBetResults = [
-            ...(betResults.length <= 4 ? betResults : betResults.slice(-4)),
-            { face: strikeNumber, win: isWin },
-          ];
-          setBetResults(newBetResults);
-          setShowPointer(true);
-          setStrikeFace(strikeNumber);
-          setRefresh(true);
-          loopSound("/sounds/diceshake.wav", 0.3);
+      const res = await rollDice(wallet, betAmt, selectedFace);
+      if (res.success) {
+        const { strikeNumber, result } = res.data;
+        const isWin = result === "Won";
+        if (isWin) soundAlert("/sounds/win.wav");
+        const newBetResults = [
+          ...(betResults.length <= 4 ? betResults : betResults.slice(-4)),
+          { face: strikeNumber, win: isWin },
+        ];
+        setBetResults(newBetResults);
+        setShowPointer(true);
+        setStrikeFace(strikeNumber);
+        setRefresh(true);
+        loopSound("/sounds/diceshake.wav", 0.3);
 
-          // auto options
-          if (betType === "auto") {
-            if (useAutoConfig && autoWinChange && isWin) {
-              setBetAmt(
-                autoWinChangeReset
-                  ? userInput!
-                  : betAmt + (autoWinChange * betAmt) / 100.0,
-              );
-            } else if (useAutoConfig && autoLossChange && !isWin) {
-              setBetAmt(
-                autoLossChangeReset
-                  ? userInput!
-                  : betAmt + (autoLossChange * betAmt) / 100.0,
-              );
-            }
-            // update profit / loss
-            setAutoBetProfit(
-              autoBetProfit +
-                (isWin ? winningPays * (1 - houseEdge) - 1 : -1) * betAmt,
+        // auto options
+        if (betType === "auto") {
+          if (useAutoConfig && autoWinChange && isWin) {
+            setBetAmt(
+              autoWinChangeReset
+                ? userInput!
+                : betAmt + (autoWinChange * betAmt) / 100.0,
             );
-            // update count
-            if (typeof autoBetCount === "number")
-              setAutoBetCount(autoBetCount > 0 ? autoBetCount - 1 : 0);
-            else
-              setAutoBetCount(
-                autoBetCount.length > 12
-                  ? autoBetCount.slice(0, 5)
-                  : autoBetCount + 1,
-              );
+          } else if (useAutoConfig && autoLossChange && !isWin) {
+            setBetAmt(
+              autoLossChangeReset
+                ? userInput!
+                : betAmt + (autoLossChange * betAmt) / 100.0,
+            );
           }
-        } else {
-          setAutoBetCount(0);
-          setStartAuto(false);
+          // update profit / loss
+          setAutoBetProfit(
+            autoBetProfit +
+              (isWin ? winningPays * (1 - houseEdge) - 1 : -1) * betAmt,
+          );
+          // update count
+          if (typeof autoBetCount === "number")
+            setAutoBetCount(autoBetCount > 0 ? autoBetCount - 1 : 0);
+          else
+            setAutoBetCount(
+              autoBetCount.length > 12
+                ? autoBetCount.slice(0, 5)
+                : autoBetCount + 1,
+            );
         }
-      } catch (e) {
-        setIsRolling(false);
-        setAutoBetCount(0);
-        setStartAuto(false);
-        console.error("Error occurred while rolling the dice:", e);
+      } else {
+        throw new Error(res?.message ?? "Could not make the Bet.");
       }
+    } catch (e: any) {
+      errorCustom(e?.message ?? "Could not make the Bet.");
       setIsRolling(false);
+      setAutoBetCount(0);
+      setStartAuto(false);
+      console.error("Error occurred while rolling the dice:", e);
     }
+    setIsRolling(false);
   };
 
   useEffect(() => {
@@ -298,7 +286,7 @@ export default function Dice() {
   }, []);
 
   useEffect(() => {
-    setBetAmt(userInput ?? 0);
+    setBetAmt(userInput);
   }, [userInput]);
 
   useEffect(() => {
@@ -341,6 +329,7 @@ export default function Dice() {
     } else {
       setStartAuto(false);
       setAutoBetProfit(0);
+      setUserInput(betAmt);
     }
   }, [startAuto, autoBetCount]);
 
@@ -365,8 +354,8 @@ export default function Dice() {
   };
 
   const disableInput = useMemo(() => {
-    return betType === "auto" && startAuto ? true : false;
-  }, [betType, startAuto]);
+    return betType === "auto" && startAuto ? true : false || isRolling;
+  }, [betType, startAuto, isRolling]);
 
   return (
     <GameLayout title="FOMO - Dice">
@@ -414,7 +403,7 @@ export default function Dice() {
           </div>
           {betType === "auto" && (
             <div className="w-full flex lg:hidden">
-              <ConfigureAutoButton />
+              <ConfigureAutoButton disabled={disableInput} />
             </div>
           )}
           <div className="w-full hidden lg:flex">
@@ -433,7 +422,7 @@ export default function Dice() {
               >
                 {/* amt input  */}
                 <BetAmount
-                  betAmt={userInput}
+                  betAmt={betAmt}
                   setBetAmt={setUserInput}
                   currentMultiplier={winningPays}
                   leastMultiplier={6 / 5}
@@ -444,12 +433,9 @@ export default function Dice() {
                   <></>
                 ) : (
                   <div className="w-full flex flex-row items-end gap-3">
-                    <AutoCount
-                      loading={isRolling || startAuto}
-                      onChange={handleCountChange}
-                    />
+                    <AutoCount loading={isRolling || startAuto} />
                     <div className="w-full hidden lg:flex">
-                      <ConfigureAutoButton />
+                      <ConfigureAutoButton disabled={disableInput} />
                     </div>
                   </div>
                 )}

@@ -144,7 +144,7 @@ export default function VerifyLimboModal({
                   {translator("Payout", language)}
                 </div>
                 <div className="text-white font-chakra text-xs font-medium">
-                  {flip.amountWon - flip.amount} $SOL
+                  {(flip.amountWon - flip.amount).toFixed(5)} $SOL
                 </div>
               </button>
             </div>

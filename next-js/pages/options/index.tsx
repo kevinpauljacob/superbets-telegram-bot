@@ -422,8 +422,6 @@ export default function Options() {
               </div>
             </div>
 
-            {/* <BalanceAlert /> */}
-
             <div className="flex w-full flex-row lg:mb-[1.4rem] gap-3">
               {/* buttons  */}
               <div

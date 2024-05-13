@@ -3,7 +3,7 @@ import { useGlobalContext } from "./GlobalContext";
 import { BsInfinity } from "react-icons/bs";
 import { translator } from "@/context/transactions";
 
-export default function AutoCount({
+export default function ProfitBox({
   multiplier,
   amount,
 }: {

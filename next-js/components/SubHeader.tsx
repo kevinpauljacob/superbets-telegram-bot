@@ -31,15 +31,36 @@ export default function SubHeader() {
     });
   }, [cards]);
 
-  const { sendMessage, lastJsonMessage } = useWebSocket(wsEndpoint, {
-    onOpen: () =>
-      sendMessage(
-        JSON.stringify({
-          clientType: "listener-client",
-          channel: "fomo-casino_games-channel",
-        }),
-      ),
-    shouldReconnect: () => true,
+  const { sendJsonMessage } = useWebSocket(wsEndpoint, {
+    onOpen: () => {
+      console.log("Connected to ws");
+      sendJsonMessage({
+        clientType: "listener-client",
+        channel: "fomo-casino_games-channel",
+      });
+    },
+    onMessage: (event) => {
+      const response = JSON.parse(event.data.toString());
+
+      if (!response.payload) return;
+
+      const payload = response.payload;
+      if (payload.result === "Won")
+        setCards((prev) => {
+          const newCards = [payload, ...prev];
+          return newCards.slice(0, 15);
+        });
+
+      setLiveBets((prev) => [payload, ...prev]);
+    },
+    shouldReconnect: () => {
+      console.log("Reconnecting to ws");
+      return true;
+    },
+    retryOnError: true,
+    reconnectInterval: (attemptNumber) =>
+      Math.min(Math.pow(2, attemptNumber) * 1000, 10000),
+    reconnectAttempts: 25,
   });
 
   useEffect(() => {
@@ -50,22 +71,6 @@ export default function SubHeader() {
         setCards(data.data);
       });
   }, []);
-
-  useEffect(() => {
-    if (lastJsonMessage !== null) {
-      const response = lastJsonMessage as any;
-
-      if (!response.payload) return;
-      const payload = response.payload;
-
-      if (payload.result === "Won")
-        setCards((prev) => {
-          const newCards = [payload, ...prev];
-          return newCards.slice(0, 15);
-        });
-      setLiveBets((prev) => [payload, ...prev]);
-    }
-  }, [lastJsonMessage]);
 
   return (
     <div className="flex flex-col w-full">

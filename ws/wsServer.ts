@@ -64,12 +64,9 @@ const handleAPIClient = (socket: WebSocket, message: any) => {
   if (channels[channel] === authKey) {
     socket.send(JSON.stringify({ success: true }));
 
-    console.log("outside");
     // Forward payload to all clients on channel
     channelClients[channel].forEach((client) => {
       if (client.readyState === WebSocket.OPEN) {
-        console.log("inside", channel);
-
         client.send(JSON.stringify({ channel, payload }));
       }
     });
@@ -86,7 +83,6 @@ const handleListenerClient = (socket: WebSocket, message: any) => {
     if (!channelClients[channel]) {
       channelClients[channel] = new Set();
     }
-
     channelClients[channel].add(socket);
 
     socket.send(
@@ -98,6 +94,13 @@ const handleListenerClient = (socket: WebSocket, message: any) => {
   } else {
     socket.send(JSON.stringify({ success: false }));
   }
+
+  socket.on("close", () => {
+    // Remove the disconnected client from all channels
+    Object.values(channelClients).forEach((clients) => {
+      clients.delete(socket);
+    });
+  });
 };
 
 try {
@@ -105,19 +108,9 @@ try {
   handleFomoBuyEvent(fomoJupProgramId, fomoJupIDL, "jupexit");
 
   server.on("connection", (socket: WebSocket) => {
-    console.log("server connected");
     socket.on("message", (data) => {
       try {
         const message = JSON.parse(data.toString());
-
-        console.log(
-          "server msg received",
-          message,
-          "connected clients: ",
-          channelClients,
-          "socket.readyState: ",
-          socket.readyState
-        );
 
         if (message.clientType === "api-client") {
           handleAPIClient(socket, message);
@@ -129,23 +122,6 @@ try {
       } catch (error) {
         console.error("Error parsing message:", error);
       }
-    });
-
-    socket.on("error", (e: any) => {
-      console.log("socket error: ", e);
-      Object.values(channelClients).forEach((clients) => {
-        clients.delete(socket);
-      });
-    });
-
-    socket.on("close", () => {
-      console.log("server closed");
-      // Remove the disconnected client from all channels
-      // Object.values(channelClients).forEach((clients) => {
-      //   clients.delete(socket);
-      // });
-
-      console.log("connected clients: ", channelClients);
     });
   });
 

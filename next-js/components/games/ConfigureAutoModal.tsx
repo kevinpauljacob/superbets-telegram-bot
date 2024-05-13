@@ -1,5 +1,5 @@
 import { useWallet } from "@solana/wallet-adapter-react";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useForm, FormProvider } from "react-hook-form";
 import { obfuscatePubKey } from "@/context/transactions";
 import { deposit, withdraw } from "../../context/gameTransactions";
@@ -8,7 +8,7 @@ import { useGlobalContext } from "../GlobalContext";
 import { IoClose, IoCloseOutline } from "react-icons/io5";
 import {translator} from "@/context/transactions";
 import Image from "next/image";
-import { Translate } from "iconsax-react";
+import { warningCustom } from "../toasts/ToastGroup";
 
 export default function ConfigureAutoModal() {
   const methods = useForm();
@@ -49,8 +49,8 @@ export default function ConfigureAutoModal() {
 
   const onSubmit = async (data: any) => {
     if (
-      parseFloat(data.autoWinChange) > 0 ||
-      parseFloat(data.autoLossChange) > 0 ||
+      parseFloat(data.autoWinChange) ||
+      parseFloat(data.autoLossChange) ||
       parseFloat(data.autoStopProfit) > 0 ||
       parseFloat(data.autoStopLoss) > 0
     ) {
@@ -58,15 +58,27 @@ export default function ConfigureAutoModal() {
       setShowAutoModal(false);
       console.log(
         "Setting auto",
-        data.autoWinChange,
-        data.autoLossChange,
+        autoWinChange,
+        autoLossChange,
         autoWinChangeReset,
         autoLossChangeReset,
-        data.autoStopProfit,
-        data.autoStopLoss,
+        autoStopProfit,
+        autoStopLoss,
       );
     }
   };
+
+  useEffect(() => {
+    console.log(
+      "Setting auto",
+      autoWinChange,
+      autoLossChange,
+      autoWinChangeReset,
+      autoLossChangeReset,
+      autoStopProfit,
+      autoStopLoss,
+    );
+  }, []);
 
   return showAutoModal ? (
     <div
@@ -118,7 +130,7 @@ export default function ConfigureAutoModal() {
                   } text-xs font-chakra font-medium text-white transition-all rounded-[5px] py-1.5 px-4`}
                   onClick={() => {
                     setAutoWinChangeReset(true);
-                    setAutoWinChange(null);
+                    // setAutoWinChange(null);
                   }}
                 >
                   {translator("Reset", language)}
@@ -141,10 +153,11 @@ export default function ConfigureAutoModal() {
                   autoComplete="off"
                   disabled={autoWinChangeReset}
                   onChange={(e) => {
+                    console.log(e.target.value, parseFloat(e.target.value));
                     setAutoWinChange(parseFloat(e.target.value));
                   }}
                   placeholder={"00.00"}
-                  value={autoWinChange ?? undefined}
+                  value={autoWinChange ?? NaN}
                   className={`flex w-full min-w-0 bg-transparent text-right text-base disabled:text-opacity-40 text-[#94A3B8] placeholder-[#94A3B8] font-chakra placeholder-opacity-40 outline-none`}
                 />
                 <span className="text-[#94A3B8] text-base font-chakra ml-3">
@@ -186,7 +199,7 @@ export default function ConfigureAutoModal() {
                   } text-xs font-chakra font-medium text-white transition-all rounded-[5px] py-1.5 px-4`}
                   onClick={() => {
                     setAutoLossChangeReset(true);
-                    setAutoLossChange(null);
+                    // setAutoLossChange(null);
                   }}
                 >
                   {translator("Reset", language)}
@@ -212,7 +225,7 @@ export default function ConfigureAutoModal() {
                     setAutoLossChange(parseFloat(e.target.value));
                   }}
                   placeholder={"00.00"}
-                  value={autoLossChange ?? undefined}
+                  value={autoLossChange ?? NaN}
                   className={`flex w-full min-w-0 bg-transparent text-right text-base disabled:text-opacity-40 text-[#94A3B8] placeholder-[#94A3B8] font-chakra placeholder-opacity-40 outline-none`}
                 />
                 <span className="text-[#94A3B8] text-base font-chakra ml-3">
@@ -268,10 +281,15 @@ export default function ConfigureAutoModal() {
                   step={"any"}
                   autoComplete="off"
                   onChange={(e) => {
+                    const amount = parseFloat(e.target.value);
+                    console.log(amount, !amount);
                     setAutoStopProfit(parseFloat(e.target.value));
+                    if (!amount || (amount && amount >= 0)) {
+                      methods.clearErrors("autoStopProfit");
+                    }
                   }}
                   placeholder={"00.00"}
-                  value={autoStopProfit ?? undefined}
+                  value={autoStopProfit ?? NaN}
                   className={`ml-2 flex w-full min-w-0 bg-transparent text-base text-[#94A3B8] placeholder-[#94A3B8]  font-chakra placeholder-opacity-40 outline-none`}
                 />
               </div>
@@ -324,10 +342,14 @@ export default function ConfigureAutoModal() {
                   step={"any"}
                   autoComplete="off"
                   onChange={(e) => {
+                    const amount = parseFloat(e.target.value);
                     setAutoStopLoss(parseFloat(e.target.value));
+                    if (!amount || (amount && amount >= 0)) {
+                      methods.clearErrors("autoStopLoss");
+                    }
                   }}
                   placeholder={"00.00"}
-                  value={autoStopLoss ?? undefined}
+                  value={autoStopLoss ?? NaN}
                   className={`ml-2 flex w-full min-w-0 bg-transparent text-base text-[#94A3B8] placeholder-[#94A3B8]  font-chakra placeholder-opacity-40 outline-none`}
                 />
               </div>
@@ -358,12 +380,13 @@ export default function ConfigureAutoModal() {
                   !autoStopProfit
                 }
                 onClick={onSubmit}
-                className={`disabled:cursor-default opacity-70 hover:opacity-90 w-full h-[3.75rem] rounded-lg transition-all bg-[#7839C5] disabled:bg-[#4b2876] hover:bg-[#9361d1] focus:bg-[#602E9E] flex items-center justify-center font-chakra font-semibold text-xl text-white`}
+                className={`disabled:cursor-default disabled:opacity-70 hover:duration-75 hover:opacity-90 w-full h-[3.75rem] rounded-lg transition-all bg-[#7839C5] disabled:bg-[#4b2876] hover:bg-[#9361d1] focus:bg-[#602E9E] flex items-center justify-center font-chakra font-semibold text-xl tracking-wider text-white`}
               >
                 {translator("APPLY", language)}
               </button>
             </div>
-            <span
+            <button
+              type="button"
               onClick={() => {
                 setAutoLossChange(null);
                 setAutoWinChange(null);
@@ -372,11 +395,20 @@ export default function ConfigureAutoModal() {
                 setAutoStopLoss(null);
                 setAutoStopProfit(null);
                 setUseAutoConfig(false);
+                methods.setValue("autoWinChange", NaN);
+                methods.setValue("autoLossChange", NaN);
+                methods.setValue("autoStopProfit", NaN);
+                methods.setValue("autoStopLoss", NaN);
+                methods.clearErrors("autoWinChange");
+                methods.clearErrors("autoLossChange");
+                methods.clearErrors("autoStopProfit");
+                methods.clearErrors("autoStopLoss");
+                warningCustom("All values reset.");
               }}
               className="text-[#94A3B8] hover:text-white/70 transition-all hover:duration-75 w-full text-center cursor-pointer text-base font-semibold font-chakra mt-8 underline underline-offset-2"
             >
               {translator("Reset All", language)}
-            </span>
+            </button>
           </form>
         </FormProvider>
       </div>

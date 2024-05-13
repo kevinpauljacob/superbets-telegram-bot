@@ -33,6 +33,7 @@ export default function Leaderboard() {
     });
   }, [userData]);
 
+
   return (
     <div className="flex flex-col items-center w-full overflow-hidden min-h-screen flex-1 relative">
       {/* Navbar  */}

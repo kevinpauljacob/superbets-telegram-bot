@@ -68,7 +68,7 @@ export default function Flip() {
     language,
   } = useGlobalContext();
 
-  const [betAmt, setBetAmt] = useState(0);
+  const [betAmt, setBetAmt] = useState<number | undefined>();
   const [userInput, setUserInput] = useState<number | undefined>();
   const [betType, setBetType] = useState<string | null>(null);
   const [flipping, setFlipping] = useState(false);
@@ -84,6 +84,16 @@ export default function Flip() {
 
   const bet = async () => {
     try {
+      if (!wallet.connected || !wallet.publicKey) {
+        throw new Error("Wallet not connected");
+      }
+      if (!betAmt || betAmt === 0) {
+        throw new Error("Set Amount.");
+      }
+      if (coinData && coinData[0].amount < betAmt) {
+        throw new Error("Insufficient balance for bet !");
+      }
+
       console.log("Placing Flip");
       let response = await placeFlip(
         wallet,
@@ -123,7 +133,6 @@ export default function Flip() {
                     : betAmt + (autoWinChange * betAmt) / 100.0,
                 );
               } else if (useAutoConfig && autoLossChange && !win) {
-                setAutoBetProfit(autoBetProfit - betAmt);
                 setBetAmt(
                   autoLossChangeReset
                     ? userInput!
@@ -145,36 +154,23 @@ export default function Flip() {
                 );
             }
           } else {
-            setBetType(null);
-            setLoading(false);
-            setFlipping(false);
-            setResult(null);
-            response?.message && errorCustom(response?.message);
+            throw new Error(
+              response?.message ? response?.message : "Could not make Flip.",
+            );
           }
         },
         betSetting === "auto" ? 500 : 3000,
       );
-    } catch (e) {
-      errorCustom("Could not make Flip.");
+    } catch (e: any) {
+      errorCustom(e?.message ?? "Could not make Flip.");
       setBetType(null);
       setFlipping(false);
       setLoading(false);
       setResult(null);
+      setStartAuto(false);
+      setAutoBetCount(0);
     }
   };
-
-  // useEffect(() => {
-  //   console.log("Bet type: ", betType);
-  //   console.log("Others: ", loading, flipping, deposit);
-  // }, [betType]);
-  // useEffect(() => {
-  //   console.log("load Bet type: ", betType);
-  //   console.log("load Others: ", loading, flipping, deposit);
-  // }, [loading]);
-  // useEffect(() => {
-  //   console.log("flip Bet type: ", betType);
-  //   console.log("flip Others: ", loading, flipping, deposit);
-  // }, [flipping]);
 
   useEffect(() => {
     if (refresh && wallet?.publicKey) {
@@ -185,7 +181,7 @@ export default function Flip() {
   }, [wallet?.publicKey, refresh]);
 
   useEffect(() => {
-    setBetAmt(userInput ?? 0);
+    setBetAmt(userInput);
   }, [userInput]);
 
   useEffect(() => {
@@ -193,8 +189,10 @@ export default function Flip() {
       "Auto: ",
       startAuto,
       autoBetCount,
-      autoBetProfit,
       autoStopProfit,
+      autoStopLoss,
+      autoBetProfit,
+      betAmt,
     );
     if (
       betSetting === "auto" &&
@@ -232,11 +230,11 @@ export default function Flip() {
     } else {
       setStartAuto(false);
       setAutoBetProfit(0);
+      setUserInput(betAmt);
     }
   }, [startAuto, autoBetCount]);
 
   const onSubmit = async (data: any) => {
-    console.log(data);
     if (!wallet.publicKey) {
       errorCustom("Wallet not connected");
       return;
@@ -269,21 +267,10 @@ export default function Flip() {
       }
     }
   };
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
-  ) => {
-    setBetAmt(parseFloat(e.target.value));
-  };
-
-  const handleCountChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
-  ) => {
-    setAutoBetCount(parseFloat(e.target.value));
-  };
 
   const disableInput = useMemo(() => {
-    return betSetting === "auto" && startAuto ? true : false;
-  }, [betSetting, startAuto]);
+    return betSetting === "auto" && startAuto ? true : false || loading;
+  }, [betSetting, startAuto, loading]);
 
   return (
     <GameLayout title="FOMO - Coin Flip">
@@ -325,7 +312,7 @@ export default function Flip() {
           </div>
           {betSetting === "auto" && (
             <div className="w-full flex lg:hidden">
-              <ConfigureAutoButton />
+              <ConfigureAutoButton disabled={disableInput} />
             </div>
           )}
           <div className="w-full hidden lg:flex">
@@ -345,7 +332,7 @@ export default function Flip() {
               >
                 {/* amt input  */}
                 <BetAmount
-                  betAmt={userInput}
+                  betAmt={betAmt}
                   setBetAmt={setUserInput}
                   currentMultiplier={2.0}
                   leastMultiplier={2.0}
@@ -357,18 +344,12 @@ export default function Flip() {
                   <></>
                 ) : (
                   <div className="w-full flex flex-row items-end gap-3">
-                    <AutoCount
-                      loading={flipping || startAuto}
-                      onChange={handleCountChange}
-                    />
+                    <AutoCount loading={flipping || startAuto} />
                     <div className="w-full hidden lg:flex">
-                      <ConfigureAutoButton />
+                      <ConfigureAutoButton disabled={disableInput} />
                     </div>
                   </div>
                 )}
-
-                {/* balance alert  */}
-                {/* <BalanceAlert /> */}
 
                 {/* choosing bet options  */}
                 <div className="flex w-full flex-row gap-3 mb-[1.4rem]">
@@ -445,7 +426,7 @@ export default function Flip() {
                         ? true
                         : false
                     }
-                    onClickFunction={onSubmit}
+                    // onClickFunction={onSubmit}
                   >
                     {loading ? <Loader /> : "BET"}
                   </BetButton>
