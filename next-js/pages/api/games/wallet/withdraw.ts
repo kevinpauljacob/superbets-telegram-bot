@@ -15,7 +15,6 @@ import {
 import connectDatabase from "../../../../utils/database";
 import Deposit from "../../../../models/games/deposit";
 import User from "../../../../models/games/gameUser";
-import House from "../../../../models/games/house";
 
 import { getToken } from "next-auth/jwt";
 import { bs58 } from "@project-serum/anchor/dist/cjs/utils/bytes";
@@ -135,10 +134,13 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         },
       ]);
 
-      const netSum =
-        transferAgg[0]?.depositTotal - transferAgg[0]?.withdrawalTotal;
+      const netTransfer =
+        (transferAgg[0]?.depositTotal -
+          transferAgg[0]?.withdrawalTotal +
+          amount) /
+        24;
 
-      if (netSum + amount > timeWeightedAvgLimit) {
+      if (netTransfer > timeWeightedAvgLimit) {
         await Deposit.create({
           wallet,
           amount,
@@ -173,13 +175,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           "Withdraw failed: insufficient funds or user not found",
         );
       }
-
-      await House.findOneAndUpdate(
-        {},
-        {
-          $inc: { houseBalance: -amount },
-        },
-      );
 
       txn.partialSign(devWalletKey);
 

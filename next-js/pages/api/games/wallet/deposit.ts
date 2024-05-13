@@ -12,7 +12,6 @@ import {
 import connectDatabase from "../../../../utils/database";
 import Deposit from "../../../../models/games/deposit";
 import User from "../../../../models/games/gameUser";
-import House from "../../../../models/games/house";
 import TxnSignature from "../../../../models/txnSignature";
 
 import { getToken } from "next-auth/jwt";
@@ -125,13 +124,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         tokenMint,
         txnSignature,
       });
-
-      await House.findOneAndUpdate(
-        {},
-        {
-          $inc: { houseBalance: amount },
-        },
-      );
 
       return res.json({
         success: true,
