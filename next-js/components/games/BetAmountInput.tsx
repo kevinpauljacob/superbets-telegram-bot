@@ -10,6 +10,7 @@ import { InfoCircle } from "iconsax-react";
 import { BsInfoCircleFill } from "react-icons/bs";
 import DicePointer from "@/public/assets/DicePointer";
 import { translator } from "@/context/transactions";
+import { truncateNumber } from "@/context/gameTransactions";
 
 export default function BetAmount({
   betAmt,
@@ -46,12 +47,11 @@ export default function BetAmount({
   const highestMaxBetAmt =
     leastMultiplier !== undefined &&
     (maxPayouts[game as GameType] / leastMultiplier).toFixed(2);
-  // console.log("highestMaxBetAmt", highestMaxBetAmt);
 
   const tempBetAmt = betAmt ?? 0;
-  // console.log("tempBetAmt", tempBetAmt);
 
   const [currentMaxBetAmt, setCurrentMaxBetAmt] = useState(0);
+  const [inputString, setInputString] = useState("");
 
   useEffect(() => {
     if (tempBetAmt !== undefined && currentMultiplier !== undefined) {
@@ -76,19 +76,19 @@ export default function BetAmount({
   }, [tempBetAmt, betAmt, currentMultiplier, game]);
 
   useEffect(() => {
-    // console.log("currentMaxBetAmt", currentMaxBetAmt);
     setMaxBetAmt(
       Math.min(
-        Number(currentMaxBetAmt.toFixed(4)),
+        truncateNumber(currentMaxBetAmt, 4),
         coinData && coinData[0]?.amount
-          ? parseFloat(coinData[0].amount.toFixed(4))
-          : Number(currentMaxBetAmt.toFixed(4)),
+          ? truncateNumber(coinData[0].amount, 4)
+          : truncateNumber(currentMaxBetAmt, 4),
       ),
     );
   }, [currentMaxBetAmt, coinData]);
 
   const handleSetMaxBet = () => {
     setBetAmt(maxBetAmt);
+    setInputString((maxBetAmt ?? 0).toString());
   };
 
   const handleHalfBet = () => {
@@ -107,6 +107,7 @@ export default function BetAmount({
       }
 
       setBetAmt(newBetAmt);
+      setInputString(newBetAmt.toString());
     }
   };
 
@@ -126,6 +127,7 @@ export default function BetAmount({
         : newBetAmt;
 
       setBetAmt(finalBetAmt);
+      setInputString(finalBetAmt.toString());
     }
   };
 
@@ -326,10 +328,11 @@ export default function BetAmount({
               methods.clearErrors("amount");
             }
             setBetAmt(enteredAmount);
+            setInputString(e.target.value);
           }}
           placeholder={"0.0"}
           disabled={disabled}
-          value={betAmt ?? NaN}
+          value={inputString}
           lang="en"
           className={`flex w-full min-w-0 bg-transparent text-base text-[#94A3B8] placeholder-[#94A3B8] font-chakra placeholder-opacity-40 outline-none disabled:cursor-default disabled:opacity-50`}
         />

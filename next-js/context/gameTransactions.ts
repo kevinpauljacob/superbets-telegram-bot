@@ -506,3 +506,8 @@ export function trimStringToLength(str: string, desiredLength: number): string {
     str.substring(str.length - desiredLength, str.length)
   );
 }
+
+export const truncateNumber = (num: number, numOfDecimals: number) => {
+  const [whole, decimal] = num.toString().split(".");
+  return parseFloat(whole + "." + (decimal || "").slice(0, numOfDecimals));
+};
