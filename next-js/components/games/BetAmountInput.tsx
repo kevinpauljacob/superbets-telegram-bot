@@ -92,7 +92,7 @@ export default function BetAmount({
   const handleHalfBet = () => {
     if (betAmt || coinData) {
       let newBetAmt =
-        betAmt === 0 ? (coinData ? coinData[0]?.amount / 2 : 0) : betAmt! / 2;
+        !betAmt || betAmt === 0 ? (coinData ? coinData[0]?.amount / 2 : 0) : betAmt! / 2;
 
       newBetAmt = parseFloat(newBetAmt.toFixed(4));
 
