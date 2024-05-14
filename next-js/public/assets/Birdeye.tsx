@@ -1,11 +1,6 @@
-import Link from "next/link";
-
 export default function Birdeye({ className }: { className: string }) {
   return (
-    <Link
-      href="https://birdeye.so/token/Cx9oLynYgC3RrgXzin7U417hNY9D6YB1eMGw4ZMbWJgw?chain=solana"
-      target="_blank"
-    >
+    <div>
       <svg
         xmlns="http://www.w3.org/2000/svg"
         width="15"
@@ -47,6 +42,6 @@ export default function Birdeye({ className }: { className: string }) {
           </clipPath>
         </defs>
       </svg>
-    </Link>
+    </div>
   );
 }
