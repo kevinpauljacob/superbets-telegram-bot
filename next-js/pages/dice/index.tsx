@@ -30,6 +30,7 @@ import Bets from "../../components/games/Bets";
 import AutoCount from "@/components/AutoCount";
 import ConfigureAutoButton from "@/components/ConfigureAutoButton";
 import { errorCustom, warningCustom } from "@/components/toasts/ToastGroup";
+import { translator } from "@/context/transactions";
 
 export default function Dice() {
   const wallet = useWallet();
@@ -57,6 +58,7 @@ export default function Dice() {
     setUseAutoConfig,
     houseEdge,
     maxBetAmt,
+    language
   } = useGlobalContext();
 
   const [userInput, setUserInput] = useState<number | undefined>();
@@ -187,17 +189,17 @@ export default function Dice() {
 
         // auto options
         if (betType === "auto") {
-          if (useAutoConfig && autoWinChange && isWin) {
+          if (useAutoConfig && isWin) {
             setBetAmt(
               autoWinChangeReset
                 ? userInput!
-                : betAmt + (autoWinChange * betAmt) / 100.0,
+                : betAmt + ((autoWinChange ?? 0) * betAmt) / 100.0,
             );
-          } else if (useAutoConfig && autoLossChange && !isWin) {
+          } else if (useAutoConfig && !isWin) {
             setBetAmt(
               autoLossChangeReset
                 ? userInput!
-                : betAmt + (autoLossChange * betAmt) / 100.0,
+                : betAmt + ((autoLossChange ?? 0) * betAmt) / 100.0,
             );
           }
           // update profit / loss
@@ -376,7 +378,7 @@ export default function Dice() {
                 }}
                 className="cursor-pointer rounded-lg absolute w-full h-full z-20 bg-[#442c62] hover:bg-[#7653A2] focus:bg-[#53307E] flex items-center justify-center font-chakra font-semibold text-2xl tracking-wider text-white"
               >
-                STOP
+                {translator("STOP", language)}
               </div>
             )}
             <BetButton
@@ -454,7 +456,7 @@ export default function Dice() {
                       }}
                       className="cursor-pointer rounded-lg absolute w-full h-full z-20 bg-[#442c62] hover:bg-[#7653A2] focus:bg-[#53307E] flex items-center justify-center font-chakra font-semibold text-2xl tracking-wider text-white"
                     >
-                      STOP
+                      {translator("STOP", language)}
                     </div>
                   )}
                   <BetButton
@@ -488,15 +490,15 @@ export default function Dice() {
             <div>
               {isRolling ? (
                 <div className="font-chakra text-sm font-medium text-white text-opacity-75">
-                  Rolling the dice...
+                  {translator("Rolling the dice", language)}...
                 </div>
               ) : (
                 <div className="font-chakra text-sm font-medium text-white text-opacity-75">
                   {selectedFace.length === 0
-                    ? "Choose Upto 5 Faces"
+                    ? translator("Choose Upto 5 Faces", language)
                     : `${selectedFace.length
                         .toString()
-                        .padStart(2, "0")}/05 faces`}
+                        .padStart(2, "0")}/0${translator("5 Faces", language)}`}
                 </div>
               )}
             </div>

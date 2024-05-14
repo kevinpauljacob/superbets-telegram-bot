@@ -30,6 +30,7 @@ import {
   successCustom,
   warningCustom,
 } from "@/components/toasts/ToastGroup";
+import { translator } from "@/context/transactions";
 
 const Timer = dynamic(() => import("../../components/games/Timer"), {
   ssr: false,
@@ -64,6 +65,7 @@ export default function Flip() {
     setUseAutoConfig,
     houseEdge,
     maxBetAmt,
+    language,
   } = useGlobalContext();
 
   const [betAmt, setBetAmt] = useState<number | undefined>();
@@ -124,17 +126,17 @@ export default function Flip() {
 
             // auto options
             if (betSetting === "auto") {
-              if (useAutoConfig && autoWinChange && win) {
+              if (useAutoConfig && win) {
                 setBetAmt(
                   autoWinChangeReset
                     ? userInput!
-                    : betAmt + (autoWinChange * betAmt) / 100.0,
+                    : betAmt + ((autoWinChange ?? 0) * betAmt) / 100.0,
                 );
-              } else if (useAutoConfig && autoLossChange && !win) {
+              } else if (useAutoConfig && !win) {
                 setBetAmt(
                   autoLossChangeReset
                     ? userInput!
-                    : betAmt + (autoLossChange * betAmt) / 100.0,
+                    : betAmt + ((autoLossChange ?? 0) * betAmt) / 100.0,
                 );
               }
               // update profit / loss
@@ -285,7 +287,7 @@ export default function Flip() {
                 }}
                 className="cursor-pointer rounded-lg absolute w-full h-full z-20 bg-[#442c62] hover:bg-[#7653A2] focus:bg-[#53307E] flex items-center justify-center font-chakra font-semibold text-2xl tracking-wider text-white"
               >
-                STOP
+                {translator("STOP", language)}
               </div>
             )}
             <BetButton
@@ -321,7 +323,7 @@ export default function Flip() {
             />
           </div>
 
-          <div className="w-full flex flex-col">
+          <div className="w-full flex flex-col nobar">
             <FormProvider {...methods}>
               <form
                 className="flex w-full flex-col gap-0"
@@ -372,7 +374,7 @@ export default function Flip() {
                       className={``}
                     />
                     <span className="mt-0.5 font-chakra text-xl font-semibold">
-                      Heads
+                      {translator("Heads", language)}
                     </span>
                   </button>
                   <button
@@ -395,7 +397,7 @@ export default function Flip() {
                       className={``}
                     />
                     <span className="mt-0.5 font-chakra text-xl font-semibold">
-                      Tails
+                      {translator("Tails", language)}
                     </span>
                   </button>
                 </div>
@@ -410,7 +412,7 @@ export default function Flip() {
                       }}
                       className="cursor-pointer rounded-lg absolute w-full h-full z-20 bg-[#442c62] hover:bg-[#7653A2] focus:bg-[#53307E] flex items-center justify-center font-chakra font-semibold text-2xl tracking-wider text-white"
                     >
-                      STOP
+                      {translator("STOP", language)}
                     </div>
                   )}
                   <BetButton
@@ -448,8 +450,8 @@ export default function Flip() {
                 ? "Flipping..."
                 : result
                 ? result === "Won"
-                  ? "You Won!"
-                  : "You Lost!"
+                  ? translator("You Won!", language)
+                  : translator("You Lost!", language)
                 : ""}
             </span>
             <div className="flex items-center gap-2">

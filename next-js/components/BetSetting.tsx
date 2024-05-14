@@ -1,5 +1,5 @@
+import { translator } from "@/context/transactions";
 import { useGlobalContext } from "./GlobalContext";
-
 export default function BetSetting({
   betSetting,
   setBetSetting,
@@ -9,7 +9,7 @@ export default function BetSetting({
   setBetSetting: any;
   disabled?: boolean;
 }) {
-  const { setAutoBetCount } = useGlobalContext();
+  const { language, setAutoBetCount } = useGlobalContext();
   return (
     <div className="w-full flex lg:mb-6">
       <button
@@ -21,7 +21,7 @@ export default function BetSetting({
         onClick={() => setBetSetting("manual")}
         disabled={disabled}
       >
-        Manual
+        {translator("Manual", language)}
       </button>
       <button
         className={`w-full border-2 hover:duration-75 rounded-md py-2 ml-1 text-white font-semibold text-sm transition-all duration-300 ease-in-out disabled:cursor-not-allowed disabled:opacity-50 ${
@@ -35,7 +35,7 @@ export default function BetSetting({
         }}
         disabled={disabled}
       >
-        Auto
+        {translator("Auto", language)}
       </button>
     </div>
   );

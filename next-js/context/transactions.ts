@@ -21,6 +21,8 @@ const devPublicKey = new PublicKey(process.env.NEXT_PUBLIC_DEV_PUBLIC_KEY!);
 
 export const fomoToken = "Cx9oLynYgC3RrgXzin7U417hNY9D6YB1eMGw4ZMbWJgw";
 
+export const launchPromoEdge = true;
+
 export interface User {
   wallet: string;
   solAmount: number;
@@ -163,7 +165,11 @@ export const obfuscatePubKey = (address: string) => {
 export const translator = (text: string, language: string) => {
   let result = "";
   Object.entries(translationsMap).map((obj, value) => {
-    if (obj[0] === text) {
+    if (
+      text &&
+      typeof text === "string" &&
+      obj[0].toLowerCase() === text?.toLowerCase()
+    ) {
       switch (language) {
         case "en":
           result = text;

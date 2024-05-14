@@ -1,4 +1,6 @@
 import { useEffect, useState } from "react";
+import { useGlobalContext } from "../GlobalContext";
+import { translator } from "@/context/transactions";
 
 function CountdownTimer({
   betTime,
@@ -9,6 +11,7 @@ function CountdownTimer({
 }) {
   const timestamp = new Date(betTime).getTime() + minutes * 60000;
   const [timeLeft, setTimeLeft] = useState(calculateTimeLeft(timestamp));
+  const { language } = useGlobalContext();
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -64,7 +67,7 @@ function CountdownTimer({
         </div>
       ) : (
         <span className="font-changa text-xs md:text-sm text-[#F0F0F0] text-opacity-75">
-          {betTime ? "ENDED" : "00:00"}
+          {betTime ? translator("ENDED", language) : "00:00"}
         </span>
       )}
     </div>

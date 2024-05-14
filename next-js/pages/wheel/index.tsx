@@ -30,6 +30,7 @@ import {
   successCustom,
   warningCustom,
 } from "@/components/toasts/ToastGroup";
+import { translator } from "@/context/transactions";
 
 export default function Wheel() {
   const wallet = useWallet();
@@ -56,6 +57,7 @@ export default function Wheel() {
     setUseAutoConfig,
     houseEdge,
     maxBetAmt,
+    language,
   } = useGlobalContext();
   const [betAmt, setBetAmt] = useState<number | undefined>();
   const [userInput, setUserInput] = useState<number | undefined>();
@@ -78,12 +80,9 @@ export default function Wheel() {
   );
 
   const multipliers = riskToChance[risk];
-  console.log("multipliers", multipliers);
   const maxMultiplier = multipliers.reduce((max, item) => {
     return Math.max(max, item.multiplier);
   }, 0);
-
-  console.log("Maximum Multiplier:", maxMultiplier);
 
   const sortedMultipliers = multipliers
     .slice()
@@ -94,8 +93,7 @@ export default function Wheel() {
       index === 0 || self[index - 1].multiplier !== segment.multiplier,
   );
   const minMultiplier = uniqueSegments[1].multiplier;
-  console.log("Minimum Multiplier:", minMultiplier);
-  console.log("uniqueSegments", uniqueSegments);
+
   const segmentFill =
     segments === 10
       ? 0
@@ -212,17 +210,17 @@ export default function Wheel() {
 
       // auto options
       if (betType === "auto") {
-        if (useAutoConfig && autoWinChange && win) {
+        if (useAutoConfig && win) {
           setBetAmt(
             autoWinChangeReset
               ? userInput!
-              : betAmt + (autoWinChange * betAmt) / 100.0,
+              : betAmt + ((autoWinChange ?? 0) * betAmt) / 100.0,
           );
-        } else if (useAutoConfig && autoLossChange && !win) {
+        } else if (useAutoConfig && !win) {
           setBetAmt(
             autoLossChangeReset
               ? userInput!
-              : betAmt + (autoLossChange * betAmt) / 100.0,
+              : betAmt + ((autoLossChange ?? 0) * betAmt) / 100.0,
           );
         }
         // update profit / loss
@@ -340,7 +338,7 @@ export default function Wheel() {
                 }}
                 className="cursor-pointer rounded-lg absolute w-full h-full z-20 bg-[#442c62] hover:bg-[#7653A2] focus:bg-[#53307E] flex items-center justify-center font-chakra font-semibold text-2xl tracking-wider text-white"
               >
-                STOP
+                {translator("STOP", language)}
               </div>
             )}
             <BetButton
@@ -372,7 +370,7 @@ export default function Wheel() {
               disabled={disableInput}
             />
           </div>
-          <div className="w-full flex flex-col no-scrollbar overflow-y-auto">
+          <div className="w-full flex flex-col nobar">
             <FormProvider {...methods}>
               <form
                 className="flex w-full flex-col gap-0"
@@ -391,7 +389,7 @@ export default function Wheel() {
                 <div className="mb-6 w-full">
                   <div className="flex justify-between text-xs mb-2">
                     <p className="font-medium font-changa text-[#F0F0F0] text-opacity-90">
-                      Risk
+                      {translator("Risk", language)}
                     </p>
                   </div>
                   <div className="flex lg:flex-row flex-col gap-2.5 w-full items-center justify-evenly rounded-[8px] text-white font-chakra text-sm font-semibold bg-[#0C0F16] p-4">
@@ -406,7 +404,7 @@ export default function Wheel() {
                         }`}
                         disabled={disableInput}
                       >
-                        Low
+                        {translator("Low", language)}
                       </button>
                       <button
                         onClick={() => setRisk("medium")}
@@ -418,7 +416,7 @@ export default function Wheel() {
                         }`}
                         disabled={disableInput}
                       >
-                        Medium
+                        {translator("Medium", language)}
                       </button>
                     </div>
                     <button
@@ -431,14 +429,14 @@ export default function Wheel() {
                       }`}
                       disabled={disableInput}
                     >
-                      High
+                      {translator("High", language)}
                     </button>
                   </div>
                 </div>
 
                 <div className="mb-6 w-full">
                   <div className="flex justify-between text-xs mb-2 font-medium font-changa text-[#F0F0F0] text-opacity-90">
-                    <p className="">Segments</p>
+                    <p className="">{translator("Segments", language)}</p>
                     <p className="text-[#94A3B8] text-sm">{segments}</p>
                   </div>
                   <div className="relative h-[5px] rounded-full bg-[#2A2E38] w-full mt-5">
@@ -480,7 +478,7 @@ export default function Wheel() {
                       }}
                       className="rounded-lg absolute w-full h-full z-20 bg-[#442c62] hover:bg-[#7653A2] focus:bg-[#53307E] flex items-center justify-center font-chakra font-semibold text-2xl tracking-wider text-white"
                     >
-                      STOP
+                      {translator("STOP", language)}
                     </div>
                   )}
                   <BetButton
@@ -512,7 +510,7 @@ export default function Wheel() {
           <div>
             {isRolling ? (
               <div className="font-chakra text-sm font-medium text-white text-opacity-75">
-                Betting...
+                {translator("Betting", language)}...
               </div>
             ) : null}
           </div>
@@ -596,8 +594,13 @@ export default function Wheel() {
                       <div className="absolute top-[-120px] left-0 z-50 flex gap-4 text-white bg-[#202329] border border-white/10 rounded-lg w-full p-4 fadeInUp duration-100 min-w-[250px]">
                         <div className="w-1/2">
                           <div className="flex justify-between text-[13px] font-medium font-changa text-opacity-90 text-[#F0F0F0]">
-                            <span className="">Profit</span>
-                            <span>SOL</span>
+                            <span className="">
+                              {translator("Profit", language)}
+                            </span>
+                            <span>
+                              {/* {coinData ? coinData[0]?.amount.toFixed(4) : 0} $SOL */}
+                              SOL
+                            </span>
                           </div>
                           <div className="border border-white/10 rounded-lg p-3 mt-2">
                             {coinData
@@ -611,7 +614,7 @@ export default function Wheel() {
                         </div>
                         <div className="w-1/2">
                           <div className="text-[13px] font-medium font-changa text-opacity-90 text-[#F0F0F0]">
-                            Chance
+                            {translator("Chance", language)}
                           </div>
                           <div className="border border-white/10 rounded-lg p-3 mt-2">
                             {segment.chance}%
@@ -628,9 +631,12 @@ export default function Wheel() {
             (coinData[0].amount < 0.0001 && (
               <div className="w-full rounded-lg bg-[#d9d9d90d] bg-opacity-10 flex items-center px-3 py-3 text-white md:px-6">
                 <div className="w-full text-center font-changa font-medium text-sm md:text-base text-[#F0F0F0] text-opacity-75">
-                  Please deposit funds to start playing. View{" "}
+                  {translator(
+                    "Please deposit funds to start playing. View",
+                    language,
+                  )}{" "}
                   <Link href="/balance">
-                    <u>WALLET</u>
+                    <u>{translator("WALLET", language)}</u>
                   </Link>
                 </div>
               </div>

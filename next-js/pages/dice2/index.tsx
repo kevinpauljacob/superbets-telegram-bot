@@ -30,6 +30,7 @@ import {
   successCustom,
   warningCustom,
 } from "@/components/toasts/ToastGroup";
+import { translator } from "@/context/transactions";
 
 export default function Dice2() {
   const wallet = useWallet();
@@ -55,6 +56,7 @@ export default function Dice2() {
     setUseAutoConfig,
     houseEdge,
     maxBetAmt,
+    language,
   } = useGlobalContext();
   const [betAmt, setBetAmt] = useState<number | undefined>();
   const [userInput, setUserInput] = useState<number | undefined>();
@@ -93,7 +95,7 @@ export default function Dice2() {
       setMultiplier(floatValue);
 
       const calculatedChoice =
-        rollType === "over" ? 100 - 98 / floatValue : 98 / floatValue;
+        rollType === "over" ? 100 - 100 / floatValue : 100 / floatValue;
 
       const roundedChoice = parseFloat(calculatedChoice.toFixed(2));
       setChoice(roundedChoice);
@@ -122,7 +124,7 @@ export default function Dice2() {
       setChance(floatValue);
 
       const calculatedMultiplier =
-        rollType === "over" ? 98 / (100 - floatValue) : 98 / floatValue;
+        rollType === "over" ? 100 / (100 - floatValue) : 100 / floatValue;
       const roundedMultiplier = parseFloat(calculatedMultiplier.toFixed(4));
       setMultiplier(roundedMultiplier);
 
@@ -199,17 +201,23 @@ export default function Dice2() {
 
       // auto options
       if (betType === "auto") {
-        if (useAutoConfig && autoWinChange && win) {
+        console.log(
+          autoWinChange,
+          autoLossChange,
+          autoWinChangeReset,
+          autoLossChangeReset,
+        );
+        if (useAutoConfig && win) {
           setBetAmt(
             autoWinChangeReset
               ? userInput!
-              : betAmt + (autoWinChange * betAmt) / 100.0,
+              : betAmt + ((autoWinChange ?? 0) * betAmt) / 100.0,
           );
-        } else if (useAutoConfig && autoLossChange && !win) {
+        } else if (useAutoConfig && !win) {
           setBetAmt(
             autoLossChangeReset
               ? userInput!
-              : betAmt + (autoLossChange * betAmt) / 100.0,
+              : betAmt + ((autoLossChange ?? 0) * betAmt) / 100.0,
           );
         }
         // update profit / loss
@@ -245,10 +253,10 @@ export default function Dice2() {
   useEffect(() => {
     const calculateMultiplier = () => {
       if (rollType === "over") {
-        const calculatedMultiplier = (98 / (100 - choice)).toPrecision(4);
+        const calculatedMultiplier = (100 / (100 - choice)).toPrecision(4);
         setMultiplier(parseFloat(calculatedMultiplier));
       } else if (rollType === "under") {
-        const calculatedMultiplier = (98 / choice).toPrecision(4);
+        const calculatedMultiplier = (100 / choice).toPrecision(4);
         setMultiplier(parseFloat(calculatedMultiplier));
       }
     };
@@ -296,6 +304,7 @@ export default function Dice2() {
         showInfoToast("Profit limit reached.");
         setAutoBetCount(0);
         setStartAuto(false);
+        setUserInput(betAmt);
         return;
       }
       if (
@@ -352,7 +361,7 @@ export default function Dice2() {
                 }}
                 className="cursor-pointer rounded-lg absolute w-full h-full z-20 bg-[#442c62] hover:bg-[#7653A2] focus:bg-[#53307E] flex items-center justify-center font-chakra font-semibold text-2xl tracking-wider text-white"
               >
-                STOP
+                {translator("STOP", language)}
               </div>
             )}
             <BetButton
@@ -427,7 +436,7 @@ export default function Dice2() {
                       }}
                       className="cursor-pointer rounded-lg absolute w-full h-full z-20 bg-[#442c62] hover:bg-[#7653A2] focus:bg-[#53307E] flex items-center justify-center font-chakra font-semibold text-2xl tracking-wider text-white"
                     >
-                      STOP
+                      {translator("STOP", language)}
                     </div>
                   )}
                   <BetButton
@@ -459,7 +468,7 @@ export default function Dice2() {
           <div>
             {isRolling ? (
               <div className="font-chakra text-xs sm:text-sm font-medium text-white text-opacity-75">
-                Betting ...
+                {translator("Betting", language)}...
               </div>
             ) : null}
           </div>
@@ -480,7 +489,7 @@ export default function Dice2() {
             <>
               <div className="flex flex-col w-full">
                 <span className="text-[#F0F0F0] font-changa font-semibold text-xs mb-1">
-                  Multiplier
+                  {translator("Multiplier", language)}
                 </span>
                 <input
                   id={"amount-input"}
@@ -505,11 +514,11 @@ export default function Dice2() {
               >
                 {rollType === "over" ? (
                   <span className="text-[#F0F0F0] text-xs font-changa font-semibold mb-1">
-                    Roll Over
+                    {translator("Roll Over", language)}
                   </span>
                 ) : (
                   <span className="text-[#F0F0F0] text-xs font-chakra font-semibold mb-1">
-                    Roll Under
+                    {translator("Roll Under", language)}
                   </span>
                 )}
                 <span className="flex justify-between items-center bg-[#202329] text-xs font-chakra text-white rounded-md px-2 md:px-5 py-3">
@@ -526,7 +535,7 @@ export default function Dice2() {
               {choice && (
                 <div className="flex flex-col w-full">
                   <span className="text-[#F0F0F0] font-chakra font-semibold text-xs mb-1">
-                    Chance
+                    {translator("Chance", language)}
                   </span>
                   <input
                     className={`bg-[#202329] w-full min-w-0 font-chakra text-xs text-white rounded-md px-2 md:px-5 py-3 placeholder-[#94A3B8] placeholder-opacity-40 outline-none`}
@@ -547,9 +556,12 @@ export default function Dice2() {
             (coinData[0].amount < 0.0001 && (
               <div className="w-full rounded-lg bg-[#d9d9d90d] bg-opacity-10 flex items-center px-3 py-3 text-white md:px-6">
                 <div className="w-full text-center font-changa font-medium text-sm md:text-base text-[#F0F0F0] text-opacity-75">
-                  Please deposit funds to start playing. View{" "}
+                  {translator(
+                    "Please deposit funds to start playing. View",
+                    language,
+                  )}{" "}
                   <Link href="/balance">
-                    <u>WALLET</u>
+                    <u>{translator("WALLET", language)}</u>
                   </Link>
                 </div>
               </div>

@@ -8,7 +8,11 @@ import {
   seedStatus,
 } from "@/utils/provably-fair";
 import StakingUser from "@/models/staking/user";
-import { houseEdgeTiers, pointTiers } from "@/context/transactions";
+import {
+  houseEdgeTiers,
+  launchPromoEdge,
+  pointTiers,
+} from "@/context/transactions";
 import { wsEndpoint } from "@/context/gameTransactions";
 import { Decimal } from "decimal.js";
 Decimal.set({ precision: 9 });
@@ -178,7 +182,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       const userTier = Object.entries(pointTiers).reduce((prev, next) => {
         return points >= next[1]?.limit ? next : prev;
       })[0];
-      const houseEdge = houseEdgeTiers[parseInt(userTier)];
+      const houseEdge = launchPromoEdge
+        ? 0
+        : houseEdgeTiers[parseInt(userTier)];
 
       const activeGameSeed = await GameSeed.findOneAndUpdate(
         {

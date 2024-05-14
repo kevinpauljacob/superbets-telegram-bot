@@ -1,4 +1,6 @@
 import React from "react";
+import { translator } from "@/context/transactions";
+import { useGlobalContext } from "../GlobalContext";
 
 interface MultiplierInputProps {
   inputMultiplier: number;
@@ -19,10 +21,11 @@ const MultiplierInput = ({
   step,
   maxLength,
 }: MultiplierInputProps) => {
+  const { language } = useGlobalContext();
   return (
     <div className="flex flex-col w-full mb-6">
       <span className="text-[#F0F0F0] font-changa font-semibold text-xs mb-1">
-        Multiplier
+        {translator("Multiplier", language)}
       </span>
       <input
         id={"amount-input"}

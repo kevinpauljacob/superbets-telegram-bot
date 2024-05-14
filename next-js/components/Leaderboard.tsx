@@ -77,14 +77,14 @@ function Leaderboard() {
           <div className="flex w-full flex-col items-center">
             {/* header  */}
             {data.length > 0 && (
-              <div className="mb-[1.4rem] flex w-full flex-row items-center gap-2 pr-10">
-                <span className="w-[10%] text-right font-medium text-[#F0F0F080]">
+              <div className="mb-[1.4rem] flex w-full flex-row items-center gap-2 pr-10 bg-staking-bg py-1 font-changa">
+                <span className="w-[10%] text-right text-[#F0F0F080]">
                   {headers[0]}
                 </span>
-                <span className="w-[70%] text-left font-medium text-[#F0F0F080] pl-[18%]">
+                <span className="w-[70%] text-left text-[#F0F0F080] pl-[18%]">
                   {headers[1]}
                 </span>
-                <span className="w-[15%] text-right font-medium text-[#F0F0F080]">
+                <span className="w-[15%] text-right text-[#F0F0F080]">
                   {headers[2]}
                 </span>
               </div>
@@ -125,15 +125,7 @@ function Leaderboard() {
                 .map((data, index) => (
                   <div
                     key={index}
-                    className={`mb-2.5 flex w-full flex-row items-center gap-2 rounded-[5px] ${
-                      index % 2 === 0
-                        ? myData
-                          ? "bg-transparent"
-                          : "bg-[#9945FF] bg-opacity-[0.075]"
-                        : myData
-                        ? "bg-[#9945FF] bg-opacity-[0.075]"
-                        : "bg-transparent"
-                    } py-3 pr-10`}
+                    className={`mb-2.5 flex w-full flex-row items-center gap-2 rounded-[5px] bg-staking-bg  py-3 pr-10`}
                   >
                     <span className="w-[10%] text-right font-changa text-sm text-[#F0F0F0] text-opacity-75">
                       {data.rank}

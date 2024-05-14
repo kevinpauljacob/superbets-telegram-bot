@@ -5,6 +5,7 @@ import { useWallet } from "@solana/wallet-adapter-react";
 import { GameType } from "@/utils/provably-fair";
 import { useGlobalContext } from "./GlobalContext";
 import { useSession } from "next-auth/react";
+import { translator } from "@/context/transactions";
 
 export default function GameHeader() {
   const { data: session, status } = useSession();
@@ -13,7 +14,7 @@ export default function GameHeader() {
   const router = useRouter();
   const game = router.pathname.split("/")[1];
 
-  const { coinData, getProvablyFairData, setOpenPFModal } = useGlobalContext();
+  const { coinData, getProvablyFairData, setOpenPFModal, language } = useGlobalContext();
 
   useEffect(() => {
     const fetchGameData = (game: GameType) => {
@@ -92,7 +93,8 @@ export default function GameHeader() {
             height={30}
           />
           <p className="uppercase font-changa font-bold text-opacity-90 text-3xl min-w-[150px] ml-2">
-            {selectedGame.name}
+            {translator(selectedGame.name, language)}
+            {/* {selectedGame.name} */}
           </p>
         </div>
         <div className="flex flex-wrap mt-1 justify-end">
@@ -103,13 +105,13 @@ export default function GameHeader() {
             </p>
           </div> */}
           <div className="hidden md:flex items-center justify-between bg-[#1E2220] rounded-md mx-1.5  my-1 px-4 py-1">
-            <p className="font-thin text-xs">Volume :&nbsp;</p>
+            <p className="font-thin text-xs">{translator("Volume", language)} :&nbsp;</p>
             <p className="text-[#7839C5] font-semibold text-xs">
               {selectedGame.stats?.volume.toFixed(2)}
             </p>
           </div>
           <div className="hidden md:flex items-center justify-between bg-[#1E2220] rounded-md mx-1.5  my-1 px-4 py-1">
-            <p className="font-thin text-xs">Unique Players :&nbsp;</p>
+            <p className="font-thin text-xs">{translator("Unique Players", language)} :&nbsp;</p>
             <p className="text-[#7839C5] font-semibold text-xs">
               {selectedGame.stats?.players}
             </p>
@@ -120,7 +122,7 @@ export default function GameHeader() {
                 className="underline text-[#94A3B8] decoration-[#94A3B8] underline-offset-2 hover:cursor-pointer text-xs font-medium"
                 onClick={() => setOpenPFModal(true)}
               >
-                Provably Fair
+                {translator("Provably Fair", language)}
               </p>
               <Image
                 src={"/assets/fair.png"}

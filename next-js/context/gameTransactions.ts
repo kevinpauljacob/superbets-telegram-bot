@@ -26,6 +26,9 @@ const devPublicKey = new PublicKey(process.env.NEXT_PUBLIC_DEV_PUBLIC_KEY!);
 
 export const minGameAmount = 1e-6;
 
+export const timeWeightedAvgInterval = 24 * 60 * 60 * 1000;
+export const timeWeightedAvgLimit = 100;
+
 export const placeBet = async (
   wallet: WalletContextState,
   amount: number,
@@ -503,3 +506,8 @@ export function trimStringToLength(str: string, desiredLength: number): string {
     str.substring(str.length - desiredLength, str.length)
   );
 }
+
+export const truncateNumber = (num: number, numOfDecimals: number) => {
+  const [whole, decimal] = num.toString().split(".");
+  return parseFloat(whole + "." + (decimal || "").slice(0, numOfDecimals));
+};

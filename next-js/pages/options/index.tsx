@@ -20,6 +20,7 @@ import BetButton from "@/components/games/BetButton";
 import BalanceAlert from "@/components/games/BalanceAlert";
 import { soundAlert } from "@/utils/soundUtils";
 import { errorCustom, successCustom } from "@/components/toasts/ToastGroup";
+import {translator} from "@/context/transactions";
 
 const Timer = dynamic(() => import("../../components/games/Timer"), {
   ssr: false,
@@ -40,6 +41,7 @@ export default function Options() {
     coinData,
     setShowWalletModal,
     maxBetAmt,
+    language
   } = useGlobalContext();
 
   const [livePrice, setLivePrice] = useState(0);
@@ -373,7 +375,7 @@ export default function Options() {
             {/* select interval  */}
             <div className="mb-[1.4rem] flex w-full flex-col rounded-lg bg-transparent bg-opacity-10">
               <span className="mb-1 text-sm text-white/90 font-medium font-changa">
-                Select Interval
+                {translator("Select Interval", language)}
               </span>
               <div className="flex lg:flex-row flex-col items-center gap-2.5 bg-[#0C0F16] p-2 md:p-4 rounded-lg">
                 <div className="flex lg:w-[66.66%] w-full gap-2.5">
@@ -388,7 +390,7 @@ export default function Options() {
                         : "border-transparent hover:border-[#7839C580]"
                     } w-full rounded-[5px] border-[2px] bg-[#202329] py-2 text-xs font-chakra text-white text-opacity-90 transition duration-200`}
                   >
-                    3 Min
+                    3 {translator("Min", language)}
                   </button>
                   <button
                     type="button"
@@ -401,7 +403,7 @@ export default function Options() {
                         : "border-transparent hover:border-[#7839C580]"
                     } w-full rounded-[5px] border-[2px] bg-[#202329] py-2 text-xs font-chakra text-white text-opacity-90 transition duration-200`}
                   >
-                    4 Min
+                    4 {translator("Min", language)}
                   </button>
                 </div>
                 <button
@@ -415,7 +417,7 @@ export default function Options() {
                       : "border-transparent hover:border-[#7839C580]"
                   } lg:w-[33.33%] w-full rounded-[5px] border-[2px] bg-[#202329] py-2 text-xs font-chakra text-white text-opacity-90 transition duration-200`}
                 >
-                  5 Min
+                  5 {translator("Min", language)}
                 </button>
               </div>
             </div>
@@ -432,7 +434,7 @@ export default function Options() {
                     : "border-transparent hover:border-[#7839C580]"
                 } w-full rounded-lg text-center cursor-pointer border-2 bg-[#202329] py-2.5 font-changa text-xl text-white shadow-[0px_4px_15px_0px_rgba(0,0,0,0.25)]`}
               >
-                UP
+                {translator("UP", language)}
               </div>
               <div
                 onClick={() => {
@@ -444,7 +446,7 @@ export default function Options() {
                     : "border-transparent hover:border-[#7839C580]"
                 } w-full rounded-lg text-center cursor-pointer border-2 bg-[#202329] py-2.5 font-changa text-xl text-white shadow-[0px_4px_15px_0px_rgba(0,0,0,0.25)] `}
               >
-                DOWN
+                {translator("DOWN", language)}
               </div>
             </div>
 
@@ -487,14 +489,14 @@ export default function Options() {
               <Timer minutes={betInterval} betTime={betTime!} />
               {strikePrice === 0
                 ? loading && !checkResult
-                  ? "Placing bet..."
+                  ? translator("Placing bet", language) + "..."
                   : ""
                 : checkResult
                 ? loading && !result
-                  ? "Checking result..."
+                  ? translator("Checking result", language) + "..."
                   : ""
                 : (timeLeft * 50) / (betInterval * 60000) <= 0
-                ? "Checking result..."
+                ? translator("Checking result", language) + "..."
                 : ""}
             </div>
             <div className="flex flex-col items-end">
@@ -506,7 +508,7 @@ export default function Options() {
                   betType === "up" ? "text-[#72F238]" : "text-[#CF304A]"
                 } text-xs md:text-base font-bold`}
               >
-                {betType ? (betType === "up" ? "BET UP" : "BET DOWN") : ""}
+                {betType ? (betType === "up" ? translator("BET UP", language) : translator("BET DOWN", language)) : ""}
               </span>
             </div>
           </div>
@@ -541,7 +543,7 @@ export default function Options() {
                       : "text-[#f0f0f0] test-opacity-75"
                   }`}
                 >
-                  {result ? (result === "Won" ? "You Won!" : "You Lost!") : ""}
+                  {result ? (result === "Won" ? translator("You Won!", language) : translator("You Lost!", language)) : ""}
                 </span>
               )}
             </div>

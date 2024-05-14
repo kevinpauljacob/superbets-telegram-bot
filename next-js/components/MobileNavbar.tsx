@@ -12,18 +12,23 @@ import ActiveStore from "/public/assets/activeStore.svg";
 import Dashboard from "/public/assets/dashboard.svg";
 import ActiveDashboard from "/public/assets/activeDashboard.svg";
 import Link from "next/link";
+
+import { translator } from "@/context/transactions";
 import { useGlobalContext } from "./GlobalContext";
 
-export default function MobileNavbar() {
+export default function MobileNavbar({
+  sidebar,
+  toggleSidebar,
+}: {
+  sidebar: boolean;
+  toggleSidebar: () => void;
+}) {
   const router = useRouter();
-  const { mobileSidebar, setMobileSidebar } = useGlobalContext();
-  const toggleSidebar = () => {
-    setMobileSidebar(!mobileSidebar);
-  };
+  const { language } = useGlobalContext();
   return (
     <div
       className={`${
-        mobileSidebar ? "z-50" : ""
+        sidebar ? "z-50" : ""
       } md:hidden text-white bg-[#121418] border-b border-white/10 py-2 w-full`}
     >
       <ul className="flex flex-1">
@@ -33,21 +38,21 @@ export default function MobileNavbar() {
         >
           <li
             className={`${
-              mobileSidebar ? "bg-[#1E2024]" : ""
+              sidebar ? "bg-[#1E2024]" : ""
             } hover:bg-[#1E2024] flex flex-col items-center rounded-md w-[4.7rem] pt-1.5 pb-1`}
           >
             <Image
-              src={mobileSidebar ? ActiveMenu : Menu}
+              src={sidebar ? ActiveMenu : Menu}
               alt="Menu"
               width={23}
               height={20}
             />
             <p
               className={`text-[10px] text-white/60 ${
-                mobileSidebar ? "text-[#8033D7]" : "text-white/60"
+                sidebar ? "text-[#8033D7]" : "text-white/60"
               } mt-1.5`}
             >
-              Menu
+              {translator("Menu", language)}
             </p>
           </li>
         </button>
@@ -74,7 +79,7 @@ export default function MobileNavbar() {
                   : "text-white/60"
               } mt-1.5`}
             >
-              Staking
+              {translator("Staking", language)}
             </p>
           </li>
         </Link>
@@ -104,7 +109,7 @@ export default function MobileNavbar() {
                   : "text-white/60"
               } mt-1.5`}
             >
-              Leaderboard
+              {translator("Leaderboard", language)}
             </p>
           </li>
         </Link>
@@ -130,7 +135,7 @@ export default function MobileNavbar() {
                   : "text-white/60"
               } mt-1.5`}
             >
-              Store
+              {translator("Store", language)}
             </p>
           </li>
         </Link>
@@ -154,7 +159,7 @@ export default function MobileNavbar() {
                 router.pathname === "/" ? "text-[#8033D7]" : "text-white/60"
               } mt-1.5`}
             >
-              Home
+              {translator("Dashboard", language)}
             </p>
           </li>
         </Link>
