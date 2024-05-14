@@ -254,7 +254,7 @@ export default function ProvablyFairModal({
   const renderRiskAndSegments = () => (
     
     <>
-      <div >
+      <div>
         <label className="text-xs text-opacity-75 font-changa text-[#F0F0F0]">
           {translator("Risk", language)}
         </label>
@@ -315,7 +315,7 @@ export default function ProvablyFairModal({
                 id="pointer"
                 className="absolute z-50 -top-2 transition-all duration-100"
               />
-              <div ref={wheelRef} className="relative w-[200px] h-[200px] rounded-full overflow-hidden">
+              <div ref={wheelRef} className="relative w-[200px] h-[200px] rounded-full overflow-hidden ">
                 {typeof window !== "undefined" && (
                   <svg viewBox="0 0 300 300">
                     {rotationAngle &&
@@ -333,25 +333,25 @@ export default function ProvablyFairModal({
                   </svg>
                 )}
               </div>
-              <div className="absolute z-10 w-[79.75%] h-[79.75%] rounded-full bg-black/10 left-[10%] top-[10%]" />
-              <div className="absolute z-20 w-[66.5%] h-[66.5%] rounded-full bg-[#171A1F] left-[16.75%] top-[16.75%]" />
+              <div className="absolute z-10 w-[79.75%] h-[79.75%] rounded-full bg-black/10 left-[10%] top-[10%] " />
+              <div className="absolute z-20 w-[66.5%] h-[66.5%] rounded-full bg-[#171A1F] left-[16.75%] top-[16.75%] " />
               <div className="absolute z-20 w-[62.5%] h-[62.5%] rounded-full bg-[#0C0F16] left-[18.75%] top-[18.75%] text-white flex items-center justify-center text-2xl font-semibold font-changa text-opacity-80 ">
                 {strikeMultiplier}
               </div>
             </div>
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-2 flex-wrap  justify-center ">
             {uniqueSegments.map((segment, index) => (
               <div
                 key={index}
-                className="relative w-full"
+                className="relative w-[40px] "
                 onMouseEnter={() =>
                   setHoveredMultiplier(segment.multiplier)
                 }
                 onMouseLeave={() => setHoveredMultiplier(null)}
               >
                 <div
-                  className={`w-full border-t-[6px] text-center font-chakra font-semibold bg-[#202329] text-xs text-white rounded-md px-1.5 md:px-5 py-2.5`}
+                  className={`w-full border-t-[6px] text-center font-chakra font-semibold bg-[#202329] text-xs text-white rounded-md px-1.5 md:px-5 py-2.5 flex justify-center items-center`}
                   style={{ borderColor: segment.color }}
                 >
                   {segment.multiplier}x
