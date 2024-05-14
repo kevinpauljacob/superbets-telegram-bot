@@ -1245,5 +1245,30 @@ export const translationsMap = {
     ru: "Панель",
     ko: "대시 보드",
     ch: "仪表板",
+  },
+  "Signing Out ...": {
+    ru: "Выход ...",
+    ko: "로그 아웃 중 ...",
+    ch: "登出中 ...",
+  },
+  "You Won!": {
+    ru: "Вы выиграли",
+    ko: "당신이 이겼습니다",
+    ch: "你赢了",
+  },
+  "You Lost!": {
+    ru: "Вы проиграли",
+    ko: "당신이 졌습니다",
+    ch: "你输了",
+  },
+  "Maximum amount for a single bet in this game is": {
+    ru: "Максимальная сумма для одной ставки в этой игре",
+    ko: "이 게임에서 한 번에 베팅할 수 있는 최대 금액",
+    ch: "此游戏中单次投注的最大金额为",
+  },
+  "The better must first rotate their seed pair to verify this bet.": {
+    ru: "Сначала нужно повернуть пару семян, чтобы проверить эту ставку.",
+    ko: "베팅자는 먼저 시드 페어를 회전해야 합니다.",
+    ch: "投注者首先需要旋转种子对。",
   }
 };

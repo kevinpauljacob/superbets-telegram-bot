@@ -449,7 +449,7 @@ export default function Keno() {
                 <div className="mb-[1.4rem] w-full">
                   <div className="flex justify-between text-xs mb-2">
                     <p className="font-medium font-changa text-[#F0F0F0] text-opacity-90">
-                      Risk
+                      {translator("Risk", language)}
                     </p>
                   </div>
                   <div className="grid lg:grid-cols-4 grid-cols-2 gap-3 w-full items-center rounded-[8px] text-white font-chakra text-sm font-semibold bg-[#0C0F16] p-4">
@@ -650,7 +650,7 @@ export default function Keno() {
                           <div className="absolute top-[-120px] left-0 xl:left-4 z-50 flex gap-4 text-white bg-[#0f0f0f] border border-white/10 rounded-[5px] w-full xl:w-[calc(100%-2rem)] p-4 fadeInUp duration-100 min-w-[250px]">
                             <div className="w-1/2">
                               <div className="flex justify-between text-[13px] font-medium font-changa text-opacity-90 text-[#F0F0F0]">
-                                <span className="">Profit</span>
+                                <span className="">{translator("Profit", language)}</span>
                               </div>
                               <div className="border border-white/10 rounded-[5px] p-3 mt-2">
                                 {coinData

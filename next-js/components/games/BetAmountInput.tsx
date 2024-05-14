@@ -138,7 +138,7 @@ export default function BetAmount({
   return (
     <div className="relative flex w-full flex-col mb-[1.4rem] z-10">
       <div className="flex w-full items-center justify-between text-xs font-changa text-opacity-90">
-        <label className="text-white/90 font-changa">Bet Amount</label>
+        <label className="text-white/90 font-changa">{translator("Bet Amount", language)}</label>
         <span className="flex items-center text-[#94A3B8] text-opacity-90 font-changa text-xs gap-2">
           <span className="cursor-pointer" onClick={handleSetMaxBet}>
             {maxBetAmt} $SOL
@@ -154,7 +154,7 @@ export default function BetAmount({
                 handleBetAmountsModal();
             }}
           >
-            Why?
+            {translator("Why", language)}?
           </span>
         </span>
       </div>
@@ -185,7 +185,7 @@ export default function BetAmount({
                 <div className="relative">
                   <div className="absolute text-[#94A3B8] text-[11px] font-semibold font-chakra -top-7 -right-[24px] w-max">
                     <span className="text-white">
-                      Max {currentMaxBetAmt.toFixed(2)}
+                      {translator("Max", language)} {currentMaxBetAmt.toFixed(2)}
                     </span>
                     <svg
                       width="6"
@@ -215,7 +215,7 @@ export default function BetAmount({
           <div className="flex justify-between gap-2.5 w-full">
             <div className="flex flex-col items-center bg-[#202329]/50 text-white font-chakra font-semibold rounded-[5px] py-1.5 w-full">
               <span className="text-[10px] text-white text-opacity-50 mb-1">
-                Multiplier
+                {translator("Multiplier", language)}
               </span>
               <span className="text-xs font-medium">
                 {isNaN(currentMultiplier)
@@ -225,7 +225,7 @@ export default function BetAmount({
             </div>
             <div className="flex flex-col items-center bg-[#202329]/50 text-white font-chakra font-semibold rounded-[5px] py-1.5 w-full">
               <span className="cursor-pointer group relative text-[10px] text-white text-opacity-50 mb-1">
-                {"Max Bet"}
+                {translator("Max Bet", language)}
                 {/* <BsInfoCircleFill className="text-white text-opacity-50 w-3 h-3 absolute top-1/2 -translate-y-1/2 -right-4" />
                 <span className="absolute hidden group-hover:block transition-all z-[1000] text-justify w-80 p-2 rounded-[5px] top-5 -right-16 translate-x-[30%] md:translate-x-1/4 bg-[#080808] text-white/50 text-xs text-regular font-changa">
                   The maximum amount you can bet with the current multiplier (
@@ -259,7 +259,7 @@ export default function BetAmount({
             </div>
             <div className="flex flex-col items-center bg-[#202329]/50 text-white font-chakra font-semibold rounded-[5px] py-1.5 w-full">
               <span className="text-[10px] text-white text-opacity-50 mb-1">
-                Balance
+                {translator("Balance", language)}
               </span>
               <span className="text-xs font-medium">
                 {coinData ? (coinData[0]?.amount).toFixed(2) : 0.0}
@@ -289,14 +289,14 @@ export default function BetAmount({
             </span>
 
             <span className="text-[11px] font-medium font-chakra mx-3 min-[1412px]:max-w-[200px]">
-              Maximum amount for a single bet in this game is
+              {translator("Maximum amount for a single bet in this game is", language)}
               <span className="text-white/90 font-semibold"> 20.00 SOL</span>
                .
             </span>
           </div>
           <div className="flex flex-col items-center text-white font-chakra font-medium w-[20%] min-[1412px]:flex lg:hidden">
             <span className="text-[11px] text-white text-center font-semibold text-opacity-50">
-              Max Bet
+              {translator("Max Bet", language)}
             </span>
             <span className="flex items-center justify-center gap-1">
               {20}

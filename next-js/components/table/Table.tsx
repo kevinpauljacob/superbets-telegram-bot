@@ -96,7 +96,7 @@ export const TablePagination: React.FC<PaginationProps> = ({
   };
 
   return (
-    <div className="pb-5 mt-4 flex w-full cursor-pointer items-center justify-center gap-6 font-changa">
+    <div className="mt-5 flex w-full cursor-pointer items-center justify-center gap-6 font-changa">
       <button
         onClick={() => {
           if (page > 1) setPage(page - 1);
@@ -302,8 +302,8 @@ export const Table: React.FC<TableProps> = ({
           <div className={`scrollbar w-full ${home ? "" : "mt-8 pb-8"}`}>
             <div className="flex w-full md:min-w-[50rem] flex-col items-center">
               <TableHeader all={all} setAll={setAll} />
-              <div className="flex flex-col items-center w-full max-h-[34rem] nobar overflow-y-auto">
-                {bets.length ? (
+              <div className="flex flex-col items-center w-full max-h-[34rem]">
+                {bets?.length ? (
                   (home
                     ? bets
                     : bets.slice(

@@ -84,7 +84,7 @@ export default function ConnectWallet() {
           >
             {wallet.publicKey
               ? obfuscatePubKey(wallet.publicKey.toBase58())
-              : "signing out .."}
+              : translator("Signing Out ...", language)}
           </button>
         </>
       )}

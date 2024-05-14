@@ -1,5 +1,7 @@
 import { obfuscatePubKey, translator } from "@/context/transactions";
 import { useGlobalContext } from "../GlobalContext";
+import Badge from "@/public/assets/Badge.svg";
+import Image from "next/image";
 
 interface BetRowProps {
   bet: any;
@@ -31,13 +33,24 @@ const BetRow: React.FC<BetRowProps> = ({
     >
       {all && (
         <span className="w-full hidden md:block text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
-          {obfuscatePubKey(bet.wallet)}
+          <p className="flex items-center justify-center gap-2">
+            <Image src={Badge} alt="" />
+            {obfuscatePubKey(bet.wallet)}
+          </p>
         </span>
       )}
 
       <span className="w-full md:block text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
-        {translator(Capitalize(bet.game), language)}
-        {/* {Capitalize(bet.game)} */}
+        <p className="flex items-center justify-center gap-2">
+          <Image
+            src={`/assets/live-win-cards/${bet.game}.png`}
+            alt={bet.game}
+            width={25}
+            height={25}
+            className="rounded-md"
+          />
+          {translator(Capitalize(bet.game), language)}
+        </p>
       </span>
       <span className="w-full hidden md:block text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
         {(bet.amount ?? 0).toFixed(4)}
