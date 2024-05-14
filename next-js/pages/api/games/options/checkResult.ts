@@ -52,13 +52,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         });
 
       const userData = await StakingUser.findOne({ wallet });
-      let points = userData?.points ?? 0;
-      const userTier = Object.entries(pointTiers).reduce((prev, next) => {
-        return points >= next[1]?.limit ? next : prev;
-      })[0];
-      const houseEdge = launchPromoEdge
-        ? 0
-        : houseEdgeTiers[parseInt(userTier)];
+      const userTier = userData?.tier ?? 0;
+      const houseEdge = launchPromoEdge ? 0 : houseEdgeTiers[userTier];
 
       await new Promise((r) => setTimeout(r, 2000));
 
@@ -96,6 +91,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         {
           $inc: {
             "deposit.$.amount": amountWon,
+            numOfGamesPlayed: 1,
           },
           isOptionOngoing: false,
         },
@@ -117,28 +113,48 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         },
       );
 
-      if (result === "Won") {
-        const socket = new WebSocket(wsEndpoint);
+      const pointsGained =
+        0 * user.numOfGamesPlayed + 1.4 * bet.amount * userData.multiplier;
 
-        socket.onopen = () => {
-          socket.send(
-            JSON.stringify({
-              clientType: "api-client",
-              channel: "fomo-casino_games-channel",
-              authKey: process.env.FOMO_CHANNEL_AUTH_KEY!,
-              payload: {
-                game: GameType.options,
-                wallet,
-                absAmount: amountWon.sub(bet.amount).toNumber(),
-                result,
-                userTier,
-              },
-            }),
-          );
+      const points = userData.points + pointsGained;
+      const newTier = Object.entries(pointTiers).reduce((prev, next) => {
+        return points >= next[1]?.limit ? next : prev;
+      })[0];
 
-          socket.close();
-        };
-      }
+      await StakingUser.findOneAndUpdate(
+        {
+          wallet,
+        },
+        {
+          $inc: {
+            points: pointsGained,
+          },
+          $set: {
+            tier: newTier,
+          },
+        },
+      );
+
+      const socket = new WebSocket(wsEndpoint);
+
+      socket.onopen = () => {
+        socket.send(
+          JSON.stringify({
+            clientType: "api-client",
+            channel: "fomo-casino_games-channel",
+            authKey: process.env.FOMO_CHANNEL_AUTH_KEY!,
+            payload: {
+              game: GameType.options,
+              wallet,
+              absAmount: amountWon.sub(bet.amount).toNumber(),
+              result,
+              userTier,
+            },
+          }),
+        );
+
+        socket.close();
+      };
 
       return res.json({
         success: true,

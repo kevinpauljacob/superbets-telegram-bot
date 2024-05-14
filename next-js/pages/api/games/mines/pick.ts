@@ -92,13 +92,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         .toNumber();
 
       const userData = await StakingUser.findOne({ wallet });
-      let points = userData?.points ?? 0;
-      const userTier = Object.entries(pointTiers).reduce((prev, next) => {
-        return points >= next[1]?.limit ? next : prev;
-      })[0];
-      const houseEdge = launchPromoEdge
-        ? 0
-        : houseEdgeTiers[parseInt(userTier)];
+      const userTier = userData?.tier ?? 0;
+      const houseEdge = launchPromoEdge ? 0 : houseEdgeTiers[userTier];
+
       if (strikeNumbers[userBet] === 1) {
         result = "Lost";
 
@@ -136,6 +132,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
             {
               $inc: {
                 "deposit.$.amount": amountWon,
+                numOfGamesPlayed: 1,
               },
             },
             {
@@ -177,6 +174,28 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       }
 
       if (result !== "Pending") {
+        const pointsGained =
+          0 * user.numOfGamesPlayed + 1.4 * amount * userData.multiplier;
+
+        const points = userData.points + pointsGained;
+        const newTier = Object.entries(pointTiers).reduce((prev, next) => {
+          return points >= next[1]?.limit ? next : prev;
+        })[0];
+
+        await StakingUser.findOneAndUpdate(
+          {
+            wallet,
+          },
+          {
+            $inc: {
+              points: pointsGained,
+            },
+            $set: {
+              tier: newTier,
+            },
+          },
+        );
+
         const socket = new WebSocket(wsEndpoint);
 
         socket.onopen = () => {
