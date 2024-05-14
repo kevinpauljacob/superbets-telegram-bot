@@ -39,7 +39,7 @@ export default function Leaderboard() {
       </span>
       <div className="flex flex-col sm:flex-row items-center py-7 px-5 sm:px-10 2xl:px-[8%] mt-6 w-full h-full">
         {/* point bar and info  */}
-        <div className="px-4 py-2 flex flex-col w-full rounded-[5px] bg-staking-bg h-full">
+        <div className="px-6 py-4 flex flex-col w-full rounded-[5px] bg-staking-bg h-full ">
           <div className="flex flex-row items-end justify-between">
             <div className="flex items-center gap-2">
               <div className="flex relative min-w-[4.5rem] h-[4.5rem]">
