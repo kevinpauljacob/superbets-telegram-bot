@@ -1,7 +1,6 @@
 import { useWallet } from "@solana/wallet-adapter-react";
 import { useState, useEffect } from "react";
 import { Table } from "../table/Table";
-import { wsEndpoint } from "@/context/gameTransactions";
 import { useGlobalContext } from "../GlobalContext";
 
 interface Bet {
@@ -11,6 +10,7 @@ interface Bet {
   strikeMultiplier: number;
   payout: number;
   result: "Pending" | "Won" | "Lost";
+  userTier: number;
 }
 
 export default function Bets({ refresh }: { refresh: boolean }) {

@@ -52,17 +52,15 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
       const userData = await StakingUser.find({
         wallet: { $in: wallets },
-      }).select("wallet points");
+      }).select("wallet tier");
 
       const userTiers = userData.reduce((acc, user) => {
-        acc[user.wallet] = Object.entries(pointTiers).reduce((prev, next) => {
-          return user.points >= next[1].limit ? next : prev;
-        })[0];
+        acc[user.wallet] = user.tier;
         return acc;
       }, {});
 
       sortedGames.forEach((doc: any) => {
-        doc.userTier = userTiers[doc.wallet] ?? "0";
+        doc.userTier = userTiers[doc.wallet] ?? 0;
       });
 
       return res.json({
