@@ -15,6 +15,7 @@ import ProvablyFairModal from "../ProvablyFairModal";
 import { translator } from "@/context/transactions";
 import { useGlobalContext } from "@/components/GlobalContext";
 
+
 export interface PFModalData {
   activeGameSeed: {
     wallet: string;
@@ -56,37 +57,35 @@ export default function RollDiceProvablyFairModal({
   const [newClientSeed, setNewClientSeed] = useState<string>(
     generateClientSeed(),
   );
-  const [strikeNumbers, setStrikeNumbers] = useState<number[]>([]);
+
   const [selectedGameType, setSelectedGameType] = useState<GameType>(GameType.keno)
   const { language } = useGlobalContext();
   const [verificationState, setVerificationState] = useState<{
     clientSeed: string;
     serverSeed: string;
     nonce: string;
+    risk?:string;
+    segments?:number;
+
   }>(
     bet?.gameSeed
       ? {
-          clientSeed: bet.gameSeed?.clientSeed,
-          serverSeed: bet.gameSeed?.serverSeed ?? "",
+          clientSeed: bet.gameSeed.clientSeed,
+          serverSeed: bet.gameSeed.serverSeed ?? "",
           nonce: bet.nonce?.toString() ?? "",
+          risk: bet.risk || (selectedGameType === GameType.wheel ? "low" : undefined),
+          segments: bet.segments || (selectedGameType === GameType.wheel ? 10 : undefined),
         }
       : {
           clientSeed: "",
           serverSeed: "",
           nonce: "",
+          risk: selectedGameType === GameType.wheel ? "low" : undefined,
+          segments: selectedGameType === GameType.wheel ? 10 : undefined,
         },
   );
 
-  useEffect(() => {
-    setStrikeNumbers(
-      generateGameResult(
-        verificationState.serverSeed,
-        verificationState.clientSeed,
-        parseInt(verificationState.nonce),
-        GameType.keno,
-      ),
-    );
-  }, []);
+
 
   const handleToggleState = (newState: "seeds" | "verify") => {
     setState(newState);
@@ -115,16 +114,9 @@ export default function RollDiceProvablyFairModal({
       [name]: value,
     }));
 
-    const { clientSeed, serverSeed, nonce } = verificationState;
 
-    setStrikeNumbers(
-      generateGameResult(
-        name === "serverSeed" ? value : serverSeed,
-        name === "clientSeed" ? value : clientSeed,
-        parseInt(name === "nonce" ? value : nonce),
-        GameType.keno,
-      ),
-    );
+
+  
   };
 
   const handleSetClientSeed = async () => {
@@ -300,12 +292,12 @@ export default function RollDiceProvablyFairModal({
               <div className="grid w-full text-white">
                 <div className="grid gap-2">
                   <div className="border-2 border-opacity-5 border-[#FFFFFF] md:px-8">
-                    <div className="p-4">
+                   
                       <ProvablyFairModal
-                    
+                      setVerificationState={setVerificationState}
                        verificationState={verificationState}
                        selectedGameType={selectedGameType}/>
-                    </div>
+                    
                   </div>
                   <div>
                     <label className="text-xs text-opacity-75 font-changa text-[#F0F0F0]">
@@ -325,7 +317,7 @@ export default function RollDiceProvablyFairModal({
                         <option value={GameType.keno}>Keno</option>
                         <option value={GameType.dice}>Dice To Win</option>
   <option value={GameType.coin}>Coin Flip</option>
-  <option value={GameType.options}>Options</option>
+
   <option value={GameType.dice2}>Dice2</option>
   <option value={GameType.limbo}>Limbo</option>
   <option value={GameType.wheel}>Wheel</option>
@@ -369,6 +361,8 @@ export default function RollDiceProvablyFairModal({
                       className="bg-[#202329] text-white font-chakra text-xs font-medium mt-1 rounded-md px-5 py-4 w-full relative"
                     />
                   </div>
+                  
+                  
                 </div>
               </div>
             )}

@@ -13,6 +13,7 @@ import CheckPF from "@/public/assets/CheckPF.svg";
 import { errorCustom } from "@/components/toasts/ToastGroup";
 import { translator } from "@/context/transactions";
 import { useGlobalContext } from "@/components/GlobalContext";
+import ProvablyFairModal from "../ProvablyFairModal";
 
 export interface PFModalData {
   activeGameSeed: {
@@ -55,41 +56,37 @@ export default function CoinFlipProvablyFairModal({
   const [newClientSeed, setNewClientSeed] = useState<string>(
     generateClientSeed(),
   );
-
+  const [selectedGameType, setSelectedGameType] = useState<GameType>(GameType.coin)
   const { language } = useGlobalContext();
   const [verificationState, setVerificationState] = useState<{
     clientSeed: string;
     serverSeed: string;
     nonce: string;
+    risk?:string;
+    segments?:number;
+
   }>(
-    flip?.gameSeed
+   flip?.gameSeed
       ? {
-          clientSeed: flip.gameSeed.clientSeed,
-          serverSeed: flip.gameSeed.serverSeed ?? "",
-          nonce: flip.nonce?.toString() ?? "",
+          clientSeed:flip.gameSeed.clientSeed,
+          serverSeed:flip.gameSeed.serverSeed ?? "",
+          nonce:flip.nonce?.toString() ?? "",
+          risk:flip.risk || (selectedGameType === GameType.wheel ? "low" : undefined),
+          segments:flip.segments || (selectedGameType === GameType.wheel ? 10 : undefined),
         }
       : {
           clientSeed: "",
           serverSeed: "",
           nonce: "",
+          risk: selectedGameType === GameType.wheel ? "low" : undefined,
+          segments: selectedGameType === GameType.wheel ? 10 : undefined,
         },
   );
 
   //handling coin flip
-  const [wonCoinFace, setWonCoinface] = useState<"heads" | "tails">("heads");
 
-  useEffect(() => {
-    setWonCoinface(
-      generateGameResult(
-        verificationState.serverSeed,
-        verificationState.clientSeed,
-        parseInt(verificationState.nonce),
-        GameType.coin,
-      ) === 1
-        ? "heads"
-        : "tails",
-    );
-  }, []);
+
+  
 
   const handleToggleState = (newState: "seeds" | "verify") => {
     setState(newState);
@@ -118,18 +115,8 @@ export default function CoinFlipProvablyFairModal({
       [name]: value,
     }));
 
-    const { clientSeed, serverSeed, nonce } = verificationState;
-
-    setWonCoinface(
-      generateGameResult(
-        name === "serverSeed" ? value : serverSeed,
-        name === "clientSeed" ? value : clientSeed,
-        parseInt(name === "nonce" ? value : nonce),
-        GameType.coin,
-      ) === 1
-        ? "heads"
-        : "tails",
-    );
+    
+  
   };
 
   const handleSetClientSeed = async () => {
@@ -305,51 +292,34 @@ export default function CoinFlipProvablyFairModal({
               <div className="grid w-full text-white">
                 <div className="grid gap-2">
                   <div className="border-2 border-opacity-5 border-[#FFFFFF] md:px-5 sm:px-8">
-                    <div className="flex justify-center items-center gap-4 md:px-4 sm:px-3 px-2 py-4">
-                      <div
-                        className={`bg-[#202329] py-4 px-3 rounded-md flex gap-2 items-center justify-center w-full ${
-                          wonCoinFace === "heads"
-                            ? "border-2 border-[#7839C5]"
-                            : "border-[rgb(192,201,210)]"
-                        }`}
-                      >
-                        <div className="w-5 h-5 bg-[#FFC20E] rounded-full"></div>
-                        <div className="font-changa text-xl font-semibold">
-                          {translator("Heads", language)}
-                        </div>
-                      </div>
-                      <div
-                        className={`bg-[#202329] py-4 px-3 rounded-md flex gap-2 items-center justify-center w-full  ${
-                          wonCoinFace === "tails"
-                            ? "border-2 border-[#7839C5]"
-                            : "border-[rgb(192,201,210)]"
-                        }`}
-                      >
-                        <div className="w-5 h-5 bg-[rgb(192,201,210)] border border-white rounded-full"></div>
-                        <div className="font-changa text-xl font-semibold">
-                          {translator("Tails", language)}
-                        </div>
-                      </div>
-                    </div>
+                    <ProvablyFairModal
+                    verificationState={verificationState}
+                    setVerificationState={setVerificationState}
+                    selectedGameType={selectedGameType}/>
                   </div>
                   <div>
                     <label className="text-xs text-opacity-75 font-changa text-[#F0F0F0]">
                       {translator("Game", language)}
                     </label>
                     <div className="flex items-center">
-                      <select
+                    <select
                         name="game"
-                        value={GameType.coin}
+                        value={selectedGameType}
                         onChange={(e) =>
-                          setModalData((prevData) => ({
-                            ...prevData,
-                            game: e.target.value as GameType,
-                          }))
+                          setSelectedGameType(
+                           e.target.value as GameType
+                         )
                         }
                         className="bg-[#202329] text-white font-chakra text-xs font-medium mt-1 rounded-md px-5 py-4 w-full relative appearance-none"
                       >
-                        {/* <option value={GameType.dice}>Dice</option> */}
-                        <option value={GameType.coin}>{translator("Coin Flip", language)}</option>
+                        <option value={GameType.keno}>Keno</option>
+                        <option value={GameType.dice}>Dice To Win</option>
+  <option value={GameType.coin}>Coin Flip</option>
+  
+  <option value={GameType.dice2}>Dice2</option>
+  <option value={GameType.limbo}>Limbo</option>
+  <option value={GameType.wheel}>Wheel</option>
+
                       </select>
                     </div>
                   </div>

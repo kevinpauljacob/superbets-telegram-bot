@@ -15,6 +15,8 @@ export interface Limbo {
   result: "Won" | "Lost";
   strikeNumber: number;
   amountWon: number;
+  risk?:string;
+  segments?:number;
   nonce?: number;
   gameSeed?: {
     status: seedStatus;

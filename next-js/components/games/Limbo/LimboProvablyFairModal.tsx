@@ -65,33 +65,27 @@ export default function LimboProvablyFairModal({
     clientSeed: string;
     serverSeed: string;
     nonce: string;
+    risk?:string;
+    segments?:number;
+
   }>(
     flip?.gameSeed
       ? {
           clientSeed: flip.gameSeed.clientSeed,
           serverSeed: flip.gameSeed.serverSeed ?? "",
           nonce: flip.nonce?.toString() ?? "",
+          risk: flip.risk || (selectedGameType === GameType.wheel ? "low" : undefined),
+          segments: flip.segments || (selectedGameType === GameType.wheel ? 10 : undefined),
         }
       : {
           clientSeed: "",
           serverSeed: "",
           nonce: "",
+          risk: selectedGameType === GameType.wheel ? "low" : undefined,
+          segments: selectedGameType === GameType.wheel ? 10 : undefined,
         },
   );
 
-  useEffect(() => {
-    setMultiplier(
-      (
-        100 /
-        generateGameResult(
-          verificationState.serverSeed,
-          verificationState.clientSeed,
-          parseInt(verificationState.nonce),
-          GameType.limbo,
-        )
-      ).toFixed(2),
-    );
-  }, []);
 
   const handleToggleState = (newState: "seeds" | "verify") => {
     setState(newState);
@@ -310,6 +304,7 @@ export default function LimboProvablyFairModal({
                   <div className="border-2 border-opacity-5 border-[#FFFFFF] md:px-8">
                     <ProvablyFairModal
                     verificationState={verificationState}
+                    setVerificationState={setVerificationState}
                     selectedGameType={selectedGameType}/>
                   </div>
                 </div>
@@ -331,7 +326,7 @@ export default function LimboProvablyFairModal({
                         <option value={GameType.keno}>Keno</option>
                         <option value={GameType.dice}>Dice To Win</option>
   <option value={GameType.coin}>Coin Flip</option>
-  <option value={GameType.options}>Options</option>
+ 
   <option value={GameType.dice2}>Dice2</option>
   <option value={GameType.limbo}>Limbo</option>
   <option value={GameType.wheel}>Wheel</option>

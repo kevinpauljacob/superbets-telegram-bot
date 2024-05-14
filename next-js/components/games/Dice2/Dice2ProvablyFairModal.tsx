@@ -62,22 +62,28 @@ export default function RollDiceProvablyFairModal({
   const [strikeNumber, setStrikeNumber] = useState<number>(50.0);
   
   const {language} = useGlobalContext();
-
   const [verificationState, setVerificationState] = useState<{
     clientSeed: string;
     serverSeed: string;
     nonce: string;
+    risk?:string;
+    segments?:number;
+
   }>(
     bet?.gameSeed
       ? {
-          clientSeed: bet.gameSeed?.clientSeed,
-          serverSeed: bet.gameSeed?.serverSeed ?? "",
+          clientSeed: bet.gameSeed.clientSeed,
+          serverSeed: bet.gameSeed.serverSeed ?? "",
           nonce: bet.nonce?.toString() ?? "",
+          risk: bet.risk || (selectedGameType === GameType.wheel ? "low" : undefined),
+          segments: bet.segments || (selectedGameType === GameType.wheel ? 10 : undefined),
         }
       : {
           clientSeed: "",
           serverSeed: "",
           nonce: "",
+          risk: selectedGameType === GameType.wheel ? "low" : undefined,
+          segments: selectedGameType === GameType.wheel ? 10 : undefined,
         },
   );
 
@@ -305,8 +311,8 @@ export default function RollDiceProvablyFairModal({
                 <div className="grid gap-2">
                   <div className="border-2 border-opacity-5 border-[#FFFFFF] md:px-8">
                   <ProvablyFairModal
-                    
                     verificationState={verificationState}
+                    setVerificationState={setVerificationState}
                     selectedGameType={selectedGameType}/>
                   </div>
                   <div>
@@ -329,7 +335,7 @@ export default function RollDiceProvablyFairModal({
   <option value={GameType.coin}>Coin Flip</option>
   <option value={GameType.options}>Options</option>
   <option value={GameType.dice2}>Dice2</option>
-  <option value={GameType.limbo}>Limbo</option>
+
   <option value={GameType.wheel}>Wheel</option>
 
                       </select>

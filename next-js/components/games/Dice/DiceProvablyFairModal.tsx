@@ -78,18 +78,7 @@ export default function RollDiceProvablyFairModal({
         },
   );
 
-  useEffect(() => {
-    setWonDiceFace(
-      generateGameResult(
-        verificationState.serverSeed,
-        verificationState.clientSeed,
-        parseInt(verificationState.nonce),
-        GameType.dice,
-      ),
-    );
-  }, []);
 
-  const [wonDiceFace, setWonDiceFace] = useState<number>(1);
 
   const handleToggleState = (newState: "seeds" | "verify") => {
     setState(newState);
@@ -118,16 +107,8 @@ export default function RollDiceProvablyFairModal({
       [name]: value,
     }));
 
-    const { clientSeed, serverSeed, nonce } = verificationState;
 
-    setWonDiceFace(
-      generateGameResult(
-        name === "serverSeed" ? value : serverSeed,
-        name === "clientSeed" ? value : clientSeed,
-        parseInt(name === "nonce" ? value : nonce),
-        GameType.dice,
-      ),
-    );
+ 
   };
 
   const handleSetClientSeed = async () => {
@@ -302,10 +283,14 @@ export default function RollDiceProvablyFairModal({
             {state === "verify" && (
               <div className="grid w-full text-white">
                 <div className="grid gap-2">
+                <div className="border-2 border-opacity-5 border-[#FFFFFF] md:px-8 py-2">
                   <ProvablyFairModal 
                    verificationState={verificationState}
+                   setVerificationState={setVerificationState}
                    selectedGameType={selectedGameType}
                    />
+                   
+                  </div>
                   <div>
                     <label className="text-xs text-opacity-75 font-changa text-[#F0F0F0]">
                       {translator("Game", language)}
@@ -321,7 +306,14 @@ export default function RollDiceProvablyFairModal({
                         }
                         className="bg-[#202329] text-white font-chakra text-xs font-medium mt-1 rounded-md px-5 py-4 w-full relative appearance-none"
                       >
-                        <option value={GameType.dice}>Dice</option>
+                        <option value={GameType.keno}>Keno</option>
+                        <option value={GameType.dice}>Dice To Win</option>
+  <option value={GameType.coin}>Coin Flip</option>
+  <option value={GameType.options}>Options</option>
+  <option value={GameType.dice2}>Dice2</option>
+  <option value={GameType.limbo}>Limbo</option>
+  <option value={GameType.wheel}>Wheel</option>
+
                       </select>
                     </div>
                   </div>
