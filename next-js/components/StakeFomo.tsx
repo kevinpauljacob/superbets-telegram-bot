@@ -100,17 +100,17 @@ export default function StakeFomo() {
   };
 
   return (
-    <div className="w-full p-4 flex flex-col items-start gap-2 bg-staking-bg rounded-xl">
+    <div className="w-full p-6 py-6 flex flex-col items-start gap-1 bg-staking-bg rounded-xl">
       <span className="text-white text-opacity-90 font-semibold text-xl">
         {translator("Stake", language)} FOMO
       </span>
-      <div className="flex w-full items-center border-b border-white border-opacity-10">
+      <div className="flex w-full items-center border-b border-white border-opacity-10 mt-5">
         <button
           className={`${
             stake
               ? "text-white border-[#9945FF]"
               : "text-[#ffffff80] border-transparent hover:text-[#ffffffb5]"
-          } p-4 border-b-2 text-base font-medium transition-all`}
+          } p-2  border-b-2 text-base font-medium transition-all`}
           onClick={() => {
             setStake(true);
           }}
@@ -122,7 +122,7 @@ export default function StakeFomo() {
             !stake
               ? "text-white border-[#9945FF]"
               : "text-[#ffffff80] border-transparent hover:text-[#ffffffb5]"
-          } p-4 border-b-2 text-base font-medium transition-all`}
+          } p-2 border-b-2 text-base font-medium transition-all`}
           onClick={() => {
             setStake(false);
           }}
@@ -131,10 +131,10 @@ export default function StakeFomo() {
         </button>
       </div>
 
-      <p className="text-white text-opacity-90 text-sm mt-4 font-changa flex justify-between w-full">
+      <p className="text-white text-opacity-90 text-xs mt-4 font-changa flex justify-between w-full">
         {stake
-          ? translator("Deposit FOMO", language)
-          : translator("Withdraw FOMO", language)}
+          ? translator("Deposit", language)
+          : translator("Withdraw", language)}
         <span
           onClick={() => {
             stake ? setAmount(solBal) : setAmount(userData?.stakedAmount ?? 0);
@@ -146,7 +146,7 @@ export default function StakeFomo() {
       </p>
 
       <div
-        className={`relative group flex mt-1 h-11 w-full cursor-pointer items-center rounded-[8px] bg-[#202329] px-4`}
+        className={`relative group flex h-11 w-full cursor-pointer items-center rounded-[8px] bg-[#202329] px-4`}
       >
         <input
           id={"stake-amount-input"}
@@ -196,7 +196,7 @@ export default function StakeFomo() {
           handleRequest();
         }}
         disabled={loading || !session?.user}
-        className="w-full flex items-center justify-center gap-1 p-1.5 mt-4 bg-[#9945FF] hover:bg-opacity-50 disabled:bg-opacity-20 transition-all text-white text-xl font-semibold rounded-[5px]"
+        className="w-full flex py-3 items-center justify-center gap-1 p-1.5 mt-4 bg-[#9945FF] hover:bg-opacity-50 disabled:bg-opacity-20 transition-all text-white text-md tracking-wider font-semibold rounded-[5px]"
       >
         {loading && <Spinner />}
         {stake

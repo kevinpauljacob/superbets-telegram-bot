@@ -80,10 +80,9 @@ export default function Stake() {
   }, [session?.user, wallet.publicKey]);
 
   return (
-    <div className="flex flex-col items-center w-full overflow-hidden min-h-screen flex-1 relative font-chakra">
-      <div className="w-full flex flex-1 flex-col items-start gap-5 px-5 sm:px-10 lg:px-40 2xl:px-[15%] pb-10">
-        <span className="text-white text-opacity-90 font-semibold text-[1.5rem] sm:text-[2rem] mt-[4rem] flex items-center justify-center gap-x-2">
-          <Image src="/assets/lockIcon.svg" width={24} height={24} />
+    <div className="flex flex-col items-center w-full overflow-hidden min-h-screen flex-1 relative font-chakra h-full">
+      <div className="w-full flex flex-1 flex-col items-start gap-5 px-5 sm:px-10 lg:px-40 pb-10">
+        <span className="text-white text-opacity-90 font-semibold text-[1.5rem] sm:text-[2rem] mt-[1rem] sm:mt-[2rem] flex items-center justify-center gap-x-2">
           {translator("Stake", language).toUpperCase()}
         </span>
 
@@ -97,20 +96,20 @@ export default function Stake() {
         </div>
 
         {/* Global staking  */}
-        <span className="text-white text-opacity-50 text-xl mt-5 sm:mt-10 font-sans">
+        <span className="text-white text-opacity-50 text-base mt-5 sm:mt-10 font-sans">
           {translator("Global Staking Overview", language)}
         </span>
         <div className="flex w-full sm:w-[64.8%] font-sans">
-          <div className="w-full sm:w-[50%] relative p-3 sm:p-5 flex items-center justify-between gap-10 bg-staking-bg bg-opacity-75 -mt-1">
-            <div className="flex w-full sm:w-fit flex-col items-start gap-2 just">
+          <div className="w-full sm:w-[50%] relative p-3 sm:p-5 flex items-center justify-between gap-10 bg-staking-bg bg-opacity-75 -mt-2">
+            <div className="flex w-full sm:w-fit flex-col items-start gap-4 just">
               <span className="text-white text-opacity-50 text-xs sm:text-sm">
                 {translator("Total FOMO Staked", language)}
               </span>
               <div className="flex w-full mt-3 sm:mt-0 justify-end sm:justify-start items-end gap-2 font-chakra">
-                <span className="text-white text-opacity-80 text-xl sm:text-2xl font-semibold">
+                <span className="text-white text-opacity-80 text-2xl sm:text-2xl font-semibold">
                   {formatNumber(globalInfo?.stakedTotal)} $FOMO
                 </span>
-                <span className="text-staking-secondary text-opacity-80 text-sm sm:text-base font-semibold">
+                <span className="text-staking-secondary text-opacity-80 text-base sm:text-base font-semibold">
                   (
                   {formatNumber(
                     (globalInfo?.stakedTotal / globalInfo?.totalVolume) * 100,

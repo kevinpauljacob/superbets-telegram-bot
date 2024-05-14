@@ -23,7 +23,7 @@ export default function StakeStats() {
   ];
   return (
     <div className="w-full flex flex-col items-start gap-2">
-      <div className="px-4 py-2 flex flex-col bg-staking-bg w-full rounded-[5px]">
+      <div className="px-8 py-6 flex flex-col bg-staking-bg w-full rounded-[5px]">
         <div className="flex flex-row items-center justify-between">
           <p className="text-xl font-semibold text-white text-opacity-90">
             {translator("My Current Tier", language)}{" "}
@@ -122,7 +122,7 @@ export default function StakeStats() {
             }}
             className="h-full bg-[linear-gradient(91.179deg,#C867F0_0%,#1FCDF0_50.501%,#19EF99_100%)]"
           />
-          <span className="w-full h-full absolute top-0 left-0 flex items-center justify-center z-10 text-black font-semibold text-sm text-opacity-75">
+          <span className="w-full h-full absolute top-0 left-0 flex items-center justify-center z-10 text-white font-semibold text-sm">
             {(
               (((userData?.tier ?? 0) < 7
                 ? userData?.stakedAmount ?? 0
@@ -148,7 +148,7 @@ export default function StakeStats() {
             <span
               className={`relative font-chakra flex flex-row items-center w-full justify-end ${
                 index !== 2 ? "text-staking-secondary" : "text-white"
-              } font-semibold text-2xl`}
+              } font-semibold text-xl`}
             >
               {/* {stat.icon.length > 0 && (
                 <Image
