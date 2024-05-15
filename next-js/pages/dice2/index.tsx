@@ -368,9 +368,6 @@ export default function Dice2() {
               disabled={
                 !wallet ||
                 isRolling ||
-                (typeof autoBetCount === "number" && autoBetCount <= 0) ||
-                (typeof autoBetCount === "string" &&
-                  !autoBetCount.includes("inf")) ||
                 (coinData && coinData[0].amount < 0.0001) ||
                 (betAmt !== undefined &&
                   maxBetAmt !== undefined &&

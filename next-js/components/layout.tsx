@@ -58,6 +58,7 @@ export default function Layout({ children }: LayoutProps) {
     closeVerifyModal,
     verifyModalData,
     sidebar,
+    mobileSidebar,
     setSidebar,
     setMobileSidebar,
     setAutoBetCount,
@@ -165,7 +166,7 @@ export default function Layout({ children }: LayoutProps) {
         </section>
       </section>
       <div className="w-full fixed bottom-0 flex md:hidden z-[1000]">
-        <MobileNavbar sidebar={sidebar} toggleSidebar={toggleSidebar} />
+        <MobileNavbar sidebar={mobileSidebar} toggleSidebar={toggleSidebar} />
       </div>
       {showWalletModal && <BalanceModal />}
 
