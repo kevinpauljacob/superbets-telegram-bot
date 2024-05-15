@@ -26,6 +26,7 @@ const config: Config = {
         "fomo-red": "#F1323E",
         "staking-secondary": "#94A3B8",
         "staking-bg": "#121418",
+        "table-secondary": "#171A20"
       },
       fontFamily: {
         sans: ["Inter", "sans-serif"],
