@@ -347,6 +347,7 @@ export default function Keno() {
     return (
       <>
         <button
+          type="button"
           onClick={() => {
             handleAutoPick();
           }}
@@ -360,6 +361,7 @@ export default function Keno() {
           {translator("AUTOPICK", language)}
         </button>
         <button
+          type="button"
           onClick={() => {
             handleClear();
           }}
@@ -466,6 +468,7 @@ export default function Keno() {
                       {translator("Classic", language)}
                     </button>
                     <button
+                      type="button"
                       onClick={() => setRisk("low")}
                       className={`text-center w-full rounded-[5px] border-[2px] bg-[#202329] py-2 text-xs font-chakra disabled:opacity-50 text-white text-opacity-90 transition duration-200 ${
                         risk === "low"
@@ -477,6 +480,7 @@ export default function Keno() {
                       {translator("Low", language)}
                     </button>
                     <button
+                      type="button"
                       onClick={() => setRisk("medium")}
                       className={`text-center w-full block m-auto rounded-[5px] border-[2px] bg-[#202329] py-2 text-xs font-chakra disabled:opacity-50 text-white text-opacity-90 transition duration-200 ${
                         risk === "medium"
@@ -650,7 +654,9 @@ export default function Keno() {
                           <div className="absolute top-[-120px] left-0 xl:left-4 z-50 flex gap-4 text-white bg-[#0f0f0f] border border-white/10 rounded-[5px] w-full xl:w-[calc(100%-2rem)] p-4 fadeInUp duration-100 min-w-[250px]">
                             <div className="w-1/2">
                               <div className="flex justify-between text-[13px] font-medium font-changa text-opacity-90 text-[#F0F0F0]">
-                                <span className="">{translator("Profit", language)}</span>
+                                <span className="">
+                                  {translator("Profit", language)}
+                                </span>
                               </div>
                               <div className="border border-white/10 rounded-[5px] p-3 mt-2">
                                 {coinData
