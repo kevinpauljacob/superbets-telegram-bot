@@ -376,9 +376,11 @@ export default function Wheel() {
               {isRolling ? <Loader /> : "BET"}
             </BetButton>
           </div>
-          <div className="w-full flex lg:hidden">
-            <ConfigureAutoButton disabled={disableInput} />
-          </div>
+          {betType === "auto" && (
+            <div className="w-full flex lg:hidden">
+              <ConfigureAutoButton disabled={disableInput} />
+            </div>
+          )}
           <div className="w-full hidden lg:flex">
             <BetSetting
               betSetting={betType}
