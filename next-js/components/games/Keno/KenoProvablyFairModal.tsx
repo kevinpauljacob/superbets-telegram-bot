@@ -15,7 +15,6 @@ import ProvablyFairModal from "../ProvablyFairModal";
 import { translator } from "@/context/transactions";
 import { useGlobalContext } from "@/components/GlobalContext";
 
-
 export interface PFModalData {
   activeGameSeed: {
     wallet: string;
@@ -58,23 +57,28 @@ export default function RollDiceProvablyFairModal({
     generateClientSeed(),
   );
 
-  const [selectedGameType, setSelectedGameType] = useState<GameType>(GameType.keno)
+  const [selectedGameType, setSelectedGameType] = useState<GameType>(
+    GameType.keno,
+  );
   const { language } = useGlobalContext();
   const [verificationState, setVerificationState] = useState<{
     clientSeed: string;
     serverSeed: string;
     nonce: string;
-    risk?:string;
-    segments?:number;
-
+    risk?: string;
+    segments?: number;
   }>(
     bet?.gameSeed
       ? {
           clientSeed: bet.gameSeed.clientSeed,
           serverSeed: bet.gameSeed.serverSeed ?? "",
           nonce: bet.nonce?.toString() ?? "",
-          risk: bet.risk || (selectedGameType === GameType.wheel ? "low" : undefined),
-          segments: bet.segments || (selectedGameType === GameType.wheel ? 10 : undefined),
+          risk:
+            bet.risk ||
+            (selectedGameType === GameType.wheel ? "low" : undefined),
+          segments:
+            bet.segments ||
+            (selectedGameType === GameType.wheel ? 10 : undefined),
         }
       : {
           clientSeed: "",
@@ -84,8 +88,6 @@ export default function RollDiceProvablyFairModal({
           segments: selectedGameType === GameType.wheel ? 10 : undefined,
         },
   );
-
-
 
   const handleToggleState = (newState: "seeds" | "verify") => {
     setState(newState);
@@ -113,10 +115,6 @@ export default function RollDiceProvablyFairModal({
       ...prevData,
       [name]: value,
     }));
-
-
-
-  
   };
 
   const handleSetClientSeed = async () => {
@@ -292,10 +290,11 @@ export default function RollDiceProvablyFairModal({
               <div className="grid w-full text-white">
                 <div className="grid gap-2">
                   <div className="border-2 border-opacity-5 border-[#FFFFFF] md:px-8 py-2">
-                      <ProvablyFairModal
+                    <ProvablyFairModal
                       setVerificationState={setVerificationState}
-                       verificationState={verificationState}
-                       selectedGameType={selectedGameType}/>
+                      verificationState={verificationState}
+                      selectedGameType={selectedGameType}
+                    />
                   </div>
                   <div>
                     <label className="text-xs text-opacity-75 font-changa text-[#F0F0F0]">
@@ -306,20 +305,17 @@ export default function RollDiceProvablyFairModal({
                         name="game"
                         value={selectedGameType}
                         onChange={(e) =>
-                          setSelectedGameType(
-                           e.target.value as GameType
-                         )
+                          setSelectedGameType(e.target.value as GameType)
                         }
                         className="bg-[#202329] text-white font-chakra text-xs font-medium mt-1 rounded-md px-5 py-4 w-full relative appearance-none"
                       >
                         <option value={GameType.keno}>Keno</option>
                         <option value={GameType.dice}>Dice To Win</option>
-  <option value={GameType.coin}>Coin Flip</option>
+                        <option value={GameType.coin}>Coin Flip</option>
 
-  <option value={GameType.dice2}>Dice2</option>
-  <option value={GameType.limbo}>Limbo</option>
-  <option value={GameType.wheel}>Wheel</option>
-
+                        <option value={GameType.dice2}>Dice2</option>
+                        <option value={GameType.limbo}>Limbo</option>
+                        <option value={GameType.wheel}>Wheel</option>
                       </select>
                     </div>
                   </div>
@@ -359,8 +355,6 @@ export default function RollDiceProvablyFairModal({
                       className="bg-[#202329] text-white font-chakra text-xs font-medium mt-1 rounded-md px-5 py-4 w-full relative"
                     />
                   </div>
-                  
-                  
                 </div>
               </div>
             )}

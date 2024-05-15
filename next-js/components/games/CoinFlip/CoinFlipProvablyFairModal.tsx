@@ -56,23 +56,28 @@ export default function CoinFlipProvablyFairModal({
   const [newClientSeed, setNewClientSeed] = useState<string>(
     generateClientSeed(),
   );
-  const [selectedGameType, setSelectedGameType] = useState<GameType>(GameType.coin)
+  const [selectedGameType, setSelectedGameType] = useState<GameType>(
+    GameType.coin,
+  );
   const { language } = useGlobalContext();
   const [verificationState, setVerificationState] = useState<{
     clientSeed: string;
     serverSeed: string;
     nonce: string;
-    risk?:string;
-    segments?:number;
-
+    risk?: string;
+    segments?: number;
   }>(
-   flip?.gameSeed
+    flip?.gameSeed
       ? {
-          clientSeed:flip.gameSeed.clientSeed,
-          serverSeed:flip.gameSeed.serverSeed ?? "",
-          nonce:flip.nonce?.toString() ?? "",
-          risk:flip.risk || (selectedGameType === GameType.wheel ? "low" : undefined),
-          segments:flip.segments || (selectedGameType === GameType.wheel ? 10 : undefined),
+          clientSeed: flip.gameSeed.clientSeed,
+          serverSeed: flip.gameSeed.serverSeed ?? "",
+          nonce: flip.nonce?.toString() ?? "",
+          risk:
+            flip.risk ||
+            (selectedGameType === GameType.wheel ? "low" : undefined),
+          segments:
+            flip.segments ||
+            (selectedGameType === GameType.wheel ? 10 : undefined),
         }
       : {
           clientSeed: "",
@@ -84,9 +89,6 @@ export default function CoinFlipProvablyFairModal({
   );
 
   //handling coin flip
-
-
-  
 
   const handleToggleState = (newState: "seeds" | "verify") => {
     setState(newState);
@@ -114,9 +116,6 @@ export default function CoinFlipProvablyFairModal({
       ...prevData,
       [name]: value,
     }));
-
-    
-  
   };
 
   const handleSetClientSeed = async () => {
@@ -293,33 +292,31 @@ export default function CoinFlipProvablyFairModal({
                 <div className="grid gap-2">
                   <div className="border-2 border-opacity-5 border-[#FFFFFF] md:px-8 py-2 sm:px-8">
                     <ProvablyFairModal
-                    verificationState={verificationState}
-                    setVerificationState={setVerificationState}
-                    selectedGameType={selectedGameType}/>
+                      verificationState={verificationState}
+                      setVerificationState={setVerificationState}
+                      selectedGameType={selectedGameType}
+                    />
                   </div>
                   <div>
                     <label className="text-xs text-opacity-75 font-changa text-[#F0F0F0]">
                       {translator("Game", language)}
                     </label>
                     <div className="flex items-center">
-                    <select
+                      <select
                         name="game"
                         value={selectedGameType}
                         onChange={(e) =>
-                          setSelectedGameType(
-                           e.target.value as GameType
-                         )
+                          setSelectedGameType(e.target.value as GameType)
                         }
                         className="bg-[#202329] text-white font-chakra text-xs font-medium mt-1 rounded-md px-5 py-4 w-full relative appearance-none"
                       >
                         <option value={GameType.keno}>Keno</option>
                         <option value={GameType.dice}>Dice To Win</option>
-  <option value={GameType.coin}>Coin Flip</option>
-  
-  <option value={GameType.dice2}>Dice2</option>
-  <option value={GameType.limbo}>Limbo</option>
-  <option value={GameType.wheel}>Wheel</option>
+                        <option value={GameType.coin}>Coin Flip</option>
 
+                        <option value={GameType.dice2}>Dice2</option>
+                        <option value={GameType.limbo}>Limbo</option>
+                        <option value={GameType.wheel}>Wheel</option>
                       </select>
                     </div>
                   </div>
