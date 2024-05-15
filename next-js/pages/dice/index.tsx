@@ -409,9 +409,6 @@ export default function Dice() {
               disabled={
                 !wallet ||
                 selectedFace.length === 0 ||
-                (typeof autoBetCount === "number" && autoBetCount <= 0) ||
-                (typeof autoBetCount === "string" &&
-                  !autoBetCount.includes("inf")) ||
                 isRolling ||
                 (coinData && coinData[0].amount < 0.0001) ||
                 (betAmt !== undefined &&
