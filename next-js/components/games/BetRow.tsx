@@ -1,6 +1,5 @@
 import { obfuscatePubKey, translator } from "@/context/transactions";
 import { useGlobalContext } from "../GlobalContext";
-import Badge from "@/public/assets/Badge.svg";
 import Image from "next/image";
 
 interface BetRowProps {
@@ -34,7 +33,12 @@ const BetRow: React.FC<BetRowProps> = ({
       {all && (
         <span className="w-full hidden md:block text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
           <p className="flex items-center justify-center gap-2">
-            <Image src={Badge} alt="" />
+            <Image
+              src={`/assets/badges/T-${bet.userTier}.png`}
+              alt="badge"
+              width={20}
+              height={20}
+            />
             {obfuscatePubKey(bet.wallet)}
           </p>
         </span>

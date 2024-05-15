@@ -28,9 +28,15 @@ const gameUserSchema = new Schema(
       default: false,
     },
     sns: { type: String },
+    numOfGamesPlayed: {
+      type: Number,
+      default: 0,
+      required: true,
+    },
   },
   { timestamps: true },
 );
 
-let GameUser = mongoose.models.GameUser || mongoose.model("GameUser", gameUserSchema);
+let GameUser =
+  mongoose.models.GameUser || mongoose.model("GameUser", gameUserSchema);
 export default GameUser;

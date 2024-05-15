@@ -8,26 +8,32 @@ const userSchema = new mongoose.Schema(
     },
     solAmount: {
       type: Number,
+      default: 0,
       required: true,
     },
     keys: {
       type: Number,
+      default: 0,
       required: true,
     },
     stakedAmount: {
       type: Number,
+      default: 0,
       required: true,
     },
     tier: {
       type: Number,
+      default: 0,
       required: true,
     },
     multiplier: {
       type: Number,
+      default: 0.5,
       required: true,
     },
     points: {
       type: Number,
+      default: 0,
       required: true,
     },
   },

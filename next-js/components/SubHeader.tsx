@@ -17,7 +17,7 @@ export default function SubHeader() {
     wallet: string;
     amountWon: number;
     result: "Won" | "Lost";
-    userTier: string;
+    userTier: number;
   };
   const [cards, setCards] = useState<Array<Card>>([]);
 

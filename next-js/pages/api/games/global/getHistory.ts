@@ -1,6 +1,7 @@
 import connectDatabase from "../../../../utils/database";
 import { NextApiRequest, NextApiResponse } from "next";
 import { GameType, seedStatus } from "@/utils/provably-fair";
+import StakingUser from "@/models/staking/user";
 import { gameModelMap } from "@/models/games";
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -23,7 +24,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
             { populate: { path: "gameSeed" } },
           )
           .sort({ createdAt: -1 })
-          .limit(100);
+          .limit(25);
 
         const nonExpiredWithGame = nonExpired.map((record) => ({
           ...record._doc,
@@ -37,7 +38,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
             { populate: { path: "gameSeed" } },
           )
           .sort({ createdAt: -1 })
-          .limit(100);
+          .limit(25);
 
         const expiredWithGame = expired.map((record) => ({
           ...record._doc,
@@ -47,8 +48,21 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         data.push(...nonExpiredWithGame, ...expiredWithGame);
       }
 
-      data.sort((a: any, b: any) => {
-        return b.createdAt.getTime() - a.createdAt.getTime();
+      const wallets: string[] = Array.from(
+        new Set(data.map((doc: any) => doc.wallet)),
+      );
+
+      const userData = await StakingUser.find({
+        wallet: { $in: wallets },
+      }).select("wallet tier");
+
+      const userTiers = userData.reduce((acc, user) => {
+        acc[user.wallet] = user.tier;
+        return acc;
+      }, {});
+
+      data.forEach((doc: any) => {
+        doc.userTier = userTiers[doc.wallet] ?? 0;
       });
 
       return res.json({
