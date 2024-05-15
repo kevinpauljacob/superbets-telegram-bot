@@ -301,7 +301,7 @@ export default function RollDiceProvablyFairModal({
               <div className="grid w-full text-white">
                 <div className="grid gap-2">
                   <div className="border-2 border-opacity-5 border-[#FFFFFF] md:px-8">
-                    <div className="px-8 pt-10 pb-4">
+                    <div className="lg2:px-8 md:px-6 px-4 pt-10 pb-4">
                       <div className="relative w-full mb-8 xl:mb-6">
                         <div>
                           <Image
@@ -311,7 +311,7 @@ export default function RollDiceProvablyFairModal({
                             height={100}
                           />
                         </div>
-                        <div className="flex justify-around md:gap-2">
+                        <div className="flex justify-around gap-2">
                           {Array.from({ length: 6 }, (_, i) => i + 1).map(
                             (face) => (
                               <div

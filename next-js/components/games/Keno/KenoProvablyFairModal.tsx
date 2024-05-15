@@ -296,10 +296,10 @@ export default function RollDiceProvablyFairModal({
             )}
             {state === "verify" && (
               <div className="grid w-full text-white">
-                <div className="grid gap-2">
-                  <div className="border-2 border-opacity-5 border-[#FFFFFF] md:px-8">
+                <div className="w-full">
+                  <div className="border-2 border-opacity-5 border-[#FFFFFF] lg2:px-6 md:px-4 px-0 w-full">
                     <div className="p-4">
-                      <div className="grid grid-cols-8 gap-2 text-white text-xl font-chakra w-full">
+                      <div className="grid grid-cols-8 gap-2 text-white lg:text-xl md:text-lg sm:text-base text-sm font-chakra w-full">
                         {Array.from(
                           { length: 40 },
                           (_, index) => index + 1,
@@ -310,10 +310,10 @@ export default function RollDiceProvablyFairModal({
                               strikeNumbers.includes(number)
                                 ? "bg-black border-2 border-fomo-green"
                                 : "bg-[#202329]"
-                            } rounded-md text-center transition-all duration-300 ease-in-out w-[45px] h-[45px]`}
+                            } rounded-md text-center transition-all duration-300 ease-in-out lg2:w-[45px] lg2:h-[45px] md:w-[42px] md:h-[42px] sm:w-[42px] sm:h-[42px] w-[30px] h-[30px]`}
                           >
                             {strikeNumbers.includes(number) ? (
-                              <div className="flex justify-center items-center bg-[#FFD100] text-black rounded-full w-[32px] h-[32px]">
+                              <div className="flex justify-center items-center bg-[#FFD100] text-black rounded-full lg2:w-[32px] lg2:h-[32px] md:w-[32px] md:h-[32px] sm:w-[28px] sm:h-[28px] w-[25px] h-[25px]">
                                 {number}
                               </div>
                             ) : (

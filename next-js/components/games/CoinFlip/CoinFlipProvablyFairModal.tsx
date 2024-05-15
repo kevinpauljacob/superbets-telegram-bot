@@ -173,7 +173,7 @@ export default function CoinFlipProvablyFairModal({
                 <Image src={CheckPF} alt="" />
                 {translator("PROVABLY FAIR", language)}
               </div>
-              <div className="hover:cursor-pointer hover:bg-[#26282c] transition-all rounded-full p-[2px]">
+              <div className="hover:cursor-pointer">
                 <MdClose
                   size={25}
                   color="#F0F0F0"

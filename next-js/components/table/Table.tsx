@@ -290,7 +290,7 @@ export const Table: React.FC<TableProps> = ({
     <div
       className={`flex w-full flex-col
         ${loading ? " h-[50rem]" : ""}
-        ${home ? "" : "pb-[10rem] lg:pb-10"}`}
+        ${home ? "" : "pb-10"}`}
     >
       {!home && <TableButtons all={all} setAll={setAll} />}
       {loading ? (

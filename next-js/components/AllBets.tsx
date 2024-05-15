@@ -70,7 +70,7 @@ export default function AllBets() {
         loading={loading}
       />
       <div
-        className="absolute inset-x-0 bottom-2 h-[10rem] bg-[linear-gradient(0deg,#0F0F0F_0%,rgba(15,15,15,0.00)_100%)] pointer-events-none"
+        className="absolute inset-x-0 bottom-1 h-[10rem] bg-[linear-gradient(0deg,#0F0F0F_0%,rgba(15,15,15,0.00)_100%)] pointer-events-none"
         style={{ zIndex: 1 }}
       ></div>
     </div>
