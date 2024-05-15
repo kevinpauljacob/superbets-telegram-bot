@@ -277,7 +277,12 @@ export default function Limbo() {
         setStartAuto(false);
         return;
       }
-      if (useAutoConfig && autoStopLoss && potentialLoss >= autoStopLoss) {
+      if (
+        useAutoConfig &&
+        autoStopLoss &&
+        ((autoBetProfit < 0 && autoBetProfit <= -autoStopLoss) ||
+          potentialLoss >= autoStopLoss)
+      ) {
         showInfoToast("Loss limit reached.");
         setAutoBetCount(0);
         setStartAuto(false);
