@@ -148,9 +148,11 @@ export default function Layout({ children }: LayoutProps) {
         <Sidebar sidebar={sidebar} setSidebar={setSidebar} />
         <section className="w-full relative overflow-hidden">
           <MobileSidebar />
-          <section className="w-full h-full">
+          <section className="relative w-full h-full pt-[4.4rem]">
             <SubHeader />
-            <main className="marker:w-full h-full md:pt-[4.5%] lg:pt-0 max-h-[calc(100%-1rem)] lg:max-h-[calc(100%-5.5rem)]">
+            <main
+              className={`marker:w-full h-full max-h-[calc(100%-1rem)] pt-6`}
+            >
               <section className="w-full h-full overflow-y-auto no-scrollbar">
                 <div
                   id="scroll-element"

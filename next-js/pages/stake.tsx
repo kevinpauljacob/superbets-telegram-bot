@@ -83,7 +83,7 @@ export default function Stake() {
   return (
     <div className={`flex flex-col ${sidebar ? "items-start sm:pl-14": "items-center"} w-full min-h-screen flex-1 relative font-chakra h-fit`}>
       <div className="w-full flex flex-1 flex-col items-start gap-5 pb-1- px-3 sm:max-w-[90%]">
-        <span className="text-white text-opacity-90 font-semibold text-[1.5rem] sm:text-[2rem] mt-[1rem] sm:mt-[2rem] flex items-center justify-center gap-x-2">
+        <span className="text-white text-opacity-90 font-semibold text-[1.5rem] sm:text-[2rem] mt-[1rem] flex items-center justify-center gap-x-2">
           {translator("Stake", language).toUpperCase()} FOMO
         </span>
 

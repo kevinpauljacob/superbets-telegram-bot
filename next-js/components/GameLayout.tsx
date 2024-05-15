@@ -100,7 +100,7 @@ const GameLayout: React.FC<LayoutProps> = ({ children, title }) => {
       <Head>
         <title>{title}</title>
       </Head>
-      <div className="fadeInUp mt-0 lg:mt-6 w-full min-h-fit lg:min-h-[calc(100vh-13.7rem)] items-stretch bg-[#121418] rounded-2xl flex flex-col-reverse lg:flex-row">
+      <div className="fadeInUp w-full min-h-fit lg:min-h-[calc(100vh-13.7rem)] items-stretch bg-[#121418] rounded-2xl flex flex-col-reverse lg:flex-row">
         <div className="fadeInUp flex w-full min-h-fit lg:w-[35%] flex-col items-center rounded-[1.15rem] px-3 py-5 lg:p-9 2xl:p-14">
           {React.Children.map(children, (child) => {
             if (React.isValidElement(child) && child.type === GameOptions) {
