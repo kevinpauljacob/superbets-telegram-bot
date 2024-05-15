@@ -52,7 +52,7 @@ export default function Sidebar({
     "cursor-pointer mb-2.5 transition-all flex items-center justify-center rounded-md w-12 h-9 bg-[#181A1D] hover:bg-[#1E2024] focus:bg-[#1E2024] text-[#ababac] hover:text-[#9945FF] focus:text-[#9945FF]";
 
   const closedIconCss =
-    "w-5 h-5 text-white group-hover:text-[#9945FF] group-focus:text-[#9945FF] transition-all";
+    "w-5 h-5 group-hover:text-[#9945FF] group-focus:text-[#9945FF] transition-all";
   return (
     <div
       className={`${
@@ -151,7 +151,9 @@ export default function Sidebar({
               className={`${bottomIconCss}`}
               onClick={() => router.push("/")}
             >
-              <Birdeye className={`${closedIconCss}`} />
+              <Birdeye
+                className={`w-5 h-5 text-white group-hover:text-[#9945FF] group-focus:text-[#9945FF] transition-all`}
+              />
             </div>
             <div
               className={`${bottomIconCss}`}
