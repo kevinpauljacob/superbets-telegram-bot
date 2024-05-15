@@ -100,6 +100,9 @@ export default function Flip() {
         betAmt,
         betType === "Heads" ? "heads" : "tails",
       );
+      if (response.success !== true) {
+        throw new Error(response?.message ? response?.message : "Could not make Flip.");
+      }
       setTimeout(
         () => {
           if (response.success) {
