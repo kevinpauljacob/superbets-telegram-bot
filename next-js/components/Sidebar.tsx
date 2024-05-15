@@ -4,7 +4,11 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 
 import { useWallet } from "@solana/wallet-adapter-react";
-import { obfuscatePubKey, pointTiers, translator } from "@/context/transactions";
+import {
+  obfuscatePubKey,
+  pointTiers,
+  translator,
+} from "@/context/transactions";
 import { useGlobalContext } from "./GlobalContext";
 import Home from "@/public/assets/Home";
 import FomoExitIcon from "@/public/assets/FomoExitIcon";
@@ -36,7 +40,7 @@ export default function Sidebar({
 }) {
   const wallet = useWallet();
   const router = useRouter();
-  const {language} = useGlobalContext();
+  const { language, setMobileSidebar } = useGlobalContext();
   const [showExitTokens, setShowExitTokens] = useState<boolean>(false);
   const [showPlayTokens, setShowPlayTokens] = useState<boolean>(false);
 
@@ -170,7 +174,7 @@ export const SidebarOpenElement = ({
   link?: string;
 }) => {
   const router = useRouter();
-  const {language} = useGlobalContext();
+  const { language } = useGlobalContext();
   return (
     <div
       onClick={() => {
@@ -273,7 +277,7 @@ export const OpenSidebar = ({
     setCasinoGames(updatedCasinoGames);
   };
 
-  const {language} = useGlobalContext();
+  const { language } = useGlobalContext();
 
   useEffect(() => {
     // Function to check if any game link matches the current pathname
@@ -368,7 +372,10 @@ export const OpenSidebar = ({
                   <Link
                     href={token.link}
                     key={index}
-                    onClick={() => toggleCasinoToken(index)}
+                    onClick={() => {
+                      toggleCasinoToken(index);
+                      setMobileSidebar(false);
+                    }}
                     className={`${
                       router.pathname === token.link
                         ? "bg-white/10"
@@ -424,7 +431,10 @@ export const OpenSidebar = ({
                   <Link
                     href={token.link}
                     key={index}
-                    onClick={() => toggleExitToken(index)}
+                    onClick={() => {
+                      toggleExitToken(index);
+                      setMobileSidebar(false);
+                    }}
                     className={`${
                       token.active ? "bg-white/10" : "hover:bg-[#191a1d]"
                     } group flex transition-all items-center rounded-md p-2 pl-12 gap-2`}
@@ -444,7 +454,11 @@ export const OpenSidebar = ({
               </ul>
             )}
           </div>
-          <SidebarOpenElement text={"DCA"} Icon={Dollar} link="https://dca.fomosolana.com/" />
+          <SidebarOpenElement
+            text={"DCA"}
+            Icon={Dollar}
+            link="https://dca.fomosolana.com/"
+          />
           <div className="opacity-50">
             <SidebarOpenElement text={"Roadmap"} Icon={Flag} link="" />
           </div>
@@ -461,7 +475,7 @@ export const OpenSidebar = ({
           className={`${openLinkCss}`}
           target="_blank"
         >
-          <Twitter className="w-5 h-5"/>
+          <Twitter className="w-5 h-5" />
           {translator("Twitter", language)}
         </Link>
         <Link
@@ -472,11 +486,7 @@ export const OpenSidebar = ({
           <Birdeye className="w-5 h-5 text-white" />
           Birdeye
         </Link>
-        <Link
-          href="t.me/FOMO_wtf"
-          className={`${openLinkCss}`}
-          target="_blank"
-        >
+        <Link href="t.me/FOMO_wtf" className={`${openLinkCss}`} target="_blank">
           <Telegram className="w-5 h-5" />
           {translator("Telegram", language)}
         </Link>
