@@ -14,6 +14,7 @@ export interface Keno {
   result: string;
   risk: string;
   strikeNumbers: number[];
+  segments:number;
   chosenNumbers: number[];
   strikeMultiplier: number;
   amountWon: number;

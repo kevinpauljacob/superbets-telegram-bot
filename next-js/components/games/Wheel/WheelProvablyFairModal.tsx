@@ -16,6 +16,7 @@ import CheckPF from "@/public/assets/CheckPF.svg";
 import { errorCustom } from "@/components/toasts/ToastGroup";
 import { useGlobalContext } from "@/components/GlobalContext";
 import { translator } from "@/context/transactions";
+import ProvablyFairModal from "../ProvablyFairModal";
 
 export interface PFModalData {
   activeGameSeed: {
@@ -66,28 +67,30 @@ export default function WheelProvablyFairModal({
   const [hoveredMultiplier, setHoveredMultiplier] = useState<number | null>(
     null,
   );
+  const [selectedGameType, setSelectedGameType] = useState<GameType>(GameType.wheel)
 
   const [verificationState, setVerificationState] = useState<{
     clientSeed: string;
     serverSeed: string;
     nonce: string;
-    risk: string;
-    segments: number;
+    risk?:string;
+    segments?:number;
+
   }>(
     bet?.gameSeed
       ? {
-          clientSeed: bet.gameSeed?.clientSeed,
-          serverSeed: bet.gameSeed?.serverSeed ?? "",
+          clientSeed: bet.gameSeed.clientSeed,
+          serverSeed: bet.gameSeed.serverSeed ?? "",
           nonce: bet.nonce?.toString() ?? "",
-          risk: bet.risk,
-          segments: bet.segments,
+          risk: bet.risk || (selectedGameType === GameType.wheel ? "low" : undefined),
+          segments: bet.segments || (selectedGameType === GameType.wheel ? 10 : undefined),
         }
       : {
           clientSeed: "",
           serverSeed: "",
           nonce: "",
-          risk: "low",
-          segments: 10,
+          risk: selectedGameType === GameType.wheel ? "low" : undefined,
+          segments: selectedGameType === GameType.wheel ? 10 : undefined,
         },
   );
 
@@ -102,15 +105,7 @@ export default function WheelProvablyFairModal({
     );
   }, []);
 
-  const multipliers = riskToChance[verificationState.risk];
-  const sortedMultipliers = multipliers
-    .slice()
-    .sort((a, b) => a.multiplier - b.multiplier);
 
-  const uniqueSegments = sortedMultipliers.filter(
-    (segment, index, self) =>
-      index === 0 || self[index - 1].multiplier !== segment.multiplier,
-  );
 
   const handleToggleState = (newState: "seeds" | "verify") => {
     setState(newState);
@@ -176,34 +171,7 @@ export default function WheelProvablyFairModal({
     if (text) navigator.clipboard.writeText(text);
   };
 
-  useEffect(() => {
-    const resultAngle = ((strikeNumber - 1) * 360) / 100;
-    const rotationAngle = 360 / verificationState.segments;
-    setRotationAngle(rotationAngle);
-    if (wheelRef.current) {
-      wheelRef.current.style.transform = `rotate(${360 - resultAngle}deg)`;
-    }
-
-    const item = riskToChance[verificationState.risk];
-    let strikeMultiplier = 0;
-
-    for (let i = 0, isFound = false; i < 100 && !isFound; ) {
-      for (let j = 0; j < item.length; j++) {
-        i += (item[j].chance * 10) / verificationState.segments;
-        if (i >= strikeNumber) {
-          strikeMultiplier = item[j].multiplier;
-          setStrikeMultiplier(strikeMultiplier);
-          isFound = true;
-          break;
-        }
-      }
-    }
-  }, [
-    isOpen,
-    strikeNumber,
-    verificationState.risk,
-    verificationState.segments,
-  ]);
+ 
 
   return (
     <>
@@ -350,111 +318,39 @@ export default function WheelProvablyFairModal({
               </div>
             )}
             {state === "verify" && (
-              <div className="grid w-full text-white">
+              <div className="grid w-full text-white ">
                 <div className="grid gap-2">
-                  <div className="border-2 border-opacity-5 border-[#FFFFFF] md:px-8">
-                    <div className="px-8 py-5">
-                      <div className="flex justify-center items-center w-full">
-                        <div className="relative  w-[200px] h-[200px] flex justify-center">
-                          <Image
-                            src="/assets/wheelPointer.svg"
-                            alt="Pointer"
-                            width={25}
-                            height={25}
-                            id="pointer"
-                            className="absolute z-50 -top-2 transition-all duration-100"
-                          />
-                          <div
-                            ref={wheelRef}
-                            className="relative w-[200px] h-[200px] rounded-full overflow-hidden"
-                          >
-                            {typeof window !== "undefined" && (
-                              <svg viewBox="0 0 300 300">
-                                {rotationAngle &&
-                                  Array.from({
-                                    length: verificationState.segments,
-                                  }).map((_, index) => (
-                                    <Arc
-                                      key={index}
-                                      index={index}
-                                      rotationAngle={rotationAngle}
-                                      risk={verificationState.risk}
-                                      segments={verificationState.segments}
-                                    />
-                                  ))}
-                              </svg>
-                            )}
-                          </div>
-                          <div className="absolute z-10 w-[79.75%] h-[79.75%] rounded-full bg-black/10 left-[10%] top-[10%]" />
-                          <div className="absolute z-20 w-[66.5%] h-[66.5%] rounded-full bg-[#171A1F] left-[16.75%] top-[16.75%]" />
-                          <div className="absolute z-20 w-[62.5%] h-[62.5%] rounded-full bg-[#0C0F16] left-[18.75%] top-[18.75%] text-white flex items-center justify-center text-2xl font-semibold font-changa text-opacity-80 ">
-                            {strikeMultiplier}
-                          </div>
-                        </div>
-                      </div>
-                      <div className="flex gap-2">
-                        {uniqueSegments.map((segment, index) => (
-                          <div
-                            key={index}
-                            className="relative w-full"
-                            onMouseEnter={() =>
-                              setHoveredMultiplier(segment.multiplier)
-                            }
-                            onMouseLeave={() => setHoveredMultiplier(null)}
-                          >
-                            <div
-                              className={`w-full border-t-[6px] text-center font-chakra font-semibold bg-[#202329] text-xs text-white rounded-md px-1.5 md:px-5 py-2.5`}
-                              style={{ borderColor: segment.color }}
-                            >
-                              {segment.multiplier}x
-                            </div>
-                            {hoveredMultiplier === segment.multiplier && (
-                              <div className="absolute top-[-80px] left-0 z-50 flex gap-2 text-white bg-[#202329] border border-white/10 rounded-lg w-full p-2 fadeInUp duration-100 min-w-[200px]">
-                                <div className="w-1/2">
-                                  <div className="flex justify-between text-[10px] font-medium font-changa text-opacity-90 text-[#F0F0F0]">
-                                    <span className="">
-                                      {translator("Profit", language)}
-                                    </span>
-                                    <span>0.00 SOL</span>
-                                  </div>
-                                  <div className="border border-white/10 rounded-lg text-[10px] p-2 mt-2">
-                                    0.00
-                                  </div>
-                                </div>
-                                <div className="w-1/2">
-                                  <div className="text-[10px] font-medium font-changa text-opacity-90 text-[#F0F0F0]">
-                                    {translator("Chance", language)}
-                                  </div>
-                                  <div className="border border-white/10 rounded-lg text-[10px] p-2 mt-2">
-                                    {segment.chance}%
-                                  </div>
-                                </div>
-                              </div>
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                    </div>
+                  <div className="border-2 border-opacity-5 border-[#FFFFFF] md:px-8 py-2">
+                    
+                    <ProvablyFairModal
+                      setVerificationState={setVerificationState}
+                       verificationState={verificationState}
+                       selectedGameType={selectedGameType}/>
+                  
                   </div>
                   <div>
                     <label className="text-xs text-opacity-75 font-changa text-[#F0F0F0]">
                       {translator("Game", language)}
                     </label>
                     <div className="flex items-center">
-                      <select
+                    <select
                         name="game"
-                        value={GameType.wheel}
+                        value={selectedGameType}
                         onChange={(e) =>
-                          setModalData((prevData) => ({
-                            ...prevData,
-                            game: e.target.value as GameType,
-                          }))
+                          setSelectedGameType(
+                           e.target.value as GameType
+                         )
                         }
                         className="bg-[#202329] text-white font-chakra text-xs font-medium mt-1 rounded-md px-5 py-4 w-full relative appearance-none"
                       >
-                        <option value={GameType.wheel}>
-                          {translator("Wheel", language)}
-                        </option>
+                        <option value={GameType.keno}>Keno</option>
+                        <option value={GameType.dice}>Dice To Win</option>
+  <option value={GameType.coin}>Coin Flip</option>
+  <option value={GameType.options}>Options</option>
+  <option value={GameType.dice2}>Dice2</option>
+  <option value={GameType.limbo}>Limbo</option>
+  <option value={GameType.wheel}>Wheel</option>
+
                       </select>
                     </div>
                   </div>
@@ -494,48 +390,8 @@ export default function WheelProvablyFairModal({
                       className="bg-[#202329] text-white font-chakra text-xs font-medium mt-1 rounded-md px-5 py-4 w-full relative"
                     />
                   </div>
-                  <div>
-                    <label className="text-xs text-opacity-75 font-changa text-[#F0F0F0]">
-                      {translator("Risk", language)}
-                    </label>
-                    <div className="flex items-center">
-                      <select
-                        name="risk"
-                        value={verificationState.risk}
-                        onChange={handleChange}
-                        className="bg-[#202329] text-white font-chakra text-xs font-medium mt-1 rounded-md px-5 py-4 w-full relative appearance-none"
-                      >
-                        <option value={"low"}>
-                          {translator("Low", language)}
-                        </option>
-                        <option value={"medium"}>
-                          {translator("Medium", language)}
-                        </option>
-                        <option value={"high"}>
-                          {translator("High", language)}
-                        </option>
-                      </select>
-                    </div>
-                  </div>
-                  <div>
-                    <label className="text-xs text-opacity-75 font-changa text-[#F0F0F0]">
-                      {translator("Segments", language)}
-                    </label>
-                    <div className="flex items-center">
-                      <select
-                        name="segments"
-                        value={verificationState.segments}
-                        onChange={handleChange}
-                        className="bg-[#202329] text-white font-chakra text-xs font-medium mt-1 rounded-md px-5 py-4 w-full relative appearance-none"
-                      >
-                        <option value={10}>10</option>
-                        <option value={20}>20</option>
-                        <option value={30}>30</option>
-                        <option value={40}>40</option>
-                        <option value={50}>50</option>
-                      </select>
-                    </div>
-                  </div>
+                  
+                 
                 </div>
               </div>
             )}

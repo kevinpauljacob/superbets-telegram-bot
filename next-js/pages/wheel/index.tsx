@@ -362,9 +362,6 @@ export default function Wheel() {
               disabled={
                 !wallet ||
                 isRolling ||
-                (typeof autoBetCount === "number" && autoBetCount <= 0) ||
-                (typeof autoBetCount === "string" &&
-                  !autoBetCount.includes("inf")) ||
                 (coinData && coinData[0].amount < 0.0001) ||
                 (betAmt !== undefined &&
                   maxBetAmt !== undefined &&
@@ -377,9 +374,11 @@ export default function Wheel() {
               {isRolling ? <Loader /> : "BET"}
             </BetButton>
           </div>
-          <div className="w-full flex lg:hidden">
-            <ConfigureAutoButton disabled={disableInput} />
-          </div>
+          {betType === "auto" && (
+            <div className="w-full flex lg:hidden">
+              <ConfigureAutoButton disabled={disableInput} />
+            </div>
+          )}
           <div className="w-full hidden lg:flex">
             <BetSetting
               betSetting={betType}

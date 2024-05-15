@@ -16,6 +16,8 @@ export interface Flip {
   wallet: string;
   amount: number;
   result: "Won" | "Lost";
+  risk?:string;
+  segments?:number;
   amountWon: number;
   nonce?: number;
   gameSeed?: {

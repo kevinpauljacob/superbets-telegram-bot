@@ -44,6 +44,8 @@ export default function BetAmount({
   const [inputString, setInputString] = useState("");
 
   useEffect(() => {
+    console.log("killa", currentMultiplier);
+    if (betAmt !== undefined && betAmt > 0) setInputString(betAmt.toString());
     if (tempBetAmt !== undefined && currentMultiplier !== undefined) {
       let calculatedMaxBetAmt =
         maxPayouts[game as GameType] / currentMultiplier;
@@ -68,7 +70,9 @@ export default function BetAmount({
   useEffect(() => {
     setMaxBetAmt(
       Math.min(
-        truncateNumber(currentMaxBetAmt, 4),
+        game === "keno" || game === "wheel"
+          ? 20.0
+          : truncateNumber(currentMaxBetAmt, 4),
         coinData && coinData[0]?.amount
           ? truncateNumber(coinData[0].amount, 4)
           : truncateNumber(currentMaxBetAmt, 4),
@@ -128,7 +132,9 @@ export default function BetAmount({
   return (
     <div className="relative flex w-full flex-col mb-[1.4rem] z-10">
       <div className="flex w-full items-center justify-between text-xs font-changa text-opacity-90">
-        <label className="text-white/90 font-changa">{translator("Bet Amount", language)}</label>
+        <label className="text-white/90 font-changa">
+          {translator("Bet Amount", language)}
+        </label>
         <span className="flex items-center text-[#94A3B8] text-opacity-90 font-changa text-xs gap-2">
           <span className="cursor-pointer" onClick={handleSetMaxBet}>
             {maxBetAmt} $SOL
@@ -175,7 +181,8 @@ export default function BetAmount({
                 <div className="relative">
                   <div className="absolute text-[#94A3B8] text-[11px] font-semibold font-chakra -top-7 -right-[24px] w-max">
                     <span className="text-white">
-                      {translator("Max", language)} {currentMaxBetAmt.toFixed(2)}
+                      {translator("Max", language)}{" "}
+                      {currentMaxBetAmt.toFixed(2)}
                     </span>
                     <svg
                       width="6"
@@ -279,7 +286,10 @@ export default function BetAmount({
             </span>
 
             <span className="text-[11px] font-medium font-chakra mx-3 min-[1412px]:max-w-[200px]">
-              {translator("Maximum amount for a single bet in this game is", language)}
+              {translator(
+                "Maximum amount for a single bet in this game is",
+                language,
+              )}
               <span className="text-white/90 font-semibold"> 20.00 SOL</span>
                .
             </span>
@@ -322,7 +332,7 @@ export default function BetAmount({
           }}
           placeholder={"0.0"}
           disabled={disabled}
-          value={betAmt ?? NaN}
+          value={inputString}
           lang="en"
           className={`flex w-full min-w-0 bg-transparent text-base text-[#94A3B8] placeholder-[#94A3B8] font-chakra placeholder-opacity-40 outline-none disabled:cursor-default disabled:opacity-50`}
         />

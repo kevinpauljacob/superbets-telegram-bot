@@ -40,7 +40,9 @@ export default function Sidebar({
 }) {
   const wallet = useWallet();
   const router = useRouter();
-  const { language } = useGlobalContext();
+
+  const { language, setMobileSidebar } = useGlobalContext();
+
   const [showExitTokens, setShowExitTokens] = useState<boolean>(false);
   const [showPlayTokens, setShowPlayTokens] = useState<boolean>(false);
 
@@ -372,7 +374,10 @@ export const OpenSidebar = ({
                   <Link
                     href={token.link}
                     key={index}
-                    onClick={() => toggleCasinoToken(index)}
+                    onClick={() => {
+                      toggleCasinoToken(index);
+                      setMobileSidebar(false);
+                    }}
                     className={`${
                       router.pathname === token.link
                         ? "bg-white/10"
@@ -428,7 +433,10 @@ export const OpenSidebar = ({
                   <Link
                     href={token.link}
                     key={index}
-                    onClick={() => toggleExitToken(index)}
+                    onClick={() => {
+                      toggleExitToken(index);
+                      setMobileSidebar(false);
+                    }}
                     className={`${
                       token.active ? "bg-white/10" : "hover:bg-[#191a1d]"
                     } group flex transition-all items-center rounded-md p-2 pl-12 gap-2`}

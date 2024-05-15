@@ -13,6 +13,7 @@ import CheckPF from "@/public/assets/CheckPF.svg";
 import { errorCustom } from "@/components/toasts/ToastGroup";
 import { translator } from "@/context/transactions";
 import { useGlobalContext } from "@/components/GlobalContext";
+import ProvablyFairModal from "../ProvablyFairModal";
 
 export interface PFModalData {
   activeGameSeed: {
@@ -56,39 +57,35 @@ export default function LimboProvablyFairModal({
     generateClientSeed(),
   );
   const [multiplier, setMultiplier] = useState<string>("1.00");
+  const [selectedGameType, setSelectedGameType] = useState<GameType>(GameType.limbo)
+    
   const {language} = useGlobalContext();
 
   const [verificationState, setVerificationState] = useState<{
     clientSeed: string;
     serverSeed: string;
     nonce: string;
+    risk?:string;
+    segments?:number;
+
   }>(
     flip?.gameSeed
       ? {
           clientSeed: flip.gameSeed.clientSeed,
           serverSeed: flip.gameSeed.serverSeed ?? "",
           nonce: flip.nonce?.toString() ?? "",
+          risk: flip.risk || (selectedGameType === GameType.wheel ? "low" : undefined),
+          segments: flip.segments || (selectedGameType === GameType.wheel ? 10 : undefined),
         }
       : {
           clientSeed: "",
           serverSeed: "",
           nonce: "",
+          risk: selectedGameType === GameType.wheel ? "low" : undefined,
+          segments: selectedGameType === GameType.wheel ? 10 : undefined,
         },
   );
 
-  useEffect(() => {
-    setMultiplier(
-      (
-        100 /
-        generateGameResult(
-          verificationState.serverSeed,
-          verificationState.clientSeed,
-          parseInt(verificationState.nonce),
-          GameType.limbo,
-        )
-      ).toFixed(2),
-    );
-  }, []);
 
   const handleToggleState = (newState: "seeds" | "verify") => {
     setState(newState);
@@ -304,10 +301,11 @@ export default function LimboProvablyFairModal({
             {state === "verify" && (
               <div className="grid w-full text-white">
                 <div className="grid gap-2">
-                  <div className="border-2 border-opacity-5 border-[#FFFFFF] md:px-8">
-                    <div className="flex justify-center items-center gap-4 md:px-8 py-4 md:text-6xl font-changa">
-                      {multiplier}x
-                    </div>
+                  <div className="border-2 border-opacity-5 border-[#FFFFFF] md:px-8 py-2">
+                    <ProvablyFairModal
+                    verificationState={verificationState}
+                    setVerificationState={setVerificationState}
+                    selectedGameType={selectedGameType}/>
                   </div>
                 </div>
                 <div>
@@ -315,21 +313,25 @@ export default function LimboProvablyFairModal({
                     {translator("Game", language)}
                   </label>
                   <div className="flex items-center">
-                    <select
-                      name="game"
-                      value={GameType.limbo}
-                      onChange={(e) =>
-                        setModalData((prevData) => ({
-                          ...prevData,
-                          game: e.target.value as GameType,
-                        }))
-                      }
-                      className="bg-[#202329] text-white font-chakra text-xs font-medium mt-1 rounded-md px-5 py-4 w-full relative appearance-none"
-                    >
-                      {/* <option value={GameType.dice}>Dice</option>
-                      <option value={GameType.coin}>Coin Flip</option> */}
-                      <option value={GameType.limbo}>Limbo</option>
-                    </select>
+                  <select
+                        name="game"
+                        value={selectedGameType}
+                        onChange={(e) =>
+                          setSelectedGameType(
+                           e.target.value as GameType
+                         )
+                        }
+                        className="bg-[#202329] text-white font-chakra text-xs font-medium mt-1 rounded-md px-5 py-4 w-full relative appearance-none"
+                      >
+                        <option value={GameType.keno}>Keno</option>
+                        <option value={GameType.dice}>Dice To Win</option>
+  <option value={GameType.coin}>Coin Flip</option>
+ 
+  <option value={GameType.dice2}>Dice2</option>
+  <option value={GameType.limbo}>Limbo</option>
+  <option value={GameType.wheel}>Wheel</option>
+
+                      </select>
                   </div>
                 </div>
                 <div>

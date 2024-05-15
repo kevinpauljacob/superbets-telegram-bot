@@ -58,7 +58,9 @@ export default function Layout({ children }: LayoutProps) {
     closeVerifyModal,
     verifyModalData,
     sidebar,
+    mobileSidebar,
     setSidebar,
+    setMobileSidebar,
     setAutoBetCount,
     setStartAuto,
     openPFModal,
@@ -113,6 +115,7 @@ export default function Layout({ children }: LayoutProps) {
 
   const toggleSidebar = () => {
     setSidebar(!sidebar);
+    setMobileSidebar(!sidebar);
   };
 
   const openPfModal = () => {
@@ -145,9 +148,11 @@ export default function Layout({ children }: LayoutProps) {
         <Sidebar sidebar={sidebar} setSidebar={setSidebar} />
         <section className="w-full relative overflow-hidden">
           <MobileSidebar />
-          <section className="w-full h-full">
+          <section className="relative w-full h-full pt-[4.4rem]">
             <SubHeader />
-            <main className="marker:w-full h-full md:pt-[4.5%] lg:pt-0 max-h-[calc(100%-1rem)] lg:max-h-[calc(100%-5.5rem)]">
+            <main
+              className={`marker:w-full h-full max-h-[calc(100%-1rem)] pt-6`}
+            >
               <section className="w-full h-full overflow-y-auto no-scrollbar">
                 <div
                   id="scroll-element"
@@ -163,7 +168,7 @@ export default function Layout({ children }: LayoutProps) {
         </section>
       </section>
       <div className="w-full fixed bottom-0 flex md:hidden z-[1000]">
-        <MobileNavbar sidebar={sidebar} toggleSidebar={toggleSidebar} />
+        <MobileNavbar sidebar={mobileSidebar} toggleSidebar={toggleSidebar} />
       </div>
       {showWalletModal && <BalanceModal />}
 

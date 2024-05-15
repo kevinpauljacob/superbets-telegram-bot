@@ -28,23 +28,21 @@ export default function Sidebar() {
   const [showExitTokens, setShowExitTokens] = useState(false);
   const [showPlayTokens, setShowPlayTokens] = useState(false);
 
-  useEffect(() => {
-    setMobileSidebar(false);
-  }, [router.pathname]);
-
   return (
     <div
       className={`${
-        mobileSidebar ? "top-[6.3rem]" : "fadeOutDown top-[1000px]"
-      } fixed transition-all duration-500 ease-in-out z-20 md:hidden bg-[#121418] no-scrollbar overflow-y-auto text-white flex flex-col justify-between w-full h-[calc(100dvh-10rem)]`}
+        mobileSidebar ? "top-[6.3rem]" : "fadeOutDown top-[100dvh]"
+      } fixed transition-all duration-500 ease-in-out z-[1000] md:hidden bg-[#121418] no-scrollbar overflow-y-auto text-white flex flex-col justify-between w-full h-[calc(100dvh-10rem)]`}
     >
-      <OpenSidebar
-        sidebar={mobileSidebar}
-        showExitTokens={showExitTokens}
-        setShowExitTokens={setShowExitTokens}
-        showPlayTokens={showPlayTokens}
-        setShowPlayTokens={setShowPlayTokens}
-      />
+      {mobileSidebar && (
+        <OpenSidebar
+          sidebar={mobileSidebar}
+          showExitTokens={showExitTokens}
+          setShowExitTokens={setShowExitTokens}
+          showPlayTokens={showPlayTokens}
+          setShowPlayTokens={setShowPlayTokens}
+        />
+      )}
     </div>
   );
 }

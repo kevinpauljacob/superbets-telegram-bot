@@ -386,9 +386,6 @@ export default function Dice2() {
               disabled={
                 !wallet ||
                 isRolling ||
-                (typeof autoBetCount === "number" && autoBetCount <= 0) ||
-                (typeof autoBetCount === "string" &&
-                  !autoBetCount.includes("inf")) ||
                 (coinData && coinData[0].amount < 0.0001) ||
                 (betAmt !== undefined &&
                   maxBetAmt !== undefined &&
@@ -552,7 +549,7 @@ export default function Dice2() {
 
               {choice && (
                 <div className="flex flex-col w-full">
-                  <span className="text-[#F0F0F0] font-chakra font-semibold text-xs mb-1">
+                  <span className="text-[#F0F0F0] font-changa font-semibold text-xs mb-1">
                     {translator("Chance", language)}
                   </span>
                   <input
