@@ -94,7 +94,11 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           .status(400)
           .json({ success: false, message: "Insufficient balance !" });
 
-      const userData = await StakingUser.findOne({ wallet });
+      const userData = await StakingUser.findOneAndUpdate(
+        { wallet },
+        {},
+        { upsert: true, new: true },
+      );
       const userTier = userData?.tier ?? 0;
       const houseEdge = launchPromoEdge ? 0 : houseEdgeTiers[userTier];
 
