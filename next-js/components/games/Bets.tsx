@@ -29,7 +29,7 @@ export default function Bets({ refresh }: { refresh: boolean }) {
   const { liveBets } = useGlobalContext();
 
   useEffect(() => {
-    if (wallet?.publicKey) {
+    if (!all) {
       const newBets = liveBets.filter((bet) => {
         return (
           !myBets.includes(bet) && bet.wallet === wallet.publicKey?.toBase58()
