@@ -120,7 +120,7 @@ export const TablePagination: React.FC<PaginationProps> = ({
           {maxPages > 1 && (
             <button
               onClick={() => {
-                (page === 1 || page === 2 || page === 3) && setPage(1);
+                (page === 1 || page === 2 || page === 3) && setPage(2);
               }}
               className={`${
                 page === 2 ? "text-opacity-75" : "text-opacity-50"
