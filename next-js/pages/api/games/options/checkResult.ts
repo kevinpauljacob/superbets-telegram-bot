@@ -51,7 +51,11 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           message: "No active bets on this account",
         });
 
-      const userData = await StakingUser.findOne({ wallet });
+      const userData = await StakingUser.findOneAndUpdate(
+        { wallet },
+        {},
+        { upsert: true, new: true },
+      );
       const userTier = userData?.tier ?? 0;
       const houseEdge = launchPromoEdge ? 0 : houseEdgeTiers[userTier];
 
