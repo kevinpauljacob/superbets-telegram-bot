@@ -120,7 +120,7 @@ export const TablePagination: React.FC<PaginationProps> = ({
           {maxPages > 1 && (
             <button
               onClick={() => {
-                (page === 1 || page === 2 || page === 3) && setPage(1);
+                (page === 1 || page === 2 || page === 3) && setPage(2);
               }}
               className={`${
                 page === 2 ? "text-opacity-75" : "text-opacity-50"
@@ -288,9 +288,9 @@ export const Table: React.FC<TableProps> = ({
 
   return (
     <div
-      className={`flex w-full flex-col
-        ${loading ? " h-[50rem]" : ""}
-        ${home ? "" : "pb-10"}`}
+      className={`flex w-full flex-col ${loading ? " h-[50rem]" : ""} ${
+        home ? "" : "pb-[10rem] lg:pb-10"
+      }`}
     >
       {!home && <TableButtons all={all} setAll={setAll} />}
       {loading ? (
@@ -302,7 +302,7 @@ export const Table: React.FC<TableProps> = ({
           <div className={`scrollbar w-full ${home ? "" : "mt-8 pb-8"}`}>
             <div className="flex w-full md:min-w-[50rem] flex-col items-center">
               <TableHeader all={all} setAll={setAll} />
-              <div className="flex flex-col items-center w-full max-h-[34rem]">
+              <div className="flex flex-col items-center w-full max-h-[36rem] overflow-hidden">
                 {bets?.length ? (
                   (home
                     ? bets

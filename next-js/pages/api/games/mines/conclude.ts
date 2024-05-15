@@ -64,7 +64,11 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       let { nonce, gameSeed, minesCount, amount, amountWon, strikeMultiplier } =
         gameInfo;
 
-      const userData = await StakingUser.findOne({ wallet });
+      const userData = await StakingUser.findOneAndUpdate(
+        { wallet },
+        {},
+        { upsert: true, new: true },
+      );
       const userTier = userData?.tier ?? 0;
       const houseEdge = launchPromoEdge ? 0 : houseEdgeTiers[userTier];
 

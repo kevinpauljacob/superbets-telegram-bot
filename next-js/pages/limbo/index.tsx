@@ -29,7 +29,7 @@ import ConfigureAutoButton from "@/components/ConfigureAutoButton";
 import AutoCount from "@/components/AutoCount";
 import MultiplierInput from "@/components/games/MultiplierInput";
 import { errorCustom, warningCustom } from "@/components/toasts/ToastGroup";
-import {translator} from "@/context/transactions";
+import { translator } from "@/context/transactions";
 
 function useInterval(callback: Function, delay: number | null) {
   const savedCallback = useRef<Function | null>(null);
@@ -78,7 +78,7 @@ export default function Limbo() {
     setUseAutoConfig,
     houseEdge,
     maxBetAmt,
-    language
+    language,
   } = useGlobalContext();
 
   const multiplierLimits = [1.02, 50];
@@ -242,6 +242,30 @@ export default function Limbo() {
       ((typeof autoBetCount === "string" && autoBetCount.includes("inf")) ||
         (typeof autoBetCount === "number" && autoBetCount > 0))
     ) {
+      let potentialLoss = 0;
+      if (betAmt !== undefined) {
+        let adjustedBetAmt = betAmt;
+        if (autoWinChange !== null) {
+          adjustedBetAmt += (autoWinChange * betAmt) / 100.0;
+        } else if (autoLossChange !== null) {
+          adjustedBetAmt -= (autoLossChange * betAmt) / 100.0;
+        }
+        console.log("Adjusted bet amount:", adjustedBetAmt);
+
+        const potentialWinProfit =
+          (multiplier * (1 - houseEdge) - 1) * adjustedBetAmt;
+        const potentialLossProfit = multiplier * -1 * adjustedBetAmt;
+
+        potentialLoss =
+          adjustedBetAmt + Math.max(potentialWinProfit, potentialLossProfit);
+      }
+
+      if (betAmt !== undefined) {
+        console.log("Current bet amount:", betAmt);
+        console.log("Auto loss change:", autoLossChange);
+        console.log("Auto profit change:", autoWinChange);
+        console.log("Potential loss:", potentialLoss);
+      }
       if (
         useAutoConfig &&
         autoStopProfit &&
@@ -256,8 +280,8 @@ export default function Limbo() {
       if (
         useAutoConfig &&
         autoStopLoss &&
-        autoBetProfit < 0 &&
-        autoBetProfit <= -autoStopLoss
+        ((autoBetProfit < 0 && autoBetProfit <= -autoStopLoss) ||
+          potentialLoss >= autoStopLoss)
       ) {
         showInfoToast("Loss limit reached.");
         setAutoBetCount(0);
@@ -324,9 +348,6 @@ export default function Limbo() {
             <BetButton
               disabled={
                 loading ||
-                (typeof autoBetCount === "number" && autoBetCount <= 0) ||
-                (typeof autoBetCount === "string" &&
-                  !autoBetCount.includes("inf")) ||
                 (coinData && coinData[0].amount < 0.0001) ||
                 (betAmt !== undefined &&
                   maxBetAmt !== undefined &&
@@ -390,7 +411,7 @@ export default function Limbo() {
                   </div>
                 )}
 
-                <div className="relative w-full hidden lg:flex">
+                <div className="relative w-full hidden lg:flex mt-6">
                   {startAuto && (
                     <div
                       onClick={() => {
@@ -464,25 +485,15 @@ export default function Limbo() {
         <div className="flex px-0 xl:px-4 mb-0 md:mb-[1.4rem] gap-4 flex-row w-full justify-between">
           {coinData && coinData[0].amount > 0.0001 && (
             <>
-              <div className="flex flex-col w-full">
-                <span className="text-[#F0F0F0] font-changa font-semibold text-xs mb-1">
-                  {translator("Multiplier", language)}
-                </span>
-                <input
-                  id={"amount-input"}
-                  className={`bg-[#202329] w-full min-w-0 font-chakra text-xs text-white rounded-md px-2 md:px-5 py-3 placeholder-[#94A3B8] placeholder-opacity-40 outline-none`}
-                  value={inputMultiplier}
-                  type="number"
-                  maxLength={1}
-                  step={1}
-                  min={1.02}
-                  max={50}
-                  disabled={startAuto || loading}
-                  onChange={(e) => {
-                    setInputMultiplier(parseFloat(e.target.value));
-                  }}
-                />
-              </div>
+              <MultiplierInput
+                inputMultiplier={inputMultiplier}
+                setInputMultiplier={setInputMultiplier}
+                disabled={startAuto || loading || disableInput}
+                minVal={1.02}
+                maxVal={50}
+                step={1}
+                maxLength={2}
+              />
 
               <div className="flex flex-col w-full">
                 <span className="text-[#F0F0F0] font-changa font-sembiold text-xs mb-1">
@@ -517,7 +528,10 @@ export default function Limbo() {
             (coinData[0].amount < 0.0001 && (
               <div className="w-full rounded-lg bg-[#d9d9d90d] bg-opacity-10 flex items-center px-3 py-3 text-white md:px-6">
                 <div className="w-full text-center font-changa font-medium text-sm md:text-base text-[#F0F0F0] text-opacity-75">
-                  {translator("Please deposit funds to start playing. View", language)}{" "}
+                  {translator(
+                    "Please deposit funds to start playing. View",
+                    language,
+                  )}{" "}
                   <Link href="/balance">
                     <u>{translator("WALLET", language)}</u>
                   </Link>

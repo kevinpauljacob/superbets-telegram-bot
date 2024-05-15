@@ -163,7 +163,7 @@ export const obfuscatePubKey = (address: string) => {
 };
 
 export const translator = (text: string, language: string) => {
-  let result = "";
+  let result = text;
   Object.entries(translationsMap).map((obj, value) => {
     if (
       text &&

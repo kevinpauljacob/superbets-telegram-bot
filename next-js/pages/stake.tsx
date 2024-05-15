@@ -34,6 +34,7 @@ export default function Stake() {
     getGlobalInfo,
     getUserDetails,
     setLivePrice,
+    sidebar
   } = useGlobalContext();
 
   useEffect(() => {
@@ -80,10 +81,10 @@ export default function Stake() {
   }, [session?.user, wallet.publicKey]);
 
   return (
-    <div className="flex flex-col items-center w-full overflow-hidden min-h-screen flex-1 relative font-chakra h-full">
-      <div className="w-full flex flex-1 flex-col items-start gap-5 px-5 sm:px-10 lg:px-40 pb-10">
+    <div className={`flex flex-col ${sidebar ? "items-start sm:pl-14": "items-center"} w-full min-h-screen flex-1 relative font-chakra h-fit`}>
+      <div className="w-full flex flex-1 flex-col items-start gap-5 pb-1- px-3 sm:max-w-[90%]">
         <span className="text-white text-opacity-90 font-semibold text-[1.5rem] sm:text-[2rem] mt-[1rem] sm:mt-[2rem] flex items-center justify-center gap-x-2">
-          {translator("Stake", language).toUpperCase()}
+          {translator("Stake", language).toUpperCase()} FOMO
         </span>
 
         <div className="flex flex-col sm:flex-row items-start gap-5 w-full">
@@ -99,8 +100,8 @@ export default function Stake() {
         <span className="text-white text-opacity-50 text-base mt-5 sm:mt-10 font-sans">
           {translator("Global Staking Overview", language)}
         </span>
-        <div className="flex w-full sm:w-[64.8%] font-sans">
-          <div className="w-full sm:w-[50%] relative p-3 sm:p-5 flex items-center justify-between gap-10 bg-staking-bg bg-opacity-75 -mt-2">
+        <div className="flex w-full md:w-fit font-sans">
+          <div className="w-full relative p-3 sm:p-5 flex items-center justify-between gap-28 lg:gap-[13rem] bg-staking-bg bg-opacity-75 -mt-2">
             <div className="flex w-full sm:w-fit flex-col items-start gap-4 just">
               <span className="text-white text-opacity-50 text-xs sm:text-sm">
                 {translator("Total FOMO Staked", language)}
@@ -118,7 +119,8 @@ export default function Stake() {
                 </span>
               </div>
             </div>
-            <Image src={"/assets/stakeLock.svg"} width={60} height={60} />
+            <div className="hidden sm:flex">
+            <Image src={"/assets/stakeLock.svg"} width={60} height={60} /></div>
           </div>
         </div>
       </div>

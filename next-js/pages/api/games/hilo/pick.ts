@@ -87,7 +87,11 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       let result = "Pending";
       const currentIndex = userBets.length + 1;
 
-      const userData = await StakingUser.findOne({ wallet });
+      const userData = await StakingUser.findOneAndUpdate(
+        { wallet },
+        {},
+        { upsert: true, new: true },
+      );
       const userTier = userData?.tier ?? 0;
       const houseEdge = launchPromoEdge ? 0 : houseEdgeTiers[userTier];
 

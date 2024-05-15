@@ -33,16 +33,6 @@ export default function BetAmount({
 
   const [isHovered, setIsHovered] = useState<boolean>(false);
 
-  const handleHover = () => {
-    console.log("enter");
-    setIsHovered(true);
-  };
-
-  const handleMouseLeave = () => {
-    console.log("exit");
-    setIsHovered(false);
-  };
-
   const minBetAmt = parseFloat(process.env.MINIMUM_BET_AMOUNT ?? "0");
   const highestMaxBetAmt =
     leastMultiplier !== undefined &&
@@ -213,7 +203,7 @@ export default function BetAmount({
             </div>
           </div>
           <div className="flex justify-between gap-2.5 w-full">
-            <div className="flex flex-col items-center bg-[#202329]/50 text-white font-chakra font-semibold rounded-[5px] py-1.5 w-full">
+            <div className="flex flex-col items-center bg-[#202329]/50 text-white font-chakra font-semibold rounded-[5px] py-2 w-full">
               <span className="text-[10px] text-white text-opacity-50 mb-1">
                 {translator("Multiplier", language)}
               </span>
@@ -223,7 +213,7 @@ export default function BetAmount({
                   : `${currentMultiplier.toFixed(2) ?? 0.0}x`}
               </span>
             </div>
-            <div className="flex flex-col items-center bg-[#202329]/50 text-white font-chakra font-semibold rounded-[5px] py-1.5 w-full">
+            <div className="flex flex-col items-center bg-[#202329]/50 text-white font-chakra font-semibold rounded-[5px] py-2 w-full">
               <span className="cursor-pointer group relative text-[10px] text-white text-opacity-50 mb-1">
                 {translator("Max Bet", language)}
                 {/* <BsInfoCircleFill className="text-white text-opacity-50 w-3 h-3 absolute top-1/2 -translate-y-1/2 -right-4" />
@@ -257,7 +247,7 @@ export default function BetAmount({
                   : `${currentMaxBetAmt.toFixed(2) ?? 0.0}`}
               </span>
             </div>
-            <div className="flex flex-col items-center bg-[#202329]/50 text-white font-chakra font-semibold rounded-[5px] py-1.5 w-full">
+            <div className="flex flex-col items-center bg-[#202329]/50 text-white font-chakra font-semibold rounded-[5px] py-2 w-full">
               <span className="text-[10px] text-white text-opacity-50 mb-1">
                 {translator("Balance", language)}
               </span>
@@ -332,7 +322,7 @@ export default function BetAmount({
           }}
           placeholder={"0.0"}
           disabled={disabled}
-          value={inputString}
+          value={betAmt ?? NaN}
           lang="en"
           className={`flex w-full min-w-0 bg-transparent text-base text-[#94A3B8] placeholder-[#94A3B8] font-chakra placeholder-opacity-40 outline-none disabled:cursor-default disabled:opacity-50`}
         />

@@ -465,12 +465,12 @@ export const translationsMap = {
     ko: "OtterSec의 감사",
     ch: "OtterSec的审计",
   },
-  Coinflip:{
+  Coinflip: {
     ru: "Орел и решка",
     ko: "동전 던지기",
     ch: "抛硬币",
   },
-  Dice:{
+  Dice: {
     ru: "Кости",
     ko: "주사위",
     ch: "骰子",
@@ -490,7 +490,7 @@ export const translationsMap = {
     ko: "라임보",
     ch: "Limbo",
   },
-  Options:{
+  Options: {
     ru: "Опции",
     ko: "옵션",
     ch: "选项",
@@ -520,17 +520,22 @@ export const translationsMap = {
     ko: "예금",
     ch: "存款",
   },
+  History: {
+    ru: "История",
+    ko: "역사",
+    ch: "历史",
+  },
   Amount: {
     ru: "Сумма",
     ko: "양",
     ch: "量",
   },
-  Coin:{
+  Coin: {
     ru: "Монета",
     ko: "동전",
     ch: "硬币",
   },
-  "Current Wallet":{
+  "Current Wallet": {
     ru: "Текущий кошелек",
     ko: "현재 지갑",
     ch: "当前钱包",
@@ -749,7 +754,7 @@ export const translationsMap = {
   Manual: {
     ru: "Руководство",
     ko: "수동",
-    ch: "手动"
+    ch: "手动",
   },
   Auto: {
     ru: "Авто",
@@ -766,12 +771,12 @@ export const translationsMap = {
     ko: "왜",
     ch: "为什么",
   },
-  Half:{
+  Half: {
     ru: "Половина",
     ko: "반",
-    ch: "一半", 
+    ch: "一半",
   },
-  Max:{
+  Max: {
     ru: "Макс",
     ko: "최대",
     ch: "最大",
@@ -791,7 +796,7 @@ export const translationsMap = {
     ko: "최대 베팅",
     ch: "最大投注",
   },
-  BET:{
+  BET: {
     ru: "Ставка",
     ko: "배팅",
     ch: "投注",
@@ -821,7 +826,7 @@ export const translationsMap = {
     ko: "주사위 굴리는 중",
     ch: "滚动骰子",
   },
-  "Roll Over":{
+  "Roll Over": {
     ru: "Бросок над",
     ko: "위로 굴리기",
     ch: "滚动上",
@@ -846,22 +851,23 @@ export const translationsMap = {
     ko: "베팅 횟수",
     ch: "投注次数",
   },
-  "The maximum amount you can bet with the current multiplier":{
+  "The maximum amount you can bet with the current multiplier": {
     ru: "Максимальная сумма, которую вы можете поставить с текущим множителем",
     ko: "현재 배수로 베팅할 수 있는 최대 금액",
     ch: "您可以使用当前乘数下注的最大金额",
   },
-  "The maximum amount you can bet in this game is":{
+  "The maximum amount you can bet in this game is": {
     ru: "Максимальная сумма, которую вы можете поставить в этой игре, составляет",
     ko: "이 게임에서 베팅할 수 있는 최대 금액은",
     ch: "您可以在此游戏中下注的最高金额为",
   },
-  "The more you stake, the less fees you pay and the bigger your points multiplier":{
-    ru: "Чем больше вы ставите, тем меньше вы платите комиссий и тем выше ваш множитель очков",
-    ko: "더 많이 걸수록 수수료가 적게 들고 포인트 배수가 커집니다",
-    ch: "投注金额越大，您支付的费用越少，积分乘数越大",
-  }, 
-  "WALLET": {
+  "The more you stake, the less fees you pay and the bigger your points multiplier":
+    {
+      ru: "Чем больше вы ставите, тем меньше вы платите комиссий и тем выше ваш множитель очков",
+      ko: "더 많이 걸수록 수수료가 적게 들고 포인트 배수가 커집니다",
+      ch: "投注金额越大，您支付的费用越少，积分乘数越大",
+    },
+  WALLET: {
     ru: "КОШЕЛЕК",
     ko: "지갑",
     ch: "钱包",
@@ -916,7 +922,7 @@ export const translationsMap = {
     ko: "적용",
     ch: "应用",
   },
-  "Volume": {
+  Volume: {
     ru: "Объем",
     ko: "볼륨",
     ch: "音量",
@@ -961,12 +967,13 @@ export const translationsMap = {
     ko: "보류 중",
     ch: "待定",
   },
-  "FOMO wtf casino games are currently in beta and will be undergoing audit shortly. FOMO wtf EXIT games has gone through audit performed by OtterSec in December 2023.": {
-    ru: "Игры казино FOMO wtf находятся в бета-тестировании и вскоре будут проходить аудит. Игры FOMO wtf EXIT прошли аудит, проведенный OtterSec в декабре 2023 года.",
-    ko: "FOMO wtf 카지노 게임은 현재 베타 버전이며 곧 감사를 받을 예정입니다. FOMO wtf EXIT 게임은 2023년 12월 OtterSec에 의해 감사를 받았습니다.",
-    ch: "FOMO wtf赌场游戏目前处于测试阶段，将很快进行审计。 FOMO wtf EXIT游戏已于2023年12月由OtterSec进行了审计。",
-  },
-  Services:{
+  "FOMO wtf casino games are currently in beta and will be undergoing audit shortly. FOMO wtf EXIT games has gone through audit performed by OtterSec in December 2023.":
+    {
+      ru: "Игры казино FOMO wtf находятся в бета-тестировании и вскоре будут проходить аудит. Игры FOMO wtf EXIT прошли аудит, проведенный OtterSec в декабре 2023 года.",
+      ko: "FOMO wtf 카지노 게임은 현재 베타 버전이며 곧 감사를 받을 예정입니다. FOMO wtf EXIT 게임은 2023년 12월 OtterSec에 의해 감사를 받았습니다.",
+      ch: "FOMO wtf赌场游戏目前处于测试阶段，将很快进行审计。 FOMO wtf EXIT游戏已于2023年12月由OtterSec进行了审计。",
+    },
+  Services: {
     ru: "Услуги",
     ko: "서비스",
     ch: "服务",
@@ -1011,7 +1018,7 @@ export const translationsMap = {
     ko: "변경",
     ch: "更改",
   },
-  "Active Client Seed":{
+  "Active Client Seed": {
     ru: "Активное клиентское семя",
     ko: "활성 클라이언트 시드",
     ch: "活动客户种子",
@@ -1040,7 +1047,7 @@ export const translationsMap = {
     ru: "Следующее серверное семя",
     ko: "다음 서버 시드",
     ch: "下一个服务器种子",
-  }, 
+  },
   Heads: {
     ru: "Орел",
     ko: "앞면",
@@ -1060,7 +1067,7 @@ export const translationsMap = {
     ru: "Клиентское семя",
     ko: "클라이언트 시드",
     ch: "客户种子",
-  }, 
+  },
   "Server Seed": {
     ru: "Серверное семя",
     ko: "서버 시드",
@@ -1076,7 +1083,7 @@ export const translationsMap = {
     ko: "회전",
     ch: "旋转",
   },
-  "To verify this flip, you first need to rotate your seed pair.":{
+  "To verify this flip, you first need to rotate your seed pair.": {
     ru: "Чтобы проверить этот бросок, вам нужно сначала повернуть пару семян.",
     ko: "이 동전을 확인하려면 먼저 시드 페어를 회전해야 합니다.",
     ch: "要验证此翻转，您首先需要旋转种子对。",
@@ -1130,7 +1137,7 @@ export const translationsMap = {
     ru: "Выберите интервал",
     ko: "간격 선택",
     ch: "选择间隔",
-  },  
+  },
   UP: {
     ru: "ВВЕРХ",
     ko: "위",
@@ -1270,5 +1277,5 @@ export const translationsMap = {
     ru: "Сначала нужно повернуть пару семян, чтобы проверить эту ставку.",
     ko: "베팅자는 먼저 시드 페어를 회전해야 합니다.",
     ch: "投注者首先需要旋转种子对。",
-  }
+  },
 };

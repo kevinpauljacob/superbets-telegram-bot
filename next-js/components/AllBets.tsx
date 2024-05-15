@@ -50,7 +50,7 @@ export default function AllBets() {
   }, []);
 
   return (
-    <div className="mt-5 mb-5">
+    <div className="relative mt-5 mb-5">
       <div className="flex items-center mb-6">
         <Image src={Dollar} alt="" width={26} height={26} />
         <span className="font-medium font-changa text-xl text-opacity-90 pl-3">
@@ -70,7 +70,7 @@ export default function AllBets() {
         loading={loading}
       />
       <div
-        className="absolute inset-x-0 bottom-1 h-[10rem] bg-[linear-gradient(0deg,#0F0F0F_0%,rgba(15,15,15,0.00)_100%)] pointer-events-none"
+        className="absolute inset-x-0 bottom-0 h-[11rem] bg-[linear-gradient(0deg,#0F0F0F_0%,rgba(15,15,15,0.00)_100%)] pointer-events-none"
         style={{ zIndex: 1 }}
       ></div>
     </div>

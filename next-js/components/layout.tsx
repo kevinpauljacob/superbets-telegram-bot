@@ -58,7 +58,9 @@ export default function Layout({ children }: LayoutProps) {
     closeVerifyModal,
     verifyModalData,
     sidebar,
+    mobileSidebar,
     setSidebar,
+    setMobileSidebar,
     setAutoBetCount,
     setStartAuto,
     openPFModal,
@@ -113,6 +115,7 @@ export default function Layout({ children }: LayoutProps) {
 
   const toggleSidebar = () => {
     setSidebar(!sidebar);
+    setMobileSidebar(!sidebar);
   };
 
   const openPfModal = () => {
@@ -163,7 +166,7 @@ export default function Layout({ children }: LayoutProps) {
         </section>
       </section>
       <div className="w-full fixed bottom-0 flex md:hidden z-[1000]">
-        <MobileNavbar sidebar={sidebar} toggleSidebar={toggleSidebar} />
+        <MobileNavbar sidebar={mobileSidebar} toggleSidebar={toggleSidebar} />
       </div>
       {showWalletModal && <BalanceModal />}
 

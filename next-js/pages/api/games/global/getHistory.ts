@@ -48,6 +48,10 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         data.push(...nonExpiredWithGame, ...expiredWithGame);
       }
 
+      data.sort((a: any, b: any) => {
+        return b.createdAt.getTime() - a.createdAt.getTime();
+      });
+
       const wallets: string[] = Array.from(
         new Set(data.map((doc: any) => doc.wallet)),
       );
