@@ -41,17 +41,17 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           .json({ success: false, message: "Missing or invalid parameters" });
       }
 
-      const pendingMines = await Mines.findOne({ wallet, result: "Pending" });
-      if (pendingMines)
-        return res
-          .status(400)
-          .json({ success: false, message: "Pending mines game" });
+      // const pendingMines = await Mines.findOne({ wallet, result: "Pending" });
+      // if (pendingMines)
+      //   return res
+      //     .status(400)
+      //     .json({ success: false, message: "Pending mines game" });
 
-      const pendingHilo = await Hilo.findOne({ wallet, result: "Pending" });
-      if (pendingHilo)
-        return res
-          .status(400)
-          .json({ success: false, message: "Pending hilo game" });
+      // const pendingHilo = await Hilo.findOne({ wallet, result: "Pending" });
+      // if (pendingHilo)
+      //   return res
+      //     .status(400)
+      //     .json({ success: false, message: "Pending hilo game" });
 
       const expiredGameSeed = await GameSeed.findOneAndUpdate(
         {
