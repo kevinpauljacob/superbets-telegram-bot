@@ -12,8 +12,10 @@ import { FaRegCopy } from "react-icons/fa6";
 import CheckPF from "@/public/assets/CheckPF.svg";
 import { MdClose } from "react-icons/md";
 import { errorCustom } from "@/components/toasts/ToastGroup";
-import { translator } from "@/context/transactions";
+import ProvablyFairModal from "../ProvablyFairModal";
 import { useGlobalContext } from "@/components/GlobalContext";
+import { translator } from "@/context/transactions";
+
 
 export interface PFModalData {
   activeGameSeed: {
@@ -56,25 +58,32 @@ export default function RollDiceProvablyFairModal({
   const [newClientSeed, setNewClientSeed] = useState<string>(
     generateClientSeed(),
   );
+  const [selectedGameType, setSelectedGameType] = useState<GameType>(GameType.dice2)
   const [strikeNumber, setStrikeNumber] = useState<number>(50.0);
   
   const {language} = useGlobalContext();
-
   const [verificationState, setVerificationState] = useState<{
     clientSeed: string;
     serverSeed: string;
     nonce: string;
+    risk?:string;
+    segments?:number;
+
   }>(
     bet?.gameSeed
       ? {
-          clientSeed: bet.gameSeed?.clientSeed,
-          serverSeed: bet.gameSeed?.serverSeed ?? "",
+          clientSeed: bet.gameSeed.clientSeed,
+          serverSeed: bet.gameSeed.serverSeed ?? "",
           nonce: bet.nonce?.toString() ?? "",
+          risk: bet.risk || (selectedGameType === GameType.wheel ? "low" : undefined),
+          segments: bet.segments || (selectedGameType === GameType.wheel ? 10 : undefined),
         }
       : {
           clientSeed: "",
           serverSeed: "",
           nonce: "",
+          risk: selectedGameType === GameType.wheel ? "low" : undefined,
+          segments: selectedGameType === GameType.wheel ? 10 : undefined,
         },
   );
 
@@ -300,37 +309,35 @@ export default function RollDiceProvablyFairModal({
             {state === "verify" && (
               <div className="grid w-full text-white">
                 <div className="grid gap-2">
-                  <div className="border-2 border-opacity-5 border-[#FFFFFF] md:px-8">
-                    <div className="px-8 pt-20 pb-8">
-                      <div className="w-full">
-                        <DraggableBar
-                          choice={strikeNumber}
-                          setChoice={setStrikeNumber}
-                          strikeNumber={strikeNumber}
-                          result={false}
-                          rollType={"over"}
-                          draggable={false}
-                        />
-                      </div>
-                    </div>
+                  <div className="border-2 border-opacity-5 border-[#FFFFFF]  md:px-8 py-2">
+                  <ProvablyFairModal
+                    verificationState={verificationState}
+                    setVerificationState={setVerificationState}
+                    selectedGameType={selectedGameType}/>
                   </div>
                   <div>
                     <label className="text-xs text-opacity-75 font-changa text-[#F0F0F0]">
                       {translator("Game", language)}
                     </label>
                     <div className="flex items-center">
-                      <select
+                    <select
                         name="game"
-                        value={GameType.dice2}
+                        value={selectedGameType}
                         onChange={(e) =>
-                          setModalData((prevData) => ({
-                            ...prevData,
-                            game: e.target.value as GameType,
-                          }))
+                          setSelectedGameType(
+                           e.target.value as GameType
+                         )
                         }
                         className="bg-[#202329] text-white font-chakra text-xs font-medium mt-1 rounded-md px-5 py-4 w-full relative appearance-none"
                       >
-                        <option value={GameType.dice2}>{translator("Dice2", language)}</option>
+                        <option value={GameType.keno}>Keno</option>
+                        <option value={GameType.dice}>Dice To Win</option>
+  <option value={GameType.coin}>Coin Flip</option>
+  <option value={GameType.options}>Options</option>
+  <option value={GameType.dice2}>Dice2</option>
+
+  <option value={GameType.wheel}>Wheel</option>
+
                       </select>
                     </div>
                   </div>

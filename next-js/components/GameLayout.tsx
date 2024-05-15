@@ -54,7 +54,7 @@ export const GameFooterInfo: React.FC<GameFooterProps> = ({
           )}
 
           <div className="flex flex-col w-full">
-            <span className="text-[#F0F0F0] font-changa font-sembiold text-xs mb-1">
+            <span className="text-[#F0F0F0] font-changa font-semibold text-xs mb-1">
               {translator("Profit", language)}
             </span>
             <span className="bg-[#202329] font-chakra text-xs text-white rounded-md px-2 md:px-5 py-3">
