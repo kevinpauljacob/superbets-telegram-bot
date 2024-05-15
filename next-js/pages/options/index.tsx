@@ -103,14 +103,12 @@ export default function Options() {
           });
           setRefresh(true);
         } else {
-          setResult(null);
-          setCheckResult(false);
-          res?.message && errorCustom(res?.message);
+          throw  Error(res?.message ?? "Could not fetch result!")
         }
         setLoading(false);
       });
-    } catch (e) {
-      errorCustom("Could not fetch result.");
+    } catch (e:any) {
+      errorCustom(e?.message ?? "Could not fetch result.");
       setResult(null);
       setCheckResult(false);
       setLoading(false);
@@ -213,9 +211,9 @@ export default function Options() {
               new Date(bet?.betTime).getTime() +
               betInterval * 60000 -
               Date.now();
-            console.log("here");
+            console.log("here", remainingTime);
             setTimeout(async () => {
-              console.log("executing");
+              console.log("executing", checkResult);
               setBetEnd(true);
               setCheckResult(true);
 
@@ -229,8 +227,9 @@ export default function Options() {
                   (data) => data.price.price * Math.pow(10, data.price.expo),
                 );
               setBetEndPrice(betEndPrice);
-              getResult();
-            }, remainingTime * 1000);
+              if(!checkResult)
+                getResult();
+            }, remainingTime);
 
             setBetEnd(new Date(bet.betEndTime!).getTime() < Date.now());
           }

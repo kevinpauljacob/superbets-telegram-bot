@@ -43,8 +43,6 @@ export default function Sidebar({
 
   const { language, setMobileSidebar } = useGlobalContext();
 
-  const { language } = useGlobalContext();
-
   const [showExitTokens, setShowExitTokens] = useState<boolean>(false);
   const [showPlayTokens, setShowPlayTokens] = useState<boolean>(false);
 

@@ -36,6 +36,7 @@ export interface User {
 export const formatNumber = (number: number, fractions?: number) => {
   return number?.toLocaleString(undefined, {
     maximumFractionDigits: fractions ?? 3,
+    minimumFractionDigits: fractions ?? 3,
   });
 };
 
