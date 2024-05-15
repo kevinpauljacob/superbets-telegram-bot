@@ -107,7 +107,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         throw new Error("Insufficient balance for action!!");
       }
 
-      await Mines.findOneAndUpdate(
+      const record = await Mines.findOneAndUpdate(
         {
           _id: gameId,
           result: "Pending",
@@ -118,7 +118,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           strikeNumbers,
           amountWon,
         },
-      );
+        { new: true },
+      ).populate("gameSeed");
 
       const pointsGained =
         0 * user.numOfGamesPlayed + 1.4 * amount * userData.multiplier;
@@ -142,6 +143,13 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         },
       );
 
+      const { gameSeed: savedGS, ...rest } = record.toObject();
+      rest.game = GameType.mines;
+      rest.userTier = parseInt(newTier);
+      rest.gameSeed = { ...savedGS, serverSeed: undefined };
+
+      const payload = rest;
+
       const socket = new WebSocket(wsEndpoint);
 
       socket.onopen = () => {
@@ -150,16 +158,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
             clientType: "api-client",
             channel: "fomo-casino_games-channel",
             authKey: process.env.FOMO_CHANNEL_AUTH_KEY!,
-            payload: {
-              game: GameType.mines,
-              wallet,
-              result,
-              userTier,
-              time: new Date(),
-              strikeMultiplier,
-              amount,
-              amountWon,
-            },
+            payload,
           }),
         );
 

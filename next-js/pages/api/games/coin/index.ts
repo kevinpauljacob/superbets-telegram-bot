@@ -159,7 +159,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         throw new Error("Insufficient balance for bet!");
       }
 
-      await Coin.create({
+      const coin = new Coin({
         wallet,
         amount,
         flipType,
@@ -173,6 +173,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         nonce,
         gameSeed: activeGameSeed._id,
       });
+      await coin.save();
 
       const pointsGained =
         0 * user.numOfGamesPlayed + 1.4 * amount * userData.multiplier;
@@ -196,6 +197,14 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         },
       );
 
+      const record = await Coin.populate(coin, "gameSeed");
+      const { gameSeed, ...rest } = record.toObject();
+      rest.game = GameType.coin;
+      rest.userTier = parseInt(newTier);
+      rest.gameSeed = { ...gameSeed, serverSeed: undefined };
+
+      const payload = rest;
+
       const socket = new WebSocket(wsEndpoint);
 
       socket.onopen = () => {
@@ -204,16 +213,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
             clientType: "api-client",
             channel: "fomo-casino_games-channel",
             authKey: process.env.FOMO_CHANNEL_AUTH_KEY!,
-            payload: {
-              game: GameType.coin,
-              wallet,
-              result,
-              userTier,
-              time: new Date(),
-              strikeMultiplier,
-              amount,
-              amountWon: amountWon.toNumber(),
-            },
+            payload,
           }),
         );
 

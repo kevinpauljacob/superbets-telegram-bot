@@ -112,6 +112,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         .div(winChance)
         .toNumber();
 
+      let record;
       if (
         !(
           (userBet === "Higher" &&
@@ -124,7 +125,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       ) {
         result = "Lost";
 
-        await Hilo.findOneAndUpdate(
+        record = await Hilo.findOneAndUpdate(
           {
             _id: gameId,
             result: "Pending",
@@ -140,7 +141,10 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
               userBets: userBet,
             },
           },
-        );
+          {
+            new: true,
+          },
+        ).populate("gameSeed");
       } else {
         amountWon = Decimal.mul(
           Math.max(amount, amountWon),
@@ -179,7 +183,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
             throw new Error("Insufficient balance for action!!");
           }
 
-          await Hilo.findOneAndUpdate(
+          record = await Hilo.findOneAndUpdate(
             {
               _id: gameId,
               result: "Pending",
@@ -193,7 +197,10 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
                 userBets: userBet,
               },
             },
-          );
+            {
+              new: true,
+            },
+          ).populate("gameSeed");
         } else {
           await Hilo.findOneAndUpdate(
             {
@@ -234,6 +241,13 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           },
         );
 
+        const { gameSeed, ...rest } = record.toObject();
+        rest.game = GameType.hilo;
+        rest.userTier = parseInt(newTier);
+        rest.gameSeed = { ...gameSeed, serverSeed: undefined };
+
+        const payload = rest;
+
         const socket = new WebSocket(wsEndpoint);
 
         socket.onopen = () => {
@@ -242,16 +256,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
               clientType: "api-client",
               channel: "fomo-casino_games-channel",
               authKey: process.env.FOMO_CHANNEL_AUTH_KEY!,
-              payload: {
-                game: GameType.hilo,
-                wallet,
-                result,
-                userTier,
-                time: new Date(),
-                strikeMultiplier,
-                amount,
-                amountWon,
-              },
+              payload,
             }),
           );
 

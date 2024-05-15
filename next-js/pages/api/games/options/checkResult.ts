@@ -108,14 +108,15 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         throw new Error("User could not be updated !");
       }
 
-      await Option.findOneAndUpdate(
+      const record = await Option.findOneAndUpdate(
         { wallet, result: "Pending" },
         {
           result,
           betEndPrice,
           houseEdge,
         },
-      );
+        { new: true },
+      ).populate("gameSeed");
 
       const pointsGained =
         0 * user.numOfGamesPlayed + 1.4 * bet.amount * userData.multiplier;
@@ -139,6 +140,13 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         },
       );
 
+      const { gameSeed, ...rest } = record.toObject();
+      rest.game = GameType.options;
+      rest.userTier = parseInt(newTier);
+      rest.gameSeed = { ...gameSeed, serverSeed: undefined };
+
+      const payload = rest;
+
       const socket = new WebSocket(wsEndpoint);
 
       socket.onopen = () => {
@@ -147,13 +155,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
             clientType: "api-client",
             channel: "fomo-casino_games-channel",
             authKey: process.env.FOMO_CHANNEL_AUTH_KEY!,
-            payload: {
-              game: GameType.options,
-              wallet,
-              absAmount: amountWon.sub(bet.amount).toNumber(),
-              result,
-              userTier,
-            },
+            payload,
           }),
         );
 
