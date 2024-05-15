@@ -20,7 +20,7 @@ import BetButton from "@/components/games/BetButton";
 import BalanceAlert from "@/components/games/BalanceAlert";
 import { soundAlert } from "@/utils/soundUtils";
 import { errorCustom, successCustom } from "@/components/toasts/ToastGroup";
-import {translator} from "@/context/transactions";
+import { translator } from "@/context/transactions";
 
 const Timer = dynamic(() => import("../../components/games/Timer"), {
   ssr: false,
@@ -41,7 +41,7 @@ export default function Options() {
     coinData,
     setShowWalletModal,
     maxBetAmt,
-    language
+    language,
   } = useGlobalContext();
 
   const [livePrice, setLivePrice] = useState(0);
@@ -209,7 +209,13 @@ export default function Options() {
                 betInterval * 60000 -
                 Date.now(),
             );
-            if (new Date(bet.betEndTime!).getTime() < Date.now()) {
+            const remainingTime =
+              new Date(bet?.betTime).getTime() +
+              betInterval * 60000 -
+              Date.now();
+            console.log("here");
+            setTimeout(async () => {
+              console.log("executing");
               setBetEnd(true);
               setCheckResult(true);
 
@@ -224,7 +230,8 @@ export default function Options() {
                 );
               setBetEndPrice(betEndPrice);
               getResult();
-            }
+            }, remainingTime * 1000);
+
             setBetEnd(new Date(bet.betEndTime!).getTime() < Date.now());
           }
           setLoading(false);
@@ -275,12 +282,6 @@ export default function Options() {
   //   }
   // }, [wallet.publicKey, strikePrice]);
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
-  ) => {
-    setBetAmt(parseFloat(e.target.value));
-  };
-
   const onSubmit = async (data: any) => {
     console.log(betAmt, betType, betInterval);
 
@@ -302,7 +303,8 @@ export default function Options() {
           betType &&
           betAmt !== undefined &&
           betAmt !== 0 &&
-          betInterval !== 0
+          betInterval !== 0 &&
+          !loading
         ) {
           // setBetType("up");
           await bet(betType);
@@ -370,6 +372,7 @@ export default function Options() {
               currentMultiplier={2.0}
               leastMultiplier={2.0}
               game="options"
+              disabled={loading || (strikePrice > 0 && !result)}
             />
 
             {/* select interval  */}
@@ -381,6 +384,7 @@ export default function Options() {
                 <div className="flex lg:w-[66.66%] w-full gap-2.5">
                   <button
                     type="button"
+                    disabled={loading || (strikePrice > 0 && !result)}
                     onClick={() => {
                       !loading && setBetInterval(3);
                     }}
@@ -388,12 +392,13 @@ export default function Options() {
                       betInterval === 3
                         ? "border-[#7839C5]"
                         : "border-transparent hover:border-[#7839C580]"
-                    } w-full rounded-[5px] border-[2px] bg-[#202329] py-2 text-xs font-chakra text-white text-opacity-90 transition duration-200`}
+                    } disabled:pointer-events-none disabled:opacity-50 w-full rounded-[5px] border-[2px] bg-[#202329] py-2 text-xs font-chakra text-white text-opacity-90 transition duration-200`}
                   >
                     3 {translator("Min", language)}
                   </button>
                   <button
                     type="button"
+                    disabled={loading || (strikePrice > 0 && !result)}
                     onClick={() => {
                       !loading && setBetInterval(4);
                     }}
@@ -401,13 +406,14 @@ export default function Options() {
                       betInterval === 4
                         ? "border-[#7839C5]"
                         : "border-transparent hover:border-[#7839C580]"
-                    } w-full rounded-[5px] border-[2px] bg-[#202329] py-2 text-xs font-chakra text-white text-opacity-90 transition duration-200`}
+                    } disabled:pointer-events-none disabled:opacity-50 w-full rounded-[5px] border-[2px] bg-[#202329] py-2 text-xs font-chakra text-white text-opacity-90 transition duration-200`}
                   >
                     4 {translator("Min", language)}
                   </button>
                 </div>
                 <button
                   type="button"
+                  disabled={loading || (strikePrice > 0 && !result)}
                   onClick={() => {
                     !loading && setBetInterval(5);
                   }}
@@ -415,7 +421,7 @@ export default function Options() {
                     betInterval === 5
                       ? "border-[#7839C5]"
                       : "border-transparent hover:border-[#7839C580]"
-                  } lg:w-[33.33%] w-full rounded-[5px] border-[2px] bg-[#202329] py-2 text-xs font-chakra text-white text-opacity-90 transition duration-200`}
+                  } lg:w-[33.33%] disabled:pointer-events-none disabled:opacity-50 w-full rounded-[5px] border-[2px] bg-[#202329] py-2 text-xs font-chakra text-white text-opacity-90 transition duration-200`}
                 >
                   5 {translator("Min", language)}
                 </button>
@@ -424,7 +430,9 @@ export default function Options() {
 
             <div className="flex w-full flex-row lg:mb-[1.4rem] gap-3">
               {/* buttons  */}
-              <div
+              <button
+                type="button"
+                disabled={loading || (strikePrice > 0 && !result)}
                 onClick={() => {
                   setBetType("up");
                 }}
@@ -432,11 +440,13 @@ export default function Options() {
                   betType === "up"
                     ? "border-[#7839C5]"
                     : "border-transparent hover:border-[#7839C580]"
-                } w-full rounded-lg text-center cursor-pointer border-2 bg-[#202329] py-2.5 font-changa text-xl text-white shadow-[0px_4px_15px_0px_rgba(0,0,0,0.25)]`}
+                } w-full rounded-lg disabled:pointer-events-none disabled:opacity-50 text-center cursor-pointer border-2 bg-[#202329] py-2.5 font-changa text-xl text-white shadow-[0px_4px_15px_0px_rgba(0,0,0,0.25)]`}
               >
                 {translator("UP", language)}
-              </div>
-              <div
+              </button>
+              <button
+                type="button"
+                disabled={loading || (strikePrice > 0 && !result)}
                 onClick={() => {
                   setBetType("down");
                 }}
@@ -444,10 +454,10 @@ export default function Options() {
                   betType === "down"
                     ? "border-[#7839C5]"
                     : "border-transparent hover:border-[#7839C580]"
-                } w-full rounded-lg text-center cursor-pointer border-2 bg-[#202329] py-2.5 font-changa text-xl text-white shadow-[0px_4px_15px_0px_rgba(0,0,0,0.25)] `}
+                } w-full rounded-lg disabled:pointer-events-none disabled:opacity-50 text-center cursor-pointer border-2 bg-[#202329] py-2.5 font-changa text-xl text-white shadow-[0px_4px_15px_0px_rgba(0,0,0,0.25)] `}
               >
                 {translator("DOWN", language)}
-              </div>
+              </button>
             </div>
 
             {/* lap  button  */}
@@ -465,7 +475,7 @@ export default function Options() {
                     ? true
                     : false
                 }
-                onClickFunction={onSubmit}
+                // onClickFunction={onSubmit}
               >
                 {loading || (strikePrice > 0 && !result) ? (
                   <Loader />
@@ -508,7 +518,11 @@ export default function Options() {
                   betType === "up" ? "text-[#72F238]" : "text-[#CF304A]"
                 } text-xs md:text-base font-bold`}
               >
-                {betType ? (betType === "up" ? translator("BET UP", language) : translator("BET DOWN", language)) : ""}
+                {betType
+                  ? betType === "up"
+                    ? translator("BET UP", language)
+                    : translator("BET DOWN", language)
+                  : ""}
               </span>
             </div>
           </div>
@@ -543,7 +557,11 @@ export default function Options() {
                       : "text-[#f0f0f0] test-opacity-75"
                   }`}
                 >
-                  {result ? (result === "Won" ? translator("You Won!", language) : translator("You Lost!", language)) : ""}
+                  {result
+                    ? result === "Won"
+                      ? translator("You Won!", language)
+                      : translator("You Lost!", language)
+                    : ""}
                 </span>
               )}
             </div>

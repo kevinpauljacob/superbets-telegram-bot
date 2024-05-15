@@ -295,6 +295,31 @@ export default function Dice2() {
       ((typeof autoBetCount === "string" && autoBetCount.includes("inf")) ||
         (typeof autoBetCount === "number" && autoBetCount > 0))
     ) {
+      let potentialLoss = 0;
+      if (betAmt !== undefined) {
+        let adjustedBetAmt = betAmt;
+        if (autoWinChange !== null) {
+          adjustedBetAmt += (autoWinChange * betAmt) / 100.0;
+        } else if (autoLossChange !== null) {
+          adjustedBetAmt -= (autoLossChange * betAmt) / 100.0;
+        }
+        console.log("Adjusted bet amount:", adjustedBetAmt);
+
+        const potentialWinProfit =
+          (multiplier * (1 - houseEdge) - 1) * adjustedBetAmt;
+        const potentialLossProfit = multiplier * -1 * adjustedBetAmt;
+
+        potentialLoss =
+          adjustedBetAmt + Math.max(potentialWinProfit, potentialLossProfit);
+      }
+
+      if (betAmt !== undefined) {
+        console.log("Current bet amount:", betAmt);
+        console.log("Auto loss change:", autoLossChange);
+        console.log("Auto profit change:", autoWinChange);
+        console.log("Potential loss:", potentialLoss);
+      }
+
       if (
         useAutoConfig &&
         autoStopProfit &&
@@ -310,8 +335,8 @@ export default function Dice2() {
       if (
         useAutoConfig &&
         autoStopLoss &&
-        autoBetProfit < 0 &&
-        autoBetProfit <= -autoStopLoss
+        ((autoBetProfit < 0 && autoBetProfit <= -autoStopLoss) ||
+          potentialLoss >= autoStopLoss)
       ) {
         showInfoToast("Loss limit reached.");
         setAutoBetCount(0);

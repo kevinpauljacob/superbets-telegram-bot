@@ -5,7 +5,8 @@ import { WebSocket } from "ws";
 import { IDL as fomoIDL } from "./utils/fomoIDL";
 import { IDL as fomoJupIDL } from "./utils/fomoJupIDL";
 import dotenv from "dotenv";
-import recentBuyers from "./models/recentBuyers";
+import { recentBuyers, user } from "./models";
+import { pointTiers } from "./utils/helper";
 dotenv.config({ path: "./.env.local" });
 
 const port = parseInt(process.env.PORT || "4000");
@@ -46,13 +47,46 @@ const handleFomoBuyEvent = async (
 
     const { buyer, gameId, quantity, totalAmount } = event;
 
+    const wallet = (buyer as PublicKey).toBase58();
+    const userData = await user.findOneAndUpdate(
+      { wallet },
+      {},
+      { upsert: true, new: true }
+    );
+
     await recentBuyers.create({
-      buyer: (buyer as any).toBase58(),
+      buyer: wallet,
       gameId,
       numOfTickets: (quantity as any).toNumber(),
       totalAmount,
       txnSignature: signature,
     });
+
+    const numOfGamesPlayed = await recentBuyers
+      .distinct("gameId", { buyer: wallet })
+      .then((gameIds) => gameIds.length);
+
+    const pointsGained =
+      1.2 * numOfGamesPlayed +
+      1.4 * (totalAmount as number) * userData.multiplier;
+    const points = userData.points + pointsGained;
+    const newTier = Object.entries(pointTiers).reduce((prev, next) => {
+      return points >= next[1]?.limit ? next : prev;
+    })[0];
+
+    await user.findOneAndUpdate(
+      {
+        wallet,
+      },
+      {
+        $inc: {
+          points: pointsGained,
+        },
+        $set: {
+          tier: newTier,
+        },
+      }
+    );
   });
 
   console.log("Fomo buyTicket event listener started");

@@ -33,16 +33,6 @@ export default function BetAmount({
 
   const [isHovered, setIsHovered] = useState<boolean>(false);
 
-  const handleHover = () => {
-    console.log("enter");
-    setIsHovered(true);
-  };
-
-  const handleMouseLeave = () => {
-    console.log("exit");
-    setIsHovered(false);
-  };
-
   const minBetAmt = parseFloat(process.env.MINIMUM_BET_AMOUNT ?? "0");
   const highestMaxBetAmt =
     leastMultiplier !== undefined &&
@@ -332,7 +322,7 @@ export default function BetAmount({
           }}
           placeholder={"0.0"}
           disabled={disabled}
-          value={inputString}
+          value={betAmt ?? NaN}
           lang="en"
           className={`flex w-full min-w-0 bg-transparent text-base text-[#94A3B8] placeholder-[#94A3B8] font-chakra placeholder-opacity-40 outline-none disabled:cursor-default disabled:opacity-50`}
         />
