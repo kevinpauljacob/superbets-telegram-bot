@@ -165,6 +165,7 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
   const wallet = useWallet();
   const [loading, setLoading] = useState(false);
   const [language, setLanguage] = useState<"en" | "ru" | "ko" | "ch">("en");
+  
   const [userData, setUserData] = useState<User | null>(null);
   const [stake, setStake] = useState(true);
   const [amount, setAmount] = useState<number>(0);
@@ -221,6 +222,8 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
 
   const [houseEdge, setHouseEdge] = useState<number>(0);
   const [maxBetAmt, setMaxBetAmt] = useState<number>(0);
+
+
 
   useEffect(() => {
     const fetchFomoPrice = async () => {
@@ -298,12 +301,11 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
       });
 
       const { success, message, data } = await res.json();
-      // console.log("Data: ", data);
+      
       if (success) setGlobalInfo(data);
-      // else errorCustom(message);
+      
     } catch (e) {
-      // errorCustom("Unable to fetch balance.");
-      console.error(e);
+            console.error(e);
     }
   };
 

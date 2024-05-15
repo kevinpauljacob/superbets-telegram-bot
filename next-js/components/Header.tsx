@@ -30,11 +30,13 @@ export function Header({
     setMobileSidebar,
   } = useGlobalContext();
   const [langSelect, setLangSelect] = useState(false);
-
+  
   useEffect(() => {
     if (!userData && wallet && wallet.publicKey) getUserDetails();
   }, [wallet.publicKey]);
-
+  useEffect(() => {
+    localStorage.setItem("language", language);
+  }, [language]); 
   return (
     <div
       className={`${
