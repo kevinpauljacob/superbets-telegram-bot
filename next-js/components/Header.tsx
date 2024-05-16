@@ -90,7 +90,7 @@ export function Header({
                 }}
                 className="relative hidden md:flex items-center hover:bg-[#0000009f] transition-all p-1.5 rounded-md"
               >
-                <MdOutlineLanguage className="w-5 h-5 mr-3 text-white text-opacity-50" />
+                <MdOutlineLanguage className="w-5 h-5 mr-3 text-white text-opacity-50 z-[100]" />
                 <span className="text-white text-sm mr-5 text-start text-opacity-50">
                   {language === "en"
                     ? "English"
