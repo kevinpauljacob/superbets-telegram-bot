@@ -30,6 +30,7 @@ export default function BalanceModal() {
     "Deposit" | "History" | "Withdraw"
   >("Deposit");
   const historyHeaders = ["Time", "Amount", "Type", "Status"];
+  const mobileHistoryHeaders = ["Amount", "Status"];
 
   const onSubmit = async (data: any) => {
     if (!loading) {
@@ -127,7 +128,7 @@ export default function BalanceModal() {
 
         <div className="w-full flex mb-8 mt-2 gap-2">
           <button
-            className={`w-full border-2 rounded-md py-2 text-white font-semibold text-sm transition hover:duration-75 ease-in-out ${
+            className={`w-full border-2 rounded-md py-2 text-white font-semibold text-xs sm:text-sm transition hover:duration-75 ease-in-out ${
               actionType === "Deposit"
                 ? "bg-[#d9d9d90d] border-transparent text-opacity-90"
                 : "border-[#d9d9d90d] hover:bg-[#9361d1] focus:bg-[#602E9E] text-opacity-50 hover:text-opacity-90"
@@ -137,7 +138,7 @@ export default function BalanceModal() {
             {translator("Deposit", language)}
           </button>
           <button
-            className={`w-full border-2 rounded-md py-2 text-white font-semibold text-sm transition-all hover:duration-75 ease-in-out ${
+            className={`w-full border-2 rounded-md py-2 text-white font-semibold text-xs sm:text-sm transition-all hover:duration-75 ease-in-out ${
               actionType === "Withdraw"
                 ? "bg-[#d9d9d90d] border-transparent text-opacity-90"
                 : "border-[#d9d9d90d] hover:bg-[#9361d1] focus:bg-[#602E9E] text-opacity-50 hover:text-opacity-90"
@@ -147,7 +148,7 @@ export default function BalanceModal() {
             {translator("Withdraw", language)}
           </button>
           <button
-            className={`w-full border-2 rounded-md py-2 text-white font-semibold text-sm transition hover:duration-75 ease-in-out ${
+            className={`w-full border-2 rounded-md py-2 text-white font-semibold text-xs sm:text-sm transition hover:duration-75 ease-in-out ${
               actionType === "History"
                 ? "bg-[#d9d9d90d] border-transparent text-opacity-90"
                 : "border-[#d9d9d90d] hover:bg-[#9361d1] focus:bg-[#602E9E] text-opacity-50 hover:text-opacity-90"
@@ -296,47 +297,65 @@ export default function BalanceModal() {
               </div>
             ) : (
               <table className="flex w-full flex-col items-center">
-                <tr className="mb-2 flex w-full flex-row items-center gap-2 pr-10 py-1 text-sm font-light font-changa bg-table-secondary">
+                <tr className="mb-2 flex w-full flex-row items-center gap-2 py-1 text-sm font-light font-changa bg-table-secondary">
                   {historyHeaders.map((header, index) => (
                     <th
                       key={index}
-                      className={`w-full text-center font-changa text-sm font-light text-[#F0F0F0] text-opacity-75`}
+                      className={`hidden sm:block w-full text-center font-changa text-[10px] font-light text-[#F0F0F0] text-opacity-75`}
+                    >
+                      {header}
+                    </th>
+                  ))}
+                  {mobileHistoryHeaders.map((header, index) => (
+                    <th
+                      key={index}
+                      className={`sm:hidden w-full text-center font-changa text-[10px] font-light text-[#F0F0F0] text-opacity-75`}
                     >
                       {header}
                     </th>
                   ))}
                 </tr>
-                {historyData.length > 0 ? (
-                  historyData.map((data, index) => (
-                    <tr
-                      key={index}
-                      className={`mb-4 flex w-full flex-row items-center gap-2 pr-10 py-3 text-sm font-light font-changa bg-table-secondary`}
-                    >
-                      <td className="w-full text-center font-changa text-sm font-light text-[#F0F0F0] text-opacity-75">
-                        {timestampParser(data.createdAt)}
-                      </td>
-                      <td className="w-full text-center font-changa text-sm font-light text-[#F0F0F0] text-opacity-75">
-                        {data.amount} SOL
-                      </td>
-                      <td className="w-full text-center font-changa text-sm font-light text-[#F0F0F0] text-opacity-75">
-                        {data.type ? "Deposit" : "Withdraw"}
-                      </td>
-                      <td
-                        className={`w-full text-center font-changa text-sm font-light ${
-                          data.status === "completed"
-                            ? "text-green-500"
-                            : "text-red-500"
-                        }`}
+                <div
+                  className={`${
+                    historyData.length <= 0
+                      ? "flex items-center justify-center"
+                      : ""
+                  } w-full h-[310px] overflow-scroll`}
+                >
+                  {historyData.length > 0 ? (
+                    historyData.map((data, index) => (
+                      <tr
+                        key={index}
+                        className={`mb-2 flex w-full flex-row items-center gap-2 py-3 text-xs font-light font-changa bg-table-secondary`}
                       >
-                        {data.status === "completed" ? "Completed" : "Pending"}
-                      </td>
-                    </tr>
-                  ))
-                ) : (
-                  <span className="w-full text-center font-changa text-[#F0F0F080]">
-                    No data.
-                  </span>
-                )}
+                        <td className="hidden sm:block w-full text-center font-changa text-xs font-light text-[#F0F0F0] text-opacity-75">
+                          {timestampParser(data.createdAt)}
+                        </td>
+                        <td className="w-full text-center font-changa text-xs font-light text-[#F0F0F0] text-opacity-75">
+                          {data.amount} SOL
+                        </td>
+                        <td className="hidden sm:block w-full text-center font-changa text-xs font-light text-[#F0F0F0] text-opacity-75">
+                          {data.type ? "Deposit" : "Withdraw"}
+                        </td>
+                        <td
+                          className={`w-full text-center font-changa text-xs font-light ${
+                            data.status === "completed"
+                              ? "text-green-500"
+                              : "text-red-500"
+                          }`}
+                        >
+                          {data.status === "completed"
+                            ? "Completed"
+                            : "Pending"}
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <span className="flex items-center justify-center w-full text-center font-changa text-[#F0F0F080]">
+                      No data.
+                    </span>
+                  )}
+                </div>
               </table>
             )}
 
