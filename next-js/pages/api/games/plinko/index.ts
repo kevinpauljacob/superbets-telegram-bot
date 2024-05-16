@@ -214,7 +214,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       }
 
       const result = amountWon.toNumber() > amount ? "Won" : "Lost";
-      await Plinko.create({
+      const plinko = new Plinko({
         wallet,
         amount,
         rows,
@@ -229,6 +229,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         nonce,
         GameSeedId: activeGameSeed._id,
       });
+      await plinko.save();
 
       const pointsGained =
         0 * user.numOfGamesPlayed + 1.4 * amount * userData.multiplier;
@@ -252,6 +253,14 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         },
       );
 
+      const record = await Plinko.populate(plinko, "gameSeed");
+      const { gameSeed, ...rest } = record.toObject();
+      rest.game = GameType.plinko;
+      rest.userTier = parseInt(newTier);
+      rest.gameSeed = { ...gameSeed, serverSeed: undefined };
+
+      const payload = rest;
+
       const socket = new WebSocket(wsEndpoint);
 
       socket.onopen = () => {
@@ -260,16 +269,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
             clientType: "api-client",
             channel: "fomo-casino_games-channel",
             authKey: process.env.FOMO_CHANNEL_AUTH_KEY!,
-            payload: {
-              game: GameType.plinko,
-              wallet,
-              result,
-              userTier,
-              time: new Date(),
-              strikeMultiplier,
-              amount,
-              amountWon: amountWon.toNumber(),
-            },
+            payload,
           }),
         );
 

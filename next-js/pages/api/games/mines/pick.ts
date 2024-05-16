@@ -99,10 +99,11 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       const userTier = userData?.tier ?? 0;
       const houseEdge = launchPromoEdge ? 0 : houseEdgeTiers[userTier];
 
+      let record;
       if (strikeNumbers[userBet] === 1) {
         result = "Lost";
 
-        await Mines.findOneAndUpdate(
+        record = await Mines.findOneAndUpdate(
           {
             _id: gameId,
             result: "Pending",
@@ -115,7 +116,10 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
             amountWon: 0,
             amountLost: gameInfo.amount,
           },
-        );
+          {
+            new: true,
+          },
+        ).populate("gameSeed");
       } else {
         amountWon = Decimal.mul(Math.max(amount, amountWon), strikeMultiplier)
           .mul(Decimal.sub(1, houseEdge))
@@ -148,7 +152,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
             throw new Error("Insufficient balance for action!!");
           }
 
-          await Mines.findOneAndUpdate(
+          record = await Mines.findOneAndUpdate(
             {
               _id: gameId,
               result: "Pending",
@@ -161,7 +165,10 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
               amountWon,
               $push: { userBets: userBet },
             },
-          );
+            {
+              new: true,
+            },
+          ).populate("gameSeed");
         } else {
           await Mines.findOneAndUpdate(
             {
@@ -200,6 +207,13 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           },
         );
 
+        const { gameSeed, ...rest } = record.toObject();
+        rest.game = GameType.mines;
+        rest.userTier = parseInt(newTier);
+        rest.gameSeed = { ...gameSeed, serverSeed: undefined };
+
+        const payload = rest;
+
         const socket = new WebSocket(wsEndpoint);
 
         socket.onopen = () => {
@@ -208,16 +222,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
               clientType: "api-client",
               channel: "fomo-casino_games-channel",
               authKey: process.env.FOMO_CHANNEL_AUTH_KEY!,
-              payload: {
-                game: GameType.mines,
-                wallet,
-                result,
-                userTier,
-                time: new Date(),
-                strikeMultiplier,
-                amount,
-                amountWon,
-              },
+              payload,
             }),
           );
 

@@ -11,8 +11,10 @@ import { FaRegCopy } from "react-icons/fa6";
 import { MdClose } from "react-icons/md";
 import CheckPF from "@/public/assets/CheckPF.svg";
 import { errorCustom } from "@/components/toasts/ToastGroup";
+import ProvablyFairModal from "../ProvablyFairModal";
 import { translator } from "@/context/transactions";
 import { useGlobalContext } from "@/components/GlobalContext";
+
 
 export interface PFModalData {
   activeGameSeed: {
@@ -55,36 +57,35 @@ export default function RollDiceProvablyFairModal({
   const [newClientSeed, setNewClientSeed] = useState<string>(
     generateClientSeed(),
   );
-  const [strikeNumbers, setStrikeNumbers] = useState<number[]>([]);
+
+  const [selectedGameType, setSelectedGameType] = useState<GameType>(GameType.keno)
   const { language } = useGlobalContext();
   const [verificationState, setVerificationState] = useState<{
     clientSeed: string;
     serverSeed: string;
     nonce: string;
+    risk?:string;
+    segments?:number;
+
   }>(
     bet?.gameSeed
       ? {
-          clientSeed: bet.gameSeed?.clientSeed,
-          serverSeed: bet.gameSeed?.serverSeed ?? "",
+          clientSeed: bet.gameSeed.clientSeed,
+          serverSeed: bet.gameSeed.serverSeed ?? "",
           nonce: bet.nonce?.toString() ?? "",
+          risk: bet.risk || (selectedGameType === GameType.wheel ? "low" : undefined),
+          segments: bet.segments || (selectedGameType === GameType.wheel ? 10 : undefined),
         }
       : {
           clientSeed: "",
           serverSeed: "",
           nonce: "",
+          risk: selectedGameType === GameType.wheel ? "low" : undefined,
+          segments: selectedGameType === GameType.wheel ? 10 : undefined,
         },
   );
 
-  useEffect(() => {
-    setStrikeNumbers(
-      generateGameResult(
-        verificationState.serverSeed,
-        verificationState.clientSeed,
-        parseInt(verificationState.nonce),
-        GameType.keno,
-      ),
-    );
-  }, []);
+
 
   const handleToggleState = (newState: "seeds" | "verify") => {
     setState(newState);
@@ -113,16 +114,9 @@ export default function RollDiceProvablyFairModal({
       [name]: value,
     }));
 
-    const { clientSeed, serverSeed, nonce } = verificationState;
 
-    setStrikeNumbers(
-      generateGameResult(
-        name === "serverSeed" ? value : serverSeed,
-        name === "clientSeed" ? value : clientSeed,
-        parseInt(name === "nonce" ? value : nonce),
-        GameType.keno,
-      ),
-    );
+
+  
   };
 
   const handleSetClientSeed = async () => {
@@ -296,33 +290,12 @@ export default function RollDiceProvablyFairModal({
             )}
             {state === "verify" && (
               <div className="grid w-full text-white">
-                <div className="w-full">
-                  <div className="border-2 border-opacity-5 border-[#FFFFFF] lg2:px-6 md:px-4 px-0 w-full">
-                    <div className="p-4">
-                      <div className="grid grid-cols-8 gap-2 text-white lg:text-xl md:text-lg sm:text-base text-sm font-chakra w-full">
-                        {Array.from(
-                          { length: 40 },
-                          (_, index) => index + 1,
-                        ).map((number) => (
-                          <div
-                            key={number}
-                            className={`flex items-center justify-center cursor-pointer ${
-                              strikeNumbers.includes(number)
-                                ? "bg-black border-2 border-fomo-green"
-                                : "bg-[#202329]"
-                            } rounded-md text-center transition-all duration-300 ease-in-out lg2:w-[45px] lg2:h-[45px] md:w-[42px] md:h-[42px] sm:w-[42px] sm:h-[42px] w-[30px] h-[30px]`}
-                          >
-                            {strikeNumbers.includes(number) ? (
-                              <div className="flex justify-center items-center bg-[#FFD100] text-black rounded-full lg2:w-[32px] lg2:h-[32px] md:w-[32px] md:h-[32px] sm:w-[28px] sm:h-[28px] w-[25px] h-[25px]">
-                                {number}
-                              </div>
-                            ) : (
-                              <div>{number}</div>
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                    </div>
+                <div className="grid gap-2">
+                  <div className="border-2 border-opacity-5 border-[#FFFFFF] md:px-8 py-2">
+                      <ProvablyFairModal
+                      setVerificationState={setVerificationState}
+                       verificationState={verificationState}
+                       selectedGameType={selectedGameType}/>
                   </div>
                   <div>
                     <label className="text-xs text-opacity-75 font-changa text-[#F0F0F0]">
@@ -331,16 +304,22 @@ export default function RollDiceProvablyFairModal({
                     <div className="flex items-center">
                       <select
                         name="game"
-                        value={GameType.keno}
+                        value={selectedGameType}
                         onChange={(e) =>
-                          setModalData((prevData) => ({
-                            ...prevData,
-                            game: e.target.value as GameType,
-                          }))
+                          setSelectedGameType(
+                           e.target.value as GameType
+                         )
                         }
                         className="bg-[#202329] text-white font-chakra text-xs font-medium mt-1 rounded-md px-5 py-4 w-full relative appearance-none"
                       >
-                        <option value={GameType.keno}>{translator("Keno", language)}</option>
+                        <option value={GameType.keno}>Keno</option>
+                        <option value={GameType.dice}>Dice To Win</option>
+  <option value={GameType.coin}>Coin Flip</option>
+
+  <option value={GameType.dice2}>Dice2</option>
+  <option value={GameType.limbo}>Limbo</option>
+  <option value={GameType.wheel}>Wheel</option>
+
                       </select>
                     </div>
                   </div>
@@ -380,6 +359,8 @@ export default function RollDiceProvablyFairModal({
                       className="bg-[#202329] text-white font-chakra text-xs font-medium mt-1 rounded-md px-5 py-4 w-full relative"
                     />
                   </div>
+                  
+                  
                 </div>
               </div>
             )}

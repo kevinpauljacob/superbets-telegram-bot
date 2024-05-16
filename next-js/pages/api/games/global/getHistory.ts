@@ -17,35 +17,29 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
         const model = gameModelMap[game as keyof typeof gameModelMap];
 
-        const nonExpired = await model
-          .find(
-            { "gameSeed.status": { $ne: seedStatus.EXPIRED } },
-            { "gameSeed.serverSeed": 0 },
-            { populate: { path: "gameSeed" } },
-          )
+        const records = await model
+          .find()
+          .populate({
+            path: "gameSeed",
+          })
           .sort({ createdAt: -1 })
-          .limit(25);
+          .limit(20);
 
-        const nonExpiredWithGame = nonExpired.map((record) => ({
-          ...record._doc,
-          game,
-        }));
+        const resultsWithGame = records.map((record) => {
+          const { gameSeed, ...rest } = record.toObject();
 
-        const expired = await model
-          .find(
-            { "gameSeed.status": seedStatus.EXPIRED },
-            {},
-            { populate: { path: "gameSeed" } },
-          )
-          .sort({ createdAt: -1 })
-          .limit(25);
+          rest.game = game;
 
-        const expiredWithGame = expired.map((record) => ({
-          ...record._doc,
-          game,
-        }));
+          if (gameSeed.status !== seedStatus.EXPIRED) {
+            rest.gameSeed = { ...gameSeed, serverSeed: undefined };
+          } else {
+            rest.gameSeed = { ...gameSeed };
+          }
 
-        data.push(...nonExpiredWithGame, ...expiredWithGame);
+          return rest;
+        });
+
+        data.push(...resultsWithGame);
       }
 
       data.sort((a: any, b: any) => {

@@ -244,23 +244,16 @@ export default function Limbo() {
     ) {
       let potentialLoss = 0;
       if (betAmt !== undefined) {
-        let adjustedBetAmt = betAmt;
-        if (autoWinChange !== null) {
-          adjustedBetAmt += (autoWinChange * betAmt) / 100.0;
-        } else if (autoLossChange !== null) {
-          adjustedBetAmt -= (autoLossChange * betAmt) / 100.0;
-        }
-        console.log("Adjusted bet amount:", adjustedBetAmt);
-
-        const potentialWinProfit =
-          (multiplier * (1 - houseEdge) - 1) * adjustedBetAmt;
-        const potentialLossProfit = multiplier * -1 * adjustedBetAmt;
-
         potentialLoss =
-          adjustedBetAmt + Math.max(potentialWinProfit, potentialLossProfit);
-      }
+          autoBetProfit +
+          -1 *
+            (autoWinChangeReset || autoLossChangeReset
+              ? betAmt
+              : autoBetCount === "inf"
+              ? Math.max(0, betAmt)
+              : betAmt *
+                (autoLossChange !== null ? autoLossChange / 100.0 : 0));
 
-      if (betAmt !== undefined) {
         console.log("Current bet amount:", betAmt);
         console.log("Auto loss change:", autoLossChange);
         console.log("Auto profit change:", autoWinChange);
@@ -280,8 +273,8 @@ export default function Limbo() {
       if (
         useAutoConfig &&
         autoStopLoss &&
-        ((autoBetProfit < 0 && autoBetProfit <= -autoStopLoss) ||
-          potentialLoss >= autoStopLoss)
+        autoBetProfit < 0 &&
+        potentialLoss <= -autoStopLoss
       ) {
         showInfoToast("Loss limit reached.");
         setAutoBetCount(0);

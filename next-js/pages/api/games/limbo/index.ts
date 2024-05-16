@@ -158,7 +158,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         throw new Error("Insufficient balance for action!!");
       }
 
-      await Limbo.create({
+      const limbo = new Limbo({
         wallet,
         amount,
         chance,
@@ -172,6 +172,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         nonce,
         gameSeed: activeGameSeed._id,
       });
+      await limbo.save();
 
       const pointsGained =
         0 * user.numOfGamesPlayed + 1.4 * amount * userData.multiplier;
@@ -194,6 +195,14 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           },
         },
       );
+
+      const record = await Limbo.populate(limbo, "gameSeed");
+      const { gameSeed, ...rest } = record.toObject();
+      rest.game = GameType.limbo;
+      rest.userTier = parseInt(newTier);
+      rest.gameSeed = { ...gameSeed, serverSeed: undefined };
+
+      const payload = rest;
 
       const socket = new WebSocket(wsEndpoint);
 

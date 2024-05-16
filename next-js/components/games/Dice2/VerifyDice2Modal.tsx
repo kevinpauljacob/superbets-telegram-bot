@@ -16,6 +16,8 @@ export interface Dice2 {
   amount: number;
   result: string;
   strikeNumber: number;
+  risk?:string;
+  segments?:number;
   amountWon: number;
   chance: number;
   nonce?: number;

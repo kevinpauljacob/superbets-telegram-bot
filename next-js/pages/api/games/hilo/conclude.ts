@@ -113,7 +113,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         throw new Error("Insufficient balance for action!!");
       }
 
-      await Hilo.findOneAndUpdate(
+      const record = await Hilo.findOneAndUpdate(
         {
           _id: gameId,
           result: "Pending",
@@ -124,7 +124,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           houseEdge,
           amountWon,
         },
-      );
+        { new: true },
+      ).populate("gameSeed");
 
       const pointsGained =
         0 * user.numOfGamesPlayed + 1.4 * amount * userData.multiplier;
@@ -148,6 +149,13 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         },
       );
 
+      const { gameSeed: savedGS, ...rest } = record.toObject();
+      rest.game = GameType.dice;
+      rest.userTier = parseInt(newTier);
+      rest.gameSeed = { ...savedGS, serverSeed: undefined };
+
+      const payload = rest;
+
       const socket = new WebSocket(wsEndpoint);
 
       socket.onopen = () => {
@@ -156,16 +164,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
             clientType: "api-client",
             channel: "fomo-casino_games-channel",
             authKey: process.env.FOMO_CHANNEL_AUTH_KEY!,
-            payload: {
-              game: GameType.mines,
-              wallet,
-              result,
-              userTier,
-              time: new Date(),
-              strikeMultiplier,
-              amount,
-              amountWon,
-            },
+            payload,
           }),
         );
 

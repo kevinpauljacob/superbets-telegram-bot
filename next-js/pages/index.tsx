@@ -43,18 +43,18 @@ export default function Home() {
     }
   }, [wallet?.publicKey]);
 
-  useEffect(() => {
+   useEffect(() => {
     //@ts-ignore
     setLanguage(localStorage.getItem("language") ?? "en");
   }, []);
 
-  useEffect(() => {
+ /* useEffect(() => {
     localStorage.setItem("language", language);
-  }, [language]);
-
+  }, [language]); 
+ */
   return (
     <>
-      <div className="flex flex-col lg:flex-row text-white w-full overflow-hidden relative overflow-x-hidden p-4 xl:p-6">
+      <div className="flex flex-col lg:flex-row text-white w-full overflow-hidden relative overflow-x-hidden px-4 xl:px-6">
         <div className="flex flex-1 flex-col md:px-[2.5%]">
           <div className="">
             <StoreBanner />
