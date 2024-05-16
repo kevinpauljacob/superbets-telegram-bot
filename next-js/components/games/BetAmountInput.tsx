@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, use } from "react";
 import { useForm } from "react-hook-form";
 import { useGlobalContext } from "../GlobalContext";
 import { GameType } from "@/utils/provably-fair";
@@ -37,13 +37,15 @@ export default function BetAmount({
   const minBetAmt = parseFloat(process.env.MINIMUM_BET_AMOUNT ?? "0");
 
   let highestMaxBetAmt = "0";
-  if (leastMultiplier !== undefined) {
-    highestMaxBetAmt = (
-      (game === GameType.keno
-        ? maxPayouts[GameType.keno][kenoRisk]
-        : (maxPayouts[game as GameType] as number)) / leastMultiplier
-    ).toFixed(2);
-  }
+  useEffect(() => {
+    if (leastMultiplier !== undefined) {
+      highestMaxBetAmt = (
+        (game === GameType.keno
+          ? maxPayouts[GameType.keno][kenoRisk]
+          : (maxPayouts[game as GameType] as number)) / leastMultiplier
+      ).toFixed(2);
+    }
+  }, [leastMultiplier, game]);
 
   const tempBetAmt = betAmt ?? 0;
 
