@@ -53,7 +53,6 @@ export default function BetAmount({
   const [inputString, setInputString] = useState("");
 
   useEffect(() => {
-    console.log("killa", currentMultiplier);
     if (betAmt !== undefined && betAmt > 0) setInputString(betAmt.toString());
     if (tempBetAmt !== undefined && currentMultiplier !== undefined) {
       let calculatedMaxBetAmt =
@@ -64,7 +63,7 @@ export default function BetAmount({
       setCurrentMaxBetAmt(
         isFinite(calculatedMaxBetAmt) ? calculatedMaxBetAmt : 0,
       );
-      console.log("currentMaxBetAmt", currentMaxBetAmt);
+
       if (
         betAmt &&
         betAmt > (isFinite(calculatedMaxBetAmt) ? calculatedMaxBetAmt : 0)
