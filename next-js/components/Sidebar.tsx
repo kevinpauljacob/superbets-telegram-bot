@@ -10,10 +10,13 @@ import {
   translator,
 } from "@/context/transactions";
 import { useGlobalContext } from "./GlobalContext";
-import Home from "@/public/assets/Home";
-import FomoExitIcon from "@/public/assets/FomoExitIcon";
-import FomoPlayIcon from "@/public/assets/FomoPlayIcon";
-import Dollar from "@/public/assets/Dollar";
+import Home from "@/public/assets/sidebar-icons/Home";
+import FomoExitIcon from "@/public/assets/sidebar-icons/FomoExitIcon";
+import FomoPlayIcon from "@/public/assets/sidebar-icons/FomoPlayIcon";
+import Store from "@/public/assets/sidebar-icons/Store";
+import Leaderboard from "@/public/assets/sidebar-icons/Leaderboard";
+import Staking from "@/public/assets/sidebar-icons/Staking";
+import Dollar from "@/public/assets/sidebar-icons/DCA";
 import Flag from "@/public/assets/Flag";
 import Fomo from "@/public/assets/Fomo";
 import Twitter from "@/public/assets/Twitter";
@@ -62,8 +65,6 @@ export default function Sidebar({
       {sidebar ? (
         <OpenSidebar
           sidebar={sidebar}
-          showExitTokens={showExitTokens}
-          setShowExitTokens={setShowExitTokens}
           showPlayTokens={showPlayTokens}
           setShowPlayTokens={setShowPlayTokens}
         />
@@ -105,6 +106,15 @@ export default function Sidebar({
             </div>
             <div
               onClick={() => {
+                router.push("");
+                setSidebar(true);
+              }}
+              className={`${topIconCss}`}
+            >
+              <FomoExitIcon className={`${closedIconCss}`} />
+            </div>
+            <div
+              onClick={() => {
                 setSidebar(true);
                 setShowPlayTokens(true);
               }}
@@ -114,12 +124,30 @@ export default function Sidebar({
             </div>
             <div
               onClick={() => {
+                router.push("/store");
                 setSidebar(true);
-                setShowExitTokens(true);
               }}
               className={`${topIconCss}`}
             >
-              <FomoExitIcon className={`${closedIconCss}`} />
+              <Store className={`${closedIconCss}`} />
+            </div>
+            <div
+              onClick={() => {
+                router.push("/leaderboard");
+                setSidebar(true);
+              }}
+              className={`${topIconCss}`}
+            >
+              <Leaderboard className={`${closedIconCss}`} />
+            </div>
+            <div
+              onClick={() => {
+                router.push("/stake");
+                setSidebar(true);
+              }}
+              className={`${topIconCss}`}
+            >
+              <Staking className={`${closedIconCss}`} />
             </div>
             <div
               onClick={() => {
@@ -129,15 +157,6 @@ export default function Sidebar({
               className={`${topIconCss}`}
             >
               <Dollar className={`${closedIconCss}`} />
-            </div>
-            <div
-              onClick={() => {
-                router.push("/");
-                setSidebar(true);
-              }}
-              className={`${topIconCss} opacity-50`}
-            >
-              <Flag className={`${closedIconCss}`} />
             </div>
           </div>
           <div className="w-full flex flex-col items-center mb-2">
@@ -194,29 +213,16 @@ export const SidebarOpenElement = ({
 
 export const OpenSidebar = ({
   sidebar,
-  showExitTokens,
-  setShowExitTokens,
   showPlayTokens,
   setShowPlayTokens,
 }: {
   sidebar: boolean;
-  showExitTokens: boolean;
-  setShowExitTokens: React.Dispatch<React.SetStateAction<boolean>>;
   showPlayTokens: boolean;
   setShowPlayTokens: React.Dispatch<React.SetStateAction<boolean>>;
 }) => {
   const wallet = useWallet();
   const router = useRouter();
   const { fomoPrice, setSidebar, setMobileSidebar } = useGlobalContext();
-
-  const [exitGames, setExitGames] = useState<Game[]>([
-    {
-      src: "",
-      token: "$SOL",
-      link: "",
-      active: false,
-    },
-  ]);
 
   const [casinoGames, setCasinoGames] = useState<Game[]>([
     {
@@ -263,14 +269,6 @@ export const OpenSidebar = ({
     },
   ]);
 
-  const toggleExitToken: ToggleGameToken = (index) => {
-    const updatedExitGames = exitGames.map((token, i) => ({
-      ...token,
-      active: i === index ? !token.active : false,
-    }));
-    setExitGames(updatedExitGames);
-  };
-
   const toggleCasinoToken: ToggleGameToken = (index) => {
     const updatedCasinoGames = casinoGames.map((token, i) => ({
       ...token,
@@ -288,7 +286,7 @@ export const OpenSidebar = ({
     };
 
     setShowPlayTokens(isGameActive(casinoGames));
-  }, [router.pathname, exitGames, casinoGames]);
+  }, [router.pathname, casinoGames]);
 
   const openLinkCss =
     "w-full gap-2 flex items-center justify-center text-sm font-semibold text-white text-opacity-50 hover:bg-white/10 transition duration-300 ease-in-out hover:transition hover:duration-300 hover:ease-in-out bg-[#191A1D] rounded-md text-center py-2 mb-2";
@@ -340,6 +338,16 @@ export const OpenSidebar = ({
             }}
           >
             <SidebarOpenElement text={"Home"} Icon={Home} link="/" />
+          </div>
+          <div className={`mt-0`}>
+            <div className="w-full transition-all cursor-pointer rounded-md flex items-center justify-between gap-2 pl-4 pr-2 py-2 bg-transparent hover:bg-[#1f2024] focus:bg-[#1f2024] group">
+              <div className="flex items-center gap-3">
+                <FomoExitIcon className="min-w-[1.25rem] min-h-[1.25rem] transition-all text-white group-hover:text-[#9945FF] group-focus:text-[#9945FF]" />
+                <span className="mt-0.5 transition-all text-sm font-changa font-medium text-white text-opacity-90 group-hover:text-opacity-100 group-focus:text-opacity-100">
+                  FOMO: {translator("Exit", language)}
+                </span>
+              </div>
+            </div>
           </div>
           <div className={`mt-0`}>
             <div className="w-full transition-all cursor-pointer rounded-md flex items-center justify-between gap-2 pl-4 pr-2 py-2 bg-transparent hover:bg-[#1f2024] focus:bg-[#1f2024] group">
@@ -399,71 +407,18 @@ export const OpenSidebar = ({
               </ul>
             )}
           </div>
-          <div className={`mt-0`}>
-            <div className="w-full transition-all cursor-pointer rounded-md flex items-center justify-between gap-2 pl-4 pr-2 py-2 bg-transparent hover:bg-[#1f2024] focus:bg-[#1f2024] group">
-              <div className="flex items-center gap-3">
-                <FomoExitIcon className="min-w-[1.25rem] min-h-[1.25rem] transition-all text-white group-hover:text-[#9945FF] group-focus:text-[#9945FF]" />
-                <span className="mt-0.5 transition-all text-sm font-changa font-medium text-white text-opacity-90 group-hover:text-opacity-100 group-focus:text-opacity-100">
-                  FOMO: {translator("Exit", language)}
-                </span>
-              </div>
-              <button
-                className={`${
-                  showExitTokens ? "bg-[#47484A]" : "bg-white bg-opacity-5"
-                } hover:bg-[#47484A] transition duration-300 ease-in-out hover:transition hover:duration-300 hover:ease-in-out rounded-md w-8 h-6 flex justify-center items-center`}
-                onClick={() => setShowExitTokens(!showExitTokens)}
-              >
-                <Image
-                  src={
-                    showExitTokens
-                      ? "/assets/upArrow.png"
-                      : "/assets/downArrow.png"
-                  }
-                  alt=""
-                  width={9}
-                  height={9}
-                  className=""
-                />
-              </button>
-            </div>
-
-            {showExitTokens && (
-              <ul className="mt-1">
-                {exitGames.map((token, index) => (
-                  <Link
-                    href={token.link}
-                    key={index}
-                    onClick={() => {
-                      toggleExitToken(index);
-                      setMobileSidebar(false);
-                    }}
-                    className={`${
-                      token.active ? "bg-white/10" : "hover:bg-[#191a1d]"
-                    } group flex transition-all items-center rounded-md p-2 pl-12 gap-2`}
-                  >
-                    {/* <Image src={token.src} alt="" width={15} height={15} /> */}
-                    <span
-                      className={`text-[0.85rem] font-chakra font-medium transition-all ${
-                        token.active
-                          ? "text-white/90"
-                          : "text-white/50 group-hover:text-white/90"
-                      }`}
-                    >
-                      {token.token}
-                    </span>
-                  </Link>
-                ))}
-              </ul>
-            )}
-          </div>
+          <SidebarOpenElement text={"Store"} Icon={Store} link="/store" />
+          <SidebarOpenElement
+            text={"Leaderboard"}
+            Icon={Leaderboard}
+            link="/leaderboard"
+          />
+          <SidebarOpenElement text={"Staking"} Icon={Staking} link="/stake" />
           <SidebarOpenElement
             text={"DCA"}
             Icon={Dollar}
             link="https://dca.fomosolana.com/"
           />
-          <div className="opacity-50">
-            <SidebarOpenElement text={"Roadmap"} Icon={Flag} link="" />
-          </div>
         </div>
       </div>
 
