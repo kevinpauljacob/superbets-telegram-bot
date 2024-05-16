@@ -10,15 +10,15 @@ import {
   SidebarOpenElement,
   ToggleGameToken,
 } from "./Sidebar";
-import FomoExitIcon from "@/public/assets/FomoExitIcon";
-import FomoPlayIcon from "@/public/assets/FomoPlayIcon";
-import Dollar from "@/public/assets/Dollar";
+import FomoExitIcon from "@/public/assets/sidebar-icons/FomoExitIcon";
+import FomoPlayIcon from "@/public/assets/sidebar-icons/FomoPlayIcon";
+import Dollar from "@/public/assets/sidebar-icons/DCA";
 import Flag from "@/public/assets/Flag";
 import Fomo from "@/public/assets/Fomo";
 import Twitter from "@/public/assets/Twitter";
 import Birdeye from "@/public/assets/Birdeye";
 import Telegram from "@/public/assets/Telegram";
-import Home from "@/public/assets/Home";
+import Home from "@/public/assets/sidebar-icons/Home";
 import { useGlobalContext } from "./GlobalContext";
 import { useRouter } from "next/router";
 
@@ -37,8 +37,6 @@ export default function Sidebar() {
       {mobileSidebar && (
         <OpenSidebar
           sidebar={mobileSidebar}
-          showExitTokens={showExitTokens}
-          setShowExitTokens={setShowExitTokens}
           showPlayTokens={showPlayTokens}
           setShowPlayTokens={setShowPlayTokens}
         />
