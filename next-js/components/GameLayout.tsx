@@ -6,6 +6,7 @@ import { minGameAmount } from "@/context/gameTransactions";
 import { useGlobalContext } from "./GlobalContext";
 import { translator } from "@/context/transactions";
 import Link from "next/link";
+import FomoPlay from "./FomoPlay";
 
 interface LayoutProps {
   children: ReactNode;
@@ -35,7 +36,8 @@ export const GameFooterInfo: React.FC<GameFooterProps> = ({
   amount,
   chance,
 }) => {
-  const { coinData, setShowWalletModal, houseEdge, language } = useGlobalContext();
+  const { coinData, setShowWalletModal, houseEdge, language } =
+    useGlobalContext();
   return (
     <div className="flex px-0 xl:px-4 mb-0 md:mb-[1.4rem] gap-4 flex-row w-full justify-between">
       {coinData && coinData[0].amount > 0.0001 && (
@@ -79,7 +81,10 @@ export const GameFooterInfo: React.FC<GameFooterProps> = ({
         (coinData[0].amount < 0.0001 && (
           <div className="w-full rounded-lg bg-[#d9d9d90d] bg-opacity-10 flex items-center px-3 py-3 text-white md:px-6">
             <div className="w-full text-center font-changa font-medium text-sm md:text-base text-[#F0F0F0] text-opacity-75">
-              {translator("Please deposit funds to start playing. View", language)}{" "}
+              {translator(
+                "Please deposit funds to start playing. View",
+                language,
+              )}{" "}
               <u
                 onClick={() => {
                   setShowWalletModal(true);
@@ -117,8 +122,11 @@ const GameLayout: React.FC<LayoutProps> = ({ children, title }) => {
           })}
         </div>
       </div>
-      <div className="fadeInUp w-full flex min-h-[4rem]  mt-4 rounded-[5px] overflow-hidden">
+      <div className="fadeInUp w-full flex flex-col min-h-[4rem] mt-4 rounded-[5px] overflow-hidden">
         <GameHeader />
+      </div>
+      <div className="fadeInUp w-full flex flex-col min-h-[4rem] mt-8 rounded-[5px] overflow-hidden">
+        <FomoPlay />
       </div>
       {React.Children.map(children, (child) => {
         if (React.isValidElement(child) && child.type === GameTable) {
