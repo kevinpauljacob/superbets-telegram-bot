@@ -34,6 +34,15 @@ export type Game = {
 // Define type for game toggle function
 export type ToggleGameToken = (index: number) => void;
 
+const topIconCss =
+  "group cursor-pointer mb-2.5 transition-all flex items-center justify-center rounded-md w-12 h-9 bg-transparent hover:bg-[#1E2024] focus:bg-[#1E2024] text-[#ababac] hover:text-[#9945FF] focus:text-[#9945FF]";
+const bottomIconCss =
+  "cursor-pointer mb-2.5 transition-all flex items-center justify-center rounded-md w-12 h-9 bg-[#181A1D] hover:bg-[#1E2024] focus:bg-[#1E2024] text-[#ababac] hover:text-[#9945FF] focus:text-[#9945FF]";
+
+const closedIconCss =
+  "w-5 h-5 text-white group-hover:text-[#9945FF] group-focus:text-[#9945FF] transition-all opacity-50";
+const activeIconCss = "w-5 h-5 text-[#9945FF] transition-all";
+
 export default function Sidebar({
   sidebar,
   setSidebar,
@@ -49,13 +58,6 @@ export default function Sidebar({
   const [showExitTokens, setShowExitTokens] = useState<boolean>(false);
   const [showPlayTokens, setShowPlayTokens] = useState<boolean>(false);
 
-  const topIconCss =
-    "group cursor-pointer mb-2.5 transition-all flex items-center justify-center rounded-md w-12 h-9 bg-transparent hover:bg-[#1E2024] focus:bg-[#1E2024] text-[#ababac] hover:text-[#9945FF] focus:text-[#9945FF]";
-  const bottomIconCss =
-    "cursor-pointer mb-2.5 transition-all flex items-center justify-center rounded-md w-12 h-9 bg-[#181A1D] hover:bg-[#1E2024] focus:bg-[#1E2024] text-[#ababac] hover:text-[#9945FF] focus:text-[#9945FF]";
-
-  const closedIconCss =
-    "w-5 h-5 text-white group-hover:text-[#9945FF] group-focus:text-[#9945FF] transition-all";
   return (
     <div
       className={`${
@@ -102,7 +104,11 @@ export default function Sidebar({
               }}
               className={`${topIconCss}`}
             >
-              <Home className={`${closedIconCss}`} />
+              <Home
+                className={
+                  router.pathname === "/" ? activeIconCss : closedIconCss
+                }
+              />
             </div>
             <div
               onClick={() => {
@@ -111,7 +117,11 @@ export default function Sidebar({
               }}
               className={`${topIconCss}`}
             >
-              <FomoExitIcon className={`${closedIconCss}`} />
+              <FomoExitIcon
+                className={
+                  router.pathname === "/exit" ? activeIconCss : closedIconCss
+                }
+              />
             </div>
             <div
               onClick={() => {
@@ -129,7 +139,11 @@ export default function Sidebar({
               }}
               className={`${topIconCss}`}
             >
-              <Store className={`${closedIconCss}`} />
+              <Store
+                className={
+                  router.pathname === "/store" ? activeIconCss : closedIconCss
+                }
+              />
             </div>
             <div
               onClick={() => {
@@ -138,7 +152,13 @@ export default function Sidebar({
               }}
               className={`${topIconCss}`}
             >
-              <Leaderboard className={`${closedIconCss}`} />
+              <Leaderboard
+                className={
+                  router.pathname === "/leaderboard"
+                    ? activeIconCss
+                    : closedIconCss
+                }
+              />
             </div>
             <div
               onClick={() => {
@@ -147,7 +167,11 @@ export default function Sidebar({
               }}
               className={`${topIconCss}`}
             >
-              <Staking className={`${closedIconCss}`} />
+              <Staking
+                className={
+                  router.pathname === "/stake" ? activeIconCss : closedIconCss
+                }
+              />
             </div>
             <div
               onClick={() => {
@@ -156,7 +180,7 @@ export default function Sidebar({
               }}
               className={`${topIconCss}`}
             >
-              <Dollar className={`${closedIconCss}`} />
+              <Dollar className={closedIconCss} />
             </div>
           </div>
           <div className="w-full flex flex-col items-center mb-2">
@@ -189,10 +213,12 @@ export const SidebarOpenElement = ({
   text,
   Icon,
   link,
+  className,
 }: {
   text: string;
   Icon: any;
   link?: string;
+  className?: string;
 }) => {
   const router = useRouter();
   const { language } = useGlobalContext();
@@ -203,7 +229,7 @@ export const SidebarOpenElement = ({
       }}
       className="w-full transition-all cursor-pointer rounded-md flex items-end gap-3 pl-4 py-2 bg-transparent hover:bg-[#1f2024] focus:bg-[#1f2024] group"
     >
-      <Icon className="group-hover:text-[#9945FF] group-focus:text-[#9945FF] w-5 h-5 transition-all text-white/90" />
+      <Icon className={className} />
       <span className="transition-all text-sm leading-[1rem] font-changa font-medium tracking-wider text-white text-opacity-90 group-hover:text-opacity-100 group-focus:text-opacity-100">
         {translator(text, language)}
       </span>
@@ -337,12 +363,19 @@ export const OpenSidebar = ({
               }
             }}
           >
-            <SidebarOpenElement text={"Home"} Icon={Home} link="/" />
+            <SidebarOpenElement
+              text={"Home"}
+              Icon={Home}
+              link="/"
+              className={
+                router.pathname === "/" ? activeIconCss : closedIconCss
+              }
+            />
           </div>
           <div className={`mt-0`}>
             <div className="w-full transition-all cursor-pointer rounded-md flex items-center justify-between gap-2 pl-4 pr-2 py-2 bg-transparent hover:bg-[#1f2024] focus:bg-[#1f2024] group">
               <div className="flex items-center gap-3">
-                <FomoExitIcon className="min-w-[1.25rem] min-h-[1.25rem] transition-all text-white group-hover:text-[#9945FF] group-focus:text-[#9945FF]" />
+                <FomoExitIcon className="min-w-[1.25rem] min-h-[1.25rem] transition-all text-white group-hover:text-[#9945FF] group-focus:text-[#9945FF] opacity-50 hover:opacity-100" />
                 <span className="mt-0.5 transition-all text-sm font-changa font-medium text-white text-opacity-90 group-hover:text-opacity-100 group-focus:text-opacity-100">
                   FOMO: {translator("Exit", language)}
                 </span>
@@ -352,7 +385,7 @@ export const OpenSidebar = ({
           <div className={`mt-0`}>
             <div className="w-full transition-all cursor-pointer rounded-md flex items-center justify-between gap-2 pl-4 pr-2 py-2 bg-transparent hover:bg-[#1f2024] focus:bg-[#1f2024] group">
               <div className="flex items-center gap-3">
-                <FomoPlayIcon className="min-w-[1.25rem] min-h-[1.25rem] transition-all text-white group-hover:text-[#9945FF] group-focus:text-[#9945FF]" />
+                <FomoPlayIcon className="min-w-[1.25rem] min-h-[1.25rem] transition-all text-white group-hover:text-[#9945FF] group-focus:text-[#9945FF] opacity-50 hover:opacity-100" />
                 <span className="mt-0.5 transition-all text-sm font-changa font-medium text-white text-opacity-90 group-hover:text-opacity-100 group-focus:text-opacity-100">
                   FOMO: {translator("Play", language)}
                 </span>
@@ -407,17 +440,35 @@ export const OpenSidebar = ({
               </ul>
             )}
           </div>
-          <SidebarOpenElement text={"Store"} Icon={Store} link="/store" />
+          <SidebarOpenElement
+            text={"Store"}
+            Icon={Store}
+            link="/store"
+            className={
+              router.pathname === "/store" ? activeIconCss : closedIconCss
+            }
+          />
           <SidebarOpenElement
             text={"Leaderboard"}
             Icon={Leaderboard}
             link="/leaderboard"
+            className={
+              router.pathname === "/leaderboard" ? activeIconCss : closedIconCss
+            }
           />
-          <SidebarOpenElement text={"Staking"} Icon={Staking} link="/stake" />
+          <SidebarOpenElement
+            text={"Staking"}
+            Icon={Staking}
+            link="/stake"
+            className={
+              router.pathname === "/stake" ? activeIconCss : closedIconCss
+            }
+          />
           <SidebarOpenElement
             text={"DCA"}
             Icon={Dollar}
             link="https://dca.fomosolana.com/"
+            className={closedIconCss}
           />
         </div>
       </div>
