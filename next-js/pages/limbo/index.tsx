@@ -511,7 +511,7 @@ export default function Limbo() {
                   {(inputMultiplier > 0 ? 100 / inputMultiplier : 0.0).toFixed(
                     2,
                   )}
-                  x
+                  %
                 </span>
               </div>
             </>
