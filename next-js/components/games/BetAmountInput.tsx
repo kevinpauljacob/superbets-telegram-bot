@@ -36,13 +36,14 @@ export default function BetAmount({
 
   const minBetAmt = parseFloat(process.env.MINIMUM_BET_AMOUNT ?? "0");
 
-  const highestMaxBetAmt =
-    leastMultiplier !== undefined &&
-    (
+  let highestMaxBetAmt = "0";
+  if (leastMultiplier !== undefined) {
+    highestMaxBetAmt = (
       (game === GameType.keno
         ? maxPayouts[GameType.keno][kenoRisk]
         : (maxPayouts[game as GameType] as number)) / leastMultiplier
     ).toFixed(2);
+  }
 
   const tempBetAmt = betAmt ?? 0;
 
