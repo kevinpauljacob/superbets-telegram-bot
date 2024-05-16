@@ -35,9 +35,14 @@ export default function BetAmount({
   const [isHovered, setIsHovered] = useState<boolean>(false);
 
   const minBetAmt = parseFloat(process.env.MINIMUM_BET_AMOUNT ?? "0");
+
   const highestMaxBetAmt =
     leastMultiplier !== undefined &&
-    (maxPayouts[game as GameType] / leastMultiplier).toFixed(2);
+    (
+      (game === GameType.keno
+        ? maxPayouts[GameType.keno][kenoRisk]
+        : (maxPayouts[game as GameType] as number)) / leastMultiplier
+    ).toFixed(2);
 
   const tempBetAmt = betAmt ?? 0;
 
@@ -49,7 +54,10 @@ export default function BetAmount({
     if (betAmt !== undefined && betAmt > 0) setInputString(betAmt.toString());
     if (tempBetAmt !== undefined && currentMultiplier !== undefined) {
       let calculatedMaxBetAmt =
-        maxPayouts[game as GameType] / currentMultiplier;
+        (game === GameType.keno
+          ? maxPayouts[GameType.keno][kenoRisk]
+          : (maxPayouts[game as GameType] as number)) / currentMultiplier;
+
       setCurrentMaxBetAmt(
         isFinite(calculatedMaxBetAmt) ? calculatedMaxBetAmt : 0,
       );
