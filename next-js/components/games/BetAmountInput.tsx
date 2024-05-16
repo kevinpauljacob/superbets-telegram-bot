@@ -6,7 +6,7 @@ import { maxPayouts } from "@/context/transactions";
 import Image from "next/image";
 import BalanceAlert from "./BalanceAlert";
 import { FaInfo } from "react-icons/fa6";
-import { InfoCircle } from "iconsax-react";
+import { Game, InfoCircle } from "iconsax-react";
 import { BsInfoCircleFill } from "react-icons/bs";
 import DicePointer from "@/public/assets/DicePointer";
 import { translator } from "@/context/transactions";
@@ -45,7 +45,7 @@ export default function BetAmount({
           : (maxPayouts[game as GameType] as number)) / leastMultiplier
       ).toFixed(2);
     }
-  }, [leastMultiplier, game]);
+  }, [leastMultiplier, game, kenoRisk]);
 
   const tempBetAmt = betAmt ?? 0;
 
@@ -64,7 +64,7 @@ export default function BetAmount({
       setCurrentMaxBetAmt(
         isFinite(calculatedMaxBetAmt) ? calculatedMaxBetAmt : 0,
       );
-
+      console.log("currentMaxBetAmt", currentMaxBetAmt);
       if (
         betAmt &&
         betAmt > (isFinite(calculatedMaxBetAmt) ? calculatedMaxBetAmt : 0)

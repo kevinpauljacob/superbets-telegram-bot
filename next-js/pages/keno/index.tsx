@@ -71,10 +71,18 @@ export default function Keno() {
   const multipliers = riskToChance[kenoRisk][chosenNumbers.length];
   let maxMultiplier = 0;
   let leastMultiplier = 0;
+
   if (multipliers && multipliers.length > 0) {
     maxMultiplier = multipliers[multipliers.length - 1];
-    leastMultiplier = multipliers[1];
+
+    const nonZeroMultipliers = multipliers.filter(
+      (multiplier) => multiplier > 0,
+    );
+    if (nonZeroMultipliers.length > 0) {
+      leastMultiplier = Math.min(...nonZeroMultipliers);
+    }
   }
+
   const commonNumbers = strikeNumbers.filter((num) =>
     chosenNumbers.includes(num),
   );
