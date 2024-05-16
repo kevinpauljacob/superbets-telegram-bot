@@ -18,7 +18,9 @@ const config: Config = {
         width: "width",
       },
       screens: {
+        xs2: "345px",
         xs: "400px",
+        sm2: "475px",
         lg2: '1160px'
       },
       colors: {

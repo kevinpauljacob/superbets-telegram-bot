@@ -370,7 +370,7 @@ export default function ConfigureAutoModal() {
             </div>
 
             {/* apply button  */}
-            <div className="hidden md:flex w-full flex-col mt-2">
+            <div className="block md:flex w-full flex-col mt-2">
               <button
                 type="submit"
                 disabled={

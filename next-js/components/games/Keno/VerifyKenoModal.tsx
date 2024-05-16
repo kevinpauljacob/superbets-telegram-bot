@@ -174,11 +174,11 @@ export default function VerifyDice2Modal({
                             : bet.chosenNumbers?.includes(number)
                             ? "bg-black border-2 border-fomo-red text-fomo-red"
                             : "bg-[#202329]"
-                        } rounded-md text-center transition-all duration-300 ease-in-out w-[45px] h-[45px]`}
+                        } rounded-md text-center transition-all duration-300 ease-in-out lg2:w-[45px] lg2:h-[45px] md:w-[42px] md:h-[42px] sm:w-[40px] sm:h-[40px] sm2:w-[38px] sm2:h-[38px] xs:w-[36px] xs:h-[36px] w-[30px] h-[30px]`}
                       >
                         {bet.strikeNumbers?.includes(number) &&
                         bet.chosenNumbers?.includes(number) ? (
-                          <div className="flex justify-center items-center bg-[#FFD100] text-black rounded-full w-[32px] h-[32px]">
+                          <div className="flex justify-center items-center bg-[#FFD100] text-black rounded-full lg2:w-[32px] lg2:h-[32px] md:w-[32px] md:h-[32px] sm:w-[28px] sm:h-[28px] w-[25px] h-[25px]">
                             {number}
                           </div>
                         ) : (
