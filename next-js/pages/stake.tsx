@@ -6,7 +6,7 @@ import Image from "next/legacy/image";
 import { useEffect, useState } from "react";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { useSession } from "next-auth/react";
-import toast from "react-hot-toast";
+import { Inter } from "next/font/google";
 import {
   connection,
   fomoToken,
@@ -17,6 +17,7 @@ import { LAMPORTS_PER_SOL, PublicKey } from "@solana/web3.js";
 import { useGlobalContext } from "@/components/GlobalContext";
 import { getAssociatedTokenAddressSync } from "@solana/spl-token";
 import { errorCustom } from "@/components/toasts/ToastGroup";
+const inter = Inter({ subsets: ["latin"] });
 
 export default function Stake() {
   const { data: session, status } = useSession();
@@ -34,7 +35,7 @@ export default function Stake() {
     getGlobalInfo,
     getUserDetails,
     setLivePrice,
-    sidebar
+    sidebar,
   } = useGlobalContext();
 
   useEffect(() => {
@@ -81,9 +82,13 @@ export default function Stake() {
   }, [session?.user, wallet.publicKey]);
 
   return (
-    <div className={`flex flex-col ${sidebar ? "items-start sm:pl-14": "items-center"} w-full min-h-screen flex-1 relative font-chakra h-fit`}>
+    <div
+      className={`flex flex-col ${
+        sidebar ? "items-start sm:pl-14" : "items-center"
+      } w-full min-h-screen flex-1 relative font-chakra h-fit`}
+    >
       <div className="w-full flex flex-1 flex-col items-start gap-5 pb-1- px-3 sm:max-w-[90%]">
-        <span className="text-white text-opacity-90 font-semibold text-[1.5rem] sm:text-[2rem] mt-[1rem] flex items-center justify-center gap-x-2">
+        <span className="text-white text-opacity-90 font-semibold text-[1.5rem] sm:text-[2rem] tracking-[.02em] mt-[1rem] flex items-center justify-center gap-x-2">
           {translator("Stake", language).toUpperCase()} FOMO
         </span>
 
@@ -110,7 +115,9 @@ export default function Stake() {
                 <span className="text-white text-opacity-80 text-2xl sm:text-2xl font-semibold">
                   {formatNumber(globalInfo?.stakedTotal)} $FOMO
                 </span>
-                <span className="text-staking-secondary text-opacity-80 text-base sm:text-base font-semibold">
+                <span
+                  className={`text-staking-secondary text-opacity-80 text-base sm:text-base ${inter.className} font-semibold`}
+                >
                   (
                   {formatNumber(
                     (globalInfo?.stakedTotal / globalInfo?.totalVolume) * 100,
@@ -120,7 +127,8 @@ export default function Stake() {
               </div>
             </div>
             <div className="hidden sm:flex">
-            <Image src={"/assets/stakeLock.svg"} width={60} height={60} /></div>
+              <Image src={"/assets/stakeLock.svg"} width={60} height={60} />
+            </div>
           </div>
         </div>
       </div>
