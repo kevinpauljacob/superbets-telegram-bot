@@ -51,6 +51,8 @@ export default function Keno() {
     setAutoBetProfit,
     useAutoConfig,
     setUseAutoConfig,
+    kenoRisk,
+    setKenoRisk,
     houseEdge,
     maxBetAmt,
     language,
@@ -63,13 +65,10 @@ export default function Keno() {
   const [strikeNumbers, setStrikeNumbers] = useState<number[]>([]);
   const [strikeMultiplier, setStrikeMultiplier] = useState<number>();
   const [chosenNumbers, setChosenNumbers] = useState<number[]>([]);
-  const [risk, setRisk] = useState<"classic" | "low" | "medium" | "high">(
-    "classic",
-  );
   const [autoPick, setAutoPick] = useState<boolean>(false);
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
 
-  const multipliers = riskToChance[risk][chosenNumbers.length];
+  const multipliers = riskToChance[kenoRisk][chosenNumbers.length];
   let maxMultiplier = 0;
   let leastMultiplier = 0;
   if (multipliers && multipliers.length > 0) {
@@ -194,7 +193,7 @@ export default function Keno() {
           amount: betAmt,
           tokenMint: "SOL",
           chosenNumbers: chosenNumbers,
-          risk: risk,
+          risk: kenoRisk,
         }),
       });
 
@@ -471,9 +470,9 @@ export default function Keno() {
                   <div className="grid lg:grid-cols-4 grid-cols-2 gap-3 w-full items-center rounded-[8px] text-white font-chakra text-sm font-semibold bg-[#0C0F16] p-4">
                     <button
                       type="button"
-                      onClick={() => setRisk("classic")}
+                      onClick={() => setKenoRisk("classic")}
                       className={`text-center w-full rounded-[5px] border-[2px] bg-[#202329] py-2 text-xs font-chakra disabled:opacity-50 text-white text-opacity-90 transition duration-200 ${
-                        risk === "classic"
+                        kenoRisk === "classic"
                           ? "border-[#7839C5]"
                           : "border-transparent hover:border-[#7839C580]"
                       }`}
@@ -483,9 +482,9 @@ export default function Keno() {
                     </button>
                     <button
                       type="button"
-                      onClick={() => setRisk("low")}
+                      onClick={() => setKenoRisk("low")}
                       className={`text-center w-full rounded-[5px] border-[2px] bg-[#202329] py-2 text-xs font-chakra disabled:opacity-50 text-white text-opacity-90 transition duration-200 ${
-                        risk === "low"
+                        kenoRisk === "low"
                           ? "border-[#7839C5]"
                           : "border-transparent hover:border-[#7839C580]"
                       }`}
@@ -495,9 +494,9 @@ export default function Keno() {
                     </button>
                     <button
                       type="button"
-                      onClick={() => setRisk("medium")}
+                      onClick={() => setKenoRisk("medium")}
                       className={`text-center w-full block m-auto rounded-[5px] border-[2px] bg-[#202329] py-2 text-xs font-chakra disabled:opacity-50 text-white text-opacity-90 transition duration-200 ${
-                        risk === "medium"
+                        kenoRisk === "medium"
                           ? "border-[#7839C5]"
                           : "border-transparent hover:border-[#7839C580]"
                       }`}
@@ -507,9 +506,9 @@ export default function Keno() {
                     </button>
                     <button
                       type="button"
-                      onClick={() => setRisk("high")}
+                      onClick={() => setKenoRisk("high")}
                       className={`text-center w-full rounded-[5px] border-[2px] bg-[#202329] py-2 text-xs font-chakra disabled:opacity-50 text-white text-opacity-90 transition duration-200 ${
-                        risk === "high"
+                        kenoRisk === "high"
                           ? "border-[#7839C5]"
                           : "border-transparent hover:border-[#7839C580]"
                       }`}

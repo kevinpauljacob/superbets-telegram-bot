@@ -28,7 +28,8 @@ export default function BetAmount({
   disabled?: boolean;
 }) {
   const methods = useForm();
-  const { coinData, maxBetAmt, setMaxBetAmt, language } = useGlobalContext();
+  const { coinData, maxBetAmt, setMaxBetAmt, language, kenoRisk } =
+    useGlobalContext();
   const [betAmountsModal, setBetAmountsModal] = useState(false);
 
   const [isHovered, setIsHovered] = useState<boolean>(false);
