@@ -1192,11 +1192,6 @@ export const translationsMap = {
     ko: "10개의 숫자를 선택하십시오",
     ch: "最多选择10个数字",
   },
-  Dice: {
-    ru: "Кости",
-    ko: "주사위",
-    ch: "骰子",
-  },
   "Dice 2": {
     ru: "Кости 2",
     ko: "주사위 2",
