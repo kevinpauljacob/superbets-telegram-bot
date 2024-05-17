@@ -297,7 +297,7 @@ export default function BalanceModal() {
               </div>
             ) : (
               <table className="flex w-full flex-col items-center">
-                <tr className="mb-2 flex w-full flex-row items-center gap-2 py-1 text-sm font-light font-changa bg-table-secondary">
+                <tr className="mb-2 flex w-full flex-row items-center gap-2 py-1 pr-[10px] text-sm font-light font-changa bg-table-secondary">
                   {historyHeaders.map((header, index) => (
                     <th
                       key={index}
@@ -320,7 +320,7 @@ export default function BalanceModal() {
                     historyData.length <= 0
                       ? "flex items-center justify-center"
                       : ""
-                  } w-full h-[310px] overflow-scroll`}
+                  } w-full h-[310px] overflow-y-scroll modalscrollbar`}
                 >
                   {historyData.length > 0 ? (
                     historyData.map((data, index) => (
