@@ -114,9 +114,11 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           result,
           betEndPrice,
           houseEdge,
+          amountWon,
+          amountLost,
         },
         { new: true },
-      ).populate("gameSeed");
+      );
 
       const pointsGained =
         0 * user.numOfGamesPlayed + 1.4 * bet.amount * userData.multiplier;
@@ -140,10 +142,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         },
       );
 
-      const { gameSeed, ...rest } = record.toObject();
+      const rest = record.toObject();
       rest.game = GameType.options;
       rest.userTier = parseInt(newTier);
-      rest.gameSeed = { ...gameSeed, serverSeed: undefined };
 
       const payload = rest;
 

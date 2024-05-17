@@ -13,33 +13,45 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
       for (const [_, value] of Object.entries(GameType)) {
         const game = value;
-        if (game === GameType.options) continue;
-
         const model = gameModelMap[game as keyof typeof gameModelMap];
 
-        const records = await model
-          .find()
-          .populate({
-            path: "gameSeed",
-          })
-          .sort({ createdAt: -1 })
-          .limit(20);
+        if (game === GameType.options) {
+          const records = await model.find().sort({ createdAt: -1 }).limit(20);
 
-        const resultsWithGame = records.map((record) => {
-          const { gameSeed, ...rest } = record.toObject();
+          const resultsWithGame = records.map((record) => {
+            const { ...rest } = record.toObject();
 
-          rest.game = game;
+            rest.game = game;
 
-          if (gameSeed.status !== seedStatus.EXPIRED) {
-            rest.gameSeed = { ...gameSeed, serverSeed: undefined };
-          } else {
-            rest.gameSeed = { ...gameSeed };
-          }
+            return rest;
+          });
 
-          return rest;
-        });
+          data.push(...resultsWithGame);
+        } else {
+          const records = await model
+            .find()
+            .populate({
+              path: "gameSeed",
+            })
+            .sort({ createdAt: -1 })
+            .limit(20);
 
-        data.push(...resultsWithGame);
+          const resultsWithGame = records.map((record) => {
+            const { gameSeed, ...rest } = record.toObject();
+
+            rest.game = game;
+
+            if (gameSeed.status !== seedStatus.EXPIRED) {
+              rest.gameSeed = { ...gameSeed, serverSeed: undefined };
+            } else {
+              rest.gameSeed = { ...gameSeed };
+            }
+
+            return rest;
+          });
+
+          data.push(...resultsWithGame);
+        }
       }
 
       data.sort((a: any, b: any) => {

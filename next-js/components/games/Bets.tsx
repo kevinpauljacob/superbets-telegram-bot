@@ -4,6 +4,7 @@ import { Table } from "../table/Table";
 import { useGlobalContext } from "../GlobalContext";
 
 interface Bet {
+  _id: string;
   wallet: string;
   game: string;
   amount: number;
@@ -30,22 +31,30 @@ export default function Bets({ refresh }: { refresh: boolean }) {
 
   useEffect(() => {
     if (!all) {
-      const newBets = liveBets.filter((bet) => {
-        return (
-          !myBets.includes(bet) && bet.wallet === wallet.publicKey?.toBase58()
-        );
-      });
-
       setMyBets((prev) => {
-        return newBets.concat(prev);
+        liveBets
+          .filter((bet) => bet.wallet === wallet.publicKey?.toBase58())
+          .forEach((bet) => {
+            const index = prev.findIndex((b) => b._id === bet._id);
+            if (index !== -1) {
+              prev[index] = bet;
+            } else {
+              prev.unshift(bet);
+            }
+          });
+        return prev;
       });
     } else {
-      const newBets = liveBets.filter((bet) => {
-        return !allBets.includes(bet);
-      });
-
       setAllBets((prev) => {
-        return newBets.concat(prev);
+        liveBets.forEach((bet) => {
+          const index = prev.findIndex((b) => b._id === bet._id);
+          if (index !== -1) {
+            prev[index] = bet;
+          } else {
+            prev.unshift(bet);
+          }
+        });
+        return prev;
       });
     }
   }, [liveBets]);

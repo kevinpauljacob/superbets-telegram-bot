@@ -16,8 +16,8 @@ export interface Flip {
   wallet: string;
   amount: number;
   result: "Won" | "Lost";
-  risk?:string;
-  segments?:number;
+  risk?: string;
+  segments?: number;
   amountWon: number;
   nonce?: number;
   gameSeed?: {
@@ -117,7 +117,7 @@ export default function VerifyFlipModal({
           id="modal-bg"
           className="absolute z-[150] left-0 top-0 flex h-full w-full items-center justify-center bg-[#33314680] backdrop-blur-[0px] transition-all"
         >
-          <div className="relative bg-[#121418] max-h-[80dvh] modalscrollbar overflow-y-scroll p-8 rounded-lg z-10 w-11/12 sm:w-[34rem] -mt-[4.7rem] md:mt-0">
+          <div className="relative bg-[#121418] max-h-[80dvh]  overflow-y-scroll p-8 rounded-lg z-10 w-11/12 sm:w-[34rem] -mt-[4.7rem] md:mt-0 nobar">
             <div className="flex flex-wrap justify-between items-center mb-4 sm:mb-[1.4rem]">
               <div className="font-changa text-2xl font-semibold text-white mr-4 text-opacity-90">
                 {translator("Coin Flip", language)}
@@ -278,7 +278,10 @@ export default function VerifyFlipModal({
                     {flip.wallet !== wallet ? (
                       <>
                         <div className="text-xs text-[#94A3B8] font-changa text-opacity-75 text-center">
-                          {translator("The bettor must first rotate their seed pair to verify this bet.", language)}
+                          {translator(
+                            "The bettor must first rotate their seed pair to verify this bet.",
+                            language,
+                          )}
                         </div>
                         <button
                           className="bg-[#7839C5] rounded-md w-full text-sm text-white text-opacity-90 text-semibold py-3 disabled:opacity-70"
@@ -290,7 +293,10 @@ export default function VerifyFlipModal({
                     ) : flip.gameSeed?.status !== seedStatus.EXPIRED ? (
                       <>
                         <div className="text-xs text-[#94A3B8] font-changa text-opacity-75 text-center">
-                          {translator("To verify this flip, you first need to rotate your seed pair.", language)}
+                          {translator(
+                            "To verify this flip, you first need to rotate your seed pair.",
+                            language,
+                          )}
                         </div>
                         <button
                           className="bg-[#7839C5] rounded-md w-full text-sm text-white text-opacity-90 text-semibold py-3"

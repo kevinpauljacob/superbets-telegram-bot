@@ -23,33 +23,47 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
       for (const [_, value] of Object.entries(GameType)) {
         const game = value;
-        if (game === GameType.options) continue;
-
         const model = gameModelMap[game as keyof typeof gameModelMap];
 
-        const records = await model
-          .find({ wallet })
-          .populate({
-            path: "gameSeed",
-          })
-          .sort({ createdAt: -1 })
-          .limit(30);
+        if (game === GameType.options) {
+          const records = await model
+            .find({ wallet })
+            .sort({ createdAt: -1 })
+            .limit(30);
 
-        const resultsWithGame = records.map((record) => {
-          const { gameSeed, ...rest } = record.toObject();
+          const resultsWithGame = records.map((record) => {
+            const { ...rest } = record.toObject();
 
-          rest.game = game;
+            rest.game = game;
+            return rest;
+          });
 
-          if (gameSeed.status !== seedStatus.EXPIRED) {
-            rest.gameSeed = { ...gameSeed, serverSeed: undefined };
-          } else {
-            rest.gameSeed = { ...gameSeed };
-          }
+          data.push(...resultsWithGame);
+        } else {
+          const records = await model
+            .find({ wallet })
+            .populate({
+              path: "gameSeed",
+            })
+            .sort({ createdAt: -1 })
+            .limit(30);
 
-          return rest;
-        });
+          const resultsWithGame = records.map((record) => {
+            const { gameSeed, ...rest } = record.toObject();
 
-        data.push(...resultsWithGame);
+            rest.game = game;
+
+            if (gameSeed.status !== seedStatus.EXPIRED) {
+              rest.gameSeed = { ...gameSeed, serverSeed: undefined };
+            } else {
+              rest.gameSeed = { ...gameSeed };
+            }
+
+            return rest;
+          });
+
+          data.push(...resultsWithGame);
+        }
       }
 
       data.sort((a: any, b: any) => {

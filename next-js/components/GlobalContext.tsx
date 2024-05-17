@@ -153,6 +153,11 @@ interface GlobalContextProps {
 
   maxBetAmt: number | undefined;
   setMaxBetAmt: React.Dispatch<React.SetStateAction<number>>;
+
+  kenoRisk: "classic" | "low" | "medium" | "high";
+  setKenoRisk: React.Dispatch<
+    React.SetStateAction<"classic" | "low" | "medium" | "high">
+  >;
 }
 
 const GlobalContext = createContext<GlobalContextProps | undefined>(undefined);
@@ -165,7 +170,7 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
   const wallet = useWallet();
   const [loading, setLoading] = useState(false);
   const [language, setLanguage] = useState<"en" | "ru" | "ko" | "ch">("en");
-  
+
   const [userData, setUserData] = useState<User | null>(null);
   const [stake, setStake] = useState(true);
   const [amount, setAmount] = useState<number>(0);
@@ -222,8 +227,9 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
 
   const [houseEdge, setHouseEdge] = useState<number>(0);
   const [maxBetAmt, setMaxBetAmt] = useState<number>(0);
-
-
+  const [kenoRisk, setKenoRisk] = useState<
+    "classic" | "low" | "medium" | "high"
+  >("classic");
 
   useEffect(() => {
     const fetchFomoPrice = async () => {
@@ -301,11 +307,10 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
       });
 
       const { success, message, data } = await res.json();
-      
+
       if (success) setGlobalInfo(data);
-      
     } catch (e) {
-            console.error(e);
+      console.error(e);
     }
   };
 
@@ -436,6 +441,8 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
         houseEdge,
         setHouseEdge,
         maxBetAmt,
+        kenoRisk,
+        setKenoRisk,
         setMaxBetAmt,
         openVerifyModal,
         closeVerifyModal,

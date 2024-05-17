@@ -288,9 +288,9 @@ export const Table: React.FC<TableProps> = ({
 
   return (
     <div
-      className={`flex w-full flex-col ${loading ? " h-[50rem]" : ""} ${
-        home ? "" : "pb-[10rem] lg:pb-10"
-      }`}
+      className={`flex w-full flex-col
+        ${loading ? " h-[50rem]" : ""}
+        ${home ? "" : "pb-10"}`}
     >
       {!home && <TableButtons all={all} setAll={setAll} />}
       {loading ? (

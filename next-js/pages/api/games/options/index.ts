@@ -2,9 +2,11 @@ import connectDatabase from "../../../../utils/database";
 import { User, Option } from "../../../../models/games";
 import { getToken } from "next-auth/jwt";
 import { NextApiRequest, NextApiResponse } from "next";
-import { minGameAmount } from "@/context/gameTransactions";
+import { minGameAmount, wsEndpoint } from "@/context/gameTransactions";
 import { Decimal } from "decimal.js";
 import { maxPayouts } from "@/context/transactions";
+import StakingUser from "@/models/staking/user";
+import { GameType } from "@/utils/provably-fair";
 Decimal.set({ precision: 9 });
 
 const secret = process.env.NEXTAUTH_SECRET;
@@ -56,8 +58,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           .json({ success: false, message: "Max payout exceeded" });
 
       await connectDatabase();
-
-      console.log(wallet);
 
       if (
         !wallet ||
@@ -130,7 +130,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         throw new Error("Insufficient balance for bet!");
       }
 
-      await Option.create({
+      const record = new Option({
         wallet,
         betTime,
         betEndTime,
@@ -141,7 +141,38 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         timeFrame: 60 * timeFrame,
         result: "Pending",
         tokenMint,
+        amountWon: 0,
+        amountLost: 0,
       });
+      await record.save();
+
+      const userData = await StakingUser.findOneAndUpdate(
+        { wallet },
+        {},
+        { upsert: true, new: true },
+      );
+      const userTier = userData?.tier ?? 0;
+
+      const rest = record.toObject();
+      rest.game = GameType.options;
+      rest.userTier = userTier;
+
+      const payload = rest;
+
+      const socket = new WebSocket(wsEndpoint);
+
+      socket.onopen = () => {
+        socket.send(
+          JSON.stringify({
+            clientType: "api-client",
+            channel: "fomo-casino_games-channel",
+            authKey: process.env.FOMO_CHANNEL_AUTH_KEY!,
+            payload,
+          }),
+        );
+
+        socket.close();
+      };
 
       return res.json({
         success: true,
