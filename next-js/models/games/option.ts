@@ -50,6 +50,14 @@ const OptionSchema = new Schema(
       required: false,
     },
     houseEdge: Number,
+    amountWon: {
+      type: Number,
+      required: true,
+    },
+    amountLost: {
+      type: Number,
+      required: true,
+    },
   },
   { timestamps: true },
 );
