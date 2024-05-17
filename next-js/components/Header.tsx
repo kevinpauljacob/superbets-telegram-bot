@@ -89,23 +89,23 @@ export function Header({
                   setLangSelect(!langSelect);
                 }}
                 className="relative hidden md:flex items-center hover:bg-[#0000009f] transition-all p-1.5 rounded-md"
-              >
-                <MdOutlineLanguage className="w-5 h-5 mr-3 text-white text-opacity-50 z-[100]" />
-                <span className="text-white text-sm mr-5 text-start text-opacity-50">
-                  {language === "en"
-                    ? "English"
-                    : language === "ru"
-                    ? "Русский"
-                    : language === "ko"
-                    ? "한국인"
-                    : language === "ch"
-                    ? "中国人"
-                    : ""}
-                </span>
-                <FaChevronDown className="w-3 h-3 text-white" />
-                {langSelect && (
-                  <div className="w-full transition-all absolute top-full mt-2 rounded px-1 py-2 gap-0.5 z-[100] flex flex-col bg-black">
-                    <span
+              > <MdOutlineLanguage className="w-5 h-5 mr-3 text-white text-opacity-50 z-[150]" />
+              <span className="text-white text-sm mr-5 text-start text-opacity-50 z-[150]">
+                {language === "en"
+                  ? "English"
+                  : language === "ru"
+                  ? "Русский"
+                  : language === "ko"
+                  ? "한국인"
+                  : language === "ch"
+                  ? "中国人"
+                  : ""}
+              </span>
+              <FaChevronDown className="w-3 h-3 text-white z-[150]" />
+              {langSelect && (
+                <div className="w-full transition-all absolute top-full mt-2 rounded px-1 py-2 gap-0.5 z-[150] flex flex-col bg-black">
+                  <span
+                    
                       onClick={() => {
                         setLanguage("en");
                         setLangSelect(false);
