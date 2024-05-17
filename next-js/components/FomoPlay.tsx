@@ -66,7 +66,7 @@ export default function FomoPlay() {
             <span className="hidden sm:inline text-white">
               FOMO: {translator("Play - The best casino games", language)}
             </span>
-            <span className="sm:hidden">
+            <span className="sm:hidden text-white">
               FOMO: {translator("Play", language)}
             </span>
           </span>

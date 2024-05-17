@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, use } from "react";
 import { useForm } from "react-hook-form";
 import { useGlobalContext } from "../GlobalContext";
 import { GameType } from "@/utils/provably-fair";
@@ -6,7 +6,7 @@ import { maxPayouts } from "@/context/transactions";
 import Image from "next/image";
 import BalanceAlert from "./BalanceAlert";
 import { FaInfo } from "react-icons/fa6";
-import { InfoCircle } from "iconsax-react";
+import { Game, InfoCircle } from "iconsax-react";
 import { BsInfoCircleFill } from "react-icons/bs";
 import DicePointer from "@/public/assets/DicePointer";
 import { translator } from "@/context/transactions";
@@ -28,15 +28,24 @@ export default function BetAmount({
   disabled?: boolean;
 }) {
   const methods = useForm();
-  const { coinData, maxBetAmt, setMaxBetAmt, language } = useGlobalContext();
+  const { coinData, maxBetAmt, setMaxBetAmt, language, kenoRisk } =
+    useGlobalContext();
   const [betAmountsModal, setBetAmountsModal] = useState(false);
 
   const [isHovered, setIsHovered] = useState<boolean>(false);
 
   const minBetAmt = parseFloat(process.env.MINIMUM_BET_AMOUNT ?? "0");
-  const highestMaxBetAmt =
-    leastMultiplier !== undefined &&
-    (maxPayouts[game as GameType] / leastMultiplier).toFixed(2);
+
+  let highestMaxBetAmt = "0";
+  useEffect(() => {
+    if (leastMultiplier !== undefined) {
+      highestMaxBetAmt = (
+        (game === GameType.keno
+          ? maxPayouts[GameType.keno][kenoRisk]
+          : (maxPayouts[game as GameType] as number)) / leastMultiplier
+      ).toFixed(2);
+    }
+  }, [leastMultiplier, game, kenoRisk]);
 
   const tempBetAmt = betAmt ?? 0;
 
@@ -44,11 +53,13 @@ export default function BetAmount({
   const [inputString, setInputString] = useState("");
 
   useEffect(() => {
-    console.log("killa", currentMultiplier);
     if (betAmt !== undefined && betAmt > 0) setInputString(betAmt.toString());
     if (tempBetAmt !== undefined && currentMultiplier !== undefined) {
       let calculatedMaxBetAmt =
-        maxPayouts[game as GameType] / currentMultiplier;
+        (game === GameType.keno
+          ? maxPayouts[GameType.keno][kenoRisk]
+          : (maxPayouts[game as GameType] as number)) / currentMultiplier;
+
       setCurrentMaxBetAmt(
         isFinite(calculatedMaxBetAmt) ? calculatedMaxBetAmt : 0,
       );
