@@ -1,6 +1,8 @@
+import Link from "next/link";
+
 export default function Telegram({ className }: { className: string }) {
   return (
-    <div>
+    <Link href="t.me/FOMO_wtf" target="_blank">
       <svg
         xmlns="http://www.w3.org/2000/svg"
         width="23"
@@ -15,6 +17,6 @@ export default function Telegram({ className }: { className: string }) {
           fill="currentColor"
         />
       </svg>
-    </div>
+    </Link>
   );
 }

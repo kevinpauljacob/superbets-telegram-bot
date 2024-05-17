@@ -33,28 +33,32 @@ const BetRow: React.FC<BetRowProps> = ({
       {all && (
         <div className="w-full hidden md:block text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
           <div className="flex items-center justify-center gap-5 mr-8">
-            <Image
-              src={`/assets/badges/T-${bet.userTier}.png`}
-              alt="badge"
-              width={20}
-              height={20}
-            />
-            <span className="w-[10%]">
-              {obfuscatePubKey(bet.wallet)}
-            </span>
+            <div className="relative w-6 h-6">
+              <Image
+                src={`/assets/badges/T-${bet.userTier}.png`}
+                alt="badge"
+                layout="fill"
+                objectFit="contain"
+                objectPosition="center"
+              />
+            </div>
+            <span className="w-[10%]">{obfuscatePubKey(bet.wallet)}</span>
           </div>
         </div>
       )}
 
       <div className="w-full md:block text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
         <div className="w-full flex items-center justify-center gap-5 mr-5">
-          <Image
-            src={`/assets/live-win-cards/${bet.game}.png`}
-            alt={bet.game}
-            width={25}
-            height={25}
-            className="rounded-md"
-          />
+          <div className="relative w-6 h-6">
+            <Image
+              src={`/assets/live-win-cards/${bet.game}.png`}
+              alt={bet.game}
+              layout="fill"
+              objectFit="contain"
+              objectPosition="center"
+              className="rounded-md"
+            />
+          </div>
           <span className="w-[10%]">
             {translator(Capitalize(bet.game), language)}
           </span>
