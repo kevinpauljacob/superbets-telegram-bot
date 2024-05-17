@@ -23,17 +23,16 @@ export default function AllBets() {
   const { liveBets, language } = useGlobalContext();
 
   useEffect(() => {
-    setAllBets((prev) => {
-      liveBets.forEach((bet) => {
-        const index = prev.findIndex((b) => b._id === bet._id);
-        if (index !== -1) {
-          prev[index] = bet;
-        } else {
-          prev.unshift(bet);
-        }
-      });
-      return prev;
+    const updatedBets = [...allBets];
+    liveBets.forEach((bet) => {
+      const index = updatedBets.findIndex((b) => b._id === bet._id);
+      if (index !== -1) {
+        updatedBets[index] = bet;
+      } else {
+        updatedBets.unshift(bet);
+      }
     });
+    setAllBets(updatedBets);
   }, [liveBets]);
 
   useEffect(() => {

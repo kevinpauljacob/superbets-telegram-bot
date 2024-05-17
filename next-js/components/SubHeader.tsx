@@ -73,7 +73,7 @@ export default function SubHeader() {
   }, []);
 
   return (
-    <div className="flex flex-col w-full z-[100] absolute top-0 right-0">
+    <div className="flex flex-col w-full z-[90] absolute top-0 right-0">
       <div
         className={`${
           router.pathname === "/" ? "flex" : "hidden md:flex"
