@@ -14,6 +14,10 @@ export default function FomoPlay() {
       src: "/assets/game-cards/dice.png",
     },
     {
+      href: "/dice2",
+      src: "/assets/game-cards/dice2.png",
+    },
+    {
       href: "/coinflip",
       src: "/assets/game-cards/coinflip.png",
     },
@@ -25,10 +29,7 @@ export default function FomoPlay() {
       href: "/limbo",
       src: "/assets/game-cards/limbo.png",
     },
-    {
-      href: "/dice2",
-      src: "/assets/game-cards/dice2.png",
-    },
+
     {
       href: "/keno",
       src: "/assets/game-cards/keno.png",
