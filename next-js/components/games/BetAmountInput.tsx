@@ -36,14 +36,16 @@ export default function BetAmount({
 
   const minBetAmt = parseFloat(process.env.MINIMUM_BET_AMOUNT ?? "0");
 
-  let highestMaxBetAmt = "0";
+  const [highestMaxBetAmt, setHighestMaxBetAmt] = useState<string>("0");
   useEffect(() => {
     if (leastMultiplier !== undefined) {
-      highestMaxBetAmt = (
-        (game === GameType.keno
-          ? maxPayouts[GameType.keno][kenoRisk]
-          : (maxPayouts[game as GameType] as number)) / leastMultiplier
-      ).toFixed(2);
+      setHighestMaxBetAmt(
+        (
+          (game === GameType.keno
+            ? maxPayouts[GameType.keno][kenoRisk]
+            : (maxPayouts[game as GameType] as number)) / leastMultiplier
+        ).toFixed(2),
+      );
     }
   }, [leastMultiplier, game, kenoRisk]);
 
@@ -301,7 +303,10 @@ export default function BetAmount({
                 "Maximum amount for a single bet in this game is",
                 language,
               )}
-              <span className="text-white/90 font-semibold"> 20.00 SOL</span>
+              <span className="text-white/90 font-semibold">
+                {" "}
+                {currentMaxBetAmt.toFixed(2)} SOL
+              </span>
                .
             </span>
           </div>
@@ -310,7 +315,7 @@ export default function BetAmount({
               {translator("Max Bet", language)}
             </span>
             <span className="flex items-center justify-center gap-1">
-              {20}
+              {currentMaxBetAmt.toFixed(2)}
               <Image src="/assets/sol.png" alt="coins" height="11" width="14" />
             </span>
           </div>
