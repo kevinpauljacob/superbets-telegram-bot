@@ -127,11 +127,11 @@ export default function ProvablyFairModal({
 
   const renderKeno = () => (
     <div className='p-4'>
-    <div className="grid grid-cols-8 gap-2 text-white text-xl font-chakra w-full">
+    <div className="grid grid-cols-8 gap-2 text-white lg2:text-xl md:text-lg sm:text-base text-sm font-chakra w-full">
       {Array.from({ length: 40 }, (_, index) => index + 1).map((number) => (
-        <div key={number} className={`flex items-center justify-center cursor-pointer ${strikeNumbers.includes(number) ? "bg-black border-2 border-fomo-green" : "bg-[#202329]"} rounded-md text-center transition-all duration-300 ease-in-out w-[45px] h-[45px]`}>
+        <div key={number} className={`flex items-center justify-center cursor-pointer ${strikeNumbers.includes(number) ? "bg-black border-2 border-fomo-green" : "bg-[#202329]"} rounded-md text-center transition-all duration-300 ease-in-out lg2:w-[45px] lg2:h-[45px] md:w-[42px] md:h-[42px] sm:w-[40px] sm:h-[40px] sm2:w-[38px] sm2:h-[38px] w-[30px] h-[30px]`}>
           {strikeNumbers.includes(number) ? (
-            <div className="flex justify-center items-center bg-[#FFD100] text-black rounded-full w-[32px] h-[32px]">
+            <div className="flex justify-center items-center bg-[#FFD100] text-black rounded-full lg2:w-[32px] lg2:h-[32px] md:w-[32px] md:h-[32px] sm:w-[28px] sm:h-[28px] w-[25px] h-[25px]">
               {number}
             </div>
           ) : (
@@ -144,7 +144,7 @@ export default function ProvablyFairModal({
   );
 
   const renderDice = () => (
-    <div className="px-8 pt-10 pb-4">
+    <div className="lg2:px-8 md:px-6 px-4 pt-10 pb-4">
       <div className="relative w-full mb-8 xl:mb-6">
         <div>
           <Image
@@ -154,7 +154,7 @@ export default function ProvablyFairModal({
             height={100}
           />
         </div>
-        <div className="flex justify-around md:gap-2">
+        <div className="flex justify-around gap-2">
           {Array.from({ length: 6 }, (_, i) => i + 1).map(
             (face) => (
               <div

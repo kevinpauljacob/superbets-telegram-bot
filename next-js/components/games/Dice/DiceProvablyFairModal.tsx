@@ -283,13 +283,12 @@ export default function RollDiceProvablyFairModal({
             {state === "verify" && (
               <div className="grid w-full text-white">
                 <div className="grid gap-2">
-                <div className="border-2 border-opacity-5 border-[#FFFFFF] md:px-8 py-2">
+                <div className="border-2 border-opacity-5 border-[#FFFFFF] md:px-8">
                   <ProvablyFairModal 
                    verificationState={verificationState}
                    setVerificationState={setVerificationState}
                    selectedGameType={selectedGameType}
                    />
-                   
                   </div>
                   <div>
                     <label className="text-xs text-opacity-75 font-changa text-[#F0F0F0]">

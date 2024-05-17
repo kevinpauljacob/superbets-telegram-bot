@@ -31,21 +31,23 @@ const BetRow: React.FC<BetRowProps> = ({
       }}
     >
       {all && (
-        <span className="w-full hidden md:block text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
-          <p className="flex items-center justify-center gap-2">
+        <div className="w-full hidden md:block text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
+          <div className="flex items-center justify-center gap-5 mr-8">
             <Image
               src={`/assets/badges/T-${bet.userTier}.png`}
               alt="badge"
               width={20}
               height={20}
             />
-            {obfuscatePubKey(bet.wallet)}
-          </p>
-        </span>
+            <span className="w-[10%]">
+              {obfuscatePubKey(bet.wallet)}
+            </span>
+          </div>
+        </div>
       )}
 
-      <span className="w-full md:block text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
-        <p className="flex items-center justify-center gap-2">
+      <div className="w-full md:block text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
+        <div className="w-full flex items-center justify-center gap-5 mr-5">
           <Image
             src={`/assets/live-win-cards/${bet.game}.png`}
             alt={bet.game}
@@ -53,9 +55,11 @@ const BetRow: React.FC<BetRowProps> = ({
             height={25}
             className="rounded-md"
           />
-          {translator(Capitalize(bet.game), language)}
-        </p>
-      </span>
+          <span className="w-[10%]">
+            {translator(Capitalize(bet.game), language)}
+          </span>
+        </div>
+      </div>
       <span className="w-full hidden md:block text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
         {(bet.amount ?? 0).toFixed(4)}
       </span>

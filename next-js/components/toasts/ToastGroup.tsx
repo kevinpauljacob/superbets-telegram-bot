@@ -91,7 +91,7 @@ export const successCustom = (text: any, duration?: number) => {
     ),
     {
       duration: duration ?? 2000,
-      position: "top-right",
+      position: "bottom-right",
     },
   );
 };
@@ -121,7 +121,7 @@ export const errorCustom = (text: any) => {
     ),
     {
       duration: 2000,
-      position: "top-right",
+      position: "bottom-right",
     },
   );
 };
@@ -157,7 +157,7 @@ export const warningCustom = (text: any) => {
     ),
     {
       duration: 2000,
-      position: "top-right",
+      position: "bottom-right",
     },
   );
 };
