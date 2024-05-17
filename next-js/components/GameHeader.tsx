@@ -14,7 +14,8 @@ export default function GameHeader() {
   const router = useRouter();
   const game = router.pathname.split("/")[1];
 
-  const { coinData, getProvablyFairData, setOpenPFModal, language } = useGlobalContext();
+  const { coinData, getProvablyFairData, setOpenPFModal, language } =
+    useGlobalContext();
 
   useEffect(() => {
     const fetchGameData = (game: GameType) => {
@@ -50,7 +51,7 @@ export default function GameHeader() {
   >({
     dice: {
       icon: "/assets/dice.png",
-      name: "Dice To Win",
+      name: "Dice",
     },
     coinflip: {
       icon: "/assets/coinflip.png",
@@ -105,13 +106,17 @@ export default function GameHeader() {
             </p>
           </div> */}
           <div className="hidden md:flex items-center justify-between bg-[#1E2220] rounded-md mx-1.5  my-1 px-4 py-1">
-            <p className="font-thin text-xs">{translator("Volume", language)} :&nbsp;</p>
+            <p className="font-thin text-xs">
+              {translator("Volume", language)} :&nbsp;
+            </p>
             <p className="text-[#7839C5] font-semibold text-xs">
               {selectedGame.stats?.volume.toFixed(2)}
             </p>
           </div>
           <div className="hidden md:flex items-center justify-between bg-[#1E2220] rounded-md mx-1.5  my-1 px-4 py-1">
-            <p className="font-thin text-xs">{translator("Unique Players", language)} :&nbsp;</p>
+            <p className="font-thin text-xs">
+              {translator("Unique Players", language)} :&nbsp;
+            </p>
             <p className="text-[#7839C5] font-semibold text-xs">
               {selectedGame.stats?.players}
             </p>
