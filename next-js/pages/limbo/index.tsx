@@ -395,7 +395,7 @@ export default function Limbo() {
                   game="limbo"
                   disabled={disableInput}
                 />
-                <div className="mb-[1.4rem]">
+                <div className="mb-[1.4rem] font-changa">
                   <MultiplierInput
                     inputMultiplier={inputMultiplier}
                     setInputMultiplier={setInputMultiplier}
@@ -489,7 +489,7 @@ export default function Limbo() {
           </div>
         </div>
 
-        <div className="flex px-0 xl:px-4 mb-0 md:mb-[1.4rem] gap-4 flex-row w-full justify-between">
+        <div className="flex px-0 xl:px-4 mb-0 md:mb-[1.4rem] gap-4 flex-row w-full justify-between font-changa font-semibold">
           {coinData && coinData[0].amount > 0.0001 && (
             <>
               <MultiplierInput
@@ -503,7 +503,7 @@ export default function Limbo() {
               />
 
               <div className="flex flex-col w-full">
-                <span className="text-[#F0F0F0] font-changa font-sembiold text-xs mb-1">
+                <span className="text-[#F0F0F0] font-changa font-semibold text-xs mb-1">
                   {translator("Profit", language)}
                 </span>
                 <span className="bg-[#202329] font-chakra text-xs text-white rounded-md px-2 md:px-5 py-3">
@@ -518,7 +518,7 @@ export default function Limbo() {
               </div>
 
               <div className="flex flex-col w-full">
-                <span className="text-[#F0F0F0] font-changa font-sembiold text-xs mb-1">
+                <span className="text-[#F0F0F0] font-changa font-semibold text-xs mb-1">
                   {translator("Chance", language)}
                 </span>
                 <span className="bg-[#202329] font-chakra text-xs text-white rounded-md px-2 md:px-5 py-3">

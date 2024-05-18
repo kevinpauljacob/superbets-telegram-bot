@@ -56,6 +56,7 @@ export default function BetAmount({
 
   useEffect(() => {
     if (betAmt !== undefined && betAmt > 0) setInputString(betAmt.toString());
+    
     if (tempBetAmt !== undefined && currentMultiplier !== undefined) {
       let calculatedMaxBetAmt =
         (game === GameType.keno

@@ -24,7 +24,7 @@ const MultiplierInput = ({
   const { language } = useGlobalContext();
   return (
     <div className="flex flex-col w-full">
-      <span className="text-[#F0F0F0] font-changa font-semibold text-xs mb-1">
+      <span className="text-[#F0F0F0]  text-xs mb-1">
         {translator("Multiplier", language)}
       </span>
       <input
