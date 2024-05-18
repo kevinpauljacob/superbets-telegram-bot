@@ -11,7 +11,7 @@ import { BsInfoCircleFill } from "react-icons/bs";
 import DicePointer from "@/public/assets/DicePointer";
 import { translator } from "@/context/transactions";
 import { truncateNumber } from "@/context/gameTransactions";
-
+import { riskToChance } from "./Keno/RiskToChance";
 export default function BetAmount({
   betAmt,
   setBetAmt,
@@ -30,6 +30,13 @@ export default function BetAmount({
   const methods = useForm();
   const { coinData, maxBetAmt, setMaxBetAmt, language, kenoRisk } =
     useGlobalContext();
+  
+    //Temperory max bet 
+    const multipliersForRisk = riskToChance[kenoRisk];
+    const highestMultiplierForRisk = multipliersForRisk
+      ? Math.max(...Object.values(multipliersForRisk).flat())
+      : 1;
+
   const [betAmountsModal, setBetAmountsModal] = useState(false);
 
   const [isHovered, setIsHovered] = useState<boolean>(false);
@@ -56,12 +63,13 @@ export default function BetAmount({
 
   useEffect(() => {
     if (betAmt !== undefined && betAmt > 0) setInputString(betAmt.toString());
-    
-    if (tempBetAmt !== undefined && currentMultiplier !== undefined) {
+    const effectiveMultiplier = currentMultiplier || highestMultiplierForRisk;
+
+    if (tempBetAmt !== undefined && effectiveMultiplier !== undefined) {
       let calculatedMaxBetAmt =
         (game === GameType.keno
           ? maxPayouts[GameType.keno][kenoRisk]
-          : (maxPayouts[game as GameType] as number)) / currentMultiplier;
+          : (maxPayouts[game as GameType] as number)) / effectiveMultiplier;
 
       setCurrentMaxBetAmt(
         isFinite(calculatedMaxBetAmt) ? calculatedMaxBetAmt : 0,
@@ -82,6 +90,7 @@ export default function BetAmount({
   }, [tempBetAmt, betAmt, currentMultiplier, game]);
 
   useEffect(() => {
+    
     setMaxBetAmt(
       Math.min(
         game === "keno" || game === "wheel"

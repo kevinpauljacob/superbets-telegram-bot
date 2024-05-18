@@ -395,7 +395,7 @@ export default function Limbo() {
                   game="limbo"
                   disabled={disableInput}
                 />
-                <div className="mb-[1.4rem] font-changa">
+                <div className="mb-[1.4rem] text-xs font-changa text-opacity-90">
                   <MultiplierInput
                     inputMultiplier={inputMultiplier}
                     setInputMultiplier={setInputMultiplier}
