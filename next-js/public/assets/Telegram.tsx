@@ -2,7 +2,7 @@ import Link from "next/link";
 
 export default function Telegram({ className }: { className: string }) {
   return (
-    <Link href="t.me/FOMO_wtf" target="_blank">
+    <Link href="https://t.me/FOMO_wtf" target="_blank">
       <svg
         xmlns="http://www.w3.org/2000/svg"
         width="23"
