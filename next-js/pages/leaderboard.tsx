@@ -44,7 +44,7 @@ export default function Leaderboard() {
           {/* point bar and info  */}
           <div className="flex flex-col w-full rounded-[5px] h-full ">
             <div className="flex flex-row items-end justify-between">
-              <div className="flex items-center gap-2">
+              <div className="flex flex-col justify-center sm:flex-row sm:items-center sm:justify-start gap-2 w-full">
                 <div className="flex relative min-w-[4.5rem] h-[4.5rem]">
                   <Image
                     src={pointTier.image}
@@ -53,7 +53,7 @@ export default function Leaderboard() {
                     objectPosition="center"
                   />
                 </div>
-                <div className="flex flex-col gap-0.5 items-start font-chakra">
+                <div className="flex flex-col gap-0.5 items-center sm:items-start font-chakra">
                   <span className="text-white text-xl tracking-wider font-bold">
                     {wallet.publicKey
                       ? obfuscatePubKey(wallet.publicKey.toBase58())
@@ -76,7 +76,7 @@ export default function Leaderboard() {
             )} */}
             </div>
 
-            {/* next tier data - mob view  */}
+            {/* next tier data - mob view 
             {(pointTier?.index ?? 0) < 7 && (
               <div className="flex sm:hidden mt-5 items-center justify-between">
                 <div className="flex items-center gap-2">
@@ -93,9 +93,9 @@ export default function Leaderboard() {
                     " Points"}
                 </span>
               </div>
-            )}
+            )} */}
 
-            <div className="hidden sm:flex flex-row justify-between font-chakra mt-4">
+            <div className="flex flex-row justify-between font-chakra mt-4">
               <span className="text-sm text-white text-right text-opacity-75">
                 Your level progress
               </span>
@@ -137,7 +137,7 @@ export default function Leaderboard() {
                 %
               </span>
             </div>
-            <div className="hidden sm:flex flex-row justify-between font-chakra capitalize">
+            <div className="flex flex-row justify-between font-chakra capitalize">
               <span className="text-staking-secondary text-opacity-75 text-sm font-medium">
                 {pointTier?.label ?? ""}
               </span>
