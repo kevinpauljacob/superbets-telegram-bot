@@ -142,7 +142,7 @@ export const houseEdgeTiers: Record<number, number> = {
   7: 0,
 };
 
-type PayoutValue<T> = T extends GameType.keno ? Record<string, number> : number;
+type PayoutValue<T> = number;
 
 export const maxPayouts: { [K in GameType]: PayoutValue<K> } = {
   [GameType.dice]: 20,
@@ -154,12 +154,7 @@ export const maxPayouts: { [K in GameType]: PayoutValue<K> } = {
   [GameType.limbo]: 20,
   [GameType.roulette1]: 20,
   [GameType.roulette2]: 20,
-  [GameType.keno]: {
-    classic: 20,
-    low: 20,
-    medium: 20,
-    high: 20,
-  },
+  [GameType.keno]: 20,
   [GameType.mines]: 20,
   [GameType.hilo]: 20,
 };

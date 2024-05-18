@@ -30,12 +30,12 @@ export default function BetAmount({
   const methods = useForm();
   const { coinData, maxBetAmt, setMaxBetAmt, language, kenoRisk } =
     useGlobalContext();
-  
-    //Temperory max bet 
-    const multipliersForRisk = riskToChance[kenoRisk];
-    const highestMultiplierForRisk = multipliersForRisk
-      ? Math.max(...Object.values(multipliersForRisk).flat())
-      : 1;
+
+  //Temperory max bet
+  const multipliersForRisk = riskToChance[kenoRisk];
+  const highestMultiplierForRisk = multipliersForRisk
+    ? Math.max(...Object.values(multipliersForRisk).flat())
+    : 1;
 
   const [betAmountsModal, setBetAmountsModal] = useState(false);
 
@@ -47,11 +47,7 @@ export default function BetAmount({
   useEffect(() => {
     if (leastMultiplier !== undefined) {
       setHighestMaxBetAmt(
-        (
-          (game === GameType.keno
-            ? maxPayouts[GameType.keno][kenoRisk]
-            : (maxPayouts[game as GameType] as number)) / leastMultiplier
-        ).toFixed(2),
+        (maxPayouts[game as GameType] / leastMultiplier).toFixed(2),
       );
     }
   }, [leastMultiplier, game, kenoRisk]);
@@ -67,9 +63,7 @@ export default function BetAmount({
 
     if (tempBetAmt !== undefined && effectiveMultiplier !== undefined) {
       let calculatedMaxBetAmt =
-        (game === GameType.keno
-          ? maxPayouts[GameType.keno][kenoRisk]
-          : (maxPayouts[game as GameType] as number)) / effectiveMultiplier;
+        maxPayouts[game as GameType] / currentMultiplier;
 
       setCurrentMaxBetAmt(
         isFinite(calculatedMaxBetAmt) ? calculatedMaxBetAmt : 0,
@@ -90,7 +84,6 @@ export default function BetAmount({
   }, [tempBetAmt, betAmt, currentMultiplier, game]);
 
   useEffect(() => {
-    
     setMaxBetAmt(
       Math.min(
         game === "keno" || game === "wheel"

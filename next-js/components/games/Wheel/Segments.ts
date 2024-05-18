@@ -26,7 +26,7 @@ export const riskToChance: RiskToChance = {
       color: "#BEC6D1",
     },
     {
-      multiplier: 1.7,
+      multiplier: 2,
       chance: 20,
       color: "#886CFF",
     },
