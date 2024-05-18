@@ -6,6 +6,7 @@ import Image from "next/legacy/image";
 import { FaRegCheckCircle } from "react-icons/fa";
 import { BsXCircle } from "react-icons/bs";
 import { AiOutlineClose } from "react-icons/ai";
+import { PiWarningCircle } from "react-icons/pi";
 import styles from "./ToastGroup.module.css";
 
 export const errorAlert = (text: any) => {
@@ -126,7 +127,6 @@ export const errorCustom = (text: any) => {
   );
 };
 
-
 export const warningCustom = (text: any) => {
   toast.custom(
     (t) => (
@@ -136,12 +136,7 @@ export const warningCustom = (text: any) => {
         } flex flex-col rounded-md bg-[#17181A]`}
       >
         <div className="w-full h-11 flex flex-row px-3 gap-3 items-center">
-          <Image
-            src="/assets/warningIcon.svg"
-            alt="Warning"
-            width={20}
-            height={20}
-          />
+          <PiWarningCircle className="w-6 h-6 text-[#7839C5]" />
           <span className="text-white text-sm flex-1">{text}</span>
           <AiOutlineClose
             onClick={() => {

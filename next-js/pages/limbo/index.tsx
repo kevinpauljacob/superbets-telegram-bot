@@ -28,7 +28,11 @@ import { soundAlert } from "@/utils/soundUtils";
 import ConfigureAutoButton from "@/components/ConfigureAutoButton";
 import AutoCount from "@/components/AutoCount";
 import MultiplierInput from "@/components/games/MultiplierInput";
-import { errorCustom, warningCustom } from "@/components/toasts/ToastGroup";
+import {
+  errorCustom,
+  successCustom,
+  warningCustom,
+} from "@/components/toasts/ToastGroup";
 import { translator } from "@/context/transactions";
 
 function useInterval(callback: Function, delay: number | null) {
@@ -88,6 +92,7 @@ export default function Limbo() {
 
   const [flipping, setFlipping] = useState(false);
   const [result, setResult] = useState<string | null>(null);
+  const [resultAmount, setResultAmount] = useState<number>(0);
 
   const [loading, setLoading] = useState(false);
   const [refresh, setRefresh] = useState(true);
@@ -121,7 +126,10 @@ export default function Limbo() {
           clearInterval(timer);
 
           const win = result === "Won";
-          if (win) soundAlert("/sounds/win.wav");
+          if (win) {
+            soundAlert("/sounds/win.wav");
+            successCustom(`Won ${resultAmount.toFixed(4)} SOL!`);
+          } else result && errorCustom("Better luck next time!");
           const newBetResult = { result: targetMultiplier, win };
           setLastMultipliers((prevResults) => {
             const newResults = [...prevResults, newBetResult];
@@ -210,6 +218,11 @@ export default function Limbo() {
       setLoading(false);
       setTargetMultiplier(winningMultiplier);
       setResult(response.result);
+      setResultAmount(
+        response?.result === "Won"
+          ? response?.amountWon ?? 0
+          : response?.AmountLost ?? 0,
+      );
       setRefresh(true);
       //auto options are in the useEffect to modify displayMultiplier
     } catch (e: any) {
@@ -324,7 +337,7 @@ export default function Limbo() {
     <GameLayout title="FOMO - Limbo">
       <GameOptions>
         <>
-          <div className="flex lg:hidden flex-col w-full gap-4 mb-[1.4rem]">
+          <div className="relative w-full flex lg:hidden mb-[1.4rem]">
             {startAuto && (
               <div
                 onClick={() => {
@@ -382,16 +395,17 @@ export default function Limbo() {
                   game="limbo"
                   disabled={disableInput}
                 />
-
-                <MultiplierInput
-                  inputMultiplier={inputMultiplier}
-                  setInputMultiplier={setInputMultiplier}
-                  disabled={startAuto || loading || disableInput}
-                  minVal={1.02}
-                  maxVal={50}
-                  step={1}
-                  maxLength={2}
-                />
+                <div className="mb-[1.4rem]">
+                  <MultiplierInput
+                    inputMultiplier={inputMultiplier}
+                    setInputMultiplier={setInputMultiplier}
+                    disabled={startAuto || loading || disableInput}
+                    minVal={1.02}
+                    maxVal={50}
+                    step={1}
+                    maxLength={2}
+                  />
+                </div>
 
                 {betSetting == "manual" ? (
                   <></>
@@ -404,7 +418,7 @@ export default function Limbo() {
                   </div>
                 )}
 
-                <div className="relative w-full hidden lg:flex mt-6">
+                <div className="relative w-full hidden lg:flex mt-1">
                   {startAuto && (
                     <div
                       onClick={() => {

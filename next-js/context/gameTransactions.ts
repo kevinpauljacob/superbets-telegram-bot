@@ -36,7 +36,6 @@ export const placeBet = async (
   betType: string,
   timeFrame: number,
 ) => {
-  // let toastId = toast.loading("betting in progress");
 
   try {
     const res = await fetch(`/api/games/options`, {
@@ -56,21 +55,15 @@ export const placeBet = async (
     const { success, message, data } = await res.json();
 
     if (success === false) {
-      // toast.dismiss(toastId);
       errorCustom(message);
       throw new Error(message);
     }
 
-    // toast.dismiss(toastId);
 
     successCustom("Bet placed successfully!");
 
     return { success, message, data };
   } catch (error) {
-    // toast.dismiss(toastId);
-
-    // errorCustom("error placing bet!");
-
     return { success: false, message: "Unexpected error", data: null };
   }
 };
@@ -122,8 +115,6 @@ export const deposit = async (
     return { success: true, message: "Wallet not connected" };
   }
 
-  let toastId = toast.loading("Deposit in progress");
-
   try {
     let { transaction, blockhashWithExpiryBlockHeight } =
       await createDepositTxn(wallet.publicKey, amount, tokenMint);
@@ -152,18 +143,15 @@ export const deposit = async (
     const { success, message } = await res.json();
 
     if (success === false) {
-      toast.dismiss(toastId);
       errorCustom(message);
       throw new Error(message);
     }
 
-    toast.dismiss(toastId);
 
     successCustom("Deposit successfull!");
 
     return { success: true, message };
   } catch (error) {
-    toast.dismiss(toastId);
     errorCustom("Unexpected error!");
     return { success: false, message: error };
   }
@@ -183,8 +171,6 @@ export const withdraw = async (
     errorCustom("Wallet not connected");
     return { success: true, message: "Wallet not connected" };
   }
-
-  let toastId = toast.loading("Withdraw in progress");
 
   try {
     let { transaction, blockhashWithExpiryBlockHeight } =
@@ -214,19 +200,15 @@ export const withdraw = async (
     const { success, message } = await res.json();
 
     if (success === false) {
-      toast.dismiss(toastId);
       errorCustom(message);
       throw new Error(message);
     }
 
-    toast.dismiss(toastId);
 
     successCustom("Withdrawal successfull!");
 
     return { success: true, message };
   } catch (error) {
-    toast.dismiss(toastId);
-
     errorCustom("Unexpected error!");
 
     return { success: true, message: error };
@@ -234,7 +216,6 @@ export const withdraw = async (
 };
 
 export const checkResult = async (wallet: WalletContextState) => {
-  let toastId = toast.loading("fomobet is processing the result");
 
   try {
     const res = await fetch(`/api/games/options/checkResult`, {
@@ -250,16 +231,13 @@ export const checkResult = async (wallet: WalletContextState) => {
     const { success, message, data } = await res.json();
 
     if (success === false) {
-      toast.dismiss(toastId);
       errorCustom(message);
       throw new Error(message);
     }
 
-    toast.dismiss(toastId);
 
     return { success, message, data };
   } catch (error: any) {
-    toast.dismiss(toastId);
 
     errorCustom("Unexpected error! Please try again.");
 

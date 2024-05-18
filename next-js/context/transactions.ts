@@ -214,9 +214,6 @@ export const stakeFOMO = async (
     errorCustom("Wallet not connected");
     return { success: true, message: "Wallet not connected" };
   }
-
-  let toastId = toast.loading("Staking in progress.");
-
   try {
     let { transaction, blockhash } = await createDepositTxn(
       wallet.publicKey,
@@ -248,18 +245,14 @@ export const stakeFOMO = async (
     const { success, message } = await res.json();
 
     if (success === false) {
-      toast.dismiss(toastId);
       errorCustom(message);
       throw new Error(message);
     }
-
-    toast.dismiss(toastId);
 
     successCustom("Stake successfull!");
 
     return { success: true, message };
   } catch (error) {
-    toast.dismiss(toastId);
     errorCustom("Unexpected error!");
     return { success: false, message: error };
   }
@@ -279,8 +272,6 @@ export const unstakeFOMO = async (
     errorCustom("Wallet not connected");
     return { success: true, message: "Wallet not connected" };
   }
-
-  let toastId = toast.loading("Unstaking in progress");
 
   try {
     let { transaction, blockhash } = await createWithdrawTxn(
@@ -313,19 +304,14 @@ export const unstakeFOMO = async (
     const { success, message } = await res.json();
 
     if (success === false) {
-      toast.dismiss(toastId);
       errorCustom(message);
       throw new Error(message);
     }
-
-    toast.dismiss(toastId);
 
     successCustom("Unstake successfull!");
 
     return { success: true, message };
   } catch (error) {
-    toast.dismiss(toastId);
-
     errorCustom("Unexpected error!");
 
     return { success: true, message: error };
