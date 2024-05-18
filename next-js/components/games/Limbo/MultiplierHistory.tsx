@@ -1,3 +1,4 @@
+import { formatNumber } from "@/context/transactions";
 interface MultiplierHistoryProps {
   multiplierHistory: number[];
   inputMultiplier: number;
@@ -19,7 +20,7 @@ export function MultiplierHistory({
                 : "text-[#F1323E] border-[#F1323E]"
             } py-1 text-xs md:text-sm px-2 text-white`}
           >
-            {multiplier.toFixed(2)}x
+            {formatNumber(multiplier, 2)}x
           </span>
         );
       })}

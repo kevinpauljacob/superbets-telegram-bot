@@ -27,7 +27,7 @@ import {
   successCustom,
   warningCustom,
 } from "@/components/toasts/ToastGroup";
-import { translator } from "@/context/transactions";
+import { translator, formatNumber } from "@/context/transactions";
 
 export default function Keno() {
   const wallet = useWallet();
@@ -640,7 +640,7 @@ export default function Keno() {
                       key={index}
                       className="bg-[#202329] text-center font-chakra text-[8px] sm:text-xs font-semibold rounded-[5px] p-1 sm:py-3 sm:px-1 w-full"
                     >
-                      {multiplier.toFixed(2)}x
+                      {formatNumber(multiplier, 2)}x
                     </div>
                   ))}
                 </div>
@@ -682,11 +682,14 @@ export default function Keno() {
                               </div>
                               <div className="border border-white/10 rounded-[5px] p-3 mt-2">
                                 {coinData
-                                  ? Math.max(
-                                      0,
-                                      (betAmt ?? 0) *
-                                        (multiplier * (1 - houseEdge) - 1),
-                                    ).toFixed(4)
+                                  ? formatNumber(
+                                      Math.max(
+                                        0,
+                                        (betAmt ?? 0) *
+                                          (multiplier * (1 - houseEdge) - 1),
+                                      ),
+                                      4,
+                                    )
                                   : 0}{" "}
                                 SOL
                               </div>
@@ -696,7 +699,7 @@ export default function Keno() {
                                 {translator("Chance", language)}
                               </div>
                               <div className="border border-white/10 rounded-[5px] p-3 mt-2">
-                                {calculateChance(index).toFixed(2)} %
+                                {formatNumber(calculateChance(index), 2)} %
                               </div>
                             </div>
                           </div>

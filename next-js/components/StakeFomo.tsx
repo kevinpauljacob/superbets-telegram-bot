@@ -3,11 +3,11 @@ import { useGlobalContext } from "./GlobalContext";
 import {
   connection,
   fomoToken,
-  formatNumber,
   stakeFOMO,
   translator,
   unstakeFOMO,
 } from "@/context/transactions";
+import { truncateNumber } from "@/context/gameTransactions";
 import { useWallet } from "@solana/wallet-adapter-react";
 import toast from "react-hot-toast";
 import Spinner from "./Spinner";
@@ -141,7 +141,8 @@ export default function StakeFomo() {
           }}
           className="text-sm cursor-pointer font-medium font-changa text-[#94A3B8] text-opacity-90 transition-all"
         >
-          {formatNumber(stake ? solBal : userData?.stakedAmount ?? 0)} $FOMO
+          {truncateNumber(stake ? solBal : userData?.stakedAmount ?? 0, 4)}{" "}
+          $FOMO
         </span>
       </p>
 

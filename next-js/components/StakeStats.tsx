@@ -124,24 +124,26 @@ export default function StakeStats() {
           />
           <span
             className={`${
-              (
+              formatNumber(
                 (((userData?.tier ?? 0) < 7
                   ? userData?.stakedAmount ?? 0
                   : 600000) *
                   100) /
-                stakingTiers[(userData?.tier ?? 0) + 1]?.limit
-              ).toFixed(2) === "0.00"
+                  stakingTiers[(userData?.tier ?? 0) + 1]?.limit,
+                2,
+              ) === "0.00"
                 ? "text-opacity-100"
                 : ""
             } w-full h-full absolute top-0 left-0 flex items-center justify-center z-10 text-white font-semibold text-sm`}
           >
-            {(
+            {formatNumber(
               (((userData?.tier ?? 0) < 7
                 ? userData?.stakedAmount ?? 0
                 : 600000) *
                 100) /
-              stakingTiers[(userData?.tier ?? 0) + 1]?.limit
-            ).toFixed(2)}
+                stakingTiers[(userData?.tier ?? 0) + 1]?.limit,
+              2,
+            )}
             %
           </span>
         </div>

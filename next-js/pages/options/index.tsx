@@ -20,7 +20,7 @@ import BetButton from "@/components/games/BetButton";
 import BalanceAlert from "@/components/games/BalanceAlert";
 import { soundAlert } from "@/utils/soundUtils";
 import { errorCustom, successCustom } from "@/components/toasts/ToastGroup";
-import { translator } from "@/context/transactions";
+import { translator, formatNumber } from "@/context/transactions";
 
 const Timer = dynamic(() => import("../../components/games/Timer"), {
   ssr: false,
@@ -485,7 +485,7 @@ export default function Options() {
             </div>
             <div className="flex flex-col items-end">
               <span className="font-chakra font-medium text-xs md:text-sm text-[#F0F0F0] text-opacity-75">
-                ${strikePrice.toFixed(3)}
+                ${formatNumber(strikePrice, 3)}
               </span>
               <span
                 className={`font-chakra ${
@@ -508,7 +508,7 @@ export default function Options() {
                 $SOL
               </span>
               <span className="font-chakra text-2xl text-white font-semibold text-opacity-90 mb-2">
-                ${livePrice.toFixed(3)}
+                ${formatNumber(livePrice, 3)}
               </span>
               {strikePrice && !result ? (
                 <span
@@ -519,7 +519,7 @@ export default function Options() {
                   } text-opacity-90 font-chakra`}
                 >
                   {livePrice - strikePrice > 0 ? "+" : "-"}
-                  {Math.abs(livePrice - strikePrice).toFixed(4)}
+                  {formatNumber(Math.abs(livePrice - strikePrice), 4)}
                 </span>
               ) : (
                 <span

@@ -2,9 +2,8 @@ import Head from "next/head";
 import React, { ReactNode } from "react";
 import GameHeader from "./GameHeader";
 import { Table } from "./table/Table";
-import { minGameAmount } from "@/context/gameTransactions";
 import { useGlobalContext } from "./GlobalContext";
-import { translator } from "@/context/transactions";
+import { formatNumber, translator } from "@/context/transactions";
 import Link from "next/link";
 import FomoPlay from "./FomoPlay";
 
@@ -48,7 +47,7 @@ export const GameFooterInfo: React.FC<GameFooterProps> = ({
                 {translator("Multiplier", language)}
               </span>
               <span className="bg-[#202329] font-chakra text-xs text-white rounded-md px-2 md:px-5 py-3">
-                {(multiplier ?? 0).toFixed(2)}x
+                {formatNumber(multiplier ?? 0, 2)}x
               </span>
             </div>
           ) : (
@@ -60,7 +59,8 @@ export const GameFooterInfo: React.FC<GameFooterProps> = ({
               {translator("Profit", language)}
             </span>
             <span className="bg-[#202329] font-chakra text-xs text-white rounded-md px-2 md:px-5 py-3">
-              {(amount * (multiplier * (1 - houseEdge) - 1)).toFixed(4)} $SOL
+              {formatNumber(amount * (multiplier * (1 - houseEdge) - 1), 4)}{" "}
+              $SOL
             </span>
           </div>
 
@@ -70,7 +70,7 @@ export const GameFooterInfo: React.FC<GameFooterProps> = ({
                 {translator("Chance", language)}
               </span>
               <span className="bg-[#202329] font-chakra text-xs text-white rounded-md px-2 md:px-5 py-3">
-                {chance.toFixed(2)}%
+                {formatNumber(chance, 2)}%
               </span>
             </div>
           )}

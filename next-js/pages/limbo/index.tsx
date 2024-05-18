@@ -33,7 +33,7 @@ import {
   successCustom,
   warningCustom,
 } from "@/components/toasts/ToastGroup";
-import { translator } from "@/context/transactions";
+import { translator, formatNumber } from "@/context/transactions";
 
 function useInterval(callback: Function, delay: number | null) {
   const savedCallback = useRef<Function | null>(null);
@@ -211,7 +211,7 @@ export default function Limbo() {
       if (!response.success) throw new Error(response.message);
 
       const winningMultiplier = parseFloat(
-        (100 / response.strikeNumber).toFixed(2),
+        formatNumber(100 / response.strikeNumber, 2),
       );
 
       setFlipping(false);
@@ -484,7 +484,7 @@ export default function Limbo() {
                   : "text-white"
               } font-chakra inline-block transition-transform duration-1000 ease-out text-[5rem] font-black`}
             >
-              {displayMultiplier.toFixed(2)}x
+              {formatNumber(displayMultiplier, 2)}x
             </span>
           </div>
         </div>
@@ -508,10 +508,13 @@ export default function Limbo() {
                 </span>
                 <span className="bg-[#202329] font-chakra text-xs text-white rounded-md px-2 md:px-5 py-3">
                   {betAmt && inputMultiplier
-                    ? Math.max(
-                        0,
-                        betAmt * (inputMultiplier * (1 - houseEdge) - 1),
-                      ).toFixed(4)
+                    ? formatNumber(
+                        Math.max(
+                          0,
+                          betAmt * (inputMultiplier * (1 - houseEdge) - 1),
+                        ),
+                        4,
+                      )
                     : 0.0}{" "}
                   $SOL
                 </span>
@@ -522,7 +525,8 @@ export default function Limbo() {
                   {translator("Chance", language)}
                 </span>
                 <span className="bg-[#202329] font-chakra text-xs text-white rounded-md px-2 md:px-5 py-3">
-                  {(inputMultiplier > 0 ? 100 / inputMultiplier : 0.0).toFixed(
+                  {formatNumber(
+                    inputMultiplier > 0 ? 100 / inputMultiplier : 0.0,
                     2,
                   )}
                   %

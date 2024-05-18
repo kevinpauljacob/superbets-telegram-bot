@@ -1,11 +1,11 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from "react";
 import { GameType, generateGameResult } from "@/utils/provably-fair";
 import Image from "next/image";
 import DraggableBar from "@/components/games/Dice2/DraggableBar";
-import { riskToChance } from './Wheel/Segments';
-import Arc from './Wheel/Arc';
-import { useGlobalContext } from '../GlobalContext';
-import { translator } from '@/context/transactions';
+import { riskToChance } from "./Wheel/Segments";
+import Arc from "./Wheel/Arc";
+import { useGlobalContext } from "../GlobalContext";
+import { translator } from "@/context/transactions";
 interface VerificationState {
   clientSeed: string;
   serverSeed: string;
@@ -24,7 +24,7 @@ export default function ProvablyFairModal({
   verificationState,
   setVerificationState,
 
-  selectedGameType 
+  selectedGameType,
 }: Props) {
   const [strikeNumbers, setStrikeNumbers] = useState<number[]>([]);
   const [strikeNumber, setStrikeNumber] = useState<number>(50.0);
@@ -34,8 +34,10 @@ export default function ProvablyFairModal({
   const [strikeMultiplier, setStrikeMultiplier] = useState<number>();
   const [rotationAngle, setRotationAngle] = useState(0);
   const wheelRef = useRef<HTMLDivElement>(null);
-  const [hoveredMultiplier, setHoveredMultiplier] = useState<number | null>(null);
-  const {language} = useGlobalContext()
+  const [hoveredMultiplier, setHoveredMultiplier] = useState<number | null>(
+    null,
+  );
+  const { language } = useGlobalContext();
   useEffect(() => {
     const result = generateGameResult(
       verificationState.serverSeed,
@@ -52,12 +54,14 @@ export default function ProvablyFairModal({
 
   useEffect(() => {
     if (selectedGameType === GameType.dice) {
-      setWonDiceFace(generateGameResult(
-        verificationState.serverSeed,
-        verificationState.clientSeed,
-        parseInt(verificationState.nonce),
-        selectedGameType,
-      ));
+      setWonDiceFace(
+        generateGameResult(
+          verificationState.serverSeed,
+          verificationState.clientSeed,
+          parseInt(verificationState.nonce),
+          selectedGameType,
+        ),
+      );
     }
   }, [verificationState, selectedGameType]);
 
@@ -126,20 +130,27 @@ export default function ProvablyFairModal({
   }, [verificationState, selectedGameType, strikeNumber]);
 
   const renderKeno = () => (
-    <div className='p-4'>
-    <div className="grid grid-cols-8 gap-2 text-white lg2:text-xl md:text-lg sm:text-base text-sm font-chakra w-full">
-      {Array.from({ length: 40 }, (_, index) => index + 1).map((number) => (
-        <div key={number} className={`flex items-center justify-center cursor-pointer ${strikeNumbers.includes(number) ? "bg-black border-2 border-fomo-green" : "bg-[#202329]"} rounded-md text-center transition-all duration-300 ease-in-out lg2:w-[45px] lg2:h-[45px] md:w-[42px] md:h-[42px] sm:w-[40px] sm:h-[40px] sm2:w-[38px] sm2:h-[38px] w-[30px] h-[30px]`}>
-          {strikeNumbers.includes(number) ? (
-            <div className="flex justify-center items-center bg-[#FFD100] text-black rounded-full lg2:w-[32px] lg2:h-[32px] md:w-[32px] md:h-[32px] sm:w-[28px] sm:h-[28px] w-[25px] h-[25px]">
-              {number}
-            </div>
-          ) : (
-            <div>{number}</div>
-          )}
-        </div>
-      ))}
-    </div>
+    <div className="p-4">
+      <div className="grid grid-cols-8 gap-2 text-white lg2:text-xl md:text-lg sm:text-base text-sm font-chakra w-full">
+        {Array.from({ length: 40 }, (_, index) => index + 1).map((number) => (
+          <div
+            key={number}
+            className={`flex items-center justify-center cursor-pointer ${
+              strikeNumbers.includes(number)
+                ? "bg-black border-2 border-fomo-green"
+                : "bg-[#202329]"
+            } rounded-md text-center transition-all duration-300 ease-in-out lg2:w-[45px] lg2:h-[45px] md:w-[42px] md:h-[42px] sm:w-[40px] sm:h-[40px] sm2:w-[38px] sm2:h-[38px] w-[30px] h-[30px]`}
+          >
+            {strikeNumbers.includes(number) ? (
+              <div className="flex justify-center items-center bg-[#FFD100] text-black rounded-full lg2:w-[32px] lg2:h-[32px] md:w-[32px] md:h-[32px] sm:w-[28px] sm:h-[28px] w-[25px] h-[25px]">
+                {number}
+              </div>
+            ) : (
+              <div>{number}</div>
+            )}
+          </div>
+        ))}
+      </div>
     </div>
   );
 
@@ -155,44 +166,39 @@ export default function ProvablyFairModal({
           />
         </div>
         <div className="flex justify-around gap-2">
-          {Array.from({ length: 6 }, (_, i) => i + 1).map(
-            (face) => (
-              <div
-                key={face}
-                className="flex flex-col items-center"
-              >
-                {wonDiceFace === face && (
-                  <Image
-                    src="/assets/pointer-green.png"
-                    alt="pointer green"
-                    width={13}
-                    height={13}
-                    className="absolute -top-[20px]"
-                  />
-                )}
+          {Array.from({ length: 6 }, (_, i) => i + 1).map((face) => (
+            <div key={face} className="flex flex-col items-center">
+              {wonDiceFace === face && (
                 <Image
-                  src="/assets/progressTip.png"
-                  alt="progress bar"
+                  src="/assets/pointer-green.png"
+                  alt="pointer green"
                   width={13}
                   height={13}
-                  className="absolute top-[2px]"
+                  className="absolute -top-[20px]"
                 />
-                <Image
-                  src={
-                    wonDiceFace === face
-                      ? `/assets/winDiceFace${face}.png`
-                      : `/assets/diceFace${face}.png`
-                  }
-                  width={50}
-                  height={50}
-                  alt=""
-                  className={`inline-block mt-6 ${
-                    wonDiceFace === face ? "selected-face" : ""
-                  }`}
-                />
-              </div>
-            ),
-          )}
+              )}
+              <Image
+                src="/assets/progressTip.png"
+                alt="progress bar"
+                width={13}
+                height={13}
+                className="absolute top-[2px]"
+              />
+              <Image
+                src={
+                  wonDiceFace === face
+                    ? `/assets/winDiceFace${face}.png`
+                    : `/assets/diceFace${face}.png`
+                }
+                width={50}
+                height={50}
+                alt=""
+                className={`inline-block mt-6 ${
+                  wonDiceFace === face ? "selected-face" : ""
+                }`}
+              />
+            </div>
+          ))}
         </div>
       </div>
     </div>
@@ -243,16 +249,17 @@ export default function ProvablyFairModal({
       </div>
     </div>
   );
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
+  ) => {
     const { name, value } = e.target;
-  
+
     setVerificationState((prevState) => ({
       ...prevState,
-      [name]: name === 'segments' ? parseInt(value, 10) : value,
+      [name]: name === "segments" ? parseInt(value, 10) : value,
     }));
   };
   const renderRiskAndSegments = () => (
-    
     <>
       <div>
         <label className="text-xs text-opacity-75 font-changa text-[#F0F0F0]">
@@ -292,98 +299,96 @@ export default function ProvablyFairModal({
       </div>
     </>
   );
-  
 
   const renderWheel = () => {
     const multipliers = riskToChance[verificationState.risk || "low"];
-    const sortedMultipliers = multipliers.slice().sort((a, b) => a.multiplier - b.multiplier);
+    const sortedMultipliers = multipliers
+      .slice()
+      .sort((a, b) => a.multiplier - b.multiplier);
     const uniqueSegments = sortedMultipliers.filter(
       (segment, index, self) =>
         index === 0 || self[index - 1].multiplier !== segment.multiplier,
     );
 
     return (
-      
-        <div className="px-8 py-5 ">
-          <div className="flex justify-center items-center w-full flex-wrap">
-            <div className="relative  w-[200px] h-[200px] flex justify-center">
-              <Image
-                src="/assets/wheelPointer.svg"
-                alt="Pointer"
-                width={25}
-                height={25}
-                id="pointer"
-                className="absolute z-50 -top-2 transition-all duration-100"
-              />
-              <div ref={wheelRef} className="relative w-[200px] h-[200px] rounded-full overflow-hidden ">
-                {typeof window !== "undefined" && (
-                  <svg viewBox="0 0 300 300">
-                    {rotationAngle &&
-                      Array.from({
-                        length: verificationState.segments || 10,
-                      }).map((_, index) => (
-                        <Arc
-                          key={index}
-                          index={index}
-                          rotationAngle={rotationAngle}
-                          risk={verificationState.risk || "low"}
-                          segments={verificationState.segments || 10}
-                        />
-                      ))}
-                  </svg>
-                )}
-              </div>
-              <div className="absolute z-10 w-[79.75%] h-[79.75%] rounded-full bg-black/10 left-[10%] top-[10%] " />
-              <div className="absolute z-20 w-[66.5%] h-[66.5%] rounded-full bg-[#171A1F] left-[16.75%] top-[16.75%] " />
-              <div className="absolute z-20 w-[62.5%] h-[62.5%] rounded-full bg-[#0C0F16] left-[18.75%] top-[18.75%] text-white flex items-center justify-center text-2xl font-semibold font-changa text-opacity-80 ">
-                {strikeMultiplier}
-              </div>
+      <div className="px-8 py-5 ">
+        <div className="flex justify-center items-center w-full flex-wrap">
+          <div className="relative  w-[200px] h-[200px] flex justify-center">
+            <Image
+              src="/assets/wheelPointer.svg"
+              alt="Pointer"
+              width={25}
+              height={25}
+              id="pointer"
+              className="absolute z-50 -top-2 transition-all duration-100"
+            />
+            <div
+              ref={wheelRef}
+              className="relative w-[200px] h-[200px] rounded-full overflow-hidden "
+            >
+              {typeof window !== "undefined" && (
+                <svg viewBox="0 0 300 300">
+                  {rotationAngle &&
+                    Array.from({
+                      length: verificationState.segments || 10,
+                    }).map((_, index) => (
+                      <Arc
+                        key={index}
+                        index={index}
+                        rotationAngle={rotationAngle}
+                        risk={verificationState.risk || "low"}
+                        segments={verificationState.segments || 10}
+                      />
+                    ))}
+                </svg>
+              )}
+            </div>
+            <div className="absolute z-10 w-[79.75%] h-[79.75%] rounded-full bg-black/10 left-[10%] top-[10%] " />
+            <div className="absolute z-20 w-[66.5%] h-[66.5%] rounded-full bg-[#171A1F] left-[16.75%] top-[16.75%] " />
+            <div className="absolute z-20 w-[62.5%] h-[62.5%] rounded-full bg-[#0C0F16] left-[18.75%] top-[18.75%] text-white flex items-center justify-center text-2xl font-semibold font-changa text-opacity-80 ">
+              {strikeMultiplier}
             </div>
           </div>
-          <div className="flex gap-2 flex-wrap  justify-center ">
-            {uniqueSegments.map((segment, index) => (
+        </div>
+        <div className="flex gap-2 flex-wrap  justify-center ">
+          {uniqueSegments.map((segment, index) => (
+            <div
+              key={index}
+              className="relative w-[40px] "
+              onMouseEnter={() => setHoveredMultiplier(segment.multiplier)}
+              onMouseLeave={() => setHoveredMultiplier(null)}
+            >
               <div
-                key={index}
-                className="relative w-[40px] "
-                onMouseEnter={() =>
-                  setHoveredMultiplier(segment.multiplier)
-                }
-                onMouseLeave={() => setHoveredMultiplier(null)}
+                className={`w-full border-t-[6px] text-center font-chakra font-semibold bg-[#202329] text-xs text-white rounded-md px-1.5 md:px-5 py-2.5 flex justify-center items-center`}
+                style={{ borderColor: segment.color }}
               >
-                <div
-                  className={`w-full border-t-[6px] text-center font-chakra font-semibold bg-[#202329] text-xs text-white rounded-md px-1.5 md:px-5 py-2.5 flex justify-center items-center`}
-                  style={{ borderColor: segment.color }}
-                >
-                  {segment.multiplier}x
-                </div>
-                {hoveredMultiplier === segment.multiplier && (
-                  <div className="absolute top-[-80px] left-0 z-50 flex gap-2 text-white bg-[#202329] border border-white/10 rounded-lg w-full p-2 fadeInUp duration-100 min-w-[200px]">
-                    <div className="w-1/2">
-                      <div className="flex justify-between text-[10px] font-medium font-changa text-opacity-90 text-[#F0F0F0]">
-                        <span className="">
-                          {translator("Profit", language)}
-                        </span>
-                        <span>0.00 SOL</span>
-                      </div>
-                      <div className="border border-white/10 rounded-lg text-[10px] p-2 mt-2">
-                        0.00
-                      </div>
+                {segment.multiplier}x
+              </div>
+              {hoveredMultiplier === segment.multiplier && (
+                <div className="absolute top-[-80px] left-0 z-50 flex gap-2 text-white bg-[#202329] border border-white/10 rounded-lg w-full p-2 fadeInUp duration-100 min-w-[200px]">
+                  <div className="w-1/2">
+                    <div className="flex justify-between text-[10px] font-medium font-changa text-opacity-90 text-[#F0F0F0]">
+                      <span className="">{translator("Profit", language)}</span>
+                      <span>0.00 SOL</span>
                     </div>
-                    <div className="w-1/2">
-                      <div className="text-[10px] font-medium font-changa text-opacity-90 text-[#F0F0F0]">
-                        {translator("Chance", language)}
-                      </div>
-                      <div className="border border-white/10 rounded-lg text-[10px] p-2 mt-2">
-                        {segment.chance}%
-                      </div>
+                    <div className="border border-white/10 rounded-lg text-[10px] p-2 mt-2">
+                      0.00
                     </div>
                   </div>
-                )}
-              </div>
-            ))}
-          </div>
+                  <div className="w-1/2">
+                    <div className="text-[10px] font-medium font-changa text-opacity-90 text-[#F0F0F0]">
+                      {translator("Chance", language)}
+                    </div>
+                    <div className="border border-white/10 rounded-lg text-[10px] p-2 mt-2">
+                      {segment.chance}%
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          ))}
         </div>
-     
+      </div>
     );
   };
 
@@ -409,7 +414,7 @@ export default function ProvablyFairModal({
       default:
         return <div>Unsupported game type</div>;
     }
-  }
+  };
 
   return renderGameVisuals();
 }
