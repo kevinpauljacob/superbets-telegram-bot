@@ -351,7 +351,7 @@ export default function Options() {
 
             {/* select interval  */}
             <div className="mb-[1.4rem] flex w-full flex-col rounded-lg bg-transparent bg-opacity-10">
-              <span className="mb-1 text-sm text-white/90 font-medium font-changa">
+              <span className="mb-1 text-xs text-white/90  font-changa">
                 {translator("Select Interval", language)}
               </span>
               <div className="flex lg:flex-row flex-col items-center gap-2.5 bg-[#0C0F16] p-2 md:p-4 rounded-lg">
