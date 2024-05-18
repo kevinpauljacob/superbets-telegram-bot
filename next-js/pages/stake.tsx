@@ -92,7 +92,7 @@ export default function Stake() {
           {translator("Stake", language).toUpperCase()} FOMO
         </span>
 
-        <div className="flex flex-col sm:flex-row items-start gap-5 w-full">
+        <div className="flex flex-col-reverse sm:flex-row items-start gap-5 w-full">
           <div className="flex w-full basis-full sm:basis-2/3">
             <StakeStats />
           </div>
@@ -113,10 +113,11 @@ export default function Stake() {
               </span>
               <div className="flex w-full mt-3 sm:mt-0 justify-end sm:justify-start items-end gap-2 font-chakra">
                 <span className="text-white text-opacity-80 text-2xl sm:text-2xl font-semibold">
-                  {formatNumber(globalInfo?.stakedTotal)} $FOMO
+                  {formatNumber(globalInfo?.stakedTotal)}{" "}
+                  <span className="hidden sm:block">$FOMO</span>
                 </span>
                 <span
-                  className={`text-staking-secondary text-opacity-80 text-base sm:text-base ${inter.className} font-semibold`}
+                  className={`hidden sm:block text-staking-secondary text-opacity-80 text-base sm:text-base ${inter.className} font-semibold`}
                 >
                   (
                   {formatNumber(
