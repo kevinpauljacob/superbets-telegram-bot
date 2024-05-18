@@ -336,7 +336,7 @@ export default function RollDiceProvablyFairModal({
                         <option value={GameType.keno}>Keno</option>
                         <option value={GameType.dice}>Dice</option>
                         <option value={GameType.coin}>Coin Flip</option>
-                        <option value={GameType.options}>Options</option>
+                       
                         <option value={GameType.dice2}>Dice2</option>
 
                         <option value={GameType.wheel}>Wheel</option>
