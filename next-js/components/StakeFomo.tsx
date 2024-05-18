@@ -110,7 +110,7 @@ export default function StakeFomo() {
             stake
               ? "text-white border-[#9945FF]"
               : "text-[#ffffff80] border-transparent hover:text-[#ffffffb5]"
-          } p-2  border-b-2 text-base font-medium transition-all`}
+          } p-2  border-b-2 text-base font-medium transition-all w-full sm:w-max`}
           onClick={() => {
             setStake(true);
           }}
@@ -122,7 +122,7 @@ export default function StakeFomo() {
             !stake
               ? "text-white border-[#9945FF]"
               : "text-[#ffffff80] border-transparent hover:text-[#ffffffb5]"
-          } p-2 border-b-2 text-base font-medium transition-all`}
+          } p-2 border-b-2 text-base font-medium transition-all w-full sm:w-max`}
           onClick={() => {
             setStake(false);
           }}
