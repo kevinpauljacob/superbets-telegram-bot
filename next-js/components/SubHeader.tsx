@@ -6,11 +6,17 @@ import { useEffect, useRef, useState } from "react";
 import { GameType } from "@/utils/provably-fair";
 import { useRouter } from "next/router";
 import useWebSocket from "react-use-websocket";
-import { translator } from "@/context/transactions";
+import { formatNumber, translator } from "@/context/transactions";
 
 export default function SubHeader() {
   const router = useRouter();
-  const { coinData, showWalletModal, setShowWalletModal, setLiveBets, language } = useGlobalContext();
+  const {
+    coinData,
+    showWalletModal,
+    setShowWalletModal,
+    setLiveBets,
+    language,
+  } = useGlobalContext();
 
   type Card = {
     game: GameType;
@@ -107,7 +113,7 @@ export default function SubHeader() {
                   </span>
                 </div>
                 <p className="text-[#72F238] font-changa text-sm mt-1">
-                  +${(card.amountWon ?? 0).toFixed(2)}
+                  +${formatNumber(card.amountWon ?? 0, 2)}
                 </p>
               </div>
             </Link>
@@ -118,7 +124,7 @@ export default function SubHeader() {
             <div className="flex items-center h-10 px-4 py-1 gap-2 border-2 border-white border-opacity-5 rounded-[5px]">
               <Image src={"/assets/sol.png"} alt="" width={20} height={17} />
               <span className="font-chakra text-2xl text-[#94A3B8]">
-                {(coinData ? coinData[0].amount : 0).toFixed(4)}
+                {formatNumber(coinData ? coinData[0].amount : 0, 4)}
               </span>
             </div>
             <div
@@ -146,7 +152,7 @@ export default function SubHeader() {
           <div className="flex items-center h-[2.3rem] px-4 gap-1.5 border-2 border-white border-opacity-5 rounded-[5px]">
             <Image src={"/assets/sol.png"} alt="" width={14} height={14} />
             <span className="text-base font-chakra leading-3 mt-0.5 text-[#94A3B8]">
-              {(coinData ? coinData[0].amount : 0).toFixed(3)}
+              {formatNumber(coinData ? coinData[0].amount : 0, 3)}
             </span>
           </div>
           {/* wallet button  */}

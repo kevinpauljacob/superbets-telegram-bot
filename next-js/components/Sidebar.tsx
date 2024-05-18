@@ -8,6 +8,7 @@ import {
   obfuscatePubKey,
   pointTiers,
   translator,
+  formatNumber,
 } from "@/context/transactions";
 import { useGlobalContext } from "./GlobalContext";
 import Home from "@/public/assets/sidebar-icons/Home";
@@ -340,7 +341,7 @@ export const OpenSidebar = ({
             </span>
             <div className="flex items-center gap-1">
               <span className="text-sm text-[#94A3B8] font-medium font-chakra leading-3">
-                ${fomoPrice.toFixed(3)}
+                ${formatNumber(fomoPrice, 3)}
               </span>
               <span
                 className={`text-xs text-[#72F238] font-medium pt-[0.1px] leading-[0.6rem]`}

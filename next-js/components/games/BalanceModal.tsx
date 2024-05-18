@@ -198,7 +198,7 @@ export default function BalanceModal() {
                     {translator("Amount", language)}
                   </label>
                   <span className="font-changa font-medium text-sm text-[#94A3B8] text-opacity-90">
-                    {(coinData ? coinData[0]?.amount : 0).toFixed(3)} $SOL
+                    {formatNumber(coinData ? coinData[0]?.amount : 0, 3)} $SOL
                   </span>
                 </div>
 
@@ -256,7 +256,7 @@ export default function BalanceModal() {
                     {translator("Amount", language)}
                   </label>
                   <span className="font-changa font-medium text-sm text-[#94A3B8] text-opacity-90">
-                    {(walletBalance ?? 0).toFixed(3)} $SOL
+                    {formatNumber(walletBalance ?? 0, 3)} $SOL
                   </span>
                 </div>
 

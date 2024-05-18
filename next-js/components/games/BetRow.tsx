@@ -1,4 +1,8 @@
-import { obfuscatePubKey, translator } from "@/context/transactions";
+import {
+  obfuscatePubKey,
+  translator,
+  formatNumber,
+} from "@/context/transactions";
 import { useGlobalContext } from "../GlobalContext";
 import Image from "next/image";
 
@@ -65,7 +69,7 @@ const BetRow: React.FC<BetRowProps> = ({
         </div>
       </div>
       <span className="w-full hidden md:block text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
-        {(bet.amount ?? 0).toFixed(4)}
+        {formatNumber(bet.amount ?? 0, 4)}
       </span>
       <span className="w-full hidden md:block text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
         {bet.strikeMultiplier ?? 0}
@@ -76,11 +80,11 @@ const BetRow: React.FC<BetRowProps> = ({
         </span>
       ) : bet.amountWon > bet.amount ? (
         <span className="w-full text-center font-changa text-sm text-opacity-75 text-fomo-green">
-          {bet.amountWon.toFixed(4)} SOL
+          {formatNumber(bet.amountWon, 4)} SOL
         </span>
       ) : (
         <span className="w-full text-center font-changa text-sm text-opacity-75 text-fomo-red">
-          {(bet.amountWon - bet.amount).toFixed(4)} SOL
+          {formatNumber(bet.amountWon - bet.amount, 4)} SOL
         </span>
       )}
     </div>

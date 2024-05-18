@@ -30,7 +30,7 @@ import {
   successCustom,
   warningCustom,
 } from "@/components/toasts/ToastGroup";
-import { translator } from "@/context/transactions";
+import { translator, formatNumber } from "@/context/transactions";
 
 export default function Wheel() {
   const wallet = useWallet();
@@ -620,11 +620,15 @@ export default function Wheel() {
                           </div>
                           <div className="border border-white/10 rounded-lg p-3 mt-2">
                             {coinData
-                              ? Math.max(
-                                  0,
-                                  (betAmt ?? 0) *
-                                    (segment.multiplier * (1 - houseEdge) - 1),
-                                ).toFixed(4)
+                              ? formatNumber(
+                                  Math.max(
+                                    0,
+                                    (betAmt ?? 0) *
+                                      (segment.multiplier * (1 - houseEdge) -
+                                        1),
+                                  ),
+                                  4,
+                                )
                               : 0}
                           </div>
                         </div>

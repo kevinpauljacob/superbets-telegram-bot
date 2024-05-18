@@ -128,18 +128,12 @@ export default function Leaderboard() {
                 }}
                 className="h-full bg-[linear-gradient(91.179deg,#C867F0_0%,#1FCDF0_50.501%,#19EF99_100%)]"
               />
-              <span
-                className={`${(
+              <span className="w-full h-full absolute top-0 left-0 flex items-center justify-center z-10 text-white font-semibold font-chakra text-xs">
+                {formatNumber(
                   (Math.min(userData?.points ?? 0, 1_000_000) * 100) /
-                  (pointTiers[pointTier?.index + 1]?.limit ?? 1_000_000)
-                ).toFixed(
+                    (pointTiers[pointTier?.index + 1]?.limit ?? 1_000_000),
                   2,
-                )} w-full h-full absolute top-0 left-0 flex items-center justify-center z-10 text-white font-semibold font-chakra text-xs`}
-              >
-                {(
-                  (Math.min(userData?.points ?? 0, 1_000_000) * 100) /
-                  (pointTiers[pointTier?.index + 1]?.limit ?? 1_000_000)
-                ).toFixed(2)}{" "}
+                )}{" "}
                 %
               </span>
             </div>

@@ -5,7 +5,7 @@ import { useWallet } from "@solana/wallet-adapter-react";
 import { GameType } from "@/utils/provably-fair";
 import { useGlobalContext } from "./GlobalContext";
 import { useSession } from "next-auth/react";
-import { translator } from "@/context/transactions";
+import { formatNumber, translator } from "@/context/transactions";
 
 export default function GameHeader() {
   const { data: session, status } = useSession();
@@ -110,7 +110,7 @@ export default function GameHeader() {
               {translator("Volume", language)} :&nbsp;
             </p>
             <p className="text-[#7839C5] font-semibold text-xs">
-              {selectedGame.stats?.volume.toFixed(2)}
+              {formatNumber(selectedGame.stats?.volume ?? 0, 2)}
             </p>
           </div>
           <div className="hidden md:flex items-center justify-between bg-[#1E2220] rounded-md mx-1.5  my-1 px-4 py-1">
