@@ -1,17 +1,12 @@
-import { useState, useEffect, use } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useGlobalContext } from "../GlobalContext";
 import { GameType } from "@/utils/provably-fair";
 import { maxPayouts } from "@/context/transactions";
 import Image from "next/image";
-import BalanceAlert from "./BalanceAlert";
-import { FaInfo } from "react-icons/fa6";
-import { Game, InfoCircle } from "iconsax-react";
-import { BsInfoCircleFill } from "react-icons/bs";
-import DicePointer from "@/public/assets/DicePointer";
 import { translator } from "@/context/transactions";
 import { truncateNumber } from "@/context/gameTransactions";
-import { riskToChance } from "./Keno/RiskToChance";
+
 export default function BetAmount({
   betAmt,
   setBetAmt,
@@ -28,20 +23,23 @@ export default function BetAmount({
   disabled?: boolean;
 }) {
   const methods = useForm();
-  const { coinData, maxBetAmt, setMaxBetAmt, language, kenoRisk } =
-    useGlobalContext();
-  
-    //Temperory max bet 
-    const multipliersForRisk = riskToChance[kenoRisk];
-    const highestMultiplierForRisk = multipliersForRisk
-      ? Math.max(...Object.values(multipliersForRisk).flat())
-      : 1;
-
+  const { coinData, maxBetAmt, setMaxBetAmt, language, kenoRisk } = useGlobalContext();
   const [betAmountsModal, setBetAmountsModal] = useState(false);
 
   const [isHovered, setIsHovered] = useState<boolean>(false);
 
   const minBetAmt = parseFloat(process.env.MINIMUM_BET_AMOUNT ?? "0");
+
+  const riskToChance = {
+    low: [1.5, 2.0, 2.5],
+    medium: [3.0, 3.5, 4.0],
+    high: [5.0, 6.0, 7.0]
+  };
+
+  // Calculate temporary multipliers based on risk if no tiles are selected
+  const defaultMultipliers = riskToChance[kenoRisk] || [];
+  const defaultLeastMultiplier = defaultMultipliers.length > 0 ? defaultMultipliers[0] : 1; // Use 1 as a fallback to avoid division by zero
+  const defaultMaxMultiplier = defaultMultipliers.length > 0 ? defaultMultipliers[defaultMultipliers.length - 1] : 1;
 
   const [highestMaxBetAmt, setHighestMaxBetAmt] = useState<string>("0");
   useEffect(() => {
@@ -63,7 +61,8 @@ export default function BetAmount({
 
   useEffect(() => {
     if (betAmt !== undefined && betAmt > 0) setInputString(betAmt.toString());
-    const effectiveMultiplier = currentMultiplier || highestMultiplierForRisk;
+    
+    const effectiveMultiplier = currentMultiplier || defaultMaxMultiplier; // Use the default multiplier if no tiles are selected
 
     if (tempBetAmt !== undefined && effectiveMultiplier !== undefined) {
       let calculatedMaxBetAmt =
@@ -90,7 +89,8 @@ export default function BetAmount({
   }, [tempBetAmt, betAmt, currentMultiplier, game]);
 
   useEffect(() => {
-    
+    const effectiveLeastMultiplier = leastMultiplier || defaultLeastMultiplier; // Use the default least multiplier if no tiles are selected
+
     setMaxBetAmt(
       Math.min(
         game === "keno" || game === "wheel"
