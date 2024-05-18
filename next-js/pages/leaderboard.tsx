@@ -11,7 +11,7 @@ import { useWallet } from "@solana/wallet-adapter-react";
 import Image from "next/legacy/image";
 import { useRouter } from "next/router";
 import { useEffect } from "react";
-import { BsInfoCircle, BsInfoCircleFill } from "react-icons/bs";
+import { truncateNumber } from "@/context/gameTransactions";
 
 export default function Leaderboard() {
   const wallet = useWallet();
@@ -104,6 +104,7 @@ export default function Leaderboard() {
                   <span className="text-sm text-white text-right text-opacity-75">
                     {formatNumber(
                       pointTiers[pointTier?.index + 1]?.limit ?? 0,
+                      0,
                     ) + " Points"}
                   </span>
                 </div>
@@ -181,7 +182,7 @@ export default function Leaderboard() {
             </div>
           </div>
           <div className="flex gap-[12px] w-full h-[50%]">
-            <div className="flex flex-col gap-[12px] bg-staking-bg rounded-[5px] p-4 w-full h-full">
+            <div className="flex flex-col justify-between gap-[12px] bg-staking-bg rounded-[5px] p-4 w-full h-full">
               <p className="text-xs font-medium text-opacity-50 text-white">
                 Current Tier
               </p>
@@ -189,7 +190,7 @@ export default function Leaderboard() {
                 T{userData?.tier ?? 0}
               </p>
             </div>
-            <div className="flex flex-col gap-[12px] bg-staking-bg rounded-[5px] p-4 w-full h-full">
+            <div className="flex flex-col justify-between gap-[12px] bg-staking-bg rounded-[5px] p-4 w-full h-full">
               <p className="text-xs font-medium text-opacity-50 text-white">
                 Current Multiplier
               </p>

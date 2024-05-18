@@ -8,6 +8,7 @@ import { useGlobalContext } from "../GlobalContext";
 import { IoClose, IoCloseOutline } from "react-icons/io5";
 import Image from "next/image";
 import { timestampParser } from "@/utils/timestampParser";
+import { formatNumber } from "@/context/transactions";
 
 export default function BalanceModal() {
   const methods = useForm();
@@ -332,7 +333,7 @@ export default function BalanceModal() {
                           {timestampParser(data.createdAt)}
                         </td>
                         <td className="w-full text-center font-changa text-xs font-light text-[#F0F0F0] text-opacity-75">
-                          {data.amount} SOL
+                          {formatNumber(data.amount, 4)} SOL
                         </td>
                         <td className="hidden sm:block w-full text-center font-changa text-xs font-light text-[#F0F0F0] text-opacity-75">
                           {data.type ? "Deposit" : "Withdraw"}
