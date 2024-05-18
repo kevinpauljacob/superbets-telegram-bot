@@ -24,6 +24,7 @@ export default function Leaderboard() {
       return points >= next[1]?.limit ? next : prev;
     });
     console.log(tier, pointTiers["2"]);
+    console.log("pointTiers", pointTiers);
     setPointTier({
       index: parseInt(tier[0]),
       limit: tier[1]?.limit,
@@ -38,10 +39,10 @@ export default function Leaderboard() {
       <span className="text-white text-opacity-90 font-semibold text-[1.5rem] sm:text-[2rem] mt-[1rem] font-chakra tracking-[.02em] flex items-center justify-center gap-x-2 px-5 sm:px-10 2xl:px-[5%]">
         {translator("Leaderboard", language).toUpperCase()}
       </span>
-      <div className="flex px-5 sm:px-10 2xl:px-[5%] mt-6 w-full h-full ">
-        <div className="flex flex-col lg:flex-row items-center w-full h-full p-8 rounded-md gap-[3.4rem] bg-staking-bg">
+      <div className="flex gap-[12px] px-5 sm:px-10 2xl:px-[5%] mt-6 w-full h-full ">
+        <div className="flex flex-col lg:flex-row items-center w-full md:w-[55%] lg:w-[60%] h-full p-8 rounded-md gap-[3.4rem] bg-staking-bg">
           {/* point bar and info  */}
-          <div className="flex flex-col w-full lg:w-[60%] rounded-[5px] h-full ">
+          <div className="flex flex-col w-full rounded-[5px] h-full ">
             <div className="flex flex-row items-end justify-between">
               <div className="flex items-center gap-2">
                 <div className="flex relative min-w-[4.5rem] h-[4.5rem]">
@@ -109,7 +110,14 @@ export default function Leaderboard() {
               )}
             </div>
 
-            <div className="relative flex transition-width duration-1000 w-full rounded-full overflow-hidden h-6 bg-[#282E3D] mt-2 mb-2">
+            <div
+              className={`${
+                (Math.min(userData?.points ?? 0, 1_000_000) * 100) /
+                  pointTiers[pointTier?.index + 1]?.limit ?? 1
+                  ? "opacity-50"
+                  : ""
+              } relative flex transition-width duration-1000 w-full rounded-full overflow-hidden h-6 bg-[#282E3D] mt-2 mb-2`}
+            >
               <div
                 style={{
                   width: `${
@@ -119,7 +127,14 @@ export default function Leaderboard() {
                 }}
                 className="h-full bg-[linear-gradient(91.179deg,#C867F0_0%,#1FCDF0_50.501%,#19EF99_100%)]"
               />
-              <span className="w-full h-full absolute top-0 left-0 flex items-center justify-center z-10 text-white font-semibold text-xs">
+              <span
+                className={`${(
+                  (Math.min(userData?.points ?? 0, 1_000_000) * 100) /
+                  (pointTiers[pointTier?.index + 1]?.limit ?? 1_000_000)
+                ).toFixed(
+                  2,
+                )} w-full h-full absolute top-0 left-0 flex items-center justify-center z-10 text-white font-semibold font-chakra text-xs`}
+              >
                 {(
                   (Math.min(userData?.points ?? 0, 1_000_000) * 100) /
                   (pointTiers[pointTier?.index + 1]?.limit ?? 1_000_000)
@@ -127,7 +142,7 @@ export default function Leaderboard() {
                 %
               </span>
             </div>
-            <div className="hidden sm:flex flex-row justify-between font-chakra">
+            <div className="hidden sm:flex flex-row justify-between font-chakra capitalize">
               <span className="text-staking-secondary text-opacity-75 text-sm font-medium">
                 {pointTier?.label ?? ""}
               </span>
@@ -144,65 +159,43 @@ export default function Leaderboard() {
               </span>
             </div>
           </div>
-
-          {/* stake box */}
-          <div className="relative z-[10] w-full lg:w-[40%] h-fit hidden sm:flex flex-row items-center justify-between gap-2 rounded-[10px]">
-            <div className="w-full h-full absolute top-0 left-0">
+        </div>
+        <div className="hidden md:flex flex-col justify-between gap-[12px] md:w-[45%] lg-w-[40%] h-[232px]">
+          <div className="flex items-center gap-[12px] bg-staking-bg rounded-[5px] p-4 h-[50%]">
+            <div className="flex justify-center items-center bg-[#202329] rounded-lg w-[73px] h-[68px]">
               <Image
-                src="/assets/leaderboard-bg.svg"
-                layout="fill"
-                objectFit="contain"
-                objectPosition="center"
+                src="/assets/boost.svg"
+                alt="boost logo"
+                height={36}
+                width={36}
               />
             </div>
-            <div className="z-[10] w-full h-full flex flex-col items-start rounded-md text-white p-6">
-              <div className="flex items-baseline">
-                <span className="font-chakra font-semibold text-4xl sm:text-[2.5rem] mr-2">
-                  T{userData?.tier ?? 0}
-                </span>
-                <span className="font-chakra font-medium text-opacity-75 text-sm sm:text-xl tracking-wide">
-                  {`( ${userData?.multiplier ?? 0.5}x Multiplier )`}
-                </span>
-                <span className="ml-1 z-30 group flex relative justify-start">
-                  <BsInfoCircleFill className="cursor-pointer" />
-                  <div className="hidden group-hover:flex max-w-[20rem] -ml-14 bg-[#171515] p-3 rounded-md absolute min-w-max top-full mt-2 items-center justify-center text-left">
-                    <div className="grid grid-cols-2 items-center text-center">
-                      <span className="text-[#9945FF] font-bold border border-white py-1.5 px-3">
-                        Tokens
-                      </span>
-                      <span className="text-[#9945FF] font-bold border border-white py-1.5 px-3">
-                        Multiplier
-                      </span>
-                      {Object.values(stakingTiers).map((tier, index) => {
-                        return (
-                          <>
-                            <span className="border border-white py-1.5 px-3">
-                              {tier?.limit}
-                              {stakingTiers[index + 1]
-                                ? `- ${stakingTiers[index + 1]?.limit - 1}`
-                                : "+"}
-                            </span>
-                            <span className="border border-white py-1.5 px-3">
-                              {tier.multiplier}
-                            </span>
-                          </>
-                        );
-                      })}
-                    </div>
-                  </div>
-                </span>
-              </div>
-              <span className="font-sans text-xs text-white text-opacity-60 tracking-wide">
-                Boost your tier by staking!
-              </span>
-              <button
-                onClick={() => {
-                  router.push("stake");
-                }}
-                className="w-fit px-4 py-2 bg-white bg-opacity-10 rounded-[5px] font-chakra font-medium text-xs text-opacity-75 tracking-wider text-white text-center mt-6 backdrop-blur-sm"
-              >
-                STAKE NOW
-              </button>
+            <div>
+              <p className="text-white font-semibold text-base text-opacity-75">
+                Boost Your Tier by Staking!
+              </p>
+              <p className="text-[#94A3B8] font-semibold text-[11px] text-opacity-50 max-w-[290px]">
+                You can stake your $FOMO to obtain higher multiplier for your
+                points!
+              </p>
+            </div>
+          </div>
+          <div className="flex gap-[12px] w-full h-[50%]">
+            <div className="flex flex-col gap-[12px] bg-staking-bg rounded-[5px] p-4 w-full h-full">
+              <p className="text-xs font-medium text-opacity-50 text-white">
+                Current Tier
+              </p>
+              <p className="font-chakra text-2xl font-semibold text-[#94A3B8] text-right">
+                T{userData?.tier ?? 0}
+              </p>
+            </div>
+            <div className="flex flex-col gap-[12px] bg-staking-bg rounded-[5px] p-4 w-full h-full">
+              <p className="text-xs font-medium text-opacity-50 text-white">
+                Current Multiplier
+              </p>
+              <p className="font-chakra text-2xl font-semibold text-[#94A3B8] text-right">
+                {`${userData?.multiplier ?? 0.5}x`}
+              </p>
             </div>
           </div>
         </div>

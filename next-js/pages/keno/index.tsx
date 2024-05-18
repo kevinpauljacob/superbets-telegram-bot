@@ -69,6 +69,7 @@ export default function Keno() {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
 
   const multipliers = riskToChance[kenoRisk][chosenNumbers.length];
+  console.log("multipliers", multipliers);
   let maxMultiplier = 0;
   let leastMultiplier = 0;
 
