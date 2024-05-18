@@ -195,7 +195,7 @@ export default function Sidebar({
               className={`${bottomIconCss}`}
               onClick={() => router.push("/")}
             >
-              <Birdeye className={`${closedIconCss}`} />
+              <Birdeye className='w-5 h-5 text-white group-hover:text-[#9945FF] group-focus:text-[#9945FF] transition-all ' />
             </div>
             <div
               className={`${bottomIconCss}`}
