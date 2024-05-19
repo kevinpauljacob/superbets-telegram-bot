@@ -207,42 +207,42 @@ export default function Layout({ children }: LayoutProps) {
       {showWalletModal && <BalanceModal />}
 
       {/* verify modals  */}
-      {currentGame === GameType.coin ? (
+      {verifyModalData.game === GameType.coin ? (
         <VerifyFlipModal
           isOpen={isVerifyModalOpen}
           onClose={closeVerifyModal}
           modalData={{ flip: (verifyModalData as Flip)! }}
           wallet={wallet.publicKey?.toBase58()}
         />
-      ) : currentGame === GameType.dice ? (
+      ) : verifyModalData.game === GameType.dice ? (
         <VerifyDiceModal
           isOpen={isVerifyModalOpen}
           onClose={closeVerifyModal}
           modalData={{ bet: (verifyModalData as Dice)! }}
           wallet={wallet.publicKey?.toBase58()}
         />
-      ) : currentGame === GameType.dice2 ? (
+      ) : verifyModalData.game === GameType.dice2 ? (
         <VerifyDice2Modal
           isOpen={isVerifyModalOpen}
           onClose={closeVerifyModal}
           modalData={{ bet: (verifyModalData as Dice2)! }}
           wallet={wallet.publicKey?.toBase58()}
         />
-      ) : currentGame === GameType.limbo ? (
+      ) : verifyModalData.game === GameType.limbo ? (
         <VerifyLimboModal
           isOpen={isVerifyModalOpen}
           onClose={closeVerifyModal}
           modalData={{ flip: (verifyModalData as Limbo)! }}
           wallet={wallet.publicKey?.toBase58()}
         />
-      ) : currentGame === GameType.wheel ? (
+      ) : verifyModalData.game === GameType.wheel ? (
         <VerifyWheelModal
           isOpen={isVerifyModalOpen}
           onClose={closeVerifyModal}
           modalData={{ bet: (verifyModalData as Wheel)! }}
           wallet={wallet.publicKey?.toBase58()}
         />
-      ) : currentGame === GameType.keno ? (
+      ) : verifyModalData.game === GameType.keno ? (
         <VerifyKenoModal
           isOpen={isVerifyModalOpen}
           onClose={closeVerifyModal}
