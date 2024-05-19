@@ -68,6 +68,21 @@ export default function Layout({ children }: LayoutProps) {
     getProvablyFairData,
     currentGame,
     setCurrentGame,
+    setUseAutoConfig,
+    autoConfigState,
+    autoWinChange,
+    setAutoWinChange,
+    autoLossChange,
+    setAutoLossChange,
+    autoStopProfit,
+    setAutoStopProfit,
+    autoStopLoss,
+    setAutoStopLoss,
+    autoWinChangeReset,
+    setAutoWinChangeReset,
+    autoLossChangeReset,
+    setAutoLossChangeReset,
+    showAutoModal,
   } = useGlobalContext();
 
   const [modalData, setModalData] = useState({
@@ -128,8 +143,27 @@ export default function Layout({ children }: LayoutProps) {
 
   useEffect(() => {
     scrollToTop();
-    setAutoBetCount(0);
+    setAutoBetCount(1);
     setStartAuto(false);
+    const configOptions = autoConfigState.get(game);
+    console.log("Auto options", configOptions);
+    if (configOptions) {
+      setAutoWinChange(configOptions.autoWinChange);
+      setAutoLossChange(configOptions.autoLossChange);
+      setAutoWinChangeReset(configOptions.autoWinChangeReset);
+      setAutoLossChangeReset(configOptions.autoLossChangeReset);
+      setAutoStopProfit(configOptions.autoStopProfit);
+      setAutoStopLoss(configOptions.autoStopLoss);
+      setUseAutoConfig(configOptions.useAutoConfig);
+    } else {
+      setAutoWinChange(null);
+      setAutoLossChange(null);
+      setAutoWinChangeReset(true);
+      setAutoLossChangeReset(true);
+      setAutoStopProfit(null);
+      setAutoStopLoss(null);
+      setUseAutoConfig(false);
+    }
   }, [router.pathname]);
 
   useEffect(() => {

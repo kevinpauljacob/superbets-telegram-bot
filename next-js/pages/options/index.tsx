@@ -251,7 +251,7 @@ export default function Options() {
         let price = data[0].price.price * Math.pow(10, data[0].price.expo);
         setLivePrice(price);
       } catch (e) {
-        errorCustom("Could not fetch live price.");
+        // errorCustom("Could not fetch live price.");
         setLivePrice(0);
       }
     }, 1000);

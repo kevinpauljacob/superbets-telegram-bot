@@ -6,13 +6,16 @@ import { deposit, withdraw } from "../../context/gameTransactions";
 import Loader from "./Loader";
 import { useGlobalContext } from "../GlobalContext";
 import { IoClose, IoCloseOutline } from "react-icons/io5";
-import {translator} from "@/context/transactions";
+import { translator } from "@/context/transactions";
 import Image from "next/image";
 import { warningCustom } from "../toasts/ToastGroup";
+import { useRouter } from "next/router";
 
 export default function ConfigureAutoModal() {
   const methods = useForm();
   const wallet = useWallet();
+  const router = useRouter();
+  const game = router.pathname.split("/")[1];
 
   const {
     showAutoModal,
@@ -35,8 +38,34 @@ export default function ConfigureAutoModal() {
     setStartAuto,
     walletBalance,
     coinData,
-    language
+    language,
+    autoConfigState,
+    setAutoConfigState,
   } = useGlobalContext();
+
+  const updateAutoConfigState = () => {
+    setAutoConfigState((prevMap) => {
+      const newMap = new Map(prevMap);
+      newMap.set(game, {
+        autoWinChange: autoWinChange,
+        autoLossChange: autoLossChange,
+        autoWinChangeReset: autoWinChangeReset,
+        autoLossChangeReset: autoLossChangeReset,
+        autoStopProfit: autoStopProfit,
+        autoStopLoss: autoStopLoss,
+        useAutoConfig: true,
+      });
+      return newMap;
+    });
+  };
+
+  const removeAutoConfig = () => {
+    setAutoConfigState((prevMap) => {
+      const newMap = new Map(prevMap);
+      newMap.delete(game);
+      return newMap;
+    });
+  };
 
   const handleClose = () => {
     //@ts-ignore
@@ -56,6 +85,7 @@ export default function ConfigureAutoModal() {
     ) {
       setUseAutoConfig(true);
       setShowAutoModal(false);
+      updateAutoConfigState();
       console.log(
         "Setting auto",
         autoWinChange,
@@ -77,8 +107,17 @@ export default function ConfigureAutoModal() {
       autoLossChangeReset,
       autoStopProfit,
       autoStopLoss,
+      showAutoModal,
     );
-  }, []);
+    if (showAutoModal) {
+      const configOptions = autoConfigState.get(game);
+      console.log(configOptions);
+      methods.setValue("autoWinChange", configOptions?.autoWinChange ?? NaN);
+      methods.setValue("autoLossChange", configOptions?.autoLossChange ?? NaN);
+      methods.setValue("autoStopProfit", configOptions?.autoStopProfit ?? NaN);
+      methods.setValue("autoStopLoss", configOptions?.autoStopLoss ?? NaN);
+    }
+  }, [showAutoModal]);
 
   return showAutoModal ? (
     <div
@@ -403,6 +442,7 @@ export default function ConfigureAutoModal() {
                 methods.clearErrors("autoLossChange");
                 methods.clearErrors("autoStopProfit");
                 methods.clearErrors("autoStopLoss");
+                removeAutoConfig();
                 warningCustom("All values reset.");
               }}
               className="text-[#94A3B8] hover:text-white/70 transition-all hover:duration-75 w-full text-center cursor-pointer text-base font-semibold font-chakra mt-8 underline underline-offset-2"

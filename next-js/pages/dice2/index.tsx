@@ -226,9 +226,10 @@ export default function Dice2() {
             (win ? multiplier * (1 - houseEdge) - 1 : -1) * betAmt,
         );
         // update count
-        if (typeof autoBetCount === "number")
+        if (typeof autoBetCount === "number") {
           setAutoBetCount(autoBetCount > 0 ? autoBetCount - 1 : 0);
-        else
+          autoBetCount === 1 && warningCustom("Auto bet stopped", "top-right");
+        } else
           setAutoBetCount(
             autoBetCount.length > 12
               ? autoBetCount.slice(0, 5)
@@ -319,7 +320,7 @@ export default function Dice2() {
         autoBetProfit > 0 &&
         autoBetProfit >= autoStopProfit
       ) {
-        showInfoToast("Profit limit reached.");
+        warningCustom("Profit limit reached.", "top-right");
         setAutoBetCount(0);
         setStartAuto(false);
         setUserInput(betAmt);
@@ -331,7 +332,7 @@ export default function Dice2() {
         autoBetProfit < 0 &&
         potentialLoss <= -autoStopLoss
       ) {
-        showInfoToast("Loss limit reached.");
+        warningCustom("Loss limit reached.", "top-right");
         setAutoBetCount(0);
         setStartAuto(false);
         return;
@@ -373,7 +374,7 @@ export default function Dice2() {
               <div
                 onClick={() => {
                   soundAlert("/sounds/betbutton.wav");
-                  warningCustom("Auto bet stopped");
+                  warningCustom("Auto bet stopped", "top-right");
                   setAutoBetCount(0);
                   setStartAuto(false);
                 }}
@@ -445,7 +446,7 @@ export default function Dice2() {
                     <div
                       onClick={() => {
                         soundAlert("/sounds/betbutton.wav");
-                        warningCustom("Auto bet stopped");
+                        warningCustom("Auto bet stopped", "top-right");
                         setAutoBetCount(0);
                         setStartAuto(false);
                       }}

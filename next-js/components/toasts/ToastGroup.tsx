@@ -1,5 +1,5 @@
 // import { toast } from 'react-toastify'
-import toast, { Toaster } from "react-hot-toast";
+import toast, { ToastPosition, Toaster } from "react-hot-toast";
 import { useState } from "react";
 // import "react-toastify/dist/ReactToastify.css";
 import Image from "next/legacy/image";
@@ -67,7 +67,11 @@ export const infoAlert = (text: any) => {
   });
 };
 
-export const successCustom = (text: any, duration?: number) => {
+export const successCustom = (
+  text: any,
+  duration?: number,
+  position?: ToastPosition,
+) => {
   toast.custom(
     (t) => (
       <div
@@ -92,12 +96,12 @@ export const successCustom = (text: any, duration?: number) => {
     ),
     {
       duration: duration ?? 2000,
-      position: "bottom-right",
+      position: position ?? "bottom-right",
     },
   );
 };
 
-export const errorCustom = (text: any) => {
+export const errorCustom = (text: any, position?: ToastPosition) => {
   toast.custom(
     (t) => (
       <div
@@ -122,12 +126,12 @@ export const errorCustom = (text: any) => {
     ),
     {
       duration: 2000,
-      position: "bottom-right",
+      position: position ?? "bottom-right",
     },
   );
 };
 
-export const warningCustom = (text: any) => {
+export const warningCustom = (text: any, position?: ToastPosition) => {
   toast.custom(
     (t) => (
       <div
@@ -152,7 +156,7 @@ export const warningCustom = (text: any) => {
     ),
     {
       duration: 2000,
-      position: "bottom-right",
+      position: position ?? "bottom-right",
     },
   );
 };

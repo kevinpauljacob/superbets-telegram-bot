@@ -51,6 +51,16 @@ interface ProvablyFairData {
   };
 }
 
+interface AutoConfigOptions {
+  autoWinChange: number | null;
+  autoLossChange: number | null;
+  autoWinChangeReset: boolean;
+  autoLossChangeReset: boolean;
+  autoStopProfit: number | null;
+  autoStopLoss: number | null;
+  useAutoConfig: boolean;
+}
+
 interface GlobalContextProps {
   loading: boolean;
   setLoading: (stake: boolean) => void;
@@ -135,6 +145,9 @@ interface GlobalContextProps {
   setAutoBetProfit: React.Dispatch<React.SetStateAction<number>>;
   liveBets: any[];
   setLiveBets: React.Dispatch<React.SetStateAction<any[]>>;
+
+  autoConfigState: Map<string, AutoConfigOptions>;
+  setAutoConfigState: React.Dispatch<React.SetStateAction<Map<string, AutoConfigOptions>>>;
 
   openVerifyModal: () => void;
   closeVerifyModal: () => void;
@@ -221,6 +234,8 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
 
   const [liveBets, setLiveBets] = useState<any[]>([]);
 
+  const [autoConfigState, setAutoConfigState] = useState<Map<string, AutoConfigOptions>>(new Map());
+
   // fomo live price
   const [fomoPrice, setFomoPrice] = useState<number>(0);
   const [currentGame, setCurrentGame] = useState<string | null>(null);
@@ -242,7 +257,7 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
       } catch (e) {
         console.log(e);
         setFomoPrice(0);
-        errorCustom("Could not fetch fomo live price.");
+        // errorCustom("Could not fetch fomo live price.");
       }
     };
 
@@ -321,7 +336,7 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
           (await connection.getBalance(wallet.publicKey)) / LAMPORTS_PER_SOL,
         );
       } catch (e) {
-        errorCustom("Unable to fetch balance.");
+        // errorCustom("Unable to fetch balance.");
         console.error(e);
       }
   };
@@ -434,6 +449,8 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
         setAutoBetProfit,
         liveBets,
         setLiveBets,
+        autoConfigState,
+        setAutoConfigState,
         useAutoConfig,
         setUseAutoConfig,
         currentGame,

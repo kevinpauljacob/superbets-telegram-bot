@@ -48,7 +48,7 @@ export default function Stake() {
         console.log(price);
         setLivePrice(price);
       } catch (e) {
-        errorCustom("Could not fetch live price.");
+        // errorCustom("Could not fetch live price.");
         setLivePrice(0);
       }
     };
