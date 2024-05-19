@@ -259,7 +259,7 @@ export default function VerifyFlipModal({
                       </label>
                       <div className="bg-[#202329] mt-1 rounded-md px-4 py-3 w-full relative flex items-center justify-between">
                         <span className="truncate text-[#B9B9BA] text-xs font-semibold">
-                          {flip.gameSeed?.serverSeedHash ??
+                          {flip.gameSeed?.serverSeed ??
                             flip.gameSeed?.serverSeedHash}
                         </span>
                         <FaRegCopy

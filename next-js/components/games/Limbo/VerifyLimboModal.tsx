@@ -15,8 +15,8 @@ export interface Limbo {
   result: "Won" | "Lost";
   strikeNumber: number;
   amountWon: number;
-  risk?:string;
-  segments?:number;
+  risk?: string;
+  segments?: number;
   nonce?: number;
   gameSeed?: {
     status: seedStatus;
@@ -249,7 +249,7 @@ export default function VerifyLimboModal({
                       </label>
                       <div className="bg-[#202329] mt-1 rounded-md px-4 py-3 w-full relative flex items-center justify-between">
                         <span className="truncate text-[#B9B9BA] text-xs font-semibold">
-                          {flip.gameSeed?.serverSeedHash ??
+                          {flip.gameSeed?.serverSeed ??
                             flip.gameSeed?.serverSeedHash}
                         </span>
                         <FaRegCopy
@@ -268,7 +268,10 @@ export default function VerifyLimboModal({
                     {flip.wallet !== wallet ? (
                       <>
                         <div className="text-xs text-[#94A3B8] font-changa text-opacity-75 text-center">
-                          {translator("The bettor must first rotate their seed pair to verify this bet.", language)}
+                          {translator(
+                            "The bettor must first rotate their seed pair to verify this bet.",
+                            language,
+                          )}
                         </div>
                         <button
                           className="bg-[#7839C5] rounded-md w-full text-sm text-white text-opacity-90 text-semibold py-3 disabled:opacity-70"
@@ -280,7 +283,10 @@ export default function VerifyLimboModal({
                     ) : flip.gameSeed?.status !== seedStatus.EXPIRED ? (
                       <>
                         <div className="text-xs text-[#94A3B8] font-changa text-opacity-75 text-center">
-                          {translator("To verify this flip, you first need to rotate your seed pair.", language)}
+                          {translator(
+                            "To verify this flip, you first need to rotate your seed pair.",
+                            language,
+                          )}
                         </div>
                         <button
                           className="bg-[#7839C5] rounded-md w-full text-sm text-white text-opacity-90 text-semibold py-3"
