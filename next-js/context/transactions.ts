@@ -277,6 +277,7 @@ export const stakeFOMO = async (
     );
 
     transaction = await wallet.signTransaction!(transaction);
+
     const transactionBase64 = transaction
       .serialize({
         requireAllSignatures: false,
@@ -454,7 +455,7 @@ export const createWithdrawTxn = async (
   if (tokenName === "SOL") {
     transaction.add(
       ComputeBudgetProgram.setComputeUnitLimit({ units: 100_000 }),
-      ComputeBudgetProgram.setComputeUnitPrice({ microLamports: 400_000 }),
+      ComputeBudgetProgram.setComputeUnitPrice({ microLamports: 150_000 }),
       SystemProgram.transfer({
         fromPubkey: devPublicKey,
         toPubkey: wallet,
@@ -470,7 +471,7 @@ export const createWithdrawTxn = async (
 
     transaction.add(
       ComputeBudgetProgram.setComputeUnitLimit({ units: 100_000 }),
-      ComputeBudgetProgram.setComputeUnitPrice({ microLamports: 400_000 }),
+      ComputeBudgetProgram.setComputeUnitPrice({ microLamports: 150_000 }),
       createTransferInstruction(
         devAta,
         userAta,

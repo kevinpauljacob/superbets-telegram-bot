@@ -329,19 +329,23 @@ export const createWithdrawTxn = async (
 
   if (tokenName === "SOL") {
     transaction.add(
+      ComputeBudgetProgram.setComputeUnitLimit({ units: 100_000 }),
+      ComputeBudgetProgram.setComputeUnitPrice({ microLamports: 150_000 }),
       SystemProgram.transfer({
         fromPubkey: devPublicKey,
         toPubkey: wallet,
         lamports: Math.floor(amount * Math.pow(10, 9)),
       }),
     );
-    transaction.instructions[0].keys[1].isSigner = true;
-    transaction.instructions[0].keys[1].isWritable = true;
+    transaction.instructions[2].keys[1].isSigner = true;
+    transaction.instructions[2].keys[1].isWritable = true;
   } else {
     const tokenId = new PublicKey(tokenMint);
     const userAta = await getAssociatedTokenAddress(tokenId, wallet);
     const devAta = await getAssociatedTokenAddress(tokenId, devPublicKey);
     transaction.add(
+      ComputeBudgetProgram.setComputeUnitLimit({ units: 100_000 }),
+      ComputeBudgetProgram.setComputeUnitPrice({ microLamports: 150_000 }),
       createTransferInstruction(
         devAta,
         userAta,
@@ -349,8 +353,8 @@ export const createWithdrawTxn = async (
         Math.floor(amount * Math.pow(10, decimal)),
       ),
     );
-    transaction.instructions[0].keys[2].isSigner = true;
-    transaction.instructions[0].keys[2].isWritable = true;
+    transaction.instructions[2].keys[2].isSigner = true;
+    transaction.instructions[2].keys[2].isWritable = true;
   }
 
   return { transaction, blockhashWithExpiryBlockHeight };
