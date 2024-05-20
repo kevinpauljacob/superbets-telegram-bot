@@ -383,8 +383,9 @@ export async function retryTxn(
   while (blockheight < lastValidBlockHeight && flag) {
     txn = await connection.sendRawTransaction(transaction.serialize(), {
       skipPreflight: true,
+      maxRetries: 0,
     });
-    await new Promise((r) => setTimeout(r, 3000));
+    await new Promise((r) => setTimeout(r, 2000));
     console.log("retry count: ", ++j);
     connection
       .confirmTransaction({
