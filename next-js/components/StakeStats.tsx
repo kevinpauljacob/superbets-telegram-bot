@@ -1,6 +1,7 @@
 import { formatNumber, stakingTiers, translator } from "@/context/transactions";
 import { useGlobalContext } from "./GlobalContext";
 import Image from "next/legacy/image";
+import { truncateNumber } from "@/context/gameTransactions";
 
 export default function StakeStats() {
   const { userData, solBal, language } = useGlobalContext();
@@ -8,12 +9,12 @@ export default function StakeStats() {
     {
       title: translator("FOMO Staked", language),
       icon: "/assets/logowhite.svg",
-      value: formatNumber(userData?.stakedAmount ?? 0),
+      value: truncateNumber(userData?.stakedAmount ?? 0, 4),
     },
     {
       title: translator("FOMO Available", language),
       icon: "/assets/logowhite.svg",
-      value: formatNumber(solBal),
+      value: truncateNumber(solBal, 4),
     },
     {
       title: translator("Multiplier", language),
@@ -60,7 +61,7 @@ export default function StakeStats() {
                 {translator("multiplier", language)} )
               </p>
               <p className="sm:hidden text-base font-semibold text-white">
-                {formatNumber(
+                {truncateNumber(
                   (((userData?.tier ?? 0) < 7
                     ? userData?.stakedAmount ?? 0
                     : 600000) *
@@ -102,20 +103,20 @@ export default function StakeStats() {
           />
           <span
             className={`${
-              formatNumber(
+              truncateNumber(
                 (((userData?.tier ?? 0) < 7
                   ? userData?.stakedAmount ?? 0
                   : 600000) *
                   100) /
                   stakingTiers[(userData?.tier ?? 0) + 1]?.limit,
                 2,
-              ) === "0.00"
+              ).toString() === "0.00"
                 ? "text-opacity-100"
                 : ""
             } w-full h-full absolute top-0 left-0 flex items-center justify-center z-10 text-white font-semibold text-sm`}
           >
             <span className="hidden sm:block">
-              {formatNumber(
+              {truncateNumber(
                 (((userData?.tier ?? 0) < 7
                   ? userData?.stakedAmount ?? 0
                   : 600000) *

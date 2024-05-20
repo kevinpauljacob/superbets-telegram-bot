@@ -105,7 +105,7 @@ export default function Leaderboard() {
                 {(pointTier?.index ?? 0) < 7 && (
                   <div className="flex flex-col items-end">
                     <span className="text-sm text-white text-right text-opacity-75">
-                      {formatNumber(
+                      {truncateNumber(
                         pointTiers[pointTier?.index + 1]?.limit ?? 0,
                         0,
                       ) + " Points"}
@@ -132,7 +132,7 @@ export default function Leaderboard() {
                   className="h-full bg-[linear-gradient(91.179deg,#C867F0_0%,#1FCDF0_50.501%,#19EF99_100%)]"
                 />
                 <span className="w-full h-full absolute top-0 left-0 flex items-center justify-center z-10 text-white font-semibold font-chakra text-xs">
-                  {formatNumber(
+                  {truncateNumber(
                     (Math.min(userData?.points ?? 0, 1_000_000) * 100) /
                       (pointTiers[pointTier?.index + 1]?.limit ?? 1_000_000),
                     2,

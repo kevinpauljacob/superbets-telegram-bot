@@ -487,7 +487,7 @@ export function trimStringToLength(str: string, desiredLength: number): string {
   );
 }
 
-export const truncateNumber = (num: number, numOfDecimals: number) => {
+export const truncateNumber = (num: number, numOfDecimals: number = 4) => {
   const [whole, decimal] = num.toString().split(".");
   return parseFloat(whole + "." + (decimal || "").slice(0, numOfDecimals));
 };

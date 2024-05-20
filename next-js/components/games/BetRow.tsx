@@ -5,6 +5,7 @@ import {
 } from "@/context/transactions";
 import { useGlobalContext } from "../GlobalContext";
 import Image from "next/image";
+import { truncateNumber } from "@/context/gameTransactions";
 
 interface BetRowProps {
   bet: any;
@@ -69,7 +70,7 @@ const BetRow: React.FC<BetRowProps> = ({
         </div>
       </div>
       <span className="w-full hidden md:block text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
-        {formatNumber(bet.amount ?? 0, 4)}
+        {truncateNumber(bet.amount ?? 0, 4)}
       </span>
       <span className="w-full hidden md:block text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
         {bet.strikeMultiplier ?? 0}
@@ -80,11 +81,11 @@ const BetRow: React.FC<BetRowProps> = ({
         </span>
       ) : bet.amountWon > bet.amount ? (
         <span className="w-full text-center font-changa text-sm text-opacity-75 text-fomo-green">
-          {formatNumber(bet.amountWon, 4)} SOL
+          {truncateNumber(bet.amountWon, 4)} SOL
         </span>
       ) : (
         <span className="w-full text-center font-changa text-sm text-opacity-75 text-fomo-red">
-          {formatNumber(bet.amountWon - bet.amount, 4)} SOL
+          {truncateNumber(bet.amountWon - bet.amount, 4)} SOL
         </span>
       )}
     </div>

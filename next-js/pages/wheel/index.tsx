@@ -31,7 +31,7 @@ import {
   warningCustom,
 } from "@/components/toasts/ToastGroup";
 import { translator, formatNumber } from "@/context/transactions";
-import { minGameAmount } from "@/context/gameTransactions";
+import { minGameAmount, truncateNumber } from "@/context/gameTransactions";
 import { useSession } from "next-auth/react";
 
 export default function Wheel() {
@@ -626,7 +626,7 @@ export default function Wheel() {
                           </div>
                           <div className="border border-white/10 rounded-lg p-3 mt-2">
                             {coinData
-                              ? formatNumber(
+                              ? truncateNumber(
                                   Math.max(
                                     0,
                                     (betAmt ?? 0) *

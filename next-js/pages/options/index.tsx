@@ -4,7 +4,7 @@ import dynamic from "next/dynamic";
 import { useWallet } from "@solana/wallet-adapter-react";
 import toast from "react-hot-toast";
 import Loader from "../../components/games/Loader";
-import { placeBet } from "../../context/gameTransactions";
+import { placeBet, truncateNumber } from "../../context/gameTransactions";
 import { checkResult as checkResultAPI } from "../../context/gameTransactions";
 import { useGlobalContext } from "@/components/GlobalContext";
 import { FormProvider, useForm } from "react-hook-form";
@@ -490,7 +490,7 @@ export default function Options() {
             </div>
             <div className="flex flex-col items-end">
               <span className="font-chakra font-medium text-xs md:text-sm text-[#F0F0F0] text-opacity-75">
-                ${formatNumber(strikePrice, 3)}
+                ${truncateNumber(strikePrice, 3)}
               </span>
               <span
                 className={`font-chakra ${
@@ -513,7 +513,7 @@ export default function Options() {
                 $SOL
               </span>
               <span className="font-chakra text-2xl text-white font-semibold text-opacity-90 mb-2">
-                ${formatNumber(livePrice, 3)}
+                ${truncateNumber(livePrice, 3)}
               </span>
               {strikePrice && !result ? (
                 <span
@@ -524,7 +524,7 @@ export default function Options() {
                   } text-opacity-90 font-chakra`}
                 >
                   {livePrice - strikePrice > 0 ? "+" : "-"}
-                  {formatNumber(Math.abs(livePrice - strikePrice), 4)}
+                  {truncateNumber(Math.abs(livePrice - strikePrice), 4)}
                 </span>
               ) : (
                 <span

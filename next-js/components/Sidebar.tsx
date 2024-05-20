@@ -23,6 +23,7 @@ import Fomo from "@/public/assets/Fomo";
 import Twitter from "@/public/assets/Twitter";
 import Birdeye from "@/public/assets/Birdeye";
 import Telegram from "@/public/assets/Telegram";
+import { truncateNumber } from "@/context/gameTransactions";
 
 // Define types for game object
 export type Game = {
@@ -348,7 +349,7 @@ export const OpenSidebar = ({
             </span>
             <div className="flex items-center gap-1">
               <span className="text-sm text-[#94A3B8] font-medium font-chakra leading-3">
-                ${formatNumber(fomoPrice, 3)}
+                ${truncateNumber(fomoPrice, 3)}
               </span>
               <span
                 className={`text-xs text-[#72F238] font-medium pt-[0.1px] leading-[0.6rem]`}

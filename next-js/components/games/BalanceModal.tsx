@@ -2,7 +2,11 @@ import { useWallet } from "@solana/wallet-adapter-react";
 import React, { useEffect, useRef, useState } from "react";
 import { useForm, FormProvider, set } from "react-hook-form";
 import { obfuscatePubKey, translator } from "@/context/transactions";
-import { deposit, withdraw } from "../../context/gameTransactions";
+import {
+  deposit,
+  truncateNumber,
+  withdraw,
+} from "../../context/gameTransactions";
 import Loader from "./Loader";
 import { useGlobalContext } from "../GlobalContext";
 import { IoClose, IoCloseOutline } from "react-icons/io5";
@@ -202,7 +206,7 @@ export default function BalanceModal() {
                     {translator("Amount", language)}
                   </label>
                   <span className="font-changa font-medium text-sm text-[#94A3B8] text-opacity-90">
-                    {formatNumber(coinData ? coinData[0]?.amount : 0, 3)} $SOL
+                    {truncateNumber(coinData ? coinData[0]?.amount : 0, 3)} $SOL
                   </span>
                 </div>
 
@@ -261,7 +265,7 @@ export default function BalanceModal() {
                     {translator("Amount", language)}
                   </label>
                   <span className="font-changa font-medium text-sm text-[#94A3B8] text-opacity-90">
-                    {formatNumber(walletBalance ?? 0, 3)} $SOL
+                    {truncateNumber(walletBalance ?? 0, 3)} $SOL
                   </span>
                 </div>
 
@@ -338,7 +342,7 @@ export default function BalanceModal() {
                           {timestampParser(data.createdAt)}
                         </td>
                         <td className="w-full text-center font-changa text-xs font-light text-[#F0F0F0] text-opacity-75">
-                          {formatNumber(data.amount, 4)} SOL
+                          {truncateNumber(data.amount, 4)} SOL
                         </td>
                         <td className="hidden sm:block w-full text-center font-changa text-xs font-light text-[#F0F0F0] text-opacity-75">
                           {data.type ? "Deposit" : "Withdraw"}

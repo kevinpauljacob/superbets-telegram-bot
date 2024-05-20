@@ -8,6 +8,7 @@ import { FaRegCopy } from "react-icons/fa6";
 import Arc from "@/components/games/Wheel/Arc";
 import { MdClose } from "react-icons/md";
 import { translator, formatNumber } from "@/context/transactions";
+import { truncateNumber } from "@/context/gameTransactions";
 
 export interface Wheel {
   createdAt: string;
@@ -152,7 +153,7 @@ export default function VerifyWheelModal({
                   {translator("Bet", language)}
                 </div>
                 <div className="text-white font-chakra text-xs font-medium">
-                  {formatNumber(bet.amount, 4)} $SOL
+                  {truncateNumber(bet.amount, 4)} $SOL
                 </div>
               </button>
               <button className="px-1 py-3 flex flex-col items-center justify-center w-full text-white rounded-md bg-[#202329]">
@@ -166,7 +167,7 @@ export default function VerifyWheelModal({
                   {translator("Payout", language)}
                 </div>
                 <div className="text-white font-chakra text-xs font-medium">
-                  {formatNumber(bet.amountWon, 4)} $SOL
+                  {truncateNumber(bet.amountWon, 4)} $SOL
                 </div>
               </button>
             </div>

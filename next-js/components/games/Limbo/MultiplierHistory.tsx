@@ -1,3 +1,4 @@
+import { truncateNumber } from "@/context/gameTransactions";
 import { formatNumber } from "@/context/transactions";
 interface MultiplierHistoryProps {
   multiplierHistory: number[];
@@ -20,7 +21,7 @@ export function MultiplierHistory({
                 : "text-[#F1323E] border-[#F1323E]"
             } py-1 text-xs md:text-sm px-2 text-white`}
           >
-            {formatNumber(multiplier, 2)}x
+            {truncateNumber(multiplier, 2)}x
           </span>
         );
       })}

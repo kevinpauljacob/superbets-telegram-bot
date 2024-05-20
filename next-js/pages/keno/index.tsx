@@ -28,7 +28,7 @@ import {
   warningCustom,
 } from "@/components/toasts/ToastGroup";
 import { translator, formatNumber } from "@/context/transactions";
-import { minGameAmount } from "@/context/gameTransactions";
+import { minGameAmount, truncateNumber } from "@/context/gameTransactions";
 import { useSession } from "next-auth/react";
 
 export default function Keno() {
@@ -645,7 +645,7 @@ export default function Keno() {
                       key={index}
                       className="bg-[#202329] text-center font-chakra text-[8px] sm:text-xs font-semibold rounded-[5px] p-1 sm:py-3 sm:px-1 w-full"
                     >
-                      {formatNumber(multiplier, 2)}x
+                      {truncateNumber(multiplier, 2)}x
                     </div>
                   ))}
                 </div>
@@ -687,7 +687,7 @@ export default function Keno() {
                               </div>
                               <div className="border border-white/10 rounded-[5px] p-3 mt-2">
                                 {coinData
-                                  ? formatNumber(
+                                  ? truncateNumber(
                                       Math.max(
                                         0,
                                         (betAmt ?? 0) *
@@ -704,7 +704,7 @@ export default function Keno() {
                                 {translator("Chance", language)}
                               </div>
                               <div className="border border-white/10 rounded-[5px] p-3 mt-2">
-                                {formatNumber(calculateChance(index), 2)} %
+                                {truncateNumber(calculateChance(index), 2)} %
                               </div>
                             </div>
                           </div>

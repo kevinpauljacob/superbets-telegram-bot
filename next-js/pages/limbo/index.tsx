@@ -15,7 +15,7 @@ import {
 } from "@/components/GameLayout";
 import Spinner from "@/components/Spinner";
 import { MultiplierHistory } from "@/components/games/Limbo/MultiplierHistory";
-import { limboBet } from "@/context/gameTransactions";
+import { limboBet, truncateNumber } from "@/context/gameTransactions";
 import BetAmount from "@/components/games/BetAmountInput";
 import BetButton from "@/components/games/BetButton";
 import Loader from "../../components/games/Loader";
@@ -216,7 +216,7 @@ export default function Limbo() {
       if (!response.success) throw new Error(response.message);
 
       const winningMultiplier = parseFloat(
-        formatNumber(100 / response.strikeNumber, 2),
+        truncateNumber(100 / response.strikeNumber, 2).toString(),
       );
 
       setFlipping(false);
@@ -491,7 +491,7 @@ export default function Limbo() {
                   : "text-white"
               } font-chakra inline-block transition-transform duration-1000 ease-out text-[5rem] font-black`}
             >
-              {formatNumber(displayMultiplier, 2)}x
+              {truncateNumber(displayMultiplier, 2)}x
             </span>
           </div>
         </div>
@@ -515,7 +515,7 @@ export default function Limbo() {
                 </span>
                 <span className="bg-[#202329] font-chakra text-xs text-white rounded-md px-2 md:px-5 py-3">
                   {betAmt && inputMultiplier
-                    ? formatNumber(
+                    ? truncateNumber(
                         Math.max(
                           0,
                           betAmt * (inputMultiplier * (1 - houseEdge) - 1),
@@ -532,7 +532,7 @@ export default function Limbo() {
                   {translator("Chance", language)}
                 </span>
                 <span className="bg-[#202329] font-chakra text-xs text-white rounded-md px-2 md:px-5 py-3">
-                  {formatNumber(
+                  {truncateNumber(
                     inputMultiplier > 0 ? 100 / inputMultiplier : 0.0,
                     2,
                   )}

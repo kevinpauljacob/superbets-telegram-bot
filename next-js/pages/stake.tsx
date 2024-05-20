@@ -18,6 +18,7 @@ import { useGlobalContext } from "@/components/GlobalContext";
 import { getAssociatedTokenAddressSync } from "@solana/spl-token";
 import { errorCustom } from "@/components/toasts/ToastGroup";
 import FOMOHead from "@/components/HeadElement";
+import { truncateNumber } from "@/context/gameTransactions";
 const inter = Inter({ subsets: ["latin"] });
 
 export default function Stake() {
@@ -116,7 +117,7 @@ export default function Stake() {
                 </span>
                 <div className="flex w-full mt-3 sm:mt-0 justify-end sm:justify-start items-end gap-2 font-chakra">
                   <span className="text-white text-opacity-80 text-2xl sm:text-2xl font-semibold">
-                    {formatNumber(globalInfo?.stakedTotal)}{" "}
+                    {truncateNumber(globalInfo?.stakedTotal)}{" "}
                     <span className="hidden sm:block">$FOMO</span>
                   </span>
                   {/* <span
