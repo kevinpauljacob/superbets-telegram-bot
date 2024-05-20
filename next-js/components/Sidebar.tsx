@@ -195,7 +195,7 @@ export default function Sidebar({
               className={`${bottomIconCss}`}
               onClick={() => router.push("/")}
             >
-              <Birdeye className='w-5 h-5 text-white group-hover:text-[#9945FF] group-focus:text-[#9945FF] transition-all ' />
+              <Birdeye className="w-5 h-5 text-white group-hover:text-[#9945FF] group-focus:text-[#9945FF] transition-all " />
             </div>
             <div
               className={`${bottomIconCss}`}
@@ -373,18 +373,23 @@ export const OpenSidebar = ({
               }
             />
           </div>
-          <div className={`mt-0`}>
-            <div className="w-full transition-all cursor-pointer rounded-md flex items-center justify-between gap-2 pl-4 pr-2 py-2 bg-transparent hover:bg-[#1f2024] focus:bg-[#1f2024] group">
-              <div className="flex items-center gap-3">
-                <FomoExitIcon className="min-w-[1.25rem] min-h-[1.25rem] transition-all text-white group-hover:text-[#9945FF] group-focus:text-[#9945FF] opacity-50 hover:opacity-100" />
-                <span className="mt-0.5 transition-all text-sm font-changa font-medium text-white text-opacity-90 group-hover:text-opacity-100 group-focus:text-opacity-100">
-                  FOMO: {translator("Exit", language)}
-                </span>
+          <Link href="https://exitscam.live" target="_blank">
+            <div className={`mt-0`}>
+              <div className="w-full transition-all cursor-pointer rounded-md flex items-center justify-between gap-2 pl-4 pr-2 py-2 bg-transparent hover:bg-[#1f2024] focus:bg-[#1f2024] group">
+                <div className="flex items-center gap-3">
+                  <FomoExitIcon className="min-w-[1.25rem] min-h-[1.25rem] transition-all text-white group-hover:text-[#9945FF] group-focus:text-[#9945FF] opacity-50 hover:opacity-100" />
+                  <span className="mt-0.5 transition-all text-sm font-changa font-medium text-white text-opacity-90 group-hover:text-opacity-100 group-focus:text-opacity-100">
+                    FOMO: {translator("Exit", language)}
+                  </span>
+                </div>
               </div>
             </div>
-          </div>
+          </Link>
           <div className={`mt-0`}>
-            <div className="w-full transition-all cursor-pointer rounded-md flex items-center justify-between gap-2 pl-4 pr-2 py-2 bg-transparent hover:bg-[#1f2024] focus:bg-[#1f2024] group">
+            <div
+              onClick={() => setShowPlayTokens(!showPlayTokens)}
+              className="w-full transition-all cursor-pointer rounded-md flex items-center justify-between gap-2 pl-4 pr-2 py-2 bg-transparent hover:bg-[#1f2024] focus:bg-[#1f2024] group"
+            >
               <div className="flex items-center gap-3">
                 <FomoPlayIcon className="min-w-[1.25rem] min-h-[1.25rem] transition-all text-white group-hover:text-[#9945FF] group-focus:text-[#9945FF] opacity-50 hover:opacity-100" />
                 <span className="mt-0.5 transition-all text-sm font-changa font-medium text-white text-opacity-90 group-hover:text-opacity-100 group-focus:text-opacity-100">
@@ -395,7 +400,6 @@ export const OpenSidebar = ({
                 className={`${
                   showPlayTokens ? "bg-[#47484A]" : "bg-white bg-opacity-5"
                 } hover:bg-[#47484A]transition text-sm duration-300 ease-in-out hover:transition hover:duration-300 hover:ease-in-out rounded-md w-8 h-6 flex justify-center items-center`}
-                onClick={() => setShowPlayTokens(!showPlayTokens)}
               >
                 <Image
                   src={

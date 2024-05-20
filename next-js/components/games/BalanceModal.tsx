@@ -211,6 +211,7 @@ export default function BalanceModal() {
                       required: "Amount is required",
                     })}
                     type={"number"}
+                    lang="en"
                     step={"any"}
                     autoComplete="off"
                     onChange={handleChange}
