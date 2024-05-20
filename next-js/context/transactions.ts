@@ -91,40 +91,100 @@ export const pointTiers: Record<
 > = {
   0: {
     limit: 0,
-    label: "BRONZE",
+    label: "BRONZE I",
     text: "Do you even FOMO bro?",
   },
   1: {
-    limit: 5_000,
-    label: "SILVER",
-    text: "Caught the FOMO bug?",
+    limit: 300,
+    label: "BRONZE II",
+    text: "Do you even FOMO bro?",
   },
   2: {
-    limit: 25_000,
-    label: "GOLD",
-    text: "FOMO is rising...",
+    limit: 875,
+    label: "BRONZE III",
+    text: "Do you even FOMO bro?",
   },
   3: {
+    limit: 1500,
+    label: "BRONZE IV",
+    text: "Do you even FOMO bro?",
+  },
+  4: {
+    limit: 2700,
+    label: "BRONZE V",
+    text: "Do you even FOMO bro?",
+  },
+  5: {
+    limit: 5000,
+    label: "SILVER I",
+    text: "Caught the FOMO bug?",
+  },
+  6: {
+    limit: 8000,
+    label: "SILVER II",
+    text: "Caught the FOMO bug?",
+  },
+  7: {
+    limit: 11500,
+    label: "SILVER III",
+    text: "Caught the FOMO bug?",
+  },
+  8: {
+    limit: 15500,
+    label: "SILVER IV",
+    text: "Caught the FOMO bug?",
+  },
+  9: {
+    limit: 20000,
+    label: "SILVER V",
+    text: "Caught the FOMO bug?",
+  },
+  10: {
+    limit: 25000,
+    label: "GOLD I",
+    text: "FOMO is rising...",
+  },
+  11: {
+    limit: 32000,
+    label: "GOLD II",
+    text: "FOMO is rising...",
+  },
+  12: {
+    limit: 44000,
+    label: "GOLD III",
+    text: "FOMO is rising...",
+  },
+  13: {
+    limit: 60000,
+    label: "GOLD IV",
+    text: "FOMO is rising...",
+  },
+  14: {
+    limit: 79000,
+    label: "GOLD V",
+    text: "FOMO is rising...",
+  },
+  16: {
     limit: 100_000,
     label: "PLATINUM",
     text: "On your way to FOMOtopia.",
   },
-  4: {
+  17: {
     limit: 250_000,
     label: "ELITE",
     text: "FOMO Jedi - May the gains be with you.",
   },
-  5: {
+  18: {
     limit: 500_000,
     label: "SUPREME",
     text: "FOMO Wizard - Spreading magic.",
   },
-  6: {
+  19: {
     limit: 750_000,
     label: "LEGENDARY",
     text: "FOMO God – Missing out is for mortals, not you.",
   },
-  7: {
+  20: {
     limit: 1_000_000,
     label: "MYTHICAL",
     text: "FOMO is You and You are FOMO.",
