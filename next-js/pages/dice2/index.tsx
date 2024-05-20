@@ -31,10 +31,12 @@ import {
   warningCustom,
 } from "@/components/toasts/ToastGroup";
 import { translator } from "@/context/transactions";
+import { useSession } from "next-auth/react";
 
 export default function Dice2() {
   const wallet = useWallet();
   const methods = useForm();
+  const { data: session, status } = useSession();
   const {
     coinData,
     getBalance,
@@ -366,7 +368,7 @@ export default function Dice2() {
   };
 
   return (
-    <GameLayout title="FOMO - Dice 2">
+    <GameLayout title="Dice 2">
       <GameOptions>
         <>
           <div className="relative w-full flex lg:hidden mb-[1.4rem]">
@@ -386,6 +388,7 @@ export default function Dice2() {
             <BetButton
               disabled={
                 !wallet ||
+                !session?.user ||
                 isRolling ||
                 (coinData && coinData[0].amount < 0.0001) ||
                 (betAmt !== undefined &&
@@ -458,6 +461,7 @@ export default function Dice2() {
                   <BetButton
                     disabled={
                       !wallet ||
+                      !session?.user ||
                       isRolling ||
                       (coinData && coinData[0].amount < 0.0001) ||
                       (betAmt !== undefined &&

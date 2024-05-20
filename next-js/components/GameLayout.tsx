@@ -6,6 +6,7 @@ import { useGlobalContext } from "./GlobalContext";
 import { formatNumber, translator } from "@/context/transactions";
 import Link from "next/link";
 import FomoPlay from "./FomoPlay";
+import FOMOHead from "./HeadElement";
 
 interface LayoutProps {
   children: ReactNode;
@@ -102,9 +103,12 @@ export const GameFooterInfo: React.FC<GameFooterProps> = ({
 const GameLayout: React.FC<LayoutProps> = ({ children, title }) => {
   return (
     <div className="flex flex-1 h-fit w-full flex-col items-center justify-start px-3 lg:px-6">
-      <Head>
-        <title>{title}</title>
-      </Head>
+      <FOMOHead
+        title={`${
+          title ? title + " | " : ""
+        }FOMO.wtf - 0% House Edge, Pure Wins`}
+      />
+
       <div className="fadeInUp w-full min-h-fit lg:min-h-[calc(100vh-13.7rem)] items-stretch bg-[#121418] rounded-2xl flex flex-col-reverse lg:flex-row">
         <div className="fadeInUp flex w-full min-h-fit lg:w-[35%] flex-col items-center rounded-[1.15rem] px-3 py-5 lg:p-9 2xl:p-14">
           {React.Children.map(children, (child) => {

@@ -31,10 +31,12 @@ import {
   warningCustom,
 } from "@/components/toasts/ToastGroup";
 import { translator, formatNumber } from "@/context/transactions";
+import { useSession } from "next-auth/react";
 
 export default function Wheel() {
   const wallet = useWallet();
   const methods = useForm();
+  const { data: session, status } = useSession();
   const wheelRef = useRef<HTMLDivElement>(null);
   const {
     coinData,
@@ -342,7 +344,7 @@ export default function Wheel() {
   }, [betType, startAuto, isRolling]);
 
   return (
-    <GameLayout title="FOMO - Wheel">
+    <GameLayout title="Wheel">
       <GameOptions>
         <>
           <div className="relative w-full flex lg:hidden mb-[1.4rem]">
@@ -362,6 +364,7 @@ export default function Wheel() {
             <BetButton
               disabled={
                 !wallet ||
+                !session?.user ||
                 isRolling ||
                 (coinData && coinData[0].amount < 0.0001) ||
                 (betAmt !== undefined &&
@@ -501,6 +504,7 @@ export default function Wheel() {
                   <BetButton
                     disabled={
                       !wallet ||
+                      !session?.user ||
                       isRolling ||
                       (coinData && coinData[0].amount < 0.0001) ||
                       (betAmt !== undefined &&

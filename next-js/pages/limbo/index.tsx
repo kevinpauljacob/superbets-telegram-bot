@@ -34,6 +34,7 @@ import {
   warningCustom,
 } from "@/components/toasts/ToastGroup";
 import { translator, formatNumber } from "@/context/transactions";
+import { useSession } from "next-auth/react";
 
 function useInterval(callback: Function, delay: number | null) {
   const savedCallback = useRef<Function | null>(null);
@@ -59,6 +60,7 @@ function useInterval(callback: Function, delay: number | null) {
 export default function Limbo() {
   const wallet = useWallet();
   const methods = useForm();
+  const { data: session, status } = useSession();
 
   const {
     coinData,
@@ -336,7 +338,7 @@ export default function Limbo() {
   }, [betSetting, startAuto, loading]);
 
   return (
-    <GameLayout title="FOMO - Limbo">
+    <GameLayout title="Limbo">
       <GameOptions>
         <>
           <div className="relative w-full flex lg:hidden mb-[1.4rem]">
@@ -356,6 +358,7 @@ export default function Limbo() {
             <BetButton
               disabled={
                 loading ||
+                !session?.user ||
                 (coinData && coinData[0].amount < 0.0001) ||
                 (betAmt !== undefined &&
                   maxBetAmt !== undefined &&
@@ -437,6 +440,7 @@ export default function Limbo() {
                   <BetButton
                     disabled={
                       loading ||
+                      !session?.user ||
                       (coinData && coinData[0].amount < 0.0001) ||
                       (betAmt !== undefined &&
                         maxBetAmt !== undefined &&

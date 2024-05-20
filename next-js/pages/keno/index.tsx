@@ -28,10 +28,12 @@ import {
   warningCustom,
 } from "@/components/toasts/ToastGroup";
 import { translator, formatNumber } from "@/context/transactions";
+import { useSession } from "next-auth/react";
 
 export default function Keno() {
   const wallet = useWallet();
   const methods = useForm();
+  const { data: session, status } = useSession();
   const {
     coinData,
     getBalance,
@@ -404,7 +406,7 @@ export default function Keno() {
   };
 
   return (
-    <GameLayout title="FOMO - Keno">
+    <GameLayout title="Keno">
       <GameOptions>
         <>
           <div className="relative w-full flex lg:hidden mb-[1.4rem]">
@@ -424,6 +426,7 @@ export default function Keno() {
             <BetButton
               disabled={
                 !wallet ||
+                !session?.user ||
                 isRolling ||
                 (coinData && coinData[0].amount < 0.0001) ||
                 (betAmt !== undefined &&
@@ -559,6 +562,7 @@ export default function Keno() {
                   <BetButton
                     disabled={
                       !wallet ||
+                      !session?.user ||
                       isRolling ||
                       (coinData && coinData[0].amount < 0.0001) ||
                       (betAmt !== undefined &&

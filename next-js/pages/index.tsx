@@ -23,6 +23,7 @@ import FomoExit from "@/components/FomoExit";
 import FomoPlay from "@/components/FomoPlay";
 import FomoSupply from "@/components/FomoSupply";
 import AllBets from "@/components/AllBets";
+import FOMOHead from "@/components/HeadElement";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -43,17 +44,18 @@ export default function Home() {
     }
   }, [wallet?.publicKey]);
 
-   useEffect(() => {
+  useEffect(() => {
     //@ts-ignore
     setLanguage(localStorage.getItem("language") ?? "en");
   }, []);
 
- /* useEffect(() => {
+  /* useEffect(() => {
     localStorage.setItem("language", language);
   }, [language]); 
  */
   return (
     <>
+      <FOMOHead title={"Home | FOMO.wtf - 0% House Edge, Pure Wins"} />
       <div className="flex flex-col lg:flex-row text-white w-full overflow-hidden relative overflow-x-hidden px-4 xl:px-6">
         <div className="flex flex-1 flex-col md:px-[2.5%]">
           <div className="">

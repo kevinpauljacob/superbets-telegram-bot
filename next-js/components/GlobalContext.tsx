@@ -265,7 +265,7 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
 
     let intervalId = setInterval(async () => {
       fetchFomoPrice();
-    }, 60000);
+    }, 10000);
 
     return () => clearInterval(intervalId);
   }, []);

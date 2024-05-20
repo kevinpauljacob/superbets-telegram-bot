@@ -31,10 +31,12 @@ import AutoCount from "@/components/AutoCount";
 import ConfigureAutoButton from "@/components/ConfigureAutoButton";
 import { errorCustom, warningCustom } from "@/components/toasts/ToastGroup";
 import { translator } from "@/context/transactions";
+import { useSession } from "next-auth/react";
 
 export default function Dice() {
   const wallet = useWallet();
   const methods = useForm();
+  const { data: session, status } = useSession();
 
   const {
     coinData,
@@ -377,7 +379,7 @@ export default function Dice() {
   }, [betType, startAuto, isRolling]);
 
   return (
-    <GameLayout title="FOMO - Dice">
+    <GameLayout title="Dice">
       <GameOptions>
         <>
           <div className="w-full relative flex lg:hidden mb-[1.4rem]">
@@ -403,6 +405,7 @@ export default function Dice() {
             <BetButton
               disabled={
                 !wallet ||
+                !session?.user ||
                 selectedFace.length === 0 ||
                 isRolling ||
                 (coinData && coinData[0].amount < 0.0001) ||
@@ -478,6 +481,7 @@ export default function Dice() {
                   <BetButton
                     disabled={
                       !wallet ||
+                      !session?.user ||
                       selectedFace.length === 0 ||
                       isRolling ||
                       (coinData && coinData[0].amount < 0.0001) ||

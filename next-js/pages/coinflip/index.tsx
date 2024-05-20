@@ -31,6 +31,7 @@ import {
   warningCustom,
 } from "@/components/toasts/ToastGroup";
 import { translator } from "@/context/transactions";
+import { useSession } from "next-auth/react";
 
 const Timer = dynamic(() => import("../../components/games/Timer"), {
   ssr: false,
@@ -42,6 +43,7 @@ const Progress = dynamic(() => import("../../components/games/Progressbar"), {
 export default function Flip() {
   const wallet = useWallet();
   const methods = useForm();
+  const { data: session, status } = useSession();
 
   const {
     coinData,
@@ -297,7 +299,7 @@ export default function Flip() {
   }, [betSetting, startAuto, loading]);
 
   return (
-    <GameLayout title="FOMO - Coin Flip">
+    <GameLayout title="Coin Flip">
       <GameOptions>
         <>
           <div className="relative w-full flex lg:hidden mb-[1.4rem]">
@@ -318,6 +320,7 @@ export default function Flip() {
               disabled={
                 !betType ||
                 loading ||
+                !session?.user ||
                 (coinData && coinData[0].amount < 0.0001) ||
                 (betAmt !== undefined &&
                   maxBetAmt !== undefined &&
@@ -439,6 +442,7 @@ export default function Flip() {
                     disabled={
                       !betType ||
                       loading ||
+                      !session?.user ||
                       (coinData && coinData[0].amount < 0.0001) ||
                       (betAmt !== undefined &&
                         maxBetAmt !== undefined &&

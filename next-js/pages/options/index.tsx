@@ -21,6 +21,7 @@ import BalanceAlert from "@/components/games/BalanceAlert";
 import { soundAlert } from "@/utils/soundUtils";
 import { errorCustom, successCustom } from "@/components/toasts/ToastGroup";
 import { translator, formatNumber } from "@/context/transactions";
+import { useSession } from "next-auth/react";
 
 const Timer = dynamic(() => import("../../components/games/Timer"), {
   ssr: false,
@@ -32,6 +33,7 @@ const Progress = dynamic(() => import("../../components/games/Progressbar"), {
 export default function Options() {
   const wallet = useWallet();
   const methods = useForm();
+  const { data: session, status } = useSession();
 
   const {
     walletBalance,
@@ -305,7 +307,7 @@ export default function Options() {
   }, [betTime]);
 
   return (
-    <GameLayout title="FOMO - Binary Options">
+    <GameLayout title="Binary Options">
       <GameOptions>
         <FormProvider {...methods}>
           <form
@@ -318,6 +320,7 @@ export default function Options() {
               <BetButton
                 disabled={
                   !betType ||
+                  !session?.user ||
                   !coinData ||
                   (coinData && coinData[0].amount < 0.0001) ||
                   (betAmt !== undefined &&
@@ -439,6 +442,7 @@ export default function Options() {
               <BetButton
                 disabled={
                   !betType ||
+                  !session?.user ||
                   !coinData ||
                   (coinData && coinData[0].amount < 0.0001) ||
                   (betAmt !== undefined &&
