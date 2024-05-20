@@ -119,7 +119,7 @@ export default function Stake() {
                     {formatNumber(globalInfo?.stakedTotal)}{" "}
                     <span className="hidden sm:block">$FOMO</span>
                   </span>
-                  <span
+                  {/* <span
                     className={`hidden sm:block text-staking-secondary text-opacity-80 text-base sm:text-base ${inter.className} font-semibold`}
                   >
                     (
@@ -127,7 +127,7 @@ export default function Stake() {
                       (globalInfo?.stakedTotal / globalInfo?.totalVolume) * 100,
                     )}
                     % )
-                  </span>
+                  </span> */}
                 </div>
               </div>
               <div className="hidden sm:flex">
