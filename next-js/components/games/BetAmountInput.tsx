@@ -10,7 +10,7 @@ import { Game, InfoCircle } from "iconsax-react";
 import { BsInfoCircleFill } from "react-icons/bs";
 import DicePointer from "@/public/assets/DicePointer";
 import { translator } from "@/context/transactions";
-import { truncateNumber } from "@/context/gameTransactions";
+import { minGameAmount, truncateNumber } from "@/context/gameTransactions";
 import { riskToChance } from "./Keno/RiskToChance";
 export default function BetAmount({
   betAmt,
@@ -40,8 +40,6 @@ export default function BetAmount({
   const [betAmountsModal, setBetAmountsModal] = useState(false);
 
   const [isHovered, setIsHovered] = useState<boolean>(false);
-
-  const minBetAmt = parseFloat(process.env.MINIMUM_BET_AMOUNT ?? "0");
 
   const [highestMaxBetAmt, setHighestMaxBetAmt] = useState<string>("0");
   useEffect(() => {
@@ -112,8 +110,8 @@ export default function BetAmount({
 
       newBetAmt = parseFloat(newBetAmt.toFixed(4));
 
-      if (newBetAmt < minBetAmt) {
-        newBetAmt = minBetAmt;
+      if (newBetAmt < minGameAmount) {
+        newBetAmt = minGameAmount;
       }
 
       setBetAmt(newBetAmt);
@@ -180,7 +178,7 @@ export default function BetAmount({
             <div className="relative h-[4px] rounded-full bg-[#2A2E38] w-full mx-3">
               <input
                 type="range"
-                min={minBetAmt}
+                min={minGameAmount}
                 max={maxBetAmt}
                 value={maxBetAmt}
                 disabled={disabled}
@@ -218,7 +216,7 @@ export default function BetAmount({
                 </div>
               </div>
               <div className="absolute text-white text-opacity-50 text-[11px] font-medium font-chakra top-2.5 -left-2">
-                {minBetAmt.toFixed(2)}
+                {minGameAmount.toFixed(3)}
               </div>
               <div className="absolute group cursor-pointer text-white text-opacity-50 text-[11px] font-medium font-chakra top-2.5 -right-3.5">
                 {highestMaxBetAmt}
