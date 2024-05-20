@@ -23,7 +23,7 @@ export default function StoreBanner() {
       {games.map((game, index) => (
         <div
           key={index}
-          className="w-full h-full min-w-[18.5rem] transform transition-transform duration-300"
+          className="w-full h-full min-w-[18.5rem] transform transition-transform duration-300 hover:-translate-y-4"
         >
           <Link href={game.href} className="bg-white mx-4">
             <Image
