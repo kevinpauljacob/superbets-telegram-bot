@@ -113,7 +113,7 @@ export default function SubHeader() {
                   </span>
                 </div>
                 <p className="text-[#72F238] font-changa text-sm mt-1">
-                  +${formatNumber(card.amountWon ?? 0, 2)}
+                  +{formatNumber(card.amountWon ?? 0, 2)} SOL
                 </p>
               </div>
             </Link>
