@@ -86,32 +86,32 @@ export default function ConfigureAutoModal() {
       setUseAutoConfig(true);
       setShowAutoModal(false);
       updateAutoConfigState();
-      console.log(
-        "Setting auto",
-        autoWinChange,
-        autoLossChange,
-        autoWinChangeReset,
-        autoLossChangeReset,
-        autoStopProfit,
-        autoStopLoss,
-      );
+      // console.log(
+      //   "Setting auto",
+      //   autoWinChange,
+      //   autoLossChange,
+      //   autoWinChangeReset,
+      //   autoLossChangeReset,
+      //   autoStopProfit,
+      //   autoStopLoss,
+      // );
     }
   };
 
   useEffect(() => {
-    console.log(
-      "Setting auto",
-      autoWinChange,
-      autoLossChange,
-      autoWinChangeReset,
-      autoLossChangeReset,
-      autoStopProfit,
-      autoStopLoss,
-      showAutoModal,
-    );
+    // console.log(
+    //   "Setting auto",
+    //   autoWinChange,
+    //   autoLossChange,
+    //   autoWinChangeReset,
+    //   autoLossChangeReset,
+    //   autoStopProfit,
+    //   autoStopLoss,
+    //   showAutoModal,
+    // );
     if (showAutoModal) {
       const configOptions = autoConfigState.get(game);
-      console.log(configOptions);
+      // console.log(configOptions);
       methods.setValue("autoWinChange", configOptions?.autoWinChange ?? NaN);
       methods.setValue("autoLossChange", configOptions?.autoLossChange ?? NaN);
       methods.setValue("autoStopProfit", configOptions?.autoStopProfit ?? NaN);
@@ -192,7 +192,7 @@ export default function ConfigureAutoModal() {
                   autoComplete="off"
                   disabled={autoWinChangeReset}
                   onChange={(e) => {
-                    console.log(e.target.value, parseFloat(e.target.value));
+                    // console.log(e.target.value, parseFloat(e.target.value));
                     setAutoWinChange(parseFloat(e.target.value));
                   }}
                   placeholder={"00.00"}
@@ -321,7 +321,7 @@ export default function ConfigureAutoModal() {
                   autoComplete="off"
                   onChange={(e) => {
                     const amount = parseFloat(e.target.value);
-                    console.log(amount, !amount);
+                    // console.log(amount, !amount);
                     setAutoStopProfit(parseFloat(e.target.value));
                     if (!amount || (amount && amount >= 0)) {
                       methods.clearErrors("autoStopProfit");

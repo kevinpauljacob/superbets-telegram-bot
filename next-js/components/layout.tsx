@@ -146,7 +146,7 @@ export default function Layout({ children }: LayoutProps) {
     setAutoBetCount(1);
     setStartAuto(false);
     const configOptions = autoConfigState.get(game);
-    console.log("Auto options", configOptions);
+    // console.log("Auto options", configOptions);
     if (configOptions) {
       setAutoWinChange(configOptions.autoWinChange);
       setAutoLossChange(configOptions.autoLossChange);

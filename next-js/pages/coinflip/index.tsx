@@ -97,7 +97,7 @@ export default function Flip() {
         throw new Error("Insufficient balance for bet !");
       }
 
-      console.log("Placing Flip");
+      // console.log("Placing Flip");
       let response = await placeFlip(
         wallet,
         betAmt,
@@ -195,15 +195,15 @@ export default function Flip() {
   }, [userInput]);
 
   useEffect(() => {
-    console.log(
-      "Auto: ",
-      startAuto,
-      autoBetCount,
-      autoStopProfit,
-      autoStopLoss,
-      autoBetProfit,
-      betAmt,
-    );
+    // console.log(
+    //   "Auto: ",
+    //   startAuto,
+    //   autoBetCount,
+    //   autoStopProfit,
+    //   autoStopLoss,
+    //   autoBetProfit,
+    //   betAmt,
+    // );
     if (
       betSetting === "auto" &&
       startAuto &&
@@ -222,10 +222,10 @@ export default function Flip() {
               : betAmt *
                 (autoLossChange !== null ? autoLossChange / 100.0 : 0));
 
-        console.log("Current bet amount:", betAmt);
-        console.log("Auto loss change:", autoLossChange);
-        console.log("Auto profit change:", autoWinChange);
-        console.log("Potential loss:", potentialLoss);
+        // console.log("Current bet amount:", betAmt);
+        // console.log("Auto loss change:", autoLossChange);
+        // console.log("Auto profit change:", autoWinChange);
+        // console.log("Potential loss:", potentialLoss);
       }
       if (
         useAutoConfig &&
@@ -284,7 +284,7 @@ export default function Flip() {
           (typeof autoBetCount === "string" && autoBetCount.includes("inf")) ||
           (typeof autoBetCount === "number" && autoBetCount > 0)
         ) {
-          console.log("Auto betting. config: ", useAutoConfig);
+          // console.log("Auto betting. config: ", useAutoConfig);
           setStartAuto(true);
         }
       } else {

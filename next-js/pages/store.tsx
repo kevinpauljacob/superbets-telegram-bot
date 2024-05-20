@@ -41,7 +41,7 @@ export default function Store() {
 
         res.value.uiAmount ? setSolBal(res.value.uiAmount) : setSolBal(0);
       } catch (e) {
-        errorCustom("Unable to fetch balance.");
+        // errorCustom("Unable to fetch balance.");
         console.error(e);
       }
   };

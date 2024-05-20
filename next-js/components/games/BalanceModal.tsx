@@ -1,5 +1,5 @@
 import { useWallet } from "@solana/wallet-adapter-react";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useForm, FormProvider, set } from "react-hook-form";
 import { obfuscatePubKey, translator } from "@/context/transactions";
 import { deposit, withdraw } from "../../context/gameTransactions";
@@ -63,17 +63,26 @@ export default function BalanceModal() {
     setAmount(parseFloat(e.target.value));
   };
 
-  const handleClose = () => {
-    //@ts-ignore
-    document.addEventListener("click", function (event) {
-      //@ts-ignore
-      var targetId = event.target.id;
-      if (targetId && targetId === "modal-bg") setShowWalletModal(false);
-    });
-  };
+  const modalRef: any = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: any) => {
+      if (modalRef.current && !modalRef.current.contains(event.target)) {
+        setShowWalletModal(false);
+      }
+    };
+
+    if (showWalletModal) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [showWalletModal]);
 
   const handleGetHistory = async () => {
-    console.log("Getting History");
+    // console.log("Getting History");
     try {
       const res = await fetch(
         `/api/games/wallet/getDeposits/?wallet=${wallet.publicKey}`,
@@ -86,7 +95,7 @@ export default function BalanceModal() {
       );
       let { success, data, message } = await res.json();
       setHistoryData(data);
-      console.log(data);
+      // console.log(data);
     } catch (error) {
       console.error(error);
     }
@@ -97,15 +106,10 @@ export default function BalanceModal() {
   }, [actionType]);
 
   return (
-    <div
-      onClick={() => {
-        handleClose();
-      }}
-      id="modal-bg"
-      className="absolute z-[150] left-0 top-0 flex h-full w-full items-center justify-center bg-[#33314680] backdrop-blur-[0px] transition-all"
-    >
+    <div className="absolute z-[150] left-0 top-0 flex h-full w-full items-center justify-center bg-[#33314680] backdrop-blur-[0px] transition-all">
       <div
         id="modal-box"
+        ref={modalRef}
         className="relative flex w-[95%] max-w-[30rem] flex-col rounded-md bg-[#121418] p-7"
       >
         <div className="flex items-center w-full mb-7 gap-2 mt-2">

@@ -72,7 +72,7 @@ export default function Keno() {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
 
   const multipliers = riskToChance[kenoRisk][chosenNumbers.length];
-  console.log("multipliers", multipliers);
+  // console.log("multipliers", multipliers);
   let maxMultiplier = 0;
   let leastMultiplier = 0;
 
@@ -218,7 +218,7 @@ export default function Keno() {
 
       if (success) {
         setStrikeMultiplier(strikeMultiplier);
-        console.log("strikeNumbers", strikeNumbers);
+        // console.log("strikeNumbers", strikeNumbers);
         setRefresh(true);
         for (const number of strikeNumbers) {
           await new Promise((resolve) => setTimeout(resolve, 200));
@@ -295,7 +295,7 @@ export default function Keno() {
   }, [userInput]);
 
   useEffect(() => {
-    console.log("Auto: ", startAuto, autoBetCount);
+    // console.log("Auto: ", startAuto, autoBetCount);
     if (
       betType === "auto" &&
       startAuto &&
@@ -314,10 +314,10 @@ export default function Keno() {
               : betAmt *
                 (autoLossChange !== null ? autoLossChange / 100.0 : 0));
 
-        console.log("Current bet amount:", betAmt);
-        console.log("Auto loss change:", autoLossChange);
-        console.log("Auto profit change:", autoWinChange);
-        console.log("Potential loss:", potentialLoss);
+        // console.log("Current bet amount:", betAmt);
+        // console.log("Auto loss change:", autoLossChange);
+        // console.log("Auto profit change:", autoWinChange);
+        // console.log("Potential loss:", potentialLoss);
       }
       if (
         useAutoConfig &&
@@ -365,7 +365,7 @@ export default function Keno() {
         (typeof autoBetCount === "string" && autoBetCount.includes("inf")) ||
         (typeof autoBetCount === "number" && autoBetCount > 0)
       ) {
-        console.log("Auto betting. config: ", useAutoConfig);
+        // console.log("Auto betting. config: ", useAutoConfig);
         setStartAuto(true);
       }
     } else if (wallet.connected) handleBet();

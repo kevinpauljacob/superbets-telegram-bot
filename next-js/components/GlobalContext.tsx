@@ -147,7 +147,9 @@ interface GlobalContextProps {
   setLiveBets: React.Dispatch<React.SetStateAction<any[]>>;
 
   autoConfigState: Map<string, AutoConfigOptions>;
-  setAutoConfigState: React.Dispatch<React.SetStateAction<Map<string, AutoConfigOptions>>>;
+  setAutoConfigState: React.Dispatch<
+    React.SetStateAction<Map<string, AutoConfigOptions>>
+  >;
 
   openVerifyModal: () => void;
   closeVerifyModal: () => void;
@@ -234,7 +236,9 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
 
   const [liveBets, setLiveBets] = useState<any[]>([]);
 
-  const [autoConfigState, setAutoConfigState] = useState<Map<string, AutoConfigOptions>>(new Map());
+  const [autoConfigState, setAutoConfigState] = useState<
+    Map<string, AutoConfigOptions>
+  >(new Map());
 
   // fomo live price
   const [fomoPrice, setFomoPrice] = useState<number>(0);
@@ -355,13 +359,13 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
             ) {
               setCoinData(balance.data.deposit);
             } else {
-              console.log("Could not fetch balance.");
+              // console.log("Could not fetch balance.");
               setCoinData(null);
             }
             setLoading(false);
           });
     } catch (e) {
-      console.log("Could not fetch balance.");
+      // console.log("Could not fetch balance.");
       setLoading(false);
       setCoinData(null);
       console.error(e);
@@ -500,6 +504,11 @@ export const translationsMap = {
     ru: "Кости",
     ko: "주사위",
     ch: "骰子",
+  },
+  Contact: {
+    ru: "Контакт",
+    ko: "연락하다",
+    ch: "接触",
   },
   Dice2: {
     ru: "Кости 2",

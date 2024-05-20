@@ -74,7 +74,7 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
 
   const debouncedSoundAlert = debounce(() => {
     soundAlert("/sounds/slider.wav");
-    console.log("debounced");
+    // console.log("debounced");
   });
 
   // const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {

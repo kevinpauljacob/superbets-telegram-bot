@@ -135,7 +135,7 @@ export default function Wheel() {
       currentTheta +
       (currentTheta % 360 === 0 ? 0 : 360 - (currentTheta % 360));
     setResultAngle(resultAngle);
-    console.log("resultAngle", resultAngle, currentTheta, delta);
+    // console.log("resultAngle", resultAngle, currentTheta, delta);
     if (wheelRef.current) {
       wheelRef.current.style.transition =
         "transform 3s cubic-bezier(0.4, 0, 0.2, 1)";
@@ -207,7 +207,7 @@ export default function Wheel() {
       if (success) {
         setStrikeNumber(strikeNumber);
         setStrikeMultiplier(strikeMultiplier);
-        console.log("strikeNumber", strikeNumber);
+        // console.log("strikeNumber", strikeNumber);
         setRefresh(true);
       }
 
@@ -264,7 +264,7 @@ export default function Wheel() {
   }, [userInput]);
 
   useEffect(() => {
-    console.log("Auto: ", startAuto, autoBetCount, autoBetProfit);
+    // console.log("Auto: ", startAuto, autoBetCount, autoBetProfit);
     if (
       betType === "auto" &&
       startAuto &&
@@ -283,10 +283,10 @@ export default function Wheel() {
               : betAmt *
                 (autoLossChange !== null ? autoLossChange / 100.0 : 0));
 
-        console.log("Current bet amount:", betAmt);
-        console.log("Auto loss change:", autoLossChange);
-        console.log("Auto profit change:", autoWinChange);
-        console.log("Potential loss:", potentialLoss);
+        // console.log("Current bet amount:", betAmt);
+        // console.log("Auto loss change:", autoLossChange);
+        // console.log("Auto profit change:", autoWinChange);
+        // console.log("Potential loss:", potentialLoss);
       }
       if (
         useAutoConfig &&
@@ -334,7 +334,7 @@ export default function Wheel() {
         (typeof autoBetCount === "string" && autoBetCount.includes("inf")) ||
         (typeof autoBetCount === "number" && autoBetCount > 0)
       ) {
-        console.log("Auto betting. config: ", useAutoConfig);
+        // console.log("Auto betting. config: ", useAutoConfig);
         setStartAuto(true);
       }
     } else if (wallet.connected) handleBet();

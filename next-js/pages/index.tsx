@@ -33,16 +33,17 @@ export default function Home() {
 
   const maintenance = false;
 
-  const { language, setLanguage, userData, setUserData } = useGlobalContext();
+  const { language, setLanguage, userData, setUserData, showWalletModal } =
+    useGlobalContext();
 
   const [refetch, setRefetch] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
   useEffect(() => {
-    if (wallet?.publicKey) {
+    if (wallet?.publicKey && !showWalletModal) {
       getBalance();
     }
-  }, [wallet?.publicKey]);
+  }, [wallet?.publicKey, showWalletModal]);
 
   useEffect(() => {
     //@ts-ignore

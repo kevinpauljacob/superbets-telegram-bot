@@ -138,19 +138,19 @@ export default function Dice2() {
   };
 
   const handleBet = async () => {
-    console.log(
-      "betting",
-      autoWinChange,
-      autoLossChange,
-      autoWinChangeReset,
-      autoLossChangeReset,
-      autoStopProfit,
-      autoStopLoss,
-      startAuto,
-      autoBetCount,
-      autoBetProfit,
-      betAmt,
-    );
+    // console.log(
+    //   "betting",
+    //   autoWinChange,
+    //   autoLossChange,
+    //   autoWinChangeReset,
+    //   autoLossChangeReset,
+    //   autoStopProfit,
+    //   autoStopLoss,
+    //   startAuto,
+    //   autoBetCount,
+    //   autoBetProfit,
+    //   betAmt,
+    // );
     try {
       if (!wallet.connected || !wallet.publicKey) {
         throw new Error("Wallet not connected");
@@ -204,12 +204,12 @@ export default function Dice2() {
 
       // auto options
       if (betType === "auto") {
-        console.log(
-          autoWinChange,
-          autoLossChange,
-          autoWinChangeReset,
-          autoLossChangeReset,
-        );
+        // console.log(
+        //   autoWinChange,
+        //   autoLossChange,
+        //   autoWinChangeReset,
+        //   autoLossChangeReset,
+        // );
         if (useAutoConfig && win) {
           setBetAmt(
             autoWinChangeReset
@@ -292,7 +292,7 @@ export default function Dice2() {
   }, [userInput]);
 
   useEffect(() => {
-    console.log("Auto: ", startAuto, autoBetCount);
+    // console.log("Auto: ", startAuto, autoBetCount);
     if (
       betType === "auto" &&
       startAuto &&
@@ -311,10 +311,10 @@ export default function Dice2() {
               : betAmt *
                 (autoLossChange !== null ? autoLossChange / 100.0 : 0));
 
-        console.log("Current bet amount:", betAmt);
-        console.log("Auto loss change:", autoLossChange);
-        console.log("Auto profit change:", autoWinChange);
-        console.log("Potential loss:", potentialLoss);
+        // console.log("Current bet amount:", betAmt);
+        // console.log("Auto loss change:", autoLossChange);
+        // console.log("Auto profit change:", autoWinChange);
+        // console.log("Potential loss:", potentialLoss);
       }
 
       if (
@@ -362,7 +362,7 @@ export default function Dice2() {
         (typeof autoBetCount === "string" && autoBetCount.includes("inf")) ||
         (typeof autoBetCount === "number" && autoBetCount > 0)
       ) {
-        console.log("Auto betting. config: ", useAutoConfig);
+        // console.log("Auto betting. config: ", useAutoConfig);
         setStartAuto(true);
       }
     } else if (wallet.connected) handleBet();

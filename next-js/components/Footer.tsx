@@ -30,6 +30,9 @@ function Footer() {
                   "FOMO wtf casino games are currently in beta and will be undergoing audit shortly. FOMO wtf EXIT games has gone through audit performed by OtterSec in December 2023.",
                   language,
                 )}
+                <br />
+                <br />
+                {translator("Contact", language)} : hi@fomowtf.com
               </span>
             </p>
           </div>

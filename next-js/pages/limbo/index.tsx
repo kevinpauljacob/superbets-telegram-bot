@@ -205,7 +205,7 @@ export default function Limbo() {
       setDisplayMultiplier(multiplierLimits[0]);
       setTargetMultiplier(multiplierLimits[0]);
 
-      console.log("Placing Flip");
+      // console.log("Placing Flip");
       // function to place bet
       const response = await limboBet(
         wallet,
@@ -253,7 +253,7 @@ export default function Limbo() {
   }, [userInput]);
 
   useEffect(() => {
-    console.log("Auto: ", startAuto, autoBetCount, autoBetProfit);
+    // console.log("Auto: ", startAuto, autoBetCount, autoBetProfit);
     if (
       betSetting === "auto" &&
       startAuto &&
@@ -272,10 +272,10 @@ export default function Limbo() {
               : betAmt *
                 (autoLossChange !== null ? autoLossChange / 100.0 : 0));
 
-        console.log("Current bet amount:", betAmt);
-        console.log("Auto loss change:", autoLossChange);
-        console.log("Auto profit change:", autoWinChange);
-        console.log("Potential loss:", potentialLoss);
+        // console.log("Current bet amount:", betAmt);
+        // console.log("Auto loss change:", autoLossChange);
+        // console.log("Auto profit change:", autoWinChange);
+        // console.log("Potential loss:", potentialLoss);
       }
       if (
         useAutoConfig &&
@@ -325,7 +325,7 @@ export default function Limbo() {
         (typeof autoBetCount === "string" && autoBetCount.includes("inf")) ||
         (typeof autoBetCount === "number" && autoBetCount > 0)
       ) {
-        console.log("Auto betting. config: ", useAutoConfig);
+        // console.log("Auto betting. config: ", useAutoConfig);
         setStartAuto(true);
       }
     } else if (wallet.connected) {
