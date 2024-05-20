@@ -164,27 +164,27 @@ export const pointTiers: Record<
     label: "GOLD V",
     text: "FOMO is rising...",
   },
-  16: {
+  15: {
     limit: 100_000,
     label: "PLATINUM",
     text: "On your way to FOMOtopia.",
   },
-  17: {
+  16: {
     limit: 250_000,
     label: "ELITE",
     text: "FOMO Jedi - May the gains be with you.",
   },
-  18: {
+  17: {
     limit: 500_000,
     label: "SUPREME",
     text: "FOMO Wizard - Spreading magic.",
   },
-  19: {
+  18: {
     limit: 750_000,
     label: "LEGENDARY",
     text: "FOMO God – Missing out is for mortals, not you.",
   },
-  20: {
+  19: {
     limit: 1_000_000,
     label: "MYTHICAL",
     text: "FOMO is You and You are FOMO.",
