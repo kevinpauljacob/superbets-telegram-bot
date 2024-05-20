@@ -111,19 +111,20 @@ export default function Sidebar({
                 }
               />
             </div>
-            <div
-              onClick={() => {
-                router.push("");
-                setSidebar(true);
-              }}
-              className={`${topIconCss}`}
-            >
-              <FomoExitIcon
-                className={
-                  router.pathname === "/exit" ? activeIconCss : closedIconCss
-                }
-              />
-            </div>
+            <Link href="https://exitscam.live" target="_blank">
+              <div
+                onClick={() => {
+                  setSidebar(true);
+                }}
+                className={`${topIconCss}`}
+              >
+                <FomoExitIcon
+                  className={
+                    router.pathname === "/exit" ? activeIconCss : closedIconCss
+                  }
+                />
+              </div>
+            </Link>
             <div
               onClick={() => {
                 setSidebar(true);
@@ -174,35 +175,41 @@ export default function Sidebar({
                 }
               />
             </div>
-            <div
-              onClick={() => {
-                router.push("/");
-                setSidebar(true);
-              }}
-              className={`${topIconCss}`}
-            >
-              <Dollar className={closedIconCss} />
-            </div>
+            <Link href="https://dca.fomosolana.com/" target="_blank">
+              <div
+                onClick={() => {
+                  setSidebar(true);
+                }}
+                className={`${topIconCss}`}
+              >
+                <Dollar className={closedIconCss} />
+              </div>
+            </Link>
           </div>
           <div className="w-full flex flex-col items-center mb-2">
-            <div
+            <Link
+              href={"https://x.com/FOMO_wtf"}
+              target="_blank"
               className={`${bottomIconCss}`}
-              onClick={() => router.push("/")}
             >
               <Twitter className={`${closedIconCss}`} />
-            </div>
-            <div
+            </Link>
+            <Link
+              href={
+                "https://birdeye.so/token/Cx9oLynYgC3RrgXzin7U417hNY9D6YB1eMGw4ZMbWJgw?chain=solana"
+              }
+              target="_blank"
               className={`${bottomIconCss}`}
-              onClick={() => router.push("/")}
             >
               <Birdeye className="w-5 h-5 text-white group-hover:text-[#9945FF] group-focus:text-[#9945FF] transition-all " />
-            </div>
-            <div
+            </Link>
+            <Link
+              href={"https://t.me/FOMO_wtf"}
+              target="_blank"
               className={`${bottomIconCss}`}
-              onClick={() => router.push("/")}
             >
               <Telegram className={`${closedIconCss}`} />
-            </div>
+            </Link>
           </div>
         </div>
       )}
@@ -469,12 +476,14 @@ export const OpenSidebar = ({
               router.pathname === "/stake" ? activeIconCss : closedIconCss
             }
           />
-          <SidebarOpenElement
-            text={"DCA"}
-            Icon={Dollar}
-            link="https://dca.fomosolana.com/"
-            className={closedIconCss}
-          />
+          <Link href="https://dca.fomosolana.com/" target="_blank">
+            <SidebarOpenElement
+              text={"DCA"}
+              Icon={Dollar}
+              // link="https://dca.fomosolana.com/"
+              className={closedIconCss}
+            />
+          </Link>
         </div>
       </div>
 
