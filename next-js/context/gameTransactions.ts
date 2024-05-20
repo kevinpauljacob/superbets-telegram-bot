@@ -289,6 +289,8 @@ export const createDepositTxn = async (
 
   if (tokenName === "SOL")
     transaction.add(
+      ComputeBudgetProgram.setComputeUnitLimit({ units: 100_000 }),
+      ComputeBudgetProgram.setComputeUnitPrice({ microLamports: 150_000 }),
       SystemProgram.transfer({
         fromPubkey: wallet,
         toPubkey: devPublicKey,
@@ -300,6 +302,8 @@ export const createDepositTxn = async (
     const userAta = await getAssociatedTokenAddress(tokenId, wallet);
     const devAta = await getAssociatedTokenAddress(tokenId, devPublicKey);
     transaction.add(
+      ComputeBudgetProgram.setComputeUnitLimit({ units: 100_000 }),
+      ComputeBudgetProgram.setComputeUnitPrice({ microLamports: 150_000 }),
       createTransferInstruction(
         userAta,
         devAta,
