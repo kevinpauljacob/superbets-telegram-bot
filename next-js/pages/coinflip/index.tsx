@@ -31,6 +31,7 @@ import {
   warningCustom,
 } from "@/components/toasts/ToastGroup";
 import { translator } from "@/context/transactions";
+import { minGameAmount } from "@/context/gameTransactions";
 import { useSession } from "next-auth/react";
 
 const Timer = dynamic(() => import("../../components/games/Timer"), {
@@ -321,7 +322,7 @@ export default function Flip() {
                 !betType ||
                 loading ||
                 !session?.user ||
-                (coinData && coinData[0].amount < 0.0001) ||
+                (coinData && coinData[0].amount < minGameAmount) ||
                 (betAmt !== undefined &&
                   maxBetAmt !== undefined &&
                   betAmt > maxBetAmt)
@@ -443,7 +444,7 @@ export default function Flip() {
                       !betType ||
                       loading ||
                       !session?.user ||
-                      (coinData && coinData[0].amount < 0.0001) ||
+                      (coinData && coinData[0].amount < minGameAmount) ||
                       (betAmt !== undefined &&
                         maxBetAmt !== undefined &&
                         betAmt > maxBetAmt)

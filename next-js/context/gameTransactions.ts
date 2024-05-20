@@ -24,7 +24,7 @@ export const wsEndpoint = process.env.NEXT_PUBLIC_WS_ENDPOINT!;
 
 const devPublicKey = new PublicKey(process.env.NEXT_PUBLIC_DEV_PUBLIC_KEY!);
 
-export const minGameAmount = 1e-6;
+export const minGameAmount = 1e-3;
 
 export const timeWeightedAvgInterval = 24 * 60 * 60 * 1000;
 export const timeWeightedAvgLimit = 100;
@@ -36,7 +36,6 @@ export const placeBet = async (
   betType: string,
   timeFrame: number,
 ) => {
-
   try {
     const res = await fetch(`/api/games/options`, {
       method: "POST",
@@ -58,7 +57,6 @@ export const placeBet = async (
       errorCustom(message);
       throw new Error(message);
     }
-
 
     successCustom("Bet placed successfully!");
 
@@ -147,7 +145,6 @@ export const deposit = async (
       throw new Error(message);
     }
 
-
     successCustom("Deposit successfull!");
 
     return { success: true, message };
@@ -204,7 +201,6 @@ export const withdraw = async (
       throw new Error(message);
     }
 
-
     successCustom("Withdrawal successfull!");
 
     return { success: true, message };
@@ -216,7 +212,6 @@ export const withdraw = async (
 };
 
 export const checkResult = async (wallet: WalletContextState) => {
-
   try {
     const res = await fetch(`/api/games/options/checkResult`, {
       method: "POST",
@@ -235,10 +230,8 @@ export const checkResult = async (wallet: WalletContextState) => {
       throw new Error(message);
     }
 
-
     return { success, message, data };
   } catch (error: any) {
-
     errorCustom("Unexpected error! Please try again.");
 
     return {

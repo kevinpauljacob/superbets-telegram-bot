@@ -31,6 +31,7 @@ import AutoCount from "@/components/AutoCount";
 import ConfigureAutoButton from "@/components/ConfigureAutoButton";
 import { errorCustom, warningCustom } from "@/components/toasts/ToastGroup";
 import { translator } from "@/context/transactions";
+import { minGameAmount } from "@/context/gameTransactions";
 import { useSession } from "next-auth/react";
 
 export default function Dice() {
@@ -408,7 +409,7 @@ export default function Dice() {
                 !session?.user ||
                 selectedFace.length === 0 ||
                 isRolling ||
-                (coinData && coinData[0].amount < 0.0001) ||
+                (coinData && coinData[0].amount < minGameAmount) ||
                 (betAmt !== undefined &&
                   maxBetAmt !== undefined &&
                   betAmt > maxBetAmt)
@@ -484,7 +485,7 @@ export default function Dice() {
                       !session?.user ||
                       selectedFace.length === 0 ||
                       isRolling ||
-                      (coinData && coinData[0].amount < 0.0001) ||
+                      (coinData && coinData[0].amount < minGameAmount) ||
                       (betAmt !== undefined &&
                         maxBetAmt !== undefined &&
                         betAmt > maxBetAmt)

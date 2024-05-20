@@ -28,6 +28,7 @@ import {
   warningCustom,
 } from "@/components/toasts/ToastGroup";
 import { translator, formatNumber } from "@/context/transactions";
+import { minGameAmount } from "@/context/gameTransactions";
 import { useSession } from "next-auth/react";
 
 export default function Keno() {
@@ -428,7 +429,7 @@ export default function Keno() {
                 !wallet ||
                 !session?.user ||
                 isRolling ||
-                (coinData && coinData[0].amount < 0.0001) ||
+                (coinData && coinData[0].amount < minGameAmount) ||
                 (betAmt !== undefined &&
                   maxBetAmt !== undefined &&
                   betAmt > maxBetAmt)
@@ -564,7 +565,7 @@ export default function Keno() {
                       !wallet ||
                       !session?.user ||
                       isRolling ||
-                      (coinData && coinData[0].amount < 0.0001) ||
+                      (coinData && coinData[0].amount < minGameAmount) ||
                       (betAmt !== undefined &&
                         maxBetAmt !== undefined &&
                         betAmt > maxBetAmt)
@@ -635,7 +636,7 @@ export default function Keno() {
         </div>
         <div className="relative flex w-full justify-between px-0 xl:px-4 mb-0 px:mb-6 gap-4">
           {coinData &&
-            coinData[0].amount > 0.0001 &&
+            coinData[0].amount > minGameAmount &&
             chosenNumbers.length > 0 && (
               <div className="w-full">
                 <div className="flex justify-between gap-[3px] sm:gap-3.5 lg:gap-2 2xl:gap-3.5 text-white w-full">
@@ -716,7 +717,7 @@ export default function Keno() {
             )}
 
           {!coinData ||
-            (coinData[0].amount < 0.0001 ? (
+            (coinData[0].amount < minGameAmount ? (
               <div className="w-full rounded-lg bg-[#d9d9d90d] bg-opacity-10 flex items-center px-3 py-3 text-white md:px-6">
                 <div className="w-full text-center font-changa font-medium text-sm md:text-base text-[#F0F0F0] text-opacity-75">
                   {translator(

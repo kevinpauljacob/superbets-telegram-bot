@@ -31,6 +31,7 @@ import {
   warningCustom,
 } from "@/components/toasts/ToastGroup";
 import { translator, formatNumber } from "@/context/transactions";
+import { minGameAmount } from "@/context/gameTransactions";
 import { useSession } from "next-auth/react";
 
 export default function Wheel() {
@@ -366,7 +367,7 @@ export default function Wheel() {
                 !wallet ||
                 !session?.user ||
                 isRolling ||
-                (coinData && coinData[0].amount < 0.0001) ||
+                (coinData && coinData[0].amount < minGameAmount) ||
                 (betAmt !== undefined &&
                   maxBetAmt !== undefined &&
                   betAmt > maxBetAmt)
@@ -506,7 +507,7 @@ export default function Wheel() {
                       !wallet ||
                       !session?.user ||
                       isRolling ||
-                      (coinData && coinData[0].amount < 0.0001) ||
+                      (coinData && coinData[0].amount < minGameAmount) ||
                       (betAmt !== undefined &&
                         maxBetAmt !== undefined &&
                         betAmt > maxBetAmt)
@@ -585,7 +586,7 @@ export default function Wheel() {
           </div>
         </div>
         <div className="relative flex w-full justify-between px-0 xl:px-4 mb-0 px:mb-6 gap-4">
-          {coinData && coinData[0].amount > 0.0001 && (
+          {coinData && coinData[0].amount > minGameAmount && (
             <>
               {uniqueSegments.map((segment, index) => {
                 const backgroundColor = segment.color; // Store segment.color in a separate variable
@@ -653,7 +654,7 @@ export default function Wheel() {
             </>
           )}
           {!coinData ||
-            (coinData[0].amount < 0.0001 && (
+            (coinData[0].amount < minGameAmount && (
               <div className="w-full rounded-lg bg-[#d9d9d90d] bg-opacity-10 flex items-center px-3 py-3 text-white md:px-6">
                 <div className="w-full text-center font-changa font-medium text-sm md:text-base text-[#F0F0F0] text-opacity-75">
                   {translator(

@@ -21,6 +21,7 @@ import BalanceAlert from "@/components/games/BalanceAlert";
 import { soundAlert } from "@/utils/soundUtils";
 import { errorCustom, successCustom } from "@/components/toasts/ToastGroup";
 import { translator, formatNumber } from "@/context/transactions";
+import { minGameAmount } from "@/context/gameTransactions";
 import { useSession } from "next-auth/react";
 
 const Timer = dynamic(() => import("../../components/games/Timer"), {
@@ -322,7 +323,7 @@ export default function Options() {
                   !betType ||
                   !session?.user ||
                   !coinData ||
-                  (coinData && coinData[0].amount < 0.0001) ||
+                  (coinData && coinData[0].amount < minGameAmount) ||
                   (betAmt !== undefined &&
                     maxBetAmt !== undefined &&
                     betAmt > maxBetAmt) ||
@@ -444,7 +445,7 @@ export default function Options() {
                   !betType ||
                   !session?.user ||
                   !coinData ||
-                  (coinData && coinData[0].amount < 0.0001) ||
+                  (coinData && coinData[0].amount < minGameAmount) ||
                   (betAmt !== undefined &&
                     maxBetAmt !== undefined &&
                     betAmt > maxBetAmt) ||

@@ -34,6 +34,7 @@ import {
   warningCustom,
 } from "@/components/toasts/ToastGroup";
 import { translator, formatNumber } from "@/context/transactions";
+import { minGameAmount } from "@/context/gameTransactions";
 import { useSession } from "next-auth/react";
 
 function useInterval(callback: Function, delay: number | null) {
@@ -359,7 +360,7 @@ export default function Limbo() {
               disabled={
                 loading ||
                 !session?.user ||
-                (coinData && coinData[0].amount < 0.0001) ||
+                (coinData && coinData[0].amount < minGameAmount) ||
                 (betAmt !== undefined &&
                   maxBetAmt !== undefined &&
                   betAmt > maxBetAmt)
@@ -441,7 +442,7 @@ export default function Limbo() {
                     disabled={
                       loading ||
                       !session?.user ||
-                      (coinData && coinData[0].amount < 0.0001) ||
+                      (coinData && coinData[0].amount < minGameAmount) ||
                       (betAmt !== undefined &&
                         maxBetAmt !== undefined &&
                         betAmt > maxBetAmt)
@@ -496,7 +497,7 @@ export default function Limbo() {
         </div>
 
         <div className="flex px-0 xl:px-4 mb-0 md:mb-[1.4rem] gap-4 flex-row w-full justify-between font-changa font-semibold">
-          {coinData && coinData[0].amount > 0.0001 && (
+          {coinData && coinData[0].amount > minGameAmount && (
             <>
               <MultiplierInput
                 inputMultiplier={inputMultiplier}
@@ -542,7 +543,7 @@ export default function Limbo() {
           )}
 
           {!coinData ||
-            (coinData[0].amount < 0.0001 && (
+            (coinData[0].amount < minGameAmount && (
               <div className="w-full rounded-lg bg-[#d9d9d90d] bg-opacity-10 flex items-center px-3 py-3 text-white md:px-6">
                 <div className="w-full text-center font-changa font-medium text-sm md:text-base text-[#F0F0F0] text-opacity-75">
                   {translator(
