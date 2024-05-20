@@ -128,7 +128,7 @@ export default function SubHeader() {
             <div className="flex items-center h-10 px-4 py-1 gap-2 border-2 border-white border-opacity-5 rounded-[5px]">
               <Image src={"/assets/sol.png"} alt="" width={20} height={17} />
               <span className="font-chakra text-2xl text-[#94A3B8]">
-                {truncateNumber(coinData ? 0.59999 : 0, 4)}
+                {truncateNumber(coinData ? coinData[0].amount : 0, 4)}
               </span>
             </div>
             <div
