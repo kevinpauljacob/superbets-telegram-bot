@@ -101,7 +101,11 @@ export const successCustom = (
   );
 };
 
-export const errorCustom = (text: any, position?: ToastPosition) => {
+export const errorCustom = (
+  text: any,
+  position?: ToastPosition,
+  duration: number = 2000,
+) => {
   toast.custom(
     (t) => (
       <div
@@ -125,13 +129,17 @@ export const errorCustom = (text: any, position?: ToastPosition) => {
       </div>
     ),
     {
-      duration: 2000,
+      duration,
       position: position ?? "bottom-right",
     },
   );
 };
 
-export const warningCustom = (text: any, position?: ToastPosition) => {
+export const warningCustom = (
+  text: any,
+  position?: ToastPosition,
+  duration: number = 2000,
+) => {
   toast.custom(
     (t) => (
       <div
@@ -155,7 +163,7 @@ export const warningCustom = (text: any, position?: ToastPosition) => {
       </div>
     ),
     {
-      duration: 2000,
+      duration,
       position: position ?? "bottom-right",
     },
   );

@@ -13,7 +13,11 @@ import {
 import { SPL_TOKENS } from "./config";
 import toast from "react-hot-toast";
 import { WalletContextState } from "@solana/wallet-adapter-react";
-import { errorCustom, successCustom } from "@/components/toasts/ToastGroup";
+import {
+  errorCustom,
+  successCustom,
+  warningCustom,
+} from "@/components/toasts/ToastGroup";
 
 export const connection = new Connection(
   process.env.NEXT_PUBLIC_RPC!,
@@ -141,7 +145,9 @@ export const deposit = async (
     const { success, message } = await res.json();
 
     if (success === false) {
-      errorCustom(message);
+      if (message.includes("limit exceeded"))
+        warningCustom(message, "bottom-right", 8000);
+      else errorCustom(message);
       throw new Error(message);
     }
 
@@ -197,7 +203,9 @@ export const withdraw = async (
     const { success, message } = await res.json();
 
     if (success === false) {
-      errorCustom(message);
+      if (message.includes("limit exceeded"))
+        warningCustom(message, "bottom-right", 8000);
+      else errorCustom(message);
       throw new Error(message);
     }
 
