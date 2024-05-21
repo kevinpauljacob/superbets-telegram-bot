@@ -29,6 +29,11 @@ const DepositSchema = new Schema(
       default: "completed",
       required: true,
     },
+    comments: {
+      type: String,
+      default: "NA",
+      required: true,
+    },
     txnSignature: {
       type: String,
       unique: true,

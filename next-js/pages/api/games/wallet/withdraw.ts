@@ -99,6 +99,28 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           .status(400)
           .json({ success: false, message: "Insufficient balance !" });
 
+      const result = await User.findOneAndUpdate(
+        {
+          wallet,
+          deposit: {
+            $elemMatch: {
+              tokenMint: tokenMint,
+              amount: { $gte: amount },
+            },
+          },
+        },
+        {
+          $inc: { "deposit.$.amount": -amount },
+        },
+        { new: true },
+      );
+
+      if (!result) {
+        throw new Error(
+          "Withdraw failed: insufficient funds or user not found",
+        );
+      }
+
       let { transaction: vTxn } = await createWithdrawTxn(
         new PublicKey(wallet),
         amount,
@@ -140,11 +162,26 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         },
       ]);
 
-      if (userAgg.length == 0)
+      if (userAgg.length == 0) {
+        await User.findOneAndUpdate(
+          {
+            wallet,
+            deposit: {
+              $elemMatch: {
+                tokenMint: tokenMint,
+              },
+            },
+          },
+          {
+            $inc: { "deposit.$.amount": amount },
+          },
+          { new: true },
+        );
         return res.status(400).json({
           success: false,
           message: "Unexpected error please retry in 5 mins !",
         });
+      }
 
       const initialTotals: Totals = { depositTotal: 0, withdrawalTotal: 0 };
 
@@ -165,6 +202,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           amount,
           type: false,
           tokenMint,
+          comments: "user net transfer exceeded !",
           status: "review",
         });
 
@@ -184,6 +222,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           wallet,
           amount,
           type: false,
+          comments: "global net transfer exceeded !",
           tokenMint,
           status: "review",
         });
@@ -194,35 +233,36 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         });
       }
 
-      const result = await User.findOneAndUpdate(
-        {
-          wallet,
-          deposit: {
-            $elemMatch: {
-              tokenMint: tokenMint,
-              amount: { $gte: amount },
-            },
-          },
-        },
-        {
-          $inc: { "deposit.$.amount": -amount },
-        },
-        { new: true },
-      );
-
-      if (!result) {
-        throw new Error(
-          "Withdraw failed: insufficient funds or user not found",
-        );
-      }
-
       txn.partialSign(devWalletKey);
 
-      const txnSignature = await retryTxn(
-        connection,
-        txn,
-        blockhashWithExpiryBlockHeight,
-      );
+      let txnSignature;
+
+      try {
+        txnSignature = await retryTxn(
+          connection,
+          txn,
+          blockhashWithExpiryBlockHeight,
+        );
+      } catch (e) {
+        await User.findOneAndUpdate(
+          {
+            wallet,
+            deposit: {
+              $elemMatch: {
+                tokenMint: tokenMint,
+              },
+            },
+          },
+          {
+            $inc: { "deposit.$.amount": amount },
+          },
+          { new: true },
+        );
+        return res.json({
+          success: false,
+          message: `Withdraw failed ! Please retry ... `,
+        });
+      }
 
       await TxnSignature.create({ txnSignature });
 
