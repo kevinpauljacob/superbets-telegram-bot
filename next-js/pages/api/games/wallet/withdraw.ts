@@ -12,6 +12,7 @@ import {
   timeWeightedAvgInterval,
   timeWeightedAvgLimit,
   isArrayUnique,
+  userLimitMultiplier,
 } from "../../../../context/gameTransactions";
 import connectDatabase from "../../../../utils/database";
 import Deposit from "../../../../models/games/deposit";
@@ -99,28 +100,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           .status(400)
           .json({ success: false, message: "Insufficient balance !" });
 
-      const result = await User.findOneAndUpdate(
-        {
-          wallet,
-          deposit: {
-            $elemMatch: {
-              tokenMint: tokenMint,
-              amount: { $gte: amount },
-            },
-          },
-        },
-        {
-          $inc: { "deposit.$.amount": -amount },
-        },
-        { new: true },
-      );
-
-      if (!result) {
-        throw new Error(
-          "Withdraw failed: insufficient funds or user not found",
-        );
-      }
-
       let { transaction: vTxn } = await createWithdrawTxn(
         new PublicKey(wallet),
         amount,
@@ -163,24 +142,32 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       ]);
 
       if (userAgg.length == 0) {
-        await User.findOneAndUpdate(
-          {
-            wallet,
-            deposit: {
-              $elemMatch: {
-                tokenMint: tokenMint,
-              },
-            },
-          },
-          {
-            $inc: { "deposit.$.amount": amount },
-          },
-          { new: true },
-        );
         return res.status(400).json({
           success: false,
           message: "Unexpected error please retry in 5 mins !",
         });
+      }
+
+      const result = await User.findOneAndUpdate(
+        {
+          wallet,
+          deposit: {
+            $elemMatch: {
+              tokenMint: tokenMint,
+              amount: { $gte: amount },
+            },
+          },
+        },
+        {
+          $inc: { "deposit.$.amount": -amount },
+        },
+        { new: true },
+      );
+
+      if (!result) {
+        throw new Error(
+          "Withdraw failed: insufficient funds or user not found",
+        );
       }
 
       const initialTotals: Totals = { depositTotal: 0, withdrawalTotal: 0 };
@@ -191,11 +178,20 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         return acc;
       }, initialTotals);
 
+      const route = `https://fomowtf.com/api/games/global/getUserHistory?wallet=${wallet}`;
+
+      let userBets = (await (await fetch(route)).json())?.data ?? [];
+
+      const totalVolume = userBets.reduce(
+        (sum: number, gameResult: any) => sum + gameResult.amount,
+        0,
+      );
+
       let userTransferAgg = userAgg.find((data) => data._id == wallet);
 
       if (
-        userTransferAgg.depositTotal <
-        10 * (userTransferAgg.withdrawalTotal + amount)
+        totalVolume <
+        userLimitMultiplier * (userTransferAgg.withdrawalTotal + amount)
       ) {
         await Deposit.create({
           wallet,

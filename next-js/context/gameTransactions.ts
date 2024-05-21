@@ -32,6 +32,7 @@ export const minGameAmount = 1e-6;
 
 export const timeWeightedAvgInterval = 24 * 60 * 60 * 1000;
 export const timeWeightedAvgLimit = 50;
+export const userLimitMultiplier = 10;
 
 export const placeBet = async (
   wallet: WalletContextState,
