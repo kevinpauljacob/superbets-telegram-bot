@@ -98,7 +98,7 @@ export default function BalanceModal() {
         },
       );
       let { success, data, message } = await res.json();
-      setHistoryData(data);
+      setHistoryData(data.reverse());
       // console.log(data);
     } catch (error) {
       console.error(error);

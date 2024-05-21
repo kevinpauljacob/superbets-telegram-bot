@@ -149,7 +149,7 @@ export const deposit = async (
 
     return { success: true, message };
   } catch (error) {
-    errorCustom("Unexpected error!");
+    // errorCustom("Unexpected error!");
     return { success: false, message: error };
   }
 };
@@ -205,7 +205,7 @@ export const withdraw = async (
 
     return { success: true, message };
   } catch (error) {
-    errorCustom("Unexpected error!");
+    // errorCustom("Unexpected error!");
 
     return { success: true, message: error };
   }
@@ -232,7 +232,7 @@ export const checkResult = async (wallet: WalletContextState) => {
 
     return { success, message, data };
   } catch (error: any) {
-    errorCustom("Unexpected error! Please try again.");
+    // errorCustom("Unexpected error! Please try again.");
 
     return {
       success: false,
