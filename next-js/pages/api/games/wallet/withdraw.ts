@@ -42,6 +42,11 @@ type InputType = {
   blockhashWithExpiryBlockHeight: BlockhashWithExpiryBlockHeight;
 };
 
+type Totals = {
+  depositTotal: number;
+  withdrawalTotal: number;
+};
+
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === "POST") {
     try {
@@ -109,8 +114,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           .status(400)
           .json({ success: false, message: "Transaction verfication failed" });
 
-      //Check if the time weighted average exceeds the limit
-      const transferAgg = await Deposit.aggregate([
+      // //Check if the time weighted average exceeds the limit
+      const userAgg = await Deposit.aggregate([
         {
           $match: {
             createdAt: {
@@ -120,7 +125,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         },
         {
           $group: {
-            _id: null,
+            _id: "$wallet",
             depositTotal: {
               $sum: {
                 $cond: [{ $eq: ["$type", true] }, "$amount", 0],
@@ -135,15 +140,43 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         },
       ]);
 
-      if (transferAgg.length == 0)
+      if (userAgg.length == 0)
         return res.status(400).json({
           success: false,
           message: "Unexpected error please retry in 5 mins !",
         });
 
+      const initialTotals: Totals = { depositTotal: 0, withdrawalTotal: 0 };
+
+      const transferAgg = userAgg.reduce<Totals>((acc, current) => {
+        acc.depositTotal += current.depositTotal;
+        acc.withdrawalTotal += current.withdrawalTotal;
+        return acc;
+      }, initialTotals);
+
+      let userTransferAgg = userAgg.find((data) => data._id == wallet);
+
+      if (
+        userTransferAgg.depositTotal <
+        10 * (userTransferAgg.withdrawalTotal + amount)
+      ) {
+        await Deposit.create({
+          wallet,
+          amount,
+          type: false,
+          tokenMint,
+          status: "review",
+        });
+
+        return res.status(400).json({
+          success: false,
+          message: "Withdrawal limit exceeded, added to queue for review",
+        });
+      }
+
       const netTransfer =
-        (transferAgg[0]?.withdrawalTotal ?? 0) -
-        (transferAgg[0]?.depositTotal ?? 0) +
+        (transferAgg.withdrawalTotal ?? 0) -
+        (transferAgg.depositTotal ?? 0) +
         amount;
 
       if (netTransfer > timeWeightedAvgLimit) {
