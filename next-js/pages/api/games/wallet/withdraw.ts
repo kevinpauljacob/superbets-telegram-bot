@@ -190,8 +190,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       let userTransferAgg = userAgg.find((data) => data._id == wallet);
 
       if (
-        totalVolume <
-        userLimitMultiplier * (userTransferAgg.withdrawalTotal + amount)
+        totalVolume * userLimitMultiplier <
+        userTransferAgg.withdrawalTotal + amount
       ) {
         await Deposit.create({
           wallet,
