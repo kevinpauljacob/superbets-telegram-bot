@@ -13,10 +13,15 @@ import { IoClose, IoCloseOutline } from "react-icons/io5";
 import Image from "next/image";
 import { timestampParser } from "@/utils/timestampParser";
 import { formatNumber } from "@/context/transactions";
+import { useRouter } from "next/router";
 
 export default function BalanceModal() {
   const methods = useForm();
   const wallet = useWallet();
+
+  const router = useRouter();
+
+  const { c: campaignId } = router.query;
 
   const token = "SOL";
 
@@ -45,7 +50,7 @@ export default function BalanceModal() {
 
       try {
         if (actionType === "Deposit")
-          response = await deposit(wallet, amount, token);
+          response = await deposit(wallet, amount, token, campaignId);
         else response = await withdraw(wallet, amount, token);
 
         if (response && response.success) {
