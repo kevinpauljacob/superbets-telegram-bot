@@ -11,6 +11,7 @@ import {
   verifyFrontendTransaction,
   timeWeightedAvgInterval,
   timeWeightedAvgLimit,
+  isArrayUnique,
 } from "../../../../context/gameTransactions";
 import connectDatabase from "../../../../utils/database";
 import Deposit from "../../../../models/games/deposit";
@@ -113,7 +114,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         {
           $match: {
             createdAt: {
-              $gte: Date.now() - timeWeightedAvgInterval,
+              $gte: new Date(Date.now() - timeWeightedAvgInterval),
             },
           },
         },
@@ -134,11 +135,16 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         },
       ]);
 
+      if (transferAgg.length == 0)
+        return res.status(400).json({
+          success: false,
+          message: "Unexpected error please retry in 5 mins !",
+        });
+
       const netTransfer =
-        ((transferAgg[0]?.withdrawalTotal ?? 0) -
-          (transferAgg[0]?.depositTotal ?? 0) +
-          amount) /
-        24;
+        (transferAgg[0]?.withdrawalTotal ?? 0) -
+        (transferAgg[0]?.depositTotal ?? 0) +
+        amount;
 
       if (netTransfer > timeWeightedAvgLimit) {
         await Deposit.create({

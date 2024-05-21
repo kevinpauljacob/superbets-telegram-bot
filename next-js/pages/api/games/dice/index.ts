@@ -1,7 +1,11 @@
 import connectDatabase from "../../../../utils/database";
 import { getToken } from "next-auth/jwt";
 import { NextApiRequest, NextApiResponse } from "next";
-import { wsEndpoint, minGameAmount } from "@/context/gameTransactions";
+import {
+  wsEndpoint,
+  minGameAmount,
+  isArrayUnique,
+} from "@/context/gameTransactions";
 import { GameSeed, User, Dice } from "@/models/games";
 import {
   GameType,
@@ -64,7 +68,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           chosenNumbers.every(
             (v: any) => Number.isInteger(v) && v >= 1 && v <= 6,
           )
-        )
+        ) ||
+        !isArrayUnique(chosenNumbers)
       )
         return res
           .status(400)

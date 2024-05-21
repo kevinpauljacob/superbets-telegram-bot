@@ -14,7 +14,11 @@ import {
   maxPayouts,
   pointTiers,
 } from "@/context/transactions";
-import { minGameAmount, wsEndpoint } from "@/context/gameTransactions";
+import {
+  isArrayUnique,
+  minGameAmount,
+  wsEndpoint,
+} from "@/context/gameTransactions";
 import { riskToChance } from "@/components/games/Keno/RiskToChance";
 import { Decimal } from "decimal.js";
 Decimal.set({ precision: 9 });
@@ -70,7 +74,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           risk === "low" ||
           risk === "medium" ||
           risk === "high"
-        )
+        ) ||
+        !isArrayUnique(chosenNumbers)
       )
         return res
           .status(400)

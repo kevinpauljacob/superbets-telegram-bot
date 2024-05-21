@@ -27,155 +27,159 @@ type InputType = {
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === "POST") {
     try {
-      let { wallet, gameId }: InputType = req.body;
+      return res
+        .status(400)
+        .json({ success: false, message: "GAME UNDER DEVELOPMENT !" });
 
-      const token = await getToken({ req, secret });
+      // let { wallet, gameId }: InputType = req.body;
 
-      if (!token || !token.sub || token.sub != wallet)
-        return res.status(400).json({
-          success: false,
-          message: "User wallet not authenticated",
-        });
+      // const token = await getToken({ req, secret });
 
-      await connectDatabase();
+      // if (!token || !token.sub || token.sub != wallet)
+      //   return res.status(400).json({
+      //     success: false,
+      //     message: "User wallet not authenticated",
+      //   });
 
-      if (!wallet || !gameId)
-        return res
-          .status(400)
-          .json({ success: false, message: "Missing parameters" });
+      // await connectDatabase();
 
-      let user = await User.findOne({ wallet });
+      // if (!wallet || !gameId)
+      //   return res
+      //     .status(400)
+      //     .json({ success: false, message: "Missing parameters" });
 
-      if (!user)
-        return res
-          .status(400)
-          .json({ success: false, message: "User does not exist !" });
+      // let user = await User.findOne({ wallet });
 
-      let gameInfo = await Hilo.findOne({
-        _id: gameId,
-        result: "Pending",
-      }).populate("gameSeed");
+      // if (!user)
+      //   return res
+      //     .status(400)
+      //     .json({ success: false, message: "User does not exist !" });
 
-      if (!gameInfo)
-        return res
-          .status(400)
-          .json({ success: false, message: "Game does not exist !" });
+      // let gameInfo = await Hilo.findOne({
+      //   _id: gameId,
+      //   result: "Pending",
+      // }).populate("gameSeed");
 
-      let {
-        nonce,
-        gameSeed,
-        startNumber,
-        amountWon,
-        amount,
-        strikeMultiplier,
-      } = gameInfo;
+      // if (!gameInfo)
+      //   return res
+      //     .status(400)
+      //     .json({ success: false, message: "Game does not exist !" });
 
-      const strikeNumbers = generateGameResult(
-        gameSeed.serverSeed,
-        gameSeed.clientSeed,
-        nonce,
-        GameType.mines,
-        startNumber,
-      );
+      // let {
+      //   nonce,
+      //   gameSeed,
+      //   startNumber,
+      //   amountWon,
+      //   amount,
+      //   strikeMultiplier,
+      // } = gameInfo;
 
-      const userData = await StakingUser.findOneAndUpdate(
-        { wallet },
-        {},
-        { upsert: true, new: true },
-      );
-      const userTier = userData?.tier ?? 0;
-      const houseEdge = launchPromoEdge ? 0 : houseEdgeTiers[userTier];
+      // const strikeNumbers = generateGameResult(
+      //   gameSeed.serverSeed,
+      //   gameSeed.clientSeed,
+      //   nonce,
+      //   GameType.mines,
+      //   startNumber,
+      // );
 
-      amountWon = Decimal.mul(amountWon, Decimal.sub(1, houseEdge)).toNumber();
-      const result = "Won";
+      // const userData = await StakingUser.findOneAndUpdate(
+      //   { wallet },
+      //   {},
+      //   { upsert: true, new: true },
+      // );
+      // const userTier = userData?.tier ?? 0;
+      // const houseEdge = launchPromoEdge ? 0 : houseEdgeTiers[userTier];
 
-      const userUpdate = await User.findOneAndUpdate(
-        {
-          wallet,
-          deposit: {
-            $elemMatch: {
-              tokenMint: "SOL",
-            },
-          },
-        },
-        {
-          $inc: {
-            "deposit.$.amount": amountWon,
-            numOfGamesPlayed: 1,
-          },
-        },
-        {
-          new: true,
-        },
-      );
+      // amountWon = Decimal.mul(amountWon, Decimal.sub(1, houseEdge)).toNumber();
+      // const result = "Won";
 
-      if (!userUpdate) {
-        throw new Error("Insufficient balance for action!!");
-      }
+      // const userUpdate = await User.findOneAndUpdate(
+      //   {
+      //     wallet,
+      //     deposit: {
+      //       $elemMatch: {
+      //         tokenMint: "SOL",
+      //       },
+      //     },
+      //   },
+      //   {
+      //     $inc: {
+      //       "deposit.$.amount": amountWon,
+      //       numOfGamesPlayed: 1,
+      //     },
+      //   },
+      //   {
+      //     new: true,
+      //   },
+      // );
 
-      const record = await Hilo.findOneAndUpdate(
-        {
-          _id: gameId,
-          result: "Pending",
-        },
-        {
-          result,
-          strikeNumbers,
-          houseEdge,
-          amountWon,
-        },
-        { new: true },
-      ).populate("gameSeed");
+      // if (!userUpdate) {
+      //   throw new Error("Insufficient balance for action!!");
+      // }
 
-      const pointsGained =
-        0 * user.numOfGamesPlayed + 1.4 * amount * userData.multiplier;
+      // const record = await Hilo.findOneAndUpdate(
+      //   {
+      //     _id: gameId,
+      //     result: "Pending",
+      //   },
+      //   {
+      //     result,
+      //     strikeNumbers,
+      //     houseEdge,
+      //     amountWon,
+      //   },
+      //   { new: true },
+      // ).populate("gameSeed");
 
-      const points = userData.points + pointsGained;
-      const newTier = Object.entries(pointTiers).reduce((prev, next) => {
-        return points >= next[1]?.limit ? next : prev;
-      })[0];
+      // const pointsGained =
+      //   0 * user.numOfGamesPlayed + 1.4 * amount * userData.multiplier;
 
-      await StakingUser.findOneAndUpdate(
-        {
-          wallet,
-        },
-        {
-          $inc: {
-            points: pointsGained,
-          },
-          $set: {
-            tier: newTier,
-          },
-        },
-      );
+      // const points = userData.points + pointsGained;
+      // const newTier = Object.entries(pointTiers).reduce((prev, next) => {
+      //   return points >= next[1]?.limit ? next : prev;
+      // })[0];
 
-      const { gameSeed: savedGS, ...rest } = record.toObject();
-      rest.game = GameType.dice;
-      rest.userTier = parseInt(newTier);
-      rest.gameSeed = { ...savedGS, serverSeed: undefined };
+      // await StakingUser.findOneAndUpdate(
+      //   {
+      //     wallet,
+      //   },
+      //   {
+      //     $inc: {
+      //       points: pointsGained,
+      //     },
+      //     $set: {
+      //       tier: newTier,
+      //     },
+      //   },
+      // );
 
-      const payload = rest;
+      // const { gameSeed: savedGS, ...rest } = record.toObject();
+      // rest.game = GameType.dice;
+      // rest.userTier = parseInt(newTier);
+      // rest.gameSeed = { ...savedGS, serverSeed: undefined };
 
-      const socket = new WebSocket(wsEndpoint);
+      // const payload = rest;
 
-      socket.onopen = () => {
-        socket.send(
-          JSON.stringify({
-            clientType: "api-client",
-            channel: "fomo-casino_games-channel",
-            authKey: process.env.FOMO_CHANNEL_AUTH_KEY!,
-            payload,
-          }),
-        );
+      // const socket = new WebSocket(wsEndpoint);
 
-        socket.close();
-      };
+      // socket.onopen = () => {
+      //   socket.send(
+      //     JSON.stringify({
+      //       clientType: "api-client",
+      //       channel: "fomo-casino_games-channel",
+      //       authKey: process.env.FOMO_CHANNEL_AUTH_KEY!,
+      //       payload,
+      //     }),
+      //   );
 
-      return res.status(201).json({
-        success: true,
-        message: "Congratulations! You won!",
-        result,
-      });
+      //   socket.close();
+      // };
+
+      // return res.status(201).json({
+      //   success: true,
+      //   message: "Congratulations! You won!",
+      //   result,
+      // });
     } catch (e: any) {
       console.log(e);
       return res.status(500).json({ success: false, message: e.message });

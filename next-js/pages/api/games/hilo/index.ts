@@ -21,112 +21,116 @@ type InputType = {
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === "POST") {
     try {
-      let { wallet, amount, tokenMint, startNumber }: InputType = req.body;
+      return res
+        .status(400)
+        .json({ success: false, message: "GAME UNDER DEVELOPMENT !" });
 
-      const token = await getToken({ req, secret });
+      // let { wallet, amount, tokenMint, startNumber }: InputType = req.body;
 
-      if (!token || !token.sub || token.sub != wallet)
-        return res.status(400).json({
-          success: false,
-          message: "User wallet not authenticated",
-        });
+      // const token = await getToken({ req, secret });
 
-      if (!wallet || !amount || !tokenMint || !startNumber)
-        return res
-          .status(400)
-          .json({ success: false, message: "Missing parameters" });
+      // if (!token || !token.sub || token.sub != wallet)
+      //   return res.status(400).json({
+      //     success: false,
+      //     message: "User wallet not authenticated",
+      //   });
 
-      if (amount < minGameAmount)
-        return res.status(400).json({
-          success: false,
-          message: "Invalid bet amount",
-        });
+      // if (!wallet || !amount || !tokenMint || !startNumber)
+      //   return res
+      //     .status(400)
+      //     .json({ success: false, message: "Missing parameters" });
 
-      if (tokenMint !== "SOL" || !(1 <= startNumber && startNumber <= 52))
-        return res
-          .status(400)
-          .json({ success: false, message: "Invalid parameters" });
+      // if (amount < minGameAmount)
+      //   return res.status(400).json({
+      //     success: false,
+      //     message: "Invalid bet amount",
+      //   });
 
-      await connectDatabase();
+      // if (tokenMint !== "SOL" || !(1 <= startNumber && startNumber <= 52))
+      //   return res
+      //     .status(400)
+      //     .json({ success: false, message: "Invalid parameters" });
 
-      let user = await User.findOne({ wallet });
+      // await connectDatabase();
 
-      if (!user)
-        return res
-          .status(400)
-          .json({ success: false, message: "User does not exist !" });
+      // let user = await User.findOne({ wallet });
 
-      if (
-        user.deposit.find((d: any) => d.tokenMint === tokenMint)?.amount <
-        amount
-      )
-        return res
-          .status(400)
-          .json({ success: false, message: "Insufficient balance !" });
+      // if (!user)
+      //   return res
+      //     .status(400)
+      //     .json({ success: false, message: "User does not exist !" });
 
-      const activeGameSeed = await GameSeed.findOneAndUpdate(
-        {
-          wallet,
-          status: seedStatus.ACTIVE,
-        },
-        {
-          $inc: {
-            nonce: 1,
-          },
-        },
-        { new: true },
-      );
+      // if (
+      //   user.deposit.find((d: any) => d.tokenMint === tokenMint)?.amount <
+      //   amount
+      // )
+      //   return res
+      //     .status(400)
+      //     .json({ success: false, message: "Insufficient balance !" });
 
-      if (!activeGameSeed) {
-        throw new Error("Server hash not found!");
-      }
+      // const activeGameSeed = await GameSeed.findOneAndUpdate(
+      //   {
+      //     wallet,
+      //     status: seedStatus.ACTIVE,
+      //   },
+      //   {
+      //     $inc: {
+      //       nonce: 1,
+      //     },
+      //   },
+      //   { new: true },
+      // );
 
-      const { nonce } = activeGameSeed;
+      // if (!activeGameSeed) {
+      //   throw new Error("Server hash not found!");
+      // }
 
-      let result = "Pending";
+      // const { nonce } = activeGameSeed;
 
-      const userUpdate = await User.findOneAndUpdate(
-        {
-          wallet,
-          deposit: {
-            $elemMatch: {
-              tokenMint,
-              amount: { $gte: amount },
-            },
-          },
-        },
-        {
-          $inc: {
-            "deposit.$.amount": -amount,
-          },
-        },
-        {
-          new: true,
-        },
-      );
+      // let result = "Pending";
 
-      if (!userUpdate) {
-        throw new Error("Insufficient balance for action!!");
-      }
+      // const userUpdate = await User.findOneAndUpdate(
+      //   {
+      //     wallet,
+      //     deposit: {
+      //       $elemMatch: {
+      //         tokenMint,
+      //         amount: { $gte: amount },
+      //       },
+      //     },
+      //   },
+      //   {
+      //     $inc: {
+      //       "deposit.$.amount": -amount,
+      //     },
+      //   },
+      //   {
+      //     new: true,
+      //   },
+      // );
 
-      const hiloGame = await Hilo.create({
-        wallet,
-        amount,
-        startNumber,
-        strikeMultiplier: 1,
-        result,
-        tokenMint,
-        amountWon: 0,
-        amountLost: 0,
-        nonce,
-        gameSeed: activeGameSeed._id,
-      });
+      // if (!userUpdate) {
+      //   throw new Error("Insufficient balance for action!!");
+      // }
 
-      return res.status(201).json({
-        success: true,
-        gameId: hiloGame._id,
-        message: "Hilo game created",
-      });
+      // const hiloGame = await Hilo.create({
+      //   wallet,
+      //   amount,
+      //   startNumber,
+      //   strikeMultiplier: 1,
+      //   result,
+      //   tokenMint,
+      //   amountWon: 0,
+      //   amountLost: 0,
+      //   nonce,
+      //   gameSeed: activeGameSeed._id,
+      // });
+
+      // return res.status(201).json({
+      //   success: true,
+      //   gameId: hiloGame._id,
+      //   message: "Hilo game created",
+      // });
     } catch (e: any) {
       console.log(e);
       return res.status(500).json({ success: false, message: e.message });

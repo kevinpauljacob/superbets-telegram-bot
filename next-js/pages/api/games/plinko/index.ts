@@ -75,214 +75,218 @@ const riskToChance: RiskToChance = {
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === "POST") {
     try {
-      let { wallet, amount, tokenMint, rows, risk }: InputType = req.body;
+      return res
+        .status(400)
+        .json({ success: false, message: "GAME UNDER DEVELOPMENT !" });
 
-      const token = await getToken({ req, secret });
+      // let { wallet, amount, tokenMint, rows, risk }: InputType = req.body;
 
-      if (!token || !token.sub || token.sub != wallet)
-        return res.status(400).json({
-          success: false,
-          message: "User wallet not authenticated",
-        });
+      // const token = await getToken({ req, secret });
 
-      if (!wallet || !amount || !tokenMint || !rows || !risk)
-        return res
-          .status(400)
-          .json({ success: false, message: "Missing parameters" });
+      // if (!token || !token.sub || token.sub != wallet)
+      //   return res.status(400).json({
+      //     success: false,
+      //     message: "User wallet not authenticated",
+      //   });
 
-      if (amount < minGameAmount)
-        return res.status(400).json({
-          success: false,
-          message: "Invalid bet amount",
-        });
+      // if (!wallet || !amount || !tokenMint || !rows || !risk)
+      //   return res
+      //     .status(400)
+      //     .json({ success: false, message: "Missing parameters" });
 
-      if (
-        tokenMint !== "SOL" ||
-        !(10 <= rows && rows <= 50 && rows % 10 === 0) ||
-        !(risk === "low" || risk === "medium" || risk === "high")
-      )
-        return res
-          .status(400)
-          .json({ success: false, message: "Invalid parameters" });
+      // if (amount < minGameAmount)
+      //   return res.status(400).json({
+      //     success: false,
+      //     message: "Invalid bet amount",
+      //   });
 
-      const multiplier = riskToChance[risk][rows];
-      const maxStrikeMultiplier = multiplier.at(-1)!;
-      const maxPayout = Decimal.mul(amount, maxStrikeMultiplier);
+      // if (
+      //   tokenMint !== "SOL" ||
+      //   !(10 <= rows && rows <= 50 && rows % 10 === 0) ||
+      //   !(risk === "low" || risk === "medium" || risk === "high")
+      // )
+      //   return res
+      //     .status(400)
+      //     .json({ success: false, message: "Invalid parameters" });
 
-      if (!(maxPayout.toNumber() < maxPayouts.plinko))
-        return res
-          .status(400)
-          .json({ success: false, message: "Max payout exceeded" });
+      // const multiplier = riskToChance[risk][rows];
+      // const maxStrikeMultiplier = multiplier.at(-1)!;
+      // const maxPayout = Decimal.mul(amount, maxStrikeMultiplier);
 
-      await connectDatabase();
+      // if (!(maxPayout.toNumber() < maxPayouts.plinko))
+      //   return res
+      //     .status(400)
+      //     .json({ success: false, message: "Max payout exceeded" });
 
-      let user = await User.findOne({ wallet });
+      // await connectDatabase();
 
-      if (!user)
-        return res
-          .status(400)
-          .json({ success: false, message: "User does not exist !" });
+      // let user = await User.findOne({ wallet });
 
-      if (
-        user.deposit.find((d: any) => d.tokenMint === tokenMint)?.amount <
-        amount
-      )
-        return res
-          .status(400)
-          .json({ success: false, message: "Insufficient balance !" });
+      // if (!user)
+      //   return res
+      //     .status(400)
+      //     .json({ success: false, message: "User does not exist !" });
 
-      const userData = await StakingUser.findOneAndUpdate(
-        { wallet },
-        {},
-        { upsert: true, new: true },
-      );
-      const userTier = userData?.tier ?? 0;
-      const houseEdge = launchPromoEdge ? 0 : houseEdgeTiers[userTier];
+      // if (
+      //   user.deposit.find((d: any) => d.tokenMint === tokenMint)?.amount <
+      //   amount
+      // )
+      //   return res
+      //     .status(400)
+      //     .json({ success: false, message: "Insufficient balance !" });
 
-      const activeGameSeed = await GameSeed.findOneAndUpdate(
-        {
-          wallet,
-          status: seedStatus.ACTIVE,
-        },
-        {
-          $inc: {
-            nonce: 1,
-          },
-        },
-        { new: true },
-      );
+      // const userData = await StakingUser.findOneAndUpdate(
+      //   { wallet },
+      //   {},
+      //   { upsert: true, new: true },
+      // );
+      // const userTier = userData?.tier ?? 0;
+      // const houseEdge = launchPromoEdge ? 0 : houseEdgeTiers[userTier];
 
-      if (!activeGameSeed) {
-        throw new Error("Server hash not found!");
-      }
+      // const activeGameSeed = await GameSeed.findOneAndUpdate(
+      //   {
+      //     wallet,
+      //     status: seedStatus.ACTIVE,
+      //   },
+      //   {
+      //     $inc: {
+      //       nonce: 1,
+      //     },
+      //   },
+      //   { new: true },
+      // );
 
-      const { serverSeed, clientSeed, nonce } = activeGameSeed;
+      // if (!activeGameSeed) {
+      //   throw new Error("Server hash not found!");
+      // }
 
-      const strikeNumber =
-        generateGameResult(
-          serverSeed,
-          clientSeed,
-          nonce,
-          GameType.plinko,
-          rows,
-        ) % Math.pow(2, rows);
+      // const { serverSeed, clientSeed, nonce } = activeGameSeed;
 
-      if (!strikeNumber) throw new Error("Invalid strike number!");
+      // const strikeNumber =
+      //   generateGameResult(
+      //     serverSeed,
+      //     clientSeed,
+      //     nonce,
+      //     GameType.plinko,
+      //     rows,
+      //   ) % Math.pow(2, rows);
 
-      let strikeMultiplier = 1;
-      for (
-        let i = 1, chance = 1, totalChance = chance;
-        i <= rows;
-        ++i, chance = (chance * (rows - i + 1)) / i, totalChance += chance
-      ) {
-        if (strikeNumber <= totalChance) {
-          strikeMultiplier = multiplier[i - 1];
-        }
-      }
+      // if (!strikeNumber) throw new Error("Invalid strike number!");
 
-      const amountWon = Decimal.mul(amount, strikeMultiplier).mul(
-        Decimal.sub(1, houseEdge),
-      );
-      const amountLost = Math.max(
-        new Decimal(amount).sub(amountWon).toNumber(),
-        0,
-      );
+      // let strikeMultiplier = 1;
+      // for (
+      //   let i = 1, chance = 1, totalChance = chance;
+      //   i <= rows;
+      //   ++i, chance = (chance * (rows - i + 1)) / i, totalChance += chance
+      // ) {
+      //   if (strikeNumber <= totalChance) {
+      //     strikeMultiplier = multiplier[i - 1];
+      //   }
+      // }
 
-      const userUpdate = await User.findOneAndUpdate(
-        {
-          wallet,
-          deposit: {
-            $elemMatch: {
-              tokenMint,
-              amount: { $gte: amount },
-            },
-          },
-        },
-        {
-          $inc: {
-            "deposit.$.amount": amountWon.sub(amount),
-            numOfGamesPlayed: 1,
-          },
-        },
-        {
-          new: true,
-        },
-      );
+      // const amountWon = Decimal.mul(amount, strikeMultiplier).mul(
+      //   Decimal.sub(1, houseEdge),
+      // );
+      // const amountLost = Math.max(
+      //   new Decimal(amount).sub(amountWon).toNumber(),
+      //   0,
+      // );
 
-      if (!userUpdate) {
-        throw new Error("Insufficient balance for action!!");
-      }
+      // const userUpdate = await User.findOneAndUpdate(
+      //   {
+      //     wallet,
+      //     deposit: {
+      //       $elemMatch: {
+      //         tokenMint,
+      //         amount: { $gte: amount },
+      //       },
+      //     },
+      //   },
+      //   {
+      //     $inc: {
+      //       "deposit.$.amount": amountWon.sub(amount),
+      //       numOfGamesPlayed: 1,
+      //     },
+      //   },
+      //   {
+      //     new: true,
+      //   },
+      // );
 
-      const result = amountWon.toNumber() > amount ? "Won" : "Lost";
-      const plinko = new Plinko({
-        wallet,
-        amount,
-        rows,
-        risk,
-        strikeNumber,
-        strikeMultiplier,
-        tokenMint,
-        houseEdge,
-        result,
-        amountWon,
-        amountLost,
-        nonce,
-        GameSeedId: activeGameSeed._id,
-      });
-      await plinko.save();
+      // if (!userUpdate) {
+      //   throw new Error("Insufficient balance for action!!");
+      // }
 
-      const pointsGained =
-        0 * user.numOfGamesPlayed + 1.4 * amount * userData.multiplier;
+      // const result = amountWon.toNumber() > amount ? "Won" : "Lost";
+      // const plinko = new Plinko({
+      //   wallet,
+      //   amount,
+      //   rows,
+      //   risk,
+      //   strikeNumber,
+      //   strikeMultiplier,
+      //   tokenMint,
+      //   houseEdge,
+      //   result,
+      //   amountWon,
+      //   amountLost,
+      //   nonce,
+      //   GameSeedId: activeGameSeed._id,
+      // });
+      // await plinko.save();
 
-      const points = userData.points + pointsGained;
-      const newTier = Object.entries(pointTiers).reduce((prev, next) => {
-        return points >= next[1]?.limit ? next : prev;
-      })[0];
+      // const pointsGained =
+      //   0 * user.numOfGamesPlayed + 1.4 * amount * userData.multiplier;
 
-      await StakingUser.findOneAndUpdate(
-        {
-          wallet,
-        },
-        {
-          $inc: {
-            points: pointsGained,
-          },
-          $set: {
-            tier: newTier,
-          },
-        },
-      );
+      // const points = userData.points + pointsGained;
+      // const newTier = Object.entries(pointTiers).reduce((prev, next) => {
+      //   return points >= next[1]?.limit ? next : prev;
+      // })[0];
 
-      const record = await Plinko.populate(plinko, "gameSeed");
-      const { gameSeed, ...rest } = record.toObject();
-      rest.game = GameType.plinko;
-      rest.userTier = parseInt(newTier);
-      rest.gameSeed = { ...gameSeed, serverSeed: undefined };
+      // await StakingUser.findOneAndUpdate(
+      //   {
+      //     wallet,
+      //   },
+      //   {
+      //     $inc: {
+      //       points: pointsGained,
+      //     },
+      //     $set: {
+      //       tier: newTier,
+      //     },
+      //   },
+      // );
 
-      const payload = rest;
+      // const record = await Plinko.populate(plinko, "gameSeed");
+      // const { gameSeed, ...rest } = record.toObject();
+      // rest.game = GameType.plinko;
+      // rest.userTier = parseInt(newTier);
+      // rest.gameSeed = { ...gameSeed, serverSeed: undefined };
 
-      const socket = new WebSocket(wsEndpoint);
+      // const payload = rest;
 
-      socket.onopen = () => {
-        socket.send(
-          JSON.stringify({
-            clientType: "api-client",
-            channel: "fomo-casino_games-channel",
-            authKey: process.env.FOMO_CHANNEL_AUTH_KEY!,
-            payload,
-          }),
-        );
+      // const socket = new WebSocket(wsEndpoint);
 
-        socket.close();
-      };
+      // socket.onopen = () => {
+      //   socket.send(
+      //     JSON.stringify({
+      //       clientType: "api-client",
+      //       channel: "fomo-casino_games-channel",
+      //       authKey: process.env.FOMO_CHANNEL_AUTH_KEY!,
+      //       payload,
+      //     }),
+      //   );
 
-      return res.status(201).json({
-        success: true,
-        message: `Congratulations! You Won ${amountWon}`,
-        strikeNumber,
-        amountWon,
-        amountLost,
-      });
+      //   socket.close();
+      // };
+
+      // return res.status(201).json({
+      //   success: true,
+      //   message: `Congratulations! You Won ${amountWon}`,
+      //   strikeNumber,
+      //   amountWon,
+      //   amountLost,
+      // });
     } catch (e: any) {
       console.log(e);
       return res.status(500).json({ success: false, message: e.message });
