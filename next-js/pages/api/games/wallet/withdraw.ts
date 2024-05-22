@@ -22,6 +22,7 @@ import { getToken } from "next-auth/jwt";
 import { bs58 } from "@project-serum/anchor/dist/cjs/utils/bytes";
 import TxnSignature from "../../../../models/txnSignature";
 import { NextApiRequest, NextApiResponse } from "next";
+import { v4 as uuidv4 } from "uuid";
 
 const secret = process.env.NEXTAUTH_SECRET;
 
@@ -115,6 +116,20 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           .status(400)
           .json({ success: false, message: "Transaction verfication failed" });
 
+      let isPendingWithdraw = await Deposit.findOne({
+        wallet,
+        status: "review",
+      });
+
+      if (isPendingWithdraw)
+        return res
+          .status(400)
+          .json({
+            success: false,
+            message:
+              "You have a pending withdrawal. Please wait for it to be processed !",
+          });
+
       // //Check if the time weighted average exceeds the limit
       const userAgg = await Deposit.aggregate([
         {
@@ -187,7 +202,11 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         0,
       );
 
-      let userTransferAgg = userAgg.find((data) => data._id == wallet);
+      let userTransferAgg = userAgg.find((data) => data._id == wallet) ?? {
+        wallet: wallet,
+        withdrawalTotal: 0,
+        depositTotal: 0,
+      };
 
       if (
         totalVolume * userLimitMultiplier <
@@ -198,6 +217,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           amount,
           type: false,
           tokenMint,
+          txnSignature: uuidv4().toString(),
           comments: "user net transfer exceeded !",
           status: "review",
         });
@@ -219,6 +239,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           amount,
           type: false,
           comments: "global net transfer exceeded !",
+          txnSignature: uuidv4().toString(),
           tokenMint,
           status: "review",
         });
@@ -240,20 +261,20 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           blockhashWithExpiryBlockHeight,
         );
       } catch (e) {
-        await User.findOneAndUpdate(
-          {
-            wallet,
-            deposit: {
-              $elemMatch: {
-                tokenMint: tokenMint,
-              },
-            },
-          },
-          {
-            $inc: { "deposit.$.amount": amount },
-          },
-          { new: true },
-        );
+        // await User.findOneAndUpdate(
+        //   {
+        //     wallet,
+        //     deposit: {
+        //       $elemMatch: {
+        //         tokenMint: tokenMint,
+        //       },
+        //     },
+        //   },
+        //   {
+        //     $inc: { "deposit.$.amount": amount },
+        //   },
+        //   { new: true },
+        // );
         return res.json({
           success: false,
           message: `Withdraw failed ! Please retry ... `,
