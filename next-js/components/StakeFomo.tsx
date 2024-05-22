@@ -89,12 +89,6 @@ export default function StakeFomo() {
     }
   };
 
-  const handleDoubleStake = () => {
-    if (solBal > 0) {
-      setAmount(solBal * 2);
-    }
-  };
-
   const handleSetMaxStake = () => {
     stake ? setAmount(solBal) : setAmount(userData?.stakedAmount ?? 0);
   };
@@ -171,15 +165,6 @@ export default function StakeFomo() {
           }}
         >
           1/2
-        </button>
-        <button
-          type="button"
-          className="text-xs mx-2 font-medium text-white text-opacity-50 disabled:cursor-default disabled:opacity-50 bg-[#292C32] hover:bg-[#47484A] focus:bg-[#47484A] transition-all hover:duration-75 rounded-[5px] py-1.5 px-4"
-          onClick={() => {
-            handleDoubleStake();
-          }}
-        >
-          2x
         </button>
         <button
           type="button"
