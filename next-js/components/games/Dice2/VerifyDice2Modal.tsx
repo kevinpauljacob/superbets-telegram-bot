@@ -16,8 +16,7 @@ export interface Dice2 {
   amount: number;
   result: string;
   strikeNumber: number;
-  risk?:string;
-  segments?:number;
+  strikeMultiplier: number;
   amountWon: number;
   chance: number;
   nonce?: number;
@@ -145,10 +144,7 @@ export default function VerifyDice2Modal({
                   {translator("Multiplier", language)}
                 </div>
                 <div className="text-white font-chakra text-xs font-medium">
-                  {bet.direction === "over"
-                    ? (98 / (100 - (100 - bet.chance))).toFixed(2)
-                    : (98 / (100 - bet.chance)).toFixed(2)}{" "}
-                  x
+                  {bet.strikeMultiplier} x
                 </div>
               </button>
               <button className="px-1 py-3 flex flex-col items-center justify-center w-full text-white rounded-md bg-[#202329]">
@@ -181,11 +177,7 @@ export default function VerifyDice2Modal({
                   <input
                     type="text"
                     name="multiplier"
-                    value={
-                      bet.direction === "over"
-                        ? (98 / (100 - (100 - bet.chance))).toFixed(2)
-                        : (98 / (100 - bet.chance)).toFixed(2)
-                    }
+                    value={bet.strikeMultiplier}
                     className="bg-[#202329] text-white font-chakra text-xs font-semibold mt-1 rounded-md p-3 w-full relative"
                     readOnly
                   />
@@ -295,7 +287,10 @@ export default function VerifyDice2Modal({
                     {bet.wallet !== wallet ? (
                       <>
                         <div className="text-xs text-[#94A3B8] font-changa text-opacity-75 text-center">
-                          {translator("The bettor must first rotate their seed pair to verify this bet.", language)}
+                          {translator(
+                            "The bettor must first rotate their seed pair to verify this bet.",
+                            language,
+                          )}
                         </div>
                         <button
                           className="bg-[#7839C5] rounded-md w-full text-sm text-white text-opacity-90 text-semibold py-3 disabled:opacity-70"
@@ -307,7 +302,10 @@ export default function VerifyDice2Modal({
                     ) : bet.gameSeed?.status !== seedStatus.EXPIRED ? (
                       <>
                         <div className="text-xs text-[#94A3B8] font-changa text-opacity-75 text-center">
-                          {translator("To verify this bet, you first need to rotate your seed pair.", language)}
+                          {translator(
+                            "To verify this bet, you first need to rotate your seed pair.",
+                            language,
+                          )}
                         </div>
                         <button
                           className="bg-[#7839C5] rounded-md w-full text-sm text-white text-opacity-90 text-semibold py-3"
