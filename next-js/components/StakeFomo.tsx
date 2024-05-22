@@ -87,7 +87,7 @@ export default function StakeFomo() {
 
   const handleHalfStake = () => {
     if (stake) { // Deposit
-      if (amount == 0) setAmount(MinAmount);
+      if (amount == 0 && solBal > MinAmount) setAmount(MinAmount);
       else {
         let amt = amount / 2;
         if (amt < MinAmount) amt = MinAmount;
@@ -95,7 +95,7 @@ export default function StakeFomo() {
         setAmount(amt);
       }
     } else { // Withdraw
-      if (amount == 0) setAmount(MinAmount);
+      if (userData && amount == 0 && userData?.stakedAmount > MinAmount) setAmount(MinAmount);
       else {
         let amt = amount / 2;
         if (amt < MinAmount) amt = MinAmount;
@@ -107,7 +107,7 @@ export default function StakeFomo() {
 
   const handleDoubleStake = () => {
     if (stake) { // Deposit
-      if (amount == 0) setAmount(MinAmount);
+      if (amount == 0 && solBal > MinAmount) setAmount(MinAmount);
       else {
         let amt = amount * 2;
         if (amt < MinAmount) amt = MinAmount;
@@ -115,7 +115,7 @@ export default function StakeFomo() {
         setAmount(amt);
       }
     } else { // Withdraw
-      if (amount == 0) setAmount(MinAmount);
+      if (userData && amount == 0 && userData?.stakedAmount > MinAmount) setAmount(MinAmount);
       else {
         let amt = amount * 2;
         if (amt < MinAmount) amt = MinAmount;
