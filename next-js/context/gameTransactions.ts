@@ -107,6 +107,7 @@ export const deposit = async (
   wallet: WalletContextState,
   amount: number,
   tokenMint: string,
+  campaignId: any = null,
 ) => {
   if (amount == 0) {
     errorCustom("Please enter an amount greater than 0");
@@ -137,6 +138,7 @@ export const deposit = async (
         amount,
         tokenMint,
         blockhashWithExpiryBlockHeight,
+        campaignId,
       }),
       headers: {
         "Content-Type": "application/json",
@@ -274,7 +276,9 @@ export const verifyFrontendTransaction = (
   );
 
   const verificationTransactionInstructions = JSON.stringify(
-    verificationTransaction.instructions,
+    verificationTransaction.instructions.filter(
+      (i) => !i.programId.equals(ComputeBudgetProgram.programId),
+    ),
   );
 
   console.log(transactionInstructions, verificationTransactionInstructions);

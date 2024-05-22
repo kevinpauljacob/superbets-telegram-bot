@@ -16,6 +16,7 @@ import TxnSignature from "../../../../models/txnSignature";
 
 import { getToken } from "next-auth/jwt";
 import { NextApiRequest, NextApiResponse } from "next";
+import Campaign from "@/models/analytics/campaigns";
 
 const secret = process.env.NEXTAUTH_SECRET;
 
@@ -31,6 +32,7 @@ type InputType = {
   amount: number;
   tokenMint: string;
   blockhashWithExpiryBlockHeight: BlockhashWithExpiryBlockHeight;
+  campaignId: string;
 };
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -42,6 +44,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         amount,
         tokenMint,
         blockhashWithExpiryBlockHeight,
+        campaignId,
       }: InputType = req.body;
 
       const token = await getToken({ req, secret });
@@ -125,6 +128,17 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         txnSignature,
       });
 
+      if (campaignId) {
+        try {
+          await Campaign.create({
+            wallet,
+            amount,
+            campaignId,
+          });
+        } catch (e) {
+          console.log("unable to create campaign !");
+        }
+      }
       return res.json({
         success: true,
         message: `${amount} SOL successfully deposited!`,
