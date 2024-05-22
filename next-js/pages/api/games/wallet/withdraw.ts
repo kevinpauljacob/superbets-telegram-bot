@@ -122,13 +122,11 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       });
 
       if (isPendingWithdraw)
-        return res
-          .status(400)
-          .json({
-            success: false,
-            message:
-              "You have a pending withdrawal. Please wait for it to be processed !",
-          });
+        return res.status(400).json({
+          success: false,
+          message:
+            "You have a pending withdrawal. Please wait for it to be processed !",
+        });
 
       // //Check if the time weighted average exceeds the limit
       const userAgg = await Deposit.aggregate([
@@ -155,13 +153,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           },
         },
       ]);
-
-      if (userAgg.length == 0) {
-        return res.status(400).json({
-          success: false,
-          message: "Unexpected error please retry in 5 mins !",
-        });
-      }
 
       const result = await User.findOneAndUpdate(
         {
@@ -193,14 +184,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         return acc;
       }, initialTotals);
 
-      const route = `https://fomowtf.com/api/games/global/getUserHistory?wallet=${wallet}`;
+      const route = `https://fomowtf.com/api/games/global/getUserVol?wallet=${wallet}`;
 
-      let userBets = (await (await fetch(route)).json())?.data ?? [];
-
-      const totalVolume = userBets.reduce(
-        (sum: number, gameResult: any) => sum + gameResult.amount,
-        0,
-      );
+      let totalVolume = (await (await fetch(route)).json())?.data ?? 0;
 
       let userTransferAgg = userAgg.find((data) => data._id == wallet) ?? {
         wallet: wallet,
