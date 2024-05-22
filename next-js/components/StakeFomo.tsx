@@ -9,12 +9,14 @@ import {
 } from "@/context/transactions";
 import { truncateNumber } from "@/context/gameTransactions";
 import { useWallet } from "@solana/wallet-adapter-react";
-import toast from "react-hot-toast";
+//import toast from "react-hot-toast";
 import Spinner from "./Spinner";
 import { PublicKey } from "@solana/web3.js";
 import { getAssociatedTokenAddressSync } from "@solana/spl-token";
 import { useSession } from "next-auth/react";
 import { errorCustom } from "./toasts/ToastGroup";
+
+const MinAmount = 0.01
 
 export default function StakeFomo() {
   const { data: session, status } = useSession();
@@ -84,14 +86,42 @@ export default function StakeFomo() {
   };
 
   const handleHalfStake = () => {
-    if (solBal > 0) {
-      setAmount(solBal / 2);
+    if (stake) { // Deposit
+      if (amount == 0) setAmount(MinAmount);
+      else {
+        let amt = amount / 2;
+        if (amt < MinAmount) amt = MinAmount;
+        if (amt > solBal) amt = solBal;
+        setAmount(amt);
+      }
+    } else { // Withdraw
+      if (amount == 0) setAmount(MinAmount);
+      else {
+        let amt = amount / 2;
+        if (amt < MinAmount) amt = MinAmount;
+        if (userData && amt > userData?.stakedAmount) amt = userData?.stakedAmount;
+        setAmount(amt);
+      }
     }
   };
 
   const handleDoubleStake = () => {
-    if (solBal > 0) {
-      setAmount(solBal * 2);
+    if (stake) { // Deposit
+      if (amount == 0) setAmount(MinAmount);
+      else {
+        let amt = amount * 2;
+        if (amt < MinAmount) amt = MinAmount;
+        if (amt > solBal) amt = solBal;
+        setAmount(amt);
+      }
+    } else { // Withdraw
+      if (amount == 0) setAmount(MinAmount);
+      else {
+        let amt = amount * 2;
+        if (amt < MinAmount) amt = MinAmount;
+        if (userData && amt > userData?.stakedAmount) amt = userData?.stakedAmount;
+        setAmount(amt);
+      }
     }
   };
 
@@ -106,11 +136,10 @@ export default function StakeFomo() {
       </span>
       <div className="flex w-full items-center border-b border-white border-opacity-10 mt-5">
         <button
-          className={`${
-            stake
-              ? "text-white border-[#9945FF]"
-              : "text-[#ffffff80] border-transparent hover:text-[#ffffffb5]"
-          } p-2  border-b-2 text-base font-medium transition-all w-full sm:w-max`}
+          className={`${stake
+            ? "text-white border-[#9945FF]"
+            : "text-[#ffffff80] border-transparent hover:text-[#ffffffb5]"
+            } p-2  border-b-2 text-base font-medium transition-all w-full sm:w-max`}
           onClick={() => {
             setStake(true);
           }}
@@ -118,11 +147,10 @@ export default function StakeFomo() {
           {translator("Stake", language)}
         </button>
         <button
-          className={`${
-            !stake
-              ? "text-white border-[#9945FF]"
-              : "text-[#ffffff80] border-transparent hover:text-[#ffffffb5]"
-          } p-2 border-b-2 text-base font-medium transition-all w-full sm:w-max`}
+          className={`${!stake
+            ? "text-white border-[#9945FF]"
+            : "text-[#ffffff80] border-transparent hover:text-[#ffffffb5]"
+            } p-2 border-b-2 text-base font-medium transition-all w-full sm:w-max`}
           onClick={() => {
             setStake(false);
           }}
