@@ -36,6 +36,8 @@ export default function StakeFomo() {
     getGlobalInfo,
   } = useGlobalContext();
 
+  const MinAmount = 0.01;// can change this value to the minimum ammount to stake
+
   const getWalletBalance = async () => {
     if (wallet && wallet.publicKey)
       try {
@@ -84,14 +86,44 @@ export default function StakeFomo() {
   };
 
   const handleHalfStake = () => {
-    if (solBal > 0) {
-      setAmount(solBal / 2);
+    if(stake){  // while staking
+      if(amount==0) setAmount(MinAmount);
+      else{
+        let amt=amount/2;
+        if(amt<MinAmount) amt=MinAmount;
+        if(amt>solBal) amt=solBal;
+        setAmount(amt);
+      }
     }
+    else{ // while unstaking
+      if(amount==0) setAmount(MinAmount);
+      else{
+        let amt=amount/2;
+        if(amt<MinAmount) amt=MinAmount;
+        if(userData && amt>userData?.stakedAmount) amt=userData?.stakedAmount;
+        setAmount(amt);
+    }
+  }
   };
 
   const handleDoubleStake = () => {
-    if (solBal > 0) {
-      setAmount(solBal * 2);
+    if(stake){  // while staking
+      if(amount==0) setAmount(MinAmount);
+      else{
+        let amt=amount*2;
+        if(amt<MinAmount) amt=MinAmount;
+        if(amt>solBal) amt=solBal;
+        setAmount(amt);
+      }
+    }
+    else{ // while unstaking
+      if(amount==0) setAmount(MinAmount);
+      else{
+        let amt=amount*2;
+        if(amt<MinAmount) amt=MinAmount;
+        if(userData && amt>userData?.stakedAmount) amt=userData?.stakedAmount;
+        setAmount(amt);
+      }
     }
   };
 
