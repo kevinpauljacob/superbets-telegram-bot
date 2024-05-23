@@ -23,6 +23,8 @@ export const fomoToken = "Cx9oLynYgC3RrgXzin7U417hNY9D6YB1eMGw4ZMbWJgw";
 
 export const launchPromoEdge = true;
 
+export const maintainance = false;
+
 export interface User {
   wallet: string;
   solAmount: number;
