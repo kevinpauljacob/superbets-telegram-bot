@@ -1,7 +1,7 @@
 {
   "crons": [
     {
-      "path": "/api/process-withdrawals",
+      "path": "/api/cron1",
       "schedule": "0 * * * *"
     }
   ]
