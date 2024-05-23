@@ -292,13 +292,13 @@ async function main() {
   try {
     await connectDatabase();
 
-    await handleHouseWallet(connection)
-      .then((result) => {
-        console.log("House Wallet", result);
-      })
-      .catch((error) => {
-        console.log("Error in House Wallet", error);
-      });
+    // await handleHouseWallet(connection)
+    //   .then((result) => {
+    //     console.log("House Wallet", result);
+    //   })
+    //   .catch((error) => {
+    //     console.log("Error in House Wallet", error);
+    //   });
 
     await handlePendingWithdrawals(connection)
       .then((result) => {
