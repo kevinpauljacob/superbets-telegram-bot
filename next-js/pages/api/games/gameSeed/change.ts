@@ -94,7 +94,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         serverSeedHash: newServerHash.serverSeedHash,
       });
 
-      let { serverSeed, ...rest } = nextGameSeed;
+      let { serverSeed, ...rest } = nextGameSeed.toObject();
+
+      console.log(rest);
 
       return res.status(201).json({
         success: true,
