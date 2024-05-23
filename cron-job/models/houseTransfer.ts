@@ -15,6 +15,11 @@ const houseTransferSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
+    txnSignature: {
+      type: String,
+      required: true,
+      unique: true,
+    },
   },
   {
     timestamps: true,
