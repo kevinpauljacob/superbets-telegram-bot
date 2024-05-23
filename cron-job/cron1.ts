@@ -1,7 +1,6 @@
-import type { NextApiRequest, NextApiResponse } from "next";
-import connectDatabase from "@/utils/database";
-import HouseTransfer from "@/models/houseTransfer";
-import Deposit from "@/models/deposit";
+import connectDatabase from "./utils/database";
+import HouseTransfer from "./models/houseTransfer";
+import Deposit from "./models/deposit";
 import {
   BlockhashWithExpiryBlockHeight,
   ComputeBudgetProgram,
@@ -12,6 +11,9 @@ import {
   Transaction,
 } from "@solana/web3.js";
 import { bs58 } from "@project-serum/anchor/dist/cjs/utils/bytes";
+import mongoose from "mongoose";
+import dotenv from "dotenv";
+dotenv.config();
 
 const connection = new Connection(process.env.BACKEND_RPC!, "confirmed");
 
@@ -21,46 +23,6 @@ const hotDevWalletKey = Keypair.fromSecretKey(
 const coldDevWalletKey = Keypair.fromSecretKey(
   bs58.decode(process.env.COLD_DEV_KEYPAIR!)
 );
-
-export const config = {
-  maxDuration: 120,
-};
-
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse
-) {
-  if (req.method === "POST")
-    try {
-      await connectDatabase();
-
-      const withdrawalResult = await handlePendingWithdrawals(connection).catch(
-        (error) => {
-          console.log("Error in Withdrawal", error);
-          return { withdrawals: 0, message: error.message };
-        }
-      );
-
-      const houseWalletResult = await handleHouseWallet(connection).catch(
-        (error) => {
-          console.log("Error in House Wallet", error);
-          return { message: error.message };
-        }
-      );
-
-      return res.json({
-        success: true,
-        withdrawalResult,
-        houseWalletResult,
-      });
-    } catch (error: any) {
-      console.log(error);
-      res.status(500).json({ success: false, message: error.message });
-    }
-  else {
-    res.status(405).json({ success: false, message: "Method not allowed" });
-  }
-}
 
 const handlePendingWithdrawals = async (connection: Connection) => {
   const groupSize = 5;
@@ -300,3 +262,34 @@ async function retryTxn(
   if (finalTxn) return finalTxn;
   else throw new Error("Transaction could not be confirmed !");
 }
+
+async function main() {
+  try {
+    await connectDatabase();
+
+    const withdrawalResult = await handlePendingWithdrawals(connection).catch(
+      (error) => {
+        console.log("Error in Withdrawal", error);
+        return { withdrawals: 0, message: error.message };
+      }
+    );
+
+    const houseWalletResult = await handleHouseWallet(connection).catch(
+      (error) => {
+        console.log("Error in House Wallet", error);
+        return { message: error.message };
+      }
+    );
+
+    console.log(withdrawalResult, houseWalletResult);
+    return;
+  } catch (error: any) {
+    console.log(error);
+    return;
+  } finally {
+    await mongoose.disconnect();
+    return;
+  }
+}
+
+main();

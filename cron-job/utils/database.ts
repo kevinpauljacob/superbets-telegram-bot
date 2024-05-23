@@ -1,4 +1,7 @@
 import mongoose from "mongoose";
+import dotenv from "dotenv";
+dotenv.config();
+
 declare global {
   var mongoose: any; // This must be a `var` and not a `let / const`
 }
