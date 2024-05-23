@@ -1,14 +1,9 @@
-import { useState, useEffect, use } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useGlobalContext } from "../GlobalContext";
 import { GameType } from "@/utils/provably-fair";
 import { maxPayouts } from "@/context/transactions";
 import Image from "next/image";
-import BalanceAlert from "./BalanceAlert";
-import { FaInfo } from "react-icons/fa6";
-import { Game, InfoCircle } from "iconsax-react";
-import { BsInfoCircleFill } from "react-icons/bs";
-import DicePointer from "@/public/assets/DicePointer";
 import { translator } from "@/context/transactions";
 import { minGameAmount, truncateNumber } from "@/context/gameTransactions";
 import { riskToChance } from "./Keno/RiskToChance";

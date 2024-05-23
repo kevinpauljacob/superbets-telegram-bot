@@ -2,13 +2,9 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/router";
-
 import { useWallet } from "@solana/wallet-adapter-react";
 import {
-  obfuscatePubKey,
-  pointTiers,
   translator,
-  formatNumber,
 } from "@/context/transactions";
 import { useGlobalContext } from "./GlobalContext";
 import Home from "@/public/assets/sidebar-icons/Home";
@@ -18,8 +14,6 @@ import Store from "@/public/assets/sidebar-icons/Store";
 import Leaderboard from "@/public/assets/sidebar-icons/Leaderboard";
 import Staking from "@/public/assets/sidebar-icons/Staking";
 import Dollar from "@/public/assets/sidebar-icons/DCA";
-import Flag from "@/public/assets/Flag";
-import Fomo from "@/public/assets/Fomo";
 import Twitter from "@/public/assets/Twitter";
 import Birdeye from "@/public/assets/Birdeye";
 import Telegram from "@/public/assets/Telegram";

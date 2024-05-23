@@ -11,7 +11,6 @@ import {
   createTransferInstruction,
 } from "@solana/spl-token";
 import { SPL_TOKENS } from "./config";
-import toast from "react-hot-toast";
 import { WalletContextState } from "@solana/wallet-adapter-react";
 import {
   errorCustom,

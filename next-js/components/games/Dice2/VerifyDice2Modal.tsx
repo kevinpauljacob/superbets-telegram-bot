@@ -1,6 +1,6 @@
 import { seedStatus } from "@/utils/provably-fair";
 import { useState } from "react";
-import { IoIosArrowDown, IoMdCopy } from "react-icons/io";
+import { IoIosArrowDown } from "react-icons/io";
 import DiceProvablyFairModal, { PFModalData } from "./Dice2ProvablyFairModal";
 import { useGlobalContext } from "@/components/GlobalContext";
 import DraggableBar from "./DraggableBar";

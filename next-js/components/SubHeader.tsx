@@ -10,13 +10,12 @@ import { useEffect, useRef, useState } from "react";
 import { GameType } from "@/utils/provably-fair";
 import { useRouter } from "next/router";
 import useWebSocket from "react-use-websocket";
-import { formatNumber, translator } from "@/context/transactions";
+import { translator } from "@/context/transactions";
 
 export default function SubHeader() {
   const router = useRouter();
   const {
     coinData,
-    showWalletModal,
     setShowWalletModal,
     setLiveBets,
     language,

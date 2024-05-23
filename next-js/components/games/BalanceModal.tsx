@@ -1,6 +1,6 @@
 import { useWallet } from "@solana/wallet-adapter-react";
 import React, { useEffect, useRef, useState } from "react";
-import { useForm, FormProvider, set } from "react-hook-form";
+import { useForm, FormProvider } from "react-hook-form";
 import { obfuscatePubKey, translator } from "@/context/transactions";
 import {
   deposit,
@@ -9,10 +9,9 @@ import {
 } from "../../context/gameTransactions";
 import Loader from "./Loader";
 import { useGlobalContext } from "../GlobalContext";
-import { IoClose, IoCloseOutline } from "react-icons/io5";
+import { IoCloseOutline } from "react-icons/io5";
 import Image from "next/image";
 import { timestampParser } from "@/utils/timestampParser";
-import { formatNumber } from "@/context/transactions";
 import { useRouter } from "next/router";
 
 export default function BalanceModal() {

@@ -5,7 +5,6 @@ import InfoBar from "./Infobar";
 import Sidebar from "./Sidebar";
 import MobileSidebar from "./MobileSidebar";
 import SubHeader from "./SubHeader";
-import GameHeader from "./GameHeader";
 import { useGlobalContext } from "./GlobalContext";
 import BalanceModal from "./games/BalanceModal";
 import { useSession } from "next-auth/react";
@@ -33,7 +32,6 @@ import KenoProvablyFairModal from "./games/Keno/KenoProvablyFairModal";
 import Footer from "./Footer";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { soundAlert } from "@/utils/soundUtils";
-import { errorCustom, successCustom, warningCustom } from "./toasts/ToastGroup";
 
 interface LayoutProps {
   children: ReactNode;
@@ -43,18 +41,13 @@ export default function Layout({ children }: LayoutProps) {
   const router = useRouter();
   const wallet = useWallet();
   const game = router.pathname.split("/")[1];
-  const { data: session, status } = useSession();
+  const { data: session } = useSession();
 
   const {
-    coinData,
     showWalletModal,
-    setShowWalletModal,
-    walletBalance,
     getBalance,
     getWalletBalance,
     isVerifyModalOpen,
-    setIsVerifyModalOpen,
-    openVerifyModal,
     closeVerifyModal,
     verifyModalData,
     sidebar,
@@ -66,23 +59,15 @@ export default function Layout({ children }: LayoutProps) {
     openPFModal,
     setOpenPFModal,
     getProvablyFairData,
-    currentGame,
     setCurrentGame,
     setUseAutoConfig,
     autoConfigState,
-    autoWinChange,
     setAutoWinChange,
-    autoLossChange,
     setAutoLossChange,
-    autoStopProfit,
     setAutoStopProfit,
-    autoStopLoss,
     setAutoStopLoss,
-    autoWinChangeReset,
     setAutoWinChangeReset,
-    autoLossChangeReset,
     setAutoLossChangeReset,
-    showAutoModal,
   } = useGlobalContext();
 
   const [modalData, setModalData] = useState({

@@ -1,32 +1,21 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { useSession } from "next-auth/react";
-import toast from "react-hot-toast";
-import { connection, formatNumber, translator } from "@/context/transactions";
-import { LAMPORTS_PER_SOL, PublicKey } from "@solana/web3.js";
+import { connection } from "@/context/transactions";
+import { PublicKey } from "@solana/web3.js";
 import { useGlobalContext } from "@/components/GlobalContext";
 import { getAssociatedTokenAddressSync } from "@solana/spl-token";
-import StoreBanner from "@/components/Banner";
 import StoreCard from "@/components/StoreCard";
-import { errorCustom } from "@/components/toasts/ToastGroup";
 import FOMOHead from "@/components/HeadElement";
 
 export default function Store() {
-  const { data: session, status } = useSession();
+  const { data: session } = useSession();
   const wallet = useWallet();
 
   const {
-    userData,
-    setUserData,
-    solBal,
     setSolBal,
-    language,
-    loading,
-    globalInfo,
-    setGlobalInfo,
     getGlobalInfo,
     getUserDetails,
-    setLivePrice,
   } = useGlobalContext();
 
   const getWalletBalance = async () => {

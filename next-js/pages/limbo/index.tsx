@@ -1,28 +1,20 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import Bets from "../../components/games/Bets";
 import { useWallet } from "@solana/wallet-adapter-react";
-import toast from "react-hot-toast";
-import HistoryTable from "@/components/games/Limbo/VerifyLimboModal";
 import { FormProvider, useForm } from "react-hook-form";
 import { useGlobalContext } from "@/components/GlobalContext";
 import BetSetting from "@/components/BetSetting";
 import {
   GameDisplay,
-  GameFooterInfo,
   GameLayout,
   GameOptions,
   GameTable,
 } from "@/components/GameLayout";
-import Spinner from "@/components/Spinner";
-import { MultiplierHistory } from "@/components/games/Limbo/MultiplierHistory";
 import { limboBet, truncateNumber } from "@/context/gameTransactions";
 import BetAmount from "@/components/games/BetAmountInput";
 import BetButton from "@/components/games/BetButton";
 import Loader from "../../components/games/Loader";
-import { BsInfinity } from "react-icons/bs";
 import ResultsSlider from "@/components/ResultsSlider";
-import BalanceAlert from "@/components/games/BalanceAlert";
-import showInfoToast from "@/components/games/toasts/toasts";
 import Link from "next/link";
 import { soundAlert } from "@/utils/soundUtils";
 import ConfigureAutoButton from "@/components/ConfigureAutoButton";
@@ -33,7 +25,7 @@ import {
   successCustom,
   warningCustom,
 } from "@/components/toasts/ToastGroup";
-import { translator, formatNumber } from "@/context/transactions";
+import { translator } from "@/context/transactions";
 import { minGameAmount } from "@/context/gameTransactions";
 import { useSession } from "next-auth/react";
 

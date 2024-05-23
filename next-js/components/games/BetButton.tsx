@@ -1,4 +1,4 @@
-import { loopSound, soundAlert } from "@/utils/soundUtils";
+import { soundAlert } from "@/utils/soundUtils";
 import { ReactNode, useEffect, useRef } from "react";
 import { useGlobalContext } from "@/components/GlobalContext";
 import { translator } from "@/context/transactions";

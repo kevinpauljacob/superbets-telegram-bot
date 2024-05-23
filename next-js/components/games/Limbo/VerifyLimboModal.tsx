@@ -1,6 +1,6 @@
 import { seedStatus } from "@/utils/provably-fair";
 import { useState } from "react";
-import { IoIosArrowDown, IoMdCopy } from "react-icons/io";
+import { IoIosArrowDown } from "react-icons/io";
 import LimboProvablyFairModal, { PFModalData } from "./LimboProvablyFairModal";
 import { useGlobalContext } from "@/components/GlobalContext";
 import { FaRegCopy } from "react-icons/fa6";

@@ -1,5 +1,4 @@
-import { GameType, seedStatus } from "@/utils/provably-fair";
-import Image from "next/image";
+import { seedStatus } from "@/utils/provably-fair";
 import { useState } from "react";
 import { IoIosArrowDown, IoMdCopy } from "react-icons/io";
 import CoinFlipProvablyFairModal, {

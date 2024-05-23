@@ -1,4 +1,3 @@
-import { useContext, useState } from "react";
 import { useGlobalContext } from "./GlobalContext";
 import {
   connection,
@@ -9,7 +8,6 @@ import {
 } from "@/context/transactions";
 import { truncateNumber } from "@/context/gameTransactions";
 import { useWallet } from "@solana/wallet-adapter-react";
-import toast from "react-hot-toast";
 import Spinner from "./Spinner";
 import { PublicKey } from "@solana/web3.js";
 import { getAssociatedTokenAddressSync } from "@solana/spl-token";
@@ -17,7 +15,7 @@ import { useSession } from "next-auth/react";
 import { errorCustom } from "./toasts/ToastGroup";
 
 export default function StakeFomo() {
-  const { data: session, status } = useSession();
+  const { data: session } = useSession();
   const wallet = useWallet();
   const {
     stake,
@@ -29,9 +27,7 @@ export default function StakeFomo() {
     loading,
     setLoading,
     language,
-    setUserData,
     setSolBal,
-    setGlobalInfo,
     getUserDetails,
     getGlobalInfo,
   } = useGlobalContext();

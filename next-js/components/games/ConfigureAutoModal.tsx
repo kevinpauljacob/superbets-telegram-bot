@@ -1,11 +1,7 @@
-import { useWallet } from "@solana/wallet-adapter-react";
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { useForm, FormProvider } from "react-hook-form";
-import { obfuscatePubKey } from "@/context/transactions";
-import { deposit, withdraw } from "../../context/gameTransactions";
-import Loader from "./Loader";
 import { useGlobalContext } from "../GlobalContext";
-import { IoClose, IoCloseOutline } from "react-icons/io5";
+import { IoCloseOutline } from "react-icons/io5";
 import { translator } from "@/context/transactions";
 import Image from "next/image";
 import { warningCustom } from "../toasts/ToastGroup";
@@ -13,7 +9,6 @@ import { useRouter } from "next/router";
 
 export default function ConfigureAutoModal() {
   const methods = useForm();
-  const wallet = useWallet();
   const router = useRouter();
   const game = router.pathname.split("/")[1];
 

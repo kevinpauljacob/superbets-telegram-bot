@@ -10,12 +10,9 @@ import React, {
   useContext,
   useState,
   ReactNode,
-  useEffect,
 } from "react";
-import toast from "react-hot-toast";
 import { connection } from "../context/gameTransactions";
 import { LAMPORTS_PER_SOL, PublicKey } from "@solana/web3.js";
-import { TOKEN_PROGRAM_ID } from "@solana/spl-token";
 import { errorCustom } from "./toasts/ToastGroup";
 
 interface PointTier {
