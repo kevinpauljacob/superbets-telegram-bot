@@ -93,12 +93,13 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         serverSeed: newServerHash.serverSeed,
         serverSeedHash: newServerHash.serverSeedHash,
       });
-      delete nextGameSeed.serverSeed;
+
+      let { serverSeed, ...rest } = nextGameSeed;
 
       return res.status(201).json({
         success: true,
         activeGameSeed,
-        nextGameSeed,
+        nextGameSeed: rest,
       });
     } catch (e: any) {
       console.log(e);
