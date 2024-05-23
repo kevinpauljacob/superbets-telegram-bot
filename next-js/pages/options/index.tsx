@@ -163,19 +163,20 @@ export default function Options() {
       if (res.success) {
         // successCustom(res?.message ?? "Bet placed");
         setRefresh(true);
-        setStrikePrice(res?.data?.strikePrice);
-        setBetTime(res?.data?.betTime);
-        setTimeLeft(
-          new Date(res?.data?.betTime).getTime() +
-            betInterval * 60000 -
-            Date.now(),
-        );
-        checkBet = setTimeout(async () => {
-          console.log("getting old result");
-          setBetEnd(true);
-          setCheckResult(true);
-          getResult();
-        }, betInterval * 60000);
+        getActiveBet();
+        // setStrikePrice(res?.data?.strikePrice);
+        // setBetTime(res?.data?.betTime);
+        // setTimeLeft(
+        //   new Date(res?.data?.betTime).getTime() +
+        //     betInterval * 60000 -
+        //     Date.now(),
+        // );
+        // checkBet = setTimeout(async () => {
+        //   console.log("getting old result");
+        //   setBetEnd(true);
+        //   setCheckResult(true);
+        //   getResult();
+        // }, betInterval * 60000);
       } else {
         setCheckResult(false);
         setBetEnd(false);
@@ -289,9 +290,10 @@ export default function Options() {
       setLoading(false);
       setResult(null);
       setBetEnd(false);
+      setBetTime(undefined)
       setBetInterval(3);
       setStrikePrice(0);
-      setBetAmt(0.1);
+      // setBetAmt(0.1);
       if (checkBet) {
         clearTimeout(checkBet);
       }
