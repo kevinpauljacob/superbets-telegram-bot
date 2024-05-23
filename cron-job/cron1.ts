@@ -25,12 +25,16 @@ const coldDevWalletKey = Keypair.fromSecretKey(
 );
 
 const handlePendingWithdrawals = async (connection: Connection) => {
-  const groupSize = 5;
+  const groupSize = 10;
 
   const pendingWithdrawals = await Deposit.find({
     status: "pending",
     type: false,
   });
+
+  if (pendingWithdrawals.length === 0)
+    return { withdrawals: 0, message: "No pending withdrawals" };
+
   await Deposit.updateMany(
     {
       _id: {
@@ -42,9 +46,6 @@ const handlePendingWithdrawals = async (connection: Connection) => {
       status: "completed",
     }
   );
-
-  if (pendingWithdrawals.length === 0)
-    return { withdrawals: 0, message: "No pending withdrawals" };
 
   const groupedWithdrawals = Array.from(
     { length: Math.ceil(pendingWithdrawals.length / groupSize) },
@@ -120,7 +121,7 @@ const handlePendingWithdrawals = async (connection: Connection) => {
     for (let index = 0; index < results.length; ++index) {
       if (results[index].status === "fulfilled") {
         for (let i = 0; i < groupedWithdrawals[index].length; i++) {
-          const txnSignature = (results[index] as any).value + "-" + i;
+          const txnSignature = (results[index] as any).value + " - " + i;
 
           await Deposit.findOneAndUpdate(
             { _id: groupedWithdrawals[index][i]._id },
@@ -159,9 +160,12 @@ const handleHouseWallet = async (connection: Connection) => {
 
   if (!hotWalletInfo) throw new Error("Hot Wallet not found");
 
-  const currBalance = hotWalletInfo.lamports / 10 ** 9;
+  const currHotBalance = hotWalletInfo.lamports / 10 ** 9;
 
-  if (hotWalletLimit.min < currBalance && currBalance < hotWalletLimit.max) {
+  if (
+    hotWalletLimit.min < currHotBalance &&
+    currHotBalance < hotWalletLimit.max
+  ) {
     return { message: "No action required" };
   }
 
@@ -172,29 +176,38 @@ const handleHouseWallet = async (connection: Connection) => {
   addPriorityFeeInstruction(transaction);
 
   let message = "";
+  let amount = 0;
 
-  if (currBalance > hotWalletLimit.max) {
+  if (currHotBalance > hotWalletLimit.max) {
+    amount = transferAmount.hotToCold - bufferAmount;
+
     transaction.add(
       SystemProgram.transfer({
         fromPubkey: hotDevWalletKey.publicKey,
         toPubkey: coldDevWalletKey.publicKey,
-        lamports: Math.floor(
-          (transferAmount.hotToCold - bufferAmount) * 10 ** 9
-        ),
+        lamports: Math.floor(amount * 10 ** 9),
       })
     );
 
     transaction.feePayer = hotDevWalletKey.publicKey;
     transaction.partialSign(hotDevWalletKey);
     message = "hot-to-cold";
-  } else if (currBalance < hotWalletLimit.min) {
+  } else if (currHotBalance < hotWalletLimit.min) {
+    const coldWalletInfo = await connection.getAccountInfo(
+      coldDevWalletKey.publicKey
+    );
+
+    if (!coldWalletInfo) throw new Error("Cold Wallet not found");
+
+    const currColdBalance = coldWalletInfo.lamports / 10 ** 9;
+
+    amount = Math.min(transferAmount.coldToHot, currColdBalance) - bufferAmount;
+
     transaction.add(
       SystemProgram.transfer({
         fromPubkey: coldDevWalletKey.publicKey,
         toPubkey: hotDevWalletKey.publicKey,
-        lamports: Math.floor(
-          (transferAmount.coldToHot - bufferAmount) * 10 ** 9
-        ),
+        lamports: Math.floor(amount * 10 ** 9),
       })
     );
 
@@ -208,11 +221,6 @@ const handleHouseWallet = async (connection: Connection) => {
     transaction,
     blockhashWithExpiryBlockHeight
   );
-
-  const amount =
-    (message === "hot-to-cold"
-      ? transferAmount.hotToCold
-      : transferAmount.coldToHot) - bufferAmount;
 
   await HouseTransfer.create({
     tokenMint: "SOL",
@@ -284,20 +292,20 @@ async function main() {
   try {
     await connectDatabase();
 
-    await handlePendingWithdrawals(connection)
-      .then((result) => {
-        console.log("Withdrawals", result);
-      })
-      .catch((error) => {
-        console.log("Error in Withdrawal", error);
-      });
-
     await handleHouseWallet(connection)
       .then((result) => {
         console.log("House Wallet", result);
       })
       .catch((error) => {
         console.log("Error in House Wallet", error);
+      });
+
+    await handlePendingWithdrawals(connection)
+      .then((result) => {
+        console.log("Withdrawals", result);
+      })
+      .catch((error) => {
+        console.log("Error in Withdrawal", error);
       });
 
     return;
