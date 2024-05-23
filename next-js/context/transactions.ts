@@ -205,18 +205,18 @@ export const houseEdgeTiers: Record<number, number> = {
 type PayoutValue<T> = number;
 
 export const maxPayouts: { [K in GameType]: PayoutValue<K> } = {
-  [GameType.dice]: 5,
-  [GameType.coin]: 5,
-  [GameType.options]: 5,
-  [GameType.dice2]: 5,
-  [GameType.wheel]: 5,
-  [GameType.plinko]: 5,
-  [GameType.limbo]: 5,
-  [GameType.roulette1]: 5,
-  [GameType.roulette2]: 5,
-  [GameType.keno]: 5,
-  [GameType.mines]: 5,
-  [GameType.hilo]: 5,
+  [GameType.dice]: 2,
+  [GameType.coin]: 2,
+  [GameType.options]: 2,
+  [GameType.dice2]: 2,
+  [GameType.wheel]: 2,
+  [GameType.plinko]: 2,
+  [GameType.limbo]: 2,
+  [GameType.roulette1]: 2,
+  [GameType.roulette2]: 2,
+  [GameType.keno]: 2,
+  [GameType.mines]: 2,
+  [GameType.hilo]: 2,
 };
 
 export const obfuscatePubKey = (address: string) => {
