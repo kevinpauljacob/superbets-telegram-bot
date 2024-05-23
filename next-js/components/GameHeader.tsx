@@ -10,14 +10,13 @@ export default function GameHeader() {
   const router = useRouter();
   const game = router.pathname.split("/")[1];
 
-  const { setOpenPFModal, language } = useGlobalContext();
+  const { coinData, getProvablyFairData, setOpenPFModal, language } = useGlobalContext();
 
-  useEffect(() => {
     const fetchGameData = (game: GameType) => {
       fetch(`/api/games/global/getStats?game=${game}`)
         .then((res) => res.json())
         .then((data) => {
-          if (data.success)
+          if (data.success) {
             setGameData((prev) => ({
               ...prev,
               [game]: {
@@ -25,14 +24,21 @@ export default function GameHeader() {
                 stats: data.stats,
               },
             }));
+          }
         });
     };
-
-    if (!Object.entries(GameType).some(([_, value]) => value === game)) return;
-
-    fetchGameData(game as GameType);
-  }, []);
-
+  
+    useEffect(() => {
+      if (!Object.entries(GameType).some(([_, value]) => value === game)) return;
+  
+      fetchGameData(game as GameType);
+  
+      const interval = setInterval(() => {
+        fetchGameData(game as GameType);
+      }, 10000); 
+  
+      return () => clearInterval(interval); 
+    }, [game]);
   // Define game data for different games
   const [gameData, setGameData] = useState<
     Record<

@@ -728,7 +728,7 @@ export default function Keno() {
             ) : coinData && chosenNumbers.length === 0 ? (
               <div className="w-full rounded-lg bg-[#d9d9d90d] bg-opacity-10 flex items-center px-3 py-3 text-white md:px-6">
                 <div className="w-full text-center font-changa font-medium text-sm md:text-base text-[#F0F0F0] text-opacity-75">
-                  {translator("Pick upto 10 numbers", language)}
+                  {translator("Pick up to 10 numbers", language)}
                 </div>
               </div>
             ) : null)}

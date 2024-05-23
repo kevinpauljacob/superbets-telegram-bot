@@ -42,7 +42,7 @@ interface Props {
   bet?: Dice2;
 }
 
-export default function RollDiceProvablyFairModal({
+export default function Dice2ProvablyFairModal({
   isOpen,
   onClose,
   modalData,
@@ -58,47 +58,25 @@ export default function RollDiceProvablyFairModal({
   const [selectedGameType, setSelectedGameType] = useState<GameType>(
     GameType.dice2,
   );
-  const [strikeNumber, setStrikeNumber] = useState<number>(50.0);
 
   const { language } = useGlobalContext();
   const [verificationState, setVerificationState] = useState<{
     clientSeed: string;
     serverSeed: string;
     nonce: string;
-    risk?: string;
-    segments?: number;
   }>(
     bet?.gameSeed
       ? {
           clientSeed: bet.gameSeed.clientSeed,
           serverSeed: bet.gameSeed.serverSeed ?? "",
           nonce: bet.nonce?.toString() ?? "",
-          risk:
-            bet.risk ||
-            (selectedGameType === GameType.wheel ? "low" : undefined),
-          segments:
-            bet.segments ||
-            (selectedGameType === GameType.wheel ? 10 : undefined),
         }
       : {
           clientSeed: "",
           serverSeed: "",
           nonce: "",
-          risk: selectedGameType === GameType.wheel ? "low" : undefined,
-          segments: selectedGameType === GameType.wheel ? 10 : undefined,
         },
   );
-
-  useEffect(() => {
-    setStrikeNumber(
-      generateGameResult(
-        verificationState.serverSeed,
-        verificationState.clientSeed,
-        parseInt(verificationState.nonce),
-        GameType.dice2,
-      ),
-    );
-  }, []);
 
   const handleToggleState = (newState: "seeds" | "verify") => {
     setState(newState);
@@ -126,17 +104,6 @@ export default function RollDiceProvablyFairModal({
       ...prevData,
       [name]: value,
     }));
-
-    const { clientSeed, serverSeed, nonce } = verificationState;
-
-    setStrikeNumber(
-      generateGameResult(
-        name === "serverSeed" ? value : serverSeed,
-        name === "clientSeed" ? value : clientSeed,
-        parseInt(name === "nonce" ? value : nonce),
-        GameType.dice2,
-      ),
-    );
   };
 
   const handleSetClientSeed = async () => {
@@ -334,7 +301,7 @@ export default function RollDiceProvablyFairModal({
                         <option value={GameType.keno}>Keno</option>
                         <option value={GameType.dice}>Dice</option>
                         <option value={GameType.coin}>Coin Flip</option>
-                       
+
                         <option value={GameType.dice2}>Dice2</option>
 
                         <option value={GameType.wheel}>Wheel</option>

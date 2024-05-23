@@ -113,7 +113,7 @@ function Footer() {
         <div className="w-full h-[1px] bg-[#94A3B8] bg-opacity-20 rounded-full mt-5 md:px-2 mx-2" />
         <div className="w-full font-inter flex lg2:flex-row flex-col lg2:items-center lg2:justify-between lg2:pb-10 pb-[150px] pt-5 md:px-2 mx-2">
           <p className="flex text-sm font-normal text-[#FFFFFF] text-opacity-50 font-sans gap-2">
-            <span>@2024 fomowtf.com</span>
+            <span>&copy;2024 fomowtf.com</span>
             <span>{translator("All rights reserved", language)}</span>
           </p>
           <div className="flex items-center lg2:justify-center gap-5">

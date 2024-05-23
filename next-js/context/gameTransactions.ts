@@ -275,7 +275,9 @@ export const verifyFrontendTransaction = (
   );
 
   const verificationTransactionInstructions = JSON.stringify(
-    verificationTransaction.instructions,
+    verificationTransaction.instructions.filter(
+      (i) => !i.programId.equals(ComputeBudgetProgram.programId),
+    ),
   );
 
   console.log(transactionInstructions, verificationTransactionInstructions);
