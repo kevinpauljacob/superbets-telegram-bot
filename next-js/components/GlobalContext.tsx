@@ -250,29 +250,29 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
     "classic" | "low" | "medium" | "high"
   >("classic");
 
-  useEffect(() => {
-    const fetchFomoPrice = async () => {
-      try {
-        let data = await fetch(
-          "https://price.jup.ag/v4/price?ids=FOMO&vsToken=USDC",
-        ).then((res) => res.json());
-        // console.log(data);
-        setFomoPrice(data?.data?.FOMO?.price ?? 0);
-      } catch (e) {
-        console.log(e);
-        setFomoPrice(0);
-        // errorCustom("Could not fetch fomo live price.");
-      }
-    };
+  // useEffect(() => {
+  //   const fetchFomoPrice = async () => {
+  //     try {
+  //       let data = await fetch(
+  //         "https://price.jup.ag/v4/price?ids=FOMO&vsToken=USDC",
+  //       ).then((res) => res.json());
+  //       // console.log(data);
+  //       setFomoPrice(data?.data?.FOMO?.price ?? 0);
+  //     } catch (e) {
+  //       console.log(e);
+  //       setFomoPrice(0);
+  //       // errorCustom("Could not fetch fomo live price.");
+  //     }
+  //   };
 
-    fetchFomoPrice();
+  //   fetchFomoPrice();
 
-    let intervalId = setInterval(async () => {
-      fetchFomoPrice();
-    }, 10000);
+  //   let intervalId = setInterval(async () => {
+  //     fetchFomoPrice();
+  //   }, 10000);
 
-    return () => clearInterval(intervalId);
-  }, []);
+  //   return () => clearInterval(intervalId);
+  // }, []);
 
   const openVerifyModal = () => {
     setIsVerifyModalOpen(true);

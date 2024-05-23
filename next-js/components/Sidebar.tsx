@@ -312,7 +312,7 @@ export const OpenSidebar = ({
     setCasinoGames(updatedCasinoGames);
   };
 
-  const { language } = useGlobalContext();
+  const { language, setFomoPrice } = useGlobalContext();
 
   useEffect(() => {
     // Function to check if any game link matches the current pathname
@@ -320,7 +320,32 @@ export const OpenSidebar = ({
       return games.some((game) => game.link === router.pathname);
     };
 
+    /// code added to fetch fomo price
+    const fetchFomoPrice = async () => {
+      try {
+        let data = await fetch(
+          "https://price.jup.ag/v4/price?ids=FOMO&vsToken=USDC",
+        ).then((res) => res.json());
+        // console.log(data);
+        setFomoPrice(data?.data?.FOMO?.price ?? 0);
+      } catch (e) {
+        console.log(e);
+        setFomoPrice(0);
+        // errorCustom("Could not fetch fomo live price.");
+      }
+    };
+
+    fetchFomoPrice();
+
+    let intervalId = setInterval(async () => {
+      fetchFomoPrice();
+    }, 10000);
     setShowPlayTokens(isGameActive(casinoGames));
+    return () => clearInterval(intervalId);
+
+    /////////////////
+
+    //setShowPlayTokens(isGameActive(casinoGames));  // this is the part of initial code 
   }, [router.pathname, casinoGames]);
 
   const openLinkCss =
