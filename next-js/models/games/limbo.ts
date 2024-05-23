@@ -18,6 +18,10 @@ const limboSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
+    strikeMultiplier: {
+      type: Number,
+      required: true,
+    },
     result: {
       type: String,
       enum: ["Won", "Lost"],
@@ -25,6 +29,10 @@ const limboSchema = new mongoose.Schema(
     },
     tokenMint: {
       type: String,
+      required: false,
+    },
+    houseEdge: {
+      type: Number,
       required: true,
     },
     amountWon: {

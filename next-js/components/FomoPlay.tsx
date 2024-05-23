@@ -2,44 +2,49 @@ import React, { useState } from "react";
 import Image from "next/image";
 import Dollar from "/public/assets/dollar.png";
 import Link from "next/link";
+import { useRouter } from "next/router";
+import { translator } from "@/context/transactions";
+import { useGlobalContext } from "./GlobalContext";
+import FomoPlayIcon from "@/public/assets/fomoplay.svg";
 
 export default function FomoPlay() {
   const games = [
     {
       href: "/dice",
-      src: "/assets/dicecard.png",
+      src: "/assets/game-cards/dice.png",
+    },
+    {
+      href: "/dice2",
+      src: "/assets/game-cards/dice2.png",
     },
     {
       href: "/coinflip",
-      src: "/assets/flipcard.png",
+      src: "/assets/game-cards/coinflip.png",
     },
     {
       href: "/options",
-      src: "/assets/binarycard.png",
+      src: "/assets/game-cards/options.png",
     },
     {
-      href: "/",
-      src: "/assets/mines.png",
+      href: "/limbo",
+      src: "/assets/game-cards/limbo.png",
+    },
+
+    {
+      href: "/keno",
+      src: "/assets/game-cards/keno.png",
     },
     {
-      href: "/",
-      src: "/assets/blackjack.png",
-    },
-    {
-      href: "/",
-      src: "/assets/keno.png",
-    },
-    {
-      href: "/",
-      src: "/assets/plinko.png",
-    },
-    {
-      href: "/",
-      src: "/assets/wheel.png",
+      href: "/wheel",
+      src: "/assets/game-cards/wheel.png",
     },
   ];
 
   const [currentSlide, setCurrentSlide] = useState(0);
+  const { language } = useGlobalContext();
+  const router = useRouter();
+
+  const filteredGames = games.filter((game) => game.href !== router.pathname);
 
   const nextSlide = () => {
     setCurrentSlide((prevSlide) =>
@@ -57,17 +62,19 @@ export default function FomoPlay() {
     <div className="mt-5">
       <div className="flex justify-between items-center mb-1">
         <div className="flex items-center">
-          <Image src={Dollar} alt="" width={26} height={26} />
-          <span className="font-semibold font-changa text-xl text-opacity-90 pl-3">
-            <span className="hidden sm:inline">
-              FOMO: Play - The best casino games
+          <Image src={FomoPlayIcon} alt="" width={26} height={26} />
+          <span className="font-medium font-changa text-xl text-opacity-90 pl-3">
+            <span className="hidden sm:inline text-white">
+              FOMO: {translator("Play - The best casino games", language)}
             </span>
-            <span className="sm:hidden">FOMO: Play</span>
+            <span className="sm:hidden text-white">
+              FOMO: {translator("Play", language)}
+            </span>
           </span>
         </div>
         <div className="">
           <button
-            className="bg-[#1D1A21] hover:bg-[#333037] focus:bg-[#333037] text-white font-bold py-4 px-5 rounded border-2 border-transparent focus:border-[#7839C5] focus:shadow-outline mr-3"
+            className="bg-[#1D1A21] hover:bg-[#333037] focus:bg-[#333037] transition-all text-white font-bold py-3 px-3 md:py-3.5 md:px-6 rounded focus:outline-none focus:shadow-outline mr-3"
             onClick={prevSlide}
           >
             <Image
@@ -79,7 +86,7 @@ export default function FomoPlay() {
             />
           </button>
           <button
-            className="bg-[#1D1A21] hover:bg-[#333037] focus:bg-[#333037] text-white font-bold py-4 px-5 rounded border-2 border-transparent focus:border-[#7839C5] focus:shadow-outline"
+            className="bg-[#1D1A21] hover:bg-[#333037] focus:bg-[#333037] transition-all text-white font-bold py-3 px-3 md:py-3.5 md:px-6 rounded focus:outline-none focus:shadow-outline"
             onClick={nextSlide}
           >
             <Image
@@ -93,7 +100,7 @@ export default function FomoPlay() {
         </div>
       </div>
       <div className="flex items-end relative min-h-[15rem] overflow-x-auto no-scrollbar">
-        {games.map((game, index) => (
+        {filteredGames.map((game, index) => (
           <div
             key={index}
             className="absolute flex items-end top-0 left-0 w-max h-full transform transition-transform duration-300"

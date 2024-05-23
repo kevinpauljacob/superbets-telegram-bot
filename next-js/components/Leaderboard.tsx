@@ -5,6 +5,7 @@ import Head from "next/head";
 import { User, obfuscatePubKey, pointTiers } from "@/context/transactions";
 import { useGlobalContext } from "./GlobalContext";
 import Image from "next/legacy/image";
+import { errorCustom } from "./toasts/ToastGroup";
 
 function Leaderboard() {
   const wallet = useWallet();
@@ -52,11 +53,11 @@ function Leaderboard() {
         }
       } else {
         setData([]);
-        toast.error("Could not fetch leaderboard.");
+        errorCustom("Could not fetch leaderboard.");
       }
     } catch (e) {
       setData([]);
-      toast.error("Could not fetch leaderboard.");
+      errorCustom("Could not fetch leaderboard.");
       console.error(e);
     }
   };
@@ -69,21 +70,21 @@ function Leaderboard() {
   const headers = ["Rank", "Wallet", "Points"];
 
   return (
-    <div className="relative mb-10 mt-5 flex h-full w-full flex-col flex-wrap items-center justify-center pl-2 pr-2">
-      <div className="w-[95%] overflow-x-auto">
+    <div className="relative mt-8 mb-10 flex h-full w-full flex-col flex-wrap items-center justify-center">
+      <div className="w-full overflow-x-auto">
         {/* table  */}
-        <div className="scrollbar mt-10 w-full min-w-[10rem] overflow-x-auto px-5 pb-8">
+        <div className="scrollbar w-full min-w-[10rem] overflow-x-auto pb-8">
           <div className="flex w-full flex-col items-center">
             {/* header  */}
             {data.length > 0 && (
-              <div className="mb-5 flex w-full flex-row items-center gap-2 pr-10">
-                <span className="w-[10%] text-right font-medium text-[#F0F0F080]">
+              <div className="mb-[1.4rem] flex w-full flex-row items-center gap-2 pr-10 bg-staking-bg py-1 text-sm font-light font-changa">
+                <span className="w-[10%] text-center ml-10 text-[#F0F0F080]">
                   {headers[0]}
                 </span>
-                <span className="w-[70%] text-left font-medium text-[#F0F0F080] pl-[18%]">
+                <span className="w-[70%] text-left text-[#F0F0F080] pl-[18%]">
                   {headers[1]}
                 </span>
-                <span className="w-[15%] text-right font-medium text-[#F0F0F080]">
+                <span className="w-[15%] text-right text-[#F0F0F080]">
                   {headers[2]}
                 </span>
               </div>
@@ -91,10 +92,10 @@ function Leaderboard() {
 
             {myData && (
               <div className="mb-2.5 flex w-full flex-row items-center gap-2 rounded-[5px] border-2 border-[#9945ff] border-opacity-50 bg-[#9945FF] bg-opacity-[0.075] py-3 pr-10">
-                <span className="w-[10%] text-right font-changa text-sm text-[#F0F0F0] text-opacity-75">
+                <span className="w-[10%] text-center ml-10 font-changa text-sm font-light text-[#F0F0F0] text-opacity-75">
                   {myData.rank}
                 </span>
-                <span className="w-[70%] flex items-center gap-2 text-left font-changa text-sm text-[#F0F0F0] text-opacity-75 pl-[15%]">
+                <span className="w-[70%] flex items-center gap-2 text-left font-changa text-sm font-light text-[#F0F0F0] text-opacity-75 pl-[15%]">
                   <div className="relative w-8 h-8">
                     <Image
                       src={pointTier.image}
@@ -105,7 +106,7 @@ function Leaderboard() {
                   </div>
                   {obfuscatePubKey(myData.wallet ?? "")}
                 </span>
-                <span className="w-[15%] text-right font-changa text-sm text-[#F0F0F0] text-opacity-75">
+                <span className="w-[15%] text-right font-chakra text-sm font-bold text-[#FFFFFF]">
                   {myData.points.toLocaleString("en-US", {
                     maximumFractionDigits: 2,
                     minimumFractionDigits: 0,
@@ -124,20 +125,12 @@ function Leaderboard() {
                 .map((data, index) => (
                   <div
                     key={index}
-                    className={`mb-2.5 flex w-full flex-row items-center gap-2 rounded-[5px] ${
-                      index % 2 === 0
-                        ? myData
-                          ? "bg-transparent"
-                          : "bg-[#9945FF] bg-opacity-[0.075]"
-                        : myData
-                        ? "bg-[#9945FF] bg-opacity-[0.075]"
-                        : "bg-transparent"
-                    } py-3 pr-10`}
+                    className={`mb-2.5 flex w-full flex-row items-center gap-2 rounded-[5px] bg-staking-bg  py-3 pr-10`}
                   >
-                    <span className="w-[10%] text-right font-changa text-sm text-[#F0F0F0] text-opacity-75">
+                    <span className="w-[10%] text-center ml-10 font-changa text-sm font-light text-[#F0F0F0] text-opacity-75">
                       {data.rank}
                     </span>
-                    <span className="w-[70%] flex items-center gap-2 text-left font-changa text-sm text-[#F0F0F0] text-opacity-75 pl-[15%]">
+                    <span className="w-[70%] flex items-center gap-2 text-left font-changa text-sm font-light text-[#FFFFFF] text-opacity-[0.78] pl-[15%]">
                       <div className="relative w-8 h-8">
                         <Image
                           src={`/assets/badges/T-${Object.entries(
@@ -154,7 +147,7 @@ function Leaderboard() {
                       </div>
                       {obfuscatePubKey(data.wallet ?? "")}
                     </span>
-                    <span className="w-[15%] text-right font-changa text-sm text-[#F0F0F0] text-opacity-75">
+                    <span className="w-[15%] text-right font-chakra text-sm font-bold text-[#ffffff]">
                       {parseInt(data?.points ?? 0)}
                     </span>
                   </div>

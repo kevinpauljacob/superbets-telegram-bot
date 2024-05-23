@@ -23,6 +23,10 @@ const wheelSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
+    strikeMultiplier: {
+      type: Number,
+      required: true,
+    },
     result: {
       type: String,
       enum: ["Won", "Lost"],
@@ -30,6 +34,18 @@ const wheelSchema = new mongoose.Schema(
     },
     tokenMint: {
       type: String,
+      required: false,
+    },
+    houseEdge: {
+      type: Number,
+      required: true,
+    },
+    amountWon: {
+      type: Number,
+      required: true,
+    },
+    amountLost: {
+      type: Number,
       required: true,
     },
     nonce: {

@@ -23,8 +23,21 @@ const plinkoSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
+    strikeMultiplier: {
+      type: Number,
+      required: true,
+    },
     tokenMint: {
       type: String,
+      required: false,
+    },
+    houseEdge: {
+      type: Number,
+      required: true,
+    },
+    result: {
+      type: String,
+      enum: ["Won", "Lost"],
       required: true,
     },
     amountWon: {

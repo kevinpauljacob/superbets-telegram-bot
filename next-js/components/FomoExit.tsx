@@ -7,15 +7,23 @@ export default function FomoExit() {
   const games = [
     {
       href: "/",
-      src: "/assets/f1game.png",
+      src: "/assets/game-cards/mines.png",
     },
     {
       href: "/",
-      src: "/assets/clrgame.png",
+      src: "/assets/game-cards/blackjack.png",
     },
     {
       href: "/",
-      src: "/assets/odrgame.png",
+      src: "/assets/game-cards/keno.png",
+    },
+    {
+      href: "/",
+      src: "/assets/game-cards/plinko.png",
+    },
+    {
+      href: "/",
+      src: "/assets/game-cards/wheel.png",
     },
   ];
 
@@ -47,7 +55,7 @@ export default function FomoExit() {
         </div>
         <div className="">
           <button
-            className="bg-[#1D1A21] hover:bg-[#333037] focus:bg-[#333037] transition-all text-white font-bold py-4 px-5 rounded focus:outline-none focus:shadow-outline mr-3"
+            className="bg-[#1D1A21] hover:bg-[#333037] focus:bg-[#333037] transition-all text-white font-bold py-3 px-3 md:py-3.5 md:px-6 rounded focus:outline-none focus:shadow-outline mr-3"
             onClick={prevSlide}
           >
             <Image
@@ -59,7 +67,7 @@ export default function FomoExit() {
             />
           </button>
           <button
-            className="bg-[#1D1A21] hover:bg-[#333037] focus:bg-[#333037] transition-all text-white font-bold py-4 px-5 rounded focus:outline-none focus:shadow-outline"
+            className="bg-[#1D1A21] hover:bg-[#333037] focus:bg-[#333037] transition-all text-white font-bold py-3 px-3 md:py-3.5 md:px-6 rounded focus:outline-none focus:shadow-outline mr-3"
             onClick={nextSlide}
           >
             <Image
@@ -72,21 +80,25 @@ export default function FomoExit() {
           </button>
         </div>
       </div>
-      <div className="relative min-h-[185px] overflow-hidden">
+      <div className="flex items-end relative min-h-[15rem] overflow-x-auto no-scrollbar">
         {games.map((game, index) => (
           <div
             key={index}
-            className="absolute top-0 left-0 w-max h-full transform transition-transform duration-300"
+            className="absolute flex items-end top-0 left-0 w-max h-full transform transition-transform duration-300"
             style={{
               transform: `translateX(${index * 100 - currentSlide * 100}%)`,
             }}
           >
-            <Link href={game.href} className="bg-white mx-4">
+            <Link
+              href={game.href}
+              key={index}
+              className="mt-3.5 flex items-end transition-transform z-20 hover:-translate-y-4"
+            >
               <Image
                 src={game.src}
                 alt=""
-                width={295}
-                height={160}
+                width={154}
+                height={216}
                 className="mr-3.5"
               />
             </Link>

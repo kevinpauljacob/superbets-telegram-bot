@@ -2,10 +2,21 @@ import connectDatabase from "@/utils/database";
 import { getToken } from "next-auth/jwt";
 import { NextApiRequest, NextApiResponse } from "next";
 import { GameSeed, Limbo, User } from "@/models/games";
-import { generateGameResult, GameType, seedStatus } from "@/utils/vrf";
+import {
+  generateGameResult,
+  GameType,
+  seedStatus,
+} from "@/utils/provably-fair";
 import StakingUser from "@/models/staking/user";
-import { pointTiers } from "@/context/transactions";
-import { wsEndpoint } from "@/context/gameTransactions";
+import {
+  houseEdgeTiers,
+  launchPromoEdge,
+  maxPayouts,
+  pointTiers,
+} from "@/context/transactions";
+import { minGameAmount, wsEndpoint } from "@/context/gameTransactions";
+import { Decimal } from "decimal.js";
+Decimal.set({ precision: 9 });
 
 const secret = process.env.NEXTAUTH_SECRET;
 
@@ -33,17 +44,31 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           message: "User wallet not authenticated",
         });
 
-      await connectDatabase();
-
       if (!wallet || !amount || !tokenMint || !chance)
         return res
           .status(400)
           .json({ success: false, message: "Missing parameters" });
 
-      if (tokenMint !== "SOL" || !(2 <= chance && chance <= 98))
+      if (amount < minGameAmount)
+        return res.status(400).json({
+          success: false,
+          message: "Invalid bet amount",
+        });
+
+      if (tokenMint !== "SOL" || !(2 <= chance && chance <= 99))
         return res
           .status(400)
           .json({ success: false, message: "Invalid parameters" });
+
+      const strikeMultiplier = new Decimal(100).dividedBy(chance).toDP(2);
+      const maxPayout = Decimal.mul(amount, strikeMultiplier);
+
+      if (!(maxPayout.toNumber() < maxPayouts.limbo))
+        return res
+          .status(400)
+          .json({ success: false, message: "Max payout exceeded" });
+
+      await connectDatabase();
 
       let user = await User.findOne({ wallet });
 
@@ -59,6 +84,14 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         return res
           .status(400)
           .json({ success: false, message: "Insufficient balance !" });
+
+      const userData = await StakingUser.findOneAndUpdate(
+        { wallet },
+        {},
+        { upsert: true, new: true },
+      );
+      const userTier = userData?.tier ?? 0;
+      const houseEdge = launchPromoEdge ? 0 : houseEdgeTiers[userTier];
 
       const activeGameSeed = await GameSeed.findOneAndUpdate(
         {
@@ -84,29 +117,20 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         clientSeed,
         nonce,
         GameType.limbo,
-      ) as number;
+      );
 
       if (!strikeNumber) throw new Error("Invalid strike number!");
 
       let result = "Lost";
-      let amountWon = 0;
+      let amountWon = new Decimal(0);
       let amountLost = amount;
 
-      if (strikeNumber < chance) {
+      if (strikeNumber <= chance) {
         result = "Won";
-        amountWon = amount * (100 / chance - 1);
-        amountLost = 0;
-      }
-
-      let sns;
-
-      if (!user.sns) {
-        sns = (
-          await fetch(
-            `https://sns-api.bonfida.com/owners/${wallet}/domains`,
-          ).then((data) => data.json())
-        ).result[0];
-        if (sns) sns = sns + ".sol";
+        amountWon = Decimal.mul(amount, strikeMultiplier).mul(
+          Decimal.sub(1, houseEdge),
+        );
+        amountLost = Math.max(new Decimal(amount).sub(amountWon).toNumber(), 0);
       }
 
       const userUpdate = await User.findOneAndUpdate(
@@ -121,9 +145,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         },
         {
           $inc: {
-            "deposit.$.amount": -amount + amountWon,
+            "deposit.$.amount": amountWon.sub(amount),
+            numOfGamesPlayed: 1,
           },
-          sns,
         },
         {
           new: true,
@@ -134,41 +158,61 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         throw new Error("Insufficient balance for action!!");
       }
 
-      await Limbo.create({
+      const limbo = new Limbo({
         wallet,
         amount,
         chance,
         strikeNumber,
+        strikeMultiplier,
         result,
         tokenMint,
+        houseEdge,
         amountWon,
         amountLost,
         nonce,
         gameSeed: activeGameSeed._id,
       });
+      await limbo.save();
 
-      const userData = await StakingUser.findOne({ wallet });
-      let points = userData?.points ?? 0;
-      const userTier = Object.entries(pointTiers).reduce((prev, next) => {
+      const pointsGained =
+        0 * user.numOfGamesPlayed + 1.4 * amount * userData.multiplier;
+
+      const points = userData.points + pointsGained;
+      const newTier = Object.entries(pointTiers).reduce((prev, next) => {
         return points >= next[1]?.limit ? next : prev;
       })[0];
+
+      await StakingUser.findOneAndUpdate(
+        {
+          wallet,
+        },
+        {
+          $inc: {
+            points: pointsGained,
+          },
+          $set: {
+            tier: newTier,
+          },
+        },
+      );
+
+      const record = await Limbo.populate(limbo, "gameSeed");
+      const { gameSeed, ...rest } = record.toObject();
+      rest.game = GameType.limbo;
+      rest.userTier = parseInt(newTier);
+      rest.gameSeed = { ...gameSeed, serverSeed: undefined };
+
+      const payload = rest;
 
       const socket = new WebSocket(wsEndpoint);
 
       socket.onopen = () => {
-        console.log("WebSocket connection opened");
         socket.send(
           JSON.stringify({
             clientType: "api-client",
             channel: "fomo-casino_games-channel",
             authKey: process.env.FOMO_CHANNEL_AUTH_KEY!,
-            payload: {
-              game: GameType.limbo,
-              wallet,
-              absAmount: Math.abs(amountWon - amountLost),
-              result,
-              userTier,
-            },
+            payload,
           }),
         );
 
@@ -183,7 +227,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
             : "Better luck next time!",
         result,
         strikeNumber,
-        amountWon,
+        amountWon: amountWon.toNumber(),
         amountLost,
       });
     } catch (e: any) {

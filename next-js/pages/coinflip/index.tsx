@@ -1,16 +1,12 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import dynamic from "next/dynamic";
 import { useWallet } from "@solana/wallet-adapter-react";
 import toast from "react-hot-toast";
 import { placeFlip } from "../../context/gameTransactions";
-import HistoryTable from "../../components/games/CoinFlip/HistoryTable";
 import Image from "next/image";
-import Link from "next/link";
-import Head from "next/head";
 import { FormProvider, useForm } from "react-hook-form";
 import { useGlobalContext } from "@/components/GlobalContext";
 import BetSetting from "@/components/BetSetting";
-import GameHeader from "@/components/GameHeader";
 import {
   GameDisplay,
   GameFooterInfo,
@@ -18,6 +14,25 @@ import {
   GameOptions,
   GameTable,
 } from "@/components/GameLayout";
+import { BsInfinity } from "react-icons/bs";
+import Loader from "@/components/games/Loader";
+import BetAmount from "@/components/games/BetAmountInput";
+import BetButton from "@/components/games/BetButton";
+import ResultsSlider from "@/components/ResultsSlider";
+import showInfoToast from "@/components/games/toasts/toasts";
+import BalanceAlert from "@/components/games/BalanceAlert";
+import Bets from "../../components/games/Bets";
+import { soundAlert } from "@/utils/soundUtils";
+import ConfigureAutoButton from "@/components/ConfigureAutoButton";
+import AutoCount from "@/components/AutoCount";
+import {
+  errorCustom,
+  successCustom,
+  warningCustom,
+} from "@/components/toasts/ToastGroup";
+import { translator } from "@/context/transactions";
+import { minGameAmount } from "@/context/gameTransactions";
+import { useSession } from "next-auth/react";
 
 const Timer = dynamic(() => import("../../components/games/Timer"), {
   ssr: false,
@@ -29,15 +44,36 @@ const Progress = dynamic(() => import("../../components/games/Progressbar"), {
 export default function Flip() {
   const wallet = useWallet();
   const methods = useForm();
+  const { data: session, status } = useSession();
 
-  const { coinData, getBalance, getWalletBalance, setShowWalletModal } = useGlobalContext();
+  const {
+    coinData,
+    getBalance,
+    getWalletBalance,
+    setShowWalletModal,
+    setShowAutoModal,
+    autoWinChange,
+    autoLossChange,
+    autoWinChangeReset,
+    autoLossChangeReset,
+    autoStopProfit,
+    autoStopLoss,
+    startAuto,
+    setStartAuto,
+    autoBetCount,
+    setAutoBetCount,
+    autoBetProfit,
+    setAutoBetProfit,
+    useAutoConfig,
+    setUseAutoConfig,
+    houseEdge,
+    maxBetAmt,
+    language,
+  } = useGlobalContext();
 
-  const [user, setUser] = useState<any>(null);
-  const [betAmt, setBetAmt] = useState(0.2);
-  const [betCount, setBetCount] = useState(0);
+  const [betAmt, setBetAmt] = useState<number | undefined>();
+  const [userInput, setUserInput] = useState<number | undefined>();
   const [betType, setBetType] = useState<string | null>(null);
-
-  const [deposit, setDeposit] = useState(false);
   const [flipping, setFlipping] = useState(false);
   const [result, setResult] = useState<string | null>(null);
 
@@ -45,88 +81,106 @@ export default function Flip() {
   const [refresh, setRefresh] = useState(true);
 
   const [betSetting, setBetSetting] = useState<"manual" | "auto">("manual");
+  const [betResults, setBetResults] = useState<
+    { result: number; win: boolean }[]
+  >([]);
 
   const bet = async () => {
     try {
-      console.log("Placing Flip");
+      if (!wallet.connected || !wallet.publicKey) {
+        throw new Error("Wallet not connected");
+      }
+      if (!betAmt || betAmt === 0) {
+        throw new Error("Set Amount.");
+      }
+      if (coinData && coinData[0].amount < betAmt) {
+        throw new Error("Insufficient balance for bet !");
+      }
+
+      // console.log("Placing Flip");
       let response = await placeFlip(
         wallet,
         betAmt,
         betType === "Heads" ? "heads" : "tails",
       );
-      if (response.success) {
-        setTimeout(() => {
-          response?.data?.result == "Won"
-            ? toast.success(response?.message)
-            : toast.error(response?.message);
-          setResult(response?.data?.result ?? "Lost");
-          setRefresh(true);
-          // setLoading(false);
-          setFlipping(false);
-        }, 4000);
-      } else {
-        setBetType(null);
-        setDeposit(false);
-        setLoading(false);
-        setFlipping(false);
-        setResult(null);
-        response?.message && toast.error(response?.message);
+      if (response.success !== true) {
+        throw new Error(
+          response?.message ? response?.message : "Could not make Flip.",
+        );
       }
-    } catch (e) {
-      toast.error("Could not make Flip.");
+      setTimeout(
+        () => {
+          if (response.success) {
+            response?.data?.result == "Won"
+              ? successCustom(response?.message)
+              : errorCustom(response?.message);
+
+            const win = response?.data?.result === "Won";
+            if (win) soundAlert("/sounds/win.wav");
+            const newBetResult = { result: response?.data?.strikeNumber, win };
+
+            setBetResults((prevResults) => {
+              const newResults = [...prevResults, newBetResult];
+              if (newResults.length > 6) {
+                newResults.shift();
+              }
+              return newResults;
+            });
+
+            setResult(response?.data?.result ?? "Lost");
+            setRefresh(true);
+            setLoading(false);
+            setFlipping(false);
+
+            // auto options
+            if (betSetting === "auto") {
+              if (useAutoConfig && win) {
+                setBetAmt(
+                  autoWinChangeReset
+                    ? userInput!
+                    : betAmt + ((autoWinChange ?? 0) * betAmt) / 100.0,
+                );
+              } else if (useAutoConfig && !win) {
+                setBetAmt(
+                  autoLossChangeReset
+                    ? userInput!
+                    : betAmt + ((autoLossChange ?? 0) * betAmt) / 100.0,
+                );
+              }
+              // update profit / loss
+              setAutoBetProfit(
+                autoBetProfit + (win ? 2 * (1 - houseEdge) - 1 : -1) * betAmt,
+              );
+              // update count
+              if (typeof autoBetCount === "number") {
+                setAutoBetCount(autoBetCount > 0 ? autoBetCount - 1 : 0);
+                autoBetCount === 1 &&
+                  warningCustom("Auto bet stopped", "top-right");
+              } else
+                setAutoBetCount(
+                  autoBetCount.length > 12
+                    ? autoBetCount.slice(0, 5)
+                    : autoBetCount + 1,
+                );
+            }
+          } else {
+            throw new Error(
+              response?.message ? response?.message : "Could not make Flip.",
+            );
+          }
+        },
+        betSetting === "auto" ? 500 : 3000,
+      );
+    } catch (e: any) {
+      errorCustom(e?.message ?? "Could not make Flip.");
       setBetType(null);
-      setDeposit(false);
       setFlipping(false);
       setLoading(false);
       setResult(null);
+      setStartAuto(false);
+      setAutoBetCount(0);
     }
   };
-
-  const onSubmit = async (data: any) => {
-    console.log(data);
-    if (!wallet.publicKey) {
-      toast.error("Wallet not connected");
-      return;
-    }
-    if (betAmt === 0) {
-      toast.error("Set Amount.");
-      return;
-    }
-    if (betType) {
-      setLoading(true);
-      setDeposit(false);
-      setTimeout(() => {
-        setLoading(false);
-        setDeposit(true);
-        bet();
-      }, 2000);
-    }
-  };
-
-  useEffect(() => {
-    if (deposit) {
-      // console.log("deposit", deposit);
-      setLoading(true);
-      !result && setFlipping(true);
-    }
-  }, [deposit]);
-
-  // useEffect(() => {
-  //   console.log("Bet type: ", betType);
-  //   console.log("Others: ", loading, flipping, deposit);
-  // }, [betType]);
-  // useEffect(() => {
-  //   console.log("load Bet type: ", betType);
-  //   console.log("load Others: ", loading, flipping, deposit);
-  // }, [loading]);
-  // useEffect(() => {
-  //   console.log("flip Bet type: ", betType);
-  //   console.log("flip Others: ", loading, flipping, deposit);
-  // }, [flipping]);
-  // useEffect(() => {
-  //   console.log("depo Bet type: ", betType);
-  //   console.log("depo Others: ", loading, flipping, deposit);
-  // }, [deposit]);
 
   useEffect(() => {
     if (refresh && wallet?.publicKey) {
@@ -136,510 +190,386 @@ export default function Flip() {
     }
   }, [wallet?.publicKey, refresh]);
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
-  ) => {
-    setBetAmt(parseFloat(e.target.value));
+  useEffect(() => {
+    setBetAmt(userInput);
+  }, [userInput]);
+
+  useEffect(() => {
+    // console.log(
+    //   "Auto: ",
+    //   startAuto,
+    //   autoBetCount,
+    //   autoStopProfit,
+    //   autoStopLoss,
+    //   autoBetProfit,
+    //   betAmt,
+    // );
+    if (
+      betSetting === "auto" &&
+      startAuto &&
+      ((typeof autoBetCount === "string" && autoBetCount.includes("inf")) ||
+        (typeof autoBetCount === "number" && autoBetCount > 0))
+    ) {
+      let potentialLoss = 0;
+      if (betAmt !== undefined) {
+        potentialLoss =
+          autoBetProfit +
+          -1 *
+            (autoWinChangeReset || autoLossChangeReset
+              ? betAmt
+              : autoBetCount === "inf"
+              ? Math.max(0, betAmt)
+              : betAmt *
+                (autoLossChange !== null ? autoLossChange / 100.0 : 0));
+
+        // console.log("Current bet amount:", betAmt);
+        // console.log("Auto loss change:", autoLossChange);
+        // console.log("Auto profit change:", autoWinChange);
+        // console.log("Potential loss:", potentialLoss);
+      }
+      if (
+        useAutoConfig &&
+        autoStopProfit &&
+        autoBetProfit > 0 &&
+        autoBetProfit >= autoStopProfit
+      ) {
+        warningCustom("Profit limit reached.", "top-right");
+        setAutoBetCount(0);
+        setStartAuto(false);
+        return;
+      }
+      if (
+        useAutoConfig &&
+        autoStopLoss &&
+        autoBetProfit < 0 &&
+        potentialLoss <= -autoStopLoss
+      ) {
+        warningCustom("Loss limit reached.", "top-right");
+        setAutoBetCount(0);
+        setStartAuto(false);
+        return;
+      }
+      setTimeout(() => {
+        setLoading(true);
+        setFlipping(true);
+        bet();
+      }, 500);
+    } else {
+      setStartAuto(false);
+      setAutoBetProfit(0);
+      setUserInput(betAmt);
+    }
+  }, [startAuto, autoBetCount]);
+
+  const onSubmit = async (data: any) => {
+    if (!wallet.publicKey) {
+      errorCustom("Wallet not connected");
+      return;
+    }
+    if (betAmt === 0) {
+      errorCustom("Set Amount.");
+      return;
+    }
+    if (betType) {
+      if (betSetting === "auto") {
+        if (betAmt === 0) {
+          errorCustom("Set Amount.");
+          return;
+        }
+        if (typeof autoBetCount === "number" && autoBetCount <= 0) {
+          errorCustom("Set Bet Count.");
+          return;
+        }
+        if (
+          (typeof autoBetCount === "string" && autoBetCount.includes("inf")) ||
+          (typeof autoBetCount === "number" && autoBetCount > 0)
+        ) {
+          // console.log("Auto betting. config: ", useAutoConfig);
+          setStartAuto(true);
+        }
+      } else {
+        setLoading(true);
+        setFlipping(true);
+        bet();
+      }
+    }
   };
 
-  const handleCountChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
-  ) => {
-    setBetCount(parseFloat(e.target.value));
-  };
+  const disableInput = useMemo(() => {
+    return betSetting === "auto" && startAuto ? true : false || loading;
+  }, [betSetting, startAuto, loading]);
 
   return (
-    <GameLayout title="FOMO - Coin Flip">
+    <GameLayout title="Coin Flip">
       <GameOptions>
         <>
-          <BetSetting betSetting={betSetting} setBetSetting={setBetSetting} />
-
-          {betSetting == "manual" ? (
-            <div className="w-full flex flex-col">
-              <FormProvider {...methods}>
-                <form
-                  className="flex w-full flex-col gap-0"
-                  autoComplete="off"
-                  onSubmit={methods.handleSubmit(onSubmit)}
-                >
-                  {/* amt input  */}
-                  <div className="mb-0 flex w-full flex-col">
-                    <div className="mb-1 flex w-full items-center justify-between text-sm font-changa font-medium">
-                      <label className="text-[#F0F0F0] text-opacity-90">
-                        Bet amount
-                      </label>
-                      <span className="text-[#94A3B8] text-opacity-90">
-                        Available :{" "}
-                        {coinData ? coinData[0]?.amount.toFixed(4) : 0}
-                      </span>
-                    </div>
-
-                    <div
-                      className={`group flex h-11 w-full cursor-pointer items-center rounded-[8px] bg-[#202329] px-4`}
-                    >
-                      <input
-                        id={"amount-input"}
-                        {...methods.register("amount", {
-                          required: "Amount is required",
-                        })}
-                        type={"number"}
-                        step={"any"}
-                        autoComplete="off"
-                        onChange={handleChange}
-                        placeholder={"Amount"}
-                        value={betAmt}
-                        className={`flex w-full min-w-0 bg-transparent text-base text-white font-chakra placeholder-white  placeholder-opacity-40 outline-none`}
-                      />
-                      <span
-                        className="bg-[#D9D9D9] bg-opacity-5 py-1 px-1.5 rounded text-xs font-semibold text-[#F0F0F0] text-opacity-50"
-                        onClick={() =>
-                          setBetAmt(coinData ? coinData[0]?.amount : 0)
-                        }
-                      >
-                        MAX
-                      </span>
-                    </div>
-
-                    <span
-                      className={`${
-                        methods.formState.errors["amount"]
-                          ? "opacity-100"
-                          : "opacity-0"
-                      } mt-1.5 flex items-center gap-1 text-xs text-[#D92828]`}
-                    >
-                      {methods.formState.errors["amount"]
-                        ? methods.formState.errors[
-                            "amount"
-                          ]!.message!.toString()
-                        : "NONE"}
-                    </span>
-                  </div>
-
-                  {/* balance alert  */}
-                  {(!coinData || (coinData && coinData[0].amount < 0.0001)) && (
-                    <div className="mb-5 w-full rounded-lg bg-[#0C0F16] px-3 pb-2 pt-4 text-white md:px-6">
-                      <div className="-full mb-3 text-center font-changa font-medium text-[#F0F0F0] text-opacity-75">
-                        Please deposit funds to start playing. View{" "}
-                        <u
-                          onClick={() => {
-                            setShowWalletModal(true);
-                          }}
-                        >
-                          WALLET
-                        </u>
-                      </div>
-                    </div>
-                  )}
-                </form>
-                {/* choosing bet options  */}
-                <div className="flex flex-col w-full gap-4">
-                  <div className="flex w-full flex-row mb-4 gap-3">
-                    {/* buttons  */}
-                    <div
-                      onClick={() => {
-                        setBetType("Heads");
-                      }}
-                      className={`${
-                        betType === "Heads"
-                          ? "border-[#7839C5]"
-                          : "border-transparent hover:border-[#7839C580]"
-                      } w-full rounded-lg text-center cursor-pointer border-2 bg-[#202329] py-2.5 font-changa text-xl text-white shadow-[0px_4px_15px_0px_rgba(0,0,0,0.25)]`}
-                    >
-                      Heads
-                    </div>
-                    <div
-                      onClick={() => {
-                        setBetType("Tails");
-                      }}
-                      className={`${
-                        betType === "Tails"
-                          ? "border-[#7839C5]"
-                          : "border-transparent hover:border-[#7839C580]"
-                      } w-full rounded-lg text-center cursor-pointer border-2 bg-[#202329] py-2.5 font-changa text-xl text-white shadow-[0px_4px_15px_0px_rgba(0,0,0,0.25)] `}
-                    >
-                      Tails
-                    </div>
-                  </div>
-
-                  {betType && loading ? (
-                    <div className="mb-0 flex w-full flex-col items-center rounded-lg bg-[#202329] px-4 pb-4 pt-2">
-                      {deposit ? (
-                        flipping ? (
-                          // while getting flip result
-                          <div className="flex w-full flex-col items-center justify-center">
-                            <Image
-                              src={"/assets/coin.png"}
-                              width={50}
-                              height={50}
-                              alt=""
-                              className="rotate mb-2"
-                            />
-                            <span className="font-changa text-xs text-[#FFFFFF] text-opacity-75">
-                              Deposit Confirmed
-                            </span>
-                            <span className="font-changa text-xl text-[#FFFFFF] text-opacity-90">
-                              Flipping the coin...
-                            </span>
-                          </div>
-                        ) : (
-                          // after getting flip result
-                          <div className="flex w-full flex-col items-center justify-center">
-                            <span className="font-changa text-xs text-[#FFFFFF] text-opacity-75">
-                              {result && result === "Won"
-                                ? "yay..."
-                                : "ooops..."}
-                            </span>
-                            <span className="font-changa text-xl text-[#FFFFFF] text-opacity-90">
-                              {result && result === "Won"
-                                ? "You Won!"
-                                : "You Lost!"}
-                            </span>
-                            <button
-                              onClick={() => {
-                                setBetType(null);
-                                setLoading(false);
-                                setResult(null);
-                                setDeposit(false);
-                                setFlipping(false);
-                                setBetAmt(0);
-                              }}
-                              className="mt-2 w-full rounded-[5px] bg-[#7839C5] hover:bg-[#9361d1] focus:bg-[#602E9E] px-5 py-2 font-changa font-semibold text-white text-opacity-90 shadow-[0_5px_10px_rgba(0,0,0,0.3)]"
-                            >
-                              Bet Again
-                            </button>
-                          </div>
-                        )
-                      ) : (
-                        loading && (
-                          // when making bet request
-                          <div className="flex w-full flex-col items-center justify-center">
-                            <Image
-                              src={"/assets/coin.png"}
-                              width={50}
-                              height={50}
-                              alt=""
-                              className="rotate mb-2"
-                            />
-                            <span className="font-changa text-xs text-[#FFFFFF] text-opacity-75">
-                              preparing for flip
-                            </span>
-                            <span className="font-changa text-xl text-[#FFFFFF] text-opacity-90">
-                              Confirming deposit...
-                            </span>
-                          </div>
-                        )
-                      )}
-                    </div>
-                  ) : (
-                    <button
-                      type="submit"
-                      disabled={
-                        !betType || (coinData && coinData[0].amount < 0.0001)
-                          ? true
-                          : false
-                      }
-                      onClick={onSubmit}
-                      className={`${
-                        !betType || (coinData && coinData[0].amount < 0.0001)
-                          ? "cursor-not-allowed opacity-70"
-                          : "hover:opacity-90"
-                      } w-full rounded-lg bg-[#7839C5] hover:bg-[#9361d1] focus:bg-[#602E9E] py-2.5 font-changa text-xl text-white`}
-                    >
-                      BET
-                    </button>
-                  )}
-                </div>
-              </FormProvider>
-            </div>
-          ) : (
-            <div className="w-full flex flex-col">
-              <FormProvider {...methods}>
-                <form
-                  className="flex w-full flex-col gap-0"
-                  autoComplete="off"
-                  onSubmit={methods.handleSubmit(onSubmit)}
-                >
-                  <div className="mb-0 flex w-full flex-col">
-                    <div className="mb-1 flex w-full items-center justify-between">
-                      <label className="text-xs text-[#F0F0F0] text-opacity-75">
-                        Bet amount
-                      </label>
-                      <span className="text-sm text-[#F0F0F0] text-opacity-75">
-                        Available :{" "}
-                        {coinData ? coinData[0]?.amount.toFixed(4) : 0}
-                      </span>
-                    </div>
-
-                    <div
-                      className={`group flex h-11 w-full cursor-pointer items-center rounded-[8px] bg-[#202329] px-4`}
-                    >
-                      <input
-                        id={"amount-input"}
-                        {...methods.register("amount", {
-                          required: "Amount is required",
-                        })}
-                        type={"number"}
-                        step={"any"}
-                        autoComplete="off"
-                        onChange={handleChange}
-                        placeholder={"Amount"}
-                        value={betAmt}
-                        className={`flex w-full min-w-0 bg-transparent text-sm text-white placeholder-white  placeholder-opacity-40 outline-none`}
-                      />
-                      <span
-                        className="bg-[#D9D9D9] bg-opacity-5 py-1 px-1.5 rounded text-sm text-[#F0F0F0] text-opacity-75"
-                        onClick={() =>
-                          setBetAmt(coinData ? coinData[0]?.amount : 0)
-                        }
-                      >
-                        MAX
-                      </span>
-                    </div>
-
-                    <span
-                      className={`${
-                        methods.formState.errors["amount"]
-                          ? "opacity-100"
-                          : "opacity-0"
-                      } mt-1.5 flex items-center gap-1 text-xs text-[#D92828]`}
-                    >
-                      {methods.formState.errors["amount"]
-                        ? methods.formState.errors[
-                            "amount"
-                          ]!.message!.toString()
-                        : "NONE"}
-                    </span>
-                  </div>
-                  <div className="w-full flex flex-row items-end gap-3">
-                    <div className="mb-0 flex w-full flex-col">
-                      <div className="mb-1 flex w-full items-center justify-between">
-                        <label className="text-xs text-[#F0F0F0] text-opacity-75">
-                          Number of Bets
-                        </label>
-                        {/* <span className="text-sm text-[#F0F0F0] text-opacity-75">
-                Available : {coinData ? coinData[0]?.amount.toFixed(4) : 0}
-              </span> */}
-                      </div>
-
-                      <div
-                        className={`group flex h-11 w-full cursor-pointer items-center rounded-[8px] bg-[#202329] px-4`}
-                      >
-                        <input
-                          id={"count-input"}
-                          {...methods.register("betCount", {
-                            required: "Bet count is required",
-                          })}
-                          type={"number"}
-                          step={"any"}
-                          autoComplete="off"
-                          onChange={handleCountChange}
-                          placeholder={"00"}
-                          value={betCount}
-                          className={`flex w-full min-w-0 bg-transparent text-sm text-white placeholder-white  placeholder-opacity-40 outline-none`}
-                        />
-                        <span
-                          className="bg-[#D9D9D9] bg-opacity-5 py-1 px-1.5 rounded text-sm text-[#F0F0F0] text-opacity-75"
-                          onClick={() =>
-                            setBetCount(coinData ? coinData[0]?.amount : 0)
-                          }
-                        >
-                          MAX
-                        </span>
-                      </div>
-
-                      <span
-                        className={`${
-                          methods.formState.errors["amount"]
-                            ? "opacity-100"
-                            : "opacity-0"
-                        } mt-1.5 flex items-center gap-1 text-xs text-[#D92828]`}
-                      >
-                        {methods.formState.errors["amount"]
-                          ? methods.formState.errors[
-                              "amount"
-                            ]!.message!.toString()
-                          : "NONE"}
-                      </span>
-                    </div>
-                    <div className="mb-[1.4rem] rounded-md w-full h-11 flex items-center justify-center opacity-75 cursor-pointer text-white text-opacity-90 border-2 border-white bg-white bg-opacity-0 hover:bg-opacity-5">
-                      Configure Auto
-                    </div>
-                  </div>
-                </form>
-                {/* choosing bet options  */}
-                <div className="flex flex-col w-full gap-4">
-                  <div className="flex w-full flex-row mb-4 gap-3">
-                    {/* buttons  */}
-                    <div
-                      onClick={() => {
-                        setBetType("Heads");
-                      }}
-                      className={`${
-                        betType === "Heads"
-                          ? "border-[#7839C5]"
-                          : "border-transparent hover:border-[#7839C580]"
-                      } w-full rounded-lg text-center cursor-pointer border-2 bg-[#202329] py-2.5 font-changa text-xl text-white shadow-[0px_4px_15px_0px_rgba(0,0,0,0.25)]`}
-                    >
-                      Heads
-                    </div>
-                    <div
-                      onClick={() => {
-                        setBetType("Tails");
-                      }}
-                      className={`${
-                        betType === "Tails"
-                          ? "border-[#7839C5]"
-                          : "border-transparent hover:border-[#7839C580]"
-                      } w-full rounded-lg text-center cursor-pointer border-2 bg-[#202329] py-2.5 font-changa text-xl text-white shadow-[0px_4px_15px_0px_rgba(0,0,0,0.25)] `}
-                    >
-                      Tails
-                    </div>
-                  </div>
-
-                  {betType && loading ? (
-                    <div className="mb-0 flex w-full flex-col items-center rounded-lg bg-[#C20FC5] bg-opacity-10 px-4 pb-4 pt-2">
-                      {deposit ? (
-                        flipping ? (
-                          // while getting flip result
-                          <div className="flex w-full flex-col items-center justify-center">
-                            <Image
-                              src={"/assets/coin.png"}
-                              width={50}
-                              height={50}
-                              alt=""
-                              className="rotate mb-2"
-                            />
-                            <span className="font-changa text-xs text-[#FFFFFF] text-opacity-75">
-                              Deposit Confirmed
-                            </span>
-                            <span className="font-changa text-xl text-[#FFFFFF] text-opacity-90">
-                              Flipping the coin...
-                            </span>
-                          </div>
-                        ) : (
-                          // after getting flip result
-                          <div className="flex w-full flex-col items-center justify-center">
-                            <span className="font-changa text-xs text-[#FFFFFF] text-opacity-75">
-                              {result && result === "Won"
-                                ? "yay..."
-                                : "ooops..."}
-                            </span>
-                            <span className="font-changa text-xl text-[#FFFFFF] text-opacity-90">
-                              {result && result === "Won"
-                                ? "You Won!"
-                                : "You Lost!"}
-                            </span>
-                            <button
-                              onClick={() => {
-                                setBetType(null);
-                                setLoading(false);
-                                setResult(null);
-                                setDeposit(false);
-                                setFlipping(false);
-                                setBetAmt(0);
-                              }}
-                              className="mt-2 w-full rounded-[5px] border border-[#F200F21A] bg-[#7839C5] hover:bg-[#9361d1] focus:bg-[#602E9E] px-5 py-2 font-changa font-semibold text-white text-opacity-90 shadow-[0_5px_10px_rgba(0,0,0,0.3)]"
-                            >
-                              Bet Again
-                            </button>
-                          </div>
-                        )
-                      ) : (
-                        loading && (
-                          // when making bet request
-                          <div className="flex w-full flex-col items-center justify-center">
-                            <Image
-                              src={"/assets/coin.png"}
-                              width={50}
-                              height={50}
-                              alt=""
-                              className="rotate mb-2"
-                            />
-                            <span className="font-changa text-xs text-[#FFFFFF] text-opacity-75">
-                              preparing for flip
-                            </span>
-                            <span className="font-changa text-xl text-[#FFFFFF] text-opacity-90">
-                              Confirming deposit...
-                            </span>
-                          </div>
-                        )
-                      )}
-                    </div>
-                  ) : (
-                    <button
-                      type="submit"
-                      disabled={
-                        !betType || (coinData && coinData[0].amount < 0.0001)
-                          ? true
-                          : false
-                      }
-                      onClick={onSubmit}
-                      className={`${
-                        !betType || (coinData && coinData[0].amount < 0.0001)
-                          ? "cursor-not-allowed opacity-70"
-                          : "hover:opacity-90"
-                      } w-full rounded-lg bg-[#7839C5] hover:bg-[#9361d1] focus:bg-[#602E9E] py-2.5 font-lilita text-xl text-white`}
-                    >
-                      BET
-                    </button>
-                  )}
-                </div>
-              </FormProvider>
+          <div className="relative w-full flex lg:hidden mb-[1.4rem]">
+            {startAuto && (
+              <div
+                onClick={() => {
+                  soundAlert("/sounds/betbutton.wav");
+                  warningCustom("Auto bet stopped", "top-right");
+                  setAutoBetCount(0);
+                  setStartAuto(false);
+                }}
+                className="cursor-pointer rounded-lg absolute w-full h-full z-20 bg-[#442c62] hover:bg-[#7653A2] focus:bg-[#53307E] flex items-center justify-center font-chakra font-semibold text-2xl tracking-wider text-white"
+              >
+                {translator("STOP", language)}
+              </div>
+            )}
+            <BetButton
+              disabled={
+                !betType ||
+                loading ||
+                !session?.user ||
+                (coinData && coinData[0].amount < minGameAmount) ||
+                (betAmt !== undefined &&
+                  maxBetAmt !== undefined &&
+                  betAmt > maxBetAmt)
+                  ? true
+                  : false
+              }
+              onClickFunction={onSubmit}
+            >
+              {loading ? <Loader /> : "BET"}
+            </BetButton>
+          </div>
+          {betSetting === "auto" && (
+            <div className="w-full flex lg:hidden">
+              <ConfigureAutoButton disabled={disableInput} />
             </div>
           )}
+          <div className="w-full hidden lg:flex">
+            <BetSetting
+              betSetting={betSetting}
+              setBetSetting={setBetSetting}
+              disabled={disableInput}
+            />
+          </div>
+
+          <div className="w-full flex flex-col nobar">
+            <FormProvider {...methods}>
+              <form
+                className="flex w-full flex-col gap-0"
+                autoComplete="off"
+                onSubmit={methods.handleSubmit(onSubmit)}
+              >
+                {/* amt input  */}
+                <BetAmount
+                  betAmt={betAmt}
+                  setBetAmt={setUserInput}
+                  currentMultiplier={2.0}
+                  leastMultiplier={2.0}
+                  game="coinflip"
+                  disabled={disableInput}
+                />
+
+                {betSetting === "manual" ? (
+                  <></>
+                ) : (
+                  <div className="w-full flex flex-row items-end gap-3">
+                    <AutoCount loading={flipping || startAuto} />
+                    <div className="w-full hidden lg:flex">
+                      <ConfigureAutoButton disabled={disableInput} />
+                    </div>
+                  </div>
+                )}
+
+                {/* choosing bet options  */}
+                <div className="flex w-full flex-row gap-3 mb-[1.4rem]">
+                  {/* buttons  */}
+                  <button
+                    onClick={() => {
+                      setBetType("Heads");
+                    }}
+                    type="button"
+                    disabled={disableInput}
+                    className={`${
+                      betType === "Heads"
+                        ? "border-[#7839C5] text-opacity-100"
+                        : "border-transparent hover:border-[#7839C580] text-opacity-80"
+                    } w-full flex items-center disabled:opacity-50 disabled:cursor-not-allowed justify-center gap-2 rounded-lg text-center cursor-pointer border-2 bg-[#202329] py-2.5 font-changa text-xl text-white font-semibold`}
+                  >
+                    <Image
+                      src={"/assets/coin.png"}
+                      width={23}
+                      height={23}
+                      alt=""
+                      className={``}
+                    />
+                    <span className="mt-0.5 font-chakra text-xl font-semibold">
+                      {translator("Heads", language)}
+                    </span>
+                  </button>
+                  <button
+                    onClick={() => {
+                      setBetType("Tails");
+                    }}
+                    type="button"
+                    disabled={disableInput}
+                    className={`${
+                      betType === "Tails"
+                        ? "border-[#7839C5] text-opacity-100"
+                        : "border-transparent hover:border-[#7839C580] text-opacity-80"
+                    } w-full flex items-center disabled:opacity-50 disabled:cursor-not-allowed justify-center gap-2 rounded-lg text-center cursor-pointer border-2 bg-[#202329] py-2.5 font-changa text-xl text-white font-semibold`}
+                  >
+                    <Image
+                      src={"/assets/tails.png"}
+                      width={23}
+                      height={23}
+                      alt=""
+                      className={``}
+                    />
+                    <span className="mt-0.5 font-chakra text-xl font-semibold">
+                      {translator("Tails", language)}
+                    </span>
+                  </button>
+                </div>
+                <div className="relative w-full hidden lg:flex mb-[1.4rem]">
+                  {startAuto && (
+                    <div
+                      onClick={() => {
+                        soundAlert("/sounds/betbutton.wav");
+                        warningCustom("Auto bet stopped", "top-right");
+                        setAutoBetCount(0);
+                        setStartAuto(false);
+                      }}
+                      className="cursor-pointer rounded-lg absolute w-full h-full z-20 bg-[#442c62] hover:bg-[#7653A2] focus:bg-[#53307E] flex items-center justify-center font-chakra font-semibold text-2xl tracking-wider text-white"
+                    >
+                      {translator("STOP", language)}
+                    </div>
+                  )}
+                  <BetButton
+                    disabled={
+                      !betType ||
+                      loading ||
+                      !session?.user ||
+                      (coinData && coinData[0].amount < minGameAmount) ||
+                      (betAmt !== undefined &&
+                        maxBetAmt !== undefined &&
+                        betAmt > maxBetAmt)
+                        ? true
+                        : false
+                    }
+                    // onClickFunction={onSubmit}
+                  >
+                    {loading ? <Loader /> : "BET"}
+                  </BetButton>
+                </div>
+              </form>
+            </FormProvider>
+            <div className="w-full flex lg:hidden">
+              <BetSetting
+                betSetting={betSetting}
+                setBetSetting={setBetSetting}
+              />
+            </div>
+          </div>
         </>
       </GameOptions>
       <GameDisplay>
         <>
-          <div
-            className={`${
-              betType && loading ? "opacity-100" : "opacity-0"
-            } w-full flex items-center justify-between`}
-          >
-            <span className="font-changa text-sm text-[#f0f0f0] text-opacity-75">
-              {deposit
-                ? flipping
-                  ? "Flipping..."
-                  : result && result === "Won"
-                  ? "You Won!"
-                  : "You Lost!"
-                : "Loading"}
+          <div className={`w-full flex items-center justify-between h-8`}>
+            <span className="text-xs md:text-sm font-chakra font-medium text-[#f0f0f0] text-opacity-75">
+              {flipping
+                ? "Flipping..."
+                : result
+                ? result === "Won"
+                  ? translator("You Won!", language)
+                  : translator("You Lost!", language)
+                : ""}
             </span>
-            <div className="flex gap-3">
-              <span
-                className={`px-4 py-1 ${
-                  deposit
-                    ? flipping
-                      ? "border-transparent text-white"
-                      : result && result === "Won"
-                      ? "border-[#72F238] text-[#72F238]"
-                      : "border-[#D92828] text-[#D92828]"
-                    : "border-transparent text-white"
-                } text-xs border-2 bg-[#282E3D] rounded`}
-              >
-                {betAmt}
-              </span>
-              <span className="text-xs px-4 py-1 bg-[#282E3D] text-white rounded">
-                1.0x
-              </span>
+            <div className="flex items-center gap-2">
+              {betResults.map((result, index) => (
+                <div
+                  key={index}
+                  className={`bg-[#282E3D] p-0.5 flex items-center justify-center border-2 rounded-full ${
+                    result.win ? "border-fomo-green" : "border-fomo-red"
+                  }`}
+                >
+                  {result.result === 1 && (
+                    <Image
+                      src={"/assets/coin.png"}
+                      width={23}
+                      height={23}
+                      alt=""
+                      className={``}
+                    />
+                  )}
+                  {result.result === 2 && (
+                    <Image
+                      src={"/assets/tails.png"}
+                      width={23}
+                      height={23}
+                      alt=""
+                      className={``}
+                    />
+                  )}
+                </div>
+              ))}
             </div>
           </div>
 
-          <div className="w-20 h-20 md:w-40 md:h-40 relative mb-10">
+          <div
+            className={`w-[11rem] h-[11rem] my-4 relative ${
+              betType && loading ? "rotate" : ""
+            }`}
+          >
+            <Image
+              src={"/assets/tails.png"}
+              layout="fill"
+              objectFit="contain"
+              objectPosition="center"
+              alt=""
+              className={`absolute ${
+                betType && loading
+                  ? "translateZ1"
+                  : result
+                  ? result === "Won"
+                    ? betType === "Tails"
+                      ? "z-[100]"
+                      : "z-[10]"
+                    : betType === "Tails"
+                    ? "z-[10]"
+                    : "z-[100]"
+                  : betType === "Tails"
+                  ? "z-[100]"
+                  : "z-[10]"
+              }`}
+            />
             <Image
               src={"/assets/coin.png"}
               layout="fill"
               objectFit="contain"
               objectPosition="center"
               alt=""
-              className={`${betType && loading && !result ? "rotate" : ""}`}
+              className={`absolute ${
+                betType && loading
+                  ? "z-[10]"
+                  : result
+                  ? result === "Won"
+                    ? betType === "Heads"
+                      ? "z-[100]"
+                      : "z-[1]"
+                    : betType === "Heads"
+                    ? "z-[1]"
+                    : "z-[100]"
+                  : betType === "Heads"
+                  ? "z-[100]"
+                  : "z-[10]"
+              }`}
             />
           </div>
-          <GameFooterInfo multiplier={1.0} amount={betAmt} chance={50} />
+
+          <GameFooterInfo
+            multiplier={2.0}
+            amount={betAmt ? betAmt : 0.0}
+            chance={50}
+          />
         </>
       </GameDisplay>
       <GameTable>
-        <HistoryTable refresh={refresh} />
+        <Bets refresh={refresh} />
       </GameTable>
     </GameLayout>
   );

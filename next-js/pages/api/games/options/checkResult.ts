@@ -1,12 +1,17 @@
 import connectDatabase from "../../../../utils/database";
 import { Option, User } from "../../../../models/games";
-import { HOUSE_TAX } from "../../../../context/config";
 import { NextApiRequest, NextApiResponse } from "next";
 import { getToken } from "next-auth/jwt";
 import StakingUser from "@/models/staking/user";
-import { pointTiers } from "@/context/transactions";
-import { GameType } from "@/utils/vrf";
+import {
+  houseEdgeTiers,
+  launchPromoEdge,
+  pointTiers,
+} from "@/context/transactions";
+import { GameType } from "@/utils/provably-fair";
 import { wsEndpoint } from "@/context/gameTransactions";
+import { Decimal } from "decimal.js";
+Decimal.set({ precision: 9 });
 
 const secret = process.env.NEXTAUTH_SECRET;
 
@@ -19,8 +24,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     try {
       let { wallet } = req.body;
 
-      // return res.send("Under Maintainance");
-
       const token = await getToken({ req, secret });
 
       if (!token || !token.sub || token.sub != wallet)
@@ -28,29 +31,33 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           error: "User wallet not authenticated",
         });
 
-      await connectDatabase();
-
-      console.log(wallet);
-
       if (!wallet)
         return res
           .status(400)
           .json({ success: false, message: "Missing parameters" });
 
+      await connectDatabase();
+
       let user = await User.findOne({ wallet });
-
-      let bet = await Option.findOne({ wallet, result: "Pending" });
-
       if (!user)
         return res
           .status(400)
           .json({ success: false, message: "User does not exist !" });
 
+      let bet = await Option.findOne({ wallet, result: "Pending" });
       if (!bet)
         return res.status(400).json({
           success: false,
           message: "No active bets on this account",
         });
+
+      const userData = await StakingUser.findOneAndUpdate(
+        { wallet },
+        {},
+        { upsert: true, new: true },
+      );
+      const userTier = userData?.tier ?? 0;
+      const houseEdge = launchPromoEdge ? 0 : houseEdgeTiers[userTier];
 
       await new Promise((r) => setTimeout(r, 2000));
 
@@ -62,35 +69,19 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         .then((res) => res.json())
         .then((data) => data.price.price * Math.pow(10, data.price.expo));
 
-      let result = "Pending";
-      let amountWon = 0;
+      let result = "Lost";
+      let amountWon = new Decimal(0);
       let amountLost = bet.amount;
 
-      if (bet.betType === "betUp") {
-        // if betUp
-        if (betEndPrice > bet.strikePrice) {
-          // bet won
-          result = "Won";
-          amountWon += bet.amount;
-          amountLost = 0;
-        } else {
-          // bet lost
-          result = "Lost";
-          amountWon = 0;
-        }
-      } else {
-        // if betDown
-        if (betEndPrice < bet.strikePrice) {
-          // bet won
-          result = "Won";
-          amountWon += bet.amount;
-          amountLost = 0;
-        } else {
-          // bet lost
-          result = "Lost";
-          amountWon = 0;
-        }
+      if (
+        (bet.betType === "betUp" && betEndPrice > bet.strikePrice) ||
+        (bet.betType === "betDown" && betEndPrice < bet.strikePrice)
+      ) {
+        result = "Won";
+        amountWon = Decimal.mul(bet.amount, 2).mul(Decimal.sub(1, houseEdge));
+        amountLost = 0;
       }
+
       const status = await User.findOneAndUpdate(
         {
           wallet,
@@ -103,11 +94,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         },
         {
           $inc: {
-            "deposit.$.amount": amountWon * (1 + (1 - HOUSE_TAX)),
-            amountWon: amountWon * (1 - HOUSE_TAX),
-            amountLost,
-            betsWon: result == "Won" ? 1 : 0,
-            betsLost: result == "Lost" ? 1 : 0,
+            "deposit.$.amount": amountWon,
+            numOfGamesPlayed: 1,
           },
           isOptionOngoing: false,
         },
@@ -120,36 +108,55 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         throw new Error("User could not be updated !");
       }
 
-      await Option.findOneAndUpdate(
+      const record = await Option.findOneAndUpdate(
         { wallet, result: "Pending" },
         {
           result,
           betEndPrice,
+          houseEdge,
+          amountWon,
+          amountLost,
+        },
+        { new: true },
+      );
+
+      const pointsGained =
+        0 * user.numOfGamesPlayed + 1.4 * bet.amount * userData.multiplier;
+
+      const points = userData.points + pointsGained;
+      const newTier = Object.entries(pointTiers).reduce((prev, next) => {
+        return points >= next[1]?.limit ? next : prev;
+      })[0];
+
+      await StakingUser.findOneAndUpdate(
+        {
+          wallet,
+        },
+        {
+          $inc: {
+            points: pointsGained,
+          },
+          $set: {
+            tier: newTier,
+          },
         },
       );
 
-      const userData = await StakingUser.findOne({ wallet });
-      let points = userData?.points ?? 0;
-      const userTier = Object.entries(pointTiers).reduce((prev, next) => {
-        return points >= next[1]?.limit ? next : prev;
-      })[0];
+      const rest = record.toObject();
+      rest.game = GameType.options;
+      rest.userTier = parseInt(newTier);
+
+      const payload = rest;
 
       const socket = new WebSocket(wsEndpoint);
 
       socket.onopen = () => {
-        console.log("WebSocket connection opened");
         socket.send(
           JSON.stringify({
             clientType: "api-client",
             channel: "fomo-casino_games-channel",
             authKey: process.env.FOMO_CHANNEL_AUTH_KEY!,
-            payload: {
-              game: GameType.options,
-              wallet,
-              absAmount: Math.abs(amountWon - amountLost),
-              result,
-              userTier,
-            },
+            payload,
           }),
         );
 
@@ -160,9 +167,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         success: true,
         data: { amountWon, amountLost, result },
         message: `${result} ${
-          result == "Won"
-            ? (amountWon * (1 + (1 - HOUSE_TAX))).toFixed(4)
-            : amountLost.toFixed(4)
+          result == "Won" ? amountWon.toFixed(4) : amountLost.toFixed(4)
         } SOL!`,
       });
     } catch (e: any) {

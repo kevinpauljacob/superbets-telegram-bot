@@ -24,6 +24,10 @@ const OptionSchema = new Schema(
       enum: ["betUp", "betDown"],
       required: true,
     },
+    strikeMultiplier: {
+      type: Number,
+      required: true,
+    },
     strikePrice: {
       type: Number,
       required: false,
@@ -44,6 +48,15 @@ const OptionSchema = new Schema(
     tokenMint: {
       type: String,
       required: false,
+    },
+    houseEdge: Number,
+    amountWon: {
+      type: Number,
+      required: true,
+    },
+    amountLost: {
+      type: Number,
+      required: true,
     },
   },
   { timestamps: true },

@@ -1,65 +1,79 @@
 import connectDatabase from "../../../../utils/database";
 import { NextApiRequest, NextApiResponse } from "next";
-import { GameType } from "@/utils/vrf";
-import {
-  Coin,
-  Dice,
-  Option,
-  Dice2,
-  Keno,
-  Limbo,
-  Plinko,
-  Roulette1,
-  Roulette2,
-  Wheel,
-} from "@/models/games";
+import { GameType, seedStatus } from "@/utils/provably-fair";
+import StakingUser from "@/models/staking/user";
+import { gameModelMap } from "@/models/games";
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === "GET") {
     try {
-      // Get the game type from the query
-      const game = req.query.game as string;
-
-      if (!Object.entries(GameType).some(([_, value]) => value === game))
-        return res
-          .status(400)
-          .json({ success: false, message: "Invalid game type" });
-
       await connectDatabase();
 
-      let data;
-      switch (game) {
-        case GameType.dice:
-          data = await Dice.find({}).sort({ createdAt: -1 }).limit(1000);
-          break;
-        case GameType.coin:
-          data = await Coin.find({}).sort({ createdAt: -1 }).limit(1000);
-          break;
-        case GameType.options:
-          data = await Option.find({}).sort({ createdAt: -1 }).limit(1000);
-          break;
-        case GameType.dice2:
-          data = await Dice2.find({}).sort({ createdAt: -1 }).limit(1000);
-          break;
-        case GameType.keno:
-          data = await Keno.find({}).sort({ createdAt: -1 }).limit(1000);
-          break;
-        case GameType.limbo:
-          data = await Limbo.find({}).sort({ createdAt: -1 }).limit(1000);
-          break;
-        case GameType.plinko:
-          data = await Plinko.find({}).sort({ createdAt: -1 }).limit(1000);
-          break;
-        case GameType.roulette1:
-          data = await Roulette1.find({}).sort({ createdAt: -1 }).limit(1000);
-          break;
-        case GameType.roulette2:
-          data = await Roulette2.find({}).sort({ createdAt: -1 }).limit(1000);
-          break;
-        case GameType.wheel:
-          data = await Wheel.find({}).sort({ createdAt: -1 }).limit(1000);
-          break;
+      const data: any[] = [];
+
+      for (const [_, value] of Object.entries(GameType)) {
+        const game = value;
+        const model = gameModelMap[game as keyof typeof gameModelMap];
+
+        if (game === GameType.options) {
+          const records = await model.find().sort({ createdAt: -1 }).limit(20);
+
+          const resultsWithGame = records.map((record) => {
+            const { ...rest } = record.toObject();
+
+            rest.game = game;
+
+            return rest;
+          });
+
+          data.push(...resultsWithGame);
+        } else {
+          const records = await model
+            .find()
+            .populate({
+              path: "gameSeed",
+            })
+            .sort({ createdAt: -1 })
+            .limit(20);
+
+          const resultsWithGame = records.map((record) => {
+            const { gameSeed, ...rest } = record.toObject();
+
+            rest.game = game;
+
+            if (gameSeed.status !== seedStatus.EXPIRED) {
+              rest.gameSeed = { ...gameSeed, serverSeed: undefined };
+            } else {
+              rest.gameSeed = { ...gameSeed };
+            }
+
+            return rest;
+          });
+
+          data.push(...resultsWithGame);
+        }
       }
+
+      data.sort((a: any, b: any) => {
+        return b.createdAt.getTime() - a.createdAt.getTime();
+      });
+
+      const wallets: string[] = Array.from(
+        new Set(data.map((doc: any) => doc.wallet)),
+      );
+
+      const userData = await StakingUser.find({
+        wallet: { $in: wallets },
+      }).select("wallet tier");
+
+      const userTiers = userData.reduce((acc, user) => {
+        acc[user.wallet] = user.tier;
+        return acc;
+      }, {});
+
+      data.forEach((doc: any) => {
+        doc.userTier = userTiers[doc.wallet] ?? 0;
+      });
 
       return res.json({
         success: true,

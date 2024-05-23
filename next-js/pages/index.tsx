@@ -22,6 +22,8 @@ import StoreBanner from "@/components/Banner";
 import FomoExit from "@/components/FomoExit";
 import FomoPlay from "@/components/FomoPlay";
 import FomoSupply from "@/components/FomoSupply";
+import AllBets from "@/components/AllBets";
+import FOMOHead from "@/components/HeadElement";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -31,42 +33,49 @@ export default function Home() {
 
   const maintenance = false;
 
-  const { language, setLanguage, userData, setUserData } = useGlobalContext();
+  const { language, setLanguage, userData, setUserData, showWalletModal } =
+    useGlobalContext();
 
   const [refetch, setRefetch] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
   useEffect(() => {
-    if (wallet?.publicKey) {
+    if (wallet?.publicKey && !showWalletModal) {
       getBalance();
     }
-  }, [wallet?.publicKey]);
+  }, [wallet?.publicKey, showWalletModal]);
 
   useEffect(() => {
     //@ts-ignore
     setLanguage(localStorage.getItem("language") ?? "en");
   }, []);
 
-  useEffect(() => {
+  /* useEffect(() => {
     localStorage.setItem("language", language);
-  }, [language]);
-
+  }, [language]); 
+ */
   return (
-    <div className="flex flex-col lg:flex-row text-white w-full overflow-hidden min-h-screen relative overflow-x-hidden p-4 xl:p-6">
-      <div className="flex flex-1 flex-col">
-        <div className="mb-7">
-          <StoreBanner />
+    <>
+      <FOMOHead title={"Home | FOMO.wtf - 0% House Edge, Pure Wins"} />
+      <div className="flex flex-col lg:flex-row text-white w-full overflow-hidden relative overflow-x-hidden px-4 xl:px-6">
+        <div className="flex flex-1 flex-col md:px-[2.5%]">
+          <div className="">
+            <StoreBanner />
+          </div>
+          <div className="mb-7">
+            <FomoPlay />
+          </div>
+          {/* <div className="mb-7">
+            <FomoExit />
+          </div> */}
+          <div className="mb-5">
+            <AllBets />
+          </div>
         </div>
-        <div className="mb-7">
-          <FomoPlay />
-        </div>
-        <div className="mb-7">
-          <FomoExit />
-        </div>
-      </div>
-      {/* <div className="lg:ml-4">
+        {/* <div className="lg:ml-4">
         <FomoSupply />
       </div> */}
-    </div>
+      </div>
+    </>
   );
 }

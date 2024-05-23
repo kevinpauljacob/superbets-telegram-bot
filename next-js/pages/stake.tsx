@@ -6,7 +6,7 @@ import Image from "next/legacy/image";
 import { useEffect, useState } from "react";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { useSession } from "next-auth/react";
-import toast from "react-hot-toast";
+import { Inter } from "next/font/google";
 import {
   connection,
   fomoToken,
@@ -16,6 +16,10 @@ import {
 import { LAMPORTS_PER_SOL, PublicKey } from "@solana/web3.js";
 import { useGlobalContext } from "@/components/GlobalContext";
 import { getAssociatedTokenAddressSync } from "@solana/spl-token";
+import { errorCustom } from "@/components/toasts/ToastGroup";
+import FOMOHead from "@/components/HeadElement";
+import { truncateNumber } from "@/context/gameTransactions";
+const inter = Inter({ subsets: ["latin"] });
 
 export default function Stake() {
   const { data: session, status } = useSession();
@@ -33,6 +37,7 @@ export default function Stake() {
     getGlobalInfo,
     getUserDetails,
     setLivePrice,
+    sidebar,
   } = useGlobalContext();
 
   useEffect(() => {
@@ -42,10 +47,10 @@ export default function Stake() {
           "https://hermes.pyth.network/api/latest_price_feeds?ids%5B%5D=0xef0d8b6fda2ceba41da15d4095d1da392a0d2f8ed0c6c7bc0f4cfac8c280b56d",
         ).then((res) => res.json());
         let price = data[0].price.price * Math.pow(10, data[0].price.expo);
-        console.log(price);
+        // console.log(price);
         setLivePrice(price);
       } catch (e) {
-        toast.error("Could not fetch live price.");
+        // errorCustom("Could not fetch live price.");
         setLivePrice(0);
       }
     };
@@ -62,11 +67,10 @@ export default function Stake() {
         let address = new PublicKey(fomoToken);
         const ata = getAssociatedTokenAddressSync(address, wallet.publicKey);
         const res = await connection.getTokenAccountBalance(ata, "recent");
-        // console.log("balance : ", res.value.uiAmount ?? 0);
 
         res.value.uiAmount ? setSolBal(res.value.uiAmount) : setSolBal(0);
       } catch (e) {
-        toast.error("Unable to fetch balance.");
+        // errorCustom("Unable to fetch balance.");
         console.error(e);
       }
   };
@@ -80,65 +84,60 @@ export default function Stake() {
   }, [session?.user, wallet.publicKey]);
 
   return (
-    <div className="flex flex-col items-center w-full overflow-hidden min-h-screen flex-1 relative">
-      <div className="w-full flex flex-1 flex-col items-start gap-5 px-5 sm:px-10 lg:px-40 2xl:px-[15%] pb-10">
-        <span className="text-white text-opacity-90 font-semibold text-[1.5rem] sm:text-[2rem] mt-[4rem]">
-          {/* {translator("You have", language)}{" "} */}
-          {/* <span className="text-[#9945FF]">{solBal.toFixed(3)} FOMO</span>{" "} */}
-          {/* {translator("available in your wallet to stake", language)} */}
-          {translator("Stake your", language)}
-          <span className="text-[#9945FF]"> FOMO </span>
-          {translator("to boost your leaderboard points and more.", language)}
-        </span>
+    <>
+      <FOMOHead title={"Stake | FOMO.wtf - 0% House Edge, Pure Wins"} />
+      <div
+        className={`flex flex-col ${
+          sidebar ? "items-start sm:pl-14" : "items-center"
+        } w-full min-h-screen flex-1 relative font-chakra h-fit`}
+      >
+        <div className="w-full flex flex-1 flex-col items-start gap-5 pb-1- px-3 sm:max-w-[90%]">
+          <span className="text-white text-opacity-90 font-semibold text-[1.5rem] sm:text-[2rem] tracking-[.02em] mt-[1rem] flex items-center justify-center gap-x-2">
+            {translator("Stake", language).toUpperCase()} FOMO
+          </span>
 
-        {/* <span className="text-white text-opacity-50 text-base font-medium">
-          {translator(
-            "Sake your FOMO tokens to receive multipliers for your points which gets you amazing rewards from our store.",
-            language,
-          )}
-        </span> */}
-
-        <div className="flex flex-col sm:flex-row items-start gap-5 w-full">
-          <div className="flex w-full basis-full sm:basis-2/3">
-            <StakeStats />
+          <div className="flex flex-col-reverse sm:flex-row items-start gap-5 w-full">
+            <div className="flex w-full basis-full sm:basis-2/3">
+              <StakeStats />
+            </div>
+            <div className="flex w-full basis-full sm:basis-1/3 ">
+              <StakeFomo />
+            </div>
           </div>
-          <div className="flex w-full basis-full sm:basis-1/3 sm:pt-8 ">
-            <StakeFomo />
-          </div>
-        </div>
 
-        {/* Global staking  */}
-        <span className="text-white text-opacity-50 text-xl mt-5 sm:mt-10">
-          {translator("Global Staking Overview", language)}
-        </span>
-        <div className="flex w-full sm:w-[64.8%]">
-          <div className="w-full sm:w-[50%] relative p-3 sm:p-5 flex items-center gap-10 bg-[#19161C] bg-opacity-75 -mt-1">
-            <div className="flex w-full sm:w-fit flex-col items-start gap-2">
-              <span className="text-white text-opacity-50 text-xs sm:text-base">
-                {translator("Total FOMO Staked", language)}
-              </span>
-              <div className="flex w-full mt-3 sm:mt-0 justify-end sm:justify-start items-end gap-2">
-                <span className="text-white text-opacity-80 text-xl sm:text-2xl font-semibold">
-                  {formatNumber(globalInfo?.stakedTotal)} FOMO
+          {/* Global staking  */}
+          <span className="text-white text-opacity-50 text-base mt-5 sm:mt-10 font-sans">
+            {translator("Global Staking Overview", language)}
+          </span>
+          <div className="flex w-full md:w-fit font-sans">
+            <div className="w-full relative p-3 sm:p-5 flex items-center justify-between gap-28 lg:gap-[13rem] bg-staking-bg bg-opacity-75 -mt-2">
+              <div className="flex w-full sm:w-fit flex-col items-start gap-4 just">
+                <span className="text-white text-opacity-50 text-xs sm:text-sm">
+                  {translator("Total FOMO Staked", language)}
                 </span>
-                {/* <span className="text-[#9945FF] text-base font-semibold text-opacity-90">
-                  (0.0%)
-                </span> */}
+                <div className="flex w-full mt-3 sm:mt-0 justify-end sm:justify-start items-end gap-2 font-chakra">
+                  <span className="text-white text-opacity-80 text-2xl sm:text-2xl font-semibold">
+                    {truncateNumber(globalInfo?.stakedTotal)}{" "}
+                    <span className="hidden sm:block">$FOMO</span>
+                  </span>
+                  {/* <span
+                    className={`hidden sm:block text-staking-secondary text-opacity-80 text-base sm:text-base ${inter.className} font-semibold`}
+                  >
+                    (
+                    {formatNumber(
+                      (globalInfo?.stakedTotal / globalInfo?.totalVolume) * 100,
+                    )}
+                    % )
+                  </span> */}
+                </div>
+              </div>
+              <div className="hidden sm:flex">
+                <Image src={"/assets/stakeLock.svg"} width={60} height={60} />
               </div>
             </div>
-            {/* <div className="absolute sm:relative top-2 sm:top-auto right-3 sm:right-auto w-[9rem] h-[1.5rem] sm:h-[2rem]">
-              <Image
-                src={"/assets/graphtotal.png"}
-                layout="fill"
-                objectFit="contain"
-                objectPosition="center"
-                className="flex sm:hidden"
-                alt={"FOMO"}
-              />
-            </div> */}
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }

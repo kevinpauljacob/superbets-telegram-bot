@@ -15,13 +15,13 @@
   }
 
   .modalscrollbar::-webkit-scrollbar-track {
-    border-radius: 100vh;
+    border-radius: 100dvh;
     background: #202329;
   }
 
   .modalscrollbar::-webkit-scrollbar-thumb {
     background: #000000;
-    border-radius: 100vh;
+    border-radius: 100dvh;
     border: 3px solid #202329;
   }
 
@@ -48,7 +48,7 @@
 
 html,
 body {
-  max-height: 100vh;
+  max-height: 100dvh;
   padding: 0;
   margin: 0;
   font-family:
@@ -146,8 +146,44 @@ text-shadow-gold {
   }
 }
 
-.blink {
+.blink_3 {
+  animation: blink 3s ease-in-out infinite;
+}
+
+.blink_1 {
   animation: blink 1s ease-in-out infinite;
+}
+
+@keyframes blink50 {
+  0% {
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 0.2;
+  }
+  100% {
+    opacity: 0.5;
+  }
+}
+
+.blink_1_50 {
+  animation: blink50 1s ease-in-out infinite;
+}
+
+@keyframes blink_dice {
+  0% {
+    color: #202329;
+  }
+  50% {
+    color: #47484a;
+  }
+  100% {
+    color: #202329;
+  }
+}
+
+.blink_dice {
+  animation: blink_dice 0.4s ease-in-out 0s 4;
 }
 
 .box-shadow-green {
@@ -347,7 +383,29 @@ button.dark-bg {
 }
 
 .rotate {
-  animation: rotate 1s ease-in-out 0s infinite normal forwards;
+  animation: rotate 0.5s linear 0s infinite normal forwards;
+}
+
+@keyframes translateZ {
+  0% {
+    z-index: 50;
+  }
+  49.99% {
+    z-index: 50;
+  }
+  50% {
+    z-index: 1;
+  }
+  99.99% {
+    z-index: 1;
+  }
+  100% {
+    z-index: 50;
+  }
+}
+
+.translateZ1 {
+  animation: translateZ 0.5s linear 0.125s infinite normal forwards;
 }
 
 /* .selected-face {
@@ -381,6 +439,25 @@ button.dark-bg {
   animation: fadeInUp 0.8s ease forwards;
 }
 
+@keyframes fadeInDown {
+  0% {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0px);
+  }
+}
+
+.fadeInDown {
+  animation: fadeInDown 0.8s ease forwards;
+}
+
+.fadeInDown_04 {
+  animation: fadeInDown 0.4s ease forwards;
+}
+
 @keyframes fadeOutDown {
   0% {
     opacity: 1;
@@ -409,9 +486,86 @@ button.dark-bg {
   animation: fadeIn 0.8s ease forwards;
 }
 
+@keyframes slideInFadeIn {
+  0% {
+    transform: translateX(20px);
+  }
+  100% {
+    transform: translateX(0);
+  }
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes stop {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(
+      var(--result-angle)
+    ); /* Use CSS variable for the stopping angle */
+  }
+}
+
+/* .spin {
+  animation: spin 3s ease forwards infinite;
+} */
+
 .connect-wallet {
   background: linear-gradient(89deg, #dc1fff 12.97%, #00ffa3 93.89%);
   background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
+
+/* hide arrow sin number input  */
+/* Chrome, Safari, Edge, Opera */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Firefox */
+input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+input[type="range"] {
+  -webkit-appearance: none;
+}
+
+.dice2::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  height: 1.625rem;
+  width: 1rem;
+  background: #9945ff;
+  border-radius: 7px;
+}
+
+.defaultSlider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 21px; /* Set thumb width as desired */
+  height: 21px; /* Set thumb height as desired */
+  background-color: white;
+  cursor: pointer;
+  border-radius: 100%;
+}
+
+.maxBetsSlider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 21px; /* Set thumb width as desired */
+  height: 21px; /* Set thumb height as desired */
+  cursor: pointer;
+  border-radius: 100%;
+}
+
+

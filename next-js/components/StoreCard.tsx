@@ -1,5 +1,5 @@
 import Image from "next/image";
-import Card from "/public/assets/Card.png";
+import Card from "/public/assets/storeMyster.png";
 
 interface StoreCardProps {
   src: string;
@@ -9,7 +9,7 @@ interface StoreCardProps {
 
 export default function StoreCard({ src, name, points }: StoreCardProps) {
   return (
-    <div className="bg-[#171717] rounded-md w-full mb-5">
+    <div className="bg-[#171717] rounded-md w-full mb-[1.4rem]">
       <div>
         <Image
           className="rounded-md w-full"
@@ -20,12 +20,12 @@ export default function StoreCard({ src, name, points }: StoreCardProps) {
         />
       </div>
       <div className="px-3">
-        <div className="text-center font-bold my-3">
-          <p className="text-xs text-[#9945FF] font-changa">{name}</p>
-          <p className="text-lg sm:text-xl font-changa">{points} points</p>
+        <div className="text-center font-bold mt-2 mb-4">
+          <p className="text-xs font-medium text-[#94A3B8] font-changa">Mystery Box</p>
+          <p className="text-lg sm:text-xl text-white font-semibold font-chakra mt-1">{points} points</p>
         </div>
-        <button className="text-base sm:text-xl font-bold font-changa bg-[#9945FF] rounded-md w-full py-1 sm:py-2 mb-4">
-          Redeem
+        <button type="button" disabled className="text-xs font-bold font-chakra disabled:opacity-50 tracking-wider bg-[#202329] rounded-[5px] w-full h-[3.1rem] mb-4">
+          REDEEM
         </button>
       </div>
     </div>

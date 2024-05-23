@@ -3,6 +3,8 @@ import { useWallet } from "@solana/wallet-adapter-react";
 import toast from "react-hot-toast";
 import { obfuscatePubKey } from "@/context/transactions";
 import Head from "next/head";
+import { errorCustom } from "../toasts/ToastGroup";
+import FOMOHead from "../HeadElement";
 
 function Leaderboard() {
   const wallet = useWallet();
@@ -41,10 +43,10 @@ function Leaderboard() {
 
             setData(users);
 
-            console.log("sss");
+            // console.log("sss");
           } else {
             setData([]);
-            toast.error("Could not fetch history.");
+            errorCustom("Could not fetch history.");
           }
         });
     else
@@ -72,7 +74,7 @@ function Leaderboard() {
             setData(users);
           } else {
             setData([]);
-            toast.error("Could not fetch history.");
+            errorCustom("Could not fetch history.");
           }
         });
   }, [isWeekly]);
@@ -83,7 +85,7 @@ function Leaderboard() {
     let userInfo = data.find(
       (info: any) =>
         info.data.address ==
-        obfuscatePubKey(wallet.publicKey ? wallet.publicKey.toBase58() : "")
+        obfuscatePubKey(wallet.publicKey ? wallet.publicKey.toBase58() : ""),
     );
 
     setMyData(userInfo);
@@ -101,9 +103,7 @@ function Leaderboard() {
 
   return (
     <>
-      <Head>
-        <title>Leaderboard</title>
-      </Head>
+      <FOMOHead title={"Leaderboard | FOMO.wtf - 0% House Edge, Pure Wins"} />
       <div className="relative mb-20 mt-10 flex h-full w-full flex-col flex-wrap items-center justify-center pl-2 pr-2">
         <h2 className="text-shadow-pink mb-10 flex w-[95%] max-w-[65rem] justify-between rounded-[5px] bg-[#0f0f0f] p-8 py-4 text-center text-2xl text-[#F0F0F0] text-opacity-75">
           {isWeekly ? <>Weekly Leaderboard</> : <>All Time Leaderboard</>}
@@ -134,7 +134,7 @@ function Leaderboard() {
             <div className="flex w-full flex-col items-center">
               {/* header  */}
               {data.length > 0 && (
-                <div className="mb-5 flex w-full flex-row items-center gap-2">
+                <div className="mb-[1.4rem] flex w-full flex-row items-center gap-2">
                   {headers.map((header, index) => (
                     <span
                       key={index}
@@ -184,14 +184,14 @@ function Leaderboard() {
                 data
                   .slice(
                     page * transactionsPerPage - transactionsPerPage,
-                    page * transactionsPerPage
+                    page * transactionsPerPage,
                   )
                   .filter(
                     (info) =>
                       info.data.address !=
                       obfuscatePubKey(
-                        wallet.publicKey ? wallet.publicKey.toBase58() : ""
-                      )
+                        wallet.publicKey ? wallet.publicKey.toBase58() : "",
+                      ),
                   )
                   .map((data, index) => (
                     <div

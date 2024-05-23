@@ -2,10 +2,26 @@ import connectDatabase from "@/utils/database";
 import { getToken } from "next-auth/jwt";
 import { NextApiRequest, NextApiResponse } from "next";
 import { GameSeed, Keno, User } from "@/models/games";
-import { generateGameResult, GameType, seedStatus } from "@/utils/vrf";
+import {
+  generateGameResult,
+  GameType,
+  seedStatus,
+} from "@/utils/provably-fair";
 import StakingUser from "@/models/staking/user";
-import { pointTiers } from "@/context/transactions";
-import { wsEndpoint } from "@/context/gameTransactions";
+import {
+  houseEdgeTiers,
+  launchPromoEdge,
+  maxPayouts,
+  pointTiers,
+} from "@/context/transactions";
+import {
+  isArrayUnique,
+  minGameAmount,
+  wsEndpoint,
+} from "@/context/gameTransactions";
+import { riskToChance } from "@/components/games/Keno/RiskToChance";
+import { Decimal } from "decimal.js";
+Decimal.set({ precision: 9 });
 
 const secret = process.env.NEXTAUTH_SECRET;
 
@@ -19,59 +35,6 @@ type InputType = {
   tokenMint: string;
   chosenNumbers: number[];
   risk: "classic" | "low" | "medium" | "high";
-};
-
-type RiskToChance = Record<string, Record<number, Array<number>>>;
-
-const riskToChance: RiskToChance = {
-  classic: {
-    1: [0.0, 3.96],
-    2: [0.0, 1.9, 4.5],
-    3: [0.0, 1.0, 3.1, 10.4],
-    4: [0.0, 0.8, 1.8, 5.0, 22.5],
-    5: [0.0, 0.25, 1.4, 4.1, 16.5, 36.0],
-    6: [0.0, 0.0, 1.0, 2.68, 7.0, 16.5, 40.0],
-    7: [0.0, 0.0, 0.47, 3.0, 4.5, 14.0, 31.0, 60.0],
-    8: [0.0, 0.0, 0.0, 2.2, 4.0, 13.0, 22.0, 55.0, 70.0],
-    9: [0.0, 0.0, 0.0, 1.55, 3.0, 8.0, 15.0, 44.0, 60.0, 85.0],
-    10: [0.0, 0.0, 0.0, 1.4, 2.25, 4.5, 8.0, 17.0, 50.0, 80.0, 100.0],
-  },
-  low: {
-    1: [0.0, 1.85],
-    2: [0.0, 2.0, 3.8],
-    3: [0.0, 1.1, 1.38, 26.0],
-    4: [0.0, 0.0, 2.2, 7.9, 90.0],
-    5: [0.0, 0.0, 1.5, 4.2, 13.0, 300.0],
-    6: [0.0, 0.0, 1.1, 2.0, 6.2, 100.0, 700.0],
-    7: [0.0, 0.0, 1.1, 1.6, 3.5, 15.0, 225.0, 700.0],
-    8: [0.0, 0.0, 1.1, 1.5, 2.0, 5.5, 39.0, 100.0, 800.0],
-    9: [0.0, 0.0, 1.1, 1.3, 1.7, 2.5, 7.5, 50.0, 250.0, 1000.0],
-    10: [0.0, 0.0, 1.1, 1.2, 1.3, 1.8, 3.5, 13.0, 50.0, 250.0, 1000.0],
-  },
-  medium: {
-    1: [0.4, 2.75],
-    2: [0.0, 1.8, 5.1],
-    3: [0.0, 0.0, 2.8, 50.0],
-    4: [0.0, 0.0, 1.7, 10.0, 100.0],
-    5: [0.0, 0.0, 1.4, 4.0, 14.0, 390.0],
-    6: [0.0, 0.0, 0.0, 3.0, 9.0, 180.0, 710.0],
-    7: [0.0, 0.0, 0.0, 2.0, 7.0, 30.0, 400.0, 800.0],
-    8: [0.0, 0.0, 0.0, 1.0, 4.0, 11.0, 67.0, 400.0, 900.0],
-    9: [0.0, 0.0, 0.0, 2.0, 2.5, 5.0, 15.0, 100.0, 500.0, 1000.0],
-    10: [0.0, 0.0, 0.0, 1.6, 2.0, 4.0, 7.0, 26.0, 100.0, 500.0, 1000.0],
-  },
-  high: {
-    1: [0.0, 3.96],
-    2: [0.0, 0.0, 17.1],
-    3: [0.0, 0.0, 0.0, 81.5],
-    4: [0.0, 0.0, 0.0, 10.0, 259.0],
-    5: [0.0, 0.0, 0.0, 4.5, 48.0, 450.0],
-    6: [0.0, 0.0, 0.0, 0.0, 11.0, 350.0, 710.0],
-    7: [0.0, 0.0, 0.0, 0.0, 7.0, 90.0, 400.0, 800.0],
-    8: [0.0, 0.0, 0.0, 0.0, 5.0, 20.0, 270.0, 600.0, 900.0],
-    9: [0.0, 0.0, 0.0, 0.0, 4.0, 11.0, 56.0, 500.0, 800.0, 1000.0],
-    10: [0.0, 0.0, 0.0, 0.0, 3.5, 8.0, 13.0, 3.0, 500.0, 800.0, 1000.0],
-  },
 };
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -88,30 +51,46 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           message: "User wallet not authenticated",
         });
 
-      await connectDatabase();
-
       if (!wallet || !amount || !tokenMint || !chosenNumbers || !risk)
         return res
           .status(400)
           .json({ success: false, message: "Missing parameters" });
+
+      if (amount < minGameAmount)
+        return res.status(400).json({
+          success: false,
+          message: "Invalid bet amount",
+        });
 
       if (
         tokenMint !== "SOL" ||
         !(
           1 <= chosenNumbers.length &&
           chosenNumbers.length <= 10 &&
-          chosenNumbers.every((n) => 1 <= n && n <= 40 && n % 10 === 0)
+          chosenNumbers.every((n) => 1 <= n && n <= 40 && Number.isInteger(n))
         ) ||
         !(
           risk === "classic" ||
           risk === "low" ||
           risk === "medium" ||
           risk === "high"
-        )
+        ) ||
+        !isArrayUnique(chosenNumbers)
       )
         return res
           .status(400)
           .json({ success: false, message: "Invalid parameters" });
+
+      const multiplier = riskToChance[risk][chosenNumbers.length];
+      const maxStrikeMultiplier = multiplier.at(-1)!;
+
+      const maxPayout = Decimal.mul(amount, maxStrikeMultiplier);
+
+      if (!(maxPayout.toNumber() < maxPayouts.keno))
+        return res
+          .status(400)
+          .json({ success: false, message: "Max payout exceeded" });
+      await connectDatabase();
 
       let user = await User.findOne({ wallet });
 
@@ -127,6 +106,14 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         return res
           .status(400)
           .json({ success: false, message: "Insufficient balance !" });
+
+      const userData = await StakingUser.findOneAndUpdate(
+        { wallet },
+        {},
+        { upsert: true, new: true },
+      );
+      const userTier = userData?.tier ?? 0;
+      const houseEdge = launchPromoEdge ? 0 : houseEdgeTiers[userTier];
 
       const activeGameSeed = await GameSeed.findOneAndUpdate(
         {
@@ -147,37 +134,30 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
       const { serverSeed, clientSeed, nonce } = activeGameSeed;
 
-      const strikeNumber = generateGameResult(
+      const strikeNumbers = generateGameResult(
         serverSeed,
         clientSeed,
         nonce,
         GameType.keno,
-      ) as number[];
+      );
 
-      if (!strikeNumber) throw new Error("Invalid strike number!");
+      if (!strikeNumbers) throw new Error("Invalid strike number!");
 
-      const multiplier = riskToChance[risk][chosenNumbers.length];
-
-      //find the number of matches in strikeNumber and chosenNumbers
+      //find the number of matches in strikeNumbers and chosenNumbers
       let matches = 0;
       chosenNumbers.forEach((number) => {
-        if (strikeNumber.includes(number)) {
+        if (strikeNumbers.includes(number)) {
           matches++;
         }
       });
-      const amountWon = amount * multiplier[matches];
-      const amountLost = Math.max(amount - amountWon, 0);
-
-      let sns;
-
-      if (!user.sns) {
-        sns = (
-          await fetch(
-            `https://sns-api.bonfida.com/owners/${wallet}/domains`,
-          ).then((data) => data.json())
-        ).result[0];
-        if (sns) sns = sns + ".sol";
-      }
+      const strikeMultiplier = multiplier[matches];
+      const amountWon = Decimal.mul(amount, strikeMultiplier).mul(
+        Decimal.sub(1, houseEdge),
+      );
+      const amountLost = Math.max(
+        new Decimal(amount).sub(amountWon).toNumber(),
+        0,
+      );
 
       const userUpdate = await User.findOneAndUpdate(
         {
@@ -191,9 +171,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         },
         {
           $inc: {
-            "deposit.$.amount": -amount + amountWon,
+            "deposit.$.amount": amountWon.sub(amount),
+            numOfGamesPlayed: 1,
           },
-          sns,
         },
         {
           new: true,
@@ -204,50 +184,80 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         throw new Error("Insufficient balance for action!!");
       }
 
-      await Keno.create({
+      const result = amountWon.toNumber() > amount ? "Won" : "Lost";
+      const keno = new Keno({
         wallet,
         amount,
         chosenNumbers,
         risk,
-        strikeNumber,
+        strikeNumbers,
+        strikeMultiplier,
         tokenMint,
+        houseEdge,
+        result,
+        amountWon,
+        amountLost,
         nonce,
         gameSeed: activeGameSeed._id,
       });
+      await keno.save();
 
-      const userData = await StakingUser.findOne({ wallet });
-      let points = userData?.points ?? 0;
-      const userTier = Object.entries(pointTiers).reduce((prev, next) => {
+      const pointsGained =
+        0 * user.numOfGamesPlayed + 1.4 * amount * userData.multiplier;
+
+      const points = userData.points + pointsGained;
+      const newTier = Object.entries(pointTiers).reduce((prev, next) => {
         return points >= next[1]?.limit ? next : prev;
       })[0];
+
+      await StakingUser.findOneAndUpdate(
+        {
+          wallet,
+        },
+        {
+          $inc: {
+            points: pointsGained,
+          },
+          $set: {
+            tier: newTier,
+          },
+        },
+      );
+
+      const record = await Keno.populate(keno, "gameSeed");
+      const { gameSeed, ...rest } = record.toObject();
+      rest.game = GameType.keno;
+      rest.userTier = parseInt(newTier);
+      rest.gameSeed = { ...gameSeed, serverSeed: undefined };
+
+      const payload = rest;
 
       const socket = new WebSocket(wsEndpoint);
 
       socket.onopen = () => {
-        console.log("WebSocket connection opened");
         socket.send(
           JSON.stringify({
             clientType: "api-client",
             channel: "fomo-casino_games-channel",
             authKey: process.env.FOMO_CHANNEL_AUTH_KEY!,
-            payload: {
-              game: GameType.keno,
-              wallet,
-              absAmount: Math.abs(amountWon - amountLost),
-              result: amountWon > amount ? "Won" : "Lost",
-              userTier,
-            },
+            payload,
           }),
         );
 
         socket.close();
       };
 
+      const message =
+        result === "Won"
+          ? `Congratulations! You won ${amountWon}!`
+          : `Sorry, Better luck next time!`;
       return res.status(201).json({
         success: true,
-        message: `Congratulations! You won ${amountWon}!`,
-        strikeNumber,
-        amountWon,
+        message: message,
+        result,
+        strikeNumbers,
+        strikeMultiplier,
+        amountWon: amountWon.toNumber(),
         amountLost,
       });
     } catch (e: any) {

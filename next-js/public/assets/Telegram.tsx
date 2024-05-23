@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export default function Telegram({ className }: { className: string }) {
   return (
     <svg

@@ -33,6 +33,10 @@ const diceSchema = new mongoose.Schema(
         message: "strikeNumber must be a whole number between 1 and 6.",
       },
     },
+    strikeMultiplier: {
+      type: Number,
+      required: true,
+    },
     result: {
       type: String,
       enum: ["Won", "Lost"],
@@ -40,6 +44,10 @@ const diceSchema = new mongoose.Schema(
     tokenMint: {
       type: String,
       required: false,
+    },
+    houseEdge: {
+      type: Number,
+      required: true,
     },
     amountWon: {
       type: Number,

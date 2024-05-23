@@ -1,18 +1,7 @@
 import connectDatabase from "../../../../utils/database";
 import { NextApiRequest, NextApiResponse } from "next";
-import {
-  Coin,
-  Dice,
-  Dice2,
-  Keno,
-  Limbo,
-  Option,
-  Plinko,
-  Roulette1,
-  Roulette2,
-  Wheel,
-} from "@/models/games";
-import { GameType } from "@/utils/vrf";
+import { gameModelMap } from "@/models/games";
+import { GameType } from "@/utils/provably-fair";
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === "GET") {
@@ -27,169 +16,25 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
       await connectDatabase();
 
+      const model = gameModelMap[game as keyof typeof gameModelMap];
+
       //count the unique wallets and aggregate amount field from Model
-      let stats;
-      switch (game) {
-        case GameType.coin:
-          stats = await Coin.aggregate([
-            {
-              $group: {
-                _id: null,
-                volume: { $sum: "$amount" },
-                players: { $addToSet: "$wallet" },
-              },
+      const stats = await model
+        .aggregate([
+          {
+            $group: {
+              _id: null,
+              volume: { $sum: "$amount" },
+              wallets: { $addToSet: "$wallet" },
             },
-            {
-              $addFields: {
-                players: { $size: "$players" },
-              },
+          },
+          {
+            $addFields: {
+              players: { $size: "$wallets" },
             },
-          ]).then((res) => res[0]);
-        case GameType.dice:
-          stats = await Dice.aggregate([
-            {
-              $group: {
-                _id: null,
-                volume: { $sum: "$amount" },
-                players: { $addToSet: "$wallet" },
-              },
-            },
-            {
-              $addFields: {
-                players: { $size: "$players" },
-              },
-            },
-          ]).then((res) => res[0]);
-          break;
-        case GameType.options:
-          stats = await Option.aggregate([
-            {
-              $group: {
-                _id: null,
-                volume: { $sum: "$amount" },
-                players: { $addToSet: "$wallet" },
-              },
-            },
-            {
-              $addFields: {
-                players: { $size: "$players" },
-              },
-            },
-          ]).then((res) => res[0]);
-          break;
-        case GameType.dice2:
-          stats = await Dice2.aggregate([
-            {
-              $group: {
-                _id: null,
-                volume: { $sum: "$amount" },
-                players: { $addToSet: "$wallet" },
-              },
-            },
-            {
-              $addFields: {
-                players: { $size: "$players" },
-              },
-            },
-          ]).then((res) => res[0]);
-          break;
-        case GameType.keno:
-          stats = await Keno.aggregate([
-            {
-              $group: {
-                _id: null,
-                volume: { $sum: "$amount" },
-                players: { $addToSet: "$wallet" },
-              },
-            },
-            {
-              $addFields: {
-                players: { $size: "$players" },
-              },
-            },
-          ]).then((res) => res[0]);
-          break;
-        case GameType.limbo:
-          stats = await Limbo.aggregate([
-            {
-              $group: {
-                _id: null,
-                volume: { $sum: "$amount" },
-                players: { $addToSet: "$wallet" },
-              },
-            },
-            {
-              $addFields: {
-                players: { $size: "$players" },
-              },
-            },
-          ]).then((res) => res[0]);
-          break;
-        case GameType.plinko:
-          stats = await Plinko.aggregate([
-            {
-              $group: {
-                _id: null,
-                volume: { $sum: "$amount" },
-                players: { $addToSet: "$wallet" },
-              },
-            },
-            {
-              $addFields: {
-                players: { $size: "$players" },
-              },
-            },
-          ]).then((res) => res[0]);
-          break;
-        case GameType.roulette1:
-          stats = await Roulette1.aggregate([
-            {
-              $group: {
-                _id: null,
-                volume: { $sum: "$amount" },
-                players: { $addToSet: "$wallet" },
-              },
-            },
-            {
-              $addFields: {
-                players: { $size: "$players" },
-              },
-            },
-          ]).then((res) => res[0]);
-          break;
-        case GameType.roulette2:
-          stats = await Roulette2.aggregate([
-            {
-              $group: {
-                _id: null,
-                volume: { $sum: "$amount" },
-                players: { $addToSet: "$wallet" },
-              },
-            },
-            {
-              $addFields: {
-                players: { $size: "$players" },
-              },
-            },
-          ]).then((res) => res[0]);
-          break;
-        case GameType.wheel:
-          stats = await Wheel.aggregate([
-            {
-              $group: {
-                _id: null,
-                volume: { $sum: "$amount" },
-                players: { $addToSet: "$wallet" },
-              },
-            },
-            {
-              $addFields: {
-                players: { $size: "$players" },
-              },
-            },
-          ]).then((res) => res[0]);
-          break;
-      }
+          },
+        ])
+        .then((res) => res[0]);
 
       return res.json({
         success: true,

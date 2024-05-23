@@ -13,6 +13,11 @@ import {
 import { SPL_TOKENS } from "./config";
 import toast from "react-hot-toast";
 import { WalletContextState } from "@solana/wallet-adapter-react";
+import {
+  errorCustom,
+  successCustom,
+  warningCustom,
+} from "@/components/toasts/ToastGroup";
 
 export const connection = new Connection(
   process.env.NEXT_PUBLIC_RPC!,
@@ -25,6 +30,10 @@ const devPublicKey = new PublicKey(process.env.NEXT_PUBLIC_DEV_PUBLIC_KEY!);
 
 export const minGameAmount = 1e-6;
 
+export const timeWeightedAvgInterval = 24 * 60 * 60 * 1000;
+export const timeWeightedAvgLimit = 50;
+export const userLimitMultiplier = 10;
+
 export const placeBet = async (
   wallet: WalletContextState,
   amount: number,
@@ -32,8 +41,6 @@ export const placeBet = async (
   betType: string,
   timeFrame: number,
 ) => {
-  // let toastId = toast.loading("betting in progress");
-
   try {
     const res = await fetch(`/api/games/options`, {
       method: "POST",
@@ -52,21 +59,14 @@ export const placeBet = async (
     const { success, message, data } = await res.json();
 
     if (success === false) {
-      // toast.dismiss(toastId);
-      toast.error(message);
+      errorCustom(message);
       throw new Error(message);
     }
 
-    // toast.dismiss(toastId);
-
-    toast.success("Bet placed successfully!", { duration: 2000 });
+    successCustom("Bet placed successfully!");
 
     return { success, message, data };
   } catch (error) {
-    // toast.dismiss(toastId);
-
-    // toast.error("error placing bet!");
-
     return { success: false, message: "Unexpected error", data: null };
   }
 };
@@ -107,18 +107,17 @@ export const deposit = async (
   wallet: WalletContextState,
   amount: number,
   tokenMint: string,
+  campaignId: any = null,
 ) => {
   if (amount == 0) {
-    toast.error("Please enter an amount greater than 0");
+    errorCustom("Please enter an amount greater than 0");
     return { success: true, message: "Please enter an amount greater than 0" };
   }
 
   if (!wallet.publicKey) {
-    toast.error("Wallet not connected");
+    errorCustom("Wallet not connected");
     return { success: true, message: "Wallet not connected" };
   }
-
-  let toastId = toast.loading("Deposit in progress");
 
   try {
     let { transaction, blockhashWithExpiryBlockHeight } =
@@ -139,6 +138,7 @@ export const deposit = async (
         amount,
         tokenMint,
         blockhashWithExpiryBlockHeight,
+        campaignId,
       }),
       headers: {
         "Content-Type": "application/json",
@@ -148,19 +148,17 @@ export const deposit = async (
     const { success, message } = await res.json();
 
     if (success === false) {
-      toast.dismiss(toastId);
-      toast.error(message);
+      if (message.includes("limit exceeded"))
+        warningCustom(message, "bottom-right", 8000);
+      else errorCustom(message);
       throw new Error(message);
     }
 
-    toast.dismiss(toastId);
-
-    toast.success("Deposit successfull!");
+    successCustom("Deposit successfull!");
 
     return { success: true, message };
   } catch (error) {
-    toast.dismiss(toastId);
-    toast.error("Unexpected error!");
+    // errorCustom("Unexpected error!");
     return { success: false, message: error };
   }
 };
@@ -171,16 +169,14 @@ export const withdraw = async (
   tokenMint: string,
 ) => {
   if (amount == 0) {
-    toast.error("Please enter an amount greater than 0");
+    errorCustom("Please enter an amount greater than 0");
     return { success: true, message: "Please enter an amount greater than 0" };
   }
 
   if (!wallet.publicKey) {
-    toast.error("Wallet not connected");
+    errorCustom("Wallet not connected");
     return { success: true, message: "Wallet not connected" };
   }
-
-  let toastId = toast.loading("Withdraw in progress");
 
   try {
     let { transaction, blockhashWithExpiryBlockHeight } =
@@ -210,28 +206,23 @@ export const withdraw = async (
     const { success, message } = await res.json();
 
     if (success === false) {
-      toast.dismiss(toastId);
-      toast.error(message);
+      if (message.includes("limit exceeded"))
+        warningCustom(message, "bottom-right", 8000);
+      else errorCustom(message);
       throw new Error(message);
     }
 
-    toast.dismiss(toastId);
-
-    toast.success("Withdrawal successfull!");
+    successCustom("Withdrawal successfull!");
 
     return { success: true, message };
   } catch (error) {
-    toast.dismiss(toastId);
-
-    toast.error("Unexpected error!");
+    // errorCustom("Unexpected error!");
 
     return { success: true, message: error };
   }
 };
 
 export const checkResult = async (wallet: WalletContextState) => {
-  let toastId = toast.loading("fomobet is processing the result");
-
   try {
     const res = await fetch(`/api/games/options/checkResult`, {
       method: "POST",
@@ -246,18 +237,13 @@ export const checkResult = async (wallet: WalletContextState) => {
     const { success, message, data } = await res.json();
 
     if (success === false) {
-      toast.dismiss(toastId);
-      toast.error(message);
+      errorCustom(message);
       throw new Error(message);
     }
 
-    toast.dismiss(toastId);
-
     return { success, message, data };
   } catch (error: any) {
-    toast.dismiss(toastId);
-
-    toast.error("Unexpected error! Please try again.");
+    // errorCustom("Unexpected error! Please try again.");
 
     return {
       success: false,
@@ -290,7 +276,9 @@ export const verifyFrontendTransaction = (
   );
 
   const verificationTransactionInstructions = JSON.stringify(
-    verificationTransaction.instructions,
+    verificationTransaction.instructions.filter(
+      (i) => !i.programId.equals(ComputeBudgetProgram.programId),
+    ),
   );
 
   console.log(transactionInstructions, verificationTransactionInstructions);
@@ -314,6 +302,8 @@ export const createDepositTxn = async (
 
   if (tokenName === "SOL")
     transaction.add(
+      ComputeBudgetProgram.setComputeUnitLimit({ units: 100_000 }),
+      ComputeBudgetProgram.setComputeUnitPrice({ microLamports: 150_000 }),
       SystemProgram.transfer({
         fromPubkey: wallet,
         toPubkey: devPublicKey,
@@ -325,6 +315,8 @@ export const createDepositTxn = async (
     const userAta = await getAssociatedTokenAddress(tokenId, wallet);
     const devAta = await getAssociatedTokenAddress(tokenId, devPublicKey);
     transaction.add(
+      ComputeBudgetProgram.setComputeUnitLimit({ units: 100_000 }),
+      ComputeBudgetProgram.setComputeUnitPrice({ microLamports: 150_000 }),
       createTransferInstruction(
         userAta,
         devAta,
@@ -354,19 +346,23 @@ export const createWithdrawTxn = async (
 
   if (tokenName === "SOL") {
     transaction.add(
+      ComputeBudgetProgram.setComputeUnitLimit({ units: 100_000 }),
+      ComputeBudgetProgram.setComputeUnitPrice({ microLamports: 150_000 }),
       SystemProgram.transfer({
         fromPubkey: devPublicKey,
         toPubkey: wallet,
         lamports: Math.floor(amount * Math.pow(10, 9)),
       }),
     );
-    transaction.instructions[0].keys[1].isSigner = true;
-    transaction.instructions[0].keys[1].isWritable = true;
+    transaction.instructions[2].keys[1].isSigner = true;
+    transaction.instructions[2].keys[1].isWritable = true;
   } else {
     const tokenId = new PublicKey(tokenMint);
     const userAta = await getAssociatedTokenAddress(tokenId, wallet);
     const devAta = await getAssociatedTokenAddress(tokenId, devPublicKey);
     transaction.add(
+      ComputeBudgetProgram.setComputeUnitLimit({ units: 100_000 }),
+      ComputeBudgetProgram.setComputeUnitPrice({ microLamports: 150_000 }),
       createTransferInstruction(
         devAta,
         userAta,
@@ -374,8 +370,8 @@ export const createWithdrawTxn = async (
         Math.floor(amount * Math.pow(10, decimal)),
       ),
     );
-    transaction.instructions[0].keys[2].isSigner = true;
-    transaction.instructions[0].keys[2].isWritable = true;
+    transaction.instructions[2].keys[2].isSigner = true;
+    transaction.instructions[2].keys[2].isWritable = true;
   }
 
   return { transaction, blockhashWithExpiryBlockHeight };
@@ -400,8 +396,9 @@ export async function retryTxn(
   while (blockheight < lastValidBlockHeight && flag) {
     txn = await connection.sendRawTransaction(transaction.serialize(), {
       skipPreflight: true,
+      maxRetries: 0,
     });
-    await new Promise((r) => setTimeout(r, 1000));
+    await new Promise((r) => setTimeout(r, 2000));
     console.log("retry count: ", ++j);
     connection
       .confirmTransaction({
@@ -453,16 +450,45 @@ export const rollDice = async (
     const { success, message, data } = await res.json();
 
     if (success != true) {
-      toast.error(message);
+      errorCustom(message);
       throw new Error(message);
     }
 
-    if (data.result == "Won") toast.success(message, { duration: 2000 });
-    else toast.error(message, { duration: 2000 });
+    if (data.result == "Won") successCustom(message);
+    else errorCustom(message);
 
     return { success, message, data };
   } catch (error) {
     return { success: false, message: "Unexpected error", data: null };
+  }
+};
+
+export const limboBet = async (
+  wallet: WalletContextState,
+  amount: number,
+  chance: number,
+) => {
+  try {
+    if (!wallet.publicKey) throw new Error("Wallet not connected");
+
+    const res = await fetch(`/api/games/limbo`, {
+      method: "POST",
+      body: JSON.stringify({
+        wallet: wallet.publicKey,
+        amount: amount,
+        tokenMint: "SOL",
+        chance,
+      }),
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    const data = await res.json();
+
+    return data;
+  } catch (error: any) {
+    return { success: false, message: error.message, data: null };
   }
 };
 
@@ -473,3 +499,12 @@ export function trimStringToLength(str: string, desiredLength: number): string {
     str.substring(str.length - desiredLength, str.length)
   );
 }
+
+export const truncateNumber = (num: number, numOfDecimals: number = 4) => {
+  const [whole, decimal] = num.toString().split(".");
+  return parseFloat(whole + "." + (decimal || "").slice(0, numOfDecimals));
+};
+
+export const isArrayUnique = (arr: number[]) => {
+  return new Set(arr).size === arr.length;
+};

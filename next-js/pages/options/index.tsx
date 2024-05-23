@@ -1,16 +1,13 @@
 import Bets from "../../components/games/Bets";
-import { use, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import { useWallet } from "@solana/wallet-adapter-react";
 import toast from "react-hot-toast";
 import Loader from "../../components/games/Loader";
-import { placeBet } from "../../context/gameTransactions";
+import { placeBet, truncateNumber } from "../../context/gameTransactions";
 import { checkResult as checkResultAPI } from "../../context/gameTransactions";
-import Head from "next/head";
-import Link from "next/link";
 import { useGlobalContext } from "@/components/GlobalContext";
 import { FormProvider, useForm } from "react-hook-form";
-import GameHeader from "@/components/GameHeader";
 import {
   GameDisplay,
   GameLayout,
@@ -18,6 +15,14 @@ import {
   GameFooterInfo,
   GameTable,
 } from "@/components/GameLayout";
+import BetAmount from "@/components/games/BetAmountInput";
+import BetButton from "@/components/games/BetButton";
+import BalanceAlert from "@/components/games/BalanceAlert";
+import { soundAlert } from "@/utils/soundUtils";
+import { errorCustom, successCustom } from "@/components/toasts/ToastGroup";
+import { translator, formatNumber } from "@/context/transactions";
+import { minGameAmount } from "@/context/gameTransactions";
+import { useSession } from "next-auth/react";
 
 const Timer = dynamic(() => import("../../components/games/Timer"), {
   ssr: false,
@@ -29,6 +34,7 @@ const Progress = dynamic(() => import("../../components/games/Progressbar"), {
 export default function Options() {
   const wallet = useWallet();
   const methods = useForm();
+  const { data: session, status } = useSession();
 
   const {
     walletBalance,
@@ -36,14 +42,16 @@ export default function Options() {
     getWalletBalance,
     getBalance,
     coinData,
-    setShowWalletModal
+    setShowWalletModal,
+    maxBetAmt,
+    language,
   } = useGlobalContext();
 
   const [livePrice, setLivePrice] = useState(0);
   const [user, setUser] = useState<any>();
   const [strikePrice, setStrikePrice] = useState(0);
   const [betInterval, setBetInterval] = useState(3);
-  const [betAmt, setBetAmt] = useState(0.1);
+  const [betAmt, setBetAmt] = useState<number | undefined>();
   const [betType, setBetType] = useState<string | null>(null);
 
   const [betEnd, setBetEnd] = useState(false);
@@ -55,6 +63,9 @@ export default function Options() {
   const [refresh, setRefresh] = useState(true);
   const [betTime, setBetTime] = useState();
   const [betEndPrice, setBetEndPrice] = useState<number>();
+  const [betResults, setBetResults] = useState<
+    { result: number; win: boolean }[]
+  >([]);
 
   const [timeLeft, setTimeLeft] = useState(
     betTime
@@ -62,14 +73,61 @@ export default function Options() {
       : 0,
   );
 
+  const getResult = async () => {
+    setLoading(true);
+    setCheckResult(true);
+    try {
+      checkResultAPI(wallet).then((res) => {
+        if (res.success) {
+          if (res?.data?.result == "Won") {
+            successCustom(res?.message);
+            soundAlert("/sounds/win.wav");
+          } else errorCustom(res?.message);
+          setResult(res?.data?.result);
+          setResultAmt(
+            res?.data?.result == "Won"
+              ? res?.data?.amountWon
+              : res?.data?.amountLost,
+          );
+
+          setBetResults((prevResults) => {
+            const newResults = [
+              ...prevResults,
+              {
+                result: res?.data?.amountWon,
+                win: res?.data?.result === "Won",
+              },
+            ];
+            if (newResults.length > 6) {
+              newResults.shift();
+            }
+            return newResults;
+          });
+          setRefresh(true);
+        } else {
+          throw Error(res?.message ?? "Could not fetch result!");
+        }
+        setLoading(false);
+      });
+    } catch (e: any) {
+      errorCustom(e?.message ?? "Could not fetch result.");
+      setResult(null);
+      setCheckResult(false);
+      setLoading(false);
+    }
+  };
+
   const bet = async (betType: string) => {
     setLoading(true);
     setCheckResult(false);
     try {
-      // console.log("Placing bet");
+      if (betAmt === undefined) {
+        errorCustom("Invalid amount");
+        return;
+      }
 
       if (betAmt > coinData![0].amount) {
-        toast.error("Insufficient balance to place bet");
+        errorCustom("Insufficient balance to place bet");
         setBetType(null);
         setCheckResult(false);
         setBetEnd(false);
@@ -84,7 +142,7 @@ export default function Options() {
         betInterval,
       );
       if (res.success) {
-        toast.success(res?.message ?? "Bet placed");
+        successCustom(res?.message ?? "Bet placed");
         setRefresh(true);
         setStrikePrice(res?.data?.strikePrice);
         setBetTime(res?.data?.betTime);
@@ -94,12 +152,8 @@ export default function Options() {
             Date.now(),
         );
         setTimeout(async () => {
-          // console.log("ending the bet")
-          setBetInterval(3);
           setBetEnd(true);
-          setLoading(false);
-
-          await new Promise((r) => setTimeout(r, 2000));
+          setCheckResult(true);
 
           let betEndPrice = await fetch(
             `https://hermes.pyth.network/api/get_price_feed?id=0xef0d8b6fda2ceba41da15d4095d1da392a0d2f8ed0c6c7bc0f4cfac8c280b56d&publish_time=${Math.floor(
@@ -110,50 +164,19 @@ export default function Options() {
             .then((res) => res.json())
             .then((data) => data.price.price * Math.pow(10, data.price.expo));
           setBetEndPrice(betEndPrice);
+          getResult();
         }, betInterval * 60000);
       } else {
         setCheckResult(false);
         setBetEnd(false);
         setLoading(false);
-        res?.message && toast.error(res?.message);
+        res?.message && errorCustom(res?.message);
       }
     } catch (e) {
-      toast.error("Could not place bet.");
+      errorCustom("Could not place bet.");
       setBetType(null);
       setCheckResult(false);
       setBetEnd(false);
-      setLoading(false);
-    }
-  };
-
-  const getResult = async () => {
-    setLoading(true);
-    setCheckResult(true);
-    try {
-      // console.log("Checking Result");
-      checkResultAPI(wallet).then((res) => {
-        if (res.success) {
-          res?.data?.result == "Won"
-            ? toast.success(res?.message)
-            : toast.error(res?.message);
-          setResult(res?.data?.result);
-          setResultAmt(
-            res?.data?.result == "Won"
-              ? res?.data?.amountWon
-              : res?.data?.amountLost,
-          );
-          setRefresh(true);
-        } else {
-          setResult(null);
-          setCheckResult(false);
-          res?.message && toast.error(res?.message);
-        }
-        setLoading(false);
-      });
-    } catch (e) {
-      toast.error("Could not fetch result.");
-      setResult(null);
-      setCheckResult(false);
       setLoading(false);
     }
   };
@@ -179,8 +202,13 @@ export default function Options() {
                 betInterval * 60000 -
                 Date.now(),
             );
-            if (new Date(bet.betEndTime!).getTime() < Date.now()) {
-              await new Promise((r) => setTimeout(r, 2000));
+            const remainingTime =
+              new Date(bet?.betTime).getTime() +
+              betInterval * 60000 -
+              Date.now();
+            setTimeout(async () => {
+              setBetEnd(true);
+              setCheckResult(true);
 
               let betEndPrice = await fetch(
                 `https://hermes.pyth.network/api/get_price_feed?id=0xef0d8b6fda2ceba41da15d4095d1da392a0d2f8ed0c6c7bc0f4cfac8c280b56d&publish_time=${Math.floor(
@@ -192,7 +220,9 @@ export default function Options() {
                   (data) => data.price.price * Math.pow(10, data.price.expo),
                 );
               setBetEndPrice(betEndPrice);
-            }
+              if (!checkResult) getResult();
+            }, remainingTime);
+
             setBetEnd(new Date(bet.betEndTime!).getTime() < Date.now());
           }
           setLoading(false);
@@ -224,40 +254,40 @@ export default function Options() {
         let price = data[0].price.price * Math.pow(10, data[0].price.expo);
         setLivePrice(price);
       } catch (e) {
-        toast.error("Could not fetch live price.");
+        // errorCustom("Could not fetch live price.");
         setLivePrice(0);
       }
-    }, 2000);
+    }, 1000);
 
     return () => clearInterval(intervalId);
   }, []);
 
-  // useEffect(() => {
-  //   if (wallet.publicKey) {
-  //     fetch(`/api/games/user/getUser?wallet=${wallet.publicKey?.toBase58()}`)
-  //       .then((res) => res.json())
-  //       .then((user) => {
-  //         // console.log(user.data);
-  //         setUser(user.data);
-  //       });
-  //   }
-  // }, [wallet.publicKey, strikePrice]);
-
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
-  ) => {
-    setBetAmt(parseFloat(e.target.value));
-  };
-
   const onSubmit = async (data: any) => {
-    console.log(betAmt, betType, betInterval);
-
-    if (!wallet.publicKey) toast.error("Wallet not connected");
-    else {
-      if (betType && betAmt !== 0 && betInterval !== 0) {
-        // setBetType("up");
-        await bet(betType);
-      } else toast.error("Choose amount, interval and type.");
+    if (result) {
+      setBetType(null);
+      setCheckResult(false);
+      setLoading(false);
+      setResult(null);
+      setBetEnd(false);
+      setBetInterval(3);
+      setStrikePrice(0);
+      setBetAmt(0.1);
+      setBetEndPrice(0);
+      return;
+    } else {
+      if (!wallet.publicKey) errorCustom("Wallet not connected");
+      else {
+        if (
+          betType &&
+          betAmt !== undefined &&
+          betAmt !== 0 &&
+          betInterval !== 0 &&
+          !loading
+        ) {
+          // setBetType("up");
+          await bet(betType);
+        } else errorCustom("Choose amount, interval and type.");
+      }
     }
   };
 
@@ -268,7 +298,6 @@ export default function Options() {
       const remaining = timeLeft - 1000;
       setTimeLeft((prev) => prev - 1000);
 
-      // console.log(remaining);
       if (remaining <= 0 && (betEnd || (!betEnd && betTime !== undefined))) {
         setTimeLeft(0);
         clearInterval(interval);
@@ -279,7 +308,7 @@ export default function Options() {
   }, [betTime]);
 
   return (
-    <GameLayout title="FOMO - Binary Options">
+    <GameLayout title="Binary Options">
       <GameOptions>
         <FormProvider {...methods}>
           <form
@@ -287,87 +316,82 @@ export default function Options() {
             autoComplete="off"
             onSubmit={methods.handleSubmit(onSubmit)}
           >
-            <div className="mb-0 flex w-full flex-col">
-              <div className="mb-1 flex w-full items-center justify-between text-sm font-changa text-opacity-90">
-                <label className="text-[#F0F0F0] text-opacity-75">
-                  Bet amount
-                </label>
-                <span className="text-[#94A3B8] text-opacity-75">
-                  Available : {coinData ? coinData[0]?.amount.toFixed(4) : 0}
-                </span>
-              </div>
-
-              <div
-                className={`group flex h-11 w-full cursor-pointer items-center rounded-[8px] bg-[#202329] px-4`}
+            {/* mobile button  */}
+            <div className="w-full flex lg:hidden mb-[1.4rem]">
+              <BetButton
+                disabled={
+                  !betType ||
+                  !session?.user ||
+                  !coinData ||
+                  (coinData && coinData[0].amount < minGameAmount) ||
+                  (betAmt !== undefined &&
+                    maxBetAmt !== undefined &&
+                    betAmt > maxBetAmt) ||
+                  loading ||
+                  (strikePrice > 0 && !result)
+                    ? true
+                    : false
+                }
+                onClickFunction={onSubmit}
               >
-                <input
-                  id={"amount-input"}
-                  {...methods.register("amount", {
-                    required: "Amount is required",
-                  })}
-                  type={"number"}
-                  step={"any"}
-                  autoComplete="off"
-                  onChange={handleChange}
-                  placeholder={"Amount"}
-                  value={betAmt}
-                  className={`flex w-full min-w-0 bg-transparent text-base text-white placeholder-white  font-changa placeholder-opacity-40 outline-none`}
-                />
-                <span
-                  className="bg-[#D9D9D9] bg-opacity-5 py-1 px-1.5 rounded text-xs font-semibold text-[#F0F0F0] text-opacity-50"
-                  onClick={() => setBetAmt(coinData ? coinData[0]?.amount : 0)}
-                >
-                  MAX
-                </span>
-              </div>
-
-              <span
-                className={`${
-                  methods.formState.errors["amount"]
-                    ? "opacity-100"
-                    : "opacity-0"
-                } mt-1.5 flex items-center gap-1 text-xs text-[#D92828]`}
-              >
-                {methods.formState.errors["amount"]
-                  ? methods.formState.errors["amount"]!.message!.toString()
-                  : "NONE"}
-              </span>
+                {loading || (strikePrice > 0 && !result) ? (
+                  <Loader />
+                ) : result ? (
+                  "BET AGAIN"
+                ) : (
+                  "BET"
+                )}
+              </BetButton>
             </div>
 
+            <BetAmount
+              betAmt={betAmt}
+              setBetAmt={setBetAmt}
+              currentMultiplier={2.0}
+              leastMultiplier={2.0}
+              game="options"
+              disabled={loading || (strikePrice > 0 && !result)}
+            />
+
             {/* select interval  */}
-            <div className="mb-4 flex w-full flex-col rounded-lg bg-transparent bg-opacity-10">
-              <span className="-full mb-3 text-left text-sm font-changa font-medium text-[#F0F0F0] text-opacity-75">
-                Select Interval
+            <div className="mb-[1.4rem] flex w-full flex-col rounded-lg bg-transparent bg-opacity-10">
+              <span className="mb-1 text-xs text-white/90  font-changa">
+                {translator("Select Interval", language)}
               </span>
-              <div className="flex flex-col items-center gap-2.5 md:flex-row bg-[#0C0F16] p-4 rounded-lg">
+              <div className="flex lg:flex-row flex-col items-center gap-2.5 bg-[#0C0F16] p-2 md:p-4 rounded-lg">
+                <div className="flex lg:w-[66.66%] w-full gap-2.5">
+                  <button
+                    type="button"
+                    disabled={loading || (strikePrice > 0 && !result)}
+                    onClick={() => {
+                      !loading && setBetInterval(3);
+                    }}
+                    className={`${
+                      betInterval === 3
+                        ? "border-[#7839C5]"
+                        : "border-transparent hover:border-[#7839C580]"
+                    } disabled:pointer-events-none disabled:opacity-50 w-full rounded-[5px] border-[2px] bg-[#202329] py-2 text-xs font-chakra text-white text-opacity-90 transition duration-200`}
+                  >
+                    3 {translator("Min", language)}
+                  </button>
+                  <button
+                    type="button"
+                    disabled={loading || (strikePrice > 0 && !result)}
+                    onClick={() => {
+                      !loading && setBetInterval(4);
+                    }}
+                    className={`${
+                      betInterval === 4
+                        ? "border-[#7839C5]"
+                        : "border-transparent hover:border-[#7839C580]"
+                    } disabled:pointer-events-none disabled:opacity-50 w-full rounded-[5px] border-[2px] bg-[#202329] py-2 text-xs font-chakra text-white text-opacity-90 transition duration-200`}
+                  >
+                    4 {translator("Min", language)}
+                  </button>
+                </div>
                 <button
                   type="button"
-                  onClick={() => {
-                    !loading && setBetInterval(3);
-                  }}
-                  className={`${
-                    betInterval === 3
-                      ? "border-[#7839C5]"
-                      : "border-transparent hover:border-[#7839C580]"
-                  } w-full rounded-[5px] border-[2px] bg-[#202329] py-2 text-xs font-chakra text-white text-opacity-90 transition duration-200`}
-                >
-                  3 Min
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    !loading && setBetInterval(4);
-                  }}
-                  className={`${
-                    betInterval === 4
-                      ? "border-[#7839C5]"
-                      : "border-transparent hover:border-[#7839C580]"
-                  } w-full rounded-[5px] border-[2px] bg-[#202329] py-2 text-xs font-chakra text-white text-opacity-90 transition duration-200`}
-                >
-                  4 Min
-                </button>
-                <button
-                  type="button"
+                  disabled={loading || (strikePrice > 0 && !result)}
                   onClick={() => {
                     !loading && setBetInterval(5);
                   }}
@@ -375,32 +399,18 @@ export default function Options() {
                     betInterval === 5
                       ? "border-[#7839C5]"
                       : "border-transparent hover:border-[#7839C580]"
-                  } w-full rounded-[5px] border-[2px] bg-[#202329] py-2 text-xs font-chakra -white text-opacity-90 transition duration-200`}
+                  } lg:w-[33.33%] disabled:pointer-events-none disabled:opacity-50 w-full rounded-[5px] border-[2px] bg-[#202329] py-2 text-xs font-chakra text-white text-opacity-90 transition duration-200`}
                 >
-                  5 Min
+                  5 {translator("Min", language)}
                 </button>
               </div>
             </div>
 
-            {(!coinData || (coinData && coinData[0].amount < 0.0001)) &&
-              strikePrice == 0 && (
-                <div className="mb-5 w-full rounded-lg bg-[#0C0F16] p-2 text-white md:px-6">
-                  <div className="-full text-center font-changa font-medium text-[#F0F0F0] text-opacity-75">
-                    Please deposit funds to start playing. View{" "}
-                    <u
-                      onClick={() => {
-                        setShowWalletModal(true);
-                      }}
-                    >
-                      WALLET
-                    </u>
-                  </div>
-                </div>
-              )}
-
-            <div className="flex w-full flex-row mb-4 gap-3">
+            <div className="flex w-full flex-row lg:mb-[1.4rem] gap-3">
               {/* buttons  */}
-              <div
+              <button
+                type="button"
+                disabled={loading || (strikePrice > 0 && !result)}
                 onClick={() => {
                   setBetType("up");
                 }}
@@ -408,11 +418,13 @@ export default function Options() {
                   betType === "up"
                     ? "border-[#7839C5]"
                     : "border-transparent hover:border-[#7839C580]"
-                } w-full rounded-lg text-center cursor-pointer border-2 bg-[#202329] py-2.5 font-changa text-xl text-white shadow-[0px_4px_15px_0px_rgba(0,0,0,0.25)]`}
+                } w-full rounded-lg disabled:pointer-events-none disabled:opacity-50 text-center cursor-pointer border-2 bg-[#202329] py-2.5 font-changa text-xl text-white shadow-[0px_4px_15px_0px_rgba(0,0,0,0.25)]`}
               >
-                UP
-              </div>
-              <div
+                {translator("UP", language)}
+              </button>
+              <button
+                type="button"
+                disabled={loading || (strikePrice > 0 && !result)}
                 onClick={() => {
                   setBetType("down");
                 }}
@@ -420,242 +432,161 @@ export default function Options() {
                   betType === "down"
                     ? "border-[#7839C5]"
                     : "border-transparent hover:border-[#7839C580]"
-                } w-full rounded-lg text-center cursor-pointer border-2 bg-[#202329] py-2.5 font-changa text-xl text-white shadow-[0px_4px_15px_0px_rgba(0,0,0,0.25)] `}
+                } w-full rounded-lg disabled:pointer-events-none disabled:opacity-50 text-center cursor-pointer border-2 bg-[#202329] py-2.5 font-changa text-xl text-white shadow-[0px_4px_15px_0px_rgba(0,0,0,0.25)] `}
               >
-                DOWN
-              </div>
+                {translator("DOWN", language)}
+              </button>
             </div>
 
-            {strikePrice !== 0 ? (
-              <div className="mb-0 flex w-full flex-col items-center rounded-lg bg-[#202329] px-6 py-4">
-                {checkResult ? (
-                  loading && !result ? (
-                    <div className="flex w-full flex-col items-center">
-                      <span
-                        className={`mb-4 font-changa text-xl text-[#FFFFFF] text-opacity-90`}
-                      >
-                        Calculating.....
-                      </span>
-                      <span
-                        className={`mb-1 w-[90%] max-w-[22rem] text-center font-changa text-sm text-[#F0F0F0] text-opacity-50`}
-                      >
-                        This round’s closing transaction has been submitted to
-                        the blockchain, and is awaiting confirmation.
-                      </span>
-                    </div>
-                  ) : (
-                    <div className="flex w-full flex-col items-center">
-                      {/* time and type  */}
-                      <div className="flex w-full items-start justify-between">
-                        <div className="flex flex-col items-start -gap-1">
-                          <Timer minutes={betInterval} betTime={betTime!} />
-                          <span
-                            className={`font-lilita ${
-                              betType === "up"
-                                ? "text-[#0F8B62]"
-                                : "text-[#CF304A]"
-                            } text-sm`}
-                          >
-                            {betType === "up" ? "BET UP" : "BET DOWN"}
-                          </span>
-                        </div>
-                        <div className="flex flex-col items-end -gap-1">
-                          <span className="font-changa text-sm text-[#FFFFFF] text-opacity-75 mt-1">
-                            Price Amount
-                          </span>
-                          <span className="font-changa text-sm font-semibold text-[#FFFFFF] text-opacity-90">
-                            {resultAmt ? resultAmt!.toFixed(4) : 0} $SOL
-                          </span>
-                        </div>
-                      </div>
-
-                      {/* result  */}
-                      <span
-                        className={`-mt-0 mb-2.5 font-changa text-[2rem] text-[#FFFFFF] text-opacity-90`}
-                      >
-                        You {result}!
-                      </span>
-
-                      {/* bet Again */}
-                      <button
-                        onClick={() => {
-                          setBetType(null);
-                          setCheckResult(false);
-                          setLoading(false);
-                          setResult(null);
-                          setBetEnd(false);
-                          setBetInterval(3);
-                          setStrikePrice(0);
-                          setBetAmt(0.1);
-                          setBetEndPrice(0);
-                        }}
-                        className="w-full rounded-[5px] border border-[#F200F21A] bg-[#7839C5] hover:bg-[#9361d1] focus:bg-[#602E9E] px-5 py-2 font-changa font-semibold text-white text-opacity-90 shadow-[0_5px_10px_rgba(0,0,0,0.3)]"
-                      >
-                        Bet Again
-                      </button>
-                    </div>
-                  )
-                ) : (
-                  <div className="flex w-full flex-col items-center">
-                    {/* time and type  */}
-                    <div className="flex w-full items-start justify-between">
-                      <div className="flex flex-col items-start -gap-1">
-                        <Timer minutes={betInterval} betTime={betTime!} />
-                        <span
-                          className={`font-lilita ${
-                            betType === "up"
-                              ? "text-[#0F8B62]"
-                              : "text-[#CF304A]"
-                          } text-sm`}
-                        >
-                          {betType === "up" ? "BET UP" : "BET DOWN"}
-                        </span>
-                      </div>
-                      <div className="flex flex-col items-end -gap-1">
-                        <span className="font-changa text-sm text-[#FFFFFF] text-opacity-75">
-                          Price Amount
-                        </span>
-                        <span className="font-changa text-sm font-semibold text-[#FFFFFF] text-opacity-90">
-                          {betAmt.toFixed(4)} $SOL
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* price  */}
-                    <div
-                      className={`flex ${
-                        betEnd ? "flex-row" : "-mt-1 flex-col"
-                      } mb-3 items-center`}
-                    >
-                      <span
-                        className={`font-changa ${
-                          betEnd ? "text-sm" : "text-xl"
-                        } font-medium text-[#F0F0F0] text-opacity-75`}
-                      >
-                        Strike Price
-                      </span>
-                      <span
-                        className={`font-changa ${
-                          betEnd ? "ml-1 text-sm" : "text-[2rem]"
-                        } text-[#FFFFFF] text-opacity-90`}
-                      >
-                        ${strikePrice.toFixed(4)}
-                      </span>
-                    </div>
-
-                    {/* timer bar / check result */}
-                    {betEnd ? (
-                      <button
-                        onClick={async () => {
-                          await getResult();
-                        }}
-                        className="w-full rounded-[5px] border border-[#F200F21A] bg-[#d9d9d90d] px-5 py-2 font-changa font-semibold text-white text-opacity-90 shadow-[0_5px_10px_rgba(0,0,0,0.3)]"
-                      >
-                        Check Result
-                      </button>
-                    ) : (
-                      <Progress minutes={betInterval} betTime={betTime!} />
-                    )}
-                  </div>
-                )}
-              </div>
-            ) : loading && !checkResult ? (
-              <div className="w-full flex items-center justify-center gap-2 rounded-lg bg-[#202329] p-2">
-                <span className="font-changa text-xl whitespace-nowrap font-medium text-[#F0F0F0] text-opacity-75">
-                  Betting in Progress
-                </span>
-                <div className="w-10">
+            {/* lap  button  */}
+            <div className="w-full hidden lg:flex">
+              <BetButton
+                disabled={
+                  !betType ||
+                  !session?.user ||
+                  !coinData ||
+                  (coinData && coinData[0].amount < minGameAmount) ||
+                  (betAmt !== undefined &&
+                    maxBetAmt !== undefined &&
+                    betAmt > maxBetAmt) ||
+                  loading ||
+                  (strikePrice > 0 && !result)
+                    ? true
+                    : false
+                }
+                // onClickFunction={onSubmit}
+              >
+                {loading || (strikePrice > 0 && !result) ? (
                   <Loader />
-                </div>
-              </div>
-            ) : (
-              <div className="flex w-full flex-col">
-                <button
-                  type="submit"
-                  disabled={
-                    !coinData || (coinData && coinData[0].amount < 0.0001)
-                      ? true
-                      : false
-                  }
-                  onClick={onSubmit}
-                  className={`${
-                    !coinData || (coinData && coinData[0].amount < 0.0001)
-                      ? "cursor-not-allowed opacity-70"
-                      : "hover:opacity-90"
-                  } w-full rounded-lg bg-[#7839C5] hover:bg-[#9361d1] focus:bg-[#602E9E] py-2.5 font-lilita text-xl text-white`}
-                >
-                  BET
-                </button>
-              </div>
-            )}
+                ) : result ? (
+                  "BET AGAIN"
+                ) : (
+                  "BET"
+                )}
+              </BetButton>
+            </div>
           </form>
         </FormProvider>
       </GameOptions>
       <GameDisplay>
         <>
           {/* time and amt */}
-          <div
-            className={`${
-              strikePrice !== 0 ? "opacity-100" : "opacity-0"
-            } flex w-full items-start justify-between`}
-          >
-            <div className="flex flex-col items-start gap-1">
+          <div className={`flex w-full items-start justify-between h-11`}>
+            <div
+              className={`flex flex-col items-start text-xs md:text-sm font-chakra font-medium text-[#f0f0f0] test-opacity-75`}
+            >
               <Timer minutes={betInterval} betTime={betTime!} />
+              {strikePrice === 0
+                ? loading && !checkResult
+                  ? translator("Placing bet", language) + "..."
+                  : ""
+                : checkResult
+                ? loading && !result
+                  ? translator("Checking result", language) + "..."
+                  : ""
+                : (timeLeft * 50) / (betInterval * 60000) <= 0
+                ? translator("Checking result", language) + "..."
+                : ""}
             </div>
             <div className="flex flex-col items-end">
-              <span className="font-changa text-sm text-[#FFFFFF] text-opacity-90">
-                {strikePrice.toFixed(4)} $SOL
+              <span className="font-chakra font-medium text-xs md:text-sm text-[#F0F0F0] text-opacity-75">
+                ${truncateNumber(strikePrice, 3)}
               </span>
               <span
-                className={`font-changa ${
-                  betType === "up" ? "text-[#0F8B62]" : "text-[#CF304A]"
-                } text-base`}
+                className={`font-chakra ${
+                  betType === "up" ? "text-[#72F238]" : "text-[#CF304A]"
+                } text-xs md:text-base font-bold`}
               >
-                {betType === "up" ? "BET UP" : "BET DOWN"}
+                {betType
+                  ? betType === "up"
+                    ? translator("BET UP", language)
+                    : translator("BET DOWN", language)
+                  : ""}
               </span>
             </div>
           </div>
 
           {/* central loader  */}
-          <div className="flex flex-col items-center relative mb-10">
-            <div className="flex flex-col items-center absolute w-[12rem] h-[12rem] justify-center">
-              <span className="font-change text-sm text-[#94A3B8] text-opacity-75 mb-5">
+          <div className="flex flex-1 flex-col justify-center items-center relative py-4 mb-6 md:mb-6">
+            <div className="flex flex-col items-center absolute w-[14rem] h-[14rem] justify-start pt-14">
+              <span className="font-chakra text-sm text-[#94A3B8] text-opacity-75 mb-[1.4rem]">
                 $SOL
               </span>
-              <span className="font-change text-2xl text-white text-opacity-90 mb-2">
-                {livePrice.toFixed(4)}
+              <span className="font-chakra text-2xl text-white font-semibold text-opacity-90 mb-2">
+                ${truncateNumber(livePrice, 3)}
               </span>
-              {strikePrice && (
+              {strikePrice && !result ? (
                 <span
                   className={`text-sm ${
                     livePrice - strikePrice > 0
                       ? "text-[#72F238]"
                       : "text-[#CF304A]"
-                  } text-opacity-90 font-changa`}
+                  } text-opacity-90 font-chakra`}
                 >
-                  {Math.abs(livePrice - strikePrice).toFixed(4)}
+                  {livePrice - strikePrice > 0 ? "+" : "-"}
+                  {truncateNumber(Math.abs(livePrice - strikePrice), 4)}
+                </span>
+              ) : (
+                <span
+                  className={`flex text-sm font-chakra font-medium ${
+                    result
+                      ? result === "Won"
+                        ? "text-[#72F238]"
+                        : "text-[#CF304A]"
+                      : "text-[#f0f0f0] test-opacity-75"
+                  }`}
+                >
+                  {result
+                    ? result === "Won"
+                      ? translator("You Won!", language)
+                      : translator("You Lost!", language)
+                    : ""}
                 </span>
               )}
             </div>
-            <div className="w-[12rem] h-[12rem] relative">
-              {[...Array(40)].map((item, index) => (
+            <div className="w-[14rem] h-[14rem] relative transform -rotate-90">
+              {[...Array(50)].map((item, index) => (
                 <div
                   key={index}
-                  className={`w-[6rem] h-2 flex justify-end absolute top-[50%] left-[50%] origin-[0_0px] bg-transparent`}
-                  style={{ rotate: `${(360 / 40) * index}deg` }}
+                  className={`w-[6.5rem] h-2 flex justify-end absolute top-[50%] left-[50%] origin-[0_0px] bg-transparent`}
+                  style={{ rotate: `${(360 / 50) * index}deg` }}
                 >
                   <div
-                    className={`w-[8px] h-[5px] ${
-                      index >= (timeLeft * 40) / (betInterval * 60000)
-                        ? "bg-[#282E3D]"
-                        : "bg-[#D9D9D9]"
+                    className={`w-[9px] h-[6px] ${
+                      strikePrice === 0
+                        ? loading && !checkResult
+                          ? "blink_1_50 bg-white"
+                          : "blink_3 bg-[#282E3D]"
+                        : checkResult
+                        ? loading && !result
+                          ? "blink_1_50 bg-white"
+                          : result === "Won"
+                          ? "bg-[#72F238] bg-opacity-40 blink_3"
+                          : "bg-[#CF304A] bg-opacity-40 blink_3"
+                        : betEnd
+                        ? "blink_1_50 bg-white"
+                        : index >= (timeLeft * 50) / (betInterval * 60000)
+                        ? (timeLeft * 50) / (betInterval * 60000) <= 0
+                          ? "blink_1_50 bg-white"
+                          : "bg-[#282E3D]"
+                        : timeLeft / (betInterval * 60000) < 0.25
+                        ? `bg-[#CF304A] blink_1 ${
+                            index >= (timeLeft * 50) / (betInterval * 60000) - 1
+                              ? "blink_1"
+                              : ""
+                          }`
+                        : `bg-[#D9D9D9] ${
+                            index >= (timeLeft * 50) / (betInterval * 60000) - 1
+                              ? "blink_1"
+                              : ""
+                          }`
                     }`}
                   />
                 </div>
               ))}
             </div>
           </div>
-          <GameFooterInfo multiplier={1.0} amount={betAmt ?? 0} chance={50} />
+          <GameFooterInfo multiplier={2.0} amount={betAmt ? betAmt : 0.0} />
         </>
       </GameDisplay>
       <GameTable>

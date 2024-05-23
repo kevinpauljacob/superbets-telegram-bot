@@ -3,17 +3,18 @@ import { useGlobalContext } from "./GlobalContext";
 import {
   connection,
   fomoToken,
-  formatNumber,
   stakeFOMO,
   translator,
   unstakeFOMO,
 } from "@/context/transactions";
+import { truncateNumber } from "@/context/gameTransactions";
 import { useWallet } from "@solana/wallet-adapter-react";
 import toast from "react-hot-toast";
 import Spinner from "./Spinner";
 import { PublicKey } from "@solana/web3.js";
 import { getAssociatedTokenAddressSync } from "@solana/spl-token";
 import { useSession } from "next-auth/react";
+import { errorCustom } from "./toasts/ToastGroup";
 
 export default function StakeFomo() {
   const { data: session, status } = useSession();
@@ -45,7 +46,7 @@ export default function StakeFomo() {
 
         res.value.uiAmount ? setSolBal(res.value.uiAmount) : setSolBal(0);
       } catch (e) {
-        toast.error("Unable to fetch balance.");
+        // errorCustom("Unable to fetch balance.");
         console.error(e);
       }
   };
@@ -56,14 +57,14 @@ export default function StakeFomo() {
     try {
       if (stake) {
         if (amount > solBal) {
-          toast.error(translator("Insufficient FOMO", language));
+          errorCustom(translator("Insufficient FOMO", language));
           setLoading(false);
           return;
         }
         response = await stakeFOMO(wallet, amount, fomoToken);
       } else {
         if (amount > (userData?.stakedAmount ?? 0)) {
-          toast.error(translator("Insufficient FOMO", language));
+          errorCustom(translator("Insufficient FOMO", language));
           setLoading(false);
           return;
         }
@@ -78,22 +79,38 @@ export default function StakeFomo() {
     } catch (e) {
       setLoading(false);
       console.error(e);
-      toast.error("Something went wrong, please try again");
+      errorCustom("Something went wrong, please try again");
     }
   };
 
+  const handleHalfStake = () => {
+    if (solBal > 0) {
+      setAmount(solBal / 2);
+    }
+  };
+
+  const handleDoubleStake = () => {
+    if (solBal > 0) {
+      setAmount(solBal * 2);
+    }
+  };
+
+  const handleSetMaxStake = () => {
+    stake ? setAmount(solBal) : setAmount(userData?.stakedAmount ?? 0);
+  };
+
   return (
-    <div className="w-full p-4 flex flex-col items-start gap-2 bg-[#19161C] bg-opacity-50 rounded-xl">
+    <div className="w-full p-6 py-6 flex flex-col items-start gap-1 bg-staking-bg rounded-xl">
       <span className="text-white text-opacity-90 font-semibold text-xl">
         {translator("Stake", language)} FOMO
       </span>
-      <div className="flex w-full items-center border-b border-white border-opacity-10">
+      <div className="flex w-full items-center border-b border-white border-opacity-10 mt-5">
         <button
           className={`${
             stake
-              ? "text-[#9945FF] border-[#9945FF]"
+              ? "text-white border-[#9945FF]"
               : "text-[#ffffff80] border-transparent hover:text-[#ffffffb5]"
-          } p-4 border-b-2 text-base font-medium transition-all`}
+          } p-2  border-b-2 text-base font-medium transition-all w-full sm:w-max`}
           onClick={() => {
             setStake(true);
           }}
@@ -103,9 +120,9 @@ export default function StakeFomo() {
         <button
           className={`${
             !stake
-              ? "text-[#9945FF] border-[#9945FF]"
+              ? "text-white border-[#9945FF]"
               : "text-[#ffffff80] border-transparent hover:text-[#ffffffb5]"
-          } p-4 border-b-2 text-base font-medium transition-all`}
+          } p-2 border-b-2 text-base font-medium transition-all w-full sm:w-max`}
           onClick={() => {
             setStake(false);
           }}
@@ -114,45 +131,78 @@ export default function StakeFomo() {
         </button>
       </div>
 
-      <span className="text-white text-opacity-90 text-sm mt-4">
+      <p className="text-white text-opacity-90 text-xs mt-4 font-changa flex justify-between w-full">
         {stake
-          ? translator("Deposit FOMO", language)
-          : translator("Withdraw FOMO", language)}
-      </span>
-
-      <input
-        className="bg-[#1A1A1A] w-full outline-none py-1 px-2 rounded-[5px] text-[#94A3B8]"
-        min={0}
-        value={amount}
-        onChange={(e) => {
-          parseFloat(e.target.value) >= 0 &&
-            setAmount(parseFloat(e.target.value));
-        }}
-      />
-
-      <span className="text-[#B1B1B1] text-sm">
-        {translator("Available", language)}{" "}
+          ? translator("Deposit", language)
+          : translator("Withdraw", language)}
         <span
           onClick={() => {
             stake ? setAmount(solBal) : setAmount(userData?.stakedAmount ?? 0);
           }}
-          className="text-sm font-bold cursor-pointer text-[#B1B1B1] hover:text-opacity-100 text-opacity-50 transition-all"
+          className="text-sm cursor-pointer font-medium font-changa text-[#94A3B8] text-opacity-90 transition-all"
         >
-          {formatNumber(stake ? solBal : userData?.stakedAmount ?? 0)} FOMO
+          {truncateNumber(stake ? solBal : userData?.stakedAmount ?? 0, 4)}{" "}
+          $FOMO
         </span>
-      </span>
+      </p>
+
+      <div
+        className={`relative group flex h-11 w-full cursor-pointer items-center rounded-[8px] bg-[#202329] px-4`}
+      >
+        <input
+          id={"stake-amount-input"}
+          type={"number"}
+          step={"any"}
+          autoComplete="off"
+          onChange={(e) => {
+            parseFloat(e.target.value) >= 0 &&
+              setAmount(parseFloat(e.target.value));
+          }}
+          placeholder={"0.0"}
+          value={amount}
+          lang="en"
+          className={`flex w-full min-w-0 bg-transparent text-base text-[#94A3B8] placeholder-[#94A3B8] font-chakra placeholder-opacity-40 outline-none disabled:cursor-default disabled:opacity-50`}
+        />
+        <button
+          type="button"
+          className="text-xs font-medium text-white text-opacity-50 disabled:cursor-default disabled:opacity-50 bg-[#292C32] hover:bg-[#47484A] focus:bg-[#47484A] transition-all hover:duration-75 rounded-[5px] py-1.5 px-4"
+          onClick={() => {
+            handleHalfStake();
+          }}
+        >
+          1/2
+        </button>
+        <button
+          type="button"
+          className="text-xs mx-2 font-medium text-white text-opacity-50 disabled:cursor-default disabled:opacity-50 bg-[#292C32] hover:bg-[#47484A] focus:bg-[#47484A] transition-all hover:duration-75 rounded-[5px] py-1.5 px-4"
+          onClick={() => {
+            handleDoubleStake();
+          }}
+        >
+          2x
+        </button>
+        <button
+          type="button"
+          className="text-xs font-medium text-white text-opacity-50 disabled:cursor-default disabled:opacity-50 bg-[#292C32] hover:bg-[#47484A] focus:bg-[#47484A] transition-all hover:duration-75 rounded-[5px] py-1.5 px-4"
+          onClick={() => {
+            handleSetMaxStake();
+          }}
+        >
+          Max
+        </button>
+      </div>
 
       <button
         onClick={() => {
           handleRequest();
         }}
         disabled={loading || !session?.user}
-        className="w-full flex items-center justify-center gap-1 p-1.5 mt-4 bg-[#9945FF] hover:bg-opacity-50 disabled:bg-opacity-20 transition-all text-white text-xl font-semibold rounded-[5px]"
+        className="w-full flex py-3 items-center justify-center gap-1 p-1.5 mt-4 bg-[#9945FF] hover:bg-opacity-50 disabled:bg-opacity-20 transition-all text-white text-md tracking-wider font-semibold rounded-[5px]"
       >
         {loading && <Spinner />}
         {stake
-          ? translator("Stake", language)
-          : translator("Unstake", language)}
+          ? translator("STAKE", language)
+          : translator("UNSTAKE", language)}
       </button>
     </div>
   );

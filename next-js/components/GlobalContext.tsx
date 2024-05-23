@@ -1,9 +1,22 @@
-import { User } from "@/context/transactions";
+import {
+  User,
+  houseEdgeTiers,
+  launchPromoEdge,
+  pointTiers,
+} from "@/context/transactions";
 import { useWallet } from "@solana/wallet-adapter-react";
-import { createContext, useContext, useState, ReactNode } from "react";
+import React, {
+  createContext,
+  useContext,
+  useState,
+  ReactNode,
+  useEffect,
+} from "react";
 import toast from "react-hot-toast";
 import { connection } from "../context/gameTransactions";
-import { LAMPORTS_PER_SOL } from "@solana/web3.js";
+import { LAMPORTS_PER_SOL, PublicKey } from "@solana/web3.js";
+import { TOKEN_PROGRAM_ID } from "@solana/spl-token";
+import { errorCustom } from "./toasts/ToastGroup";
 
 interface PointTier {
   index: number;
@@ -38,6 +51,16 @@ interface ProvablyFairData {
   };
 }
 
+interface AutoConfigOptions {
+  autoWinChange: number | null;
+  autoLossChange: number | null;
+  autoWinChangeReset: boolean;
+  autoLossChangeReset: boolean;
+  autoStopProfit: number | null;
+  autoStopLoss: number | null;
+  useAutoConfig: boolean;
+}
+
 interface GlobalContextProps {
   loading: boolean;
   setLoading: (stake: boolean) => void;
@@ -60,6 +83,9 @@ interface GlobalContextProps {
   livePrice: number;
   setLivePrice: (amount: number) => void;
 
+  fomoPrice: number;
+  setFomoPrice: (amount: number) => void;
+
   globalInfo: { users: number; stakedTotal: number; totalVolume: number };
   setGlobalInfo: (amount: {
     users: number;
@@ -79,11 +105,74 @@ interface GlobalContextProps {
   showWalletModal: boolean;
   setShowWalletModal: React.Dispatch<React.SetStateAction<boolean>>;
 
+  isVerifyModalOpen: boolean;
+  setIsVerifyModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
+
+  verifyModalData: any;
+  setVerifyModalData: (verifyModalData: any) => void;
+
+  sidebar: boolean;
+  setSidebar: React.Dispatch<React.SetStateAction<boolean>>;
+
+  mobileSidebar: boolean;
+  setMobileSidebar: React.Dispatch<React.SetStateAction<boolean>>;
+
+  openPFModal: boolean;
+  setOpenPFModal: React.Dispatch<React.SetStateAction<boolean>>;
+
+  //configure auto
+  showAutoModal: boolean;
+  setShowAutoModal: React.Dispatch<React.SetStateAction<boolean>>;
+  autoWinChange: number | null;
+  setAutoWinChange: React.Dispatch<React.SetStateAction<number | null>>;
+  autoLossChange: number | null;
+  setAutoLossChange: React.Dispatch<React.SetStateAction<number | null>>;
+  autoWinChangeReset: boolean;
+  setAutoWinChangeReset: React.Dispatch<React.SetStateAction<boolean>>;
+  autoLossChangeReset: boolean;
+  setAutoLossChangeReset: React.Dispatch<React.SetStateAction<boolean>>;
+  autoStopProfit: number | null;
+  setAutoStopProfit: React.Dispatch<React.SetStateAction<number | null>>;
+  autoStopLoss: number | null;
+  setAutoStopLoss: React.Dispatch<React.SetStateAction<number | null>>;
+  startAuto: boolean;
+  setStartAuto: React.Dispatch<React.SetStateAction<boolean>>;
+  useAutoConfig: boolean;
+  setUseAutoConfig: React.Dispatch<React.SetStateAction<boolean>>;
+  autoBetCount: number | string;
+  setAutoBetCount: React.Dispatch<React.SetStateAction<number | string>>;
+  autoBetProfit: number;
+  setAutoBetProfit: React.Dispatch<React.SetStateAction<number>>;
+  liveBets: any[];
+  setLiveBets: React.Dispatch<React.SetStateAction<any[]>>;
+
+  autoConfigState: Map<string, AutoConfigOptions>;
+  setAutoConfigState: React.Dispatch<
+    React.SetStateAction<Map<string, AutoConfigOptions>>
+  >;
+
+  openVerifyModal: () => void;
+  closeVerifyModal: () => void;
+
   getUserDetails: () => Promise<void>;
   getGlobalInfo: () => Promise<void>;
   getWalletBalance: () => Promise<void>;
   getBalance: () => Promise<void>;
   getProvablyFairData: () => Promise<ProvablyFairData | null>;
+
+  currentGame: string | null;
+  setCurrentGame: (currentGame: string | null) => void;
+
+  houseEdge: number;
+  setHouseEdge: (currentGame: number) => void;
+
+  maxBetAmt: number | undefined;
+  setMaxBetAmt: React.Dispatch<React.SetStateAction<number>>;
+
+  kenoRisk: "classic" | "low" | "medium" | "high";
+  setKenoRisk: React.Dispatch<
+    React.SetStateAction<"classic" | "low" | "medium" | "high">
+  >;
 }
 
 const GlobalContext = createContext<GlobalContextProps | undefined>(undefined);
@@ -96,9 +185,10 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
   const wallet = useWallet();
   const [loading, setLoading] = useState(false);
   const [language, setLanguage] = useState<"en" | "ru" | "ko" | "ch">("en");
+
   const [userData, setUserData] = useState<User | null>(null);
   const [stake, setStake] = useState(true);
-  const [amount, setAmount] = useState(0);
+  const [amount, setAmount] = useState<number>(0);
   const [solBal, setSolBal] = useState<number>(0.0);
   const [livePrice, setLivePrice] = useState<number>(0.0);
   const [globalInfo, setGlobalInfo] = useState<{
@@ -122,8 +212,75 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
       tokenMint: "SOL",
     },
   ]);
-
   const [showWalletModal, setShowWalletModal] = useState<boolean>(false);
+  const [isVerifyModalOpen, setIsVerifyModalOpen] = useState<boolean>(false);
+  const [verifyModalData, setVerifyModalData] = useState({});
+
+  const [sidebar, setSidebar] = useState<boolean>(false);
+  const [mobileSidebar, setMobileSidebar] = useState<boolean>(false);
+
+  const [openPFModal, setOpenPFModal] = useState<boolean>(false);
+
+  // configure auto
+  const [showAutoModal, setShowAutoModal] = useState<boolean>(false);
+  const [autoWinChange, setAutoWinChange] = useState<number | null>(null);
+  const [autoLossChange, setAutoLossChange] = useState<number | null>(null);
+  const [autoWinChangeReset, setAutoWinChangeReset] = useState<boolean>(true);
+  const [autoLossChangeReset, setAutoLossChangeReset] = useState<boolean>(true);
+  const [autoStopProfit, setAutoStopProfit] = useState<number | null>(null);
+  const [autoStopLoss, setAutoStopLoss] = useState<number | null>(null);
+  const [startAuto, setStartAuto] = useState<boolean>(false);
+  const [useAutoConfig, setUseAutoConfig] = useState<boolean>(false);
+  const [autoBetCount, setAutoBetCount] = useState<number | string>(1);
+  const [autoBetProfit, setAutoBetProfit] = useState<number>(0);
+
+  const [liveBets, setLiveBets] = useState<any[]>([]);
+
+  const [autoConfigState, setAutoConfigState] = useState<
+    Map<string, AutoConfigOptions>
+  >(new Map());
+
+  // fomo live price
+  const [fomoPrice, setFomoPrice] = useState<number>(0);
+  const [currentGame, setCurrentGame] = useState<string | null>(null);
+
+  const [houseEdge, setHouseEdge] = useState<number>(0);
+  const [maxBetAmt, setMaxBetAmt] = useState<number>(0);
+  const [kenoRisk, setKenoRisk] = useState<
+    "classic" | "low" | "medium" | "high"
+  >("classic");
+
+  useEffect(() => {
+    const fetchFomoPrice = async () => {
+      try {
+        let data = await fetch(
+          "https://price.jup.ag/v4/price?ids=FOMO&vsToken=USDC",
+        ).then((res) => res.json());
+        // console.log(data);
+        setFomoPrice(data?.data?.FOMO?.price ?? 0);
+      } catch (e) {
+        console.log(e);
+        setFomoPrice(0);
+        // errorCustom("Could not fetch fomo live price.");
+      }
+    };
+
+    fetchFomoPrice();
+
+    let intervalId = setInterval(async () => {
+      fetchFomoPrice();
+    }, 10000);
+
+    return () => clearInterval(intervalId);
+  }, []);
+
+  const openVerifyModal = () => {
+    setIsVerifyModalOpen(true);
+  };
+
+  const closeVerifyModal = () => {
+    setIsVerifyModalOpen(false);
+  };
 
   const getUserDetails = async () => {
     if (wallet && wallet.publicKey)
@@ -140,12 +297,17 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
         });
 
         const { success, message, user } = await res.json();
-        // console.log("User: ", user);
-        if (success) setUserData(user);
-        // else toast.error(message);
-        // getWalletBalance();
+
+        if (success) {
+          setUserData(user);
+        } else console.error(message);
+        let points = user?.points ?? 0;
+        const userTier = Object.entries(pointTiers).reduce((prev, next) => {
+          return points >= next[1]?.limit ? next : prev;
+        })[0];
+        setHouseEdge(launchPromoEdge ? 0 : houseEdgeTiers[parseInt(userTier)]);
       } catch (e) {
-        // toast.error("Unable to fetch balance.");
+        // errorCustom("Unable to fetch balance.");
         console.error(e);
       }
   };
@@ -164,11 +326,9 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
       });
 
       const { success, message, data } = await res.json();
-      // console.log("Data: ", data);
+
       if (success) setGlobalInfo(data);
-      // else toast.error(message);
     } catch (e) {
-      // toast.error("Unable to fetch balance.");
       console.error(e);
     }
   };
@@ -180,7 +340,7 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
           (await connection.getBalance(wallet.publicKey)) / LAMPORTS_PER_SOL,
         );
       } catch (e) {
-        toast.error("Unable to fetch balance.");
+        // errorCustom("Unable to fetch balance.");
         console.error(e);
       }
   };
@@ -199,13 +359,13 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
             ) {
               setCoinData(balance.data.deposit);
             } else {
-              console.log("Could not fetch balance.");
+              // console.log("Could not fetch balance.");
               setCoinData(null);
             }
             setLoading(false);
           });
     } catch (e) {
-      console.log("Could not fetch balance.");
+      // console.log("Could not fetch balance.");
       setLoading(false);
       setCoinData(null);
       console.error(e);
@@ -215,7 +375,7 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
   const getProvablyFairData = async () => {
     if (wallet?.publicKey)
       try {
-        const res = await fetch(`/api/games/vrf`, {
+        const res = await fetch(`/api/games/gameSeed`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -229,7 +389,7 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
         if (data.success) return data;
         else return null;
       } catch (e) {
-        toast.error("Unable to fetch provably fair data.");
+        errorCustom("Unable to fetch provably fair data.");
         return null;
       }
   };
@@ -251,6 +411,8 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
         setSolBal,
         livePrice,
         setLivePrice,
+        fomoPrice,
+        setFomoPrice,
         globalInfo,
         setGlobalInfo,
         pointTier,
@@ -259,6 +421,52 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
         setWalletBalance,
         coinData,
         showWalletModal,
+        isVerifyModalOpen,
+        setIsVerifyModalOpen,
+        verifyModalData,
+        setVerifyModalData,
+        sidebar,
+        setSidebar,
+        mobileSidebar,
+        setMobileSidebar,
+        openPFModal,
+        setOpenPFModal,
+        showAutoModal,
+        setShowAutoModal,
+        autoWinChange,
+        setAutoWinChange,
+        autoLossChange,
+        setAutoLossChange,
+        autoWinChangeReset,
+        setAutoWinChangeReset,
+        autoLossChangeReset,
+        setAutoLossChangeReset,
+        autoStopProfit,
+        setAutoStopProfit,
+        autoStopLoss,
+        setAutoStopLoss,
+        startAuto,
+        setStartAuto,
+        autoBetCount,
+        setAutoBetCount,
+        autoBetProfit,
+        setAutoBetProfit,
+        liveBets,
+        setLiveBets,
+        autoConfigState,
+        setAutoConfigState,
+        useAutoConfig,
+        setUseAutoConfig,
+        currentGame,
+        setCurrentGame,
+        houseEdge,
+        setHouseEdge,
+        maxBetAmt,
+        kenoRisk,
+        setKenoRisk,
+        setMaxBetAmt,
+        openVerifyModal,
+        closeVerifyModal,
         setShowWalletModal,
         setCoinData,
         getUserDetails,
@@ -286,6 +494,86 @@ export const translationsMap = {
     ru: "Проверено OtterSec",
     ko: "OtterSec의 감사",
     ch: "OtterSec的审计",
+  },
+  Coinflip: {
+    ru: "Орел и решка",
+    ko: "동전 던지기",
+    ch: "抛硬币",
+  },
+  Dice: {
+    ru: "Кости",
+    ko: "주사위",
+    ch: "骰子",
+  },
+  Contact: {
+    ru: "Контакт",
+    ko: "연락하다",
+    ch: "接触",
+  },
+  Dice2: {
+    ru: "Кости 2",
+    ko: "주사위 2",
+    ch: "骰子2",
+  },
+  Keno: {
+    ru: "Кено",
+    ko: "키노",
+    ch: "Keno",
+  },
+  Limbo: {
+    ru: "Лимбо",
+    ko: "라임보",
+    ch: "Limbo",
+  },
+  Options: {
+    ru: "Опции",
+    ko: "옵션",
+    ch: "选项",
+  },
+  Wheel: {
+    ru: "Колесо",
+    ko: "바퀴",
+    ch: "轮子",
+  },
+  Mines: {
+    ru: "Шахты",
+    ko: "광산",
+    ch: "矿山",
+  },
+  Hilo: {
+    ru: "Хайло",
+    ko: "하이로",
+    ch: "Hilo",
+  },
+  Withdraw: {
+    ru: "Вывод",
+    ko: "철수",
+    ch: "提款",
+  },
+  Deposit: {
+    ru: "Депозит",
+    ko: "예금",
+    ch: "存款",
+  },
+  History: {
+    ru: "История",
+    ko: "역사",
+    ch: "历史",
+  },
+  Amount: {
+    ru: "Сумма",
+    ko: "양",
+    ch: "量",
+  },
+  Coin: {
+    ru: "Монета",
+    ko: "동전",
+    ch: "硬币",
+  },
+  "Current Wallet": {
+    ru: "Текущий кошелек",
+    ko: "현재 지갑",
+    ch: "当前钱包",
   },
   English: {
     ru: "Английский",
@@ -432,10 +720,10 @@ export const translationsMap = {
     ko: "다음 티어",
     ch: "下一个层级",
   },
-  "more FOMO to reach": {
-    ru: "Еще FOMO для достижения",
-    ko: "다음 단계까지 필요한 FOMO",
-    ch: "还需要更多FOMO",
+  "more $FOMO to reach": {
+    ru: "Еще $FOMO для достижения",
+    ko: "다음 단계까지 필요한 $FOMO",
+    ch: "还需要更多$FOMO",
   },
   multiplier: {
     ru: "Мультипликатор",
@@ -492,5 +780,532 @@ export const translationsMap = {
     ru: "FOMO Бог - Упускать возможность - это для смертных, а не для вас.",
     ko: "FOMO 신 - 놓치는 것은 죽었는 사람들을 위한 것입니다, 당신은 아닙니다.",
     ch: "FOMO之神 - 错过是为凡人，而不是你。",
+  },
+  "My Current Tier": {
+    ru: "Мой текущий уровень",
+    ko: "내 현재 등급",
+    ch: "我的当前层",
+  },
+  Manual: {
+    ru: "Руководство",
+    ko: "수동",
+    ch: "手动",
+  },
+  Auto: {
+    ru: "Авто",
+    ko: "자동",
+    ch: "自动",
+  },
+  "Bet Amount": {
+    ru: "Сумма ставки",
+    ko: "배팅 금액",
+    ch: "投注金额",
+  },
+  Why: {
+    ru: "Почему",
+    ko: "왜",
+    ch: "为什么",
+  },
+  Half: {
+    ru: "Половина",
+    ko: "반",
+    ch: "一半",
+  },
+  Max: {
+    ru: "Макс",
+    ko: "최대",
+    ch: "最大",
+  },
+  Bet: {
+    ru: "Ставка",
+    ko: "배팅",
+    ch: "投注",
+  },
+  Bets: {
+    ru: "Ставки",
+    ko: "배팅",
+    ch: "投注",
+  },
+  "Max Bet": {
+    ru: "Максимальная ставка",
+    ko: "최대 베팅",
+    ch: "最大投注",
+  },
+  BET: {
+    ru: "Ставка",
+    ko: "배팅",
+    ch: "投注",
+  },
+  "BET AGAIN": {
+    ru: "Ставить снова",
+    ko: "다시 배팅",
+    ch: "再次投注",
+  },
+  Betting: {
+    ru: "Ставка",
+    ko: "배팅",
+    ch: "投注",
+  },
+  Profit: {
+    ru: "Прибыль",
+    ko: "이익",
+    ch: "盈利",
+  },
+  Chance: {
+    ru: "Шанс",
+    ko: "기회",
+    ch: "机会",
+  },
+  "Rolling the dice": {
+    ru: "Бросок костей",
+    ko: "주사위 굴리는 중",
+    ch: "滚动骰子",
+  },
+  "Roll Over": {
+    ru: "Бросок над",
+    ko: "위로 굴리기",
+    ch: "滚动上",
+  },
+  "Roll Under": {
+    ru: "Бросок под",
+    ko: "아래로 굴리기",
+    ch: "滚动下",
+  },
+  STOP: {
+    ru: "СТОП",
+    ko: "중지",
+    ch: "停止",
+  },
+  "Configure Auto": {
+    ru: "Настроить авто",
+    ko: "자동 설정",
+    ch: "配置自动",
+  },
+  "Number of Bets": {
+    ru: "Количество ставок",
+    ko: "베팅 횟수",
+    ch: "投注次数",
+  },
+  "The maximum amount you can bet with the current multiplier": {
+    ru: "Максимальная сумма, которую вы можете поставить с текущим множителем",
+    ko: "현재 배수로 베팅할 수 있는 최대 금액",
+    ch: "您可以使用当前乘数下注的最大金额",
+  },
+  "The maximum amount you can bet in this game is": {
+    ru: "Максимальная сумма, которую вы можете поставить в этой игре, составляет",
+    ko: "이 게임에서 베팅할 수 있는 최대 금액은",
+    ch: "您可以在此游戏中下注的最高金额为",
+  },
+  "The more you stake, the less fees you pay and the bigger your points multiplier":
+    {
+      ru: "Чем больше вы ставите, тем меньше вы платите комиссий и тем выше ваш множитель очков",
+      ko: "더 많이 걸수록 수수료가 적게 들고 포인트 배수가 커집니다",
+      ch: "投注金额越大，您支付的费用越少，积分乘数越大",
+    },
+  WALLET: {
+    ru: "КОШЕЛЕК",
+    ko: "지갑",
+    ch: "钱包",
+  },
+  "Please deposit funds to start playing. View": {
+    ru: "Пожалуйста, внесите средства, чтобы начать играть. Просмотр",
+    ko: "게임을 시작하려면 자금을 입금하십시오. 보기",
+    ch: "请存入资金开始游戏。查看",
+  },
+  "Choose Upto 5 Faces": {
+    ru: "Выберите до 5 лиц",
+    ko: "최대 5개의 얼굴 선택",
+    ch: "选择最多5张脸",
+  },
+  "5 Faces": {
+    ru: "5 лиц",
+    ko: "5개의 얼굴",
+    ch: "5张脸",
+  },
+  "On Win": {
+    ru: "При победе",
+    ko: "이기면",
+    ch: "赢了",
+  },
+  "Increase by": {
+    ru: "Увеличить на",
+    ko: "증가",
+    ch: "增加",
+  },
+  Reset: {
+    ru: "Сброс",
+    ko: "리셋",
+    ch: "重置",
+  },
+  "On Loss": {
+    ru: "При проигрыше",
+    ko: "패배하면",
+    ch: "失败",
+  },
+  "Stop On Profit": {
+    ru: "Остановиться при прибыли",
+    ko: "이익 중지",
+    ch: "停止盈利",
+  },
+  "Stop On Loss": {
+    ru: "Остановиться при убытке",
+    ko: "손실 중지",
+    ch: "停止损失",
+  },
+  APPLY: {
+    ru: "ПРИМЕНИТЬ",
+    ko: "적용",
+    ch: "应用",
+  },
+  Volume: {
+    ru: "Объем",
+    ko: "볼륨",
+    ch: "音量",
+  },
+  "Provably Fair": {
+    ru: "Доказуемо справедливо",
+    ko: "증명 가능",
+    ch: "公平性",
+  },
+  "PROVABLY FAIR": {
+    ru: "ДОКАЗУЕМО СПРАВЕДЛИВО",
+    ko: "증명 가능",
+    ch: "公平性",
+  },
+  "Reset All": {
+    ru: "СБРОСИТЬ ВСЕ",
+    ko: "모두 리셋",
+    ch: "重置全部",
+  },
+  "All Bets": {
+    ru: "Все ставки",
+    ko: "모든 베팅",
+    ch: "所有投注",
+  },
+  "My Bets": {
+    ru: "Мои ставки",
+    ko: "내 베팅",
+    ch: "我的投注",
+  },
+  Game: {
+    ru: "Игра",
+    ko: "게임",
+    ch: "游戏",
+  },
+  Payout: {
+    ru: "Выплата",
+    ko: "지급",
+    ch: "支付",
+  },
+  Pending: {
+    ru: "В ожидании",
+    ko: "보류 중",
+    ch: "待定",
+  },
+  "FOMO wtf casino games are currently in beta and will be undergoing audit shortly. FOMO wtf EXIT games has gone through audit performed by OtterSec in December 2023.":
+    {
+      ru: "Игры казино FOMO wtf находятся в бета-тестировании и вскоре будут проходить аудит. Игры FOMO wtf EXIT прошли аудит, проведенный OtterSec в декабре 2023 года.",
+      ko: "FOMO wtf 카지노 게임은 현재 베타 버전이며 곧 감사를 받을 예정입니다. FOMO wtf EXIT 게임은 2023년 12월 OtterSec에 의해 감사를 받았습니다.",
+      ch: "FOMO wtf赌场游戏目前处于测试阶段，将很快进行审计。 FOMO wtf EXIT游戏已于2023年12月由OtterSec进行了审计。",
+    },
+  Services: {
+    ru: "Услуги",
+    ko: "서비스",
+    ch: "服务",
+  },
+  Platform: {
+    ru: "Платформа",
+    ko: "플랫폼",
+    ch: "平台",
+  },
+  Community: {
+    ru: "Сообщество",
+    ko: "커뮤니티",
+    ch: "社区",
+  },
+  Docs: {
+    ru: "Документы",
+    ko: "문서",
+    ch: "文档",
+  },
+  Wallet: {
+    ru: "Кошелек",
+    ko: "지갑",
+    ch: "钱包",
+  },
+  "All rights reserved": {
+    ru: "Все права защищены",
+    ko: "모든 권리 보유",
+    ch: "保留所有权利",
+  },
+  Seeds: {
+    ru: "Семена",
+    ko: "씨앗",
+    ch: "种子",
+  },
+  Verify: {
+    ru: "Проверить",
+    ko: "확인",
+    ch: "验证",
+  },
+  Change: {
+    ru: "Изменить",
+    ko: "변경",
+    ch: "更改",
+  },
+  "Active Client Seed": {
+    ru: "Активное клиентское семя",
+    ko: "활성 클라이언트 시드",
+    ch: "活动客户种子",
+  },
+  "Active Server Seed (Hashed)": {
+    ru: "Активное серверное семя (хешировано)",
+    ko: "활성 서버 시드 (해시 처리됨)",
+    ch: "活动服务器种子（已散列）",
+  },
+  "Total Bets": {
+    ru: "Всего ставок",
+    ko: "총 베팅",
+    ch: "总投注",
+  },
+  "Rotate Seed Pair": {
+    ru: "Повернуть пару семян",
+    ko: "시드 페어 회전",
+    ch: "旋转种子对",
+  },
+  "New Client Seed": {
+    ru: "Новое клиентское семя",
+    ko: "새로운 클라이언트 시드",
+    ch: "新客户种子",
+  },
+  "Next Server Seed": {
+    ru: "Следующее серверное семя",
+    ko: "다음 서버 시드",
+    ch: "下一个服务器种子",
+  },
+  Heads: {
+    ru: "Орел",
+    ko: "앞면",
+    ch: "正面",
+  },
+  Tails: {
+    ru: "Решка",
+    ko: "뒷면",
+    ch: "反面",
+  },
+  "Coin Flip": {
+    ru: "Бросок монеты",
+    ko: "동전 던지기",
+    ch: "抛硬币",
+  },
+  "Client Seed": {
+    ru: "Клиентское семя",
+    ko: "클라이언트 시드",
+    ch: "客户种子",
+  },
+  "Server Seed": {
+    ru: "Серверное семя",
+    ko: "서버 시드",
+    ch: "服务器种子",
+  },
+  Nonce: {
+    ru: "Нонс",
+    ko: "논스",
+    ch: "一次",
+  },
+  Rotate: {
+    ru: "Повернуть",
+    ko: "회전",
+    ch: "旋转",
+  },
+  "To verify this flip, you first need to rotate your seed pair.": {
+    ru: "Чтобы проверить этот бросок, вам нужно сначала повернуть пару семян.",
+    ko: "이 동전을 확인하려면 먼저 시드 페어를 회전해야 합니다.",
+    ch: "要验证此翻转，您首先需要旋转种子对。",
+  },
+  "Target Multiplier": {
+    ru: "Целевой множитель",
+    ko: "목표 배수",
+    ch: "目标倍数",
+  },
+  Risk: {
+    ru: "Риск",
+    ko: "위험",
+    ch: "风险",
+  },
+  Segments: {
+    ru: "Сегменты",
+    ko: "세그먼트",
+    ch: "段",
+  },
+  Classic: {
+    ru: "Классический",
+    ko: "클래식",
+    ch: "经典",
+  },
+  Low: {
+    ru: "Низкий",
+    ko: "낮음",
+    ch: "低",
+  },
+  Medium: {
+    ru: "Средний",
+    ko: "중간",
+    ch: "中等",
+  },
+  High: {
+    ru: "Высокий",
+    ko: "높음",
+    ch: "高",
+  },
+  ENDED: {
+    ru: "ЗАКОНЧЕНО",
+    ko: "끝남",
+    ch: "结束",
+  },
+  Min: {
+    ru: "Мин",
+    ko: "분",
+    ch: "分钟",
+  },
+  "Select Interval": {
+    ru: "Выберите интервал",
+    ko: "간격 선택",
+    ch: "选择间隔",
+  },
+  UP: {
+    ru: "ВВЕРХ",
+    ko: "위",
+    ch: "向上",
+  },
+  DOWN: {
+    ru: "ВНИЗ",
+    ko: "아래",
+    ch: "向下",
+  },
+  "Placing bet": {
+    ru: "Совершение ставки",
+    ko: "베팅 중",
+    ch: "下注中",
+  },
+  "Checking result": {
+    ru: "Проверка результата",
+    ko: "결과 확인",
+    ch: "检查结果",
+  },
+  "BET UP": {
+    ru: "СТАВКА ВВЕРХ",
+    ko: "베팅 위",
+    ch: "投注向上",
+  },
+  "BET DOWN": {
+    ru: "СТАВКА ВНИЗ",
+    ko: "베팅 아래",
+    ch: "投注向下",
+  },
+  AUTOPICK: {
+    ru: "АВТОВЫБОР",
+    ko: "자동 선택",
+    ch: "自动选择",
+  },
+  CLEAR: {
+    ru: "ОЧИСТИТЬ",
+    ko: "지우기",
+    ch: "清除",
+  },
+  "Pick upto 10 numbers": {
+    ru: "Выберите до 10 чисел",
+    ko: "10개의 숫자를 선택하십시오",
+    ch: "最多选择10个数字",
+  },
+  "Dice 2": {
+    ru: "Кости 2",
+    ko: "주사위 2",
+    ch: "骰子2",
+  },
+  "Fomo Flip": {
+    ru: "Fomo Флип",
+    ko: "Fomo 플립",
+    ch: "Fomo 翻转",
+  },
+  "Binary Options": {
+    ru: "Бинарные опционы",
+    ko: "바이너리 옵션",
+    ch: "二元期权",
+  },
+  Play: {
+    ru: "Играть",
+    ko: "재생",
+    ch: "玩",
+  },
+  "Play - The best casino games": {
+    ru: "Играйте - лучшие казино игры",
+    ko: "플레이 - 최고의 카지노 게임",
+    ch: "玩 - 最好的赌场游戏",
+  },
+  Exit: {
+    ru: "Выход",
+    ko: "출구",
+    ch: "出口",
+  },
+  Roadmap: {
+    ru: "Дорожная карта",
+    ko: "로드맵",
+    ch: "路线图",
+  },
+  Home: {
+    ru: "Главная",
+    ko: "홈",
+    ch: "主页",
+  },
+  DCA: {
+    ru: "DCA",
+    ko: "DCA",
+    ch: "DCA",
+  },
+  Twitter: {
+    ru: "Твиттер",
+    ko: "트위터",
+    ch: "推特",
+  },
+  Telegram: {
+    ru: "Телеграм",
+    ko: "텔레그램",
+    ch: "电报",
+  },
+  Menu: {
+    ru: "Меню",
+    ko: "메뉴",
+    ch: "菜单",
+  },
+  Dashboard: {
+    ru: "Панель",
+    ko: "대시 보드",
+    ch: "仪表板",
+  },
+  "Signing Out ...": {
+    ru: "Выход ...",
+    ko: "로그 아웃 중 ...",
+    ch: "登出中 ...",
+  },
+  "You Won!": {
+    ru: "Вы выиграли",
+    ko: "당신이 이겼습니다",
+    ch: "你赢了",
+  },
+  "You Lost!": {
+    ru: "Вы проиграли",
+    ko: "당신이 졌습니다",
+    ch: "你输了",
+  },
+  "Maximum amount for a single bet in this game is": {
+    ru: "Максимальная сумма для одной ставки в этой игре",
+    ko: "이 게임에서 한 번에 베팅할 수 있는 최대 금액",
+    ch: "此游戏中单次投注的最大金额为",
+  },
+  "The better must first rotate their seed pair to verify this bet.": {
+    ru: "Сначала нужно повернуть пару семян, чтобы проверить эту ставку.",
+    ko: "베팅자는 먼저 시드 페어를 회전해야 합니다.",
+    ch: "投注者首先需要旋转种子对。",
   },
 };

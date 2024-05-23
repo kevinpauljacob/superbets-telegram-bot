@@ -2,9 +2,12 @@ import Head from "next/head";
 import React, { ReactNode } from "react";
 import GameHeader from "./GameHeader";
 import { Table } from "./table/Table";
-import { minGameAmount } from "@/context/gameTransactions";
 import { useGlobalContext } from "./GlobalContext";
+import { formatNumber, translator } from "@/context/transactions";
+import { minGameAmount, truncateNumber } from "@/context/gameTransactions";
 import Link from "next/link";
+import FomoPlay from "./FomoPlay";
+import FOMOHead from "./HeadElement";
 
 interface LayoutProps {
   children: ReactNode;
@@ -24,7 +27,7 @@ const GameTable: React.FC<LayoutProps> = ({ children }) => {
 };
 
 interface GameFooterProps {
-  multiplier?: number;
+  multiplier: number;
   amount: number;
   chance?: number;
 }
@@ -34,38 +37,42 @@ export const GameFooterInfo: React.FC<GameFooterProps> = ({
   amount,
   chance,
 }) => {
-  const { coinData, setShowWalletModal } = useGlobalContext();
+  const { coinData, setShowWalletModal, houseEdge, language } =
+    useGlobalContext();
   return (
-    <div className="flex px-0 xl:px-4 mb-0 px:mb-6 gap-4 flex-row w-full justify-between">
-      {coinData && coinData[0].amount > 0.0001 && (
+    <div className="flex px-0 xl:px-4 mb-0 md:mb-[1.4rem] gap-4 flex-row w-full justify-between">
+      {coinData && coinData[0].amount > minGameAmount && (
         <>
-          {multiplier && (
+          {multiplier !== undefined ? (
             <div className="flex flex-col w-full">
-              <span className="text-[#F0F0F0] font-changa text-opacity-75 text-xs mb-1">
-                Multiplier
+              <span className="text-[#F0F0F0] font-changa font-semibold text-xs mb-1">
+                {translator("Multiplier", language)}
               </span>
-              <span className="bg-[#202329] text-xs text-white rounded-md px-1.5 md:px-5 py-2">
-                {multiplier.toFixed(2)}x
+              <span className="bg-[#202329] font-chakra text-xs text-white rounded-md px-2 md:px-5 py-3">
+                {truncateNumber(multiplier ?? 0, 2)}x
               </span>
             </div>
+          ) : (
+            <></>
           )}
 
           <div className="flex flex-col w-full">
-            <span className="text-[#F0F0F0] font-changa text-opacity-75 text-xs mb-1">
-              Winning Amount
+            <span className="text-[#F0F0F0] font-changa font-semibold text-xs mb-1">
+              {translator("Profit", language)}
             </span>
-            <span className="bg-[#202329] text-xs text-white rounded-md px-1.5 md:px-5 py-2">
-              {amount.toFixed(5)} $SOL
+            <span className="bg-[#202329] font-chakra text-xs text-white rounded-md px-2 md:px-5 py-3">
+              {truncateNumber(amount * (multiplier * (1 - houseEdge) - 1), 4)}{" "}
+              $SOL
             </span>
           </div>
 
-          {chance && (
+          {chance !== undefined && (
             <div className="flex flex-col w-full">
-              <span className="text-[#F0F0F0] font-changa text-opacity-75 text-xs mb-1">
-                Chance
+              <span className="text-[#F0F0F0] font-changa font-semibold text-xs mb-1">
+                {translator("Chance", language)}
               </span>
-              <span className="bg-[#202329] text-xs text-white rounded-md px-1.5 md:px-5 py-2">
-                {chance.toFixed(2)}%
+              <span className="bg-[#202329] font-chakra text-xs text-white rounded-md px-2 md:px-5 py-3">
+                {truncateNumber(chance, 2)}%
               </span>
             </div>
           )}
@@ -73,16 +80,19 @@ export const GameFooterInfo: React.FC<GameFooterProps> = ({
       )}
 
       {!coinData ||
-        (coinData[0].amount < 0.0001 && (
+        (coinData[0].amount < minGameAmount && (
           <div className="w-full rounded-lg bg-[#d9d9d90d] bg-opacity-10 flex items-center px-3 py-3 text-white md:px-6">
             <div className="w-full text-center font-changa font-medium text-sm md:text-base text-[#F0F0F0] text-opacity-75">
-              Please deposit funds to start playing. View{" "}
+              {translator(
+                "Please deposit funds to start playing. View",
+                language,
+              )}{" "}
               <u
                 onClick={() => {
                   setShowWalletModal(true);
                 }}
               >
-                WALLET
+                {translator("WALLET", language)}
               </u>
             </div>
           </div>
@@ -93,20 +103,23 @@ export const GameFooterInfo: React.FC<GameFooterProps> = ({
 
 const GameLayout: React.FC<LayoutProps> = ({ children, title }) => {
   return (
-    <div className="flex flex-1 h-full w-full flex-col items-center justify-start px-6">
-      <Head>
-        <title>{title}</title>
-      </Head>
-      <div className="fadeInUp mt-6 w-full min-h-[calc(100vh-16.8rem)] items-stretch bg-[#121418] rounded-2xl flex flex-col-reverse md:flex-row">
-        <div className="fadeInUp flex w-full md:w-[35%] flex-col items-center rounded-[1.15rem] px-3 py-5 md:p-7">
+    <div className="flex flex-1 h-fit w-full flex-col items-center justify-start px-3 lg:px-6">
+      <FOMOHead
+        title={`${
+          title ? title + " | " : ""
+        }FOMO.wtf - 0% House Edge, Pure Wins`}
+      />
+
+      <div className="fadeInUp w-full min-h-fit lg:min-h-[calc(100vh-13.7rem)] items-stretch bg-[#121418] rounded-2xl flex flex-col-reverse lg:flex-row">
+        <div className="fadeInUp flex w-full min-h-fit lg:w-[35%] flex-col items-center rounded-[1.15rem] px-3 py-5 lg:p-9 2xl:p-14">
           {React.Children.map(children, (child) => {
             if (React.isValidElement(child) && child.type === GameOptions) {
               return child;
             }
           })}
         </div>
-        <div className="bg-white bg-opacity-10 w-[1px]" />
-        <div className="fadeInUp flex flex-1 flex-col items-center justify-between gap-2 m-3 md:m-6 bg-[#0C0F16] rounded-lg p-3 md:p-10">
+        <div className="bg-white bg-opacity-10 h-[1px] lg:h-auto w-full lg:w-[1px]" />
+        <div className="fadeInUp flex flex-1 flex-col items-center justify-between gap-0 m-3 lg:m-9 bg-[#0C0F16] rounded-lg p-3 lg:px-10 lg:pt-6 lg:pb-10">
           {React.Children.map(children, (child) => {
             if (React.isValidElement(child) && child.type === GameDisplay) {
               return child;
@@ -114,8 +127,11 @@ const GameLayout: React.FC<LayoutProps> = ({ children, title }) => {
           })}
         </div>
       </div>
-      <div className="fadeInUp w-full flex md:hidden mt-4 rounded-[5px] overflow-hidden">
+      <div className="fadeInUp w-full flex flex-col min-h-[4rem] mt-4 rounded-[5px] overflow-hidden">
         <GameHeader />
+      </div>
+      <div className="fadeInUp w-full flex flex-col min-h-[4rem] mt-8 rounded-[5px] overflow-hidden">
+        <FomoPlay />
       </div>
       {React.Children.map(children, (child) => {
         if (React.isValidElement(child) && child.type === GameTable) {

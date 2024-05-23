@@ -1,166 +1,74 @@
 import connectDatabase from "../../../../utils/database";
 import { NextApiRequest, NextApiResponse } from "next";
-import {
-  Coin,
-  Dice,
-  Dice2,
-  Keno,
-  Limbo,
-  Option,
-  Plinko,
-  Roulette1,
-  Roulette2,
-  Wheel,
-} from "@/models/games";
-import { GameType, seedStatus } from "@/utils/vrf";
+import { gameModelMap, User } from "@/models/games";
+import { GameType, seedStatus } from "@/utils/provably-fair";
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === "GET") {
     try {
-      // Get the game type from the query
-      const game = req.query.game as string;
+      const wallet = req.query.wallet;
 
-      if (!Object.entries(GameType).some(([_, value]) => value === game))
+      if (!wallet)
         return res
           .status(400)
-          .json({ success: false, message: "Invalid game type" });
+          .json({ success: false, message: "Invalid wallet" });
 
       await connectDatabase();
 
-      const wallet = req.query.wallet;
+      const user = await User.findOne({ wallet });
+      if (!user)
+        return res.json({ success: true, data: [], message: "No data found" });
 
-      let nonExpired = [];
-      let expired = [];
+      const data: any[] = [];
 
-      switch (game) {
-        case GameType.dice:
-          nonExpired = await Dice.find(
-            { wallet, "gameSeed.status": { $ne: seedStatus.EXPIRED } },
-            { "gameSeed.serverSeed": 0 },
-            { populate: { path: "gameSeed" } },
-          );
+      for (const [_, value] of Object.entries(GameType)) {
+        const game = value;
+        const model = gameModelMap[game as keyof typeof gameModelMap];
 
-          expired = await Dice.find(
-            { wallet, "gameSeed.status": seedStatus.EXPIRED },
-            {},
-            { populate: { path: "gameSeed" } },
-          );
-          break;
+        if (game === GameType.options) {
+          const records = await model
+            .find({ wallet })
+            .sort({ createdAt: -1 })
+            .limit(30);
 
-        case GameType.coin:
-          nonExpired = await Coin.find(
-            { wallet, "gameSeed.status": { $ne: seedStatus.EXPIRED } },
-            { "gameSeed.serverSeed": 0 },
-            { populate: { path: "gameSeed" } },
-          );
+          const resultsWithGame = records.map((record) => {
+            const { ...rest } = record.toObject();
 
-          expired = await Coin.find(
-            { wallet, "gameSeed.status": seedStatus.EXPIRED },
-            {},
-            { populate: { path: "gameSeed" } },
-          );
-          break;
+            rest.game = game;
+            return rest;
+          });
 
-        case GameType.options:
-          nonExpired = await Option.find({ wallet });
-          break;
+          data.push(...resultsWithGame);
+        } else {
+          const records = await model
+            .find({ wallet })
+            .populate({
+              path: "gameSeed",
+            })
+            .sort({ createdAt: -1 })
+            .limit(30);
 
-        case GameType.dice2:
-          nonExpired = await Dice2.find(
-            { wallet, "gameSeed.status": { $ne: seedStatus.EXPIRED } },
-            { "gameSeed.serverSeed": 0 },
-            { populate: { path: "gameSeed" } },
-          );
+          const resultsWithGame = records.map((record) => {
+            const { gameSeed, ...rest } = record.toObject();
 
-          expired = await Dice2.find(
-            { wallet, "gameSeed.status": seedStatus.EXPIRED },
-            {},
-            { populate: { path: "gameSeed" } },
-          );
-          break;
+            rest.game = game;
 
-        case GameType.keno:
-          nonExpired = await Keno.find(
-            { wallet, "gameSeed.status": { $ne: seedStatus.EXPIRED } },
-            { "gameSeed.serverSeed": 0 },
-            { populate: { path: "gameSeed" } },
-          );
-          expired = await Keno.find(
-            { wallet, "gameSeed.status": seedStatus.EXPIRED },
-            {},
-            { populate: { path: "gameSeed" } },
-          );
-          break;
+            if (gameSeed.status !== seedStatus.EXPIRED) {
+              rest.gameSeed = { ...gameSeed, serverSeed: undefined };
+            } else {
+              rest.gameSeed = { ...gameSeed };
+            }
 
-        case GameType.limbo:
-          nonExpired = await Limbo.find(
-            { wallet, "gameSeed.status": { $ne: seedStatus.EXPIRED } },
-            { "gameSeed.serverSeed": 0 },
-            { populate: { path: "gameSeed" } },
-          );
-          expired = await Limbo.find(
-            { wallet, "gameSeed.status": seedStatus.EXPIRED },
-            {},
-            { populate: { path: "gameSeed" } },
-          );
-          break;
+            return rest;
+          });
 
-        case GameType.plinko:
-          nonExpired = await Plinko.find(
-            { wallet, "gameSeed.status": { $ne: seedStatus.EXPIRED } },
-            { "gameSeed.serverSeed": 0 },
-            { populate: { path: "gameSeed" } },
-          );
-          expired = await Plinko.find(
-            { wallet, "gameSeed.status": seedStatus.EXPIRED },
-            {},
-            { populate: { path: "gameSeed" } },
-          );
-          break;
-
-        case GameType.roulette1:
-          nonExpired = await Roulette1.find(
-            { wallet, "gameSeed.status": { $ne: seedStatus.EXPIRED } },
-            { "gameSeed.serverSeed": 0 },
-            { populate: { path: "gameSeed" } },
-          );
-          expired = await Roulette1.find(
-            { wallet, "gameSeed.status": seedStatus.EXPIRED },
-            {},
-            { populate: { path: "gameSeed" } },
-          );
-          break;
-
-        case GameType.roulette2:
-          nonExpired = await Roulette2.find(
-            { wallet, "gameSeed.status": { $ne: seedStatus.EXPIRED } },
-            { "gameSeed.serverSeed": 0 },
-            { populate: { path: "gameSeed" } },
-          );
-          expired = await Roulette2.find(
-            { wallet, "gameSeed.status": seedStatus.EXPIRED },
-            {},
-            { populate: { path: "gameSeed" } },
-          );
-          break;
-
-        case GameType.wheel:
-          nonExpired = await Wheel.find(
-            { wallet, "gameSeed.status": { $ne: seedStatus.EXPIRED } },
-            { "gameSeed.serverSeed": 0 },
-            { populate: { path: "gameSeed" } },
-          );
-          expired = await Wheel.find(
-            { wallet, "gameSeed.status": seedStatus.EXPIRED },
-            {},
-            { populate: { path: "gameSeed" } },
-          );
-          break;
+          data.push(...resultsWithGame);
+        }
       }
 
-      const data = [...nonExpired, ...expired].sort(
-        (a: any, b: any) => b.createdAt - a.createdAt,
-      );
+      data.sort((a: any, b: any) => {
+        return b.createdAt.getTime() - a.createdAt.getTime();
+      });
 
       return res.json({
         success: true,
