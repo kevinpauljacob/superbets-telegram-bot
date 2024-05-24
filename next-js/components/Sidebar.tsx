@@ -2,13 +2,9 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/router";
-
 import { useWallet } from "@solana/wallet-adapter-react";
 import {
-  obfuscatePubKey,
-  pointTiers,
   translator,
-  formatNumber,
 } from "@/context/transactions";
 import { useGlobalContext } from "./GlobalContext";
 import Home from "@/public/assets/sidebar-icons/Home";
@@ -18,8 +14,6 @@ import Store from "@/public/assets/sidebar-icons/Store";
 import Leaderboard from "@/public/assets/sidebar-icons/Leaderboard";
 import Staking from "@/public/assets/sidebar-icons/Staking";
 import Dollar from "@/public/assets/sidebar-icons/DCA";
-import Flag from "@/public/assets/Flag";
-import Fomo from "@/public/assets/Fomo";
 import Twitter from "@/public/assets/Twitter";
 import Birdeye from "@/public/assets/Birdeye";
 import Telegram from "@/public/assets/Telegram";
@@ -312,7 +306,7 @@ export const OpenSidebar = ({
     setCasinoGames(updatedCasinoGames);
   };
 
-  const { language } = useGlobalContext();
+  const { language, setFomoPrice } = useGlobalContext();
 
   useEffect(() => {
     // Function to check if any game link matches the current pathname
@@ -320,7 +314,32 @@ export const OpenSidebar = ({
       return games.some((game) => game.link === router.pathname);
     };
 
+    /// code added to fetch fomo price
+    const fetchFomoPrice = async () => {
+      try {
+        let data = await fetch(
+          "https://price.jup.ag/v4/price?ids=FOMO&vsToken=USDC",
+        ).then((res) => res.json());
+        // console.log(data);
+        setFomoPrice(data?.data?.FOMO?.price ?? 0);
+      } catch (e) {
+        console.log(e);
+        setFomoPrice(0);
+        // errorCustom("Could not fetch fomo live price.");
+      }
+    };
+
+    fetchFomoPrice();
+
+    let intervalId = setInterval(async () => {
+      fetchFomoPrice();
+    }, 10000);
     setShowPlayTokens(isGameActive(casinoGames));
+    return () => clearInterval(intervalId);
+
+    /////////////////
+
+    //setShowPlayTokens(isGameActive(casinoGames));  // this is the part of initial code 
   }, [router.pathname, casinoGames]);
 
   const openLinkCss =

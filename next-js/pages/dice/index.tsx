@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef, useMemo } from "react";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { rollDice } from "@/context/gameTransactions";
-import { toast } from "react-hot-toast";
 import BetSetting from "@/components/BetSetting";
 import { useGlobalContext } from "@/components/GlobalContext";
 import {
@@ -12,7 +11,6 @@ import {
   GameTable,
 } from "@/components/GameLayout";
 import { FormProvider, useForm } from "react-hook-form";
-import { BsInfinity } from "react-icons/bs";
 import Loader from "@/components/games/Loader";
 import WinPointer from "@/public/assets/WinPointer";
 import DicePointer from "@/public/assets/DicePointer";
@@ -24,7 +22,6 @@ import Dice5 from "@/public/assets/Dice5";
 import Dice6 from "@/public/assets/Dice6";
 import BetAmount from "@/components/games/BetAmountInput";
 import BetButton from "@/components/games/BetButton";
-import showInfoToast from "@/components/games/toasts/toasts";
 import { loopSound, soundAlert } from "@/utils/soundUtils";
 import Bets from "../../components/games/Bets";
 import AutoCount from "@/components/AutoCount";
@@ -40,7 +37,7 @@ export default function Dice() {
   const { data: session, status } = useSession();
 
   const {
-    coinData,
+    selectedCoinData,
     getBalance,
     getWalletBalance,
     setShowAutoModal,
@@ -168,7 +165,7 @@ export default function Dice() {
       if (!betAmt || betAmt === 0) {
         throw new Error("Set Amount.");
       }
-      if (coinData && coinData[0].amount < betAmt) {
+      if (selectedCoinData && selectedCoinData.amount < betAmt) {
         throw new Error("Insufficient balance for bet !");
       }
       if (selectedFace.length === 0) {
@@ -409,7 +406,7 @@ export default function Dice() {
                 !session?.user ||
                 selectedFace.length === 0 ||
                 isRolling ||
-                (coinData && coinData[0].amount < minGameAmount) ||
+                (selectedCoinData && selectedCoinData.amount < minGameAmount) ||
                 (betAmt !== undefined &&
                   maxBetAmt !== undefined &&
                   betAmt > maxBetAmt)
@@ -485,7 +482,7 @@ export default function Dice() {
                       !session?.user ||
                       selectedFace.length === 0 ||
                       isRolling ||
-                      (coinData && coinData[0].amount < minGameAmount) ||
+                      (selectedCoinData && selectedCoinData.amount < minGameAmount) ||
                       (betAmt !== undefined &&
                         maxBetAmt !== undefined &&
                         betAmt > maxBetAmt)

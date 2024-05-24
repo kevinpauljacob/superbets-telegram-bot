@@ -10,16 +10,15 @@ import { useEffect, useRef, useState } from "react";
 import { GameType } from "@/utils/provably-fair";
 import { useRouter } from "next/router";
 import useWebSocket from "react-use-websocket";
-import { formatNumber, translator } from "@/context/transactions";
+import { translator } from "@/context/transactions";
 
 export default function SubHeader() {
   const router = useRouter();
   const {
-    coinData,
-    showWalletModal,
     setShowWalletModal,
     setLiveBets,
     language,
+    selectedCoinData
   } = useGlobalContext();
 
   type Card = {
@@ -126,9 +125,9 @@ export default function SubHeader() {
         <div className="hidden md:flex items-center border-l border-[#1E2220] pl-4 md:min-w-fit">
           <div className="flex items-center gap-2">
             <div className="flex items-center h-10 px-4 py-1 gap-2 border-2 border-white border-opacity-5 rounded-[5px]">
-              <Image src={"/assets/sol.png"} alt="" width={20} height={17} />
+              <Image src={selectedCoinData ? selectedCoinData.img: "/assets/sol.png"} alt="" width={20} height={17} />
               <span className="font-chakra text-2xl text-[#94A3B8]">
-                {truncateNumber(coinData ? coinData[0].amount : 0, 4)}
+                {truncateNumber(selectedCoinData ? selectedCoinData.amount : 0, 4)}
               </span>
             </div>
             <div
@@ -156,7 +155,7 @@ export default function SubHeader() {
           <div className="flex items-center h-[2.3rem] px-4 gap-1.5 border-2 border-white border-opacity-5 rounded-[5px]">
             <Image src={"/assets/sol.png"} alt="" width={14} height={14} />
             <span className="text-base font-chakra leading-3 mt-0.5 text-[#94A3B8]">
-              {truncateNumber(coinData ? coinData[0].amount : 0, 3)}
+              {truncateNumber(selectedCoinData ? selectedCoinData.amount : 0, 3)}
             </span>
           </div>
           {/* wallet button  */}

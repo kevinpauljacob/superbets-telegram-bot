@@ -7,7 +7,7 @@ import { useGlobalContext } from "@/components/GlobalContext";
 import { FaRegCopy } from "react-icons/fa6";
 import Arc from "@/components/games/Wheel/Arc";
 import { MdClose } from "react-icons/md";
-import { translator, formatNumber } from "@/context/transactions";
+import { translator } from "@/context/transactions";
 import { truncateNumber } from "@/context/gameTransactions";
 
 export interface Wheel {

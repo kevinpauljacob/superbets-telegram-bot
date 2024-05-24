@@ -6,7 +6,6 @@ import { MdOutlineLanguage } from "react-icons/md";
 import { FaChevronDown } from "react-icons/fa6";
 import ConnectWallet from "./ConnectWallet";
 import { useRouter } from "next/router";
-import { translator } from "@/context/transactions";
 import Staking from "/public/assets/Stake1.svg";
 import Leaderboard from "/public/assets/Leaderboard1.svg";
 import Store from "/public/assets/store1.svg";

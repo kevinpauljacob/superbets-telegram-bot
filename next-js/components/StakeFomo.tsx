@@ -9,7 +9,6 @@ import {
 } from "@/context/transactions";
 import { truncateNumber } from "@/context/gameTransactions";
 import { useWallet } from "@solana/wallet-adapter-react";
-//import toast from "react-hot-toast";
 import Spinner from "./Spinner";
 import { PublicKey } from "@solana/web3.js";
 import { getAssociatedTokenAddressSync } from "@solana/spl-token";
@@ -20,7 +19,7 @@ import { getFOMOBalance } from "@/pages/stake";
 const MinAmount = 0.01;
 
 export default function StakeFomo() {
-  const { data: session, status } = useSession();
+  const { data: session } = useSession();
   const wallet = useWallet();
   const {
     stake,
@@ -32,12 +31,30 @@ export default function StakeFomo() {
     loading,
     setLoading,
     language,
+    setSolBal,
     setUserData,
     setFomoBalance,
     setGlobalInfo,
     getUserDetails,
     getGlobalInfo,
   } = useGlobalContext();
+
+  const MinAmount = 0.01;// can change this value to the minimum ammount to stake
+
+  const getWalletBalance = async () => {
+    if (wallet && wallet.publicKey)
+      try {
+        let address = new PublicKey(fomoToken);
+        const ata = getAssociatedTokenAddressSync(address, wallet.publicKey);
+        const res = await connection.getTokenAccountBalance(ata, "recent");
+        // console.log("balance : ", res.value.uiAmount ?? 0);
+
+        res.value.uiAmount ? setSolBal(res.value.uiAmount) : setSolBal(0);
+      } catch (e) {
+        // errorCustom("Unable to fetch balance.");
+        console.error(e);
+      }
+  };
 
   const handleRequest = async () => {
     setLoading(true);
@@ -94,6 +111,7 @@ export default function StakeFomo() {
         setStakeAmount(amt);
       }
     }
+  }
   };
 
   const handleDoubleStake = () => {

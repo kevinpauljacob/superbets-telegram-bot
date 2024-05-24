@@ -1,21 +1,15 @@
-import Image from "next/legacy/image";
 // import solanalogo from "../public/assets/Solana_logo_1.svg";
 import { useState, useEffect } from "react";
-import toast from "react-hot-toast";
 import { useWallet } from "@solana/wallet-adapter-react";
-import BalanceModal from "./BalanceModal";
 import { useSession } from "next-auth/react";
-import Loader from "./Loader";
 import { useWalletModal } from "@solana/wallet-adapter-react-ui";
-import { connection } from "../../context/gameTransactions";
-import { LAMPORTS_PER_SOL } from "@solana/web3.js";
 import { useGlobalContext } from "../GlobalContext";
 
 function Balance() {
   const { data: session, status } = useSession();
   const wallet = useWallet();
 
-  const { walletBalance, setWalletBalance, getWalletBalance, getBalance, coinData, setCoinData, showWalletModal, setShowWalletModal } = useGlobalContext();
+  const { walletBalance, setWalletBalance, getWalletBalance, getBalance, showWalletModal, setShowWalletModal } = useGlobalContext();
 
   const [loading, setLoading] = useState(false);
 

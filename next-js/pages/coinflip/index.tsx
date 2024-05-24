@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import dynamic from "next/dynamic";
 import { useWallet } from "@solana/wallet-adapter-react";
-import toast from "react-hot-toast";
 import { placeFlip } from "../../context/gameTransactions";
 import Image from "next/image";
 import { FormProvider, useForm } from "react-hook-form";
@@ -14,13 +13,9 @@ import {
   GameOptions,
   GameTable,
 } from "@/components/GameLayout";
-import { BsInfinity } from "react-icons/bs";
 import Loader from "@/components/games/Loader";
 import BetAmount from "@/components/games/BetAmountInput";
 import BetButton from "@/components/games/BetButton";
-import ResultsSlider from "@/components/ResultsSlider";
-import showInfoToast from "@/components/games/toasts/toasts";
-import BalanceAlert from "@/components/games/BalanceAlert";
 import Bets from "../../components/games/Bets";
 import { soundAlert } from "@/utils/soundUtils";
 import ConfigureAutoButton from "@/components/ConfigureAutoButton";
@@ -47,11 +42,8 @@ export default function Flip() {
   const { data: session, status } = useSession();
 
   const {
-    coinData,
     getBalance,
     getWalletBalance,
-    setShowWalletModal,
-    setShowAutoModal,
     autoWinChange,
     autoLossChange,
     autoWinChangeReset,
@@ -65,7 +57,7 @@ export default function Flip() {
     autoBetProfit,
     setAutoBetProfit,
     useAutoConfig,
-    setUseAutoConfig,
+    selectedCoinData,
     houseEdge,
     maxBetAmt,
     language,
@@ -93,7 +85,7 @@ export default function Flip() {
       if (!betAmt || betAmt === 0) {
         throw new Error("Set Amount.");
       }
-      if (coinData && coinData[0].amount < betAmt) {
+      if (selectedCoinData && selectedCoinData.amount < betAmt) {
         throw new Error("Insufficient balance for bet !");
       }
 
@@ -322,7 +314,7 @@ export default function Flip() {
                 !betType ||
                 loading ||
                 !session?.user ||
-                (coinData && coinData[0].amount < minGameAmount) ||
+                (selectedCoinData && selectedCoinData.amount < minGameAmount) ||
                 (betAmt !== undefined &&
                   maxBetAmt !== undefined &&
                   betAmt > maxBetAmt)
@@ -444,7 +436,7 @@ export default function Flip() {
                       !betType ||
                       loading ||
                       !session?.user ||
-                      (coinData && coinData[0].amount < minGameAmount) ||
+                      (selectedCoinData && selectedCoinData.amount < minGameAmount) ||
                       (betAmt !== undefined &&
                         maxBetAmt !== undefined &&
                         betAmt > maxBetAmt)

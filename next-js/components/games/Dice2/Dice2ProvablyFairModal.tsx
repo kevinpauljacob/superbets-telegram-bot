@@ -6,8 +6,6 @@ import {
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { Dice2 } from "./VerifyDice2Modal";
-import toast from "react-hot-toast";
-import DraggableBar from "@/components/games/Dice2/DraggableBar";
 import { FaRegCopy } from "react-icons/fa6";
 import CheckPF from "@/public/assets/CheckPF.svg";
 import { MdClose } from "react-icons/md";

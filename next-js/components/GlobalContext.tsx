@@ -12,10 +12,8 @@ import React, {
   ReactNode,
   useEffect,
 } from "react";
-import toast from "react-hot-toast";
 import { connection } from "../context/gameTransactions";
-import { LAMPORTS_PER_SOL, PublicKey } from "@solana/web3.js";
-import { TOKEN_PROGRAM_ID } from "@solana/spl-token";
+import { LAMPORTS_PER_SOL } from "@solana/web3.js";
 import { errorCustom } from "./toasts/ToastGroup";
 
 interface PointTier {
@@ -30,6 +28,7 @@ interface CoinBalance {
   type: boolean;
   amount: number;
   tokenMint: string;
+  img: string
 }
 
 interface ProvablyFairData {
@@ -101,6 +100,12 @@ interface GlobalContextProps {
 
   coinData: CoinBalance[] | null;
   setCoinData: (coinData: CoinBalance[] | null) => void;
+
+  selectedCoin: string;
+  setSelectedCoin: (selectedCoin: string) => void;
+
+  selectedCoinData: CoinBalance | null;
+  setSelectedCoinData: (selectedCoinData: CoinBalance | null) => void;
 
   showWalletModal: boolean;
   setShowWalletModal: React.Dispatch<React.SetStateAction<boolean>>;
@@ -210,8 +215,11 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
       type: true,
       amount: 0,
       tokenMint: "SOL",
+      img: "/assets/sol.png",
     },
   ]);
+  const [selectedCoin, setSelectedCoin] = useState<string>("SOL");
+  const [selectedCoinData, setSelectedCoinData] = useState<CoinBalance | null>(null);
   const [showWalletModal, setShowWalletModal] = useState<boolean>(false);
   const [isVerifyModalOpen, setIsVerifyModalOpen] = useState<boolean>(false);
   const [verifyModalData, setVerifyModalData] = useState({});
@@ -250,29 +258,41 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
     "classic" | "low" | "medium" | "high"
   >("classic");
 
+  const getSelectedCoin = () => {
+    if (coinData && coinData.length > 0) {
+      const selected = coinData.find((coin) => coin.tokenMint === selectedCoin);
+      if (selected) return selected;
+    }
+    return null
+  }
+
   useEffect(() => {
-    const fetchFomoPrice = async () => {
-      try {
-        let data = await fetch(
-          "https://price.jup.ag/v4/price?ids=FOMO&vsToken=USDC",
-        ).then((res) => res.json());
-        // console.log(data);
-        setFomoPrice(data?.data?.FOMO?.price ?? 0);
-      } catch (e) {
-        console.log(e);
-        setFomoPrice(0);
-        // errorCustom("Could not fetch fomo live price.");
-      }
-    };
+    setSelectedCoinData(getSelectedCoin())
+  }, [selectedCoin])
 
-    fetchFomoPrice();
+  // useEffect(() => {
+  //   const fetchFomoPrice = async () => {
+  //     try {
+  //       let data = await fetch(
+  //         "https://price.jup.ag/v4/price?ids=FOMO&vsToken=USDC",
+  //       ).then((res) => res.json());
+  //       // console.log(data);
+  //       setFomoPrice(data?.data?.FOMO?.price ?? 0);
+  //     } catch (e) {
+  //       console.log(e);
+  //       setFomoPrice(0);
+  //       // errorCustom("Could not fetch fomo live price.");
+  //     }
+  //   };
 
-    let intervalId = setInterval(async () => {
-      fetchFomoPrice();
-    }, 10000);
+  //   fetchFomoPrice();
 
-    return () => clearInterval(intervalId);
-  }, []);
+  //   let intervalId = setInterval(async () => {
+  //     fetchFomoPrice();
+  //   }, 10000);
+
+  //   return () => clearInterval(intervalId);
+  // }, []);
 
   const openVerifyModal = () => {
     setIsVerifyModalOpen(true);
@@ -474,6 +494,10 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
         getWalletBalance,
         getBalance,
         getProvablyFairData,
+        selectedCoin,
+        setSelectedCoin,
+        selectedCoinData,
+        setSelectedCoinData
       }}
     >
       {children}

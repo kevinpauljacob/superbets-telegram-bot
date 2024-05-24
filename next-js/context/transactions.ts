@@ -9,7 +9,6 @@ import {
   getAssociatedTokenAddress,
   createTransferInstruction,
 } from "@solana/spl-token";
-import toast from "react-hot-toast";
 import { WalletContextState } from "@solana/wallet-adapter-react";
 import { translationsMap } from "@/components/GlobalContext";
 import { GameType } from "@/utils/provably-fair";

@@ -1,10 +1,7 @@
-import { IoMdCloseCircleOutline, IoMdDocument, IoMdMenu } from "react-icons/io";
-import { FaStopwatch, FaKey, FaParachuteBox, FaLink } from "react-icons/fa";
+import { IoMdMenu } from "react-icons/io";
 import { useGlobalContext } from "./GlobalContext";
 import { useWallet } from "@solana/wallet-adapter-react";
-import { useWalletModal } from "@solana/wallet-adapter-react-ui";
-import Spinner from "./Spinner";
-import { obfuscatePubKey, translator } from "@/context/transactions";
+import { translator } from "@/context/transactions";
 import { MdOutlineLanguage } from "react-icons/md";
 import { FaChevronDown } from "react-icons/fa6";
 import { useState } from "react";
@@ -20,7 +17,6 @@ export default function Sidebar({ open, setOpen }: Sidebar) {
   const { language, setLanguage } = useGlobalContext();
   const router = useRouter();
   const wallet = useWallet();
-  const walletModal = useWalletModal();
 
   async function logout() {
     try {
@@ -40,7 +36,6 @@ export default function Sidebar({ open, setOpen }: Sidebar) {
     >
       <IoMdMenu
         className="flex cursor-pointer sm:hidden w-10 h-10 text-white"
-        as="button"
         onClick={() => {
           setOpen(false);
         }}

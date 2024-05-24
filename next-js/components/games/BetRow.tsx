@@ -1,7 +1,6 @@
 import {
   obfuscatePubKey,
   translator,
-  formatNumber,
 } from "@/context/transactions";
 import { useGlobalContext } from "../GlobalContext";
 import Image from "next/image";

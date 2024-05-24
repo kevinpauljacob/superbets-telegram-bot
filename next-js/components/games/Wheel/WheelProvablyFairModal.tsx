@@ -6,12 +6,8 @@ import {
 import Image from "next/image";
 import { useEffect, useState, useRef } from "react";
 import { Wheel } from "./VerifyWheelModal";
-import toast from "react-hot-toast";
 import { FaRegCopy } from "react-icons/fa6";
 import { MdClose } from "react-icons/md";
-import Arc from "@/components/games/Wheel/Arc";
-import { riskToChance } from "@/components/games/Wheel/Segments";
-import { verify } from "tweetnacl";
 import CheckPF from "@/public/assets/CheckPF.svg";
 import { errorCustom } from "@/components/toasts/ToastGroup";
 import { useGlobalContext } from "@/components/GlobalContext";

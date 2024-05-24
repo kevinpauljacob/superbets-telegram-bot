@@ -1,6 +1,5 @@
 import { useWallet } from "@solana/wallet-adapter-react";
 import { ReactNode } from "react";
-import toast from "react-hot-toast";
 import BetRow from "../games/BetRow";
 import { useGlobalContext } from "../GlobalContext";
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa6";

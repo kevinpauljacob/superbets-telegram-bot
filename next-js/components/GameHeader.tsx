@@ -1,22 +1,16 @@
 import { useRouter } from "next/router";
 import Image from "next/image";
 import { useEffect, useState } from "react";
-import { useWallet } from "@solana/wallet-adapter-react";
 import { GameType } from "@/utils/provably-fair";
 import { useGlobalContext } from "./GlobalContext";
-import { useSession } from "next-auth/react";
-import { formatNumber, translator } from "@/context/transactions";
+import { translator } from "@/context/transactions";
 import { truncateNumber } from "@/context/gameTransactions";
 
 export default function GameHeader() {
-  const { data: session, status } = useSession();
-
-  const wallet = useWallet();
   const router = useRouter();
   const game = router.pathname.split("/")[1];
 
-  const { coinData, getProvablyFairData, setOpenPFModal, language} =
-    useGlobalContext();
+  const { setOpenPFModal, language } = useGlobalContext();
 
     const fetchGameData = (game: GameType) => {
       fetch(`/api/games/global/getStats?game=${game}`)

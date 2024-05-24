@@ -1,28 +1,20 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import Bets from "../../components/games/Bets";
 import { useWallet } from "@solana/wallet-adapter-react";
-import toast from "react-hot-toast";
-import HistoryTable from "@/components/games/Limbo/VerifyLimboModal";
 import { FormProvider, useForm } from "react-hook-form";
 import { useGlobalContext } from "@/components/GlobalContext";
 import BetSetting from "@/components/BetSetting";
 import {
   GameDisplay,
-  GameFooterInfo,
   GameLayout,
   GameOptions,
   GameTable,
 } from "@/components/GameLayout";
-import Spinner from "@/components/Spinner";
-import { MultiplierHistory } from "@/components/games/Limbo/MultiplierHistory";
 import { limboBet, truncateNumber } from "@/context/gameTransactions";
 import BetAmount from "@/components/games/BetAmountInput";
 import BetButton from "@/components/games/BetButton";
 import Loader from "../../components/games/Loader";
-import { BsInfinity } from "react-icons/bs";
 import ResultsSlider from "@/components/ResultsSlider";
-import BalanceAlert from "@/components/games/BalanceAlert";
-import showInfoToast from "@/components/games/toasts/toasts";
 import Link from "next/link";
 import { soundAlert } from "@/utils/soundUtils";
 import ConfigureAutoButton from "@/components/ConfigureAutoButton";
@@ -33,7 +25,7 @@ import {
   successCustom,
   warningCustom,
 } from "@/components/toasts/ToastGroup";
-import { translator, formatNumber } from "@/context/transactions";
+import { translator } from "@/context/transactions";
 import { minGameAmount } from "@/context/gameTransactions";
 import { useSession } from "next-auth/react";
 
@@ -64,7 +56,6 @@ export default function Limbo() {
   const { data: session, status } = useSession();
 
   const {
-    coinData,
     getBalance,
     getWalletBalance,
     setShowWalletModal,
@@ -82,7 +73,7 @@ export default function Limbo() {
     autoBetProfit,
     setAutoBetProfit,
     useAutoConfig,
-    setUseAutoConfig,
+    selectedCoinData,
     houseEdge,
     maxBetAmt,
     language,
@@ -192,7 +183,7 @@ export default function Limbo() {
       if (!betAmt || betAmt === 0) {
         throw new Error("Set Amount.");
       }
-      if (coinData && coinData[0].amount < betAmt) {
+      if (selectedCoinData && selectedCoinData.amount < betAmt) {
         throw new Error("Insufficient balance for bet !");
       }
       if (inputMultiplier < multiplierLimits[0]) {
@@ -360,7 +351,7 @@ export default function Limbo() {
               disabled={
                 loading ||
                 !session?.user ||
-                (coinData && coinData[0].amount < minGameAmount) ||
+                (selectedCoinData && selectedCoinData.amount < minGameAmount) ||
                 (betAmt !== undefined &&
                   maxBetAmt !== undefined &&
                   betAmt > maxBetAmt)
@@ -442,7 +433,7 @@ export default function Limbo() {
                     disabled={
                       loading ||
                       !session?.user ||
-                      (coinData && coinData[0].amount < minGameAmount) ||
+                      (selectedCoinData && selectedCoinData.amount < minGameAmount) ||
                       (betAmt !== undefined &&
                         maxBetAmt !== undefined &&
                         betAmt > maxBetAmt)
@@ -497,7 +488,7 @@ export default function Limbo() {
         </div>
 
         <div className="flex px-0 xl:px-4 mb-0 md:mb-[1.4rem] gap-4 flex-row w-full justify-between font-changa font-semibold">
-          {coinData && coinData[0].amount > minGameAmount && (
+          {selectedCoinData && selectedCoinData.amount > minGameAmount && (
             <>
               <MultiplierInput
                 inputMultiplier={inputMultiplier}
@@ -542,8 +533,8 @@ export default function Limbo() {
             </>
           )}
 
-          {!coinData ||
-            (coinData[0].amount < minGameAmount && (
+          {!selectedCoinData ||
+            (selectedCoinData.amount < minGameAmount && (
               <div className="w-full rounded-lg bg-[#d9d9d90d] bg-opacity-10 flex items-center px-3 py-3 text-white md:px-6">
                 <div className="w-full text-center font-changa font-medium text-sm md:text-base text-[#F0F0F0] text-opacity-75">
                   {translator(

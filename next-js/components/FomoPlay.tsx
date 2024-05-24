@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import Image from "next/image";
-import Dollar from "/public/assets/dollar.png";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { translator } from "@/context/transactions";
