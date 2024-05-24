@@ -73,11 +73,11 @@ interface GlobalContextProps {
   stake: boolean;
   setStake: (stake: boolean) => void;
 
-  amount: number;
-  setAmount: (amount: number) => void;
+  stakeAmount: number;
+  setStakeAmount: (amount: number) => void;
 
-  solBal: number;
-  setSolBal: (amount: number) => void;
+  fomoBalance: number;
+  setFomoBalance: (amount: number) => void;
 
   livePrice: number;
   setLivePrice: (amount: number) => void;
@@ -193,8 +193,8 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
 
   const [userData, setUserData] = useState<User | null>(null);
   const [stake, setStake] = useState(true);
-  const [amount, setAmount] = useState<number>(0);
-  const [solBal, setSolBal] = useState<number>(0.0);
+  const [stakeAmount, setStakeAmount] = useState<number>(0);
+  const [fomoBalance, setFomoBalance] = useState<number>(0.0);
   const [livePrice, setLivePrice] = useState<number>(0.0);
   const [globalInfo, setGlobalInfo] = useState<{
     users: number;
@@ -425,10 +425,10 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
         setUserData,
         stake,
         setStake,
-        amount,
-        setAmount,
-        solBal,
-        setSolBal,
+        stakeAmount,
+        setStakeAmount,
+        fomoBalance,
+        setFomoBalance,
         livePrice,
         setLivePrice,
         fomoPrice,

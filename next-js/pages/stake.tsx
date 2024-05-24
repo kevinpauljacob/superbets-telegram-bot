@@ -1,8 +1,8 @@
 import StakeFomo from "@/components/StakeFomo";
 import StakeStats from "@/components/StakeStats";
 import Image from "next/legacy/image";
-import { useEffect } from "react";
-import { useWallet } from "@solana/wallet-adapter-react";
+import { useEffect, useState } from "react";
+import { WalletContextState, useWallet } from "@solana/wallet-adapter-react";
 import { useSession } from "next-auth/react";
 import {
   connection,
@@ -15,12 +15,35 @@ import { getAssociatedTokenAddressSync } from "@solana/spl-token";
 import FOMOHead from "@/components/HeadElement";
 import { truncateNumber } from "@/context/gameTransactions";
 
+export async function getFOMOBalance(
+  wallet: WalletContextState,
+  setFomoBalance: any,
+) {
+  if (wallet && wallet.publicKey)
+    try {
+      let address = new PublicKey(fomoToken);
+      const ata = getAssociatedTokenAddressSync(address, wallet.publicKey);
+      const res = await connection.getTokenAccountBalance(ata, "recent");
+
+      res.value.uiAmount
+        ? setFomoBalance(res.value.uiAmount)
+        : setFomoBalance(0);
+    } catch (e) {
+      // errorCustom("Unable to fetch balance.");
+      console.error(e);
+    }
+}
+
 export default function Stake() {
   const { data: session } = useSession();
   const wallet = useWallet();
 
   const {
     setSolBal,
+    userData,
+    setUserData,
+    fomoBalance,
+    setFomoBalance,
     language,
     globalInfo,
     getGlobalInfo,
@@ -50,23 +73,9 @@ export default function Stake() {
     return () => clearInterval(intervalId);
   }, []);
 
-  const getWalletBalance = async () => {
-    if (wallet && wallet.publicKey)
-      try {
-        let address = new PublicKey(fomoToken);
-        const ata = getAssociatedTokenAddressSync(address, wallet.publicKey);
-        const res = await connection.getTokenAccountBalance(ata, "recent");
-
-        res.value.uiAmount ? setSolBal(res.value.uiAmount) : setSolBal(0);
-      } catch (e) {
-        // errorCustom("Unable to fetch balance.");
-        console.error(e);
-      }
-  };
-
   useEffect(() => {
     if (session?.user && wallet && wallet.publicKey) {
-      getWalletBalance();
+      getFOMOBalance(wallet, setFomoBalance);
       getUserDetails();
     }
     getGlobalInfo();
