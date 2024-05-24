@@ -55,7 +55,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           message: "Invalid bet amount",
         });
 
-      if (tokenMint !== "SOL" || !(2 <= chance && chance <= 99))
+      if (tokenMint !== "SOL" || !(2 <= chance && chance <= 98))
         return res
           .status(400)
           .json({ success: false, message: "Invalid parameters" });

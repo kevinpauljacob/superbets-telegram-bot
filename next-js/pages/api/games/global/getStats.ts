@@ -33,6 +33,11 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
               players: { $size: "$wallets" },
             },
           },
+          {
+            $project: {
+              wallets: 0,
+            },
+          },
         ])
         .then((res) => res[0]);
 
