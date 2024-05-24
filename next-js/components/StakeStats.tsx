@@ -134,11 +134,8 @@ export default function StakeStats() {
             (userData?.stakedAmount ?? 0)}{" "}
           {translator("more $FOMO to reach", language)} T
           {(userData?.tier ?? 0) + 1}
-          <span className="text-[#94A3B8]">
-            (
-            <span className="text-staking-secondary ml-1">
-              {stakingTiers[(userData?.tier ?? 0) + 1]?.multiplier ?? 0.5}x
-            </span>{" "}
+          <span className="text-staking-secondary">
+            ( {stakingTiers[(userData?.tier ?? 0) + 1]?.multiplier ?? 0.5}x{" "}
             {translator("multiplier", language)} )
           </span>
         </p>
