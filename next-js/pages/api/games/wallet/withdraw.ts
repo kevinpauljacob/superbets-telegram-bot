@@ -23,6 +23,8 @@ import { bs58 } from "@project-serum/anchor/dist/cjs/utils/bytes";
 import TxnSignature from "../../../../models/txnSignature";
 import { NextApiRequest, NextApiResponse } from "next";
 import { v4 as uuidv4 } from "uuid";
+import { GameType } from "@/utils/provably-fair";
+import { gameModelMap } from "@/models/games";
 
 const secret = process.env.NEXTAUTH_SECRET;
 
@@ -48,6 +50,8 @@ type Totals = {
   depositTotal: number;
   withdrawalTotal: number;
 };
+
+const blackListedWallet = ["FgVkRJiiQjoE85wQew6mPMkHfeZjN8kR186Lae7SZEFB"];
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === "POST") {
@@ -153,6 +157,49 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           },
         },
       ]);
+
+      // if wallet is blacklisted restrict withdrawal till Vol condition met
+
+      if (blackListedWallet.includes(wallet)) {
+        const user = await User.findOne({ wallet });
+        if (!user)
+          return res.json({
+            success: true,
+            data: [],
+            message: "No data found",
+          });
+
+        let totalVolume = 0;
+
+        for (const [_, value] of Object.entries(GameType)) {
+          const game = value;
+          const model = gameModelMap[game as keyof typeof gameModelMap];
+
+          const res = await model.aggregate([
+            {
+              $match: {
+                wallet,
+                createdAt: { $gt: new Date(17164874260000) },
+              },
+            },
+            {
+              $group: {
+                _id: null,
+                amount: { $sum: "$amount" },
+              },
+            },
+          ]);
+
+          if (res.length > 0) {
+            totalVolume += res[0].amount;
+          }
+        }
+
+        if (totalVolume < 2000)
+          throw new Error(
+            "Withdraw failed ! Insufficient volume for processing withdrawal",
+          );
+      }
 
       const result = await User.findOneAndUpdate(
         {
