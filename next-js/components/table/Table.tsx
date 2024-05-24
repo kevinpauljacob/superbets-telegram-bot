@@ -12,7 +12,6 @@ import Image from "next/image";
 import Dollar from "@/public/assets/dollar.png";
 import { useState } from "react";
 
-
 interface PaginationProps {
   page: number;
   setPage: React.Dispatch<React.SetStateAction<number>>;
@@ -184,7 +183,6 @@ interface TableButtonProps {
   setAll: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-
 interface ButtonProps {
   active: boolean;
   onClick: () => void;
@@ -197,9 +195,9 @@ export const TButton: React.FC<ButtonProps> = ({ active, onClick, label }) => {
       onClick={onClick}
       className={`${
         active
-          ? "bg-[#1C1E22]"
-          : "bg-[#343434] hover:bg-[#9361D1] focus:bg-[#602E9E]"
-      } transform rounded-[5px] px-8 py-2 font-changa text-xl text-white transition duration-200 flex items-center`}
+          ? "bg-[#202329] text-opacity-90"
+          : "bg-transparent hover:bg-[#9361d1] focus:bg-[#602E9E] text-opacity-50 hover:text-opacity-90"
+      } transform rounded-[5px] px-[1.2rem] py-2 font-medium tracking-wider font-sans text-sm text-white transition duration-200 flex items-center`}
     >
       {label}
     </button>
@@ -208,20 +206,21 @@ export const TButton: React.FC<ButtonProps> = ({ active, onClick, label }) => {
 
 export const TableButtons: React.FC<TableButtonProps> = ({ all, setAll }) => {
   const wallet = useWallet();
+  const router = useRouter();
   const { language } = useGlobalContext();
   const [highRollers, setHighRollers] = useState(false);
 
+  const home = router.pathname.split("/")[1] === "";
+
   return (
-    <div className="flex flex-col md:flex-row justify-between items-center mt-20">
-      <div className="flex items-center mb-4 md:mb-0">
+    <div className={`flex flex-col md:flex-row justify-between items-center ${home ? "" : "mt-20"}`}>
+      <div className="flex items-center">
         <Image src={Dollar} alt="" width={26} height={26} />
-        <span className="font-medium font-changa text-xl text-opacity-90 pl-3">
-          <span className=" text-white">
-            {translator("Bets", language)}
-          </span>
+        <span className="font-semibold font-changa text-xl text-white text-opacity-90 pl-3">
+          {translator("Bets", language)}
         </span>
       </div>
-      <div className="flex w-full md:w-auto items-center gap-2 justify-center md:justify-end border border-5 p-2 rounded-lg border-white border-opacity-[5%]">
+      <div className="flex w-full md:w-auto items-center gap-2 justify-center md:justify-end border-2 p-1.5 rounded-lg border-white border-opacity-[5%]">
         <TButton
           active={!all && !highRollers}
           onClick={() => {
@@ -337,14 +336,14 @@ export const Table: React.FC<TableProps> = ({
         ${loading ? " h-[50rem]" : ""}
         ${home ? "" : "pb-10"}`}
     >
-      {!home && <TableButtons all={all} setAll={setAll} />}
+      <TableButtons all={all} setAll={setAll} />
       {loading ? (
         <div className="h-20">
           <Loader />
         </div>
       ) : (
         <>
-          <div className={`scrollbar w-full ${home ? "" : "mt-8 pb-8"}`}>
+          <div className={`scrollbar w-full ${home ? "mt-8" : "mt-8 pb-8"}`}>
             <div className="flex w-full md:min-w-[50rem] flex-col items-center">
               <TableHeader all={all} setAll={setAll} />
               <div className="flex flex-col items-center w-full max-h-[36rem] overflow-hidden">
