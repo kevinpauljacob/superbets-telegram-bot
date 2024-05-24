@@ -83,8 +83,8 @@ export const generateGameResult = <T extends GameType>(
     case GameType.plinko: {
       if (!parameter) throw new Error("Game parameter missing!");
 
-      return ((parseInt(hash.slice(0, 4), 16) % Math.pow(2, parameter)) +
-        1) as GameResult<T>;
+      return (parseInt(hash.slice(0, 4), 16) %
+        Math.pow(2, parameter)) as GameResult<T>;
     }
 
     case GameType.keno: {
