@@ -4,7 +4,7 @@ import Image from "next/legacy/image";
 import { truncateNumber } from "@/context/gameTransactions";
 
 export default function StakeStats() {
-  const { userData, solBal, language } = useGlobalContext();
+  const { userData, fomoBalance, language } = useGlobalContext();
   let stats = [
     {
       title: translator("FOMO Staked", language),
@@ -14,7 +14,7 @@ export default function StakeStats() {
     {
       title: translator("FOMO Available", language),
       icon: "/assets/logowhite.svg",
-      value: truncateNumber(solBal, 4),
+      value: truncateNumber(fomoBalance, 4),
     },
     {
       title: translator("Multiplier", language),

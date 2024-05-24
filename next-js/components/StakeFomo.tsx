@@ -24,15 +24,15 @@ export default function StakeFomo() {
   const {
     stake,
     setStake,
-    amount,
-    setAmount,
-    solBal,
+    stakeAmount,
+    setStakeAmount,
+    fomoBalance,
     userData,
     loading,
     setLoading,
     language,
     setUserData,
-    setSolBal,
+    setFomoBalance,
     setGlobalInfo,
     getUserDetails,
     getGlobalInfo,
@@ -46,7 +46,7 @@ export default function StakeFomo() {
         const res = await connection.getTokenAccountBalance(ata, "recent");
         // console.log("balance : ", res.value.uiAmount ?? 0);
 
-        res.value.uiAmount ? setSolBal(res.value.uiAmount) : setSolBal(0);
+        res.value.uiAmount ? setFomoBalance(res.value.uiAmount) : setFomoBalance(0);
       } catch (e) {
         // errorCustom("Unable to fetch balance.");
         console.error(e);
@@ -58,19 +58,19 @@ export default function StakeFomo() {
     let response: { success: boolean; message: string };
     try {
       if (stake) {
-        if (amount > solBal) {
+        if (stakeAmount > fomoBalance) {
           errorCustom(translator("Insufficient FOMO", language));
           setLoading(false);
           return;
         }
-        response = await stakeFOMO(wallet, amount, fomoToken);
+        response = await stakeFOMO(wallet, stakeAmount, fomoToken);
       } else {
-        if (amount > (userData?.stakedAmount ?? 0)) {
+        if (stakeAmount > (userData?.stakedAmount ?? 0)) {
           errorCustom(translator("Insufficient FOMO", language));
           setLoading(false);
           return;
         }
-        response = await unstakeFOMO(wallet, amount, fomoToken);
+        response = await unstakeFOMO(wallet, stakeAmount, fomoToken);
       }
       // console.log(response);
       if (response && response.success) await getWalletBalance();
@@ -87,46 +87,46 @@ export default function StakeFomo() {
 
   const handleHalfStake = () => {
     if (stake) { // Deposit
-      if (amount == 0 && solBal > MinAmount) setAmount(MinAmount);
+      if (stakeAmount == 0 && fomoBalance > MinAmount) setStakeAmount(MinAmount);
       else {
-        let amt = amount / 2;
+        let amt = stakeAmount / 2;
         if (amt < MinAmount) amt = MinAmount;
-        if (amt > solBal) amt = solBal;
-        setAmount(amt);
+        if (amt > fomoBalance) amt = fomoBalance;
+        setStakeAmount(amt);
       }
     } else { // Withdraw
-      if (userData && amount == 0 && userData?.stakedAmount > MinAmount) setAmount(MinAmount);
+      if (userData && stakeAmount == 0 && userData?.stakedAmount > MinAmount) setStakeAmount(MinAmount);
       else {
-        let amt = amount / 2;
+        let amt = stakeAmount / 2;
         if (amt < MinAmount) amt = MinAmount;
         if (userData && amt > userData?.stakedAmount) amt = userData?.stakedAmount;
-        setAmount(amt);
+        setStakeAmount(amt);
       }
     }
   };
 
   const handleDoubleStake = () => {
     if (stake) { // Deposit
-      if (amount == 0 && solBal > MinAmount) setAmount(MinAmount);
+      if (stakeAmount == 0 && fomoBalance > MinAmount) setStakeAmount(MinAmount);
       else {
-        let amt = amount * 2;
+        let amt = stakeAmount * 2;
         if (amt < MinAmount) amt = MinAmount;
-        if (amt > solBal) amt = solBal;
-        setAmount(amt);
+        if (amt > fomoBalance) amt = fomoBalance;
+        setStakeAmount(amt);
       }
     } else { // Withdraw
-      if (userData && amount == 0 && userData?.stakedAmount > MinAmount) setAmount(MinAmount);
+      if (userData && stakeAmount == 0 && userData?.stakedAmount > MinAmount) setStakeAmount(MinAmount);
       else {
-        let amt = amount * 2;
+        let amt = stakeAmount * 2;
         if (amt < MinAmount) amt = MinAmount;
         if (userData && amt > userData?.stakedAmount) amt = userData?.stakedAmount;
-        setAmount(amt);
+        setStakeAmount(amt);
       }
     }
   };
 
   const handleSetMaxStake = () => {
-    stake ? setAmount(solBal) : setAmount(userData?.stakedAmount ?? 0);
+    stake ? setStakeAmount(fomoBalance) : setStakeAmount(userData?.stakedAmount ?? 0);
   };
 
   return (
@@ -165,11 +165,11 @@ export default function StakeFomo() {
           : translator("Withdraw", language)}
         <span
           onClick={() => {
-            stake ? setAmount(solBal) : setAmount(userData?.stakedAmount ?? 0);
+            stake ? setStakeAmount(fomoBalance) : setStakeAmount(userData?.stakedAmount ?? 0);
           }}
           className="text-sm cursor-pointer font-medium font-changa text-[#94A3B8] text-opacity-90 transition-all"
         >
-          {truncateNumber(stake ? solBal : userData?.stakedAmount ?? 0, 4)}{" "}
+          {truncateNumber(stake ? fomoBalance : userData?.stakedAmount ?? 0, 4)}{" "}
           $FOMO
         </span>
       </p>
@@ -184,10 +184,10 @@ export default function StakeFomo() {
           autoComplete="off"
           onChange={(e) => {
             parseFloat(e.target.value) >= 0 &&
-              setAmount(parseFloat(e.target.value));
+              setStakeAmount(parseFloat(e.target.value));
           }}
           placeholder={"0.0"}
-          value={amount}
+          value={stakeAmount}
           lang="en"
           className={`flex w-full min-w-0 bg-transparent text-base text-[#94A3B8] placeholder-[#94A3B8] font-chakra placeholder-opacity-40 outline-none disabled:cursor-default disabled:opacity-50`}
         />

@@ -28,8 +28,8 @@ export default function Stake() {
   const {
     userData,
     setUserData,
-    solBal,
-    setSolBal,
+    fomoBalance,
+    setFomoBalance,
     language,
     loading,
     globalInfo,
@@ -68,7 +68,7 @@ export default function Stake() {
         const ata = getAssociatedTokenAddressSync(address, wallet.publicKey);
         const res = await connection.getTokenAccountBalance(ata, "recent");
 
-        res.value.uiAmount ? setSolBal(res.value.uiAmount) : setSolBal(0);
+        res.value.uiAmount ? setFomoBalance(res.value.uiAmount) : setFomoBalance(0);
       } catch (e) {
         // errorCustom("Unable to fetch balance.");
         console.error(e);
