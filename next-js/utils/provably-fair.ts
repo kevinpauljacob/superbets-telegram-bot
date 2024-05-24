@@ -74,8 +74,7 @@ export const generateGameResult = <T extends GameType>(
     case GameType.dice2:
       return ((parseInt(hash.slice(0, 4), 16) % 10001) / 100) as GameResult<T>;
     case GameType.limbo:
-      return (((parseInt(hash.slice(0, 4), 16) % 9601) + 200) /
-        100) as GameResult<T>;
+      return ((parseInt(hash.slice(0, 4), 16) % 10001) / 100) as GameResult<T>;
 
     case GameType.wheel:
       return (parseInt(hash.slice(0, 4), 16) % 101) as GameResult<T>;
