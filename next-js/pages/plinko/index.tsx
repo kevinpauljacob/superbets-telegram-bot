@@ -9,12 +9,11 @@ import {
   Runner,
   World,
 } from "matter-js";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import dynamic from "next/dynamic";
 import { useWallet } from "@solana/wallet-adapter-react";
 import toast from "react-hot-toast";
-import { placeFlip } from "../../context/gameTransactions";
-import HistoryTable from "../../components/games/CoinFlip/HistoryTable";
+import { minGameAmount, placeFlip } from "../../context/gameTransactions";
 import Image from "next/image";
 import Link from "next/link";
 import Head from "next/head";
@@ -31,6 +30,16 @@ import {
 } from "@/components/GameLayout";
 import { MultiplierHistory } from "@/components/games/Plinko/MultiplierHistory";
 import useWindowSize from "@/hooks/useWindowSize";
+import Bets from "@/components/games/Bets";
+import { soundAlert } from "@/utils/soundUtils";
+import { warningCustom } from "@/components/toasts/ToastGroup";
+import { translator } from "@/context/transactions";
+import { useSession } from "next-auth/react";
+import BetButton from "@/components/games/BetButton";
+import Loader from "@/components/games/Loader";
+import ConfigureAutoButton from "@/components/ConfigureAutoButton";
+import BetAmount from "@/components/games/BetAmountInput";
+import AutoCount from "@/components/AutoCount";
 
 export type LinesType = 8;
 
@@ -137,7 +146,8 @@ const Progress = dynamic(() => import("../../components/games/Progressbar"), {
   ssr: false,
 });
 
-export default function Flip() {
+export default function Plinko() {
+  const { data: session, status } = useSession();
   const { width, height } = useWindowSize();
   const world = {
     width: width! < 400 ? 400 : 800,
@@ -147,11 +157,36 @@ export default function Flip() {
   const wallet = useWallet();
   const methods = useForm();
 
-  const { coinData, getBalance, getWalletBalance, setShowWalletModal } =
-    useGlobalContext();
+  const {
+    coinData,
+    getBalance,
+    getWalletBalance,
+    setShowWalletModal,
+    setShowAutoModal,
+    autoWinChange,
+    autoLossChange,
+    autoWinChangeReset,
+    autoLossChangeReset,
+    autoStopProfit,
+    autoStopLoss,
+    startAuto,
+    setStartAuto,
+    autoBetCount,
+    setAutoBetCount,
+    autoBetProfit,
+    setAutoBetProfit,
+    useAutoConfig,
+    setUseAutoConfig,
+    houseEdge,
+    maxBetAmt,
+    language,
+  } = useGlobalContext();
 
   const [user, setUser] = useState<any>(null);
-  const [betAmt, setBetAmt] = useState(0.2);
+  const [betAmt, setBetAmt] = useState<number | undefined>();
+  const [userInput, setUserInput] = useState<number | undefined>();
+  const [risk, setRisk] = useState<"low" | "medium" | "high">("low");
+  const [segments, setSegments] = useState<number>(10);
   const [betCount, setBetCount] = useState(0);
   const [deposit, setDeposit] = useState(false);
   const [flipping, setFlipping] = useState(false);
@@ -441,6 +476,19 @@ export default function Flip() {
   //   console.log("depo Others: ", loading, flipping, deposit);
   // }, [deposit]);
 
+  const segmentFill =
+    segments === 10
+      ? 0
+      : segments === 20
+      ? 25
+      : segments === 30
+      ? 50
+      : segments === 40
+      ? 75
+      : segments === 50
+      ? 100
+      : null;
+
   useEffect(() => {
     if (refresh && wallet?.publicKey) {
       getBalance();
@@ -449,332 +497,219 @@ export default function Flip() {
     }
   }, [wallet?.publicKey, refresh]);
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
-  ) => {
-    setBetAmt(parseFloat(e.target.value));
-  };
+  useEffect(() => {
+    setBetAmt(userInput);
+  }, [userInput]);
 
-  const handleCountChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
-  ) => {
-    setBetCount(parseFloat(e.target.value));
-  };
+  const disableInput = useMemo(() => {
+    return betSetting === "auto" && startAuto ? true : false || loading;
+  }, [betSetting, startAuto, loading]);
 
   return (
     <GameLayout title="FOMO - Plinko">
       <GameOptions>
         <>
-          <BetSetting betSetting={betSetting} setBetSetting={setBetSetting} />
-
-          {betSetting == "manual" ? (
-            <div className="w-full flex flex-col">
-              <FormProvider {...methods}>
-                <form
-                  className="flex w-full flex-col gap-0"
-                  autoComplete="off"
-                  onSubmit={methods.handleSubmit(onSubmit)}
-                >
-                  {/* amt input  */}
-                  <div className="mb-0 flex w-full flex-col">
-                    <div className="mb-1 flex w-full items-center justify-between text-sm font-changa font-medium">
-                      <label className="text-[#F0F0F0] text-opacity-90">
-                        Bet amount
-                      </label>
-                      <span className="text-[#94A3B8] text-opacity-90">
-                        Available :{" "}
-                        {coinData ? coinData[0]?.amount.toFixed(4) : 0}
-                      </span>
-                    </div>
-
-                    <div
-                      className={`group flex h-11 w-full cursor-pointer items-center rounded-[8px] bg-[#202329] px-4`}
-                    >
-                      <input
-                        id={"amount-input"}
-                        {...methods.register("amount", {
-                          required: "Amount is required",
-                        })}
-                        type={"number"}
-                        step={"any"}
-                        autoComplete="off"
-                        onChange={handleChange}
-                        placeholder={"Amount"}
-                        value={betAmt}
-                        className={`flex w-full min-w-0 bg-transparent text-base text-white font-chakra placeholder-white  placeholder-opacity-40 outline-none`}
-                      />
-                      <span
-                        className="bg-[#D9D9D9] bg-opacity-5 py-1 px-1.5 rounded text-xs font-semibold text-[#F0F0F0] text-opacity-50"
-                        onClick={() =>
-                          setBetAmt(coinData ? coinData[0]?.amount : 0)
-                        }
-                      >
-                        MAX
-                      </span>
-                    </div>
-
-                    <span
-                      className={`${
-                        methods.formState.errors["amount"]
-                          ? "opacity-100"
-                          : "opacity-0"
-                      } mt-1.5 flex items-center gap-1 text-xs text-[#D92828]`}
-                    >
-                      {methods.formState.errors["amount"]
-                        ? methods.formState.errors[
-                            "amount"
-                          ]!.message!.toString()
-                        : "NONE"}
-                    </span>
-                  </div>
-
-                  {/* balance alert  */}
-                  {(!coinData || (coinData && coinData[0].amount < 0.0001)) && (
-                    <div className="mb-5 w-full rounded-lg bg-[#0C0F16] px-3 pb-2 pt-4 text-white md:px-6">
-                      <div className="-full mb-3 text-center font-changa font-medium text-[#F0F0F0] text-opacity-75">
-                        Please deposit funds to start playing. View{" "}
-                        <u
-                          onClick={() => {
-                            setShowWalletModal(true);
-                          }}
-                        >
-                          WALLET
-                        </u>
-                      </div>
-                    </div>
-                  )}
-                </form>
-                {/* choosing bet options  */}
-                <div className="flex flex-col w-full gap-4">
-                  <button
-                    type="submit"
-                    disabled={
-                      coinData && coinData[0].amount < 0.0001 ? true : false
-                    }
-                    onClick={onSubmit}
-                    className={`${
-                      coinData && coinData[0].amount < 0.0001
-                        ? "cursor-not-allowed opacity-70"
-                        : "hover:opacity-90"
-                    } w-full rounded-lg bg-[#7839C5] hover:bg-[#9361d1] focus:bg-[#602E9E] py-2.5 font-changa text-xl text-white`}
-                  >
-                    BET
-                  </button>
-                </div>
-              </FormProvider>
-            </div>
-          ) : (
-            <div className="w-full flex flex-col">
-              <FormProvider {...methods}>
-                <form
-                  className="flex w-full flex-col gap-0"
-                  autoComplete="off"
-                  onSubmit={methods.handleSubmit(onSubmit)}
-                >
-                  <div className="mb-0 flex w-full flex-col">
-                    <div className="mb-1 flex w-full items-center justify-between">
-                      <label className="text-xs text-[#F0F0F0] text-opacity-75">
-                        Bet amount
-                      </label>
-                      <span className="text-sm text-[#F0F0F0] text-opacity-75">
-                        Available :{" "}
-                        {coinData ? coinData[0]?.amount.toFixed(4) : 0}
-                      </span>
-                    </div>
-
-                    <div
-                      className={`group flex h-11 w-full cursor-pointer items-center rounded-[8px] bg-[#202329] px-4`}
-                    >
-                      <input
-                        id={"amount-input"}
-                        {...methods.register("amount", {
-                          required: "Amount is required",
-                        })}
-                        type={"number"}
-                        step={"any"}
-                        autoComplete="off"
-                        onChange={handleChange}
-                        placeholder={"Amount"}
-                        value={betAmt}
-                        className={`flex w-full min-w-0 bg-transparent text-sm text-white placeholder-white  placeholder-opacity-40 outline-none`}
-                      />
-                      <span
-                        className="bg-[#D9D9D9] bg-opacity-5 py-1 px-1.5 rounded text-sm text-[#F0F0F0] text-opacity-75"
-                        onClick={() =>
-                          setBetAmt(coinData ? coinData[0]?.amount : 0)
-                        }
-                      >
-                        MAX
-                      </span>
-                    </div>
-
-                    <span
-                      className={`${
-                        methods.formState.errors["amount"]
-                          ? "opacity-100"
-                          : "opacity-0"
-                      } mt-1.5 flex items-center gap-1 text-xs text-[#D92828]`}
-                    >
-                      {methods.formState.errors["amount"]
-                        ? methods.formState.errors[
-                            "amount"
-                          ]!.message!.toString()
-                        : "NONE"}
-                    </span>
-                  </div>
-                  <div className="w-full flex flex-row items-end gap-3">
-                    <div className="mb-0 flex w-full flex-col">
-                      <div className="mb-1 flex w-full items-center justify-between">
-                        <label className="text-xs text-[#F0F0F0] text-opacity-75">
-                          Number of Bets
-                        </label>
-                      </div>
-
-                      <div
-                        className={`group flex h-11 w-full cursor-pointer items-center rounded-[8px] bg-[#202329] px-4`}
-                      >
-                        <input
-                          id={"count-input"}
-                          {...methods.register("betCount", {
-                            required: "Bet count is required",
-                          })}
-                          type={"number"}
-                          step={"any"}
-                          autoComplete="off"
-                          onChange={handleCountChange}
-                          placeholder={"00"}
-                          value={betCount}
-                          className={`flex w-full min-w-0 bg-transparent text-sm text-white placeholder-white  placeholder-opacity-40 outline-none`}
-                        />
-                        <span
-                          className="bg-[#D9D9D9] bg-opacity-5 py-1 px-1.5 rounded text-sm text-[#F0F0F0] text-opacity-75"
-                          onClick={() =>
-                            setBetCount(coinData ? coinData[0]?.amount : 0)
-                          }
-                        >
-                          MAX
-                        </span>
-                      </div>
-
-                      <span
-                        className={`${
-                          methods.formState.errors["amount"]
-                            ? "opacity-100"
-                            : "opacity-0"
-                        } mt-1.5 flex items-center gap-1 text-xs text-[#D92828]`}
-                      >
-                        {methods.formState.errors["amount"]
-                          ? methods.formState.errors[
-                              "amount"
-                            ]!.message!.toString()
-                          : "NONE"}
-                      </span>
-                    </div>
-                    <div className="mb-[1.4rem] rounded-md w-full h-11 flex items-center justify-center opacity-75 cursor-pointer text-white text-opacity-90 border-2 border-white bg-white bg-opacity-0 hover:bg-opacity-5">
-                      Configure Auto
-                    </div>
-                  </div>
-                </form>
-                {/* choosing bet options  */}
-                <div className="flex flex-col w-full gap-4">
-                  {loading ? (
-                    <div className="mb-0 flex w-full flex-col items-center rounded-lg bg-[#C20FC5] bg-opacity-10 px-4 pb-4 pt-2">
-                      {deposit ? (
-                        flipping ? (
-                          // while getting flip result
-                          <div className="flex w-full flex-col items-center justify-center">
-                            <Image
-                              src={"/assets/coin.png"}
-                              width={50}
-                              height={50}
-                              alt=""
-                              className="rotate mb-2"
-                            />
-                            <span className="font-changa text-xs text-[#FFFFFF] text-opacity-75">
-                              Deposit Confirmed
-                            </span>
-                            <span className="font-changa text-xl text-[#FFFFFF] text-opacity-90">
-                              Flipping the coin...
-                            </span>
-                          </div>
-                        ) : (
-                          // after getting flip result
-                          <div className="flex w-full flex-col items-center justify-center">
-                            <span className="font-changa text-xs text-[#FFFFFF] text-opacity-75">
-                              {result && result === "Won"
-                                ? "yay..."
-                                : "ooops..."}
-                            </span>
-                            <span className="font-changa text-xl text-[#FFFFFF] text-opacity-90">
-                              {result && result === "Won"
-                                ? "You Won!"
-                                : "You Lost!"}
-                            </span>
-                            <button
-                              onClick={() => {
-                                setLoading(false);
-                                setResult(null);
-                                setDeposit(false);
-                                setFlipping(false);
-                                setBetAmt(0);
-                              }}
-                              className="mt-2 w-full rounded-[5px] border border-[#F200F21A] bg-[#7839C5] hover:bg-[#9361d1] focus:bg-[#602E9E] px-5 py-2 font-changa font-semibold text-white text-opacity-90 shadow-[0_5px_10px_rgba(0,0,0,0.3)]"
-                            >
-                              Bet Again
-                            </button>
-                          </div>
-                        )
-                      ) : (
-                        loading && (
-                          // when making bet request
-                          <div className="flex w-full flex-col items-center justify-center">
-                            <Image
-                              src={"/assets/coin.png"}
-                              width={50}
-                              height={50}
-                              alt=""
-                              className="rotate mb-2"
-                            />
-                            <span className="font-changa text-xs text-[#FFFFFF] text-opacity-75">
-                              preparing for flip
-                            </span>
-                            <span className="font-changa text-xl text-[#FFFFFF] text-opacity-90">
-                              Confirming deposit...
-                            </span>
-                          </div>
-                        )
-                      )}
-                    </div>
-                  ) : (
-                    <button
-                      type="submit"
-                      disabled={
-                        coinData && coinData[0].amount < 0.0001 ? true : false
-                      }
-                      onClick={onSubmit}
-                      className={`${
-                        coinData && coinData[0].amount < 0.0001
-                          ? "cursor-not-allowed opacity-70"
-                          : "hover:opacity-90"
-                      } w-full rounded-lg bg-[#7839C5] hover:bg-[#9361d1] focus:bg-[#602E9E] py-2.5 font-lilita text-xl text-white`}
-                    >
-                      BET
-                    </button>
-                  )}
-                </div>
-              </FormProvider>
+          <div className="relative w-full flex lg:hidden mb-[1.4rem]">
+            {startAuto && (
+              <div
+                onClick={() => {
+                  soundAlert("/sounds/betbutton.wav");
+                  warningCustom("Auto bet stopped", "top-right");
+                  setAutoBetCount(0);
+                  setStartAuto(false);
+                }}
+                className="cursor-pointer rounded-lg absolute w-full h-full z-20 bg-[#442c62] hover:bg-[#7653A2] focus:bg-[#53307E] flex items-center justify-center font-chakra font-semibold text-2xl tracking-wider text-white"
+              >
+                {translator("STOP", language)}
+              </div>
+            )}
+            <BetButton
+              disabled={
+                !wallet ||
+                !session?.user ||
+                loading ||
+                (coinData && coinData[0].amount < minGameAmount) ||
+                (betAmt !== undefined &&
+                  maxBetAmt !== undefined &&
+                  betAmt > maxBetAmt)
+                  ? true
+                  : false
+              }
+              onClickFunction={onSubmit}
+            >
+              {loading ? <Loader /> : "BET"}
+            </BetButton>
+          </div>
+          {betSetting === "auto" && (
+            <div className="w-full flex lg:hidden">
+              <ConfigureAutoButton disabled={disableInput} />
             </div>
           )}
+          <div className="w-full hidden lg:flex">
+            <BetSetting
+              betSetting={betSetting}
+              setBetSetting={setBetSetting}
+              disabled={disableInput}
+            />
+          </div>
+
+          <div className="w-full flex flex-col nobar">
+            <FormProvider {...methods}>
+              <form
+                className="flex w-full flex-col gap-0"
+                autoComplete="off"
+                onSubmit={methods.handleSubmit(onSubmit)}
+              >
+                {/* amt input  */}
+                <BetAmount
+                  betAmt={betAmt}
+                  setBetAmt={setUserInput}
+                  currentMultiplier={5.6}
+                  leastMultiplier={0}
+                  game="wheel"
+                  disabled={disableInput}
+                />
+
+                {/* risk  */}
+                <div className="mb-6 w-full">
+                  <div className="flex justify-between text-xs mb-2">
+                    <p className="font-medium font-changa text-[#F0F0F0] text-opacity-90">
+                      {translator("Risk", language)}
+                    </p>
+                  </div>
+                  <div className="flex lg:flex-row flex-col gap-2.5 w-full items-center justify-evenly rounded-[8px] text-white font-chakra text-sm font-semibold bg-[#0C0F16] p-4">
+                    <div className="flex lg:w-[66.66%] w-full gap-2.5">
+                      <button
+                        onClick={() => setRisk("low")}
+                        type="button"
+                        className={`text-center w-full rounded-[5px] border-[2px] disabled:cursor-not-allowed disabled:opacity-50 bg-[#202329] py-2 text-xs font-chakra text-white text-opacity-90 transition duration-200 ${
+                          risk === "low"
+                            ? "border-[#7839C5]"
+                            : "border-transparent hover:border-[#7839C580]"
+                        }`}
+                        disabled={disableInput}
+                      >
+                        {translator("Low", language)}
+                      </button>
+                      <button
+                        onClick={() => setRisk("medium")}
+                        type="button"
+                        className={`text-center w-full rounded-[5px] border-[2px] disabled:cursor-not-allowed disabled:opacity-50 bg-[#202329] py-2 text-xs font-chakra text-white text-opacity-90 transition duration-200 ${
+                          risk === "medium"
+                            ? "border-[#7839C5]"
+                            : "border-transparent hover:border-[#7839C580]"
+                        }`}
+                        disabled={disableInput}
+                      >
+                        {translator("Medium", language)}
+                      </button>
+                    </div>
+                    <button
+                      onClick={() => setRisk("high")}
+                      type="button"
+                      className={`text-center lg:w-[33.33%] w-full rounded-[5px] border-[2px] disabled:cursor-not-allowed disabled:opacity-50 bg-[#202329] py-2 text-xs font-chakra text-white text-opacity-90 transition duration-200 ${
+                        risk === "high"
+                          ? "border-[#7839C5]"
+                          : "border-transparent hover:border-[#7839C580]"
+                      }`}
+                      disabled={disableInput}
+                    >
+                      {translator("High", language)}
+                    </button>
+                  </div>
+                </div>
+
+                {/* rows  */}
+                <div className="mb-6 w-full">
+                  <div className="flex justify-between text-xs mb-2 font-medium font-changa text-[#F0F0F0] text-opacity-90">
+                    <p className="">{translator("Segments", language)}</p>
+                    <p className="text-[#94A3B8] text-sm">{segments}</p>
+                  </div>
+                  <div className="relative h-[5px] rounded-full bg-[#2A2E38] w-full mt-5">
+                    <input
+                      type="range"
+                      min={10}
+                      max={50}
+                      step={10}
+                      disabled={loading || startAuto || disableInput}
+                      value={segments}
+                      onChange={(e) => setSegments(parseInt(e.target.value))}
+                      className="defaultSlider absolute top-[-8px] w-full bg-transparent appearance-none z-20 disabled:cursor-not-allowed disabled:opacity-50"
+                    />
+                    <div
+                      className="absolute rounded-l-full h-[5px] bg-[#9945ff] z-10"
+                      style={{ width: `${segmentFill}%` }}
+                    ></div>
+                  </div>
+                </div>
+
+                {betSetting === "manual" ? (
+                  <></>
+                ) : (
+                  <div className="w-full flex flex-row items-end gap-3">
+                    <AutoCount loading={loading || startAuto} />
+                    <div className="w-full hidden lg:flex">
+                      <ConfigureAutoButton disabled={disableInput} />
+                    </div>
+                  </div>
+                )}
+
+                <div className="relative w-full hidden lg:flex mt-2">
+                  {startAuto && (
+                    <div
+                      onClick={() => {
+                        soundAlert("/sounds/betbutton.wav");
+                        warningCustom("Auto bet stopped", "top-right");
+                        setAutoBetCount(0);
+                        setStartAuto(false);
+                      }}
+                      className="rounded-lg absolute w-full h-full z-20 bg-[#442c62] hover:bg-[#7653A2] focus:bg-[#53307E] flex items-center justify-center font-chakra font-semibold text-2xl tracking-wider text-white"
+                    >
+                      {translator("STOP", language)}
+                    </div>
+                  )}
+                  <BetButton
+                    disabled={
+                      !wallet ||
+                      !session?.user ||
+                      loading ||
+                      (coinData && coinData[0].amount < minGameAmount) ||
+                      (betAmt !== undefined &&
+                        maxBetAmt !== undefined &&
+                        betAmt > maxBetAmt)
+                        ? true
+                        : false
+                    }
+                  >
+                    {loading ? <Loader /> : "BET"}
+                  </BetButton>
+                </div>
+              </form>
+            </FormProvider>
+            <div className="w-full flex lg:hidden">
+              <BetSetting
+                betSetting={betSetting}
+                setBetSetting={setBetSetting}
+              />
+            </div>
+          </div>
         </>
       </GameOptions>
       <GameDisplay>
         <>
+          <div className="w-full flex justify-between items-center h-4">
+            {loading ? (
+              <div className="font-chakra text-sm font-medium text-white text-opacity-75">
+                {translator("Betting", language)}...
+              </div>
+            ) : null}
+          </div>
           <MultiplierHistory multiplierHistory={lastMultipliers} />
           <div id="plinko" />
         </>
       </GameDisplay>
       <GameTable>
-        <HistoryTable refresh={refresh} />
+        <Bets refresh={refresh} />{" "}
       </GameTable>
     </GameLayout>
   );
