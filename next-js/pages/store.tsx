@@ -10,6 +10,7 @@ import StoreBanner from "@/components/Banner";
 import StoreCard from "@/components/StoreCard";
 import { errorCustom } from "@/components/toasts/ToastGroup";
 import FOMOHead from "@/components/HeadElement";
+import { getFOMOBalance } from "./stake";
 
 export default function Store() {
   const { data: session, status } = useSession();
@@ -29,24 +30,10 @@ export default function Store() {
     setLivePrice,
   } = useGlobalContext();
 
-  const getWalletBalance = async () => {
-    if (wallet && wallet.publicKey)
-      try {
-        let address = new PublicKey(fomoToken);
-        const ata = getAssociatedTokenAddressSync(address, wallet.publicKey);
-        const res = await connection.getTokenAccountBalance(ata, "recent");
-        // console.log("balance : ", res.value.uiAmount ?? 0);
-
-        res.value.uiAmount ? setFomoBalance(res.value.uiAmount) : setFomoBalance(0);
-      } catch (e) {
-        // errorCustom("Unable to fetch balance.");
-        console.error(e);
-      }
-  };
 
   useEffect(() => {
     if (session?.user && wallet && wallet.publicKey) {
-      getWalletBalance();
+      getFOMOBalance(wallet, setFomoBalance);
       getUserDetails();
     }
     getGlobalInfo();

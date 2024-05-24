@@ -1,4 +1,4 @@
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { useGlobalContext } from "./GlobalContext";
 import {
   connection,
@@ -15,8 +15,9 @@ import { PublicKey } from "@solana/web3.js";
 import { getAssociatedTokenAddressSync } from "@solana/spl-token";
 import { useSession } from "next-auth/react";
 import { errorCustom } from "./toasts/ToastGroup";
+import { getFOMOBalance } from "@/pages/stake";
 
-const MinAmount = 0.01
+const MinAmount = 0.01;
 
 export default function StakeFomo() {
   const { data: session, status } = useSession();
@@ -38,21 +39,6 @@ export default function StakeFomo() {
     getGlobalInfo,
   } = useGlobalContext();
 
-  const getWalletBalance = async () => {
-    if (wallet && wallet.publicKey)
-      try {
-        let address = new PublicKey(fomoToken);
-        const ata = getAssociatedTokenAddressSync(address, wallet.publicKey);
-        const res = await connection.getTokenAccountBalance(ata, "recent");
-        // console.log("balance : ", res.value.uiAmount ?? 0);
-
-        res.value.uiAmount ? setFomoBalance(res.value.uiAmount) : setFomoBalance(0);
-      } catch (e) {
-        // errorCustom("Unable to fetch balance.");
-        console.error(e);
-      }
-  };
-
   const handleRequest = async () => {
     setLoading(true);
     let response: { success: boolean; message: string };
@@ -73,7 +59,7 @@ export default function StakeFomo() {
         response = await unstakeFOMO(wallet, stakeAmount, fomoToken);
       }
       // console.log(response);
-      if (response && response.success) await getWalletBalance();
+      if (response && response.success) await getFOMOBalance(wallet, setFomoBalance);
 
       getUserDetails();
       getGlobalInfo();
@@ -86,48 +72,64 @@ export default function StakeFomo() {
   };
 
   const handleHalfStake = () => {
-    if (stake) { // Deposit
-      if (stakeAmount == 0 && fomoBalance > MinAmount) setStakeAmount(MinAmount);
+    if (stake) {
+      // Deposit
+      if (stakeAmount == 0 && fomoBalance > MinAmount)
+        setStakeAmount(MinAmount);
       else {
         let amt = stakeAmount / 2;
         if (amt < MinAmount) amt = MinAmount;
         if (amt > fomoBalance) amt = fomoBalance;
         setStakeAmount(amt);
       }
-    } else { // Withdraw
-      if (userData && stakeAmount == 0 && userData?.stakedAmount > MinAmount) setStakeAmount(MinAmount);
+    } else {
+      // Withdraw
+      if (userData && stakeAmount == 0 && userData?.stakedAmount > MinAmount)
+        setStakeAmount(MinAmount);
       else {
         let amt = stakeAmount / 2;
         if (amt < MinAmount) amt = MinAmount;
-        if (userData && amt > userData?.stakedAmount) amt = userData?.stakedAmount;
+        if (userData && amt > userData?.stakedAmount)
+          amt = userData?.stakedAmount;
         setStakeAmount(amt);
       }
     }
   };
 
   const handleDoubleStake = () => {
-    if (stake) { // Deposit
-      if (stakeAmount == 0 && fomoBalance > MinAmount) setStakeAmount(MinAmount);
+    if (stake) {
+      // Deposit
+      if (stakeAmount == 0 && fomoBalance > MinAmount)
+        setStakeAmount(MinAmount);
       else {
         let amt = stakeAmount * 2;
         if (amt < MinAmount) amt = MinAmount;
         if (amt > fomoBalance) amt = fomoBalance;
         setStakeAmount(amt);
       }
-    } else { // Withdraw
-      if (userData && stakeAmount == 0 && userData?.stakedAmount > MinAmount) setStakeAmount(MinAmount);
+    } else {
+      // Withdraw
+      if (userData && stakeAmount == 0 && userData?.stakedAmount > MinAmount)
+        setStakeAmount(MinAmount);
       else {
         let amt = stakeAmount * 2;
         if (amt < MinAmount) amt = MinAmount;
-        if (userData && amt > userData?.stakedAmount) amt = userData?.stakedAmount;
+        if (userData && amt > userData?.stakedAmount)
+          amt = userData?.stakedAmount;
         setStakeAmount(amt);
       }
     }
   };
 
   const handleSetMaxStake = () => {
-    stake ? setStakeAmount(fomoBalance) : setStakeAmount(userData?.stakedAmount ?? 0);
+    stake
+      ? setStakeAmount(fomoBalance)
+      : setStakeAmount(userData?.stakedAmount ?? 0);
   };
+
+  useEffect(() => {
+    setStakeAmount(0);
+  }, [stake]);
 
   return (
     <div className="w-full p-6 py-6 flex flex-col items-start gap-1 bg-staking-bg rounded-xl">
@@ -136,10 +138,11 @@ export default function StakeFomo() {
       </span>
       <div className="flex w-full items-center border-b border-white border-opacity-10 mt-5">
         <button
-          className={`${stake
-            ? "text-white border-[#9945FF]"
-            : "text-[#ffffff80] border-transparent hover:text-[#ffffffb5]"
-            } p-2  border-b-2 text-base font-medium transition-all w-full sm:w-max`}
+          className={`${
+            stake
+              ? "text-white border-[#9945FF]"
+              : "text-[#ffffff80] border-transparent hover:text-[#ffffffb5]"
+          } p-2  border-b-2 text-base font-medium transition-all w-full sm:w-max`}
           onClick={() => {
             setStake(true);
           }}
@@ -147,10 +150,11 @@ export default function StakeFomo() {
           {translator("Stake", language)}
         </button>
         <button
-          className={`${!stake
-            ? "text-white border-[#9945FF]"
-            : "text-[#ffffff80] border-transparent hover:text-[#ffffffb5]"
-            } p-2 border-b-2 text-base font-medium transition-all w-full sm:w-max`}
+          className={`${
+            !stake
+              ? "text-white border-[#9945FF]"
+              : "text-[#ffffff80] border-transparent hover:text-[#ffffffb5]"
+          } p-2 border-b-2 text-base font-medium transition-all w-full sm:w-max`}
           onClick={() => {
             setStake(false);
           }}
@@ -165,7 +169,9 @@ export default function StakeFomo() {
           : translator("Withdraw", language)}
         <span
           onClick={() => {
-            stake ? setStakeAmount(fomoBalance) : setStakeAmount(userData?.stakedAmount ?? 0);
+            stake
+              ? setStakeAmount(fomoBalance)
+              : setStakeAmount(userData?.stakedAmount ?? 0);
           }}
           className="text-sm cursor-pointer font-medium font-changa text-[#94A3B8] text-opacity-90 transition-all"
         >
