@@ -10,7 +10,7 @@ export default function GameHeader() {
   const router = useRouter();
   const game = router.pathname.split("/")[1];
 
-  const { coinData, getProvablyFairData, setOpenPFModal, language } = useGlobalContext();
+  const { setOpenPFModal, language } = useGlobalContext();
 
     const fetchGameData = (game: GameType) => {
       fetch(`/api/games/global/getStats?game=${game}`)

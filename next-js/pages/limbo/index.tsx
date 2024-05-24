@@ -56,7 +56,6 @@ export default function Limbo() {
   const { data: session, status } = useSession();
 
   const {
-    coinData,
     getBalance,
     getWalletBalance,
     setShowWalletModal,
@@ -74,7 +73,7 @@ export default function Limbo() {
     autoBetProfit,
     setAutoBetProfit,
     useAutoConfig,
-    setUseAutoConfig,
+    selectedCoinData,
     houseEdge,
     maxBetAmt,
     language,
@@ -184,7 +183,7 @@ export default function Limbo() {
       if (!betAmt || betAmt === 0) {
         throw new Error("Set Amount.");
       }
-      if (coinData && coinData[0].amount < betAmt) {
+      if (selectedCoinData && selectedCoinData.amount < betAmt) {
         throw new Error("Insufficient balance for bet !");
       }
       if (inputMultiplier < multiplierLimits[0]) {
@@ -352,7 +351,7 @@ export default function Limbo() {
               disabled={
                 loading ||
                 !session?.user ||
-                (coinData && coinData[0].amount < minGameAmount) ||
+                (selectedCoinData && selectedCoinData.amount < minGameAmount) ||
                 (betAmt !== undefined &&
                   maxBetAmt !== undefined &&
                   betAmt > maxBetAmt)
@@ -434,7 +433,7 @@ export default function Limbo() {
                     disabled={
                       loading ||
                       !session?.user ||
-                      (coinData && coinData[0].amount < minGameAmount) ||
+                      (selectedCoinData && selectedCoinData.amount < minGameAmount) ||
                       (betAmt !== undefined &&
                         maxBetAmt !== undefined &&
                         betAmt > maxBetAmt)
@@ -489,7 +488,7 @@ export default function Limbo() {
         </div>
 
         <div className="flex px-0 xl:px-4 mb-0 md:mb-[1.4rem] gap-4 flex-row w-full justify-between font-changa font-semibold">
-          {coinData && coinData[0].amount > minGameAmount && (
+          {selectedCoinData && selectedCoinData.amount > minGameAmount && (
             <>
               <MultiplierInput
                 inputMultiplier={inputMultiplier}
@@ -534,8 +533,8 @@ export default function Limbo() {
             </>
           )}
 
-          {!coinData ||
-            (coinData[0].amount < minGameAmount && (
+          {!selectedCoinData ||
+            (selectedCoinData.amount < minGameAmount && (
               <div className="w-full rounded-lg bg-[#d9d9d90d] bg-opacity-10 flex items-center px-3 py-3 text-white md:px-6">
                 <div className="w-full text-center font-changa font-medium text-sm md:text-base text-[#F0F0F0] text-opacity-75">
                   {translator(

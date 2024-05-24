@@ -23,7 +23,7 @@ export default function BetAmount({
   disabled?: boolean;
 }) {
   const methods = useForm();
-  const { coinData, maxBetAmt, setMaxBetAmt, language, kenoRisk } =
+  const { coinData, maxBetAmt, setMaxBetAmt, language, kenoRisk, selectedCoinData } =
     useGlobalContext();
 
   //Temperory max bet
@@ -82,8 +82,8 @@ export default function BetAmount({
         game === "keno" || game === "wheel"
           ? 20.0
           : truncateNumber(currentMaxBetAmt, 4),
-        coinData && coinData[0]?.amount
-          ? truncateNumber(coinData[0].amount, 4)
+          selectedCoinData && selectedCoinData?.amount
+          ? truncateNumber(selectedCoinData.amount, 4)
           : truncateNumber(currentMaxBetAmt, 4),
       ),
     );
@@ -98,8 +98,8 @@ export default function BetAmount({
     if (betAmt || coinData) {
       let newBetAmt =
         !betAmt || betAmt === 0
-          ? coinData
-            ? coinData[0]?.amount / 2
+          ? selectedCoinData
+            ? selectedCoinData.amount / 2
             : 0
           : betAmt! / 2;
 
@@ -115,11 +115,11 @@ export default function BetAmount({
   };
 
   const handleDoubleBet = () => {
-    if (betAmt !== undefined || coinData) {
+    if (betAmt !== undefined || selectedCoinData) {
       const newBetAmt =
         betAmt === 0
-          ? coinData
-            ? parseFloat((coinData[0]?.amount * 2).toFixed(4))
+          ? selectedCoinData
+            ? parseFloat((selectedCoinData.amount * 2).toFixed(4))
             : 0
           : parseFloat(((betAmt ?? 0) * 2).toFixed(4));
 
@@ -268,7 +268,7 @@ export default function BetAmount({
                 {translator("Balance", language)}
               </span>
               <span className="text-xs font-medium">
-                {coinData ? (coinData[0]?.amount).toFixed(2) : 0.0}
+                {selectedCoinData ? (selectedCoinData.amount).toFixed(2) : 0.0}
               </span>
             </div>
           </div>

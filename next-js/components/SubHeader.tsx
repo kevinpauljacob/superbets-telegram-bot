@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { CoinBalance, useGlobalContext } from "./GlobalContext";
+import { useGlobalContext } from "./GlobalContext";
 import Link from "next/link";
 import {
   wsEndpoint,

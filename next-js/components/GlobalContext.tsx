@@ -23,7 +23,7 @@ interface PointTier {
   label: string;
 }
 
-export interface CoinBalance {
+interface CoinBalance {
   wallet: string;
   type: boolean;
   amount: number;

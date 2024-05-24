@@ -36,7 +36,6 @@ export default function Wheel() {
   const { data: session, status } = useSession();
   const wheelRef = useRef<HTMLDivElement>(null);
   const {
-    coinData,
     getBalance,
     getWalletBalance,
     setShowAutoModal,
@@ -53,7 +52,7 @@ export default function Wheel() {
     autoBetProfit,
     setAutoBetProfit,
     useAutoConfig,
-    setUseAutoConfig,
+    selectedCoinData,
     houseEdge,
     maxBetAmt,
     language,
@@ -149,7 +148,7 @@ export default function Wheel() {
       if (!betAmt || betAmt === 0) {
         throw new Error("Set Amount.");
       }
-      if (coinData && coinData[0].amount < betAmt) {
+      if (selectedCoinData && selectedCoinData.amount < betAmt) {
         throw new Error("Insufficient balance for bet !");
       }
 
@@ -363,7 +362,7 @@ export default function Wheel() {
                 !wallet ||
                 !session?.user ||
                 isRolling ||
-                (coinData && coinData[0].amount < minGameAmount) ||
+                (selectedCoinData && selectedCoinData.amount < minGameAmount) ||
                 (betAmt !== undefined &&
                   maxBetAmt !== undefined &&
                   betAmt > maxBetAmt)
@@ -503,7 +502,7 @@ export default function Wheel() {
                       !wallet ||
                       !session?.user ||
                       isRolling ||
-                      (coinData && coinData[0].amount < minGameAmount) ||
+                      (selectedCoinData && selectedCoinData.amount < minGameAmount) ||
                       (betAmt !== undefined &&
                         maxBetAmt !== undefined &&
                         betAmt > maxBetAmt)
@@ -582,7 +581,7 @@ export default function Wheel() {
           </div>
         </div>
         <div className="relative flex w-full justify-between px-0 xl:px-4 mb-0 px:mb-6 gap-4">
-          {coinData && coinData[0].amount > minGameAmount && (
+          {selectedCoinData && selectedCoinData.amount > minGameAmount && (
             <>
               {uniqueSegments.map((segment, index) => {
                 const backgroundColor = segment.color; // Store segment.color in a separate variable
@@ -621,7 +620,7 @@ export default function Wheel() {
                             </span>
                           </div>
                           <div className="border border-white/10 rounded-lg p-3 mt-2">
-                            {coinData
+                            {selectedCoinData
                               ? truncateNumber(
                                   Math.max(
                                     0,
@@ -649,8 +648,8 @@ export default function Wheel() {
               })}
             </>
           )}
-          {!coinData ||
-            (coinData[0].amount < minGameAmount && (
+          {!selectedCoinData ||
+            (selectedCoinData.amount < minGameAmount && (
               <div className="w-full rounded-lg bg-[#d9d9d90d] bg-opacity-10 flex items-center px-3 py-3 text-white md:px-6">
                 <div className="w-full text-center font-changa font-medium text-sm md:text-base text-[#F0F0F0] text-opacity-75">
                   {translator(

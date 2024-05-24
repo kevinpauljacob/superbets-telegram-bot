@@ -1,6 +1,6 @@
-import React, { ReactNode, useEffect, useState } from "react";
+import React, { ReactNode } from "react";
 import GameHeader from "./GameHeader";
-import { CoinBalance, useGlobalContext } from "./GlobalContext";
+import { useGlobalContext } from "./GlobalContext";
 import { translator } from "@/context/transactions";
 import { minGameAmount, truncateNumber } from "@/context/gameTransactions";
 import FomoPlay from "./FomoPlay";

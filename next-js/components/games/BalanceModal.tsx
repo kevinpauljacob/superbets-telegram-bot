@@ -28,8 +28,8 @@ export default function BalanceModal() {
     showWalletModal,
     setShowWalletModal,
     walletBalance,
-    coinData,
     language,
+    selectedCoinData
   } = useGlobalContext();
 
   const [loading, setLoading] = useState<boolean>(false);
@@ -210,7 +210,7 @@ export default function BalanceModal() {
                     {translator("Amount", language)}
                   </label>
                   <span className="font-changa font-medium text-sm text-[#94A3B8] text-opacity-90">
-                    {truncateNumber(coinData ? coinData[0]?.amount : 0, 3)} $SOL
+                    {truncateNumber(selectedCoinData ? selectedCoinData.amount : 0, 3)} $SOL
                   </span>
                 </div>
 
@@ -234,7 +234,7 @@ export default function BalanceModal() {
                   <span
                     className="text-xs font-medium text-white text-opacity-50 bg-[#292C32] hover:bg-[#47484A] focus:bg-[#47484A] transition-all rounded-[5px] mr-2 py-1.5 px-4"
                     onClick={() =>
-                      setAmount(coinData ? coinData[0]?.amount / 2 : 0)
+                      setAmount(selectedCoinData ? selectedCoinData.amount / 2 : 0)
                     }
                   >
                     {translator("Half", language)}
@@ -242,7 +242,7 @@ export default function BalanceModal() {
                   <span
                     className="text-xs font-medium text-white text-opacity-50 bg-[#292C32] hover:bg-[#47484A] focus:bg-[#47484A] transition-all rounded-[5px] py-1.5 px-4"
                     onClick={() =>
-                      setAmount(coinData ? coinData[0]?.amount : 0)
+                      setAmount(selectedCoinData ? selectedCoinData.amount : 0)
                     }
                   >
                     {translator("Max", language)}

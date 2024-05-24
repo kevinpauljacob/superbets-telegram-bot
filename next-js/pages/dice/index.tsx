@@ -37,7 +37,7 @@ export default function Dice() {
   const { data: session, status } = useSession();
 
   const {
-    coinData,
+    selectedCoinData,
     getBalance,
     getWalletBalance,
     setShowAutoModal,
@@ -165,7 +165,7 @@ export default function Dice() {
       if (!betAmt || betAmt === 0) {
         throw new Error("Set Amount.");
       }
-      if (coinData && coinData[0].amount < betAmt) {
+      if (selectedCoinData && selectedCoinData.amount < betAmt) {
         throw new Error("Insufficient balance for bet !");
       }
       if (selectedFace.length === 0) {
@@ -406,7 +406,7 @@ export default function Dice() {
                 !session?.user ||
                 selectedFace.length === 0 ||
                 isRolling ||
-                (coinData && coinData[0].amount < minGameAmount) ||
+                (selectedCoinData && selectedCoinData.amount < minGameAmount) ||
                 (betAmt !== undefined &&
                   maxBetAmt !== undefined &&
                   betAmt > maxBetAmt)
@@ -482,7 +482,7 @@ export default function Dice() {
                       !session?.user ||
                       selectedFace.length === 0 ||
                       isRolling ||
-                      (coinData && coinData[0].amount < minGameAmount) ||
+                      (selectedCoinData && selectedCoinData.amount < minGameAmount) ||
                       (betAmt !== undefined &&
                         maxBetAmt !== undefined &&
                         betAmt > maxBetAmt)

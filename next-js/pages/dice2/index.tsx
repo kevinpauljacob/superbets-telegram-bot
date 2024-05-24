@@ -33,9 +33,8 @@ import { useSession } from "next-auth/react";
 export default function Dice2() {
   const wallet = useWallet();
   const methods = useForm();
-  const { data: session, status } = useSession();
+  const { data: session } = useSession();
   const {
-    coinData,
     getBalance,
     getWalletBalance,
     autoWinChange,
@@ -54,6 +53,7 @@ export default function Dice2() {
     houseEdge,
     maxBetAmt,
     language,
+    selectedCoinData
   } = useGlobalContext();
   const [betAmt, setBetAmt] = useState<number | undefined>();
   const [userInput, setUserInput] = useState<number | undefined>();
@@ -152,7 +152,7 @@ export default function Dice2() {
       if (!betAmt || betAmt === 0) {
         throw new Error("Set Amount.");
       }
-      if (coinData && coinData[0].amount < betAmt) {
+      if (selectedCoinData && selectedCoinData.amount < betAmt) {
         throw new Error("Insufficient balance for bet !");
       }
       setIsRolling(true);
@@ -385,7 +385,7 @@ export default function Dice2() {
                 !wallet ||
                 !session?.user ||
                 isRolling ||
-                (coinData && coinData[0].amount < minGameAmount) ||
+                (selectedCoinData && selectedCoinData.amount < minGameAmount) ||
                 (betAmt !== undefined &&
                   maxBetAmt !== undefined &&
                   betAmt > maxBetAmt)
@@ -458,7 +458,7 @@ export default function Dice2() {
                       !wallet ||
                       !session?.user ||
                       isRolling ||
-                      (coinData && coinData[0].amount < minGameAmount) ||
+                      (selectedCoinData && selectedCoinData.amount < minGameAmount) ||
                       (betAmt !== undefined &&
                         maxBetAmt !== undefined &&
                         betAmt > maxBetAmt)
@@ -500,7 +500,7 @@ export default function Dice2() {
           />
         </div>
         <div className="flex px-0 xl:px-4 mb-0 md:mb-[1.4rem] gap-4 flex-row w-full justify-between">
-          {coinData && coinData[0].amount > minGameAmount && (
+          {selectedCoinData && selectedCoinData.amount > minGameAmount && (
             <>
               <div className="flex flex-col w-full">
                 <span className="text-[#F0F0F0] font-changa font-semibold text-xs mb-1">
@@ -567,8 +567,8 @@ export default function Dice2() {
               )}
             </>
           )}
-          {!coinData ||
-            (coinData[0].amount < minGameAmount && (
+          {!selectedCoinData ||
+            (selectedCoinData.amount < minGameAmount && (
               <div className="w-full rounded-lg bg-[#d9d9d90d] bg-opacity-10 flex items-center px-3 py-3 text-white md:px-6">
                 <div className="w-full text-center font-changa font-medium text-sm md:text-base text-[#F0F0F0] text-opacity-75">
                   {translator(

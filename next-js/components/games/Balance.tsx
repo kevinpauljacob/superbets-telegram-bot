@@ -9,7 +9,7 @@ function Balance() {
   const { data: session, status } = useSession();
   const wallet = useWallet();
 
-  const { walletBalance, setWalletBalance, getWalletBalance, getBalance, coinData, setCoinData, showWalletModal, setShowWalletModal } = useGlobalContext();
+  const { walletBalance, setWalletBalance, getWalletBalance, getBalance, showWalletModal, setShowWalletModal } = useGlobalContext();
 
   const [loading, setLoading] = useState(false);
 
