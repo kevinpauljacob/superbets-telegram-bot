@@ -466,7 +466,7 @@ export const rollDice = async (
 export const limboBet = async (
   wallet: WalletContextState,
   amount: number,
-  chance: number,
+  multiplier: number,
 ) => {
   try {
     if (!wallet.publicKey) throw new Error("Wallet not connected");
@@ -477,7 +477,7 @@ export const limboBet = async (
         wallet: wallet.publicKey,
         amount: amount,
         tokenMint: "SOL",
-        chance,
+        multiplier,
       }),
       headers: {
         "Content-Type": "application/json",

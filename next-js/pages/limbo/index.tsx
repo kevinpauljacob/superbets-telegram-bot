@@ -205,13 +205,7 @@ export default function Limbo() {
       setDisplayMultiplier(multiplierLimits[0]);
       setTargetMultiplier(multiplierLimits[0]);
 
-      // console.log("Placing Flip");
-      // function to place bet
-      const response = await limboBet(
-        wallet,
-        betAmt!,
-        parseFloat((100 / inputMultiplier).toFixed(8)),
-      );
+      const response = await limboBet(wallet, betAmt!, inputMultiplier);
 
       if (!response.success) throw new Error(response.message);
 
