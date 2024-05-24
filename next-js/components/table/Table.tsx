@@ -8,6 +8,10 @@ import Loader from "../games/Loader";
 import { errorCustom } from "../toasts/ToastGroup";
 import { translator } from "@/context/transactions";
 import { useRouter } from "next/router";
+import Image from "next/image";
+import Dollar from "@/public/assets/dollar.png";
+import { useState } from "react";
+
 
 interface PaginationProps {
   page: number;
@@ -180,32 +184,73 @@ interface TableButtonProps {
   setAll: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
+
+interface ButtonProps {
+  active: boolean;
+  onClick: () => void;
+  label: string;
+}
+
+export const TButton: React.FC<ButtonProps> = ({ active, onClick, label }) => {
+  return (
+    <button
+      onClick={onClick}
+      className={`${
+        active
+          ? "bg-[#1C1E22]"
+          : "bg-[#343434] hover:bg-[#9361D1] focus:bg-[#602E9E]"
+      } transform rounded-[5px] px-8 py-2 font-changa text-xl text-white transition duration-200 flex items-center`}
+    >
+      {label}
+    </button>
+  );
+};
+
 export const TableButtons: React.FC<TableButtonProps> = ({ all, setAll }) => {
   const wallet = useWallet();
   const { language } = useGlobalContext();
+  const [highRollers, setHighRollers] = useState(false);
+
   return (
-    <div className="mt-[1rem] md:mt-[3.5rem] flex w-full items-center justify-center gap-4 md:justify-start">
-      <button
-        onClick={() => {
-          if (wallet.publicKey) setAll(false);
-          else errorCustom("Wallet not connected");
-        }}
-        className={`${
-          all ? "bg-[#202329] hover:bg-[#47484A]" : "bg-[#7839C5]"
-        } w-full transform rounded-[5px] px-8 py-2 font-changa text-xl text-white transition duration-200 md:w-fit`}
-      >
-        {translator("My Bets", language)}
-      </button>
-      <button
-        onClick={() => {
-          setAll(true);
-        }}
-        className={`${
-          all ? "bg-[#7839C5]" : "bg-[#202329] hover:bg-[#47484A]"
-        } w-full transform rounded-[5px] px-8 py-2 font-changa text-xl text-white transition duration-200 md:w-fit`}
-      >
-        {translator("All Bets", language)}
-      </button>
+    <div className="flex flex-col md:flex-row justify-between items-center mt-20">
+      <div className="flex items-center mb-4 md:mb-0">
+        <Image src={Dollar} alt="" width={26} height={26} />
+        <span className="font-medium font-changa text-xl text-opacity-90 pl-3">
+          <span className=" text-white">
+            {translator("Bets", language)}
+          </span>
+        </span>
+      </div>
+      <div className="flex w-full md:w-auto items-center gap-2 justify-center md:justify-end border border-5 p-2 rounded-lg border-white border-opacity-[5%]">
+        <TButton
+          active={!all && !highRollers}
+          onClick={() => {
+            if (wallet.publicKey) {
+              setAll(false);
+              setHighRollers(false);
+            } else {
+              errorCustom("Wallet not connected");
+            }
+          }}
+          label={translator("My Bets", language)}
+        />
+        <TButton
+          active={all}
+          onClick={() => {
+            setAll(true);
+            setHighRollers(false);
+          }}
+          label={translator("All Bets", language)}
+        />
+        <TButton
+          active={highRollers}
+          onClick={() => {
+            setAll(false);
+            setHighRollers(true);
+          }}
+          label={translator("High Rollers", language)}
+        />
+      </div>
     </div>
   );
 };

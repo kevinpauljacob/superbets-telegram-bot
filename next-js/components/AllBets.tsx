@@ -2,8 +2,6 @@ import { useState, useEffect } from "react";
 import { useGlobalContext } from "./GlobalContext";
 import { Table } from "./table/Table";
 import { translator } from "@/context/transactions";
-import Image from "next/image";
-import Dollar from "@/public/assets/dollar.png";
 
 interface Bet {
   _id: string;
@@ -56,15 +54,6 @@ export default function AllBets() {
 
   return (
     <div className="relative mt-5 mb-5">
-      <div className="flex items-center mb-6">
-        <Image src={Dollar} alt="" width={26} height={26} />
-        <span className="font-medium font-changa text-xl text-opacity-90 pl-3">
-          <span className="hidden sm:inline">
-            {translator("Bets", language)}
-          </span>
-          <span className="sm:hidden">{translator("Bets", language)}</span>
-        </span>
-      </div>
       <Table
         all={true}
         setAll={() => {}}
