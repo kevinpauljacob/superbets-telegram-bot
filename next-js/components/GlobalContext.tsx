@@ -12,7 +12,7 @@ import React, {
   ReactNode,
 } from "react";
 import { connection } from "../context/gameTransactions";
-import { LAMPORTS_PER_SOL, PublicKey } from "@solana/web3.js";
+import { LAMPORTS_PER_SOL } from "@solana/web3.js";
 import { errorCustom } from "./toasts/ToastGroup";
 
 interface PointTier {
@@ -22,11 +22,12 @@ interface PointTier {
   label: string;
 }
 
-interface CoinBalance {
+export interface CoinBalance {
   wallet: string;
   type: boolean;
   amount: number;
   tokenMint: string;
+  img: string
 }
 
 interface ProvablyFairData {
@@ -98,6 +99,10 @@ interface GlobalContextProps {
 
   coinData: CoinBalance[] | null;
   setCoinData: (coinData: CoinBalance[] | null) => void;
+
+  selectedCoin: string;
+  setSelectedCoin: (selectedCoin: string) => void;
+  getSelectedCoin: () => CoinBalance | null;
 
   showWalletModal: boolean;
   setShowWalletModal: React.Dispatch<React.SetStateAction<boolean>>;
@@ -207,8 +212,10 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
       type: true,
       amount: 0,
       tokenMint: "SOL",
+      img: "/assets/sol.png",
     },
   ]);
+  const [selectedCoin, setSelectedCoin] = useState<string>("SOL");
   const [showWalletModal, setShowWalletModal] = useState<boolean>(false);
   const [isVerifyModalOpen, setIsVerifyModalOpen] = useState<boolean>(false);
   const [verifyModalData, setVerifyModalData] = useState({});
@@ -246,6 +253,14 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
   const [kenoRisk, setKenoRisk] = useState<
     "classic" | "low" | "medium" | "high"
   >("classic");
+
+  const getSelectedCoin = () => {
+    if (coinData && coinData.length > 0) {
+      const selected = coinData.find((coin) => coin.tokenMint === selectedCoin);
+      if (selected) return selected;
+    }
+    return null
+  }
 
   // useEffect(() => {
   //   const fetchFomoPrice = async () => {
@@ -471,6 +486,9 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
         getWalletBalance,
         getBalance,
         getProvablyFairData,
+        selectedCoin,
+        setSelectedCoin,
+        getSelectedCoin
       }}
     >
       {children}
