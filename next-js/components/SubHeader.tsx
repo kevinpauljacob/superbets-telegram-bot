@@ -11,6 +11,7 @@ import { GameType } from "@/utils/provably-fair";
 import { useRouter } from "next/router";
 import useWebSocket from "react-use-websocket";
 import { translator } from "@/context/transactions";
+import { SPL_TOKENS } from "@/context/config";
 
 export default function SubHeader() {
   const router = useRouter();
@@ -20,6 +21,7 @@ export default function SubHeader() {
     language,
     selectedCoinData
   } = useGlobalContext();
+  const [showSelectCoinModal, setShowSelectCoinModal] = useState(false);
 
   type Card = {
     game: GameType;
@@ -84,9 +86,8 @@ export default function SubHeader() {
   return (
     <div className="flex flex-col w-full z-[80] absolute top-0 right-0">
       <div
-        className={`${
-          router.pathname === "/" ? "flex" : "hidden md:flex"
-        } w-full text-white h-[4.4rem] flex items-center border-b border-[#1E2220] px-4 lg:pl-4 lg:pr-4 bg-[#121418]`}
+        className={`${router.pathname === "/" ? "flex" : "hidden md:flex"
+          } w-full text-white h-[4.4rem] flex items-center border-b border-[#1E2220] px-4 lg:pl-4 lg:pr-4 bg-[#121418]`}
       >
         <div className="flex w-full items-center overflow-x-auto no-scrollbar">
           <div ref={endOfListRef} />
@@ -124,12 +125,32 @@ export default function SubHeader() {
         </div>
         <div className="hidden md:flex items-center border-l border-[#1E2220] pl-4 md:min-w-fit">
           <div className="flex items-center gap-2">
-            <div className="flex items-center h-10 px-4 py-1 gap-2 border-2 border-white border-opacity-5 rounded-[5px]">
-              <Image src={selectedCoinData ? selectedCoinData.img: "/assets/sol.png"} alt="" width={20} height={17} />
-              <span className="font-chakra text-2xl text-[#94A3B8]">
-                {truncateNumber(selectedCoinData ? selectedCoinData.amount : 0, 4)}
-              </span>
+            <div className="relative flex flex-col w-36">
+              <div className="flex flex-row justify-left items-center px-4 py-1 gap-2 border-2 border-white border-opacity-5 rounded-[5px] cursor-pointer" onClick={() => setShowSelectCoinModal(!showSelectCoinModal)}>
+                <img src={selectedCoinData ? selectedCoinData.img : "/assets/sol.png"} alt="" className="w-7 h-7" />
+                <span className="font-chakra text-2xl text-[#94A3B8]">
+                  {truncateNumber(selectedCoinData ? selectedCoinData.amount : 0, 4)}
+                </span>
+                <div className="grow" />
+                <Image src={"/assets/chevron.svg"} alt="" width={12} height={12} className={showSelectCoinModal ? "transform rotate-180" : ""} />
+              </div>
+
+              {showSelectCoinModal && (
+                <div className="absolute mt-12 bg-[#121418] w-36 rounded-[5px] border-2 border-white border-opacity-5">
+                  {SPL_TOKENS.map((coin, index) => (
+                    <div key={index} className="flex items-center h-10 px-4 py-2 gap-1.5 hover:bg-[#1E2220] cursor-pointer" onClick={() => {
+                      setShowSelectCoinModal(false);
+                    }}>
+                      <img src={coin.icon} alt="" className="w-5 h-5" />
+                      <span className="text-sm leading-3 mt-0.5 text-white text-opacity-90">
+                        {coin.tokenName}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
+
             <div
               onClick={() => {
                 setShowWalletModal(true);
@@ -145,9 +166,8 @@ export default function SubHeader() {
         </div>
       </div>
       <div
-        className={`${
-          router.pathname === "/" ? "hidden" : "flex"
-        } md:hidden items-center justify-between my-4 mx-2 rounded-[5px] bg-[#121418] py-3 px-4 md:min-w-fit`}
+        className={`${router.pathname === "/" ? "hidden" : "flex"
+          } md:hidden items-center justify-between my-4 mx-2 rounded-[5px] bg-[#121418] py-3 px-4 md:min-w-fit`}
       >
         <Image src={"/assets/wallet2.png"} alt="" width={30} height={30} />
         <div className="flex items-center gap-2">
