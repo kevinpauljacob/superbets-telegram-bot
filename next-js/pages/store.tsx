@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { useSession } from "next-auth/react";
 import toast from "react-hot-toast";
-import { connection, formatNumber, translator } from "@/context/transactions";
+import { connection, fomoToken, formatNumber, translator } from "@/context/transactions";
 import { LAMPORTS_PER_SOL, PublicKey } from "@solana/web3.js";
 import { useGlobalContext } from "@/components/GlobalContext";
 import { getAssociatedTokenAddressSync } from "@solana/spl-token";
@@ -10,6 +10,7 @@ import StoreBanner from "@/components/Banner";
 import StoreCard from "@/components/StoreCard";
 import { errorCustom } from "@/components/toasts/ToastGroup";
 import FOMOHead from "@/components/HeadElement";
+import { getFOMOBalance } from "./stake";
 
 export default function Store() {
   const { data: session, status } = useSession();
@@ -18,8 +19,8 @@ export default function Store() {
   const {
     userData,
     setUserData,
-    solBal,
-    setSolBal,
+    fomoBalance,
+    setFomoBalance,
     language,
     loading,
     globalInfo,
@@ -29,26 +30,10 @@ export default function Store() {
     setLivePrice,
   } = useGlobalContext();
 
-  const getWalletBalance = async () => {
-    if (wallet && wallet.publicKey)
-      try {
-        let address = new PublicKey(
-          "Cx9oLynYgC3RrgXzin7U417hNY9D6YB1eMGw4ZMbWJgw",
-        );
-        const ata = getAssociatedTokenAddressSync(address, wallet.publicKey);
-        const res = await connection.getTokenAccountBalance(ata, "recent");
-        // console.log("balance : ", res.value.uiAmount ?? 0);
-
-        res.value.uiAmount ? setSolBal(res.value.uiAmount) : setSolBal(0);
-      } catch (e) {
-        // errorCustom("Unable to fetch balance.");
-        console.error(e);
-      }
-  };
 
   useEffect(() => {
     if (session?.user && wallet && wallet.publicKey) {
-      getWalletBalance();
+      getFOMOBalance(wallet, setFomoBalance);
       getUserDetails();
     }
     getGlobalInfo();
