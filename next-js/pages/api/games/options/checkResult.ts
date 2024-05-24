@@ -19,6 +19,8 @@ export const config = {
   maxDuration: 60,
 };
 
+const optionsEdge = 0.2;
+
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === "POST") {
     try {
@@ -57,7 +59,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         { upsert: true, new: true },
       );
       const userTier = userData?.tier ?? 0;
-      const houseEdge = launchPromoEdge ? 0 : houseEdgeTiers[userTier];
+      const houseEdge =
+        optionsEdge + (launchPromoEdge ? 0 : houseEdgeTiers[userTier]);
+      // const houseEdge = launchPromoEdge ? 0 : houseEdgeTiers[userTier];
 
       await new Promise((r) => setTimeout(r, 2000));
 

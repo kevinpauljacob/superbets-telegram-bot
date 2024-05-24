@@ -4,7 +4,7 @@ import { getToken } from "next-auth/jwt";
 import { NextApiRequest, NextApiResponse } from "next";
 import { minGameAmount, wsEndpoint } from "@/context/gameTransactions";
 import { Decimal } from "decimal.js";
-import { maxPayouts } from "@/context/transactions";
+import { maintainance, maxPayouts } from "@/context/transactions";
 import StakingUser from "@/models/staking/user";
 import { GameType } from "@/utils/provably-fair";
 Decimal.set({ precision: 9 });
@@ -28,6 +28,12 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     try {
       let { wallet, amount, tokenMint, betType, timeFrame }: InputType =
         req.body;
+
+      if (maintainance)
+        return res.status(400).json({
+          success: false,
+          message: "Under maintenance",
+        });
 
       const token = await getToken({ req, secret });
 

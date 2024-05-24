@@ -11,6 +11,7 @@ import StakingUser from "@/models/staking/user";
 import {
   houseEdgeTiers,
   launchPromoEdge,
+  maintainance,
   maxPayouts,
   pointTiers,
 } from "@/context/transactions";
@@ -37,6 +38,12 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === "POST") {
     try {
       let { wallet, amount, tokenMint, segments, risk }: InputType = req.body;
+
+      if (maintainance)
+        return res.status(400).json({
+          success: false,
+          message: "Under maintenance",
+        });
 
       const token = await getToken({ req, secret });
 
