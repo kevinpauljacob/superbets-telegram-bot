@@ -1,5 +1,5 @@
 import { useWallet } from "@solana/wallet-adapter-react";
-import { ReactNode } from "react";
+import { ReactNode, useEffect } from "react";
 import toast from "react-hot-toast";
 import BetRow from "../games/BetRow";
 import { useGlobalContext } from "../GlobalContext";
@@ -224,6 +224,11 @@ export const TableButtons: React.FC<TableButtonProps> = ({ all, setAll }) => {
         <TButton
           active={!all && !highRollers}
           onClick={() => {
+            const {table,...rest}=router.query;
+              router.push({
+                pathname: router.pathname,
+                query: { ...rest },
+              });
             if (wallet.publicKey) {
               setAll(false);
               setHighRollers(false);
@@ -238,14 +243,23 @@ export const TableButtons: React.FC<TableButtonProps> = ({ all, setAll }) => {
           onClick={() => {
             setAll(true);
             setHighRollers(false);
+            const {table,...rest}=router.query;
+              router.push({
+                pathname: router.pathname,
+                query: { ...rest },
+              });
           }}
           label={translator("All Bets", language)}
         />
         <TButton
           active={highRollers}
           onClick={() => {
-            setAll(false);
-            setHighRollers(true);
+              setAll(false);
+              setHighRollers(true);
+              router.push({
+                pathname: router.pathname,
+                query: {table:'high-rollers'}
+              })
           }}
           label={translator("High Rollers", language)}
         />
@@ -318,7 +332,7 @@ export const Table: React.FC<TableProps> = ({
 }) => {
   const transactionsPerPage = 10;
   const router = useRouter();
-
+  const [displayBets, setDisplayBets] = useState(bets);
   const home = router.pathname.split("/")[1] === "";
 
   const {
@@ -329,6 +343,15 @@ export const Table: React.FC<TableProps> = ({
     setVerifyModalData,
     language,
   } = useGlobalContext();
+  
+  useEffect(() => {
+    if (router.query.table === 'high-rollers') {
+      // filter amount >= 2 SOL
+      setDisplayBets(bets.filter(bet => bet.amount >= 2));
+    } else {
+      setDisplayBets(bets);
+    }
+  }, [router.query, bets]);
 
   return (
     <div
@@ -347,10 +370,10 @@ export const Table: React.FC<TableProps> = ({
             <div className="flex w-full md:min-w-[50rem] flex-col items-center">
               <TableHeader all={all} setAll={setAll} />
               <div className="flex flex-col items-center w-full max-h-[36rem] overflow-hidden">
-                {bets?.length ? (
+                {displayBets?.length ? (
                   (home
-                    ? bets
-                    : bets.slice(
+                    ? displayBets
+                    : displayBets.slice(
                         page * transactionsPerPage - transactionsPerPage,
                         page * transactionsPerPage,
                       )
