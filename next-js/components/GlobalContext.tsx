@@ -10,6 +10,7 @@ import React, {
   useContext,
   useState,
   ReactNode,
+  useEffect,
 } from "react";
 import { connection } from "../context/gameTransactions";
 import { LAMPORTS_PER_SOL } from "@solana/web3.js";
@@ -102,7 +103,9 @@ interface GlobalContextProps {
 
   selectedCoin: string;
   setSelectedCoin: (selectedCoin: string) => void;
-  getSelectedCoin: () => CoinBalance | null;
+
+  selectedCoinData: CoinBalance | null;
+  setSelectedCoinData: (selectedCoinData: CoinBalance | null) => void;
 
   showWalletModal: boolean;
   setShowWalletModal: React.Dispatch<React.SetStateAction<boolean>>;
@@ -216,6 +219,7 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
     },
   ]);
   const [selectedCoin, setSelectedCoin] = useState<string>("SOL");
+  const [selectedCoinData, setSelectedCoinData] = useState<CoinBalance | null>(null);
   const [showWalletModal, setShowWalletModal] = useState<boolean>(false);
   const [isVerifyModalOpen, setIsVerifyModalOpen] = useState<boolean>(false);
   const [verifyModalData, setVerifyModalData] = useState({});
@@ -261,6 +265,10 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
     }
     return null
   }
+
+  useEffect(() => {
+    setSelectedCoinData(getSelectedCoin())
+  }, [selectedCoin])
 
   // useEffect(() => {
   //   const fetchFomoPrice = async () => {
@@ -488,7 +496,8 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
         getProvablyFairData,
         selectedCoin,
         setSelectedCoin,
-        getSelectedCoin
+        selectedCoinData,
+        setSelectedCoinData
       }}
     >
       {children}

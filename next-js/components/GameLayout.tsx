@@ -1,6 +1,6 @@
-import React, { ReactNode } from "react";
+import React, { ReactNode, useEffect, useState } from "react";
 import GameHeader from "./GameHeader";
-import { useGlobalContext } from "./GlobalContext";
+import { CoinBalance, useGlobalContext } from "./GlobalContext";
 import { translator } from "@/context/transactions";
 import { minGameAmount, truncateNumber } from "@/context/gameTransactions";
 import FomoPlay from "./FomoPlay";
@@ -34,11 +34,11 @@ export const GameFooterInfo: React.FC<GameFooterProps> = ({
   amount,
   chance,
 }) => {
-  const { coinData, setShowWalletModal, houseEdge, language } =
-    useGlobalContext();
+  const { setShowWalletModal, houseEdge, language, selectedCoinData } = useGlobalContext();
+
   return (
     <div className="flex px-0 xl:px-4 mb-0 md:mb-[1.4rem] gap-4 flex-row w-full justify-between">
-      {coinData && coinData[0].amount > minGameAmount && (
+      {selectedCoinData && selectedCoinData.amount > minGameAmount && (
         <>
           {multiplier !== undefined ? (
             <div className="flex flex-col w-full">
@@ -76,8 +76,8 @@ export const GameFooterInfo: React.FC<GameFooterProps> = ({
         </>
       )}
 
-      {!coinData ||
-        (coinData[0].amount < minGameAmount && (
+      {!selectedCoinData ||
+        (selectedCoinData.amount < minGameAmount && (
           <div className="w-full rounded-lg bg-[#d9d9d90d] bg-opacity-10 flex items-center px-3 py-3 text-white md:px-6">
             <div className="w-full text-center font-changa font-medium text-sm md:text-base text-[#F0F0F0] text-opacity-75">
               {translator(
@@ -102,9 +102,8 @@ const GameLayout: React.FC<LayoutProps> = ({ children, title }) => {
   return (
     <div className="flex flex-1 h-fit w-full flex-col items-center justify-start px-3 lg:px-6">
       <FOMOHead
-        title={`${
-          title ? title + " | " : ""
-        }FOMO.wtf - 0% House Edge, Pure Wins`}
+        title={`${title ? title + " | " : ""
+          }FOMO.wtf - 0% House Edge, Pure Wins`}
       />
 
       <div className="fadeInUp w-full min-h-fit lg:min-h-[calc(100vh-13.7rem)] items-stretch bg-[#121418] rounded-2xl flex flex-col-reverse lg:flex-row">
