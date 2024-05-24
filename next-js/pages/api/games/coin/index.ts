@@ -65,7 +65,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       const strikeMultiplier = 2;
       const maxPayout = Decimal.mul(amount, strikeMultiplier);
 
-      if (!(maxPayout.toNumber() < maxPayouts.coinflip))
+      if (!(maxPayout.toNumber() <= maxPayouts.coinflip))
         return res
           .status(400)
           .json({ success: false, message: "Max payout exceeded" });
