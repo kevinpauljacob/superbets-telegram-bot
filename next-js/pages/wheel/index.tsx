@@ -234,7 +234,7 @@ export default function Wheel() {
         // update count
         if (typeof autoBetCount === "number") {
           setAutoBetCount(autoBetCount > 0 ? autoBetCount - 1 : 0);
-          autoBetCount === 1 && warningCustom("Auto bet stopped", "top-right");
+          autoBetCount === 1 && warningCustom("Auto bet stopped", "top-left");
         } else
           setAutoBetCount(
             autoBetCount.length > 12
@@ -294,7 +294,7 @@ export default function Wheel() {
         autoBetProfit > 0 &&
         autoBetProfit >= autoStopProfit
       ) {
-        warningCustom("Profit limit reached.");
+        warningCustom("Profit limit reached.", "top-left");
         setAutoBetCount(0);
         setStartAuto(false);
         return;
@@ -305,7 +305,7 @@ export default function Wheel() {
         autoBetProfit < 0 &&
         potentialLoss <= -autoStopLoss
       ) {
-        warningCustom("Loss limit reached.", "top-right");
+        warningCustom("Loss limit reached.", "top-left");
         setAutoBetCount(0);
         setStartAuto(false);
         return;
@@ -353,7 +353,7 @@ export default function Wheel() {
               <div
                 onClick={() => {
                   soundAlert("/sounds/betbutton.wav");
-                  warningCustom("Auto bet stopped", "top-right");
+                  warningCustom("Auto bet stopped", "top-left");
                   setAutoBetCount(0);
                   setStartAuto(false);
                 }}
@@ -407,6 +407,8 @@ export default function Wheel() {
                   game="wheel"
                   disabled={disableInput}
                 />
+
+                {/* risk  */}
                 <div className="mb-6 w-full">
                   <div className="flex justify-between text-xs mb-2">
                     <p className="font-medium font-changa text-[#F0F0F0] text-opacity-90">
@@ -455,6 +457,7 @@ export default function Wheel() {
                   </div>
                 </div>
 
+                {/* segments  */}
                 <div className="mb-6 w-full">
                   <div className="flex justify-between text-xs mb-2 font-medium font-changa text-[#F0F0F0] text-opacity-90">
                     <p className="">{translator("Segments", language)}</p>
@@ -490,10 +493,10 @@ export default function Wheel() {
 
                 <div className="relative w-full hidden lg:flex mt-2">
                   {startAuto && (
-                    <div
+                    <div 
                       onClick={() => {
                         soundAlert("/sounds/betbutton.wav");
-                        warningCustom("Auto bet stopped", "top-right");
+                        warningCustom("Auto bet stopped", "top-left");
                         setAutoBetCount(0);
                         setStartAuto(false);
                       }}
@@ -514,7 +517,6 @@ export default function Wheel() {
                         ? true
                         : false
                     }
-                    onClickFunction={onSubmit}
                   >
                     {isRolling ? <Loader /> : "BET"}
                   </BetButton>
@@ -529,13 +531,11 @@ export default function Wheel() {
       </GameOptions>
       <GameDisplay>
         <div className="w-full flex justify-between items-center h-4">
-          <div>
-            {isRolling ? (
-              <div className="font-chakra text-sm font-medium text-white text-opacity-75">
-                {translator("Betting", language)}...
-              </div>
-            ) : null}
-          </div>
+          {isRolling ? (
+            <div className="font-chakra text-sm font-medium text-white text-opacity-75">
+              {translator("Betting", language)}...
+            </div>
+          ) : null}
         </div>
         <div className="hidden sm:block absolute right-3 lg:right-6">
           <ResultsSlider results={betResults} align={"vertical"} />

@@ -23,6 +23,7 @@ import { errorCustom, successCustom } from "@/components/toasts/ToastGroup";
 import { translator, formatNumber } from "@/context/transactions";
 import { minGameAmount } from "@/context/gameTransactions";
 import { useSession } from "next-auth/react";
+import { useRouter } from "next/router";
 
 const Timer = dynamic(() => import("../../components/games/Timer"), {
   ssr: false,
@@ -35,6 +36,9 @@ export default function Options() {
   const wallet = useWallet();
   const methods = useForm();
   const { data: session, status } = useSession();
+  const router = useRouter();
+
+  let checkBet: NodeJS.Timeout | null = null;
 
   const {
     walletBalance,
@@ -62,7 +66,6 @@ export default function Options() {
   const [loading, setLoading] = useState(false);
   const [refresh, setRefresh] = useState(true);
   const [betTime, setBetTime] = useState();
-  const [betEndPrice, setBetEndPrice] = useState<number>();
   const [betResults, setBetResults] = useState<
     { result: number; win: boolean }[]
   >([]);
@@ -73,42 +76,58 @@ export default function Options() {
       : 0,
   );
 
+  const handleBeforeUnload = () => {
+    if (checkBet) {
+      console.log("clearing");
+      clearTimeout(checkBet);
+    }
+  };
+
+  useEffect(() => {
+    router.events.on("routeChangeStart", handleBeforeUnload);
+
+    return () => {
+      router.events.off("routeChangeStart", handleBeforeUnload);
+    };
+  }, [router.events]);
+
   const getResult = async () => {
     setLoading(true);
     setCheckResult(true);
     try {
-      checkResultAPI(wallet).then((res) => {
-        if (res.success) {
-          if (res?.data?.result == "Won") {
-            successCustom(res?.message);
-            soundAlert("/sounds/win.wav");
-          } else errorCustom(res?.message);
+      let res = await checkResultAPI(wallet);
+      if (res.success) {
+        if (res?.data?.result == "Won") {
+          successCustom(res?.message);
+          soundAlert("/sounds/win.wav");
+        } else errorCustom(res?.message);
+        if (!result) {
+          console.log("updating");
           setResult(res?.data?.result);
           setResultAmt(
             res?.data?.result == "Won"
               ? res?.data?.amountWon
               : res?.data?.amountLost,
           );
-
-          setBetResults((prevResults) => {
-            const newResults = [
-              ...prevResults,
-              {
-                result: res?.data?.amountWon,
-                win: res?.data?.result === "Won",
-              },
-            ];
-            if (newResults.length > 6) {
-              newResults.shift();
-            }
-            return newResults;
-          });
-          setRefresh(true);
-        } else {
-          throw Error(res?.message ?? "Could not fetch result!");
         }
+        setRefresh(true);
         setLoading(false);
-      });
+        setBetResults((prevResults) => {
+          const newResults = [
+            ...prevResults,
+            {
+              result: res?.data?.amountWon,
+              win: res?.data?.result === "Won",
+            },
+          ];
+          if (newResults.length > 6) {
+            newResults.shift();
+          }
+          return newResults;
+        });
+      } else {
+        throw Error(res?.message ?? "Could not fetch result!");
+      }
     } catch (e: any) {
       errorCustom(e?.message ?? "Could not fetch result.");
       setResult(null);
@@ -142,30 +161,22 @@ export default function Options() {
         betInterval,
       );
       if (res.success) {
-        successCustom(res?.message ?? "Bet placed");
+        // successCustom(res?.message ?? "Bet placed");
         setRefresh(true);
-        setStrikePrice(res?.data?.strikePrice);
-        setBetTime(res?.data?.betTime);
-        setTimeLeft(
-          new Date(res?.data?.betTime).getTime() +
-            betInterval * 60000 -
-            Date.now(),
-        );
-        setTimeout(async () => {
-          setBetEnd(true);
-          setCheckResult(true);
-
-          let betEndPrice = await fetch(
-            `https://hermes.pyth.network/api/get_price_feed?id=0xef0d8b6fda2ceba41da15d4095d1da392a0d2f8ed0c6c7bc0f4cfac8c280b56d&publish_time=${Math.floor(
-              (new Date(res?.data?.betTime).getTime() + betInterval * 60000) /
-                1000,
-            )}`,
-          )
-            .then((res) => res.json())
-            .then((data) => data.price.price * Math.pow(10, data.price.expo));
-          setBetEndPrice(betEndPrice);
-          getResult();
-        }, betInterval * 60000);
+        getActiveBet();
+        // setStrikePrice(res?.data?.strikePrice);
+        // setBetTime(res?.data?.betTime);
+        // setTimeLeft(
+        //   new Date(res?.data?.betTime).getTime() +
+        //     betInterval * 60000 -
+        //     Date.now(),
+        // );
+        // checkBet = setTimeout(async () => {
+        //   console.log("getting old result");
+        //   setBetEnd(true);
+        //   setCheckResult(true);
+        //   getResult();
+        // }, betInterval * 60000);
       } else {
         setCheckResult(false);
         setBetEnd(false);
@@ -179,10 +190,15 @@ export default function Options() {
       setBetEnd(false);
       setLoading(false);
     }
+    return () => {
+      if (checkBet) {
+        clearTimeout(checkBet);
+      }
+    };
   };
 
   const getActiveBet = async () => {
-    if (!wallet || !wallet.publicKey) return;
+    if (!wallet || !wallet.publicKey || loading) return;
     setLoading(true);
     try {
       fetch(
@@ -199,31 +215,24 @@ export default function Options() {
             setBetTime(bet?.betTime);
             setTimeLeft(
               new Date(bet?.betTime).getTime() +
-                betInterval * 60000 -
+                bet?.timeFrame * 1000 -
                 Date.now(),
             );
             const remainingTime =
               new Date(bet?.betTime).getTime() +
-              betInterval * 60000 -
+              bet?.timeFrame * 1000 -
               Date.now();
-            setTimeout(async () => {
-              setBetEnd(true);
-              setCheckResult(true);
-
-              let betEndPrice = await fetch(
-                `https://hermes.pyth.network/api/get_price_feed?id=0xef0d8b6fda2ceba41da15d4095d1da392a0d2f8ed0c6c7bc0f4cfac8c280b56d&publish_time=${Math.floor(
-                  new Date(bet.betEndTime).getTime() / 1000,
-                )}`,
-              )
-                .then((res) => res.json())
-                .then(
-                  (data) => data.price.price * Math.pow(10, data.price.expo),
-                );
-              setBetEndPrice(betEndPrice);
-              if (!checkResult) getResult();
-            }, remainingTime);
-
             setBetEnd(new Date(bet.betEndTime!).getTime() < Date.now());
+            if (checkBet) console.log("checkbet exist");
+            else console.log("checkbet no exist");
+            if (!checkBet) {
+              checkBet = setTimeout(async () => {
+                console.log("getting result");
+                setBetEnd(true);
+                setCheckResult(true);
+                if (!checkResult) getResult();
+              }, remainingTime);
+            }
           }
           setLoading(false);
         });
@@ -231,6 +240,11 @@ export default function Options() {
       setLoading(false);
       console.error(e);
     }
+    return () => {
+      if (checkBet) {
+        clearTimeout(checkBet);
+      }
+    };
   };
 
   useEffect(() => {
@@ -242,7 +256,14 @@ export default function Options() {
   }, [wallet?.publicKey, refresh]);
 
   useEffect(() => {
-    getActiveBet();
+    if (wallet?.publicKey) {
+      getActiveBet();
+      console.log("from here");
+      if (checkBet) {
+        console.log("change clearing");
+        clearTimeout(checkBet);
+      }
+    }
   }, [wallet.publicKey]);
 
   useEffect(() => {
@@ -269,10 +290,13 @@ export default function Options() {
       setLoading(false);
       setResult(null);
       setBetEnd(false);
+      setBetTime(undefined)
       setBetInterval(3);
       setStrikePrice(0);
-      setBetAmt(0.1);
-      setBetEndPrice(0);
+      // setBetAmt(0.1);
+      if (checkBet) {
+        clearTimeout(checkBet);
+      }
       return;
     } else {
       if (!wallet.publicKey) errorCustom("Wallet not connected");
@@ -481,7 +505,7 @@ export default function Options() {
                   ? translator("Placing bet", language) + "..."
                   : ""
                 : checkResult
-                ? loading && !result
+                ? loading || !result
                   ? translator("Checking result", language) + "..."
                   : ""
                 : (timeLeft * 50) / (betInterval * 60000) <= 0
@@ -558,7 +582,7 @@ export default function Options() {
                           ? "blink_1_50 bg-white"
                           : "blink_3 bg-[#282E3D]"
                         : checkResult
-                        ? loading && !result
+                        ? loading || !result
                           ? "blink_1_50 bg-white"
                           : result === "Won"
                           ? "bg-[#72F238] bg-opacity-40 blink_3"

@@ -69,8 +69,8 @@ export const infoAlert = (text: any) => {
 
 export const successCustom = (
   text: any,
-  duration?: number,
   position?: ToastPosition,
+  duration: number = 2000
 ) => {
   toast.custom(
     (t) => (
@@ -95,7 +95,7 @@ export const successCustom = (
       </div>
     ),
     {
-      duration: duration ?? 2000,
+      duration: duration,
       position: position ?? "bottom-right",
     },
   );

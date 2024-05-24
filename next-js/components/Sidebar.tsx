@@ -351,11 +351,11 @@ export const OpenSidebar = ({
               <span className="text-sm text-[#94A3B8] font-medium font-chakra leading-3">
                 ${truncateNumber(fomoPrice, 3)}
               </span>
-              <span
+              {/* <span
                 className={`text-xs text-[#72F238] font-medium pt-[0.1px] leading-[0.6rem]`}
               >
                 +2.57%
-              </span>
+              </span> */}
             </div>
           </div>
         </div>
