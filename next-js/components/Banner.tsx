@@ -17,7 +17,7 @@ export default function StoreBanner() {
     },
   ];
   return (
-    <div className="relative w-full flex flex-row overflow-x-auto no-scrollbar overflow-hidden">
+    <div className="relative w-full flex flex-row overflow-x-auto no-scrollbar overflow-hidden max-h-52 sm:max-h-full ">
       {games.map((game, index) => (
         <div
           key={index}

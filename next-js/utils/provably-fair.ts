@@ -77,7 +77,7 @@ export const generateGameResult = <T extends GameType>(
       return ((parseInt(hash.slice(0, 4), 16) % 10001) / 100) as GameResult<T>;
 
     case GameType.wheel:
-      return (parseInt(hash.slice(0, 4), 16) % 101) as GameResult<T>;
+      return ((parseInt(hash.slice(0, 4), 16) % 100) + 1) as GameResult<T>;
 
     case GameType.plinko: {
       if (!parameter) throw new Error("Game parameter missing!");

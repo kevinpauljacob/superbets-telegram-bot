@@ -31,7 +31,9 @@ export const minGameAmount = 1e-6;
 
 export const timeWeightedAvgInterval = 24 * 60 * 60 * 1000;
 export const timeWeightedAvgLimit = 50;
-export const userLimitMultiplier = 10;
+export const userLimitMultiplier = 5;
+
+export const optionsEdge = 0.1;
 
 export const placeBet = async (
   wallet: WalletContextState,
@@ -465,7 +467,7 @@ export const rollDice = async (
 export const limboBet = async (
   wallet: WalletContextState,
   amount: number,
-  chance: number,
+  multiplier: number,
 ) => {
   try {
     if (!wallet.publicKey) throw new Error("Wallet not connected");
@@ -476,7 +478,7 @@ export const limboBet = async (
         wallet: wallet.publicKey,
         amount: amount,
         tokenMint: "SOL",
-        chance,
+        multiplier,
       }),
       headers: {
         "Content-Type": "application/json",
