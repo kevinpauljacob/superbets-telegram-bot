@@ -1,9 +1,7 @@
 import React, { ReactNode } from "react";
 import GameHeader from "./GameHeader";
 import { useGlobalContext } from "./GlobalContext";
-
-
-import { formatNumber, translator } from "@/context/transactions";
+import { translator } from "@/context/transactions";
 import {
   minGameAmount,
   optionsEdge,
