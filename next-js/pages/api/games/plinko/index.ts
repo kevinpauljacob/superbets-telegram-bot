@@ -98,7 +98,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
       if (
         tokenMint !== "SOL" ||
-        !(Number.isInteger(rows) && 8 <= rows && rows <= 16) ||
+        //TODO: change rows depending on ui
+        !(Number.isInteger(rows) && rows === 8) ||
         !(risk === "low" || risk === "medium" || risk === "high")
       )
         return res
@@ -177,6 +178,13 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           break;
         }
       }
+      /*
+      chance = 1, totalChance = 1, i = 1
+      chance = 1 * 8 / 1 = 8, totalChance = 9, i = 2
+      chance = 8 * 7 / 2 = 28, totalChance = 37, i = 3
+      chance = 28 * 6 / 3 = 56, totalChance = 93, i = 4
+      chance = 56 * 5 / 4 = 70, totalChance = 163, i = 5
+      */
 
       const amountWon = Decimal.mul(amount, strikeMultiplier).mul(
         Decimal.sub(1, houseEdge),
