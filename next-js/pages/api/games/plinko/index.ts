@@ -282,6 +282,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       return res.status(201).json({
         success: true,
         message,
+        result,
         strikeMultiplier,
         strikeNumber,
         amountWon: amountWon.toNumber(),
