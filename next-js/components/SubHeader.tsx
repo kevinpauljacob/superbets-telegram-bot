@@ -19,7 +19,8 @@ export default function SubHeader() {
     setShowWalletModal,
     setLiveBets,
     language,
-    selectedCoinData
+    selectedCoinData,
+    setSelectedCoinData,
   } = useGlobalContext();
   const [showSelectCoinModal, setShowSelectCoinModal] = useState(false);
 

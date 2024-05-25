@@ -13,7 +13,7 @@ import React, {
   useEffect,
 } from "react";
 import { connection } from "../context/gameTransactions";
-import { LAMPORTS_PER_SOL } from "@solana/web3.js";
+import { LAMPORTS_PER_SOL, PublicKey } from "@solana/web3.js";
 import { errorCustom } from "./toasts/ToastGroup";
 
 interface PointTier {
@@ -22,7 +22,10 @@ interface PointTier {
   image: string;
   label: string;
 }
-
+interface TokenAccount {
+  mint: string;
+  balance: number;
+}
 interface CoinBalance {
   wallet: string;
   type: boolean;
@@ -178,6 +181,8 @@ interface GlobalContextProps {
   setKenoRisk: React.Dispatch<
     React.SetStateAction<"classic" | "low" | "medium" | "high">
   >;
+  tokens: TokenAccount[]; // Add this line
+  setTokens: React.Dispatch<React.SetStateAction<TokenAccount[]>>;
 }
 
 const GlobalContext = createContext<GlobalContextProps | undefined>(undefined);
@@ -188,9 +193,10 @@ interface GlobalProviderProps {
 
 export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
   const wallet = useWallet();
+ 
   const [loading, setLoading] = useState(false);
   const [language, setLanguage] = useState<"en" | "ru" | "ko" | "ch">("en");
-
+  const [tokens, setTokens] = useState<TokenAccount[]>([]);
   const [userData, setUserData] = useState<User | null>(null);
   const [stake, setStake] = useState(true);
   const [stakeAmount, setStakeAmount] = useState<number>(0);
@@ -269,30 +275,6 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
   useEffect(() => {
     setSelectedCoinData(getSelectedCoin())
   }, [selectedCoin])
-
-  // useEffect(() => {
-  //   const fetchFomoPrice = async () => {
-  //     try {
-  //       let data = await fetch(
-  //         "https://price.jup.ag/v4/price?ids=FOMO&vsToken=USDC",
-  //       ).then((res) => res.json());
-  //       // console.log(data);
-  //       setFomoPrice(data?.data?.FOMO?.price ?? 0);
-  //     } catch (e) {
-  //       console.log(e);
-  //       setFomoPrice(0);
-  //       // errorCustom("Could not fetch fomo live price.");
-  //     }
-  //   };
-
-  //   fetchFomoPrice();
-
-  //   let intervalId = setInterval(async () => {
-  //     fetchFomoPrice();
-  //   }, 10000);
-
-  //   return () => clearInterval(intervalId);
-  // }, []);
 
   const openVerifyModal = () => {
     setIsVerifyModalOpen(true);
@@ -391,7 +373,7 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
       console.error(e);
     }
   };
-
+  
   const getProvablyFairData = async () => {
     if (wallet?.publicKey)
       try {
@@ -497,7 +479,9 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
         selectedCoin,
         setSelectedCoin,
         selectedCoinData,
-        setSelectedCoinData
+        setSelectedCoinData,
+        tokens,
+        setTokens
       }}
     >
       {children}

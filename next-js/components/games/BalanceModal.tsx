@@ -13,6 +13,7 @@ import { IoCloseOutline } from "react-icons/io5";
 import Image from "next/image";
 import { timestampParser } from "@/utils/timestampParser";
 import { useRouter } from "next/router";
+import { SPL_TOKENS } from "@/context/config";
 
 export default function BalanceModal() {
   const methods = useForm();
@@ -21,8 +22,6 @@ export default function BalanceModal() {
   const router = useRouter();
 
   const { c: campaignId } = router.query;
-
-  const token = "SOL";
 
   const {
     showWalletModal,
@@ -33,6 +32,8 @@ export default function BalanceModal() {
   } = useGlobalContext();
 
   const [loading, setLoading] = useState<boolean>(false);
+  const [selectedToken, setSelectedToken] = useState<string>("SOL");
+  const [isSelectModalOpen, setIsSelectModalOpen] = useState<boolean>(false);
   const [amount, setAmount] = useState<number>(0);
   const [historyData, setHistoryData] = useState<any[]>([]);
   const [actionType, setActionType] = useState<
@@ -49,8 +50,8 @@ export default function BalanceModal() {
 
       try {
         if (actionType === "Deposit")
-          response = await deposit(wallet, amount, token, campaignId);
-        else response = await withdraw(wallet, amount, token);
+          response = await deposit(wallet, amount, selectedToken, campaignId);
+        else response = await withdraw(wallet, amount, selectedToken);
 
         if (response && response.success) {
           setShowWalletModal(false);
@@ -179,14 +180,33 @@ export default function BalanceModal() {
             onSubmit={methods.handleSubmit(onSubmit)}
           >
             {actionType !== "History" && (
-              <div className="mb-0 flex w-full flex-col">
-                <label className="mb-1 font-changa font-medium text-xs text-white text-opacity-90">
+              <div className="relative mb-0 flex w-full flex-col rounded-md">
+                <label className="mb-1 font-changa font-medium text-xs text-white text-opacity-90 ">
                   {translator("Coin", language)}
                 </label>
 
-                <span className="w-full rounded-md h-11 flex items-center bg-[#202329] px-4 py-2 text-[#94A3B8] text-base font-chakra">
-                  {token}
+                <span className="w-full rounded-md h-11 flex items-center bg-[#202329] px-4 py-2 text-[#94A3B8] text-base font-chakra gap-2 cursor-pointer" onClick={() => setIsSelectModalOpen(!isSelectModalOpen)}>
+                  <img src={SPL_TOKENS.find(token => token.tokenMint === selectedToken)!.icon} alt="" className="w-5 h-5" />
+                  <span>{selectedToken}</span>
+                  <div className="grow"/>
+                  <img src="/assets/chevron.svg" alt="" className={`w-4 h-4 transform ${isSelectModalOpen ? "rotate-180" : ""}`} />
                 </span>
+
+                {isSelectModalOpen && (
+                  <div className="absolute z-[100] top-[calc(100%+10px)] left-0 w-full bg-[#202329] rounded-md shadow-md">
+                    {SPL_TOKENS.map((token, index) => (
+                      <div key={index} className="w-full h-11 flex flex-row items-center bg-[#202329] px-4 py-2 text-[#94A3B8] text-base font-chakra gap-2 cursor-pointer hover:bg-[#292C32] rounded-md" onClick={() => {
+                        setSelectedToken(token.tokenMint);
+                        setIsSelectModalOpen(false);
+                      }}>
+                        <img src={token.icon} alt="" className="w-5 h-5" />
+                        <span>{token.tokenName}</span>
+                        <div className="grow"/>
+                        <span className="text-gray-400">0.0000000000</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
 
@@ -210,7 +230,7 @@ export default function BalanceModal() {
                     {translator("Amount", language)}
                   </label>
                   <span className="font-changa font-medium text-sm text-[#94A3B8] text-opacity-90">
-                    {truncateNumber(selectedCoinData ? selectedCoinData.amount : 0, 3)} $SOL
+                    {truncateNumber(selectedCoinData ? selectedCoinData.amount : 0, 3)} ${selectedToken}
                   </span>
                 </div>
 
@@ -269,7 +289,7 @@ export default function BalanceModal() {
                     {translator("Amount", language)}
                   </label>
                   <span className="font-changa font-medium text-sm text-[#94A3B8] text-opacity-90">
-                    {truncateNumber(walletBalance ?? 0, 3)} $SOL
+                    {truncateNumber(walletBalance ?? 0, 3)} ${selectedToken}
                   </span>
                 </div>
 

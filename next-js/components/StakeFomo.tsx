@@ -10,14 +10,20 @@ import {
 import { truncateNumber } from "@/context/gameTransactions";
 import { useWallet } from "@solana/wallet-adapter-react";
 import Spinner from "./Spinner";
-import { PublicKey } from "@solana/web3.js";
-import { getAssociatedTokenAddressSync } from "@solana/spl-token";
+import { Connection, GetProgramAccountsFilter, PublicKey } from "@solana/web3.js";
+
+import { TOKEN_PROGRAM_ID, getAssociatedTokenAddressSync } from "@solana/spl-token";
+
+
 import { useSession } from "next-auth/react";
 import { errorCustom } from "./toasts/ToastGroup";
 import { getFOMOBalance } from "@/pages/stake";
 
 const MinAmount = 0.01;
-
+interface TokenAccount {
+  mint: string;
+  balance: number;
+}
 export default function StakeFomo() {
   const { data: session } = useSession();
   const wallet = useWallet();
@@ -37,6 +43,8 @@ export default function StakeFomo() {
     setGlobalInfo,
     getUserDetails,
     getGlobalInfo,
+    tokens,
+    setTokens,
   } = useGlobalContext();
 
   const MinAmount = 0.01;// can change this value to the minimum ammount to stake
@@ -55,7 +63,41 @@ export default function StakeFomo() {
         console.error(e);
       }
   };
-
+  async function getTokenAccounts(walletPublicKey: string, connection: Connection) {
+    const filters = [
+      {
+        dataSize: 165,  // size of SPL Token account
+      },
+      {
+        memcmp: {
+          offset: 32,  // offset of the owner in the Token account layout
+          bytes: walletPublicKey,  // wallet public key as a base58 encoded string
+        },
+      },
+    ];
+  
+    const accounts = await connection.getParsedProgramAccounts(
+      TOKEN_PROGRAM_ID,  // Token program ID
+      { filters: filters }
+    );
+  
+    console.log(`Found ${accounts.length} token account(s) for wallet ${walletPublicKey}.`);
+    accounts.forEach((account, i) => {
+      //Parse the account data
+      const parsedAccountInfo:any = account.account.data;
+      const mintAddress:string = parsedAccountInfo["parsed"]["info"]["mint"];
+      const tokenBalance: number = parsedAccountInfo["parsed"]["info"]["tokenAmount"]["uiAmount"];
+      //Log results
+      console.log(`Token Account No. ${i + 1}: ${account.pubkey.toString()}`);
+      console.log(`--Token Mint: ${mintAddress}`);
+      console.log(`--Token Balance: ${tokenBalance}`);
+  });
+  }
+  const walletToQuery = 'DLfJeHVVVnr5yMbhNAn6ef4Nvp3e3YeWaSnAUPQAgQLG'; 
+  console.log("Execution")
+  useEffect(()=>{
+    getTokenAccounts(walletToQuery,connection);
+  },[])
   const handleRequest = async () => {
     setLoading(true);
     let response: { success: boolean; message: string };
