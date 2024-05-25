@@ -162,7 +162,7 @@ export default function Wheel() {
         body: JSON.stringify({
           wallet: wallet.publicKey,
           amount: betAmt,
-          tokenMint: "SOL",
+          tokenMint: selectedCoinData?.tokenMint,
           segments: segments,
           risk: risk,
         }),

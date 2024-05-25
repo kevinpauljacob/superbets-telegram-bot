@@ -1,6 +1,8 @@
 import React, { ReactNode } from "react";
 import GameHeader from "./GameHeader";
 import { useGlobalContext } from "./GlobalContext";
+
+
 import { formatNumber, translator } from "@/context/transactions";
 import {
   minGameAmount,
@@ -39,8 +41,8 @@ export const GameFooterInfo: React.FC<GameFooterProps> = ({
   amount,
   chance,
 }) => {
-  const { setShowWalletModal, houseEdge, language, selectedCoinData } = useGlobalContext();
-  const { coinData, setShowWalletModal, currentGame, houseEdge, language, selectedCoinData } =
+ 
+  const { coinData, setShowWalletModal, currentGame, houseEdge, language , selectedCoinData } =
     useGlobalContext();
 
   return (

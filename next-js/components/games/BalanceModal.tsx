@@ -1,7 +1,11 @@
 import { useWallet } from "@solana/wallet-adapter-react";
 import React, { useEffect, useRef, useState } from "react";
 import { useForm, FormProvider } from "react-hook-form";
-import { obfuscatePubKey, translator } from "@/context/transactions";
+import {
+  connection,
+  obfuscatePubKey,
+  translator,
+} from "@/context/transactions";
 import {
   deposit,
   truncateNumber,
@@ -14,6 +18,8 @@ import Image from "next/image";
 import { timestampParser } from "@/utils/timestampParser";
 import { useRouter } from "next/router";
 import { SPL_TOKENS } from "@/context/config";
+import { Connection, ParsedAccountData, PublicKey } from "@solana/web3.js";
+import { TOKEN_PROGRAM_ID } from "@solana/spl-token";
 
 export default function BalanceModal() {
   const methods = useForm();
@@ -28,7 +34,9 @@ export default function BalanceModal() {
     setShowWalletModal,
     walletBalance,
     language,
-    selectedCoinData
+    selectedCoinData,
+    userTokens,
+    setUserTokens,
   } = useGlobalContext();
 
   const [loading, setLoading] = useState<boolean>(false);
@@ -113,6 +121,71 @@ export default function BalanceModal() {
   useEffect(() => {
     if (actionType === "History") handleGetHistory();
   }, [actionType]);
+  interface TokenAccount {
+    mintAddress: string;
+    balance: number;
+  }
+
+  async function getTokenAccounts(
+    walletPublicKey: PublicKey,
+    connection: Connection,
+  ) {
+    const filters = [
+      {
+        dataSize: 165, // size of SPL Token account
+      },
+      {
+        memcmp: {
+          offset: 32, // offset of the owner in the Token account layout
+          bytes: walletPublicKey.toBase58(), // wallet public key as a base58 encoded string
+        },
+      },
+    ];
+
+    const accounts = await connection.getParsedProgramAccounts(
+      TOKEN_PROGRAM_ID, // Token program ID
+      { filters: filters },
+    );
+
+    const results: TokenAccount[] = accounts.map((account) => {
+      const info = account.account.data as ParsedAccountData; // Assume proper typing
+      const mintAddress = info.parsed.info.mint;
+      const balance = info.parsed.info.tokenAmount.uiAmount || 0;
+
+      console.log(`Token Mint: ${mintAddress}, Balance: ${balance}`);
+      return { mintAddress, balance };
+    });
+
+    return results;
+  }
+
+  useEffect(() => {
+    let intervalId: NodeJS.Timeout | null = null;
+
+    if (wallet && wallet.publicKey && showWalletModal) {
+      const fetchAndUpddateToken = () => {
+        getTokenAccounts(wallet.publicKey!, connection)
+          .then((tokens) => {
+            setUserTokens([
+              {
+                mintAddress: "SOL",
+                balance: walletBalance,
+              },
+              ...tokens,
+            ]);
+          })
+          .catch(console.error);
+      };
+      fetchAndUpddateToken();
+      intervalId = setInterval(fetchAndUpddateToken, 5000);
+
+      return () => {
+        if (intervalId) {
+          clearInterval(intervalId);
+        }
+      };
+    }
+  }, [wallet, showWalletModal]);
 
   return (
     <div className="absolute z-[150] left-0 top-0 flex h-full w-full items-center justify-center bg-[#33314680] backdrop-blur-[0px] transition-all">
@@ -185,24 +258,63 @@ export default function BalanceModal() {
                   {translator("Coin", language)}
                 </label>
 
-                <span className="w-full rounded-md h-11 flex items-center bg-[#202329] px-4 py-2 text-[#94A3B8] text-base font-chakra gap-2 cursor-pointer" onClick={() => setIsSelectModalOpen(!isSelectModalOpen)}>
-                  <img src={SPL_TOKENS.find(token => token.tokenMint === selectedToken)!.icon} alt="" className="w-5 h-5" />
-                  <span>{selectedToken}</span>
-                  <div className="grow"/>
-                  <img src="/assets/chevron.svg" alt="" className={`w-4 h-4 transform ${isSelectModalOpen ? "rotate-180" : ""}`} />
+                <span
+                  className="w-full rounded-md h-11 flex items-center bg-[#202329] px-4 py-2 text-[#94A3B8] text-base font-chakra gap-2 cursor-pointer"
+                  onClick={() => setIsSelectModalOpen(!isSelectModalOpen)}
+                >
+                  <img
+                    src={
+                      SPL_TOKENS.find(
+                        (token) => token.tokenMint === selectedToken,
+                      )!.icon
+                    }
+                    alt=""
+                    className="w-5 h-5"
+                  />
+                  <span>
+                    {
+                      SPL_TOKENS.find(
+                        (token) => token.tokenMint === selectedToken,
+                      )!.tokenName
+                    }
+                  </span>
+                  <div className="grow" />
+                  <img
+                    src="/assets/chevron.svg"
+                    alt=""
+                    className={`w-4 h-4 transform ${isSelectModalOpen ? "rotate-180" : ""}`}
+                  />
                 </span>
 
                 {isSelectModalOpen && (
                   <div className="absolute z-[100] top-[calc(100%+10px)] left-0 w-full bg-[#202329] rounded-md shadow-md">
                     {SPL_TOKENS.map((token, index) => (
-                      <div key={index} className="w-full h-11 flex flex-row items-center bg-[#202329] px-4 py-2 text-[#94A3B8] text-base font-chakra gap-2 cursor-pointer hover:bg-[#292C32] rounded-md" onClick={() => {
-                        setSelectedToken(token.tokenMint);
-                        setIsSelectModalOpen(false);
-                      }}>
+                      <div
+                        key={index}
+                        className="w-full h-11 flex flex-row items-center bg-[#202329] px-4 py-2 text-[#94A3B8] text-base font-chakra gap-2 cursor-pointer hover:bg-[#292C32] rounded-md"
+                        onClick={() => {
+                          setSelectedToken(token.tokenMint);
+                          setIsSelectModalOpen(false);
+                        }}
+                      >
                         <img src={token.icon} alt="" className="w-5 h-5" />
                         <span>{token.tokenName}</span>
-                        <div className="grow"/>
-                        <span className="text-gray-400">0.0000000000</span>
+                        <div className="grow" />
+                        <span className="text-gray-400">
+                          {actionType === "Deposit" && (
+                          userTokens.find(
+                            (t) => t.mintAddress === token.tokenMint,
+                          ) &&
+                          userTokens.find(
+                            (t) => t.mintAddress === token.tokenMint,
+                          )
+                            ? userTokens.find(
+                                (t) => t.mintAddress === token.tokenMint,
+                              )!.balance
+                            : "0")}
+                          {/** todo: return amount from game wallet */}
+                          {actionType === "Withdraw" && "0"}
+                        </span>
                       </div>
                     ))}
                   </div>
@@ -230,7 +342,17 @@ export default function BalanceModal() {
                     {translator("Amount", language)}
                   </label>
                   <span className="font-changa font-medium text-sm text-[#94A3B8] text-opacity-90">
-                    {truncateNumber(selectedCoinData ? selectedCoinData.amount : 0, 3)} ${selectedToken}
+                    {truncateNumber(
+                      //todo: return amount from game wallet
+                      0,
+                      3,
+                    )}{" "}
+                    $
+                    {
+                      SPL_TOKENS.find(
+                        (token) => token.tokenMint === selectedToken,
+                      )!.tokenName
+                    }
                   </span>
                 </div>
 
@@ -253,17 +375,19 @@ export default function BalanceModal() {
                   />
                   <span
                     className="text-xs font-medium text-white text-opacity-50 bg-[#292C32] hover:bg-[#47484A] focus:bg-[#47484A] transition-all rounded-[5px] mr-2 py-1.5 px-4"
-                    onClick={() =>
-                      setAmount(selectedCoinData ? selectedCoinData.amount / 2 : 0)
-                    }
+                    onClick={() => {
+                      //todo: return amount from game wallet
+                      return 0;
+                    }}
                   >
                     {translator("Half", language)}
                   </span>
                   <span
                     className="text-xs font-medium text-white text-opacity-50 bg-[#292C32] hover:bg-[#47484A] focus:bg-[#47484A] transition-all rounded-[5px] py-1.5 px-4"
-                    onClick={() =>
-                      setAmount(selectedCoinData ? selectedCoinData.amount : 0)
-                    }
+                    onClick={() => {
+                      //todo: return amount from game wallet
+                      return 0;
+                    }}
                   >
                     {translator("Max", language)}
                   </span>
@@ -289,7 +413,18 @@ export default function BalanceModal() {
                     {translator("Amount", language)}
                   </label>
                   <span className="font-changa font-medium text-sm text-[#94A3B8] text-opacity-90">
-                    {truncateNumber(walletBalance ?? 0, 3)} ${selectedToken}
+                    {truncateNumber(
+                      userTokens.find(
+                        (token) => token.mintAddress === selectedToken,
+                      )?.balance ?? 0,
+                      3,
+                    )}{" "}
+                    $
+                    {
+                      SPL_TOKENS.find(
+                        (token) => token.tokenMint === selectedToken,
+                      )!.tokenName
+                    }
                   </span>
                 </div>
 
@@ -311,7 +446,12 @@ export default function BalanceModal() {
                   />
                   <span
                     className="text-xs font-medium text-white text-opacity-50 bg-[#292C32] hover:bg-[#47484A] focus:bg-[#47484A] transition-all rounded-[5px] py-1.5 px-4"
-                    onClick={() => setAmount((walletBalance ?? 0) - 0.01)}
+                    onClick={() => {
+                      setAmount(
+                        userTokens.find((t) => t.mintAddress === selectedToken)!
+                          .balance,
+                      );
+                    }}
                   >
                     {translator("Max", language)}
                   </span>

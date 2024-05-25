@@ -23,7 +23,7 @@ interface PointTier {
   label: string;
 }
 interface TokenAccount {
-  mint: string;
+  mintAddress: string;
   balance: number;
 }
 interface CoinBalance {
@@ -31,7 +31,7 @@ interface CoinBalance {
   type: boolean;
   amount: number;
   tokenMint: string;
-  img: string
+  img: string;
 }
 
 interface ProvablyFairData {
@@ -181,8 +181,8 @@ interface GlobalContextProps {
   setKenoRisk: React.Dispatch<
     React.SetStateAction<"classic" | "low" | "medium" | "high">
   >;
-  tokens: TokenAccount[]; // Add this line
-  setTokens: React.Dispatch<React.SetStateAction<TokenAccount[]>>;
+  userTokens: TokenAccount[]; // Add this line
+  setUserTokens: React.Dispatch<React.SetStateAction<TokenAccount[]>>;
 }
 
 const GlobalContext = createContext<GlobalContextProps | undefined>(undefined);
@@ -193,10 +193,10 @@ interface GlobalProviderProps {
 
 export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
   const wallet = useWallet();
- 
+
   const [loading, setLoading] = useState(false);
   const [language, setLanguage] = useState<"en" | "ru" | "ko" | "ch">("en");
-  const [tokens, setTokens] = useState<TokenAccount[]>([]);
+  const [userTokens, setUserTokens] = useState<TokenAccount[]>([]);
   const [userData, setUserData] = useState<User | null>(null);
   const [stake, setStake] = useState(true);
   const [stakeAmount, setStakeAmount] = useState<number>(0);
@@ -221,11 +221,18 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
       type: true,
       amount: 0,
       tokenMint: "SOL",
-      img: "/assets/sol.png",
+      img: "https://upload.wikimedia.org/wikipedia/en/b/b9/Solana_logo.png",
     },
   ]);
   const [selectedCoin, setSelectedCoin] = useState<string>("SOL");
-  const [selectedCoinData, setSelectedCoinData] = useState<CoinBalance | null>(null);
+  const [selectedCoinData, setSelectedCoinData] = useState<CoinBalance | null>(
+    {amount: 0.0011550789999999942,
+      img: "https://upload.wikimedia.org/wikipedia/en/b/b9/Solana_logo.png",
+      tokenMint: "SOL",
+      type: true,
+      wallet: ""}||null
+  );
+
   const [showWalletModal, setShowWalletModal] = useState<boolean>(false);
   const [isVerifyModalOpen, setIsVerifyModalOpen] = useState<boolean>(false);
   const [verifyModalData, setVerifyModalData] = useState({});
@@ -263,18 +270,6 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
   const [kenoRisk, setKenoRisk] = useState<
     "classic" | "low" | "medium" | "high"
   >("classic");
-
-  const getSelectedCoin = () => {
-    if (coinData && coinData.length > 0) {
-      const selected = coinData.find((coin) => coin.tokenMint === selectedCoin);
-      if (selected) return selected;
-    }
-    return null
-  }
-
-  useEffect(() => {
-    setSelectedCoinData(getSelectedCoin())
-  }, [selectedCoin])
 
   const openVerifyModal = () => {
     setIsVerifyModalOpen(true);
@@ -373,7 +368,7 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
       console.error(e);
     }
   };
-  
+
   const getProvablyFairData = async () => {
     if (wallet?.publicKey)
       try {
@@ -480,8 +475,8 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
         setSelectedCoin,
         selectedCoinData,
         setSelectedCoinData,
-        tokens,
-        setTokens
+        userTokens,
+        setUserTokens,
       }}
     >
       {children}

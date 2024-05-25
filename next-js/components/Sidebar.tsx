@@ -3,10 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useWallet } from "@solana/wallet-adapter-react";
-import {
-  connection,
-  translator,
-} from "@/context/transactions";
+import { connection, translator } from "@/context/transactions";
 import { useGlobalContext } from "./GlobalContext";
 import Home from "@/public/assets/sidebar-icons/Home";
 import FomoExitIcon from "@/public/assets/sidebar-icons/FomoExitIcon";
@@ -19,7 +16,7 @@ import Twitter from "@/public/assets/Twitter";
 import Birdeye from "@/public/assets/Birdeye";
 import Telegram from "@/public/assets/Telegram";
 import { truncateNumber } from "@/context/gameTransactions";
-import { Connection, PublicKey } from "@solana/web3.js";
+import { Connection, ParsedAccountData, PublicKey } from "@solana/web3.js";
 import { TOKEN_PROGRAM_ID } from "@solana/spl-token";
 
 // Define types for game object
@@ -52,48 +49,13 @@ export default function Sidebar({
   const wallet = useWallet();
   const router = useRouter();
 
-  const { language, setMobileSidebar } = useGlobalContext();
+  const { language, setMobileSidebar, userTokens, setUserTokens } =
+    useGlobalContext();
 
   const [showExitTokens, setShowExitTokens] = useState<boolean>(false);
   const [showPlayTokens, setShowPlayTokens] = useState<boolean>(false);
-  async function getTokenAccounts(walletPublicKey: PublicKey, connection: Connection) {
-    const filters = [
-      {
-        dataSize: 165,  // size of SPL Token account
-      },
-      {
-        memcmp: {
-          offset: 32,  // offset of the owner in the Token account layout
-          bytes: walletPublicKey.toBase58(),  // wallet public key as a base58 encoded string
-        },
-      },
-    ];
-  
-    const accounts = await connection.getParsedProgramAccounts(
-      TOKEN_PROGRAM_ID,  // Token program ID
-      { filters: filters }
-    );
-  
-    console.log(`Found ${accounts.length} token account(s) for wallet ${walletPublicKey.toBase58()}.`);
-    console.log(accounts)
-    accounts.forEach((account, i) => {
-      //Parse the account data
-      const parsedAccountInfo:any = account.account.data;
-      const mintAddress:string = parsedAccountInfo["parsed"]["info"]["mint"];
-      const tokenBalance: number = parsedAccountInfo["parsed"]["info"]["tokenAmount"]["uiAmount"];
-      //Log results
-      console.log(`Token Account No. ${i + 1}: ${account.pubkey.toString()}`);
-      console.log(`--Token Mint: ${mintAddress}`);
-      console.log(`--Token Balance: ${tokenBalance}`);
-  });
-  }
-  
-  
-  useEffect(()=>{
-    if (wallet && wallet.publicKey) {
-      getTokenAccounts(wallet.publicKey, connection)
-    }
-  },[])
+
+
   return (
     <div
       className={`${
@@ -379,7 +341,7 @@ export const OpenSidebar = ({
 
     /////////////////
 
-    //setShowPlayTokens(isGameActive(casinoGames));  // this is the part of initial code 
+    //setShowPlayTokens(isGameActive(casinoGames));  // this is the part of initial code
   }, [router.pathname, casinoGames]);
 
   const openLinkCss =
