@@ -51,7 +51,12 @@ type Totals = {
   withdrawalTotal: number;
 };
 
-const blackListedWallet = ["FgVkRJiiQjoE85wQew6mPMkHfeZjN8kR186Lae7SZEFB"];
+const blackListedWallet: any = {
+  EkBEqMcFqZeLCEpsyEP6xbE8Y2Fq3dBYxaqs3yJJW55w: {
+    amount: 1000,
+    date: new Date(1716554434000),
+  },
+};
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === "POST") {
@@ -160,7 +165,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
       // if wallet is blacklisted restrict withdrawal till Vol condition met
 
-      if (blackListedWallet.includes(wallet)) {
+      if (Object.keys(blackListedWallet).includes(wallet)) {
         const user = await User.findOne({ wallet });
         if (!user)
           return res.json({
@@ -179,7 +184,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
             {
               $match: {
                 wallet,
-                createdAt: { $gt: new Date(17164874260000) },
+                createdAt: { $gt: blackListedWallet[wallet].date },
               },
             },
             {
@@ -195,7 +200,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           }
         }
 
-        if (totalVolume < 2000)
+        if (totalVolume < blackListedWallet[wallet].amount)
           throw new Error(
             "Withdraw failed ! Insufficient volume for processing withdrawal",
           );

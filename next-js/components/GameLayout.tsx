@@ -1,8 +1,15 @@
 import React, { ReactNode } from "react";
 import GameHeader from "./GameHeader";
 import { useGlobalContext } from "./GlobalContext";
-import { translator } from "@/context/transactions";
-import { minGameAmount, truncateNumber } from "@/context/gameTransactions";
+
+
+import { formatNumber, translator } from "@/context/transactions";
+import {
+  minGameAmount,
+  optionsEdge,
+  truncateNumber,
+} from "@/context/gameTransactions";
+import Link from "next/link";
 import FomoPlay from "./FomoPlay";
 import FOMOHead from "./HeadElement";
 
@@ -34,7 +41,9 @@ export const GameFooterInfo: React.FC<GameFooterProps> = ({
   amount,
   chance,
 }) => {
-  const { setShowWalletModal, houseEdge, language, selectedCoinData } = useGlobalContext();
+ 
+  const { coinData, setShowWalletModal, currentGame, houseEdge, language , selectedCoinData } =
+    useGlobalContext();
 
   return (
     <div className="flex px-0 xl:px-4 mb-0 md:mb-[1.4rem] gap-4 flex-row w-full justify-between">
@@ -58,7 +67,15 @@ export const GameFooterInfo: React.FC<GameFooterProps> = ({
               {translator("Profit", language)}
             </span>
             <span className="bg-[#202329] font-chakra text-xs text-white rounded-md px-2 md:px-5 py-3">
-              {truncateNumber(amount * (multiplier * (1 - houseEdge) - 1), 4)}{" "}
+              {truncateNumber(
+                amount *
+                  (multiplier *
+                    (1 -
+                      (currentGame == "options" ? optionsEdge : 0) +
+                      houseEdge) -
+                    1),
+                4,
+              )}{" "}
               $SOL
             </span>
           </div>

@@ -32,7 +32,9 @@ export const minGameAmount = 1e-6;
 
 export const timeWeightedAvgInterval = 24 * 60 * 60 * 1000;
 export const timeWeightedAvgLimit = 50;
-export const userLimitMultiplier = 10;
+export const userLimitMultiplier = 5;
+
+export const optionsEdge = 0.1;
 
 export const placeBet = async (
   wallet: WalletContextState,
@@ -470,7 +472,7 @@ export const rollDice = async (
 export const limboBet = async (
   wallet: WalletContextState,
   amount: number,
-  chance: number,
+  multiplier: number,
 ) => {
   const {selectedCoinData} = useGlobalContext()
 
@@ -483,7 +485,7 @@ export const limboBet = async (
         wallet: wallet.publicKey,
         amount: amount,
         tokenMint: selectedCoinData?.tokenMint,
-        chance,
+        multiplier,
       }),
       headers: {
         "Content-Type": "application/json",
@@ -507,7 +509,7 @@ export function trimStringToLength(str: string, desiredLength: number): string {
 }
 
 export const truncateNumber = (num: number, numOfDecimals: number = 4) => {
-  const [whole, decimal] = num.toString().split(".");
+  const [whole, decimal] = num.toFixed(9).split(".");
   return parseFloat(whole + "." + (decimal || "").slice(0, numOfDecimals));
 };
 
