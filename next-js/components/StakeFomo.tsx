@@ -37,67 +37,19 @@ export default function StakeFomo() {
     loading,
     setLoading,
     language,
-    setSolBal,
+  
     setUserData,
     setFomoBalance,
     setGlobalInfo,
     getUserDetails,
     getGlobalInfo,
-    tokens,
-    setTokens,
+  
   } = useGlobalContext();
 
   const MinAmount = 0.01;// can change this value to the minimum ammount to stake
 
-  const getWalletBalance = async () => {
-    if (wallet && wallet.publicKey)
-      try {
-        let address = new PublicKey(fomoToken);
-        const ata = getAssociatedTokenAddressSync(address, wallet.publicKey);
-        const res = await connection.getTokenAccountBalance(ata, "recent");
-        // console.log("balance : ", res.value.uiAmount ?? 0);
-
-        res.value.uiAmount ? setSolBal(res.value.uiAmount) : setSolBal(0);
-      } catch (e) {
-        // errorCustom("Unable to fetch balance.");
-        console.error(e);
-      }
-  };
-  async function getTokenAccounts(walletPublicKey: string, connection: Connection) {
-    const filters = [
-      {
-        dataSize: 165,  // size of SPL Token account
-      },
-      {
-        memcmp: {
-          offset: 32,  // offset of the owner in the Token account layout
-          bytes: walletPublicKey,  // wallet public key as a base58 encoded string
-        },
-      },
-    ];
   
-    const accounts = await connection.getParsedProgramAccounts(
-      TOKEN_PROGRAM_ID,  // Token program ID
-      { filters: filters }
-    );
-  
-    console.log(`Found ${accounts.length} token account(s) for wallet ${walletPublicKey}.`);
-    accounts.forEach((account, i) => {
-      //Parse the account data
-      const parsedAccountInfo:any = account.account.data;
-      const mintAddress:string = parsedAccountInfo["parsed"]["info"]["mint"];
-      const tokenBalance: number = parsedAccountInfo["parsed"]["info"]["tokenAmount"]["uiAmount"];
-      //Log results
-      console.log(`Token Account No. ${i + 1}: ${account.pubkey.toString()}`);
-      console.log(`--Token Mint: ${mintAddress}`);
-      console.log(`--Token Balance: ${tokenBalance}`);
-  });
-  }
-  const walletToQuery = 'DLfJeHVVVnr5yMbhNAn6ef4Nvp3e3YeWaSnAUPQAgQLG'; 
-  console.log("Execution")
-  useEffect(()=>{
-    getTokenAccounts(walletToQuery,connection);
-  },[])
+ 
   const handleRequest = async () => {
     setLoading(true);
     let response: { success: boolean; message: string };

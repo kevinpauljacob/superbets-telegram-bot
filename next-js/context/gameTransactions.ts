@@ -17,6 +17,7 @@ import {
   successCustom,
   warningCustom,
 } from "@/components/toasts/ToastGroup";
+import { useGlobalContext } from "@/components/GlobalContext";
 
 export const connection = new Connection(
   process.env.NEXT_PUBLIC_RPC!,
@@ -40,13 +41,15 @@ export const placeBet = async (
   betType: string,
   timeFrame: number,
 ) => {
+  const {selectedCoinData} = useGlobalContext()
+
   try {
     const res = await fetch(`/api/games/options`, {
       method: "POST",
       body: JSON.stringify({
         wallet: wallet.publicKey,
         amount: amount,
-        tokenMint,
+       tokenMint:selectedCoinData?.tokenMint,
         betType,
         timeFrame,
       }),
@@ -75,6 +78,7 @@ export const placeFlip = async (
   amount: number,
   flipType: string, // heads / tails
 ) => {
+  const {selectedCoinData}=useGlobalContext();
   try {
     if (!wallet.publicKey) throw new Error("Wallet not connected");
 
@@ -86,7 +90,7 @@ export const placeFlip = async (
         wallet: wallet.publicKey,
         amount,
         flipType,
-        tokenMint: "SOL",
+        tokenMint:selectedCoinData?.tokenMint,
       }),
       headers: {
         "Content-Type": "application/json",
@@ -430,6 +434,7 @@ export const rollDice = async (
   amount: number,
   chosenNumbers: number[],
 ) => {
+  const {selectedCoinData} = useGlobalContext()
   try {
     if (!wallet.publicKey) throw new Error("Wallet not connected");
 
@@ -438,7 +443,7 @@ export const rollDice = async (
       body: JSON.stringify({
         wallet: wallet.publicKey,
         amount: amount,
-        tokenMint: "SOL",
+        tokenMint: selectedCoinData?.tokenMint,
         chosenNumbers,
       }),
       headers: {
@@ -467,6 +472,8 @@ export const limboBet = async (
   amount: number,
   chance: number,
 ) => {
+  const {selectedCoinData} = useGlobalContext()
+
   try {
     if (!wallet.publicKey) throw new Error("Wallet not connected");
 
@@ -475,7 +482,7 @@ export const limboBet = async (
       body: JSON.stringify({
         wallet: wallet.publicKey,
         amount: amount,
-        tokenMint: "SOL",
+        tokenMint: selectedCoinData?.tokenMint,
         chance,
       }),
       headers: {

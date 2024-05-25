@@ -198,7 +198,7 @@ export default function Keno() {
         body: JSON.stringify({
           wallet: wallet.publicKey,
           amount: betAmt,
-          tokenMint: "SOL",
+          tokenMint:selectedCoinData?.tokenMint,
           chosenNumbers: chosenNumbers,
           risk: kenoRisk,
         }),

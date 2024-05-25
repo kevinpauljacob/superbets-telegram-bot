@@ -164,7 +164,7 @@ export default function Dice2() {
         body: JSON.stringify({
           wallet: wallet.publicKey,
           amount: betAmt,
-          tokenMint: "SOL",
+          tokenMint: selectedCoinData?.tokenMint,
           chance: chance,
           direction: rollType === "over" ? "over" : "under",
         }),

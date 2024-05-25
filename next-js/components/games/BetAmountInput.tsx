@@ -7,6 +7,7 @@ import Image from "next/image";
 import { translator } from "@/context/transactions";
 import { minGameAmount, truncateNumber } from "@/context/gameTransactions";
 import { riskToChance } from "./Keno/RiskToChance";
+import { SPL_TOKENS } from "@/context/config";
 export default function BetAmount({
   betAmt,
   setBetAmt,
@@ -57,11 +58,15 @@ export default function BetAmount({
     if (tempBetAmt !== undefined && effectiveMultiplier !== undefined) {
       let calculatedMaxBetAmt =
         maxPayouts[game as GameType] / currentMultiplier;
-
+      
+      
+      if(selectedCoinData?.amount == undefined && selectedCoinData?.amount == 0) {
+       setCurrentMaxBetAmt(0)
+      }
       setCurrentMaxBetAmt(
         isFinite(calculatedMaxBetAmt) ? calculatedMaxBetAmt : 0,
       );
-
+      
       if (
         betAmt &&
         betAmt > (isFinite(calculatedMaxBetAmt) ? calculatedMaxBetAmt : 0)
@@ -87,7 +92,8 @@ export default function BetAmount({
           : truncateNumber(currentMaxBetAmt, 4),
       ),
     );
-  }, [currentMaxBetAmt, coinData]);
+    console.log(selectedCoinData)
+  }, [currentMaxBetAmt, coinData,selectedCoinData]);
 
   const handleSetMaxBet = () => {
     setBetAmt(maxBetAmt);
@@ -146,7 +152,9 @@ export default function BetAmount({
         </label>
         <span className="flex items-center text-[#94A3B8] text-opacity-90 font-changa text-xs gap-2">
           <span className="cursor-pointer" onClick={handleSetMaxBet}>
-            {maxBetAmt} $SOL
+          {maxBetAmt} $ {
+      SPL_TOKENS.find(token => token.tokenMint === selectedCoinData?.tokenMint)?.tokenName || 'Unknown Token'
+    }
           </span>
           <span
             className={`group font-chakra font-medium cursor-pointer underline hover:text-opacity-100 transition-all duration-300 text-white ${
