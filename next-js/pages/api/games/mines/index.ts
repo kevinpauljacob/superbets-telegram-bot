@@ -36,7 +36,10 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           .status(400)
           .json({ success: false, message: "Missing parameters" });
 
-      if (tokenMint !== "SOL" || !(1 <= minesCount && minesCount <= 24))
+      if (
+        tokenMint !== "SOL" ||
+        !(Number.isInteger(minesCount) && 1 <= minesCount && minesCount <= 24)
+      )
         return res
           .status(400)
           .json({ success: false, message: "Invalid parameters" });
@@ -48,6 +51,13 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         });
 
       await connectDatabase();
+
+      const pendingGame = await Mines.findOne({ wallet, result: "Pending" });
+      if (pendingGame)
+        return res.status(400).json({
+          success: false,
+          message: `Previous game is still pending, gameId:${pendingGame._id}`,
+        });
 
       let user = await User.findOne({ wallet });
 
@@ -98,6 +108,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         {
           $inc: {
             "deposit.$.amount": -amount,
+            numOfGamesPlayed: 1,
           },
         },
         {

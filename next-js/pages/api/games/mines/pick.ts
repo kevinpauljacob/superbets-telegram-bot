@@ -45,7 +45,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           .status(400)
           .json({ success: false, message: "Missing parameters" });
 
-      if (!(0 <= userBet && userBet <= 24))
+      if (!(Number.isInteger(userBet) && 0 <= userBet && userBet <= 24))
         return res
           .status(400)
           .json({ success: false, message: "Invalid parameters" });
@@ -67,6 +67,12 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           .status(400)
           .json({ success: false, message: "Game does not exist !" });
 
+      if (gameInfo.wallet !== wallet)
+        return res.status(400).json({
+          success: false,
+          message: "User not authorized to play this game!",
+        });
+
       let {
         nonce,
         gameSeed,
@@ -76,6 +82,12 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         amount,
         strikeMultiplier,
       } = gameInfo;
+
+      if (userBets.includes(userBet))
+        return res.status(400).json({
+          success: false,
+          message: "You have already picked this number!",
+        });
 
       const strikeNumbers = generateGameResult(
         gameSeed.serverSeed,
@@ -110,11 +122,11 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           },
           {
             result,
-            userBets,
             strikeNumbers,
-            strikeMultiplier,
+            strikeMultiplier: 0,
             amountWon: 0,
             amountLost: gameInfo.amount,
+            $push: { userBets: userBet },
           },
           {
             new: true,
@@ -125,7 +137,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           .mul(Decimal.sub(1, houseEdge))
           .toNumber();
 
-        if (numBets === 25 - minesCount) {
+        if (numBets === 25 - minesCount + 1) {
           result = "Won";
 
           const userUpdate = await User.findOneAndUpdate(
@@ -140,7 +152,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
             {
               $inc: {
                 "deposit.$.amount": amountWon,
-                numOfGamesPlayed: 1,
               },
             },
             {
@@ -239,6 +250,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
             ? "Better luck next time!"
             : "Game in progress",
         result,
+        ...(result === "Pending" ? {} : { strikeNumbers }),
       });
     } catch (e: any) {
       console.log(e);
