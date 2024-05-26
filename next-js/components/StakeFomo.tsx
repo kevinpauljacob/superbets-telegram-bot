@@ -9,23 +9,18 @@ import {
 } from "@/context/transactions";
 import { truncateNumber } from "@/context/gameTransactions";
 import { useWallet } from "@solana/wallet-adapter-react";
+//import toast from "react-hot-toast";
 import Spinner from "./Spinner";
-import { Connection, GetProgramAccountsFilter, PublicKey } from "@solana/web3.js";
-
-import { TOKEN_PROGRAM_ID, getAssociatedTokenAddressSync } from "@solana/spl-token";
-
-
+import { PublicKey } from "@solana/web3.js";
+import { getAssociatedTokenAddressSync } from "@solana/spl-token";
 import { useSession } from "next-auth/react";
 import { errorCustom } from "./toasts/ToastGroup";
 import { getFOMOBalance } from "@/pages/stake";
 
 const MinAmount = 0.01;
-interface TokenAccount {
-  mint: string;
-  balance: number;
-}
+
 export default function StakeFomo() {
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
   const wallet = useWallet();
   const {
     stake,
@@ -37,19 +32,13 @@ export default function StakeFomo() {
     loading,
     setLoading,
     language,
-  
     setUserData,
     setFomoBalance,
     setGlobalInfo,
     getUserDetails,
     getGlobalInfo,
-  
   } = useGlobalContext();
 
-  const MinAmount = 0.01;// can change this value to the minimum ammount to stake
-
-  
- 
   const handleRequest = async () => {
     setLoading(true);
     let response: { success: boolean; message: string };
@@ -105,7 +94,6 @@ export default function StakeFomo() {
         setStakeAmount(amt);
       }
     }
-  }
   };
 
   const handleDoubleStake = () => {

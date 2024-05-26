@@ -254,7 +254,7 @@ export const OpenSidebar = ({
   const wallet = useWallet();
   const router = useRouter();
   const { fomoPrice, setSidebar, setMobileSidebar } = useGlobalContext();
-
+  console.log(fomoPrice)
   const [casinoGames, setCasinoGames] = useState<Game[]>([
     {
       src: "",
@@ -307,46 +307,47 @@ export const OpenSidebar = ({
     }));
     setCasinoGames(updatedCasinoGames);
   };
-
+  const [priceChange24h, setPriceChange24h] = useState(0)
   const { language, setFomoPrice } = useGlobalContext();
-
+ 
+  const fomoAddress = "Cx9oLynYgC3RrgXzin7U417hNY9D6YB1eMGw4ZMbWJgw";
+  const url = `https://api.dexscreener.com/latest/dex/tokens/${fomoAddress}`;
   useEffect(() => {
-    // Function to check if any game link matches the current pathname
-    const isGameActive = (games: Game[]) => {
-      return games.some((game) => game.link === router.pathname);
-    };
 
     /// code added to fetch fomo price
     const fetchFomoPrice = async () => {
       try {
-        let data = await fetch(
-          "https://price.jup.ag/v4/price?ids=FOMO&vsToken=USDC",
-        ).then((res) => res.json());
-        // console.log(data);
-        setFomoPrice(data?.data?.FOMO?.price ?? 0);
+        const response = await fetch(url);
+        const data = await response.json();
+        const priceUsd = parseFloat(data?.pairs[0]?.priceUsd);
+        const change24h = parseFloat(data?.pairs[0]?.priceChange?.h24); // Assuming API returns this as a percentage
+
+        if (!isNaN(priceUsd)) {
+          setFomoPrice(priceUsd);
+          setPriceChange24h(change24h);
+        } else {
+          console.error("Invalid price fetched:", data?.pairs[0]?.priceUsd);
+          setFomoPrice(0);
+          setPriceChange24h(0);
+        }
       } catch (e) {
-        console.log(e);
+        console.error("Failed to fetch FOMO price:", e);
         setFomoPrice(0);
-        // errorCustom("Could not fetch fomo live price.");
+        setPriceChange24h(0);
       }
     };
 
-    fetchFomoPrice();
+    const intervalId = setInterval(fetchFomoPrice, 10000);
+    fetchFomoPrice(); // fetch immediately on mount
 
-    let intervalId = setInterval(async () => {
-      fetchFomoPrice();
-    }, 10000);
-    setShowPlayTokens(isGameActive(casinoGames));
     return () => clearInterval(intervalId);
-
-    /////////////////
 
     //setShowPlayTokens(isGameActive(casinoGames));  // this is the part of initial code
   }, [router.pathname, casinoGames]);
 
   const openLinkCss =
     "w-full gap-2 flex items-center justify-center text-sm font-semibold text-white text-opacity-50 hover:bg-white/10 transition duration-300 ease-in-out hover:transition hover:duration-300 hover:ease-in-out bg-[#191A1D] rounded-md text-center py-2 mb-2";
-
+  const priceChangeColor = priceChange24h >= 0 ? 'text-[#72F238]' : 'text-[#F1323E]';
   return (
     <>
       <div className="w-full">
@@ -370,13 +371,13 @@ export const OpenSidebar = ({
             </span>
             <div className="flex items-center gap-1">
               <span className="text-sm text-[#94A3B8] font-medium font-chakra leading-3">
-                ${truncateNumber(fomoPrice, 3)}
+                ${truncateNumber(fomoPrice,3)}
               </span>
-              {/* <span
-                className={`text-xs text-[#72F238] font-medium pt-[0.1px] leading-[0.6rem]`}
+               <span
+                className={`text-xs ${priceChangeColor} font-medium pt-[0.1px] leading-[0.6rem]`}
               >
-                +2.57%
-              </span> */}
+              {priceChange24h.toFixed(2)}%
+              </span> 
             </div>
           </div>
         </div>
