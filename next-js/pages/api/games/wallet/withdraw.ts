@@ -271,6 +271,10 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         (transferAgg.depositTotal ?? 0) +
         amount;
 
+      // disable global
+
+      // netTransfer = 1000000000;
+
       if (netTransfer > timeWeightedAvgLimit) {
         await Deposit.create({
           wallet,
