@@ -104,18 +104,19 @@ export const generateGameResult = <T extends GameType>(
       return ((parseInt(hash.slice(0, 4), 16) % 38) - 1) as GameResult<T>;
 
     case GameType.mines: {
-      if (!parameter) throw new Error("Game parameter missing!");
-      let mines = Array.from({ length: 25 }, () => 0);
+      const positions = Array.from({ length: 25 }, (_, i) => i);
 
-      for (let minesCount = 0; minesCount < parameter; minesCount++) {
-        let mineIndex =
-          parseInt(hash.slice(minesCount * 2, minesCount * 2 + 2), 16) % 25;
-
-        while (mines[mineIndex] === 1) {
-          mineIndex = (mineIndex + 1) % 25;
-        }
-        mines[mineIndex] = 1;
+      for (let i = 24; i > 0; i--) {
+        const swapIndex = parseInt(hash.slice(i * 2, i * 2 + 2), 16) % (i + 1);
+        [positions[i], positions[swapIndex]] = [
+          positions[swapIndex],
+          positions[i],
+        ];
       }
+
+      const minePositions = new Set(positions.slice(0, parameter));
+      const mines = new Array(25).fill(0);
+      minePositions.forEach((position) => (mines[position] = 1));
 
       return mines as GameResult<T>;
     }

@@ -61,8 +61,26 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           .status(400)
           .json({ success: false, message: "Game does not exist !" });
 
-      let { nonce, gameSeed, minesCount, amount, amountWon, strikeMultiplier } =
-        gameInfo;
+      if (gameInfo.wallet !== wallet)
+        return res.status(400).json({
+          success: false,
+          message: "User not authorized to play this game!",
+        });
+
+      let {
+        nonce,
+        gameSeed,
+        minesCount,
+        amount,
+        amountWon,
+        userBets,
+        strikeMultiplier,
+      } = gameInfo;
+
+      if (userBets.length === 0)
+        return res
+          .status(400)
+          .json({ success: false, message: "No bets placed" });
 
       const userData = await StakingUser.findOneAndUpdate(
         { wallet },
@@ -95,7 +113,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         {
           $inc: {
             "deposit.$.amount": amountWon,
-            numOfGamesPlayed: 1,
           },
         },
         {
@@ -168,6 +185,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       return res.status(201).json({
         success: true,
         message: "Congratulations! You won!",
+        strikeNumbers,
+        strikeMultiplier,
         result,
       });
     } catch (e: any) {
