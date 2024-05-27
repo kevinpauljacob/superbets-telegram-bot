@@ -52,10 +52,6 @@ type Totals = {
 };
 
 const blackListedWallet: any = {
-  FgVkRJiiQjoE85wQew6mPMkHfeZjN8kR186Lae7SZEFB: {
-    amount: 2000,
-    date: new Date(1716487426000),
-  },
   EkBEqMcFqZeLCEpsyEP6xbE8Y2Fq3dBYxaqs3yJJW55w: {
     amount: 1000,
     date: new Date(1716554434000),

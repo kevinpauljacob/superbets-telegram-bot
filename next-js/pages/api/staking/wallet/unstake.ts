@@ -142,19 +142,19 @@ async function handler(req: any, res: any) {
       } catch (error) {
         console.log(error);
 
-        await User.findOneAndUpdate(
-          {
-            wallet,
-          },
-          {
-            $inc: { stakedAmount: amount },
-            $set: {
-              tier: user.tier,
-              multiplier: user.multiplier,
-              points: user.points,
-            },
-          },
-        );
+        // await User.findOneAndUpdate(
+        //   {
+        //     wallet,
+        //   },
+        //   {
+        //     $inc: { stakedAmount: amount },
+        //     $set: {
+        //       tier: user.tier,
+        //       multiplier: user.multiplier,
+        //       points: user.points,
+        //     },
+        //   },
+        // );
 
         return res.status(400).json({
           success: false,
