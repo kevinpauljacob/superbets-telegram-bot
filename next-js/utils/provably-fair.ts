@@ -1,5 +1,6 @@
 import crypto from "crypto";
 import { BigNumber } from "bignumber.js";
+import Decimal from "decimal.js";
 
 // Before the game round:
 export const generateClientSeed = () => {
@@ -148,7 +149,6 @@ export const generateGameResult = <T extends GameType>(
     }
 
     case GameType.limbo: {
-      var t;
       let a = getFinalValues({
         serverSeed,
         clientSeed,
@@ -157,28 +157,14 @@ export const generateGameResult = <T extends GameType>(
         count: 1,
       });
 
-      function N() {
-        return BigNumber;
-      }
+      const result = Decimal.min(
+        new Decimal(1)
+          .times(16777216)
+          .dividedBy(new Decimal(16777216).times(a[0] ?? 0).plus(1)),
+        1e6,
+      ).toFixed(2, Decimal.ROUND_DOWN);
 
-      const r = N()(100)
-        .dividedBy(
-          N().min(
-            N()(16777216).dividedBy(
-              N()(16777216)
-                .times(
-                  null !== (t = null == a ? void 0 : a[0]) && void 0 !== t
-                    ? t
-                    : 0,
-                )
-                .plus(1),
-            ),
-            1e6,
-          ),
-        )
-        .toFixed(2, N().ROUND_DOWN);
-
-      return parseFloat(r) as GameResult<T>;
+      return parseFloat(result) as GameResult<T>;
     }
 
     case GameType.wheel: {
