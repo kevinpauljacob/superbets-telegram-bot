@@ -38,6 +38,10 @@ export default function FomoPlay() {
       href: "/wheel",
       src: "/assets/game-cards/wheel.png",
     },
+    {
+      href: "/mines",
+      src: "/assets/game-cards/wheel.png",
+    },
   ];
 
   const [currentSlide, setCurrentSlide] = useState(0);

@@ -431,10 +431,10 @@ export default function Mines() {
           setGameId(gameId);
           setMinesCount(minesCount);
           setBetActive(true);
+          successCustom(message ?? "Pending game found!");
         }
 
         setRefresh(true);
-        successCustom(message);
       }
     } catch (error: any) {
       errorCustom(error?.message ?? "Could not fetch pending game.");
@@ -578,15 +578,24 @@ export default function Mines() {
                 !session?.user ||
                 isRolling ||
                 (coinData && coinData[0].amount < minGameAmount) ||
+                (betActive &&
+                  betType === "manual" &&
+                  !userBets.some((bet) => bet.pick)) ||
                 (betAmt !== undefined &&
                   maxBetAmt !== undefined &&
                   betAmt > maxBetAmt)
                   ? true
                   : false
               }
-              onClickFunction={onSubmit}
+              onClickFunction={
+                !betActive
+                  ? betType === "auto"
+                    ? onSubmit
+                    : handleBet
+                  : handleConclude
+              }
             >
-              {isRolling ? <Loader /> : "BET"}
+              {isRolling ? <Loader /> : betActive ? "CASHOUT" : "BET"}
             </BetButton>
           </div>
           {betType === "auto" && (

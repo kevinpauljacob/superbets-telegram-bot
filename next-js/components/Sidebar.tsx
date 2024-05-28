@@ -302,6 +302,12 @@ export const OpenSidebar = ({
       link: "/wheel", // Update the links to include "/"
       active: false,
     },
+    {
+      src: "",
+      token: "Mines",
+      link: "/mines", // Update the links to include "/"
+      active: false,
+    },
   ]);
 
   const toggleCasinoToken: ToggleGameToken = (index) => {
