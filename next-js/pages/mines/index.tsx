@@ -65,13 +65,13 @@ export default function Mines() {
   const [isRolling, setIsRolling] = useState(false);
   const [refresh, setRefresh] = useState(true);
   const [betType, setBetType] = useState<"manual" | "auto">("manual");
-  const [strikeNumbers, setStrikeNumbers] = useState<number[]>([]);
   const [strikeMultiplier, setStrikeMultiplier] = useState<number>(1);
+  const [currentMultiplier, setCurrentMultiplier] = useState<number>(0);
+  const [nextMultiplier, setNextMultiplier] = useState<number>(0);
   const [minesCount, setMinesCount] = useState<number>(3);
+  const [numBets, setNumBets] = useState<number>(0);
   const [gameId, setGameId] = useState<number>();
   const [betActive, setBetActive] = useState(false);
-  const [numBets, setNumBets] = useState<number>(0);
-  const [autoPick, setAutoPick] = useState<boolean>(false);
   const [dropDown, setDropDown] = useState<boolean>(false);
 
   const defaultUserBets = Array.from({ length: 25 }, (_, index) => ({
@@ -86,12 +86,6 @@ export default function Mines() {
     options.push({ key: i, value: i, label: `${i}` });
   }
 
-  const handleCountChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
-  ) => {
-    setAutoBetCount(parseFloat(e.target.value));
-  };
-
   const handleMinesCountChange = (value: number) => {
     setMinesCount(value);
     setDropDown(false);
@@ -100,6 +94,41 @@ export default function Mines() {
   const handleDropDown = () => {
     setDropDown(!dropDown);
   };
+
+  const handleMultipliers = (strikeMultiplier: number) => {
+    if (numBets === 0) {
+      setCurrentMultiplier(0);
+      setNextMultiplier(0);
+      return;
+    }
+
+    const currentMultiplier = truncateNumber(
+      Decimal.div(25 - numBets, 25 - numBets - minesCount)
+        .mul(strikeMultiplier)
+        .toNumber(),
+      2,
+    );
+    const nextMultiplier = truncateNumber(
+      Decimal.div(25 - (numBets + 1), 25 - (numBets + 1) - minesCount)
+        .mul(currentMultiplier)
+        .toNumber(),
+      2,
+    );
+    setCurrentMultiplier(currentMultiplier);
+    setNextMultiplier(nextMultiplier);
+    setStrikeMultiplier(currentMultiplier);
+  };
+
+  useEffect(() => {
+    handleMultipliers(strikeMultiplier);
+  }, [numBets]);
+
+  useEffect(() => {
+    console.log("currentMultiplier", currentMultiplier);
+    console.log("nextMultiplier", nextMultiplier);
+    console.log("strikeMultiplier", strikeMultiplier);
+    console.log("numBets", numBets);
+  }, [numBets, currentMultiplier, nextMultiplier, strikeMultiplier]);
 
   const handleConclude = async () => {
     try {
@@ -136,6 +165,10 @@ export default function Mines() {
         setUserBets(updatedUserBetsWithResult);
         setRefresh(true);
         setBetActive(false);
+        setNumBets(0);
+        setCurrentMultiplier(0);
+        setNextMultiplier(0);
+        setStrikeMultiplier(1);
       }
     } catch (error) {
       console.error("Error occurred while betting:", error);
@@ -176,6 +209,7 @@ export default function Mines() {
   }, [userBetsForAuto, userBets]);
 
   const handlePick = async (number: number) => {
+    setNumBets(numBets + 1);
     try {
       const response = await fetch(`/api/games/mines/pick`, {
         method: "POST",
@@ -196,14 +230,12 @@ export default function Mines() {
         throw new Error(message);
       }
 
-      // if (result === "Pending") {
       const updatedUserBets = [...userBets];
       updatedUserBets[number - 1] = {
         result: result === "Pending" ? "Pending" : "Lost",
         pick: true,
       };
       setUserBets(updatedUserBets);
-      // }
 
       if (result === "Lost") {
         const updatedUserBetsWithResult = userBets.map((bet, index) => ({
@@ -215,6 +247,10 @@ export default function Mines() {
           pick: true,
         };
         setUserBets(updatedUserBetsWithResult);
+        setNumBets(0);
+        setCurrentMultiplier(0);
+        setNextMultiplier(0);
+        setStrikeMultiplier(1);
         setBetActive(false);
         errorCustom(message);
         setIsRolling(false);
@@ -224,8 +260,6 @@ export default function Mines() {
       if (win) soundAlert("/sounds/win.wav");
 
       if (success) {
-        setNumBets((prevNumBets) => prevNumBets + 1);
-        setStrikeMultiplier(strikeMultiplier);
         setRefresh(true);
       }
     } catch (error) {
@@ -695,18 +729,7 @@ export default function Mines() {
                         </div>
                         <div className="flex justify-between items-center text-fomo-green">
                           <p>0.000</p>
-                          <p>
-                            {truncateNumber(
-                              Decimal.div(
-                                25 - numBets,
-                                25 - numBets - minesCount,
-                              )
-                                .mul(strikeMultiplier)
-                                .toNumber(),
-                              2,
-                            )}
-                            x
-                          </p>
+                          <p>{currentMultiplier}x</p>
                         </div>
                       </div>
                       <div className="flex items-center w-full">
@@ -726,18 +749,7 @@ export default function Mines() {
                         </div>
                         <div className="flex justify-between items-center text-fomo-green">
                           <p>0.000</p>
-                          <p>
-                            {truncateNumber(
-                              Decimal.div(
-                                25 - (numBets + 1),
-                                25 - (numBets + 1) - minesCount,
-                              )
-                                .mul(strikeMultiplier)
-                                .toNumber(),
-                              2,
-                            )}
-                            x
-                          </p>
+                          <p>{nextMultiplier}x</p>
                         </div>
                       </div>
                     </div>
