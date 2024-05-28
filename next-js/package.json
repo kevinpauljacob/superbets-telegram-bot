@@ -28,7 +28,7 @@
     "javascript-time-ago": "^2.5.9",
     "mongoose": "^8.0.1",
     "next": "14.0.2",
-    "next-auth": "^4.24.5",
+    "next-auth": "^4.24.7",
     "react": "^18",
     "react-countdown-now": "^2.1.2",
     "react-dom": "^18",
