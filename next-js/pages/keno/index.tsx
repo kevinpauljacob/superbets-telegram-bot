@@ -627,7 +627,7 @@ export default function Keno() {
                       {number}
                     </div>
                   ) : (
-                    <div>{number}</div>
+                    <div>{number}</div> 
                   )}
                 </div>
               ),

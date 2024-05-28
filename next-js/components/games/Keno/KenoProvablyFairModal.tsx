@@ -14,6 +14,7 @@ import { errorCustom } from "@/components/toasts/ToastGroup";
 import ProvablyFairModal from "../ProvablyFairModal";
 import { translator } from "@/context/transactions";
 import { useGlobalContext } from "@/components/GlobalContext";
+import { Game } from "iconsax-react";
 
 export interface PFModalData {
   activeGameSeed: {
@@ -312,7 +313,7 @@ export default function RollDiceProvablyFairModal({
                         <option value={GameType.keno}>Keno</option>
                         <option value={GameType.dice}>Dice</option>
                         <option value={GameType.coin}>Coin Flip</option>
-
+                        <option value={GameType.mines}>Mines</option>
                         <option value={GameType.dice2}>Dice2</option>
                         <option value={GameType.limbo}>Limbo</option>
                         <option value={GameType.wheel}>Wheel</option>
