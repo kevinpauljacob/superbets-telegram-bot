@@ -28,6 +28,8 @@ import { translator, formatNumber } from "@/context/transactions";
 import { minGameAmount, truncateNumber } from "@/context/gameTransactions";
 import { useSession } from "next-auth/react";
 import user from "@/models/staking/user";
+import Decimal from "decimal.js";
+Decimal.set({ precision: 9 });
 
 export default function Mines() {
   const wallet = useWallet();
@@ -64,10 +66,11 @@ export default function Mines() {
   const [refresh, setRefresh] = useState(true);
   const [betType, setBetType] = useState<"manual" | "auto">("manual");
   const [strikeNumbers, setStrikeNumbers] = useState<number[]>([]);
-  const [strikeMultiplier, setStrikeMultiplier] = useState<number>();
+  const [strikeMultiplier, setStrikeMultiplier] = useState<number>(1);
   const [minesCount, setMinesCount] = useState<number>(3);
   const [gameId, setGameId] = useState<number>();
   const [betActive, setBetActive] = useState(false);
+  const [numBets, setNumBets] = useState<number>(0);
   const [autoPick, setAutoPick] = useState<boolean>(false);
   const [dropDown, setDropDown] = useState<boolean>(false);
 
@@ -76,6 +79,7 @@ export default function Mines() {
     pick: false,
   }));
   const [userBets, setUserBets] = useState(defaultUserBets);
+  const [userBetsForAuto, setUserBetsForAuto] = useState<number[]>([]);
 
   const options = [];
   for (let i = 1; i <= 24; i++) {
@@ -110,7 +114,8 @@ export default function Mines() {
         }),
       });
 
-      const { success, message, result, amountWon } = await response.json();
+      const { success, message, result, amountWon, strikeNumbers } =
+        await response.json();
 
       if (success != true) {
         errorCustom(message);
@@ -124,13 +129,51 @@ export default function Mines() {
       } else errorCustom(message);
 
       if (success) {
+        const updatedUserBetsWithResult = userBets.map((bet, index) => ({
+          ...bet,
+          result: strikeNumbers[index] === 1 ? "Lost" : "Pending",
+        }));
+        setUserBets(updatedUserBetsWithResult);
         setRefresh(true);
         setBetActive(false);
       }
     } catch (error) {
       console.error("Error occurred while betting:", error);
+    } finally {
+      setBetActive(false);
     }
   };
+
+  const handleAutoPick = async (number: number) => {
+    console.log("number", number);
+    const updatedUserBets = [...userBets];
+    const currentPickState = updatedUserBets[number - 1].pick;
+
+    // Toggle the pick state
+    updatedUserBets[number - 1] = {
+      ...updatedUserBets[number - 1],
+      pick: !currentPickState,
+    };
+    setUserBets(updatedUserBets);
+
+    // Update userBetsForAuto based on the new pick state
+    setUserBetsForAuto((prevUserBetsForAuto) => {
+      if (!currentPickState) {
+        // If the tile was not picked before, add it to userBetsForAuto
+        return [...prevUserBetsForAuto, number - 1];
+      } else {
+        // If the tile was already picked, remove it from userBetsForAuto
+        return prevUserBetsForAuto.filter(
+          (betIndex) => betIndex !== number - 1,
+        );
+      }
+    });
+  };
+
+  useEffect(() => {
+    console.log("userBetsForAuto", userBetsForAuto);
+    console.log("userBets", userBets);
+  }, [userBetsForAuto, userBets]);
 
   const handlePick = async (number: number) => {
     try {
@@ -146,20 +189,28 @@ export default function Mines() {
         }),
       });
 
-      const { success, message, result } = await response.json();
+      const { success, message, result, strikeNumbers, strikeMultiplier } =
+        await response.json();
 
       if (success != true) {
         throw new Error(message);
       }
 
+      // if (result === "Pending") {
       const updatedUserBets = [...userBets];
       updatedUserBets[number - 1] = {
         result: result === "Pending" ? "Pending" : "Lost",
         pick: true,
       };
       setUserBets(updatedUserBets);
+      // }
 
       if (result === "Lost") {
+        const updatedUserBetsWithResult = userBets.map((bet, index) => ({
+          ...bet,
+          result: strikeNumbers[index] === 1 ? "Lost" : "Pending",
+        }));
+        setUserBets(updatedUserBetsWithResult);
         setBetActive(false);
         errorCustom(message);
         setIsRolling(false);
@@ -169,10 +220,115 @@ export default function Mines() {
       if (win) soundAlert("/sounds/win.wav");
 
       if (success) {
+        setNumBets((prevNumBets) => prevNumBets + 1);
+        setStrikeMultiplier(strikeMultiplier);
         setRefresh(true);
       }
     } catch (error) {
       console.error("Error occurred while betting:", error);
+    }
+  };
+
+  const handleAutoBet = async () => {
+    try {
+      if (!wallet.connected || !wallet.publicKey) {
+        throw new Error("Wallet not connected");
+      }
+      if (!betAmt || betAmt === 0) {
+        throw new Error("Set Amount.");
+      }
+      if (coinData && coinData[0].amount < betAmt) {
+        throw new Error("Insufficient balance for bet !");
+      }
+      if (userBetsForAuto.length === 0) {
+        throw new Error("Select at least one tile to bet on.");
+      }
+
+      setIsRolling(true);
+      setBetActive(true);
+      // setUserBets(defaultUserBets);
+      const response = await fetch(`/api/games/mines/auto`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          wallet: wallet.publicKey,
+          amount: betAmt,
+          tokenMint: "SOL",
+          minesCount: minesCount,
+          userBets: userBetsForAuto,
+        }),
+      });
+
+      const {
+        success,
+        result,
+        amountWon,
+        strikeNumbers,
+        strikeMultiplier,
+        message,
+      } = await response.json();
+
+      if (success != true) {
+        throw new Error(message);
+      }
+
+      if (success) {
+        const updatedUserBetsWithResult = userBets.map((bet, index) => ({
+          ...bet,
+          result: strikeNumbers[index] === 1 ? "Lost" : "Won",
+        }));
+
+        setGameId(gameId);
+        setBetActive(true);
+        setUserBets(updatedUserBetsWithResult);
+        setRefresh(true);
+        successCustom(message);
+      }
+
+      const win = result === "Won";
+      if (win) soundAlert("/sounds/win.wav");
+
+      // auto options
+      if (betType === "auto") {
+        if (useAutoConfig && win) {
+          setBetAmt(
+            autoWinChangeReset
+              ? userInput!
+              : betAmt + ((autoWinChange ?? 0) * betAmt) / 100.0,
+          );
+        } else if (useAutoConfig && !win) {
+          setBetAmt(
+            autoLossChangeReset
+              ? userInput!
+              : betAmt + ((autoLossChange ?? 0) * betAmt) / 100.0,
+          );
+        }
+        // update profit / loss
+        setAutoBetProfit(
+          autoBetProfit +
+            (win ? strikeMultiplier * (1 - houseEdge) - 1 : -1) * betAmt,
+        );
+        // update count
+        if (typeof autoBetCount === "number") {
+          autoBetCount === 1 && warningCustom("Auto bet stopped", "top-left");
+        } else
+          setAutoBetCount(
+            autoBetCount.length > 12
+              ? autoBetCount.slice(0, 5)
+              : autoBetCount + 1,
+          );
+      }
+    } catch (error: any) {
+      errorCustom(error?.message ?? "Could not make the Bet.");
+      setIsRolling(false);
+      setAutoBetCount(0);
+      setStartAuto(false);
+      console.error("Error occurred while betting:", error);
+    } finally {
+      setIsRolling(false);
+      setBetActive(false);
     }
   };
 
@@ -206,6 +362,12 @@ export default function Mines() {
       const { success, message, gameId } = await response.json();
 
       if (success != true) {
+        if (gameId) {
+          setGameId(gameId);
+          console.log("gameId", gameId);
+          setBetActive(true);
+          setRefresh(true);
+        }
         throw new Error(message);
       }
 
@@ -214,51 +376,7 @@ export default function Mines() {
         setBetActive(true);
         setRefresh(true);
         successCustom(message);
-        // for (const number of strikeNumbers) {
-        //   await new Promise((resolve) => setTimeout(resolve, 200));
-
-        //   if (chosenNumbers.includes(number)) {
-        //     soundAlert("/sounds/win3.wav");
-        //   } else {
-        //     soundAlert("/sounds/betbutton.wav");
-        //   }
-        //   setStrikeNumbers((prevNumbers) => [...prevNumbers, number]);
-        // }
       }
-
-      // const win = result === "Won";
-      // if (win) soundAlert("/sounds/win.wav");
-
-      // auto options
-      // if (betType === "auto") {
-      //   if (useAutoConfig && win) {
-      //     setBetAmt(
-      //       autoWinChangeReset
-      //         ? userInput!
-      //         : betAmt + ((autoWinChange ?? 0) * betAmt) / 100.0,
-      //     );
-      //   } else if (useAutoConfig && !win) {
-      //     setBetAmt(
-      //       autoLossChangeReset
-      //         ? userInput!
-      //         : betAmt + ((autoLossChange ?? 0) * betAmt) / 100.0,
-      //     );
-      //   }
-      // update profit / loss
-      // setAutoBetProfit(
-      //   autoBetProfit +
-      //     (win ? strikeMultiplier * (1 - houseEdge) - 1 : -1) * betAmt,
-      // );
-      // update count
-      //   if (typeof autoBetCount === "number") {
-      //     autoBetCount === 1 && warningCustom("Auto bet stopped", "top-left");
-      //   } else
-      //     setAutoBetCount(
-      //       autoBetCount.length > 12
-      //         ? autoBetCount.slice(0, 5)
-      //         : autoBetCount + 1,
-      //     );
-      // }
     } catch (error: any) {
       errorCustom(error?.message ?? "Could not make the Bet.");
       setIsRolling(false);
@@ -270,9 +388,71 @@ export default function Mines() {
     }
   };
 
+  const handlePendingGame = async () => {
+    const updatedUserBets = [...userBets];
+    try {
+      if (!wallet.connected || !wallet.publicKey) {
+        throw new Error("Wallet not connected");
+      }
+      setUserBets(defaultUserBets);
+      const response = await fetch(`/api/games/mines/pendingGame`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          wallet: wallet.publicKey,
+        }),
+      });
+
+      const { success, message, userBets, amount, gameId, minesCount, result } =
+        await response.json();
+
+      if (success != true) {
+        throw new Error(message);
+      }
+
+      if (success) {
+        if (result === true) {
+          const pendingGameUserBets = userBets;
+          pendingGameUserBets.forEach((index: number) => {
+            if (index >= 0 && index < updatedUserBets.length) {
+              updatedUserBets[index] = {
+                ...updatedUserBets[index],
+                result: "Pending",
+                pick: true,
+              };
+            }
+          });
+          console.log("pendingGameUserBets", pendingGameUserBets);
+          console.log("updatedUserBets", updatedUserBets);
+          setUserBets(updatedUserBets);
+          setBetAmt(amount);
+          setGameId(gameId);
+          setMinesCount(minesCount);
+          setBetActive(true);
+        }
+
+        setRefresh(true);
+        successCustom(message);
+      }
+    } catch (error: any) {
+      errorCustom(error?.message ?? "Could not fetch pending game.");
+      setAutoBetCount(0);
+      setStartAuto(false);
+      console.error("Error occurred while fetching pending game:", error);
+    }
+  };
+
+  useEffect(() => {
+    handlePendingGame();
+  }, [wallet.connected, wallet.publicKey]);
+
   const disableInput = useMemo(() => {
-    return betType === "auto" && startAuto ? true : false || isRolling;
-  }, [betType, startAuto, isRolling]);
+    return betType === "auto" && startAuto
+      ? true
+      : false || isRolling || betActive;
+  }, [betType, startAuto, isRolling, betActive]);
 
   useEffect(() => {
     if (refresh && wallet?.publicKey) {
@@ -287,7 +467,12 @@ export default function Mines() {
   }, [userInput]);
 
   useEffect(() => {
-    // console.log("Auto: ", startAuto, autoBetCount);
+    setUserBets(defaultUserBets);
+    setUserBetsForAuto([]);
+  }, [betType]);
+
+  useEffect(() => {
+    console.log("Auto: ", startAuto, autoBetCount);
     if (
       betType === "auto" &&
       startAuto &&
@@ -306,10 +491,10 @@ export default function Mines() {
               : betAmt *
                 (autoLossChange !== null ? autoLossChange / 100.0 : 0));
 
-        // console.log("Current bet amount:", betAmt);
-        // console.log("Auto loss change:", autoLossChange);
-        // console.log("Auto profit change:", autoWinChange);
-        // console.log("Potential loss:", potentialLoss);
+        console.log("Current bet amount:", betAmt);
+        console.log("Auto loss change:", autoLossChange);
+        console.log("Auto profit change:", autoWinChange);
+        console.log("Potential loss:", potentialLoss);
       }
       if (
         useAutoConfig &&
@@ -320,6 +505,8 @@ export default function Mines() {
         warningCustom("Profit limit reached.", "top-left");
         setAutoBetCount(0);
         setStartAuto(false);
+        setUserBets(defaultUserBets);
+        setUserBetsForAuto([]);
         return;
       }
       if (
@@ -331,13 +518,17 @@ export default function Mines() {
         warningCustom("Loss limit reached.", "top-left");
         setAutoBetCount(0);
         setStartAuto(false);
+        setUserBets(defaultUserBets);
+        setUserBetsForAuto([]);
         return;
       }
       setTimeout(() => {
-        handleBet();
+        handleAutoBet();
       }, 500);
     } else {
       setStartAuto(false);
+      setUserBets(defaultUserBets);
+      setUserBetsForAuto([]);
       setAutoBetProfit(0);
       setUserInput(betAmt);
     }
@@ -357,45 +548,10 @@ export default function Mines() {
         (typeof autoBetCount === "string" && autoBetCount.includes("inf")) ||
         (typeof autoBetCount === "number" && autoBetCount > 0)
       ) {
-        // console.log("Auto betting. config: ", useAutoConfig);
+        console.log("Auto betting. config: ", useAutoConfig);
         setStartAuto(true);
       }
     }
-  };
-
-  const Autopick = () => {
-    return (
-      <>
-        <button
-          type="button"
-          onClick={() => {
-            // handleAutoPick();
-          }}
-          disabled={disableInput}
-          className={`${
-            autoPick === true
-              ? "border-[#7839C5] text-opacity-100"
-              : "border-transparent hover:border-[#7839C580] text-opacity-80"
-          } w-full flex items-center justify-center disabled:opacity-50 gap-1 rounded-lg text-center cursor-pointer border-2 bg-[#202329] h-[3.75rem] lg:h-11 font-chakra text-base tracking-wider text-white font-semibold`}
-        >
-          {translator("AUTOPICK", language)}
-        </button>
-        <button
-          type="button"
-          onClick={() => {
-            // handleClear();
-          }}
-          disabled={disableInput}
-          className={`${
-            autoPick === false
-              ? "border-transparent hover:border-[#7839C580] text-opacity-80"
-              : "border-transparent hover:border-[#7839C580] text-opacity-80"
-          } w-full flex items-center justify-center disabled:opacity-50 gap-1 rounded-lg text-center cursor-pointer border-2 bg-[#202329] h-[3.75rem] lg:h-11 font-chakra text-base tracking-wider text-white font-semibold`}
-        >
-          {translator("CLEAR", language)}
-        </button>
-      </>
-    );
   };
 
   return (
@@ -433,9 +589,6 @@ export default function Mines() {
               {isRolling ? <Loader /> : "BET"}
             </BetButton>
           </div>
-          <div className="flex lg:hidden w-full flex-row gap-3 mb-[1.4rem]">
-            <Autopick />
-          </div>
           {betType === "auto" && (
             <div className="w-full flex lg:hidden">
               <ConfigureAutoButton disabled={disableInput} />
@@ -464,7 +617,7 @@ export default function Mines() {
                   game="mines"
                   disabled={disableInput}
                 />
-                {!betActive && (
+                {!betActive && betType !== "auto" && (
                   <div className="mb-6 flex flex-col w-full">
                     <div className="mb-1 w-full text-xs font-changa text-opacity-90">
                       <label className="text-white/90">Mines</label>
@@ -500,7 +653,7 @@ export default function Mines() {
                     </div>
                   </div>
                 )}
-                {betActive && (
+                {betActive && betType === "manual" ? (
                   <>
                     <div className="flex gap-2 w-full mb-8">
                       <div className="w-1/2">
@@ -528,7 +681,18 @@ export default function Mines() {
                         </div>
                         <div className="flex justify-between items-center text-fomo-green">
                           <p>0.000</p>
-                          <p>0.00x</p>
+                          <p>
+                            {truncateNumber(
+                              Decimal.div(
+                                25 - numBets,
+                                25 - numBets - minesCount,
+                              )
+                                .mul(strikeMultiplier)
+                                .toNumber(),
+                              2,
+                            )}
+                            x
+                          </p>
                         </div>
                       </div>
                       <div className="flex items-center w-full">
@@ -548,12 +712,124 @@ export default function Mines() {
                         </div>
                         <div className="flex justify-between items-center text-fomo-green">
                           <p>0.000</p>
-                          <p>0.00x</p>
+                          <p>
+                            {truncateNumber(
+                              Decimal.div(
+                                25 - (numBets + 1),
+                                25 - (numBets + 1) - minesCount,
+                              )
+                                .mul(strikeMultiplier)
+                                .toNumber(),
+                              2,
+                            )}
+                            x
+                          </p>
                         </div>
                       </div>
                     </div>
                   </>
-                )}
+                ) : betType === "auto" ? (
+                  <>
+                    <div className="flex gap-2 w-full mb-8">
+                      <div className="w-1/2">
+                        <label className="text-xs text-white/90 font-changa mb-1">
+                          Mines
+                        </label>
+                        <div
+                          className={`${
+                            dropDown ? "" : ""
+                          } relative flex h-11 w-full cursor-pointer items-center rounded-[8px] bg-[#202329] px-4`}
+                          onClick={handleDropDown}
+                        >
+                          <div className="bg-transparent text-base text-[#94A3B8] placeholder-[#94A3B8] font-chakra placeholder-opacity-40 outline-none w-full">
+                            {minesCount}
+                          </div>
+                          {dropDown && (
+                            <div className="absolute top-14 z-50 max-h-[300px] overflow-y-scroll modalscrollbar left-0 bg-[#202329] border border-[#2A2E38] rounded-[8px] w-full">
+                              {options.map((option) => (
+                                <div
+                                  key={option.key}
+                                  className={`${
+                                    minesCount === option.value
+                                      ? "text-white bg-white/20 hover:bg-white/20"
+                                      : "hover:bg-white/10"
+                                  } border-b border-r text-[#94A3B8] font-chakra border-[#2A2E38] py-1.5 px-3`}
+                                  onClick={() =>
+                                    handleMinesCountChange(option.value)
+                                  }
+                                >
+                                  {option.label}
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                      <div className="w-1/2">
+                        <label className="text-xs text-white/90 font-changa mb-1">
+                          Gems
+                        </label>
+                        <div className="bg-[#202329] text-[#94A3B8] font-chakra rounded-[8px] flex items-center h-11 px-4">
+                          {25 - minesCount}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="border border-[#FFFFFF0D] rounded-[5px] font-changa text-white text-xs font-medium p-5 mb-6">
+                      <div>
+                        <div className="flex justify-between items-center mb-2">
+                          <p>Current Profit</p>
+                          <p>0.00 SOL</p>
+                        </div>
+                        <div className="flex justify-between items-center text-fomo-green">
+                          <p>0.000</p>
+                          <p>
+                            {truncateNumber(
+                              Decimal.div(
+                                25 - numBets,
+                                25 - numBets - minesCount,
+                              )
+                                .mul(strikeMultiplier)
+                                .toNumber(),
+                              2,
+                            )}
+                            x
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-center w-full">
+                        <div className="h-[1px] bg-[#FFFFFF0D] w-full"></div>
+                        <Image
+                          src="/assets/arrowInCircle.svg"
+                          alt="arrowInCircle"
+                          width={24}
+                          height={24}
+                        />
+                        <div className="h-[1px] bg-[#FFFFFF0D] w-full"></div>
+                      </div>
+                      <div>
+                        <div className="flex justify-between items-center mb-2">
+                          <p>Profit on next tile</p>
+                          <p>0.00 SOL</p>
+                        </div>
+                        <div className="flex justify-between items-center text-fomo-green">
+                          <p>0.000</p>
+                          <p>
+                            {truncateNumber(
+                              Decimal.div(
+                                25 - (numBets + 1),
+                                25 - (numBets + 1) - minesCount,
+                              )
+                                .mul(strikeMultiplier)
+                                .toNumber(),
+                              2,
+                            )}
+                            x
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </>
+                ) : null}
                 {betType === "manual" ? (
                   <></>
                 ) : (
@@ -569,6 +845,10 @@ export default function Mines() {
                   {startAuto && (
                     <div
                       onClick={() => {
+                        setUserBets(defaultUserBets);
+                        setUserBetsForAuto([]);
+                        console.log("userBets", userBets);
+                        console.log("userBetsForAuto", userBetsForAuto);
                         soundAlert("/sounds/betbutton.wav");
                         warningCustom("Auto bet stopped", "top-left");
                         setAutoBetCount(0);
@@ -585,7 +865,9 @@ export default function Mines() {
                       !session?.user ||
                       isRolling ||
                       (coinData && coinData[0].amount < minGameAmount) ||
-                      (betActive && !userBets.some((bet) => bet.pick)) ||
+                      (betActive &&
+                        betType === "manual" &&
+                        !userBets.some((bet) => bet.pick)) ||
                       (betAmt !== undefined &&
                         maxBetAmt !== undefined &&
                         betAmt > maxBetAmt)
@@ -606,7 +888,11 @@ export default function Mines() {
               </form>
             </FormProvider>
             <div className="w-full flex lg:hidden">
-              <BetSetting betSetting={betType} setBetSetting={setBetType} />
+              <BetSetting
+                betSetting={betType}
+                setBetSetting={setBetType}
+                disabled={disableInput}
+              />
             </div>
           </div>
         </>
@@ -628,38 +914,80 @@ export default function Mines() {
                 <button
                   key={index}
                   className={`border-2 ${
-                    userBets[index - 1].result === "Pending"
-                      ? "border-[#FCB10F]"
-                      : userBets[index - 1].result === "Lost"
-                      ? "border-[#F1323E]"
-                      : "border-[#202329] hover:border-white/30"
+                    betType === "manual"
+                      ? userBets[index - 1].result === "Pending" &&
+                        userBets[index - 1].pick === true
+                        ? "border-[#FCB10F] bg-[#FCB10F33]"
+                        : userBets[index - 1].result === "Lost" &&
+                          userBets[index - 1].pick === true
+                        ? "border-[#F1323E] bg-[#F1323E33]"
+                        : "border-[#202329] hover:border-white/30"
+                      : betType === "auto"
+                      ? userBets[index - 1].result === "" &&
+                        userBets[index - 1].pick === true
+                        ? "border-[#FCB10F] bg-[#FCB10F33]"
+                        : userBets[index - 1].result === "Won" &&
+                          userBets[index - 1].pick === true
+                        ? "border-[#FCB10F] bg-[#FCB10F33]"
+                        : userBets[index - 1].result === "Lost" &&
+                          userBets[index - 1].pick === true
+                        ? "border-[#F1323E] bg-[#F1323E33]"
+                        : "border-[#202329] hover:border-white/30"
+                      : null
                   }  bg-[#202329] flex items-center justify-center cursor-pointer rounded-md text-center transition-all duration-300 ease-in-out w-[45px] h-[45px] sm:w-[55px] sm:h-[55px] md:w-[80px] md:h-[80px] xl:w-[95px] xl:h-[95px]`}
-                  disabled={userBets[index - 1].pick}
-                  onClick={() => betActive && handlePick(index)}
+                  disabled={betType === "manual" && userBets[index - 1].pick}
+                  onClick={() =>
+                    betType === "auto"
+                      ? handleAutoPick(index)
+                      : betActive && betType === "manual"
+                      ? handlePick(index)
+                      : null
+                  }
                 >
-                  {userBets[index - 1].result === "Pending" &&
-                  userBets[index - 1].pick === true ? (
-                    <div className="bg-[#FCB10F33] w-full h-full flex items-center justify-center p-1.5 sm:p-3">
-                      <Image
-                        src="/assets/gem.svg"
-                        alt="Gem"
-                        layout="responsive"
-                        height={100}
-                        width={100}
-                      />
-                    </div>
-                  ) : userBets[index - 1].result === "Lost" &&
-                    userBets[index - 1].pick === true ? (
-                    <div className="bg-[#F1323E33] w-full h-full flex items-center justify-center p-1.5 sm:p-3">
-                      <Image
-                        src="/assets/mine.svg"
-                        alt="Gem"
-                        layout="responsive"
-                        height={100}
-                        width={100}
-                      />
-                    </div>
-                  ) : null}
+                  {betType === "manual" &&
+                    (userBets[index - 1].result === "Pending" ? (
+                      <div className="w-full h-full flex items-center justify-center p-1.5 sm:p-3">
+                        <Image
+                          src="/assets/gem.svg"
+                          alt="Gem"
+                          layout="responsive"
+                          height={100}
+                          width={100}
+                        />
+                      </div>
+                    ) : userBets[index - 1].result === "Lost" ? (
+                      <div className="w-full h-full flex items-center justify-center p-1.5 sm:p-3">
+                        <Image
+                          src="/assets/mine.svg"
+                          alt="Mine"
+                          layout="responsive"
+                          height={100}
+                          width={100}
+                        />
+                      </div>
+                    ) : null)}
+                  {betType === "auto" &&
+                    (userBets[index - 1].result === "Won" ? (
+                      <div className="w-full h-full flex items-center justify-center p-1.5 sm:p-3">
+                        <Image
+                          src="/assets/gem.svg"
+                          alt="Gem"
+                          layout="responsive"
+                          height={100}
+                          width={100}
+                        />
+                      </div>
+                    ) : userBets[index - 1].result === "Lost" ? (
+                      <div className="w-full h-full flex items-center justify-center p-1.5 sm:p-3">
+                        <Image
+                          src="/assets/mine.svg"
+                          alt="Mine"
+                          layout="responsive"
+                          height={100}
+                          width={100}
+                        />
+                      </div>
+                    ) : null)}
                 </button>
               ),
             )}
