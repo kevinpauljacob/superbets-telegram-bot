@@ -1,5 +1,4 @@
 import crypto from "crypto";
-import { BigNumber } from "bignumber.js";
 import Decimal from "decimal.js";
 
 // Before the game round:
@@ -256,7 +255,9 @@ export const generateGameResult = <T extends GameType>(
         i.push(t);
       }
 
-      const mines = Array(25).map((_, index) => (i.includes(index) ? 1 : 0));
+      const mines = Array.from({ length: 25 }, (_, index) =>
+        i.includes(index) ? 1 : 0,
+      );
 
       return mines as GameResult<T>;
     }
