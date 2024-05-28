@@ -56,6 +56,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       if (pendingGame)
         return res.status(400).json({
           success: false,
+          gameId: pendingGame._id,
           message: `Previous game is still pending, gameId:${pendingGame._id}`,
         });
 

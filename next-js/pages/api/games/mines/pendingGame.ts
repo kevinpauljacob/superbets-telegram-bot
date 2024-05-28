@@ -34,10 +34,14 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       await connectDatabase();
 
       const pendingGame = await Mines.findOne({ wallet, result: "Pending" });
-
+      const result = pendingGame !== null ? true : false;
       return res.status(201).json({
         success: true,
-        pendingGame,
+        userBets: pendingGame ? pendingGame.userBets : [],
+        amount: pendingGame ? pendingGame.amount : 0,
+        gameId: pendingGame ? pendingGame._id : null,
+        minesCount: pendingGame ? pendingGame.minesCount : 0,
+        result: result,
       });
     } catch (e: any) {
       console.log(e);
