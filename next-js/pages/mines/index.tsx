@@ -210,6 +210,10 @@ export default function Mines() {
           ...bet,
           result: strikeNumbers[index] === 1 ? "Lost" : "Pending",
         }));
+        updatedUserBetsWithResult[number - 1] = {
+          result: result === "Pending" ? "Pending" : "Lost",
+          pick: true,
+        };
         setUserBets(updatedUserBetsWithResult);
         setBetActive(false);
         errorCustom(message);
@@ -312,6 +316,7 @@ export default function Mines() {
         );
         // update count
         if (typeof autoBetCount === "number") {
+          setAutoBetCount(autoBetCount > 0 ? autoBetCount - 1 : 0);
           autoBetCount === 1 && warningCustom("Auto bet stopped", "top-left");
         } else
           setAutoBetCount(
