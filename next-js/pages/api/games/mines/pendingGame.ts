@@ -41,6 +41,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         amount: pendingGame ? pendingGame.amount : 0,
         gameId: pendingGame ? pendingGame._id : null,
         minesCount: pendingGame ? pendingGame.minesCount : 0,
+        strikeMultiplier: pendingGame ? pendingGame.strikeMultiplier : 0,
         result: result,
       });
     } catch (e: any) {

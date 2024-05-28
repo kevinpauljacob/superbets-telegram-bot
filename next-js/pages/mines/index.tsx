@@ -444,8 +444,16 @@ export default function Mines() {
         }),
       });
 
-      const { success, message, userBets, amount, gameId, minesCount, result } =
-        await response.json();
+      const {
+        success,
+        message,
+        userBets,
+        amount,
+        gameId,
+        minesCount,
+        strikeMultiplier,
+        result,
+      } = await response.json();
 
       if (success != true) {
         throw new Error(message);
@@ -453,6 +461,17 @@ export default function Mines() {
 
       if (success) {
         if (result === true) {
+          setMinesCount(minesCount);
+          setNumBets(userBets.length);
+          setStrikeMultiplier(truncateNumber(strikeMultiplier, 2));
+          setCurrentMultiplier(truncateNumber(strikeMultiplier, 2));
+          const nextMultiplier = Decimal.div(
+            25 - (userBets.length + 1),
+            25 - (userBets.length + 1) - minesCount,
+          )
+            .mul(strikeMultiplier)
+            .toNumber();
+          setNextMultiplier(truncateNumber(nextMultiplier, 2));
           const pendingGameUserBets = userBets;
           pendingGameUserBets.forEach((index: number) => {
             if (index >= 0 && index < updatedUserBets.length) {
@@ -468,7 +487,6 @@ export default function Mines() {
           setUserBets(updatedUserBets);
           setBetAmt(amount);
           setGameId(gameId);
-          setMinesCount(minesCount);
           setBetActive(true);
           successCustom(message ?? "Pending game found!");
         }
