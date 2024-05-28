@@ -210,7 +210,7 @@ export default function Limbo() {
       if (!response.success) throw new Error(response.message);
 
       const winningMultiplier = parseFloat(
-        truncateNumber(100 / response.strikeNumber, 2).toString(),
+        truncateNumber(response.strikeNumber, 2).toString(),
       );
 
       setFlipping(false);

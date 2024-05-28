@@ -1,4 +1,6 @@
-import * as crypto from "crypto";
+import crypto from "crypto";
+import { BigNumber } from "bignumber.js";
+import Decimal from "decimal.js";
 
 // Before the game round:
 export const generateClientSeed = () => {
@@ -15,16 +17,61 @@ export const generateServerSeed = () => {
   return { serverSeed, serverSeedHash };
 };
 
-const generateGameHash = (
-  serverSeed: string,
-  clientSeed: string,
-  nonce: number,
-): string => {
-  const combinedSeed = serverSeed + clientSeed + nonce.toString();
-  const hash = crypto.createHash("sha256").update(combinedSeed).digest("hex");
+interface SeedData {
+  serverSeed: string;
+  clientSeed: string;
+  nonce: number;
+  cursor: number;
+  count: number;
+}
 
-  return hash;
-};
+// Function to generate the HMAC-based pseudorandom number generator
+function* hmacGenerator({
+  serverSeed,
+  clientSeed,
+  nonce,
+  cursor,
+}: Omit<SeedData, "count">) {
+  let blockIndex = Math.floor(cursor / 32);
+  let byteIndex = cursor % 32;
+
+  while (true) {
+    const hmac = crypto.createHmac("sha256", serverSeed);
+    hmac.update(`${clientSeed}:${nonce}:${blockIndex}`);
+    const digest = hmac.digest();
+
+    while (byteIndex < 32) {
+      yield digest[byteIndex];
+      byteIndex += 1;
+    }
+
+    byteIndex = 0;
+    blockIndex += 1;
+  }
+}
+
+// Function to get the final values from the pseudorandom number generator
+function getFinalValues(seedData: SeedData): number[] {
+  const generator = hmacGenerator(seedData);
+  const values: number[] = [];
+
+  while (values.length < 4 * seedData.count) {
+    values.push(generator.next().value as number);
+  }
+
+  return chunk(values, 4).map((chunk) =>
+    chunk.reduce((sum, byte, index) => sum + byte / 256 ** (index + 1), 0),
+  );
+}
+
+// Helper function to chunk an array
+function chunk<T>(array: T[], size: number): T[][] {
+  const chunks: T[][] = [];
+  for (let i = 0; i < array.length; i += size) {
+    chunks.push(array.slice(i, i + size));
+  }
+  return chunks;
+}
 
 export enum seedStatus {
   EXPIRED = "EXPIRED",
@@ -61,91 +108,184 @@ export const generateGameResult = <T extends GameType>(
   gameType: T,
   parameter?: number,
 ): GameResult<T> => {
-  const hash = generateGameHash(serverSeed, clientSeed, nonce);
-
   switch (gameType) {
-    case GameType.dice:
-      return ((parseInt(hash.slice(0, 4), 16) % 6) + 1) as GameResult<T>;
+    case GameType.dice: {
+      let n = getFinalValues({
+        serverSeed,
+        clientSeed,
+        nonce,
+        cursor: 0,
+        count: 1,
+      }).map((e) => Math.floor(6 * e) + 1);
 
-    case GameType.coin:
-      const temp = (parseInt(hash.slice(0, 4), 16) % 100) + 1;
-      return (temp % 2 === 0 ? 1 : 2) as GameResult<T>;
+      return n[0] as GameResult<T>;
+    }
 
-    case GameType.dice2:
-      return ((parseInt(hash.slice(0, 4), 16) % 10001) / 100) as GameResult<T>;
-    case GameType.limbo:
-      return ((parseInt(hash.slice(0, 4), 16) % 10001) / 100) as GameResult<T>;
+    case GameType.coin: {
+      let n = getFinalValues({
+        serverSeed,
+        clientSeed,
+        nonce,
+        cursor: 0,
+        count: 1,
+      }).map((e) => Math.floor(2 * e) + 1);
 
-    case GameType.wheel:
-      return ((parseInt(hash.slice(0, 4), 16) % 100) + 1) as GameResult<T>;
+      return n[0] as GameResult<T>;
+    }
 
-    case GameType.plinko: {
-      if (!parameter) throw new Error("Game parameter missing!");
+    case GameType.dice2: {
+      let n = getFinalValues({
+        serverSeed,
+        clientSeed,
+        nonce,
+        cursor: 0,
+        count: 1,
+      }).map((e) => Math.floor(10001 * e) / 100);
+      const r = new Intl.NumberFormat("en-US", { minimumFractionDigits: 2 })
+        .format(n[0])
+        .replace(",", ".");
 
-      return ((parseInt(hash.slice(0, 4), 16) % Math.pow(2, parameter)) +
-        1) as GameResult<T>;
+      return parseFloat(r) as GameResult<T>;
+    }
+
+    case GameType.limbo: {
+      let a = getFinalValues({
+        serverSeed,
+        clientSeed,
+        nonce,
+        cursor: 0,
+        count: 1,
+      });
+
+      const result = Decimal.min(
+        new Decimal(1)
+          .times(16777216)
+          .dividedBy(new Decimal(16777216).times(a[0] ?? 0).plus(1)),
+        1e6,
+      ).toFixed(2, Decimal.ROUND_DOWN);
+
+      return parseFloat(result) as GameResult<T>;
+    }
+
+    case GameType.wheel: {
+      let n = getFinalValues({
+        serverSeed,
+        clientSeed,
+        nonce,
+        cursor: 0,
+        count: 1,
+      }).map((e) => Math.floor(100 * e) + 1);
+
+      return n[0] as GameResult<T>;
     }
 
     case GameType.keno: {
-      let generatedNumbers = new Set<number>();
-      let start = 0;
-      while (generatedNumbers.size < 10) {
-        let num = (parseInt(hash.slice(start * 2, start * 2 + 2), 16) % 40) + 1;
-        generatedNumbers.add(num);
-        start++;
+      let n = getFinalValues({
+        serverSeed,
+        clientSeed,
+        nonce,
+        cursor: 0,
+        count: 10,
+      }).map((e, t) => Math.ceil(e * (40 - t)));
+      const a: Array<number> = [];
+      for (let e of n) {
+        let t = e,
+          l = 0;
+        for (; l <= t; ) a.includes(l) && t++, l++;
+        a.push(t);
       }
-      return Array.from(generatedNumbers) as GameResult<T>;
+
+      return a as GameResult<T>;
     }
 
-    case GameType.roulette1:
-      return (parseInt(hash.slice(0, 4), 16) % 37) as GameResult<T>;
+    //TODO: correct these
+    case GameType.plinko: {
+      if (!parameter) throw new Error("Game parameter missing!");
 
-    case GameType.roulette2:
-      return ((parseInt(hash.slice(0, 4), 16) % 38) - 1) as GameResult<T>;
+      let n = getFinalValues({
+        serverSeed,
+        clientSeed,
+        nonce,
+        cursor: 0,
+        count: 1,
+      }).map((e) => Math.floor(parameter * e) + 1);
+
+      return n[0] as GameResult<T>;
+    }
+
+    case GameType.roulette1: {
+      let n = getFinalValues({
+        serverSeed,
+        clientSeed,
+        nonce,
+        cursor: 0,
+        count: 1,
+      }).map((e) => Math.floor(37 * e));
+
+      return n[0] as GameResult<T>;
+    }
+
+    case GameType.roulette2: {
+      let n = getFinalValues({
+        serverSeed,
+        clientSeed,
+        nonce,
+        cursor: 0,
+        count: 1,
+      }).map((e) => Math.floor(37 * e) - 1);
+
+      return n[0] as GameResult<T>;
+    }
 
     case GameType.mines: {
-      const positions = Array.from({ length: 25 }, (_, i) => i);
+      if (!parameter) throw new Error("Game parameter missing!");
+      let o = getFinalValues({
+        serverSeed,
+        clientSeed,
+        nonce,
+        cursor: 0,
+        count: parameter,
+      }).map((e, t) => Math.floor(e * (25 - t)));
 
-      for (let i = 24; i > 0; i--) {
-        const swapIndex = parseInt(hash.slice(i * 2, i * 2 + 2), 16) % (i + 1);
-        [positions[i], positions[swapIndex]] = [
-          positions[swapIndex],
-          positions[i],
-        ];
+      const i: Array<number> = [];
+
+      for (let e of o) {
+        let t = e,
+          l = 0;
+        for (; l <= t; ) i.includes(l) && t++, l++;
+        i.push(t);
       }
 
-      const minePositions = new Set(positions.slice(0, parameter));
-      const mines = new Array(25).fill(0);
-      minePositions.forEach((position) => (mines[position] = 1));
+      const mines = Array(25).map((_, index) => (i.includes(index) ? 1 : 0));
 
       return mines as GameResult<T>;
     }
 
-    case GameType.hilo: {
-      if (!parameter) throw new Error("Game parameter missing!");
+    // case GameType.hilo: {
+    //   if (!parameter) throw new Error("Game parameter missing!");
 
-      let numbers = [parameter];
-      console.log(hash);
-      const reversedHash = hash.split("").reverse().join("");
+    //   let numbers = [parameter];
 
-      let combinedHash = "";
-      for (let i = 0; i < hash.length; i += 2) {
-        combinedHash += hash.substring(i, i + 2);
-        combinedHash += reversedHash.substring(i, i + 2);
-      }
+    //   const reversedHash = hash.split("").reverse().join("");
 
-      for (let i = 0; i < 51; i++) {
-        let currentNum =
-          (parseInt(combinedHash.slice(i * 2, i * 2 + 2), 16) % 52) + 1;
+    //   let combinedHash = "";
+    //   for (let i = 0; i < hash.length; i += 2) {
+    //     combinedHash += hash.substring(i, i + 2);
+    //     combinedHash += reversedHash.substring(i, i + 2);
+    //   }
 
-        while (numbers.includes(currentNum)) {
-          currentNum = (currentNum % 52) + 1;
-        }
-        numbers.push(currentNum);
-      }
+    //   for (let i = 0; i < 51; i++) {
+    //     let currentNum =
+    //       (parseInt(combinedHash.slice(i * 2, i * 2 + 2), 16) % 52) + 1;
 
-      return numbers as GameResult<T>;
-    }
+    //     while (numbers.includes(currentNum)) {
+    //       currentNum = (currentNum % 52) + 1;
+    //     }
+    //     numbers.push(currentNum);
+    //   }
+
+    //   return numbers as GameResult<T>;
+    // }
 
     default:
       throw new Error("Invalid game type!");
