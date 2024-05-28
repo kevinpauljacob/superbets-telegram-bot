@@ -16,10 +16,7 @@ import Twitter from "@/public/assets/Twitter";
 import Birdeye from "@/public/assets/Birdeye";
 import Telegram from "@/public/assets/Telegram";
 import { truncateNumber } from "@/context/gameTransactions";
-import { Connection, ParsedAccountData, PublicKey } from "@solana/web3.js";
-import { TOKEN_PROGRAM_ID } from "@solana/spl-token";
 
-// Define types for game object
 export type Game = {
   src: string;
   token: string;
@@ -27,7 +24,6 @@ export type Game = {
   active: boolean;
 };
 
-// Define type for game toggle function
 export type ToggleGameToken = (index: number) => void;
 
 const topIconCss =
@@ -254,7 +250,7 @@ export const OpenSidebar = ({
   const wallet = useWallet();
   const router = useRouter();
   const { fomoPrice, setSidebar, setMobileSidebar } = useGlobalContext();
-  console.log(fomoPrice)
+
   const [casinoGames, setCasinoGames] = useState<Game[]>([
     {
       src: "",
@@ -320,8 +316,7 @@ export const OpenSidebar = ({
         const response = await fetch(url);
         const data = await response.json();
         const priceUsd = parseFloat(data?.pairs[0]?.priceUsd);
-        const change24h = parseFloat(data?.pairs[0]?.priceChange?.h24); // Assuming API returns this as a percentage
-
+        const change24h = parseFloat(data?.pairs[0]?.priceChange?.h24); 
         if (!isNaN(priceUsd)) {
           setFomoPrice(priceUsd);
           setPriceChange24h(change24h);
@@ -338,7 +333,7 @@ export const OpenSidebar = ({
     };
 
     const intervalId = setInterval(fetchFomoPrice, 10000);
-    fetchFomoPrice(); // fetch immediately on mount
+    fetchFomoPrice(); 
 
     return () => clearInterval(intervalId);
 
