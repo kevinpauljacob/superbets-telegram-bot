@@ -132,8 +132,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         {
           result,
           houseEdge,
-          strikeNumbers,
           amountWon,
+          $set: { strikeNumbers },
         },
         { new: true },
       ).populate("gameSeed");
