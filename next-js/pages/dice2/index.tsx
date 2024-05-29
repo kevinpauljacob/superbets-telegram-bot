@@ -370,6 +370,10 @@ export default function Dice2() {
     } else if (wallet.connected) handleBet();
   };
 
+  useEffect(() => {
+    console.log("jil", coinData, minGameAmount);
+  }, []);
+
   return (
     <GameLayout title="Dice 2">
       <GameOptions>
@@ -393,6 +397,7 @@ export default function Dice2() {
                 !wallet ||
                 !session?.user ||
                 isRolling ||
+                coinData === null ||
                 (coinData && coinData[0].amount < minGameAmount) ||
                 (betAmt !== undefined &&
                   maxBetAmt !== undefined &&
@@ -466,6 +471,7 @@ export default function Dice2() {
                       !wallet ||
                       !session?.user ||
                       isRolling ||
+                      coinData === null ||
                       (coinData && coinData[0].amount < minGameAmount) ||
                       (betAmt !== undefined &&
                         maxBetAmt !== undefined &&
@@ -575,20 +581,19 @@ export default function Dice2() {
               )}
             </>
           )}
-          {!coinData ||
-            (coinData[0].amount < minGameAmount && (
-              <div className="w-full rounded-lg bg-[#d9d9d90d] bg-opacity-10 flex items-center px-3 py-3 text-white md:px-6">
-                <div className="w-full text-center font-changa font-medium text-sm md:text-base text-[#F0F0F0] text-opacity-75">
-                  {translator(
-                    "Please deposit funds to start playing. View",
-                    language,
-                  )}{" "}
-                  <Link href="/balance">
-                    <u>{translator("WALLET", language)}</u>
-                  </Link>
-                </div>
+          {(!coinData || (coinData && coinData[0].amount < minGameAmount)) && (
+            <div className="w-full rounded-lg bg-[#d9d9d90d] bg-opacity-10 flex items-center px-3 py-3 text-white md:px-6">
+              <div className="w-full text-center font-changa font-medium text-sm md:text-base text-[#F0F0F0] text-opacity-75">
+                {translator(
+                  "Please deposit funds to start playing. View",
+                  language,
+                )}{" "}
+                <Link href="/balance">
+                  <u>{translator("WALLET", language)}</u>
+                </Link>
               </div>
-            ))}
+            </div>
+          )}
         </div>
       </GameDisplay>
       <GameTable>
