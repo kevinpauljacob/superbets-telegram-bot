@@ -567,7 +567,7 @@ export default function Mines() {
   };
 
   useEffect(() => {
-    handlePendingGame();
+    if (wallet.connected && wallet?.publicKey) handlePendingGame();
   }, [wallet.connected, wallet.publicKey]);
 
   const disableInput = useMemo(() => {
