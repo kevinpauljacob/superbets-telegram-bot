@@ -166,7 +166,7 @@ const renderMines=()=>{
     <div className="grid grid-cols-5 gap-1 sm:gap-2 text-white text-sm md:text-xl font-chakra">
             {Array.from({ length: 25 }, (_, index) => index + 1).map(
               (index) => (
-             <button className={` bg-[#202329] flex items-center justify-center cursor-pointer rounded-md text-center transition-all duration-300 ease-in-out 
+             <button key={index} className={` bg-[#202329] flex items-center justify-center cursor-pointer rounded-md text-center transition-all duration-300 ease-in-out 
              lg2:w-[45px] lg2:h-[45px] md:w-[42px] md:h-[42px] sm:w-[40px] sm:h-[40px]
              sm2:w-[38px] sm2:h-[38px] w-[30px] h-[30px]`}>
               {

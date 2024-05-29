@@ -99,6 +99,7 @@ function Leaderboard() {
                   <div className="relative w-8 h-8">
                     <Image
                       src={pointTier.image}
+                      alt={pointTier.label}
                       layout="fill"
                       objectFit="contain"
                       objectPosition="center"
@@ -140,6 +141,7 @@ function Leaderboard() {
                               ? parseInt(key)
                               : acc;
                           }, 0)}.png`}
+                          alt="Tier"
                           layout="fill"
                           objectFit="contain"
                           objectPosition="center"

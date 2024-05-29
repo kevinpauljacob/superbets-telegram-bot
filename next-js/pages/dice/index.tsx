@@ -574,6 +574,7 @@ export default function Dice() {
                 <div
                   key={num}
                   id={`ghost-win-pointer-${num}`}
+                  //@ts-ignore
                   ref={(el) =>
                     (ghostWinPointerRefs.current[num - 1] = el || null)
                   }
