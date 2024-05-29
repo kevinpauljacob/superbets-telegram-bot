@@ -122,11 +122,11 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           },
           {
             result,
-            strikeNumbers,
             strikeMultiplier: 0,
             amountWon: 0,
             amountLost: gameInfo.amount,
             $push: { userBets: userBet },
+            $set: { strikeNumbers },
           },
           {
             new: true,
@@ -171,10 +171,10 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
             {
               result,
               houseEdge,
-              strikeNumbers,
               strikeMultiplier,
               amountWon,
               $push: { userBets: userBet },
+              $set: { strikeNumbers },
             },
             {
               new: true,
