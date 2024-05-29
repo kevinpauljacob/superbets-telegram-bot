@@ -8,7 +8,7 @@ import { Keno } from "./VerifyKenoModal";
 import { FaRegCopy } from "react-icons/fa6";
 import { MdClose } from "react-icons/md";
 import CheckPF from "@/public/assets/CheckPF.svg";
-import { errorCustom } from "@/components/toasts/ToastGroup";
+import { errorCustom, successCustom } from "@/components/toasts/ToastGroup";
 import ProvablyFairModal from "../ProvablyFairModal";
 import { translator } from "@/context/transactions";
 import { useGlobalContext } from "@/components/GlobalContext";
@@ -133,6 +133,7 @@ export default function RollDiceProvablyFairModal({
     if (!data.success) return console.error(data.message);
 
     setModalData(data);
+    successCustom("Successfully changed the server seed")
     setNewClientSeed(generateClientSeed());
   };
 
