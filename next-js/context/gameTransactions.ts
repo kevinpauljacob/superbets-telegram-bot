@@ -43,7 +43,7 @@ export const placeBet = async (
   betType: string,
   timeFrame: number,
 ) => {
-  const {selectedCoinData} = useGlobalContext()
+  const {selectedCoin} = useGlobalContext()
 
   try {
     const res = await fetch(`/api/games/options`, {
@@ -51,7 +51,7 @@ export const placeBet = async (
       body: JSON.stringify({
         wallet: wallet.publicKey,
         amount: amount,
-       tokenMint:selectedCoinData?.tokenMint,
+       tokenMint:selectedCoin?.tokenMint,
         betType,
         timeFrame,
       }),
@@ -80,7 +80,7 @@ export const placeFlip = async (
   amount: number,
   flipType: string, // heads / tails
 ) => {
-  const {selectedCoinData}=useGlobalContext();
+  const {selectedCoin}=useGlobalContext();
   try {
     if (!wallet.publicKey) throw new Error("Wallet not connected");
 
@@ -92,7 +92,7 @@ export const placeFlip = async (
         wallet: wallet.publicKey,
         amount,
         flipType,
-        tokenMint:selectedCoinData?.tokenMint,
+        tokenMint:selectedCoin?.tokenMint,
       }),
       headers: {
         "Content-Type": "application/json",
@@ -436,7 +436,7 @@ export const rollDice = async (
   amount: number,
   chosenNumbers: number[],
 ) => {
-  const {selectedCoinData} = useGlobalContext()
+  const {selectedCoin} = useGlobalContext()
   try {
     if (!wallet.publicKey) throw new Error("Wallet not connected");
 
@@ -445,7 +445,7 @@ export const rollDice = async (
       body: JSON.stringify({
         wallet: wallet.publicKey,
         amount: amount,
-        tokenMint: selectedCoinData?.tokenMint,
+        tokenMint: selectedCoin?.tokenMint,
         chosenNumbers,
       }),
       headers: {
@@ -474,7 +474,7 @@ export const limboBet = async (
   amount: number,
   multiplier: number,
 ) => {
-  const {selectedCoinData} = useGlobalContext()
+  const {selectedCoin} = useGlobalContext()
 
   try {
     if (!wallet.publicKey) throw new Error("Wallet not connected");
@@ -484,7 +484,7 @@ export const limboBet = async (
       body: JSON.stringify({
         wallet: wallet.publicKey,
         amount: amount,
-        tokenMint: selectedCoinData?.tokenMint,
+        tokenMint: selectedCoin?.tokenMint,
         multiplier,
       }),
       headers: {

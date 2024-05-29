@@ -48,7 +48,7 @@ export default function Keno() {
     autoBetProfit,
     setAutoBetProfit,
     useAutoConfig,
-    selectedCoinData,
+    selectedCoin,
     kenoRisk,
     setKenoRisk,
     houseEdge,
@@ -184,7 +184,7 @@ export default function Keno() {
       if (!betAmt || betAmt === 0) {
         throw new Error("Set Amount.");
       }
-      if (selectedCoinData && selectedCoinData.amount < betAmt) {
+      if (selectedCoin && selectedCoin.amount < betAmt) {
         throw new Error("Insufficient balance for bet !");
       }
 
@@ -198,7 +198,7 @@ export default function Keno() {
         body: JSON.stringify({
           wallet: wallet.publicKey,
           amount: betAmt,
-          tokenMint:selectedCoinData?.tokenMint,
+          tokenMint:selectedCoin?.tokenMint,
           chosenNumbers: chosenNumbers,
           risk: kenoRisk,
         }),
@@ -424,7 +424,7 @@ export default function Keno() {
                 !wallet ||
                 !session?.user ||
                 isRolling ||
-                (selectedCoinData && selectedCoinData.amount < minGameAmount) ||
+                (selectedCoin && selectedCoin.amount < minGameAmount) ||
                 (betAmt !== undefined &&
                   maxBetAmt !== undefined &&
                   betAmt > maxBetAmt)
@@ -560,7 +560,7 @@ export default function Keno() {
                       !wallet ||
                       !session?.user ||
                       isRolling ||
-                      (selectedCoinData && selectedCoinData.amount < minGameAmount) ||
+                      (selectedCoin && selectedCoin.amount < minGameAmount) ||
                       (betAmt !== undefined &&
                         maxBetAmt !== undefined &&
                         betAmt > maxBetAmt)
@@ -630,8 +630,8 @@ export default function Keno() {
           </div>
         </div>
         <div className="relative flex w-full justify-between px-0 xl:px-4 mb-0 px:mb-6 gap-4">
-          {selectedCoinData &&
-            selectedCoinData.amount > minGameAmount &&
+          {selectedCoin &&
+            selectedCoin.amount > minGameAmount &&
             chosenNumbers.length > 0 && (
               <div className="w-full">
                 <div className="flex justify-between gap-[3px] sm:gap-3.5 lg:gap-2 2xl:gap-3.5 text-white w-full">
@@ -681,7 +681,7 @@ export default function Keno() {
                                 </span>
                               </div>
                               <div className="border border-white/10 rounded-[5px] p-3 mt-2">
-                                {selectedCoinData
+                                {selectedCoin
                                   ? truncateNumber(
                                       Math.max(
                                         0,
@@ -711,8 +711,8 @@ export default function Keno() {
               </div>
             )}
 
-          {!selectedCoinData ||
-            (selectedCoinData.amount < minGameAmount ? (
+          {!selectedCoin ||
+            (selectedCoin.amount < minGameAmount ? (
               <div className="w-full rounded-lg bg-[#d9d9d90d] bg-opacity-10 flex items-center px-3 py-3 text-white md:px-6">
                 <div className="w-full text-center font-changa font-medium text-sm md:text-base text-[#F0F0F0] text-opacity-75">
                   {translator(
@@ -724,7 +724,7 @@ export default function Keno() {
                   </Link>
                 </div>
               </div>
-            ) : selectedCoinData && chosenNumbers.length === 0 ? (
+            ) : selectedCoin && chosenNumbers.length === 0 ? (
               <div className="w-full rounded-lg bg-[#d9d9d90d] bg-opacity-10 flex items-center px-3 py-3 text-white md:px-6">
                 <div className="w-full text-center font-changa font-medium text-sm md:text-base text-[#F0F0F0] text-opacity-75">
                   {translator("Pick up to 10 numbers", language)}

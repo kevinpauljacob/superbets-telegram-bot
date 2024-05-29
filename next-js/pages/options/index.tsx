@@ -41,7 +41,7 @@ export default function Options() {
   const {
     getWalletBalance,
     getBalance,
-    selectedCoinData,
+    selectedCoin,
     maxBetAmt,
     language,
   } = useGlobalContext();
@@ -140,7 +140,7 @@ export default function Options() {
         return;
       }
 
-      if (betAmt > selectedCoinData!.amount) {
+      if (betAmt > selectedCoin!.amount) {
         errorCustom("Insufficient balance to place bet");
         setBetType(null);
         setCheckResult(false);
@@ -341,8 +341,8 @@ export default function Options() {
                 disabled={
                   !betType ||
                   !session?.user ||
-                  !selectedCoinData ||
-                  (selectedCoinData && selectedCoinData.amount < minGameAmount) ||
+                  !selectedCoin ||
+                  (selectedCoin && selectedCoin.amount < minGameAmount) ||
                   (betAmt !== undefined &&
                     maxBetAmt !== undefined &&
                     betAmt > maxBetAmt) ||
@@ -463,8 +463,8 @@ export default function Options() {
                 disabled={
                   !betType ||
                   !session?.user ||
-                  !selectedCoinData ||
-                  (selectedCoinData && selectedCoinData.amount < minGameAmount) ||
+                  !selectedCoin ||
+                  (selectedCoin && selectedCoin.amount < minGameAmount) ||
                   (betAmt !== undefined &&
                     maxBetAmt !== undefined &&
                     betAmt > maxBetAmt) ||

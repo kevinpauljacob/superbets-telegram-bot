@@ -24,7 +24,7 @@ export default function BetAmount({
   disabled?: boolean;
 }) {
   const methods = useForm();
-  const { coinData, maxBetAmt, setMaxBetAmt, language, kenoRisk, selectedCoinData } =
+  const { coinData, maxBetAmt, setMaxBetAmt, language, kenoRisk, selectedCoin } =
     useGlobalContext();
 
   //Temperory max bet
@@ -60,7 +60,7 @@ export default function BetAmount({
         maxPayouts[game as GameType] / currentMultiplier;
       
       
-      if(selectedCoinData?.amount == undefined && selectedCoinData?.amount == 0) {
+      if(selectedCoin?.amount == undefined && selectedCoin?.amount == 0) {
        setCurrentMaxBetAmt(0)
       }
       setCurrentMaxBetAmt(
@@ -87,13 +87,13 @@ export default function BetAmount({
         game === "keno" || game === "wheel"
           ? 20.0
           : truncateNumber(currentMaxBetAmt, 4),
-          selectedCoinData && selectedCoinData?.amount
-          ? truncateNumber(selectedCoinData.amount, 4)
+          selectedCoin && selectedCoin?.amount
+          ? truncateNumber(selectedCoin.amount, 4)
           : truncateNumber(currentMaxBetAmt, 4),
       ),
     );
-    console.log(selectedCoinData)
-  }, [currentMaxBetAmt, coinData,selectedCoinData]);
+    console.log(selectedCoin)
+  }, [currentMaxBetAmt, coinData,selectedCoin]);
 
   const handleSetMaxBet = () => {
     setBetAmt(maxBetAmt);
@@ -104,8 +104,8 @@ export default function BetAmount({
     if (betAmt || coinData) {
       let newBetAmt =
         !betAmt || betAmt === 0
-          ? selectedCoinData
-            ? selectedCoinData.amount / 2
+          ? selectedCoin
+            ? selectedCoin.amount / 2
             : 0
           : betAmt! / 2;
 
@@ -121,11 +121,11 @@ export default function BetAmount({
   };
 
   const handleDoubleBet = () => {
-    if (betAmt !== undefined || selectedCoinData) {
+    if (betAmt !== undefined || selectedCoin) {
       const newBetAmt =
         betAmt === 0
-          ? selectedCoinData
-            ? parseFloat((selectedCoinData.amount * 2).toFixed(4))
+          ? selectedCoin
+            ? parseFloat((selectedCoin.amount * 2).toFixed(4))
             : 0
           : parseFloat(((betAmt ?? 0) * 2).toFixed(4));
 
@@ -153,7 +153,7 @@ export default function BetAmount({
         <span className="flex items-center text-[#94A3B8] text-opacity-90 font-changa text-xs gap-2">
           <span className="cursor-pointer" onClick={handleSetMaxBet}>
           {maxBetAmt} $ {
-      SPL_TOKENS.find(token => token.tokenMint === selectedCoinData?.tokenMint)?.tokenName || 'Unknown Token'
+      SPL_TOKENS.find(token => token.tokenMint === selectedCoin?.tokenMint)?.tokenName || 'Unknown Token'
     }
           </span>
           <span
@@ -276,7 +276,7 @@ export default function BetAmount({
                 {translator("Balance", language)}
               </span>
               <span className="text-xs font-medium">
-                {selectedCoinData ? (selectedCoinData.amount).toFixed(2) : 0.0}
+                {selectedCoin ? (selectedCoin.amount).toFixed(2) : 0.0}
               </span>
             </div>
           </div>

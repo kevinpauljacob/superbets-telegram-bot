@@ -34,7 +34,6 @@ export default function BalanceModal() {
     setShowWalletModal,
     walletBalance,
     language,
-    selectedCoinData,
     userTokens,
     setUserTokens,
   } = useGlobalContext();

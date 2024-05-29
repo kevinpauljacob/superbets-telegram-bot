@@ -17,11 +17,11 @@ export const SPL_TOKENS = [
     icon: "https://upload.wikimedia.org/wikipedia/commons/4/49/USDC_Logo.png",
     betSizes: [1, 5, 20]
   },
-  {
-    tokenName: "USDT",
-    tokenMint: "Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB",
-    decimal: 6,
-    icon: "https://upload.wikimedia.org/wikipedia/commons/0/01/USDT_Logo.png",
-    betSizes: [1, 3, 5]
-  },
+  // {
+  //   tokenName: "USDT",
+  //   tokenMint: "Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB",
+  //   decimal: 6,
+  //   icon: "https://upload.wikimedia.org/wikipedia/commons/0/01/USDT_Logo.png",
+  //   betSizes: [1, 3, 5]
+  // },
 ];

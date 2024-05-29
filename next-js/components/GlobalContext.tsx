@@ -31,6 +31,7 @@ interface CoinBalance {
   type: boolean;
   amount: number;
   tokenMint: string;
+  tokenName: string;
   img: string;
 }
 
@@ -104,11 +105,8 @@ interface GlobalContextProps {
   coinData: CoinBalance[] | null;
   setCoinData: (coinData: CoinBalance[] | null) => void;
 
-  selectedCoin: string;
-  setSelectedCoin: (selectedCoin: string) => void;
-
-  selectedCoinData: CoinBalance | null;
-  setSelectedCoinData: (selectedCoinData: CoinBalance | null) => void;
+  selectedCoin: CoinBalance;
+  setSelectedCoin: (selectedCoin: CoinBalance) => void;
 
   showWalletModal: boolean;
   setShowWalletModal: React.Dispatch<React.SetStateAction<boolean>>;
@@ -221,17 +219,18 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
       type: true,
       amount: 0,
       tokenMint: "SOL",
+      tokenName: "SOL",
       img: "https://upload.wikimedia.org/wikipedia/en/b/b9/Solana_logo.png",
     },
   ]);
-  const [selectedCoin, setSelectedCoin] = useState<string>("SOL");
-  const [selectedCoinData, setSelectedCoinData] = useState<CoinBalance | null>(
-    {amount: 0.0011550789999999942,
-      img: "https://upload.wikimedia.org/wikipedia/en/b/b9/Solana_logo.png",
-      tokenMint: "SOL",
-      type: true,
-      wallet: ""}||null
-  );
+  const [selectedCoin, setSelectedCoin] = useState<CoinBalance>({
+    wallet: "",
+    type: true,
+    amount: 0,
+    tokenMint: "SOL",
+    tokenName: "SOL",
+    img: "https://upload.wikimedia.org/wikipedia/en/b/b9/Solana_logo.png",
+  });
 
   const [showWalletModal, setShowWalletModal] = useState<boolean>(false);
   const [isVerifyModalOpen, setIsVerifyModalOpen] = useState<boolean>(false);
@@ -473,8 +472,6 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
         getProvablyFairData,
         selectedCoin,
         setSelectedCoin,
-        selectedCoinData,
-        setSelectedCoinData,
         userTokens,
         setUserTokens,
       }}

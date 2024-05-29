@@ -57,7 +57,7 @@ export default function Flip() {
     autoBetProfit,
     setAutoBetProfit,
     useAutoConfig,
-    selectedCoinData,
+    selectedCoin,
     houseEdge,
     maxBetAmt,
     language,
@@ -85,7 +85,7 @@ export default function Flip() {
       if (!betAmt || betAmt === 0) {
         throw new Error("Set Amount.");
       }
-      if (selectedCoinData && selectedCoinData.amount < betAmt) {
+      if (selectedCoin && selectedCoin.amount < betAmt) {
         throw new Error("Insufficient balance for bet !");
       }
 
@@ -314,7 +314,7 @@ export default function Flip() {
                 !betType ||
                 loading ||
                 !session?.user ||
-                (selectedCoinData && selectedCoinData.amount < minGameAmount) ||
+                (selectedCoin && selectedCoin.amount < minGameAmount) ||
                 (betAmt !== undefined &&
                   maxBetAmt !== undefined &&
                   betAmt > maxBetAmt)
@@ -436,7 +436,7 @@ export default function Flip() {
                       !betType ||
                       loading ||
                       !session?.user ||
-                      (selectedCoinData && selectedCoinData.amount < minGameAmount) ||
+                      (selectedCoin && selectedCoin.amount < minGameAmount) ||
                       (betAmt !== undefined &&
                         maxBetAmt !== undefined &&
                         betAmt > maxBetAmt)

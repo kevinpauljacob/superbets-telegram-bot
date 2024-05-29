@@ -19,8 +19,6 @@ export default function SubHeader() {
     setShowWalletModal,
     setLiveBets,
     language,
-    selectedCoinData,
-    setSelectedCoinData,
     setSelectedCoin,
     selectedCoin,
     coinData,
@@ -137,18 +135,15 @@ export default function SubHeader() {
               >
                 <img
                   src={
-                    selectedCoinData
-                      ? selectedCoinData.img
+                    selectedCoin
+                      ? selectedCoin.img
                       : "https://upload.wikimedia.org/wikipedia/en/b/b9/Solana_logo.png"
                   }
                   alt=""
                   className="w-7 h-7"
                 />
                 <span className="font-chakra text-2xl text-[#94A3B8]">
-                  {truncateNumber(
-                    selectedCoinData ? selectedCoinData.amount : 0,
-                    3,
-                  )}
+                  {truncateNumber(selectedCoin ? selectedCoin.amount : 0, 3)}
                 </span>
                 <div className="grow" />
                 <Image
@@ -170,16 +165,16 @@ export default function SubHeader() {
                         let cd = SPL_TOKENS.find(
                           (c) => c.tokenMint === coin.tokenMint,
                         )!;
-                        setSelectedCoinData({
+                        setSelectedCoin({
                           wallet: "",
                           type: true,
                           amount:
                             coinData?.find((c) => c.tokenMint === cd.tokenMint)
                               ?.amount || 0,
                           tokenMint: cd.tokenMint,
+                          tokenName: cd.tokenName,
                           img: cd.icon,
                         });
-                        setSelectedCoin(cd.tokenMint);
                         setShowSelectCoinModal(false);
                       }}
                     >
@@ -219,7 +214,7 @@ export default function SubHeader() {
             <Image src={"/assets/sol.png"} alt="" width={14} height={14} />
             <span className="text-base font-chakra leading-3 mt-0.5 text-[#94A3B8]">
               {truncateNumber(
-                selectedCoinData ? selectedCoinData.amount : 0,
+                selectedCoin ? selectedCoin.amount : 0,
                 3,
               )}
             </span>

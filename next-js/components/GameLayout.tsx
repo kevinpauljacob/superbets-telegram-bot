@@ -40,12 +40,12 @@ export const GameFooterInfo: React.FC<GameFooterProps> = ({
   chance,
 }) => {
  
-  const { coinData, setShowWalletModal, currentGame, houseEdge, language , selectedCoinData } =
+  const { coinData, setShowWalletModal, currentGame, houseEdge, language , selectedCoin } =
     useGlobalContext();
 
   return (
     <div className="flex px-0 xl:px-4 mb-0 md:mb-[1.4rem] gap-4 flex-row w-full justify-between">
-      {selectedCoinData && selectedCoinData.amount > minGameAmount && (
+      {selectedCoin && selectedCoin.amount > minGameAmount && (
         <>
           {multiplier !== undefined ? (
             <div className="flex flex-col w-full">
@@ -91,8 +91,8 @@ export const GameFooterInfo: React.FC<GameFooterProps> = ({
         </>
       )}
 
-      {!selectedCoinData ||
-        (selectedCoinData.amount < minGameAmount && (
+      {!selectedCoin ||
+        (selectedCoin.amount < minGameAmount && (
           <div className="w-full rounded-lg bg-[#d9d9d90d] bg-opacity-10 flex items-center px-3 py-3 text-white md:px-6">
             <div className="w-full text-center font-changa font-medium text-sm md:text-base text-[#F0F0F0] text-opacity-75">
               {translator(
