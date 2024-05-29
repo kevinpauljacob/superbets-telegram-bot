@@ -443,7 +443,7 @@ export default function ConfigureAutoModal() {
                 methods.clearErrors("autoStopProfit");
                 methods.clearErrors("autoStopLoss");
                 removeAutoConfig();
-                warningCustom("All values reset.");
+                warningCustom("All values reset.", "top-left");
               }}
               className="text-[#94A3B8] hover:text-white/70 transition-all hover:duration-75 w-full text-center cursor-pointer text-base font-semibold font-chakra mt-8 underline underline-offset-2"
             >

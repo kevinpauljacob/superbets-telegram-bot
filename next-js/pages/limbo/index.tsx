@@ -166,7 +166,7 @@ export default function Limbo() {
             if (typeof autoBetCount === "number") {
               setAutoBetCount(autoBetCount > 0 ? autoBetCount - 1 : 0);
               autoBetCount === 1 &&
-                warningCustom("Auto bet stopped", "top-right");
+                warningCustom("Auto bet stopped", "top-left");
             } else
               setAutoBetCount(
                 autoBetCount.length > 12
@@ -205,18 +205,12 @@ export default function Limbo() {
       setDisplayMultiplier(multiplierLimits[0]);
       setTargetMultiplier(multiplierLimits[0]);
 
-      // console.log("Placing Flip");
-      // function to place bet
-      const response = await limboBet(
-        wallet,
-        betAmt!,
-        parseFloat((100 / inputMultiplier).toFixed(8)),
-      );
+      const response = await limboBet(wallet, betAmt!, inputMultiplier);
 
       if (!response.success) throw new Error(response.message);
 
       const winningMultiplier = parseFloat(
-        truncateNumber(100 / response.strikeNumber, 2).toString(),
+        truncateNumber(response.strikeNumber, 2).toString(),
       );
 
       setFlipping(false);
@@ -283,7 +277,7 @@ export default function Limbo() {
         autoBetProfit > 0 &&
         autoBetProfit >= autoStopProfit
       ) {
-        warningCustom("Profit limit reached.", "top-right");
+        warningCustom("Profit limit reached.", "top-left");
         setAutoBetCount(0);
         setStartAuto(false);
         return;
@@ -294,7 +288,7 @@ export default function Limbo() {
         autoBetProfit < 0 &&
         potentialLoss <= -autoStopLoss
       ) {
-        warningCustom("Loss limit reached.", "top-right");
+        warningCustom("Loss limit reached.", "top-left");
         setAutoBetCount(0);
         setStartAuto(false);
         return;
@@ -347,7 +341,7 @@ export default function Limbo() {
               <div
                 onClick={() => {
                   soundAlert("/sounds/betbutton.wav");
-                  warningCustom("Auto bet stopped", "top-right");
+                  warningCustom("Auto bet stopped", "top-left");
                   setAutoBetCount(0);
                   setStartAuto(false);
                 }}
@@ -429,7 +423,7 @@ export default function Limbo() {
                     <div
                       onClick={() => {
                         soundAlert("/sounds/betbutton.wav");
-                        warningCustom("Auto bet stopped", "top-right");
+                        warningCustom("Auto bet stopped", "top-left");
                         setAutoBetCount(0);
                         setStartAuto(false);
                       }}

@@ -1,5 +1,5 @@
 import Image from "next/image";
-import Card from "/public/assets/storeMyster.png";
+import Card from "/public/assets/storeMystery.svg";
 
 interface StoreCardProps {
   src: string;

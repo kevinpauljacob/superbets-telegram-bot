@@ -101,7 +101,7 @@ function Footer() {
                     <Twitter className="w-3 h-3 text-white group-hover:text-[#9945FF] group-focus:text-[#9945FF] transition-all" />
                   </div>
                 </Link>{" "}
-                <Link href="t.me/FOMO_wtf" target="_blank">
+                <Link href="https://t.me/FOMO_wtf" target="_blank">
                   <div className="p-2 border-2 border-[#FFFFFF] rounded-full border-opacity-5 hover:bg-[#121519] hover:cursor-pointer">
                     <Telegram className="w-3 h-3 text-white group-hover:text-[#9945FF] group-focus:text-[#9945FF] transition-all" />
                   </div>

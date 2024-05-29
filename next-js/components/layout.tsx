@@ -8,7 +8,7 @@ import SubHeader from "./SubHeader";
 import GameHeader from "./GameHeader";
 import { useGlobalContext } from "./GlobalContext";
 import BalanceModal from "./games/BalanceModal";
-import { useSession } from "next-auth/react";
+import { signOut, useSession } from "next-auth/react";
 import MobileNavbar from "./MobileNavbar";
 import VerifyFlipModal from "./games/CoinFlip/VerifyFlipModal";
 import VerifyDiceModal from "./games/Dice/VerifyDiceModal";
@@ -104,12 +104,22 @@ export default function Layout({ children }: LayoutProps) {
     },
   });
 
-  const scrollToTop = () => {
-    const scrollElement = document.querySelector("#scroll-element");
+  const resetScroll= () => {
+    const scrollElement = document.querySelector("#top-scroll-element");
     if (scrollElement) {
       scrollElement.scrollIntoView({ behavior: "smooth", block: "start" });
     }
   };
+
+  const scrollToTop = () => {
+    const scrollElement = document.querySelector("#scroll-element");
+    if (scrollElement) {
+      scrollElement.scrollIntoView({ behavior: "smooth", block: "start" });
+      resetScroll();
+    }
+  };
+
+  
 
   useEffect(() => {
     //sound pre-loader
@@ -126,7 +136,37 @@ export default function Layout({ children }: LayoutProps) {
         if (pfData) setModalData(pfData);
       }
     })();
+
+    if (wallet?.publicKey && session?.user)
+      localStorage.setItem("connectedAccountKey", wallet.publicKey.toBase58());
   }, [wallet.publicKey, session?.user]);
+
+  // useEffect(() => {
+  //   const interval = setInterval(() => {
+  //     const storedKey = localStorage.getItem("connectedAccountKey");
+
+  //     if ("solana" in window) {
+  //       const provider = window.solana;
+
+  //       //@ts-ignore
+  //       if (provider?.publicKey) {
+  //         //@ts-ignore
+  //         // console.log("checking", provider?.publicKey.toBase58());
+  //         //@ts-ignore
+  //         if (storedKey && storedKey !== provider.publicKey.toBase58()) {
+  //           (async () => {
+  //             // console.log("Account changed");
+  //             localStorage.removeItem("connectedAccountKey");
+  //             await wallet.disconnect();
+  //             await signOut();
+  //           })();
+  //         }
+  //       }
+  //     }
+  //   }, 5000);
+
+  //   return () => clearInterval(interval);
+  // }, []);
 
   const toggleSidebar = () => {
     setSidebar(!sidebar);
@@ -176,6 +216,7 @@ export default function Layout({ children }: LayoutProps) {
 
   return (
     <>
+      <div id="top-scroll-element" className="w-full min-h-[1px] bg-transparent" />
       <InfoBar />
       <Header sidebar={sidebar} toggleSidebar={toggleSidebar} />
       <section className="relative flex flex-1 max-h-[calc(100%-6.25rem)]">

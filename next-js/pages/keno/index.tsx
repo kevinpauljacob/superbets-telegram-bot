@@ -259,7 +259,7 @@ export default function Keno() {
         );
         // update count
         if (typeof autoBetCount === "number") {
-          autoBetCount === 1 && warningCustom("Auto bet stopped", "top-right");
+          autoBetCount === 1 && warningCustom("Auto bet stopped", "top-left");
         } else
           setAutoBetCount(
             autoBetCount.length > 12
@@ -325,7 +325,7 @@ export default function Keno() {
         autoBetProfit > 0 &&
         autoBetProfit >= autoStopProfit
       ) {
-        warningCustom("Profit limit reached.", "top-right");
+        warningCustom("Profit limit reached.", "top-left");
         setAutoBetCount(0);
         setStartAuto(false);
         return;
@@ -336,7 +336,7 @@ export default function Keno() {
         autoBetProfit < 0 &&
         potentialLoss <= -autoStopLoss
       ) {
-        warningCustom("Loss limit reached.", "top-right");
+        warningCustom("Loss limit reached.", "top-left");
         setAutoBetCount(0);
         setStartAuto(false);
         return;
@@ -415,7 +415,7 @@ export default function Keno() {
               <div
                 onClick={() => {
                   soundAlert("/sounds/betbutton.wav");
-                  warningCustom("Auto bet stopped", "top-right");
+                  warningCustom("Auto bet stopped", "top-left");
                   setAutoBetCount(0);
                   setStartAuto(false);
                 }}
@@ -551,7 +551,7 @@ export default function Keno() {
                     <div
                       onClick={() => {
                         soundAlert("/sounds/betbutton.wav");
-                        warningCustom("Auto bet stopped", "top-right");
+                        warningCustom("Auto bet stopped", "top-left");
                         setAutoBetCount(0);
                         setStartAuto(false);
                       }}
@@ -586,10 +586,10 @@ export default function Keno() {
         </>
       </GameOptions>
       <GameDisplay>
-        <div className="w-full flex justify-between items-center">
-          <div className="hidden sm:absolute top-10 left-12">
+        <div className="w-full flex justify-between items-center h-[2.125rem] mb-7 sm:mb-0">
+          <div>
             {isRolling ? (
-              <div className="font-chakra text-sm font-medium text-white text-opacity-75">
+              <div className="font-chakra text-xs sm:text-sm font-medium text-white text-opacity-75">
                 {translator("Betting", language)}...
               </div>
             ) : null}

@@ -28,13 +28,13 @@ type InputType = {
   wallet: string;
   amount: number;
   tokenMint: string;
-  chance: number;
+  multiplier: number;
 };
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === "POST") {
     try {
-      let { wallet, amount, tokenMint, chance }: InputType = req.body;
+      let { wallet, amount, tokenMint, multiplier }: InputType = req.body;
 
       const token = await getToken({ req, secret });
 
@@ -44,7 +44,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           message: "User wallet not authenticated",
         });
 
-      if (!wallet || !amount || !tokenMint || !chance)
+      if (!wallet || !amount || !tokenMint || !multiplier)
         return res
           .status(400)
           .json({ success: false, message: "Missing parameters" });
@@ -55,15 +55,15 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           message: "Invalid bet amount",
         });
 
-      if (tokenMint !== "SOL" || !(2 <= chance && chance <= 98))
+      if (tokenMint !== "SOL" || !(1.02 <= multiplier && multiplier <= 50))
         return res
           .status(400)
           .json({ success: false, message: "Invalid parameters" });
 
-      const strikeMultiplier = new Decimal(100).dividedBy(chance).toDP(2);
+      const strikeMultiplier = multiplier;
       const maxPayout = Decimal.mul(amount, strikeMultiplier);
 
-      if (!(maxPayout.toNumber() < maxPayouts.limbo))
+      if (!(maxPayout.toNumber() <= maxPayouts.limbo))
         return res
           .status(400)
           .json({ success: false, message: "Max payout exceeded" });
@@ -125,7 +125,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       let amountWon = new Decimal(0);
       let amountLost = amount;
 
-      if (strikeNumber <= chance) {
+      const chance = new Decimal(100).div(strikeMultiplier).toNumber();
+
+      if (strikeMultiplier <= strikeNumber) {
         result = "Won";
         amountWon = Decimal.mul(amount, strikeMultiplier).mul(
           Decimal.sub(1, houseEdge),
