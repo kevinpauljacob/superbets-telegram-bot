@@ -133,7 +133,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           },
         ).populate("gameSeed");
       } else {
-        amountWon = Decimal.mul(Math.max(amount, amountWon), strikeMultiplier)
+        amountWon = Decimal.mul(amount, strikeMultiplier)
           .mul(Decimal.sub(1, houseEdge))
           .toNumber();
 

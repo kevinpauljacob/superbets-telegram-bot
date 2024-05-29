@@ -127,7 +127,7 @@ export default function Mines() {
     if (betAmt) {
       console.log("here");
       currentProfit = truncateNumber(
-        Decimal.mul(Math.max(betAmt, amountWon), strikeMultiplier)
+        Decimal.mul(betAmt, strikeMultiplier)
           .mul(Decimal.sub(1, houseEdge))
           .toNumber(),
         6,
@@ -395,12 +395,11 @@ export default function Mines() {
         message,
       } = await response.json();
       console.log({
-        "Success":success,
-        "Result":result,
-        "AmountWon":amountWon,
-        "StikerNumber":strikeNumbers,
-        
-      })
+        Success: success,
+        Result: result,
+        AmountWon: amountWon,
+        StikerNumber: strikeNumbers,
+      });
       if (success != true) {
         throw new Error(message);
       }
@@ -643,9 +642,9 @@ export default function Mines() {
             (autoWinChangeReset || autoLossChangeReset
               ? betAmt
               : autoBetCount === "inf"
-                ? Math.max(0, betAmt)
-                : betAmt *
-                  (autoLossChange !== null ? autoLossChange / 100.0 : 0));
+              ? Math.max(0, betAmt)
+              : betAmt *
+                (autoLossChange !== null ? autoLossChange / 100.0 : 0));
 
         console.log("Current bet amount:", betAmt);
         console.log("Auto loss change:", autoLossChange);
@@ -1103,29 +1102,29 @@ export default function Mines() {
                         userBets[index - 1].pick === true
                         ? "border-[#FCB10F] bg-[#FCB10F33]"
                         : userBets[index - 1].result === "Lost" &&
-                            userBets[index - 1].pick === true
-                          ? "border-[#F1323E] bg-[#F1323E33]"
-                          : "border-[#202329] hover:border-white/30"
-                      : betType === "auto"
-                        ? userBets[index - 1].result === "" &&
                           userBets[index - 1].pick === true
-                          ? "border-[#FCB10F] bg-[#FCB10F33]"
-                          : userBets[index - 1].result === "Won" &&
-                              userBets[index - 1].pick === true
-                            ? "border-[#FCB10F] bg-[#FCB10F33]"
-                            : userBets[index - 1].result === "Lost" &&
-                                userBets[index - 1].pick === true
-                              ? "border-[#F1323E] bg-[#F1323E33]"
-                              : "border-[#202329] hover:border-white/30"
-                        : null
+                        ? "border-[#F1323E] bg-[#F1323E33]"
+                        : "border-[#202329] hover:border-white/30"
+                      : betType === "auto"
+                      ? userBets[index - 1].result === "" &&
+                        userBets[index - 1].pick === true
+                        ? "border-[#FCB10F] bg-[#FCB10F33]"
+                        : userBets[index - 1].result === "Won" &&
+                          userBets[index - 1].pick === true
+                        ? "border-[#FCB10F] bg-[#FCB10F33]"
+                        : userBets[index - 1].result === "Lost" &&
+                          userBets[index - 1].pick === true
+                        ? "border-[#F1323E] bg-[#F1323E33]"
+                        : "border-[#202329] hover:border-white/30"
+                      : null
                   }  bg-[#202329] flex items-center justify-center cursor-pointer rounded-md text-center transition-all duration-300 ease-in-out w-[45px] h-[45px] sm:w-[55px] sm:h-[55px] md:w-[80px] md:h-[80px] xl:w-[95px] xl:h-[95px]`}
                   disabled={betType === "manual" && userBets[index - 1].pick}
                   onClick={() =>
                     betType === "auto"
                       ? handleAutoPick(index)
                       : betActive && betType === "manual"
-                        ? handlePick(index)
-                        : null
+                      ? handlePick(index)
+                      : null
                   }
                 >
                   {betType === "manual" &&
