@@ -316,26 +316,28 @@ export default function Dice2() {
         // console.log("Auto profit change:", autoWinChange);
         // console.log("Potential loss:", potentialLoss);
       }
-
       if (
         useAutoConfig &&
         autoStopProfit &&
         autoBetProfit > 0 &&
         autoBetProfit >= autoStopProfit
       ) {
-        warningCustom("Profit limit reached.", "top-left");
+        setTimeout(() => {
+          warningCustom("Profit limit reached.", "top-left");
+        }, 500);
         setAutoBetCount(0);
         setStartAuto(false);
-        setUserInput(betAmt);
         return;
       }
       if (
         useAutoConfig &&
         autoStopLoss &&
         autoBetProfit < 0 &&
-        potentialLoss <= -autoStopLoss
+        potentialLoss < -autoStopLoss
       ) {
-        warningCustom("Loss limit reached.", "top-left");
+        setTimeout(() => {
+          warningCustom("Loss limit reached.", "top-left");
+        }, 500);
         setAutoBetCount(0);
         setStartAuto(false);
         return;

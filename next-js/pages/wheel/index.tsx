@@ -294,7 +294,9 @@ export default function Wheel() {
         autoBetProfit > 0 &&
         autoBetProfit >= autoStopProfit
       ) {
-        warningCustom("Profit limit reached.", "top-left");
+        setTimeout(() => {
+          warningCustom("Profit limit reached.", "top-left");
+        }, 500);
         setAutoBetCount(0);
         setStartAuto(false);
         return;
@@ -303,9 +305,11 @@ export default function Wheel() {
         useAutoConfig &&
         autoStopLoss &&
         autoBetProfit < 0 &&
-        potentialLoss <= -autoStopLoss
+        potentialLoss < -autoStopLoss
       ) {
-        warningCustom("Loss limit reached.", "top-left");
+        setTimeout(() => {
+          warningCustom("Loss limit reached.", "top-left");
+        }, 500);
         setAutoBetCount(0);
         setStartAuto(false);
         return;
@@ -493,7 +497,7 @@ export default function Wheel() {
 
                 <div className="relative w-full hidden lg:flex mt-2">
                   {startAuto && (
-                    <div 
+                    <div
                       onClick={() => {
                         soundAlert("/sounds/betbutton.wav");
                         warningCustom("Auto bet stopped", "top-left");
