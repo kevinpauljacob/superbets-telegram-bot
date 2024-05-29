@@ -78,6 +78,12 @@ export default function Mines() {
   const [gameId, setGameId] = useState<number>();
   const [betActive, setBetActive] = useState(false);
   const [dropDown, setDropDown] = useState<boolean>(false);
+  const [cashoutModal, setCashoutModal] = useState({
+    show: false,
+    amountWon: 0,
+    strikeMultiplier: 0,
+    pointsGained: 0,
+  });
 
   const defaultUserBets = Array.from({ length: 25 }, (_, index) => ({
     result: "",
@@ -202,8 +208,15 @@ export default function Mines() {
         }),
       });
 
-      const { success, message, result, amountWon, strikeNumbers } =
-        await response.json();
+      const {
+        success,
+        message,
+        result,
+        amountWon,
+        strikeMultiplier,
+        strikeNumbers,
+        pointsGained,
+      } = await response.json();
 
       if (success != true) {
         errorCustom(message);
@@ -221,6 +234,12 @@ export default function Mines() {
           ...bet,
           result: strikeNumbers[index] === 1 ? "Lost" : "Pending",
         }));
+        setCashoutModal({
+          show: true,
+          amountWon: amountWon,
+          strikeMultiplier: strikeMultiplier,
+          pointsGained: pointsGained,
+        });
         setUserBets(updatedUserBetsWithResult);
         setRefresh(true);
         setBetActive(false);
@@ -239,6 +258,9 @@ export default function Mines() {
     }
   };
 
+  useEffect(() => {
+    console.log("cashoutModal", cashoutModal);
+  }, [cashoutModal]);
   const handleAutoPick = async (number: number) => {
     console.log("number", number);
     const updatedUserBets = [...userBets];
@@ -450,6 +472,12 @@ export default function Mines() {
 
       setIsRolling(true);
       setUserBets(defaultUserBets);
+      setCashoutModal({
+        show: false,
+        amountWon: 0,
+        strikeMultiplier: 0,
+        pointsGained: 0,
+      });
       const response = await fetch(`/api/games/mines`, {
         method: "POST",
         headers: {
@@ -609,9 +637,9 @@ export default function Mines() {
             (autoWinChangeReset || autoLossChangeReset
               ? betAmt
               : autoBetCount === "inf"
-              ? Math.max(0, betAmt)
-              : betAmt *
-                (autoLossChange !== null ? autoLossChange / 100.0 : 0));
+                ? Math.max(0, betAmt)
+                : betAmt *
+                  (autoLossChange !== null ? autoLossChange / 100.0 : 0));
 
         console.log("Current bet amount:", betAmt);
         console.log("Auto loss change:", autoLossChange);
@@ -885,7 +913,7 @@ export default function Mines() {
                         </div>
                       </div>
                     </div>
-                    <div className="border border-[#FFFFFF0D] rounded-[5px] font-changa text-white text-xs font-medium p-5 mb-6">
+                    {/* <div className="border border-[#FFFFFF0D] rounded-[5px] font-changa text-white text-xs font-medium p-5 mb-6">
                       <div>
                         <div className="flex justify-between items-center mb-2">
                           <p>Current Profit</p>
@@ -938,7 +966,7 @@ export default function Mines() {
                           </p>
                         </div>
                       </div>
-                    </div>
+                    </div> */}
                   </>
                 ) : null}
                 {betType === "manual" ? (
@@ -1009,7 +1037,7 @@ export default function Mines() {
         </>
       </GameOptions>
       <GameDisplay>
-        <div className="w-full flex justify-between items-center">
+        {/* <div className="w-full flex justify-between items-center">
           <div className="hidden sm:absolute top-10 left-12">
             {isRolling ? (
               <div className="font-chakra text-sm font-medium text-white text-opacity-75">
@@ -1017,9 +1045,48 @@ export default function Mines() {
               </div>
             ) : null}
           </div>
-        </div>
-        <div className="flex justify-center items-center w-full mb-[1.4rem] sm:my-5">
-          <div className="grid grid-cols-5 gap-1 sm:gap-2 text-white text-sm md:text-xl font-chakra">
+        </div> */}
+        <div
+          className="flex justify-center items-center w-full mb-[1.4rem] sm:my-5"
+          onClick={() => {
+            setCashoutModal({
+              show: false,
+              amountWon: 0,
+              strikeMultiplier: 0,
+              pointsGained: 0,
+            });
+          }}
+        >
+          <div className="relative grid grid-cols-5 gap-1 sm:gap-2 text-white text-sm md:text-xl font-chakra">
+            {cashoutModal.show && (
+              <div className="absolute top-0 left-0 w-full h-full flex items-center justify-center bg-black/40">
+                <div className="flex flex-col items-center justify-center bg-[#121418] rounded-[5px] border-2 border-fomo-green w-[200px] h-max p-2.5">
+                  <p className="text-3xl text-fomo-green font-bold font-chakra mb-2">
+                    x{truncateNumber(cashoutModal.strikeMultiplier, 2)}
+                  </p>
+                  <div className="flex items-center justify-between bg-[#202329] rounded-[3px] text-sm font-bold font-chakra text-white w-full p-2.5">
+                    <div className="flex gap-2 items-center">
+                      <Image
+                        src="/assets/sol.svg"
+                        alt="SOL"
+                        width={20}
+                        height={20}
+                      />
+                      <p>{truncateNumber(cashoutModal.amountWon, 6)}</p>
+                    </div>
+                    <div className="flex gap-2 items-center">
+                      <Image
+                        src="/assets/gem.svg"
+                        alt="SOL"
+                        width={20}
+                        height={20}
+                      />
+                      <p>{truncateNumber(cashoutModal.pointsGained, 2)}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
             {Array.from({ length: 25 }, (_, index) => index + 1).map(
               (index) => (
                 <button
@@ -1030,29 +1097,29 @@ export default function Mines() {
                         userBets[index - 1].pick === true
                         ? "border-[#FCB10F] bg-[#FCB10F33]"
                         : userBets[index - 1].result === "Lost" &&
-                          userBets[index - 1].pick === true
-                        ? "border-[#F1323E] bg-[#F1323E33]"
-                        : "border-[#202329] hover:border-white/30"
+                            userBets[index - 1].pick === true
+                          ? "border-[#F1323E] bg-[#F1323E33]"
+                          : "border-[#202329] hover:border-white/30"
                       : betType === "auto"
-                      ? userBets[index - 1].result === "" &&
-                        userBets[index - 1].pick === true
-                        ? "border-[#FCB10F] bg-[#FCB10F33]"
-                        : userBets[index - 1].result === "Won" &&
+                        ? userBets[index - 1].result === "" &&
                           userBets[index - 1].pick === true
-                        ? "border-[#FCB10F] bg-[#FCB10F33]"
-                        : userBets[index - 1].result === "Lost" &&
-                          userBets[index - 1].pick === true
-                        ? "border-[#F1323E] bg-[#F1323E33]"
-                        : "border-[#202329] hover:border-white/30"
-                      : null
+                          ? "border-[#FCB10F] bg-[#FCB10F33]"
+                          : userBets[index - 1].result === "Won" &&
+                              userBets[index - 1].pick === true
+                            ? "border-[#FCB10F] bg-[#FCB10F33]"
+                            : userBets[index - 1].result === "Lost" &&
+                                userBets[index - 1].pick === true
+                              ? "border-[#F1323E] bg-[#F1323E33]"
+                              : "border-[#202329] hover:border-white/30"
+                        : null
                   }  bg-[#202329] flex items-center justify-center cursor-pointer rounded-md text-center transition-all duration-300 ease-in-out w-[45px] h-[45px] sm:w-[55px] sm:h-[55px] md:w-[80px] md:h-[80px] xl:w-[95px] xl:h-[95px]`}
                   disabled={betType === "manual" && userBets[index - 1].pick}
                   onClick={() =>
                     betType === "auto"
                       ? handleAutoPick(index)
                       : betActive && betType === "manual"
-                      ? handlePick(index)
-                      : null
+                        ? handlePick(index)
+                        : null
                   }
                 >
                   {betType === "manual" &&

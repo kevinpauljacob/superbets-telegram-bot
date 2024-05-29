@@ -185,7 +185,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       return res.status(201).json({
         success: true,
         message: "Congratulations! You won!",
+        amountWon,
         strikeNumbers,
+        pointsGained: userBets.length,
         strikeMultiplier,
         result,
       });
