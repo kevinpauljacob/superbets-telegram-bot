@@ -213,7 +213,11 @@ export const TableButtons: React.FC<TableButtonProps> = ({ all, setAll }) => {
   const home = router.pathname.split("/")[1] === "";
 
   return (
-    <div className={`flex flex-col md:flex-row justify-between items-center ${home ? "" : "mt-20"}`}>
+    <div
+      className={`flex flex-col md:flex-row justify-between items-center ${
+        home ? "" : "mt-20"
+      }`}
+    >
       <div className="flex items-center">
         <Image src={Dollar} alt="" width={26} height={26} />
         <span className="font-semibold font-changa text-xl text-white text-opacity-90 pl-3">
@@ -224,11 +228,11 @@ export const TableButtons: React.FC<TableButtonProps> = ({ all, setAll }) => {
         <TButton
           active={!all && !highRollers}
           onClick={() => {
-            const {table,...rest}=router.query;
-              router.push({
-                pathname: router.pathname,
-                query: { ...rest },
-              });
+            const { table, ...rest } = router.query;
+            router.push({
+              pathname: router.pathname,
+              query: { ...rest },
+            });
             if (wallet.publicKey) {
               setAll(false);
               setHighRollers(false);
@@ -243,23 +247,23 @@ export const TableButtons: React.FC<TableButtonProps> = ({ all, setAll }) => {
           onClick={() => {
             setAll(true);
             setHighRollers(false);
-            const {table,...rest}=router.query;
-              router.push({
-                pathname: router.pathname,
-                query: { ...rest },
-              });
+            const { table, ...rest } = router.query;
+            router.push({
+              pathname: router.pathname,
+              query: { ...rest },
+            });
           }}
           label={translator("All Bets", language)}
         />
         <TButton
           active={highRollers}
           onClick={() => {
-              setAll(false);
-              setHighRollers(true);
-              router.push({
-                pathname: router.pathname,
-                query: {table:'high-rollers'}
-              })
+            setAll(false);
+            setHighRollers(true);
+            router.push({
+              pathname: router.pathname,
+              query: { table: "high-rollers" },
+            });
           }}
           label={translator("High Rollers", language)}
         />
@@ -280,7 +284,7 @@ export const TableHeader = ({ all, setAll }: TableButtonProps) => {
   const { language } = useGlobalContext();
   return (
     <>
-      <div className="mb-[1.4rem] hidden md:flex w-full flex-row items-center gap-2 bg-[#121418] py-1 rounded-[5px]">
+      <div className="mb-[1.125rem] hidden md:flex w-full flex-row items-center gap-2 bg-[#121418] py-1 rounded-[5px]">
         {!all
           ? headers.map((header, index) => (
               <span
@@ -343,11 +347,11 @@ export const Table: React.FC<TableProps> = ({
     setVerifyModalData,
     language,
   } = useGlobalContext();
-  
+
   useEffect(() => {
-    if (router.query.table === 'high-rollers') {
+    if (router.query.table === "high-rollers") {
       // filter amount >= 2 SOL
-      setDisplayBets(bets.filter(bet => bet.amount >= 2));
+      setDisplayBets(bets.filter((bet) => bet.amount >= 2));
     } else {
       setDisplayBets(bets);
     }
@@ -366,30 +370,42 @@ export const Table: React.FC<TableProps> = ({
         </div>
       ) : (
         <>
-          <div className={`scrollbar w-full ${home ? "mt-8" : "mt-8 pb-8"}`}>
+          <div
+            className={`scrollbar w-full ${
+              home ? "mt-[1.125rem]" : "mt-[1.125rem] pb-8"
+            }`}
+          >
             <div className="flex w-full md:min-w-[50rem] flex-col items-center">
               <TableHeader all={all} setAll={setAll} />
-              <div className="flex flex-col items-center w-full max-h-[36rem] overflow-hidden">
+              <div className="relative flex flex-col items-center w-full max-h-[36rem] overflow-hidden">
                 {displayBets?.length ? (
-                  (home
-                    ? displayBets
-                    : displayBets.slice(
-                        page * transactionsPerPage - transactionsPerPage,
-                        page * transactionsPerPage,
-                      )
-                  ).map((bet, index) => (
-                    <div
-                      key={index}
-                      className="mb-2.5 flex w-full flex-row items-center gap-2 rounded-[5px] bg-[#121418] hover:bg-[#1f2024] py-3"
-                    >
-                      <BetRow
-                        bet={bet}
-                        all={all}
-                        openModal={openModal}
-                        setVerifyModalData={setVerifyModalData}
+                  <>
+                    {(home
+                      ? displayBets.slice(0, 10)
+                      : displayBets.slice(
+                          page * transactionsPerPage - transactionsPerPage,
+                          page * transactionsPerPage,
+                        )
+                    ).map((bet, index) => (
+                      <div
+                        key={index}
+                        className="mb-2.5 flex w-full flex-row items-center gap-2 rounded-[5px] bg-[#121418] hover:bg-[#1f2024] py-3"
+                      >
+                        <BetRow
+                          bet={bet}
+                          all={all}
+                          openModal={openModal}
+                          setVerifyModalData={setVerifyModalData}
+                        />
+                      </div>
+                    ))}
+                    {home && (
+                      <div
+                        className="absolute inset-x-0 bottom-0 h-[11rem] bg-[linear-gradient(0deg,#0F0F0F_0%,rgba(15,15,15,0.00)_100%)] pointer-events-none"
+                        style={{ zIndex: 1 }}
                       />
-                    </div>
-                  ))
+                    )}
+                  </>
                 ) : (
                   <span className="font-changa text-[#F0F0F080]">
                     {translator("No Bets made.", language)}
