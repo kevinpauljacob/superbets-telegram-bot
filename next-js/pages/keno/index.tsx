@@ -336,7 +336,7 @@ export default function Keno() {
         useAutoConfig &&
         autoStopLoss &&
         autoBetProfit < 0 &&
-        potentialLoss <= -autoStopLoss
+        potentialLoss < -autoStopLoss
       ) {
         setTimeout(() => {
           warningCustom("Loss limit reached.", "top-left");

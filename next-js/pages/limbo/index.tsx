@@ -288,7 +288,7 @@ export default function Limbo() {
         useAutoConfig &&
         autoStopLoss &&
         autoBetProfit < 0 &&
-        potentialLoss <= -autoStopLoss
+        potentialLoss < -autoStopLoss
       ) {
         setTimeout(() => {
           warningCustom("Loss limit reached.", "top-left");
