@@ -394,7 +394,13 @@ export default function Mines() {
         strikeMultiplier,
         message,
       } = await response.json();
-
+      console.log({
+        "Success":success,
+        "Result":result,
+        "AmountWon":amountWon,
+        "StikerNumber":strikeNumbers,
+        
+      })
       if (success != true) {
         throw new Error(message);
       }
@@ -595,7 +601,7 @@ export default function Mines() {
   };
 
   useEffect(() => {
-    handlePendingGame();
+    if (wallet.connected && wallet?.publicKey) handlePendingGame();
   }, [wallet.connected, wallet.publicKey]);
 
   const disableInput = useMemo(() => {

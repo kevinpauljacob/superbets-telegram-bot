@@ -40,7 +40,7 @@ export default function FomoPlay() {
     },
     {
       href: "/mines",
-      src: "/assets/game-cards/wheel.png",
+      src: "/assets/game-cards/mines.png",
     },
   ];
 
