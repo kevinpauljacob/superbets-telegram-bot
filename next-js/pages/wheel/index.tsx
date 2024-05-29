@@ -371,6 +371,7 @@ export default function Wheel() {
                 !wallet ||
                 !session?.user ||
                 isRolling ||
+                !coinData ||
                 (coinData && coinData[0].amount < minGameAmount) ||
                 (betAmt !== undefined &&
                   maxBetAmt !== undefined &&
@@ -514,6 +515,7 @@ export default function Wheel() {
                       !wallet ||
                       !session?.user ||
                       isRolling ||
+                      !coinData ||
                       (coinData && coinData[0].amount < minGameAmount) ||
                       (betAmt !== undefined &&
                         maxBetAmt !== undefined &&
@@ -657,8 +659,7 @@ export default function Wheel() {
               })}
             </>
           )}
-          {!coinData ||
-            (coinData[0].amount < minGameAmount && (
+          {(!coinData || (coinData && coinData[0].amount < minGameAmount)) && (
               <div className="w-full rounded-lg bg-[#d9d9d90d] bg-opacity-10 flex items-center px-3 py-3 text-white md:px-6">
                 <div className="w-full text-center font-changa font-medium text-sm md:text-base text-[#F0F0F0] text-opacity-75">
                   {translator(
@@ -670,7 +671,7 @@ export default function Wheel() {
                   </Link>
                 </div>
               </div>
-            ))}
+            )}
         </div>
       </GameDisplay>
       <GameTable>

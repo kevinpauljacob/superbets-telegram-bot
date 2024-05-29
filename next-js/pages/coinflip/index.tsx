@@ -326,6 +326,7 @@ export default function Flip() {
                 !betType ||
                 loading ||
                 !session?.user ||
+                !coinData ||
                 (coinData && coinData[0].amount < minGameAmount) ||
                 (betAmt !== undefined &&
                   maxBetAmt !== undefined &&
@@ -448,6 +449,7 @@ export default function Flip() {
                       !betType ||
                       loading ||
                       !session?.user ||
+                      !coinData ||
                       (coinData && coinData[0].amount < minGameAmount) ||
                       (betAmt !== undefined &&
                         maxBetAmt !== undefined &&
