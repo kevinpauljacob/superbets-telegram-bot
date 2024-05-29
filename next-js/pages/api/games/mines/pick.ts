@@ -252,6 +252,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         result,
         ...(result === "Pending" ? {} : { strikeNumbers }),
         strikeMultiplier,
+        amountWon,
       });
     } catch (e: any) {
       console.log(e);

@@ -70,6 +70,9 @@ export default function Mines() {
   const [nextMultiplier, setNextMultiplier] = useState<number>(0);
   const [minesCount, setMinesCount] = useState<number>(3);
   const [numBets, setNumBets] = useState<number>(0);
+  const [currentProfit, setCurrentProfit] = useState<number>(0);
+  const [nextProfit, setNextProfit] = useState<number>(0);
+  const [amountWon, setAmountWon] = useState<number>(0);
   const [gameId, setGameId] = useState<number>();
   const [betActive, setBetActive] = useState(false);
   const [dropDown, setDropDown] = useState<boolean>(false);
@@ -99,8 +102,12 @@ export default function Mines() {
     if (numBets === 0) {
       setCurrentMultiplier(0);
       setNextMultiplier(0);
+      setAmountWon(0);
       return;
     }
+
+    let currentProfit = 0;
+    let nextProfit = 0;
 
     const currentMultiplier = truncateNumber(
       Decimal.div(25 - numBets, 25 - numBets - minesCount)
@@ -108,15 +115,38 @@ export default function Mines() {
         .toNumber(),
       2,
     );
+
+    if (betAmt) {
+      console.log("here");
+      currentProfit = truncateNumber(
+        Decimal.mul(Math.max(betAmt, amountWon), strikeMultiplier)
+          .mul(Decimal.sub(1, houseEdge))
+          .toNumber(),
+        6,
+      );
+    }
+
     const nextMultiplier = truncateNumber(
       Decimal.div(25 - (numBets + 1), 25 - (numBets + 1) - minesCount)
         .mul(currentMultiplier)
         .toNumber(),
       2,
     );
+
+    if (betAmt) {
+      nextProfit = truncateNumber(
+        Decimal.mul(Math.max(betAmt, amountWon), currentMultiplier)
+          .mul(Decimal.sub(1, houseEdge))
+          .toNumber(),
+        6,
+      );
+    }
     setCurrentMultiplier(currentMultiplier);
     setNextMultiplier(nextMultiplier);
     setStrikeMultiplier(currentMultiplier);
+    setCurrentProfit(currentProfit);
+    setNextProfit(nextProfit);
+    setAmountWon(currentProfit);
   };
 
   useEffect(() => {
@@ -128,7 +158,18 @@ export default function Mines() {
     console.log("nextMultiplier", nextMultiplier);
     console.log("strikeMultiplier", strikeMultiplier);
     console.log("numBets", numBets);
-  }, [numBets, currentMultiplier, nextMultiplier, strikeMultiplier]);
+    console.log("currentProfit", currentProfit);
+    console.log("nextProfit", nextProfit);
+    console.log("amountWon", amountWon);
+  }, [
+    numBets,
+    currentMultiplier,
+    nextMultiplier,
+    strikeMultiplier,
+    amountWon,
+    currentProfit,
+    nextProfit,
+  ]);
 
   const handleConclude = async () => {
     try {
@@ -169,6 +210,9 @@ export default function Mines() {
         setCurrentMultiplier(0);
         setNextMultiplier(0);
         setStrikeMultiplier(1);
+        setCurrentProfit(0);
+        setNextProfit(0);
+        setAmountWon(0);
       }
     } catch (error) {
       console.error("Error occurred while betting:", error);
@@ -251,6 +295,9 @@ export default function Mines() {
         setCurrentMultiplier(0);
         setNextMultiplier(0);
         setStrikeMultiplier(1);
+        setCurrentProfit(0);
+        setNextProfit(0);
+        setAmountWon(0);
         setBetActive(false);
         errorCustom(message);
         setIsRolling(false);
@@ -678,8 +725,10 @@ export default function Mines() {
                 <BetAmount
                   betAmt={betAmt}
                   setBetAmt={setUserInput}
-                  currentMultiplier={10}
-                  leastMultiplier={10}
+                  currentMultiplier={
+                    currentMultiplier === 0 ? 1.04 : currentMultiplier
+                  }
+                  leastMultiplier={1.04}
                   game="mines"
                   disabled={disableInput}
                 />
@@ -743,7 +792,7 @@ export default function Mines() {
                       <div>
                         <div className="flex justify-between items-center mb-2">
                           <p>Current Profit</p>
-                          <p>0.00 SOL</p>
+                          <p>{currentProfit} SOL</p>
                         </div>
                         <div className="flex justify-between items-center text-fomo-green">
                           <p>0.000</p>
@@ -763,7 +812,7 @@ export default function Mines() {
                       <div>
                         <div className="flex justify-between items-center mb-2">
                           <p>Profit on next tile</p>
-                          <p>0.00 SOL</p>
+                          <p>{nextProfit} SOL</p>
                         </div>
                         <div className="flex justify-between items-center text-fomo-green">
                           <p>0.000</p>
