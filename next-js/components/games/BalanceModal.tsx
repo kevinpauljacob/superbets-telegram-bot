@@ -69,6 +69,7 @@ export default function BalanceModal() {
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
+    const amount = parseFloat(e.target.value)
     setAmount(parseFloat(e.target.value));
   };
 

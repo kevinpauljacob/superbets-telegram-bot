@@ -325,7 +325,9 @@ export default function Keno() {
         autoBetProfit > 0 &&
         autoBetProfit >= autoStopProfit
       ) {
-        warningCustom("Profit limit reached.", "top-left");
+        setTimeout(() => {
+          warningCustom("Profit limit reached.", "top-left");
+        }, 500);
         setAutoBetCount(0);
         setStartAuto(false);
         return;
@@ -334,9 +336,11 @@ export default function Keno() {
         useAutoConfig &&
         autoStopLoss &&
         autoBetProfit < 0 &&
-        potentialLoss <= -autoStopLoss
+        potentialLoss < -autoStopLoss
       ) {
-        warningCustom("Loss limit reached.", "top-left");
+        setTimeout(() => {
+          warningCustom("Loss limit reached.", "top-left");
+        }, 500);
         setAutoBetCount(0);
         setStartAuto(false);
         return;
@@ -429,6 +433,7 @@ export default function Keno() {
                 !wallet ||
                 !session?.user ||
                 isRolling ||
+                !coinData ||
                 (coinData && coinData[0].amount < minGameAmount) ||
                 (betAmt !== undefined &&
                   maxBetAmt !== undefined &&
@@ -565,6 +570,7 @@ export default function Keno() {
                       !wallet ||
                       !session?.user ||
                       isRolling ||
+                      !coinData ||
                       (coinData && coinData[0].amount < minGameAmount) ||
                       (betAmt !== undefined &&
                         maxBetAmt !== undefined &&
@@ -586,10 +592,10 @@ export default function Keno() {
         </>
       </GameOptions>
       <GameDisplay>
-        <div className="w-full flex justify-between items-center">
-          <div className="hidden sm:absolute top-10 left-12">
+        <div className="w-full flex justify-between items-center h-[2.125rem] mb-7 sm:mb-0">
+          <div>
             {isRolling ? (
-              <div className="font-chakra text-sm font-medium text-white text-opacity-75">
+              <div className="font-chakra text-xs sm:text-sm font-medium text-white text-opacity-75">
                 {translator("Betting", language)}...
               </div>
             ) : null}
@@ -716,26 +722,25 @@ export default function Keno() {
               </div>
             )}
 
-          {!coinData ||
-            (coinData[0].amount < minGameAmount ? (
-              <div className="w-full rounded-lg bg-[#d9d9d90d] bg-opacity-10 flex items-center px-3 py-3 text-white md:px-6">
-                <div className="w-full text-center font-changa font-medium text-sm md:text-base text-[#F0F0F0] text-opacity-75">
-                  {translator(
-                    "Please deposit funds to start playing. View",
-                    language,
-                  )}{" "}
-                  <Link href="/balance">
-                    <u>{translator("WALLET", language)}</u>
-                  </Link>
-                </div>
+          {!coinData || (coinData && coinData[0].amount < minGameAmount) ? (
+            <div className="w-full rounded-lg bg-[#d9d9d90d] bg-opacity-10 flex items-center px-3 py-3 text-white md:px-6">
+              <div className="w-full text-center font-changa font-medium text-sm md:text-base text-[#F0F0F0] text-opacity-75">
+                {translator(
+                  "Please deposit funds to start playing. View",
+                  language,
+                )}{" "}
+                <Link href="/balance">
+                  <u>{translator("WALLET", language)}</u>
+                </Link>
               </div>
-            ) : coinData && chosenNumbers.length === 0 ? (
-              <div className="w-full rounded-lg bg-[#d9d9d90d] bg-opacity-10 flex items-center px-3 py-3 text-white md:px-6">
-                <div className="w-full text-center font-changa font-medium text-sm md:text-base text-[#F0F0F0] text-opacity-75">
-                  {translator("Pick up to 10 numbers", language)}
-                </div>
+            </div>
+          ) : coinData && chosenNumbers.length === 0 ? (
+            <div className="w-full rounded-lg bg-[#d9d9d90d] bg-opacity-10 flex items-center px-3 py-3 text-white md:px-6">
+              <div className="w-full text-center font-changa font-medium text-sm md:text-base text-[#F0F0F0] text-opacity-75">
+                {translator("Pick up to 10 numbers", language)}
               </div>
-            ) : null)}
+            </div>
+          ) : null}
         </div>
       </GameDisplay>
       <GameTable>
