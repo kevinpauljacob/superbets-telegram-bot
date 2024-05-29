@@ -107,12 +107,22 @@ export default function Layout({ children }: LayoutProps) {
     },
   });
 
-  const scrollToTop = () => {
-    const scrollElement = document.querySelector("#scroll-element");
+  const resetScroll= () => {
+    const scrollElement = document.querySelector("#top-scroll-element");
     if (scrollElement) {
       scrollElement.scrollIntoView({ behavior: "smooth", block: "start" });
     }
   };
+
+  const scrollToTop = () => {
+    const scrollElement = document.querySelector("#scroll-element");
+    if (scrollElement) {
+      scrollElement.scrollIntoView({ behavior: "smooth", block: "start" });
+      resetScroll();
+    }
+  };
+
+  
 
   useEffect(() => {
     //sound pre-loader
@@ -209,6 +219,7 @@ export default function Layout({ children }: LayoutProps) {
 
   return (
     <>
+      <div id="top-scroll-element" className="w-full min-h-[1px] bg-transparent" />
       <InfoBar />
       <Header sidebar={sidebar} toggleSidebar={toggleSidebar} />
       <section className="relative flex flex-1 max-h-[calc(100%-6.25rem)]">
