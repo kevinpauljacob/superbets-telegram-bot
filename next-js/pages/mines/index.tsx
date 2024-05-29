@@ -1042,15 +1042,15 @@ export default function Mines() {
         </>
       </GameOptions>
       <GameDisplay>
-        {/* <div className="w-full flex justify-between items-center">
-          <div className="hidden sm:absolute top-10 left-12">
+        <div className="w-full flex justify-between items-center h-[2.125rem] mb-7 sm:mb-0">
+          <div>
             {isRolling ? (
-              <div className="font-chakra text-sm font-medium text-white text-opacity-75">
+              <div className="font-chakra text-xs sm:text-sm font-medium text-white text-opacity-75">
                 {translator("Betting", language)}...
               </div>
             ) : null}
           </div>
-        </div> */}
+        </div>
         <div
           className="flex justify-center items-center w-full mb-[1.4rem] sm:my-5"
           onClick={() => {
@@ -1176,6 +1176,7 @@ export default function Mines() {
             )}
           </div>
         </div>
+        <div id="mines-footer" className="w-full min-h-[2.125rem]" />
       </GameDisplay>
       <GameTable>
         <Bets refresh={refresh} />

@@ -31,6 +31,7 @@ export default function BalanceModal() {
     walletBalance,
     coinData,
     language,
+    getBalance
   } = useGlobalContext();
 
   const [loading, setLoading] = useState<boolean>(false);
@@ -54,6 +55,7 @@ export default function BalanceModal() {
         else response = await withdraw(wallet, amount, token);
 
         if (response && response.success) {
+          getBalance()
           setShowWalletModal(false);
         } else {
           //   errorCustom(response.message);
