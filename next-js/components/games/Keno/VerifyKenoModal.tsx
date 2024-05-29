@@ -59,7 +59,7 @@ export default function VerifyDice2Modal({
   const closePFModal = () => {
     setIsPFModalOpen(false);
   };
-
+  console.log("Kenobet",bet)
   const [PFModalData, setPFModalData] = useState<PFModalData>({
     activeGameSeed: {
       wallet: "",
