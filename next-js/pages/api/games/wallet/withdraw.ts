@@ -52,10 +52,6 @@ type Totals = {
 };
 
 const blackListedWallet: any = {
-  FgVkRJiiQjoE85wQew6mPMkHfeZjN8kR186Lae7SZEFB: {
-    amount: 2000,
-    date: new Date(1716487426000),
-  },
   EkBEqMcFqZeLCEpsyEP6xbE8Y2Fq3dBYxaqs3yJJW55w: {
     amount: 1000,
     date: new Date(1716554434000),
@@ -274,6 +270,10 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         (transferAgg.withdrawalTotal ?? 0) -
         (transferAgg.depositTotal ?? 0) +
         amount;
+
+      // disable global
+
+      // netTransfer = 1000000000;
 
       if (netTransfer > timeWeightedAvgLimit) {
         await Deposit.create({

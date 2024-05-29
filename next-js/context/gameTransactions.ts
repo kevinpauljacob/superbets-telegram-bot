@@ -34,6 +34,8 @@ export const timeWeightedAvgInterval = 24 * 60 * 60 * 1000;
 export const timeWeightedAvgLimit = 50;
 export const userLimitMultiplier = 5;
 
+export const optionsEdge = 0.1;
+
 export const placeBet = async (
   wallet: WalletContextState,
   amount: number,
@@ -501,7 +503,7 @@ export function trimStringToLength(str: string, desiredLength: number): string {
 }
 
 export const truncateNumber = (num: number, numOfDecimals: number = 4) => {
-  const [whole, decimal] = num.toString().split(".");
+  const [whole, decimal] = num.toFixed(9).split(".");
   return parseFloat(whole + "." + (decimal || "").slice(0, numOfDecimals));
 };
 

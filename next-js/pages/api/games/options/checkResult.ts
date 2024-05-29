@@ -9,7 +9,7 @@ import {
   pointTiers,
 } from "@/context/transactions";
 import { GameType } from "@/utils/provably-fair";
-import { wsEndpoint } from "@/context/gameTransactions";
+import { optionsEdge, wsEndpoint } from "@/context/gameTransactions";
 import { Decimal } from "decimal.js";
 Decimal.set({ precision: 9 });
 
@@ -18,8 +18,6 @@ const secret = process.env.NEXTAUTH_SECRET;
 export const config = {
   maxDuration: 60,
 };
-
-const optionsEdge = 0.2;
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === "POST") {

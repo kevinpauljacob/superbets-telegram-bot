@@ -127,7 +127,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
       const chance = new Decimal(100).div(strikeMultiplier).toNumber();
 
-      if (strikeNumber <= chance) {
+      if (strikeMultiplier <= strikeNumber) {
         result = "Won";
         amountWon = Decimal.mul(amount, strikeMultiplier).mul(
           Decimal.sub(1, houseEdge),
