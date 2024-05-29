@@ -179,8 +179,8 @@ export default function Mines() {
         const response = await fetch("https://price.jup.ag/v6/price?ids=SOL");
         const data = await response.json();
         const solPrice = data.data.SOL.price;
-        setCurrentProfitInUSD(truncateNumber(currentProfit * solPrice), 4);
-        setNextProfitInUSD(truncateNumber(nextProfit * solPrice), 4);
+        setCurrentProfitInUSD(truncateNumber(currentProfit * solPrice, 4));
+        setNextProfitInUSD(truncateNumber(nextProfit * solPrice, 4));
       } catch (error: any) {
         throw new Error(error.message);
       }
