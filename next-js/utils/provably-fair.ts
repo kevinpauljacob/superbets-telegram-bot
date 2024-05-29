@@ -21,10 +21,10 @@ export const generateServerSeed = (encryptionKey: Buffer) => {
 
 // Generate a random encryption key and IV (ensure secure storage of the key)
 const encryptionKey = crypto.randomBytes(32); // 32 bytes for AES-256
-const generateIV = () => crypto.randomBytes(16); // 16 bytes for AES
+export const generateIV = () => crypto.randomBytes(16); // 16 bytes for AES
 
 // Encrypt the serverSeed
-const encryptServerSeed = (
+export const encryptServerSeed = (
   serverSeed: string,
   key: Buffer,
   iv: Buffer,
@@ -228,7 +228,7 @@ export const generateGameResult = <T extends GameType>(
       return a as GameResult<T>;
     }
 
-    //TODO: correct these
+    //TODO: reverify these
     case GameType.plinko: {
       if (!parameter) throw new Error("Game parameter missing!");
 
@@ -238,7 +238,7 @@ export const generateGameResult = <T extends GameType>(
         nonce,
         cursor: 0,
         count: 1,
-      }).map((e) => Math.floor(parameter * e) + 1);
+      }).map((e) => Math.floor(Math.pow(2, parameter) * e) + 1);
 
       return n[0] as GameResult<T>;
     }
