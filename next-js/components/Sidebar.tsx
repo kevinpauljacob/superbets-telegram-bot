@@ -2,14 +2,8 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/router";
-
 import { useWallet } from "@solana/wallet-adapter-react";
-import {
-  obfuscatePubKey,
-  pointTiers,
-  translator,
-  formatNumber,
-} from "@/context/transactions";
+import { connection, fomoToken, translator } from "@/context/transactions";
 import { useGlobalContext } from "./GlobalContext";
 import Home from "@/public/assets/sidebar-icons/Home";
 import FomoExitIcon from "@/public/assets/sidebar-icons/FomoExitIcon";
@@ -18,15 +12,12 @@ import Store from "@/public/assets/sidebar-icons/Store";
 import Leaderboard from "@/public/assets/sidebar-icons/Leaderboard";
 import Staking from "@/public/assets/sidebar-icons/Staking";
 import Dollar from "@/public/assets/sidebar-icons/DCA";
-import Flag from "@/public/assets/Flag";
-import Fomo from "@/public/assets/Fomo";
 import Twitter from "@/public/assets/Twitter";
 import Birdeye from "@/public/assets/Birdeye";
 import Telegram from "@/public/assets/Telegram";
 import { truncateNumber } from "@/context/gameTransactions";
 import FomoExitSidebar from "./FomoExitSidebar";
 
-// Define types for game object
 export type Game = {
   src: string;
   token: string;
@@ -34,7 +25,6 @@ export type Game = {
   active: boolean;
 };
 
-// Define type for game toggle function
 export type ToggleGameToken = (index: number) => void;
 
 const topIconCss =
@@ -56,10 +46,12 @@ export default function Sidebar({
   const wallet = useWallet();
   const router = useRouter();
 
-  const { language, setMobileSidebar } = useGlobalContext();
+  const { language, setMobileSidebar } =
+    useGlobalContext();
 
   const [showExitTokens, setShowExitTokens] = useState<boolean>(false);
   const [showPlayTokens, setShowPlayTokens] = useState<boolean>(false);
+
 
   return (
     <div
@@ -318,21 +310,45 @@ export const OpenSidebar = ({
     }));
     setCasinoGames(updatedCasinoGames);
   };
-
-  const { language } = useGlobalContext();
-
+  const [priceChange24h, setPriceChange24h] = useState(0)
+  const { language, setFomoPrice } = useGlobalContext();
+ 
+  const url = `https://api.dexscreener.com/latest/dex/tokens/${fomoToken}`;
   useEffect(() => {
-    // Function to check if any game link matches the current pathname
-    const isGameActive = (games: Game[]) => {
-      return games.some((game) => game.link === router.pathname);
+
+    /// code added to fetch fomo price
+    const fetchFomoPrice = async () => {
+      try {
+        const response = await fetch(url);
+        const data = await response.json();
+        const priceUsd = parseFloat(data?.pairs[0]?.priceUsd);
+        const change24h = parseFloat(data?.pairs[0]?.priceChange?.h24); 
+        if (!isNaN(priceUsd)) {
+          setFomoPrice(priceUsd);
+          setPriceChange24h(change24h);
+        } else {
+          console.error("Invalid price fetched:", data?.pairs[0]?.priceUsd);
+          setFomoPrice(0);
+          setPriceChange24h(0);
+        }
+      } catch (e) {
+        console.error("Failed to fetch FOMO price:", e);
+        setFomoPrice(0);
+        setPriceChange24h(0);
+      }
     };
 
-    setShowPlayTokens(isGameActive(casinoGames));
+    const intervalId = setInterval(fetchFomoPrice, 10000);
+    fetchFomoPrice(); 
+
+    return () => clearInterval(intervalId);
+
+    //setShowPlayTokens(isGameActive(casinoGames));  // this is the part of initial code
   }, [router.pathname, casinoGames]);
 
   const openLinkCss =
     "w-full gap-2 flex items-center justify-center text-sm font-semibold text-white text-opacity-50 hover:bg-white/10 transition duration-300 ease-in-out hover:transition hover:duration-300 hover:ease-in-out bg-[#191A1D] rounded-md text-center py-2 mb-2";
-
+  const priceChangeColor = priceChange24h >= 0 ? 'text-fomo-green' : 'text-fomo-red';
   return (
     <>
       <div className="w-full">
@@ -356,13 +372,13 @@ export const OpenSidebar = ({
             </span>
             <div className="flex items-center gap-1">
               <span className="text-sm text-[#94A3B8] font-medium font-chakra leading-3">
-                ${truncateNumber(fomoPrice, 3)}
+                ${truncateNumber(fomoPrice,3)}
               </span>
-              {/* <span
-                className={`text-xs text-[#72F238] font-medium pt-[0.1px] leading-[0.6rem]`}
+               <span
+                className={`text-xs ${priceChangeColor} font-medium pt-[0.1px] leading-[0.6rem]`}
               >
-                +2.57%
-              </span> */}
+              {priceChange24h.toFixed(2)}%
+              </span> 
             </div>
           </div>
         </div>
