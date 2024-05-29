@@ -14,6 +14,7 @@ import Image from "next/image";
 import { timestampParser } from "@/utils/timestampParser";
 import { formatNumber } from "@/context/transactions";
 import { useRouter } from "next/router";
+import Link from "next/link";
 
 export default function BalanceModal() {
   const methods = useForm();
@@ -41,6 +42,7 @@ export default function BalanceModal() {
   >("Deposit");
   const historyHeaders = ["Time", "Amount", "Type", "Status"];
   const mobileHistoryHeaders = ["Amount", "Status"];
+  const [checked,setChecked] = useState(false)
 
   const onSubmit = async (data: any) => {
     if (!loading) {
@@ -273,7 +275,6 @@ export default function BalanceModal() {
                     {truncateNumber(walletBalance ?? 0, 3)} $SOL
                   </span>
                 </div>
-
                 <div
                   className={`group flex h-11 w-full cursor-pointer items-center rounded-[8px] bg-[#202329] pl-4 pr-2.5`}
                 >
@@ -297,7 +298,37 @@ export default function BalanceModal() {
                     {translator("Max", language)}
                   </span>
                 </div>
-
+                <div className=" flex gap-2 justify-between my-4 ">
+                  <input
+                    type="checkbox"
+                    id="termsCheckbox"
+                    checked={checked}
+                    onChange={(e) => setChecked(e.target.checked)}
+                  />
+                  <label
+                    htmlFor="termsCheckbox"
+                    className="ml-2 text-xs text-[#94A3B8]"
+                  >
+                    {translator("I agree with ", language)}
+                    <Link
+                      href="/privacy-policy"
+                      className="underline underline-offset-2 hover:text-white"
+                    >
+                      {translator("Privacy Policy", language)}
+                    </Link>
+                    {translator(" and with ", language)}
+                    <Link
+                      href="/terms-of-use"
+                      className="underline underline-offset-2 hover:text-white"
+                    >
+                      {translator("Terms of Use", language)}
+                    </Link>
+                    {translator(
+                      ", Gambling isn't forbidden by my local authorities and I'm at least 18 years old.",
+                      language,
+                    )}
+                  </label>
+                </div>
                 <span
                   className={`${
                     methods.formState.errors["amount"]
@@ -378,6 +409,7 @@ export default function BalanceModal() {
               <button
                 type="submit"
                 className="rounded-[5px] -mt-1 mb-4 border border-[#F200F21A] bg-[#7839C5] hover:bg-[#9361d1] focus:bg-[#602E9E] transition-all py-2.5 font-changa text-base font-medium text-[#F0F0F0] text-opacity-90"
+                disabled={actionType === "Deposit" && !checked}
               >
                 {loading ? <Loader /> : translator(actionType, language)}
               </button>

@@ -1308,4 +1308,35 @@ export const translationsMap = {
     ko: "베팅자는 먼저 시드 페어를 회전해야 합니다.",
     ch: "投注者首先需要旋转种子对。",
   },
+  "I agree with ": {
+    en: "I agree with ",
+    ru: "Согласен с ",
+    ko: "동의합니다 ",
+    ch: "同意 ",
+  },
+  "Privacy Policy": {
+    en: "Privacy Policy",
+    ru: "Политикой конфиденциальности",
+    ko: "개인정보 보호정책",
+    ch: "隐私政策",
+  },
+  " and with ": {
+    en: " and with ",
+    ru: " и с ",
+    ko: " 및 ",
+    ch: " 和 ",
+  },
+  "Terms of Use": {
+    en: "Terms of Use",
+    ru: "Условиями использования",
+    ko: "이용 약관",
+    ch: "使用条款",
+  },
+  ", Gambling isn't forbidden by my local authorities and I'm at least 18 years old.":
+    {
+      en: ", Gambling isn't forbidden by my local authorities and I'm at least 18 years old.",
+      ru: ", Азартные игры не запрещены моими местными властями, и мне не менее 18 лет.",
+      ko: ", 도박은 내 지역 당국에 의해 금지되지 않았으며 나는 적어도 18세입니다.",
+      ch: ", 赌博未被我的地方当局禁止 而且我至少18岁。",
+    },
 };
