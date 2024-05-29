@@ -27,152 +27,170 @@ type InputType = {
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === "POST") {
     try {
-      return res
-        .status(400)
-        .json({ success: false, message: "GAME UNDER DEVELOPMENT !" });
-      // let { wallet, gameId }: InputType = req.body;
+      let { wallet, gameId }: InputType = req.body;
 
-      // const token = await getToken({ req, secret });
+      const token = await getToken({ req, secret });
 
-      // if (!token || !token.sub || token.sub != wallet)
-      //   return res.status(400).json({
-      //     success: false,
-      //     message: "User wallet not authenticated",
-      //   });
+      if (!token || !token.sub || token.sub != wallet)
+        return res.status(400).json({
+          success: false,
+          message: "User wallet not authenticated",
+        });
 
-      // await connectDatabase();
+      await connectDatabase();
 
-      // if (!wallet || !gameId)
-      //   return res
-      //     .status(400)
-      //     .json({ success: false, message: "Missing parameters" });
+      if (!wallet || !gameId)
+        return res
+          .status(400)
+          .json({ success: false, message: "Missing parameters" });
 
-      // let user = await User.findOne({ wallet });
+      let user = await User.findOne({ wallet });
 
-      // if (!user)
-      //   return res
-      //     .status(400)
-      //     .json({ success: false, message: "User does not exist !" });
+      if (!user)
+        return res
+          .status(400)
+          .json({ success: false, message: "User does not exist !" });
 
-      // let gameInfo = await Mines.findOne({
-      //   _id: gameId,
-      //   result: "Pending",
-      // }).populate("gameSeed");
+      let gameInfo = await Mines.findOne({
+        _id: gameId,
+        result: "Pending",
+      }).populate("gameSeed");
 
-      // if (!gameInfo)
-      //   return res
-      //     .status(400)
-      //     .json({ success: false, message: "Game does not exist !" });
+      if (!gameInfo)
+        return res
+          .status(400)
+          .json({ success: false, message: "Game does not exist !" });
 
-      // let { nonce, gameSeed, minesCount, amount, amountWon, strikeMultiplier } =
-      //   gameInfo;
+      if (gameInfo.wallet !== wallet)
+        return res.status(400).json({
+          success: false,
+          message: "User not authorized to play this game!",
+        });
 
-      // const userData = await StakingUser.findOneAndUpdate(
-      //   { wallet },
-      //   {},
-      //   { upsert: true, new: true },
-      // );
-      // const userTier = userData?.tier ?? 0;
-      // const houseEdge = launchPromoEdge ? 0 : houseEdgeTiers[userTier];
+      let {
+        nonce,
+        gameSeed,
+        minesCount,
+        amount,
+        amountWon,
+        userBets,
+        strikeMultiplier,
+      } = gameInfo;
 
-      // amountWon = Decimal.mul(amountWon, Decimal.sub(1, houseEdge)).toNumber();
+      if (userBets.length === 0)
+        return res
+          .status(400)
+          .json({ success: false, message: "No bets placed" });
 
-      // const strikeNumbers = generateGameResult(
-      //   gameSeed.serverSeed,
-      //   gameSeed.clientSeed,
-      //   nonce,
-      //   GameType.mines,
-      //   minesCount,
-      // );
+      const userData = await StakingUser.findOneAndUpdate(
+        { wallet },
+        {},
+        { upsert: true, new: true },
+      );
+      const userTier = userData?.tier ?? 0;
+      const houseEdge = launchPromoEdge ? 0 : houseEdgeTiers[userTier];
 
-      // const result = "Won";
-      // const userUpdate = await User.findOneAndUpdate(
-      //   {
-      //     wallet,
-      //     deposit: {
-      //       $elemMatch: {
-      //         tokenMint: "SOL",
-      //       },
-      //     },
-      //   },
-      //   {
-      //     $inc: {
-      //       "deposit.$.amount": amountWon,
-      //       numOfGamesPlayed: 1,
-      //     },
-      //   },
-      //   {
-      //     new: true,
-      //   },
-      // );
+      amountWon = Decimal.mul(amountWon, Decimal.sub(1, houseEdge)).toNumber();
 
-      // if (!userUpdate) {
-      //   throw new Error("Insufficient balance for action!!");
-      // }
+      const strikeNumbers = generateGameResult(
+        gameSeed.serverSeed,
+        gameSeed.clientSeed,
+        nonce,
+        GameType.mines,
+        minesCount,
+      );
 
-      // const record = await Mines.findOneAndUpdate(
-      //   {
-      //     _id: gameId,
-      //     result: "Pending",
-      //   },
-      //   {
-      //     result,
-      //     houseEdge,
-      //     strikeNumbers,
-      //     amountWon,
-      //   },
-      //   { new: true },
-      // ).populate("gameSeed");
+      const result = "Won";
+      const userUpdate = await User.findOneAndUpdate(
+        {
+          wallet,
+          deposit: {
+            $elemMatch: {
+              tokenMint: "SOL",
+            },
+          },
+        },
+        {
+          $inc: {
+            "deposit.$.amount": amountWon,
+          },
+        },
+        {
+          new: true,
+        },
+      );
 
-      // const pointsGained =
-      //   0 * user.numOfGamesPlayed + 1.4 * amount * userData.multiplier;
+      if (!userUpdate) {
+        throw new Error("Insufficient balance for action!!");
+      }
 
-      // const points = userData.points + pointsGained;
-      // const newTier = Object.entries(pointTiers).reduce((prev, next) => {
-      //   return points >= next[1]?.limit ? next : prev;
-      // })[0];
+      const record = await Mines.findOneAndUpdate(
+        {
+          _id: gameId,
+          result: "Pending",
+        },
+        {
+          result,
+          houseEdge,
+          amountWon,
+          $set: { strikeNumbers },
+        },
+        { new: true },
+      ).populate("gameSeed");
 
-      // await StakingUser.findOneAndUpdate(
-      //   {
-      //     wallet,
-      //   },
-      //   {
-      //     $inc: {
-      //       points: pointsGained,
-      //     },
-      //     $set: {
-      //       tier: newTier,
-      //     },
-      //   },
-      // );
+      const pointsGained =
+        0 * user.numOfGamesPlayed + 1.4 * amount * userData.multiplier;
 
-      // const { gameSeed: savedGS, ...rest } = record.toObject();
-      // rest.game = GameType.mines;
-      // rest.userTier = parseInt(newTier);
-      // rest.gameSeed = { ...savedGS, serverSeed: undefined };
+      const points = userData.points + pointsGained;
+      const newTier = Object.entries(pointTiers).reduce((prev, next) => {
+        return points >= next[1]?.limit ? next : prev;
+      })[0];
 
-      // const payload = rest;
+      await StakingUser.findOneAndUpdate(
+        {
+          wallet,
+        },
+        {
+          $inc: {
+            points: pointsGained,
+          },
+          $set: {
+            tier: newTier,
+          },
+        },
+      );
 
-      // const socket = new WebSocket(wsEndpoint);
+      const { gameSeed: savedGS, ...rest } = record.toObject();
+      rest.game = GameType.mines;
+      rest.userTier = parseInt(newTier);
+      rest.gameSeed = { ...savedGS, serverSeed: undefined };
 
-      // socket.onopen = () => {
-      //   socket.send(
-      //     JSON.stringify({
-      //       clientType: "api-client",
-      //       channel: "fomo-casino_games-channel",
-      //       authKey: process.env.FOMO_CHANNEL_AUTH_KEY!,
-      //       payload,
-      //     }),
-      //   );
+      const payload = rest;
 
-      //   socket.close();
-      // };
+      const socket = new WebSocket(wsEndpoint);
 
-      // return res.status(201).json({
-      //   success: true,
-      //   message: "Congratulations! You won!",
-      //   result,
-      // });
+      socket.onopen = () => {
+        socket.send(
+          JSON.stringify({
+            clientType: "api-client",
+            channel: "fomo-casino_games-channel",
+            authKey: process.env.FOMO_CHANNEL_AUTH_KEY!,
+            payload,
+          }),
+        );
+
+        socket.close();
+      };
+
+      return res.status(201).json({
+        success: true,
+        message: "Congratulations! You won!",
+        amountWon,
+        strikeNumbers,
+        pointsGained: userBets.length,
+        strikeMultiplier,
+        result,
+      });
     } catch (e: any) {
       console.log(e);
       return res.status(500).json({ success: false, message: e.message });

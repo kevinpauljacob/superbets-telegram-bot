@@ -303,9 +303,9 @@ export default function Dice2ProvablyFairModal({
                         <option value={GameType.keno}>Keno</option>
                         <option value={GameType.dice}>Dice</option>
                         <option value={GameType.coin}>Coin Flip</option>
-
+                        <option value={GameType.mines}>Mines</option>
                         <option value={GameType.dice2}>Dice2</option>
-
+                        <option value={GameType.limbo}>Limbo</option>
                         <option value={GameType.wheel}>Wheel</option>
                       </select>
                     </div>

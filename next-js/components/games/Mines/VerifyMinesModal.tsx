@@ -1,20 +1,25 @@
 import { seedStatus } from "@/utils/provably-fair";
 import { useState } from "react";
 import { IoIosArrowDown } from "react-icons/io";
-import KenoProvablyFairModal, { PFModalData } from "./KenoProvablyFairModal";
+import KenoProvablyFairModal, { PFModalData } from "./MinesProvablyFairModal";
 import { useGlobalContext } from "@/components/GlobalContext";
 import { FaRegCopy } from "react-icons/fa6";
 import { MdClose } from "react-icons/md";
-import {translator} from "@/context/transactions";
+import { translator } from "@/context/transactions";
+import Image from "next/image";
+import Bets from "../Bets";
+import Loader from "../Loader";
 
-export interface Keno {
+export interface Mines {
   createdAt: string;
+  minesCount: number;
   wallet: string;
+  userBets: number[];
   amount: number;
   result: string;
   risk: string;
   strikeNumbers: number[];
-  segments:number;
+  segments: number;
   chosenNumbers: number[];
   strikeMultiplier: number;
   amountWon: number;
@@ -29,7 +34,7 @@ export interface Keno {
 }
 
 interface ModalData {
-  bet: Keno;
+  bet: Mines;
 }
 
 interface Props {
@@ -45,12 +50,12 @@ export default function VerifyDice2Modal({
   modalData,
   wallet,
 }: Props) {
-  //handling dice
   const { bet } = modalData;
   const { getProvablyFairData, language } = useGlobalContext();
 
   //Provably Fair Modal handling
   const [isPFModalOpen, setIsPFModalOpen] = useState(false);
+  const [pfLoading, setPfLoading] = useState(false);
 
   const openPFModal = () => {
     setIsPFModalOpen(true);
@@ -59,7 +64,7 @@ export default function VerifyDice2Modal({
   const closePFModal = () => {
     setIsPFModalOpen(false);
   };
-  console.log("Kenobet",bet)
+
   const [PFModalData, setPFModalData] = useState<PFModalData>({
     activeGameSeed: {
       wallet: "",
@@ -99,8 +104,13 @@ export default function VerifyDice2Modal({
   const Capitalize = (str: string) => {
     return str?.charAt(0).toUpperCase() + str?.slice(1);
   };
-
-
+  const modifiedBet = {
+    ...bet,
+    strikeNumbers: [
+      0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    ],
+  };
+  console.log(modifiedBet);
   function formatDate(dateString: string) {
     const date = new Date(dateString);
     const day = date.getUTCDate().toString().padStart(2, "0");
@@ -111,7 +121,7 @@ export default function VerifyDice2Modal({
 
     return `${day}-${month}-${year} ${hours}:${minutes} UTC`;
   }
-
+  console.log("Mines Bet", bet);
   return (
     <>
       {isOpen && (
@@ -158,33 +168,46 @@ export default function VerifyDice2Modal({
               </button>
             </div>
             <div className="mt-6 px-4 md:px-12 pt-7 border-2 border-white border-opacity-5 rounded-md">
-              <div className="relative w-full">
-                <div className="grid grid-cols-8 gap-2 text-white text-xl font-chakra">
-                  {Array.from({ length: 40 }, (_, index) => index + 1).map(
+              <div className="flex justify-center items-center w-full p-2">
+                <div className="grid grid-cols-5 gap-1 sm:gap-2 text-white text-sm md:text-xl font-chakra">
+                  {Array.from({ length: 25 }, (_, index) => index + 1).map(
                     (number) => (
-                      <div
+                      <button
                         key={number}
-                        className={`flex items-center justify-center cursor-pointer ${
-                          bet.strikeNumbers?.length === 0 &&
-                          bet.chosenNumbers?.includes(number)
-                            ? "bg-[#7839C5]"
-                            : bet.strikeNumbers?.includes(number) &&
-                              bet.chosenNumbers?.includes(number)
-                            ? "bg-black border-2 border-fomo-green"
-                            : bet.chosenNumbers?.includes(number)
-                            ? "bg-black border-2 border-fomo-red text-fomo-red"
+                        className={`${
+                          modifiedBet.userBets.includes(number - 1)
+                            ? modifiedBet.strikeNumbers[number - 1] === 0
+                              ? "border-[#FCB10F] bg-[#FCB10F33]"
+                              : modifiedBet.strikeNumbers[number - 1] === 1
+                              ? "border-[#F1323E] bg-[#F1323E33]"
+                              : ""
                             : "bg-[#202329]"
-                        } rounded-md text-center transition-all duration-300 ease-in-out lg2:w-[45px] lg2:h-[45px] md:w-[42px] md:h-[42px] sm:w-[40px] sm:h-[40px] sm2:w-[38px] sm2:h-[38px] xs:w-[36px] xs:h-[36px] w-[30px] h-[30px]`}
+                        } flex items-center justify-center cursor-pointer rounded-md text-center transition-all duration-300 ease-in-out 
+          lg2:w-[48px] lg2:h-[48px] md:w-[45px] md:h-[45px] sm:w-[43px] sm:h-[43px] sm2:w-[40px]
+          sm2:h-[40px] xs:w-[38px] xs:h-[38px] w-[33px] h-[33px]`}
                       >
-                        {bet.strikeNumbers?.includes(number) &&
-                        bet.chosenNumbers?.includes(number) ? (
-                          <div className="flex justify-center items-center bg-[#FFD100] text-black rounded-full lg2:w-[32px] lg2:h-[32px] md:w-[32px] md:h-[32px] sm:w-[28px] sm:h-[28px] w-[25px] h-[25px]">
-                            {number}
+                        {modifiedBet.strikeNumbers[number - 1] === 0 ? (
+                          <div className="w-full h-full flex items-center justify-center p-1.5 sm:p-3">
+                            <Image
+                              src="/assets/gem.svg"
+                              alt="Gem"
+                              layout="responsive"
+                              height={100}
+                              width={100}
+                            />
                           </div>
-                        ) : (
-                          <div>{number}</div>
-                        )}
-                      </div>
+                        ) : modifiedBet.strikeNumbers[number - 1] === 1 ? (
+                          <div className="w-full h-full flex items-center justify-center p-1.5 sm:p-3">
+                            <Image
+                              src="/assets/mine.svg"
+                              alt="Mine"
+                              layout="responsive"
+                              height={100}
+                              width={100}
+                            />
+                          </div>
+                        ) : null}
+                      </button>
                     ),
                   )}
                 </div>
@@ -192,12 +215,12 @@ export default function VerifyDice2Modal({
               <div className="flex gap-4 pt-7 mb-8">
                 <div className="w-full">
                   <label className="text-xs text-opacity-75 font-changa text-[#F0F0F0]">
-                    {translator("Risk", language)}
+                    {translator("Mines", language)}
                   </label>
                   <input
                     type="text"
                     name="multiplier"
-                    value={translator(Capitalize(bet.risk), language)}
+                    value={bet.minesCount}
                     className="bg-[#202329] text-white font-chakra capitalize text-xs font-medium mt-1 rounded-md p-3 w-full relative"
                     readOnly
                   />
@@ -281,7 +304,10 @@ export default function VerifyDice2Modal({
                     {bet.wallet !== wallet ? (
                       <>
                         <div className="text-xs text-[#94A3B8] font-changa text-opacity-75 text-center">
-                          {translator("The bettor must first rotate their seed pair to verify this bet.", language)}
+                          {translator(
+                            "The bettor must first rotate their seed pair to verify this bet.",
+                            language,
+                          )}
                         </div>
                         <button
                           className="bg-[#7839C5] rounded-md w-full text-sm text-white text-opacity-90 text-semibold py-3 disabled:opacity-70"
@@ -293,28 +319,41 @@ export default function VerifyDice2Modal({
                     ) : bet.gameSeed?.status !== seedStatus.EXPIRED ? (
                       <>
                         <div className="text-xs text-[#94A3B8] font-changa text-opacity-75 text-center">
-                          {translator("To verify this bet, you first need to rotate your seed pair.", language)}
+                          {translator(
+                            "To verify this bet, you first need to rotate your seed pair.",
+                            language,
+                          )}
                         </div>
                         <button
                           className="bg-[#7839C5] rounded-md w-full text-sm text-white text-opacity-90 text-semibold py-3"
+                          disabled={pfLoading}
                           onClick={async () => {
+                            setPfLoading(true);
                             const fpData = await getProvablyFairData();
                             if (fpData)
                               setPFModalData({ ...fpData, tab: "seeds" });
+                            setPfLoading(false);
 
                             openPFModal();
                           }}
                         >
-                          {translator("Rotate", language)}
+                          {pfLoading ? (
+                            <Loader />
+                          ) : (
+                            translator("Rotate", language)
+                          )}
                         </button>
                       </>
                     ) : (
                       <button
                         className="bg-[#7839C5] rounded-md w-full text-sm text-white text-opacity-90 text-semibold py-3"
+                        disabled={pfLoading}
                         onClick={async () => {
+                          setPfLoading(true);
                           const fpData = await getProvablyFairData();
                           if (fpData)
                             setPFModalData({ ...fpData, tab: "verify" });
+                          setPfLoading(false);
 
                           openPFModal();
                         }}

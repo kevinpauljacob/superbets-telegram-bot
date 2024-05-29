@@ -3,17 +3,17 @@ import {
   generateClientSeed,
   generateGameResult,
 } from "@/utils/provably-fair";
-import { useEffect, useState } from "react";
-import { Limbo } from "./VerifyLimboModal";
 import Image from "next/image";
+import { useEffect, useState } from "react";
+import { Mines } from "./VerifyMinesModal";
 import toast from "react-hot-toast";
 import { FaRegCopy } from "react-icons/fa6";
 import { MdClose } from "react-icons/md";
 import CheckPF from "@/public/assets/CheckPF.svg";
 import { errorCustom } from "@/components/toasts/ToastGroup";
+import ProvablyFairModal from "../ProvablyFairModal";
 import { translator } from "@/context/transactions";
 import { useGlobalContext } from "@/components/GlobalContext";
-import ProvablyFairModal from "../ProvablyFairModal";
 
 export interface PFModalData {
   activeGameSeed: {
@@ -40,15 +40,15 @@ interface Props {
   onClose: () => void;
   modalData: PFModalData;
   setModalData: React.Dispatch<React.SetStateAction<PFModalData>>;
-  flip?: Limbo;
+  bet?: Mines;
 }
 
-export default function LimboProvablyFairModal({
+export default function MinesProvablyFairModal({
   isOpen,
   onClose,
   modalData,
   setModalData,
-  flip,
+  bet,
 }: Props) {
   const [state, setState] = useState<"seeds" | "verify">(
     modalData.tab ?? "seeds",
@@ -56,13 +56,11 @@ export default function LimboProvablyFairModal({
   const [newClientSeed, setNewClientSeed] = useState<string>(
     generateClientSeed(),
   );
-  const [multiplier, setMultiplier] = useState<string>("1.00");
+
   const [selectedGameType, setSelectedGameType] = useState<GameType>(
-    GameType.limbo,
+    GameType.mines,
   );
-
   const { language } = useGlobalContext();
-
   const [verificationState, setVerificationState] = useState<{
     clientSeed: string;
     serverSeed: string;
@@ -70,16 +68,16 @@ export default function LimboProvablyFairModal({
     risk?: string;
     segments?: number;
   }>(
-    flip?.gameSeed
+    bet?.gameSeed
       ? {
-          clientSeed: flip.gameSeed.clientSeed,
-          serverSeed: flip.gameSeed.serverSeed ?? "",
-          nonce: flip.nonce?.toString() ?? "",
+          clientSeed: bet.gameSeed.clientSeed,
+          serverSeed: bet.gameSeed.serverSeed ?? "",
+          nonce: bet.nonce?.toString() ?? "",
           risk:
-            flip.risk ||
+            bet.risk ||
             (selectedGameType === GameType.wheel ? "low" : undefined),
           segments:
-            flip.segments ||
+            bet.segments ||
             (selectedGameType === GameType.wheel ? 10 : undefined),
         }
       : {
@@ -117,20 +115,6 @@ export default function LimboProvablyFairModal({
       ...prevData,
       [name]: value,
     }));
-
-    const { clientSeed, serverSeed, nonce } = verificationState;
-
-    setMultiplier(
-      (
-        100 /
-        generateGameResult(
-          name === "serverSeed" ? value : serverSeed,
-          name === "clientSeed" ? value : clientSeed,
-          parseInt(name === "no nce" ? value : nonce),
-          GameType.limbo,
-        )
-      ).toFixed(2),
-    );
   };
 
   const handleSetClientSeed = async () => {
@@ -166,7 +150,7 @@ export default function LimboProvablyFairModal({
             handleClose();
           }}
           id="pf-modal-bg"
-          className="absolute z-[150] left-0 top-0 flex h-full w-full items-center justify-center bg-[#33314680] backdrop-blur-[0px] transition-all"
+          className="absolute z-[150] left-0 top-0 flex h-full w-full items-center justify-center bg-black bg-opacity-50 backdrop-blur transition-all"
         >
           <div className="bg-[#121418] max-h-[80dvh]  overflow-y-scroll p-8 rounded-lg z-10 w-11/12 sm:w-[32rem] -mt-[4.7rem] md:mt-0 nobar">
             <div className="flex font-chakra tracking-wider text-2xl font-semibold text-[#F0F0F0] items-center justify-between">
@@ -305,72 +289,73 @@ export default function LimboProvablyFairModal({
             {state === "verify" && (
               <div className="grid w-full text-white">
                 <div className="grid gap-2">
-                  <div className="border-2 border-opacity-5 border-[#FFFFFF] md:px-8 py-2">
+                  <div className="border-2 border-opacity-5 border-[#FFFFFF] md:px-8">
                     <ProvablyFairModal
-                      verificationState={verificationState}
                       setVerificationState={setVerificationState}
+                      verificationState={verificationState}
                       selectedGameType={selectedGameType}
                     />
                   </div>
-                </div>
-                <div>
-                  <label className="text-xs text-opacity-75 font-changa text-[#F0F0F0]">
-                    {translator("Game", language)}
-                  </label>
-                  <div className="flex items-center">
-                    <select
-                      name="game"
-                      value={selectedGameType}
-                      onChange={(e) =>
-                        setSelectedGameType(e.target.value as GameType)
-                      }
-                      className="bg-[#202329] text-white font-chakra text-xs font-medium mt-1 rounded-md px-5 py-4 w-full relative appearance-none"
-                    >
-                      <option value={GameType.keno}>Keno</option>
+                  <div>
+                    <label className="text-xs text-opacity-75 font-changa text-[#F0F0F0]">
+                      {translator("Game", language)}
+                    </label>
+                    <div className="flex items-center">
+                      <select
+                        name="game"
+                        value={selectedGameType}
+                        onChange={(e) =>
+                          setSelectedGameType(e.target.value as GameType)
+                        }
+                        className="bg-[#202329] text-white font-chakra text-xs font-medium mt-1 rounded-md px-5 py-4 w-full relative appearance-none"
+                      >
+                        <option value={GameType.keno}>Keno</option>
                         <option value={GameType.dice}>Dice</option>
                         <option value={GameType.coin}>Coin Flip</option>
                         <option value={GameType.mines}>Mines</option>
+                         
                         <option value={GameType.dice2}>Dice2</option>
                         <option value={GameType.limbo}>Limbo</option>
                         <option value={GameType.wheel}>Wheel</option>
-                    </select>
+                      </select>
+                    </div>
                   </div>
-                </div>
-                <div>
-                  <label className="text-xs text-opacity-75 font-changa text-[#F0F0F0]">
-                    {translator("Client Seed", language)}
-                  </label>
-                  <input
-                    type="text"
-                    name="clientSeed"
-                    value={verificationState.clientSeed}
-                    onChange={handleChange}
-                    className="bg-[#202329] text-white font-chakra text-xs font-medium mt-1 rounded-md px-5 py-4 w-full relative"
-                  />
-                </div>
-                <div>
-                  <label className="text-xs text-opacity-75 font-changa text-[#F0F0F0]">
-                    {translator("Server Seed", language)}
-                  </label>
-                  <input
-                    type="text"
-                    name="serverSeed"
-                    value={verificationState.serverSeed}
-                    onChange={handleChange}
-                    className="bg-[#202329] text-white font-chakra text-xs font-medium mt-1 rounded-md px-5 py-4 w-full relative"
-                  />
-                </div>
-                <div>
-                  <label className="text-xs text-opacity-75 font-changa text-[#F0F0F0]">
-                    {translator("Nonce", language)}
-                  </label>
-                  <input
-                    type="text"
-                    name="nonce"
-                    value={verificationState.nonce}
-                    onChange={handleChange}
-                    className="bg-[#202329] text-white font-chakra text-xs font-medium mt-1 rounded-md px-5 py-4 w-full relative"
-                  />
+                  <div>
+                    <label className="text-xs text-opacity-75 font-changa text-[#F0F0F0]">
+                      {translator("Client Seed", language)}
+                    </label>
+                    <input
+                      type="text"
+                      name="clientSeed"
+                      value={verificationState.clientSeed}
+                      onChange={handleChange}
+                      className="bg-[#202329] text-white font-chakra text-xs font-medium mt-1 rounded-md px-5 py-4 w-full relative"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs text-opacity-75 font-changa text-[#F0F0F0]">
+                      {translator("Server Seed", language)}
+                    </label>
+                    <input
+                      type="text"
+                      name="serverSeed"
+                      value={verificationState.serverSeed}
+                      onChange={handleChange}
+                      className="bg-[#202329] text-white font-chakra text-xs font-medium mt-1 rounded-md px-5 py-4 w-full relative"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs text-opacity-75 font-changa text-[#F0F0F0]">
+                      {translator("Nonce", language)}
+                    </label>
+                    <input
+                      type="text"
+                      name="nonce"
+                      value={verificationState.nonce}
+                      onChange={handleChange}
+                      className="bg-[#202329] text-white font-chakra text-xs font-medium mt-1 rounded-md px-5 py-4 w-full relative"
+                    />
+                  </div>
                 </div>
               </div>
             )}

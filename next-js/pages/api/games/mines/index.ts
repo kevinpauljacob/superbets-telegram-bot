@@ -21,115 +21,124 @@ type InputType = {
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === "POST") {
     try {
-      return res
-        .status(400)
-        .json({ success: false, message: "GAME UNDER DEVELOPMENT !" });
-      // let { wallet, amount, tokenMint, minesCount }: InputType = req.body;
+      let { wallet, amount, tokenMint, minesCount }: InputType = req.body;
 
-      // const token = await getToken({ req, secret });
+      const token = await getToken({ req, secret });
 
-      // if (!token || !token.sub || token.sub != wallet)
-      //   return res.status(400).json({
-      //     success: false,
-      //     message: "User wallet not authenticated",
-      //   });
+      if (!token || !token.sub || token.sub != wallet)
+        return res.status(400).json({
+          success: false,
+          message: "User wallet not authenticated",
+        });
 
-      // if (!wallet || !amount || !tokenMint || !minesCount)
-      //   return res
-      //     .status(400)
-      //     .json({ success: false, message: "Missing parameters" });
+      if (!wallet || !amount || !tokenMint || !minesCount)
+        return res
+          .status(400)
+          .json({ success: false, message: "Missing parameters" });
 
-      // if (tokenMint !== "SOL" || !(1 <= minesCount && minesCount <= 24))
-      //   return res
-      //     .status(400)
-      //     .json({ success: false, message: "Invalid parameters" });
+      if (
+        tokenMint !== "SOL" ||
+        !(Number.isInteger(minesCount) && 1 <= minesCount && minesCount <= 24)
+      )
+        return res
+          .status(400)
+          .json({ success: false, message: "Invalid parameters" });
 
-      // if (amount < minGameAmount)
-      //   return res.status(400).json({
-      //     success: false,
-      //     message: "Invalid bet amount",
-      //   });
+      if (amount < minGameAmount)
+        return res.status(400).json({
+          success: false,
+          message: "Invalid bet amount",
+        });
 
-      // await connectDatabase();
+      await connectDatabase();
 
-      // let user = await User.findOne({ wallet });
+      const pendingGame = await Mines.findOne({ wallet, result: "Pending" });
+      if (pendingGame)
+        return res.status(400).json({
+          success: false,
+          gameId: pendingGame._id,
+          message: `Previous game is still pending, gameId:${pendingGame._id}`,
+        });
 
-      // if (!user)
-      //   return res
-      //     .status(400)
-      //     .json({ success: false, message: "User does not exist !" });
+      let user = await User.findOne({ wallet });
 
-      // if (
-      //   user.deposit.find((d: any) => d.tokenMint === tokenMint)?.amount <
-      //   amount
-      // )
-      //   return res
-      //     .status(400)
-      //     .json({ success: false, message: "Insufficient balance !" });
+      if (!user)
+        return res
+          .status(400)
+          .json({ success: false, message: "User does not exist !" });
 
-      // const activeGameSeed = await GameSeed.findOneAndUpdate(
-      //   {
-      //     wallet,
-      //     status: seedStatus.ACTIVE,
-      //   },
-      //   {
-      //     $inc: {
-      //       nonce: 1,
-      //     },
-      //   },
-      //   { new: true },
-      // );
+      if (
+        user.deposit.find((d: any) => d.tokenMint === tokenMint)?.amount <
+        amount
+      )
+        return res
+          .status(400)
+          .json({ success: false, message: "Insufficient balance !" });
 
-      // if (!activeGameSeed) {
-      //   throw new Error("Server hash not found!");
-      // }
+      const activeGameSeed = await GameSeed.findOneAndUpdate(
+        {
+          wallet,
+          status: seedStatus.ACTIVE,
+        },
+        {
+          $inc: {
+            nonce: 1,
+          },
+        },
+        { new: true },
+      );
 
-      // const { nonce } = activeGameSeed;
+      if (!activeGameSeed) {
+        throw new Error("Server hash not found!");
+      }
 
-      // let result = "Pending";
+      const { nonce } = activeGameSeed;
 
-      // const userUpdate = await User.findOneAndUpdate(
-      //   {
-      //     wallet,
-      //     deposit: {
-      //       $elemMatch: {
-      //         tokenMint,
-      //         amount: { $gte: amount },
-      //       },
-      //     },
-      //   },
-      //   {
-      //     $inc: {
-      //       "deposit.$.amount": -amount,
-      //     },
-      //   },
-      //   {
-      //     new: true,
-      //   },
-      // );
+      let result = "Pending";
 
-      // if (!userUpdate) {
-      //   throw new Error("Insufficient balance for action!!");
-      // }
+      const userUpdate = await User.findOneAndUpdate(
+        {
+          wallet,
+          deposit: {
+            $elemMatch: {
+              tokenMint,
+              amount: { $gte: amount },
+            },
+          },
+        },
+        {
+          $inc: {
+            "deposit.$.amount": -amount,
+            numOfGamesPlayed: 1,
+          },
+        },
+        {
+          new: true,
+        },
+      );
 
-      // const minesGame = await Mines.create({
-      //   wallet,
-      //   amount,
-      //   minesCount,
-      //   strikeMultiplier: 1,
-      //   result,
-      //   tokenMint,
-      //   amountWon: 0,
-      //   amountLost: 0,
-      //   nonce,
-      //   gameSeed: activeGameSeed._id,
-      // });
+      if (!userUpdate) {
+        throw new Error("Insufficient balance for action!!");
+      }
 
-      // return res.status(201).json({
-      //   success: true,
-      //   gameId: minesGame._id,
-      //   message: "Mines game created",
-      // });
+      const minesGame = await Mines.create({
+        wallet,
+        amount,
+        minesCount,
+        strikeMultiplier: 1,
+        result,
+        tokenMint,
+        amountWon: 0,
+        amountLost: 0,
+        nonce,
+        gameSeed: activeGameSeed._id,
+      });
+
+      return res.status(201).json({
+        success: true,
+        gameId: minesGame._id,
+        message: "Mines game created",
+      });
     } catch (e: any) {
       console.log(e);
       return res.status(500).json({ success: false, message: e.message });

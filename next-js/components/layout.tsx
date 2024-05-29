@@ -16,12 +16,14 @@ import VerifyDice2Modal from "./games/Dice2/VerifyDice2Modal";
 import VerifyLimboModal from "./games/Limbo/VerifyLimboModal";
 import VerifyWheelModal from "./games/Wheel/VerifyWheelModal";
 import VerifyKenoModal from "./games/Keno/VerifyKenoModal";
+import VerifyMinesModal from "./games/Mines/VerifyMinesModal";
 import { Flip } from "./games/CoinFlip/VerifyFlipModal";
 import { Dice2 } from "./games/Dice2/VerifyDice2Modal";
 import { Dice } from "./games/Dice/VerifyDiceModal";
 import { Limbo } from "./games/Limbo/VerifyLimboModal";
 import { Wheel } from "./games/Wheel/VerifyWheelModal";
 import { Keno } from "./games/Keno/VerifyKenoModal";
+import { Mines } from "./games/Mines/VerifyMinesModal";
 import { GameType } from "@/utils/provably-fair";
 import ConfigureAutoModal from "./games/ConfigureAutoModal";
 import RollDiceProvablyFairModal from "./games/Dice/DiceProvablyFairModal";
@@ -30,6 +32,7 @@ import CoinFlipProvablyFairModal from "./games/CoinFlip/CoinFlipProvablyFairModa
 import LimboProvablyFairModal from "./games/Limbo/LimboProvablyFairModal";
 import WheelProvablyFairModal from "./games/Wheel/WheelProvablyFairModal";
 import KenoProvablyFairModal from "./games/Keno/KenoProvablyFairModal";
+import MinesProvablyFairModal from "./games/Mines/MinesProvablyFairModal";
 import Footer from "./Footer";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { soundAlert } from "@/utils/soundUtils";
@@ -281,6 +284,13 @@ export default function Layout({ children }: LayoutProps) {
           modalData={{ bet: (verifyModalData as Keno)! }}
           wallet={wallet.publicKey?.toBase58()}
         />
+      ) : verifyModalData.game === GameType.mines ? (
+        <VerifyMinesModal
+          isOpen={isVerifyModalOpen}
+          onClose={closeVerifyModal}
+          modalData={{ bet: (verifyModalData as Mines)! }}
+          wallet={wallet.publicKey?.toBase58()}
+        />
       ) : null}
 
       {/* pf modals  */}
@@ -321,6 +331,13 @@ export default function Layout({ children }: LayoutProps) {
         />
       ) : game === GameType.keno ? (
         <KenoProvablyFairModal
+          isOpen={openPFModal}
+          onClose={closePfModal}
+          modalData={modalData}
+          setModalData={setModalData}
+        />
+      ) : game === GameType.mines ? (
+        <MinesProvablyFairModal
           isOpen={openPFModal}
           onClose={closePfModal}
           modalData={modalData}
