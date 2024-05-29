@@ -72,6 +72,8 @@ export default function Mines() {
   const [numBets, setNumBets] = useState<number>(0);
   const [currentProfit, setCurrentProfit] = useState<number>(0);
   const [nextProfit, setNextProfit] = useState<number>(0);
+  const [currentProfitInUSD, setCurrentProfitInUSD] = useState<number>(0);
+  const [nextProfitInUSD, setNextProfitInUSD] = useState<number>(0);
   const [amountWon, setAmountWon] = useState<number>(0);
   const [gameId, setGameId] = useState<number>();
   const [betActive, setBetActive] = useState(false);
@@ -170,6 +172,22 @@ export default function Mines() {
     currentProfit,
     nextProfit,
   ]);
+
+  useEffect(() => {
+    const fetchPrice = async () => {
+      try {
+        const response = await fetch("https://price.jup.ag/v6/price?ids=SOL");
+        const data = await response.json();
+        const solPrice = data.data.SOL.price;
+        setCurrentProfitInUSD(truncateNumber(currentProfit * solPrice), 4);
+        setNextProfitInUSD(truncateNumber(nextProfit * solPrice), 4);
+      } catch (error: any) {
+        throw new Error(error.message);
+      }
+    };
+
+    fetchPrice();
+  }, [currentProfit, nextProfit]);
 
   const handleConclude = async () => {
     try {
@@ -795,7 +813,7 @@ export default function Mines() {
                           <p>{currentProfit} SOL</p>
                         </div>
                         <div className="flex justify-between items-center text-fomo-green">
-                          <p>0.000</p>
+                          <p>{currentProfitInUSD}</p>
                           <p>{currentMultiplier}x</p>
                         </div>
                       </div>
@@ -815,7 +833,7 @@ export default function Mines() {
                           <p>{nextProfit} SOL</p>
                         </div>
                         <div className="flex justify-between items-center text-fomo-green">
-                          <p>0.000</p>
+                          <p>{nextProfitInUSD}</p>
                           <p>{nextMultiplier}x</p>
                         </div>
                       </div>
