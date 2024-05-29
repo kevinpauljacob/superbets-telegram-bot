@@ -233,7 +233,9 @@ export default function Flip() {
         autoBetProfit > 0 &&
         autoBetProfit >= autoStopProfit
       ) {
-        warningCustom("Profit limit reached.", "top-left");
+        setTimeout(() => {
+          warningCustom("Profit limit reached.", "top-left");
+        }, 500);
         setAutoBetCount(0);
         setStartAuto(false);
         return;
@@ -242,9 +244,11 @@ export default function Flip() {
         useAutoConfig &&
         autoStopLoss &&
         autoBetProfit < 0 &&
-        potentialLoss <= -autoStopLoss
+        potentialLoss < -autoStopLoss
       ) {
-        warningCustom("Loss limit reached.", "top-left");
+        setTimeout(() => {
+          warningCustom("Loss limit reached.", "top-left");
+        }, 500);
         setAutoBetCount(0);
         setStartAuto(false);
         return;
@@ -322,6 +326,7 @@ export default function Flip() {
                 !betType ||
                 loading ||
                 !session?.user ||
+                !coinData ||
                 (coinData && coinData[0].amount < minGameAmount) ||
                 (betAmt !== undefined &&
                   maxBetAmt !== undefined &&
@@ -444,6 +449,7 @@ export default function Flip() {
                       !betType ||
                       loading ||
                       !session?.user ||
+                      !coinData ||
                       (coinData && coinData[0].amount < minGameAmount) ||
                       (betAmt !== undefined &&
                         maxBetAmt !== undefined &&
