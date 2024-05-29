@@ -16,6 +16,7 @@ import Twitter from "@/public/assets/Twitter";
 import Birdeye from "@/public/assets/Birdeye";
 import Telegram from "@/public/assets/Telegram";
 import { truncateNumber } from "@/context/gameTransactions";
+import FomoExitSidebar from "./FomoExitSidebar";
 
 export type Game = {
   src: string;
@@ -398,18 +399,7 @@ export const OpenSidebar = ({
               }
             />
           </div>
-          <Link href="https://exitscam.live" target="_blank">
-            <div className={`mt-0`}>
-              <div className="w-full transition-all cursor-pointer rounded-md flex items-center justify-between gap-2 pl-4 pr-2 py-2 bg-transparent hover:bg-[#1f2024] focus:bg-[#1f2024] group">
-                <div className="flex items-center gap-3">
-                  <FomoExitIcon className="min-w-[1.25rem] min-h-[1.25rem] transition-all text-white group-hover:text-[#9945FF] group-focus:text-[#9945FF] opacity-50 hover:opacity-100" />
-                  <span className="mt-0.5 transition-all text-sm font-changa font-medium text-white text-opacity-90 group-hover:text-opacity-100 group-focus:text-opacity-100">
-                    FOMO: {translator("Exit", language)}
-                  </span>
-                </div>
-              </div>
-            </div>
-          </Link>
+          <FomoExitSidebar />
           <div className={`mt-0`}>
             <div
               onClick={() => setShowPlayTokens(!showPlayTokens)}
