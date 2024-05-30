@@ -209,6 +209,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         amount,
         minesCount,
         strikeMultiplier,
+        strikeNumbers,
         userBets,
         result,
         tokenMint,
