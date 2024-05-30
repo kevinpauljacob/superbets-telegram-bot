@@ -400,11 +400,19 @@ export default function Mines() {
         setBetActive(true);
         setUserBets(updatedUserBetsWithResult);
         setRefresh(true);
-        successCustom(message);
       }
 
       const win = result === "Won";
-      if (win) soundAlert("/sounds/win.wav");
+      if (win) {
+        soundAlert("/sounds/win.wav");
+        successCustom(message);
+      }
+
+      const lose = result === "Lost";
+      if (lose) {
+        soundAlert("/sounds/bomb.wav");
+        errorCustom(message);
+      }
 
       // auto options
       if (betType === "auto") {
