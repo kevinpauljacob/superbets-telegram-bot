@@ -78,6 +78,7 @@ export default function WheelProvablyFairModal({
     nonce: string;
     risk?: string;
     segments?: number;
+    parameter?:number;
   }>(
     bet?.gameSeed
       ? {
@@ -90,6 +91,9 @@ export default function WheelProvablyFairModal({
           segments:
             bet.segments ||
             (selectedGameType === GameType.wheel ? 10 : undefined),
+            parameter:
+            bet.minesCount ||
+            (selectedGameType === GameType.mines ? 1 : undefined),
         }
       : {
           clientSeed: "",
@@ -97,6 +101,7 @@ export default function WheelProvablyFairModal({
           nonce: "",
           risk: selectedGameType === GameType.wheel ? "low" : undefined,
           segments: selectedGameType === GameType.wheel ? 10 : undefined,
+          parameter:selectedGameType === GameType.mines ? 1 : undefined
         },
   );
 
