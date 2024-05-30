@@ -924,60 +924,6 @@ export default function Mines() {
                         </div>
                       </div>
                     </div>
-                    {/* <div className="border border-[#FFFFFF0D] rounded-[5px] font-changa text-white text-xs font-medium p-5 mb-6">
-                      <div>
-                        <div className="flex justify-between items-center mb-2">
-                          <p>Current Profit</p>
-                          <p>0.00 SOL</p>
-                        </div>
-                        <div className="flex justify-between items-center text-fomo-green">
-                          <p>0.000</p>
-                          <p>
-                            {truncateNumber(
-                              Decimal.div(
-                                25 - numBets,
-                                25 - numBets - minesCount,
-                              )
-                                .mul(strikeMultiplier)
-                                .toNumber(),
-                              2,
-                            )}
-                            x
-                          </p>
-                        </div>
-                      </div>
-                      <div className="flex items-center w-full">
-                        <div className="h-[1px] bg-[#FFFFFF0D] w-full"></div>
-                        <Image
-                          src="/assets/arrowInCircle.svg"
-                          alt="arrowInCircle"
-                          width={24}
-                          height={24}
-                        />
-                        <div className="h-[1px] bg-[#FFFFFF0D] w-full"></div>
-                      </div>
-                      <div>
-                        <div className="flex justify-between items-center mb-2">
-                          <p>Profit on next tile</p>
-                          <p>0.00 SOL</p>
-                        </div>
-                        <div className="flex justify-between items-center text-fomo-green">
-                          <p>0.000</p>
-                          <p>
-                            {truncateNumber(
-                              Decimal.div(
-                                25 - (numBets + 1),
-                                25 - (numBets + 1) - minesCount,
-                              )
-                                .mul(strikeMultiplier)
-                                .toNumber(),
-                              2,
-                            )}
-                            x
-                          </p>
-                        </div>
-                      </div>
-                    </div> */}
                   </>
                 ) : null}
                 {betType === "manual" ? (
@@ -1068,7 +1014,7 @@ export default function Mines() {
             });
           }}
         >
-          <div className="relative grid grid-cols-5 gap-1 sm:gap-2 text-white text-sm md:text-xl font-chakra">
+          <div className="relative grid grid-cols-5 gap-1.5 sm:gap-2 text-white text-sm md:text-xl font-chakra">
             {cashoutModal.show && (
               <div className="absolute top-0 left-0 w-full h-full flex items-center justify-center bg-black/40">
                 <div className="flex flex-col items-center justify-center bg-[#121418] rounded-[5px] border-2 border-fomo-green w-[200px] h-max p-2.5">
@@ -1135,7 +1081,7 @@ export default function Mines() {
                 >
                   {betType === "manual" &&
                     (userBets[index - 1].result === "Pending" ? (
-                      <div className="w-full h-full flex items-center justify-center p-1.5 sm:p-3">
+                      <div className="w-full h-full flex items-center justify-center p-2 sm:p-4">
                         <Image
                           src="/assets/gem.svg"
                           alt="Gem"
@@ -1145,7 +1091,7 @@ export default function Mines() {
                         />
                       </div>
                     ) : userBets[index - 1].result === "Lost" ? (
-                      <div className="w-full h-full flex items-center justify-center p-1.5 sm:p-3">
+                      <div className="w-full h-full flex items-center justify-center p-2 sm:p-4">
                         <Image
                           src="/assets/mine.svg"
                           alt="Mine"
