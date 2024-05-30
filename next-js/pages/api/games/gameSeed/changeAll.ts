@@ -7,6 +7,8 @@ import {
   seedStatus,
 } from "@/utils/provably-fair";
 
+const encryptionKey = Buffer.from(process.env.ENCRYPTION_KEY!, "hex");
+
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === "POST") {
     try {
@@ -72,12 +74,14 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           { projection: { serverSeed: 0 }, new: true },
         );
 
-        const newServerHash = generateServerSeed();
+        const { encryptedServerSeed, serverSeedHash, iv } =
+          generateServerSeed(encryptionKey);
 
         await GameSeed.create({
           wallet,
-          serverSeed: newServerHash.serverSeed,
-          serverSeedHash: newServerHash.serverSeedHash,
+          serverSeed: encryptedServerSeed,
+          serverSeedHash,
+          iv: iv.toString("hex"),
         });
       }
 
