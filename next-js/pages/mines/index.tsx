@@ -29,6 +29,7 @@ import { minGameAmount, truncateNumber } from "@/context/gameTransactions";
 import { useSession } from "next-auth/react";
 import user from "@/models/staking/user";
 import Decimal from "decimal.js";
+import next from "next";
 Decimal.set({ precision: 9 });
 
 export default function Mines() {
@@ -106,60 +107,14 @@ export default function Mines() {
     setDropDown(!dropDown);
   };
 
-  const handleMultipliers = (strikeMultiplier: number) => {
+  useEffect(() => {
     if (numBets === 0) {
       setCurrentMultiplier(0);
       setNextMultiplier(0);
       setAmountWon(0);
       return;
     }
-
-    let currentProfit = 0;
-    let nextProfit = 0;
-
-    const currentMultiplier = truncateNumber(
-      Decimal.div(25 - numBets, 25 - numBets - minesCount)
-        .mul(strikeMultiplier)
-        .toNumber(),
-      2,
-    );
-
-    if (betAmt) {
-      console.log("here");
-      currentProfit = truncateNumber(
-        Decimal.mul(betAmt, strikeMultiplier)
-          .mul(Decimal.sub(1, houseEdge))
-          .toNumber(),
-        6,
-      );
-    }
-
-    const nextMultiplier = truncateNumber(
-      Decimal.div(25 - (numBets + 1), 25 - (numBets + 1) - minesCount)
-        .mul(currentMultiplier)
-        .toNumber(),
-      2,
-    );
-
-    if (betAmt) {
-      nextProfit = truncateNumber(
-        Decimal.mul(Math.max(betAmt, amountWon), currentMultiplier)
-          .mul(Decimal.sub(1, houseEdge))
-          .toNumber(),
-        6,
-      );
-    }
-    setCurrentMultiplier(currentMultiplier);
-    setNextMultiplier(nextMultiplier);
-    setStrikeMultiplier(currentMultiplier);
-    setCurrentProfit(currentProfit);
-    setNextProfit(nextProfit);
-    setAmountWon(currentProfit);
-  };
-
-  useEffect(() => {
-    handleMultipliers(strikeMultiplier);
-  }, [numBets]);
+  }, [numBets, currentMultiplier, amountWon]);
 
   useEffect(() => {
     console.log("currentMultiplier", currentMultiplier);
@@ -185,8 +140,8 @@ export default function Mines() {
         const response = await fetch("https://price.jup.ag/v6/price?ids=SOL");
         const data = await response.json();
         const solPrice = data.data.SOL.price;
-        setCurrentProfitInUSD(truncateNumber(currentProfit * solPrice, 4));
-        setNextProfitInUSD(truncateNumber(nextProfit * solPrice, 4));
+        setCurrentProfitInUSD(currentProfit * solPrice);
+        setNextProfitInUSD(nextProfit * solPrice);
       } catch (error: any) {
         throw new Error(error.message);
       }
@@ -261,6 +216,7 @@ export default function Mines() {
   useEffect(() => {
     console.log("cashoutModal", cashoutModal);
   }, [cashoutModal]);
+
   const handleAutoPick = async (number: number) => {
     console.log("number", number);
     const updatedUserBets = [...userBets];
@@ -307,8 +263,14 @@ export default function Mines() {
         }),
       });
 
-      const { success, message, result, strikeNumbers, strikeMultiplier } =
-        await response.json();
+      const {
+        success,
+        message,
+        result,
+        strikeNumbers,
+        strikeMultiplier,
+        amountWon,
+      } = await response.json();
 
       if (success != true) {
         throw new Error(message);
@@ -320,6 +282,28 @@ export default function Mines() {
         pick: true,
       };
       setUserBets(updatedUserBets);
+
+      setCurrentMultiplier(strikeMultiplier);
+      setCurrentProfit(amountWon);
+
+      setNextMultiplier(
+        Decimal.div(25 - (numBets + 1), 25 - (numBets + 1) - minesCount)
+          .mul(strikeMultiplier)
+          .toNumber(),
+      );
+
+      if (betAmt) {
+        setNextProfit(
+          Decimal.mul(
+            betAmt,
+            Decimal.div(25 - (numBets + 1), 25 - (numBets + 1) - minesCount)
+              .mul(strikeMultiplier)
+              .toNumber(),
+          )
+            .mul(Decimal.sub(1, houseEdge))
+            .toNumber(),
+        );
+      }
 
       if (result === "Lost") {
         const updatedUserBetsWithResult = userBets.map((bet, index) => ({
@@ -344,7 +328,9 @@ export default function Mines() {
       }
 
       const win: boolean = result === "Pending";
+      const lose: boolean = result === "Lost";
       if (win) soundAlert("/sounds/win.wav");
+      if (lose) soundAlert("/sounds/bomb.wav");
 
       if (success) {
         setRefresh(true);
@@ -547,6 +533,7 @@ export default function Mines() {
         message,
         userBets,
         amount,
+        amountWon,
         gameId,
         minesCount,
         strikeMultiplier,
@@ -559,17 +546,32 @@ export default function Mines() {
 
       if (success) {
         if (result === true) {
-          setMinesCount(minesCount);
-          setNumBets(userBets.length);
-          setStrikeMultiplier(truncateNumber(strikeMultiplier, 2));
-          setCurrentMultiplier(truncateNumber(strikeMultiplier, 2));
-          const nextMultiplier = Decimal.div(
-            25 - (userBets.length + 1),
-            25 - (userBets.length + 1) - minesCount,
-          )
-            .mul(strikeMultiplier)
-            .toNumber();
-          setNextMultiplier(truncateNumber(nextMultiplier, 2));
+          setCurrentMultiplier(strikeMultiplier);
+          setCurrentProfit(amountWon);
+
+          setNextMultiplier(
+            Decimal.div(
+              25 - (userBets.length + 1),
+              25 - (userBets.length + 1) - minesCount,
+            )
+              .mul(strikeMultiplier)
+              .toNumber(),
+          );
+
+          setNextProfit(
+            Decimal.mul(
+              amount,
+              Decimal.div(
+                25 - (userBets.length + 1),
+                25 - (userBets.length + 1) - minesCount,
+              )
+                .mul(strikeMultiplier)
+                .toNumber(),
+            )
+              .mul(Decimal.sub(1, houseEdge))
+              .toNumber(),
+          );
+
           const pendingGameUserBets = userBets;
           pendingGameUserBets.forEach((index: number) => {
             if (index >= 0 && index < updatedUserBets.length) {
@@ -582,6 +584,10 @@ export default function Mines() {
           });
           console.log("pendingGameUserBets", pendingGameUserBets);
           console.log("updatedUserBets", updatedUserBets);
+
+          setMinesCount(minesCount);
+          setNumBets(userBets.length);
+          setStrikeMultiplier(strikeMultiplier);
           setUserBets(updatedUserBets);
           setBetAmt(amount);
           setGameId(gameId);
@@ -642,9 +648,9 @@ export default function Mines() {
             (autoWinChangeReset || autoLossChangeReset
               ? betAmt
               : autoBetCount === "inf"
-              ? Math.max(0, betAmt)
-              : betAmt *
-                (autoLossChange !== null ? autoLossChange / 100.0 : 0));
+                ? Math.max(0, betAmt)
+                : betAmt *
+                  (autoLossChange !== null ? autoLossChange / 100.0 : 0));
 
         console.log("Current bet amount:", betAmt);
         console.log("Auto loss change:", autoLossChange);
@@ -843,11 +849,11 @@ export default function Mines() {
                       <div>
                         <div className="flex justify-between items-center mb-2">
                           <p>Current Profit</p>
-                          <p>{currentProfit} SOL</p>
+                          <p>{truncateNumber(currentProfit, 7)} SOL</p>
                         </div>
                         <div className="flex justify-between items-center text-fomo-green">
-                          <p>{currentProfitInUSD}</p>
-                          <p>{currentMultiplier}x</p>
+                          <p>{truncateNumber(currentProfitInUSD, 5)}</p>
+                          <p>{truncateNumber(currentMultiplier, 2)}x</p>
                         </div>
                       </div>
                       <div className="flex items-center w-full">
@@ -863,11 +869,11 @@ export default function Mines() {
                       <div>
                         <div className="flex justify-between items-center mb-2">
                           <p>Profit on next tile</p>
-                          <p>{nextProfit} SOL</p>
+                          <p>{truncateNumber(nextProfit, 7)} SOL</p>
                         </div>
                         <div className="flex justify-between items-center text-fomo-green">
-                          <p>{nextProfitInUSD}</p>
-                          <p>{nextMultiplier}x</p>
+                          <p>{truncateNumber(nextProfitInUSD, 5)}</p>
+                          <p>{truncateNumber(nextMultiplier, 2)}x</p>
                         </div>
                       </div>
                     </div>
@@ -1102,29 +1108,29 @@ export default function Mines() {
                         userBets[index - 1].pick === true
                         ? "border-[#FCB10F] bg-[#FCB10F33]"
                         : userBets[index - 1].result === "Lost" &&
-                          userBets[index - 1].pick === true
-                        ? "border-[#F1323E] bg-[#F1323E33]"
-                        : "border-[#202329] hover:border-white/30"
+                            userBets[index - 1].pick === true
+                          ? "border-[#F1323E] bg-[#F1323E33]"
+                          : "border-[#202329] hover:border-white/30"
                       : betType === "auto"
-                      ? userBets[index - 1].result === "" &&
-                        userBets[index - 1].pick === true
-                        ? "border-[#FCB10F] bg-[#FCB10F33]"
-                        : userBets[index - 1].result === "Won" &&
+                        ? userBets[index - 1].result === "" &&
                           userBets[index - 1].pick === true
-                        ? "border-[#FCB10F] bg-[#FCB10F33]"
-                        : userBets[index - 1].result === "Lost" &&
-                          userBets[index - 1].pick === true
-                        ? "border-[#F1323E] bg-[#F1323E33]"
-                        : "border-[#202329] hover:border-white/30"
-                      : null
+                          ? "border-[#FCB10F] bg-[#FCB10F33]"
+                          : userBets[index - 1].result === "Won" &&
+                              userBets[index - 1].pick === true
+                            ? "border-[#FCB10F] bg-[#FCB10F33]"
+                            : userBets[index - 1].result === "Lost" &&
+                                userBets[index - 1].pick === true
+                              ? "border-[#F1323E] bg-[#F1323E33]"
+                              : "border-[#202329] hover:border-white/30"
+                        : null
                   }  bg-[#202329] flex items-center justify-center cursor-pointer rounded-md text-center transition-all duration-300 ease-in-out w-[45px] h-[45px] sm:w-[55px] sm:h-[55px] md:w-[80px] md:h-[80px] xl:w-[95px] xl:h-[95px]`}
                   disabled={betType === "manual" && userBets[index - 1].pick}
                   onClick={() =>
                     betType === "auto"
                       ? handleAutoPick(index)
                       : betActive && betType === "manual"
-                      ? handlePick(index)
-                      : null
+                        ? handlePick(index)
+                        : null
                   }
                 >
                   {betType === "manual" &&

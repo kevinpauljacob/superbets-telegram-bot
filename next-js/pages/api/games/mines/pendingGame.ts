@@ -39,6 +39,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         success: true,
         userBets: pendingGame ? pendingGame.userBets : [],
         amount: pendingGame ? pendingGame.amount : 0,
+        amountWon: pendingGame ? pendingGame.amountWon : 0,
         gameId: pendingGame ? pendingGame._id : null,
         minesCount: pendingGame ? pendingGame.minesCount : 0,
         strikeMultiplier: pendingGame ? pendingGame.strikeMultiplier : 0,
