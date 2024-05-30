@@ -55,8 +55,8 @@ export default function VerifyDice2Modal({
 
   //Provably Fair Modal handling
   const [isPFModalOpen, setIsPFModalOpen] = useState(false);
-  const [pfLoading, setPfLoading] = useState(false);
 
+  const [isLoading, setIsLoading]=useState<boolean>(false);
   const openPFModal = () => {
     setIsPFModalOpen(true);
   };
@@ -115,7 +115,32 @@ export default function VerifyDice2Modal({
 
     return `${day}-${month}-${year} ${hours}:${minutes} UTC`;
   }
-  console.log("Mines Bet", bet);
+
+  const handleSeedClick = async () => {
+    setIsLoading(true);
+    try {
+      const fpData = await getProvablyFairData();
+      if (fpData) setPFModalData({ ...fpData, tab: "seeds" });
+      openPFModal();
+    } catch (error) {
+      console.error("Error fetching provably fair data", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  const handleVerifyClick = async () => {
+    setIsLoading(true);
+    try {
+      const fpData = await getProvablyFairData();
+      if (fpData) setPFModalData({ ...fpData, tab: "verify" });
+      openPFModal();
+    } catch (error) {
+      console.error("Error fetching provably fair data", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <>
       {isOpen && (
@@ -129,7 +154,7 @@ export default function VerifyDice2Modal({
           <div className="relative bg-[#121418] max-h-[80vh] no-scrollbar overflow-y-scroll p-8 rounded-lg z-10 w-11/12 sm:w-[34rem]">
             <div className="flex flex-wrap justify-between items-center mb-4 sm:mb-[1.4rem]">
               <div className="font-changa text-2xl font-semibold text-white mr-4 text-opacity-90">
-                {translator("Keno", language)}
+                {translator("Mines", language)}
               </div>
               <div className="text-[#F0F0F0] text-opacity-75 font-changa text-sm">
                 {formatDate(bet.createdAt)}
@@ -320,18 +345,10 @@ export default function VerifyDice2Modal({
                         </div>
                         <button
                           className="bg-[#7839C5] rounded-md w-full text-sm text-white text-opacity-90 text-semibold py-3"
-                          disabled={pfLoading}
-                          onClick={async () => {
-                            setPfLoading(true);
-                            const fpData = await getProvablyFairData();
-                            if (fpData)
-                              setPFModalData({ ...fpData, tab: "seeds" });
-                            setPfLoading(false);
-
-                            openPFModal();
-                          }}
+                          disabled={isLoading}
+                          onClick={handleSeedClick}
                         >
-                          {pfLoading ? (
+                          {isLoading ? (
                             <Loader />
                           ) : (
                             translator("Rotate", language)
@@ -341,16 +358,8 @@ export default function VerifyDice2Modal({
                     ) : (
                       <button
                         className="bg-[#7839C5] rounded-md w-full text-sm text-white text-opacity-90 text-semibold py-3"
-                        disabled={pfLoading}
-                        onClick={async () => {
-                          setPfLoading(true);
-                          const fpData = await getProvablyFairData();
-                          if (fpData)
-                            setPFModalData({ ...fpData, tab: "verify" });
-                          setPfLoading(false);
-
-                          openPFModal();
-                        }}
+                        disabled={isLoading}
+                        onClick={handleVerifyClick}
                       >
                         {translator("Verify", language)}
                       </button>

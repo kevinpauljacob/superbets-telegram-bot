@@ -12,19 +12,21 @@ interface VerificationState {
   nonce: string;
   risk?: string;
   segments?: number;
+  
 }
 
 interface Props {
   verificationState: VerificationState;
   setVerificationState: React.Dispatch<React.SetStateAction<VerificationState>>;
   selectedGameType: GameType;
+  parameter?:number;
 }
 
 export default function ProvablyFairModal({
   verificationState,
   setVerificationState,
-
   selectedGameType,
+  parameter,
 }: Props) {
   const [ strikeNumbers, setStrikeNumbers] = useState<number[]>([]);
   const [strikeNumber, setStrikeNumber] = useState<number>(50.0);
@@ -38,13 +40,15 @@ export default function ProvablyFairModal({
     null,
   );
   const { language } = useGlobalContext();
-  console.log("Striker Number",strikeNumbers[22])
+ 
   useEffect(() => {
     const result = generateGameResult(
       verificationState.serverSeed,
       verificationState.clientSeed,
       parseInt(verificationState.nonce),
       selectedGameType,
+      parameter
+      
     );
     if (Array.isArray(result)) {
       setStrikeNumbers(result);

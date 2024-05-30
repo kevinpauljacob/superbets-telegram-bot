@@ -7,6 +7,7 @@ import DraggableBar from "./DraggableBar";
 import { FaRegCopy } from "react-icons/fa6";
 import { MdClose } from "react-icons/md";
 import { translator } from "@/context/transactions";
+import Loader from "../Loader";
 
 export interface Dice2 {
   createdAt: string;
@@ -86,7 +87,7 @@ export default function VerifyDice2Modal({
 
   //to handle dropodown
   const [openDropDown, setOpenDropDown] = useState<boolean>(false);
-
+  const [isLoading, setIsLoading]=useState<boolean>(false);
   const handleClose = () => {
     //@ts-ignore
     document.addEventListener("click", function (event) {
@@ -110,6 +111,30 @@ export default function VerifyDice2Modal({
 
     return `${day}-${month}-${year} ${hours}:${minutes} UTC`;
   }
+  const handleSeedClick = async () => {
+    setIsLoading(true);
+    try {
+      const fpData = await getProvablyFairData();
+      if (fpData) setPFModalData({ ...fpData, tab: "seeds" });
+      openPFModal();
+    } catch (error) {
+      console.error("Error fetching provably fair data", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  const handleVerifyClick = async () => {
+    setIsLoading(true);
+    try {
+      const fpData = await getProvablyFairData();
+      if (fpData) setPFModalData({ ...fpData, tab: "verify" });
+      openPFModal();
+    } catch (error) {
+      console.error("Error fetching provably fair data", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <>
@@ -309,29 +334,18 @@ export default function VerifyDice2Modal({
                         </div>
                         <button
                           className="bg-[#7839C5] rounded-md w-full text-sm text-white text-opacity-90 text-semibold py-3"
-                          onClick={async () => {
-                            const fpData = await getProvablyFairData();
-                            if (fpData)
-                              setPFModalData({ ...fpData, tab: "seeds" });
-
-                            openPFModal();
-                          }}
+                          onClick={handleSeedClick}
                         >
-                          {translator("Rotate", language)}
+                         {isLoading ? <Loader/> : translator("Rotate", language)}
+
                         </button>
                       </>
                     ) : (
                       <button
                         className="bg-[#7839C5] rounded-md w-full text-sm text-white text-opacity-90 text-semibold py-3"
-                        onClick={async () => {
-                          const fpData = await getProvablyFairData();
-                          if (fpData)
-                            setPFModalData({ ...fpData, tab: "verify" });
-
-                          openPFModal();
-                        }}
+                        onClick={handleVerifyClick}
                       >
-                        {translator("Verify", language)}
+                       {isLoading ? <Loader/> : translator("Verify", language)}
                       </button>
                     )}
                   </div>
