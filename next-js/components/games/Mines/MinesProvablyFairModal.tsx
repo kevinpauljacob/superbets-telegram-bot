@@ -14,6 +14,7 @@ import { errorCustom, successAlert } from "@/components/toasts/ToastGroup";
 import ProvablyFairModal from "../ProvablyFairModal";
 import { translator } from "@/context/transactions";
 import { useGlobalContext } from "@/components/GlobalContext";
+import GameSelect from "../GameSelect";
 
 export interface PFModalData {
   activeGameSeed: {
@@ -302,23 +303,9 @@ export default function MinesProvablyFairModal({
                       {translator("Game", language)}
                     </label>
                     <div className="flex items-center">
-                      <select
-                        name="game"
-                        value={selectedGameType}
-                        onChange={(e) =>
-                          setSelectedGameType(e.target.value as GameType)
-                        }
-                        className="bg-[#202329] text-white font-chakra text-xs font-medium mt-1 rounded-md px-5 py-4 w-full relative appearance-none"
-                      >
-                        <option value={GameType.keno}>Keno</option>
-                        <option value={GameType.dice}>Dice</option>
-                        <option value={GameType.coin}>Coin Flip</option>
-                        <option value={GameType.mines}>Mines</option>
-                         
-                        <option value={GameType.dice2}>Dice2</option>
-                        <option value={GameType.limbo}>Limbo</option>
-                        <option value={GameType.wheel}>Wheel</option>
-                      </select>
+                    <GameSelect
+                      selectedGameType={selectedGameType}
+                      setSelectedGameType={setSelectedGameType}/>
                     </div>
                   </div>
                   <div>
