@@ -115,7 +115,7 @@ export default function VerifyDice2Modal({
 
     return `${day}-${month}-${year} ${hours}:${minutes} UTC`;
   }
-  console.log("Mines Bet", bet);
+
   const handleSeedClick = async () => {
     setIsLoading(true);
     try {
