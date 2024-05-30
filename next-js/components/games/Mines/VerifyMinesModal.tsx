@@ -104,13 +104,7 @@ export default function VerifyDice2Modal({
   const Capitalize = (str: string) => {
     return str?.charAt(0).toUpperCase() + str?.slice(1);
   };
-  const modifiedBet = {
-    ...bet,
-    strikeNumbers: [
-      0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    ],
-  };
-  console.log(modifiedBet);
+
   function formatDate(dateString: string) {
     const date = new Date(dateString);
     const day = date.getUTCDate().toString().padStart(2, "0");
@@ -175,10 +169,10 @@ export default function VerifyDice2Modal({
                       <button
                         key={number}
                         className={`${
-                          modifiedBet.userBets.includes(number - 1)
-                            ? modifiedBet.strikeNumbers[number - 1] === 0
+                          bet.userBets.includes(number - 1)
+                            ? bet.strikeNumbers[number - 1] === 0
                               ? "border-[#FCB10F] bg-[#FCB10F33]"
-                              : modifiedBet.strikeNumbers[number - 1] === 1
+                              : bet.strikeNumbers[number - 1] === 1
                               ? "border-[#F1323E] bg-[#F1323E33]"
                               : ""
                             : "bg-[#202329]"
@@ -186,7 +180,7 @@ export default function VerifyDice2Modal({
           lg2:w-[48px] lg2:h-[48px] md:w-[45px] md:h-[45px] sm:w-[43px] sm:h-[43px] sm2:w-[40px]
           sm2:h-[40px] xs:w-[38px] xs:h-[38px] w-[33px] h-[33px]`}
                       >
-                        {modifiedBet.strikeNumbers[number - 1] === 0 ? (
+                        {bet.strikeNumbers[number - 1] === 0 ? (
                           <div className="w-full h-full flex items-center justify-center p-1.5 sm:p-3">
                             <Image
                               src="/assets/gem.svg"
@@ -196,7 +190,7 @@ export default function VerifyDice2Modal({
                               width={100}
                             />
                           </div>
-                        ) : modifiedBet.strikeNumbers[number - 1] === 1 ? (
+                        ) : bet.strikeNumbers[number - 1] === 1 ? (
                           <div className="w-full h-full flex items-center justify-center p-1.5 sm:p-3">
                             <Image
                               src="/assets/mine.svg"
