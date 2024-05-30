@@ -4,6 +4,8 @@ import { NextApiRequest, NextApiResponse } from "next";
 import { GameSeed, Mines, User } from "@/models/games";
 import { seedStatus } from "@/utils/provably-fair";
 import { minGameAmount } from "@/context/gameTransactions";
+import Decimal from "decimal.js";
+import { maxPayouts } from "@/context/transactions";
 
 const secret = process.env.NEXTAUTH_SECRET;
 
@@ -49,6 +51,15 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           success: false,
           message: "Invalid bet amount",
         });
+
+      const maxStrikeMultiplier = 25;
+
+      const maxPayout = Decimal.mul(amount, maxStrikeMultiplier);
+
+      if (!(maxPayout.toNumber() <= maxPayouts.mines))
+        return res
+          .status(400)
+          .json({ success: false, message: "Max payout exceeded" });
 
       await connectDatabase();
 
