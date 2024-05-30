@@ -50,3 +50,87 @@ export const riskToChance: RiskToChance = {
     10: [0.0, 0.0, 0.0, 0.0, 3.5, 8.0, 13.0, 3.0, 500.0, 800.0, 1000.0],
   },
 };
+
+function comb(n: number, k: number): number {
+  if (k === 0 || k === n) {
+    return 1;
+  }
+  let numerator = 1;
+  for (let i = 0; i < k; i++) {
+    numerator *= n - i;
+  }
+  let denominator = 1;
+  for (let i = 1; i <= k; i++) {
+    denominator *= i;
+  }
+  return numerator / denominator;
+}
+
+function hypergeometricDistribution(
+  N: number,
+  k: number,
+  n: number,
+  x: number,
+): number {
+  return (comb(k, x) * comb(N - k, n - x)) / comb(N, n);
+}
+
+function calculateExpectedValue(
+  values: number[],
+  N: number,
+  k: number,
+  n: number,
+): number {
+  let ev = 0;
+  for (let x = 1; x < values.length; x++) {
+    ev += hypergeometricDistribution(N, k, n, x) * values[x];
+  }
+  return ev;
+}
+
+function adjustFirstNonzeroValue(
+  category: string,
+  k: number,
+  N: number,
+  n: number,
+  targetEv: number,
+): number[] {
+  let values = riskToChance[category][k];
+  let index = values.findIndex((value) => value !== 0);
+
+  while (index < values.length) {
+    let low = 0;
+    let high = targetEv * 2; 
+
+    while (low < high) {
+      let mid = (low + high) / 2;
+      values[index] = mid;
+      let currentEv = calculateExpectedValue(values, N, k, n);
+
+      if (mid < 0) {
+        break; // 
+      }
+
+      if (Math.abs(currentEv - targetEv) < 1e-6) {
+        return values;
+      } else if (currentEv < targetEv) {
+        low = mid;
+      } else {
+        high = mid;
+      }
+    }
+
+    while (++index < values.length && values[index] === 0) {
+    }
+
+    if (index >= values.length) {
+      break;
+    }
+  }
+
+  return values;
+}
+
+const res = adjustFirstNonzeroValue("classic", 2, 10, 40, 100);
+console.log(res)
+
