@@ -117,24 +117,6 @@ export default function Mines() {
   }, [numBets, currentMultiplier, amountWon]);
 
   useEffect(() => {
-    console.log("currentMultiplier", currentMultiplier);
-    console.log("nextMultiplier", nextMultiplier);
-    console.log("strikeMultiplier", strikeMultiplier);
-    console.log("numBets", numBets);
-    console.log("currentProfit", currentProfit);
-    console.log("nextProfit", nextProfit);
-    console.log("amountWon", amountWon);
-  }, [
-    numBets,
-    currentMultiplier,
-    nextMultiplier,
-    strikeMultiplier,
-    amountWon,
-    currentProfit,
-    nextProfit,
-  ]);
-
-  useEffect(() => {
     const fetchPrice = async () => {
       try {
         const response = await fetch("https://price.jup.ag/v6/price?ids=SOL");
@@ -213,12 +195,7 @@ export default function Mines() {
     }
   };
 
-  useEffect(() => {
-    console.log("cashoutModal", cashoutModal);
-  }, [cashoutModal]);
-
   const handleAutoPick = async (number: number) => {
-    console.log("number", number);
     const updatedUserBets = [...userBets];
     const currentPickState = updatedUserBets[number - 1].pick;
 
@@ -242,11 +219,6 @@ export default function Mines() {
       }
     });
   };
-
-  useEffect(() => {
-    console.log("userBetsForAuto", userBetsForAuto);
-    console.log("userBets", userBets);
-  }, [userBetsForAuto, userBets]);
 
   const handlePick = async (number: number) => {
     setNumBets(numBets + 1);
@@ -380,12 +352,7 @@ export default function Mines() {
         strikeMultiplier,
         message,
       } = await response.json();
-      console.log({
-        Success: success,
-        Result: result,
-        AmountWon: amountWon,
-        StikerNumber: strikeNumbers,
-      });
+
       if (success != true) {
         throw new Error(message);
       }
@@ -495,7 +462,6 @@ export default function Mines() {
       if (success != true) {
         if (gameId) {
           setGameId(gameId);
-          console.log("gameId", gameId);
           setBetActive(true);
           setRefresh(true);
         }
@@ -558,10 +524,7 @@ export default function Mines() {
           setCurrentProfit(amountWon);
 
           setNextMultiplier(
-            Decimal.div(
-              25 - (userBets.length + 1),
-              25 - (userBets.length + 1) - minesCount,
-            )
+            Decimal.div(25 - userBets.length, 25 - userBets.length - minesCount)
               .mul(strikeMultiplier)
               .toNumber(),
           );
@@ -590,8 +553,6 @@ export default function Mines() {
               };
             }
           });
-          console.log("pendingGameUserBets", pendingGameUserBets);
-          console.log("updatedUserBets", updatedUserBets);
 
           setMinesCount(minesCount);
           setNumBets(userBets.length);
@@ -641,7 +602,6 @@ export default function Mines() {
   }, [betType]);
 
   useEffect(() => {
-    console.log("Auto: ", startAuto, autoBetCount);
     if (
       betType === "auto" &&
       startAuto &&
@@ -656,14 +616,9 @@ export default function Mines() {
             (autoWinChangeReset || autoLossChangeReset
               ? betAmt
               : autoBetCount === "inf"
-                ? Math.max(0, betAmt)
-                : betAmt *
-                  (autoLossChange !== null ? autoLossChange / 100.0 : 0));
-
-        console.log("Current bet amount:", betAmt);
-        console.log("Auto loss change:", autoLossChange);
-        console.log("Auto profit change:", autoWinChange);
-        console.log("Potential loss:", potentialLoss);
+              ? Math.max(0, betAmt)
+              : betAmt *
+                (autoLossChange !== null ? autoLossChange / 100.0 : 0));
       }
       if (
         useAutoConfig &&
@@ -717,7 +672,6 @@ export default function Mines() {
         (typeof autoBetCount === "string" && autoBetCount.includes("inf")) ||
         (typeof autoBetCount === "number" && autoBetCount > 0)
       ) {
-        console.log("Auto betting. config: ", useAutoConfig);
         setStartAuto(true);
       }
     }
@@ -951,8 +905,6 @@ export default function Mines() {
                       onClick={() => {
                         setUserBets(defaultUserBets);
                         setUserBetsForAuto([]);
-                        console.log("userBets", userBets);
-                        console.log("userBetsForAuto", userBetsForAuto);
                         soundAlert("/sounds/betbutton.wav");
                         warningCustom("Auto bet stopped", "top-left");
                         setAutoBetCount(0);
@@ -1062,29 +1014,29 @@ export default function Mines() {
                         userBets[index - 1].pick === true
                         ? "border-[#FCB10F] bg-[#FCB10F33]"
                         : userBets[index - 1].result === "Lost" &&
-                            userBets[index - 1].pick === true
-                          ? "border-[#F1323E] bg-[#F1323E33]"
-                          : "border-[#202329] hover:border-white/30"
-                      : betType === "auto"
-                        ? userBets[index - 1].result === "" &&
                           userBets[index - 1].pick === true
-                          ? "border-[#FCB10F] bg-[#FCB10F33]"
-                          : userBets[index - 1].result === "Won" &&
-                              userBets[index - 1].pick === true
-                            ? "border-[#FCB10F] bg-[#FCB10F33]"
-                            : userBets[index - 1].result === "Lost" &&
-                                userBets[index - 1].pick === true
-                              ? "border-[#F1323E] bg-[#F1323E33]"
-                              : "border-[#202329] hover:border-white/30"
-                        : null
+                        ? "border-[#F1323E] bg-[#F1323E33]"
+                        : "border-[#202329] hover:border-white/30"
+                      : betType === "auto"
+                      ? userBets[index - 1].result === "" &&
+                        userBets[index - 1].pick === true
+                        ? "border-[#FCB10F] bg-[#FCB10F33]"
+                        : userBets[index - 1].result === "Won" &&
+                          userBets[index - 1].pick === true
+                        ? "border-[#FCB10F] bg-[#FCB10F33]"
+                        : userBets[index - 1].result === "Lost" &&
+                          userBets[index - 1].pick === true
+                        ? "border-[#F1323E] bg-[#F1323E33]"
+                        : "border-[#202329] hover:border-white/30"
+                      : null
                   }  bg-[#202329] flex items-center justify-center cursor-pointer rounded-md text-center transition-all duration-300 ease-in-out w-[45px] h-[45px] sm:w-[55px] sm:h-[55px] md:w-[80px] md:h-[80px] xl:w-[95px] xl:h-[95px]`}
                   disabled={betType === "manual" && userBets[index - 1].pick}
                   onClick={() =>
                     betType === "auto"
                       ? handleAutoPick(index)
                       : betActive && betType === "manual"
-                        ? handlePick(index)
-                        : null
+                      ? handlePick(index)
+                      : null
                   }
                 >
                   {betType === "manual" &&
