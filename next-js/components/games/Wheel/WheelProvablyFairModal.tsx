@@ -13,7 +13,7 @@ import Arc from "@/components/games/Wheel/Arc";
 import { riskToChance } from "@/components/games/Wheel/Segments";
 import { verify } from "tweetnacl";
 import CheckPF from "@/public/assets/CheckPF.svg";
-import { errorCustom } from "@/components/toasts/ToastGroup";
+import { errorCustom, successAlert } from "@/components/toasts/ToastGroup";
 import { useGlobalContext } from "@/components/GlobalContext";
 import { translator } from "@/context/transactions";
 import ProvablyFairModal from "../ProvablyFairModal";
@@ -167,6 +167,7 @@ export default function WheelProvablyFairModal({
     if (!data.success) return console.error(data.message);
 
     setModalData(data);
+    successAlert("Successfully changed the server seed")
     setNewClientSeed(generateClientSeed());
   };
 

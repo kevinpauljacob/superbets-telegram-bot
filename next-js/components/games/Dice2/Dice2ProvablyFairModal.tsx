@@ -11,7 +11,7 @@ import DraggableBar from "@/components/games/Dice2/DraggableBar";
 import { FaRegCopy } from "react-icons/fa6";
 import CheckPF from "@/public/assets/CheckPF.svg";
 import { MdClose } from "react-icons/md";
-import { errorCustom } from "@/components/toasts/ToastGroup";
+import { errorCustom, successAlert } from "@/components/toasts/ToastGroup";
 import ProvablyFairModal from "../ProvablyFairModal";
 import { useGlobalContext } from "@/components/GlobalContext";
 import { translator } from "@/context/transactions";
@@ -126,6 +126,7 @@ export default function Dice2ProvablyFairModal({
     if (!data.success) return console.error(data.message);
 
     setModalData(data);
+    successAlert("Successfully changed the server seed")
     setNewClientSeed(generateClientSeed());
   };
 
