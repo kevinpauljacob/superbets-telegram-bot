@@ -36,6 +36,7 @@ import {
 import { translator, formatNumber } from "@/context/transactions";
 import { minGameAmount } from "@/context/gameTransactions";
 import { useSession } from "next-auth/react";
+import { GameType } from "@/utils/provably-fair";
 
 function useInterval(callback: Function, delay: number | null) {
   const savedCallback = useRef<Function | null>(null);
@@ -86,6 +87,8 @@ export default function Limbo() {
     houseEdge,
     maxBetAmt,
     language,
+    setLiveStats,
+    liveStats
   } = useGlobalContext();
 
   const multiplierLimits = [1.02, 50];
@@ -141,6 +144,16 @@ export default function Limbo() {
             }
             return newResults;
           });
+
+          setLiveStats([
+            ...liveStats,
+            {
+              game: GameType.limbo,
+              amount: betAmt!,
+              result: newBetResult.win ? "Won" : "Lost",
+              pnl: newBetResult.win ? (betAmt! * targetMultiplier) - betAmt! : -betAmt!,
+            }
+          ])
 
           // auto options
           if (betSetting === "auto" && betAmt !== undefined) {

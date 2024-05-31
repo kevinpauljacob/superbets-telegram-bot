@@ -33,6 +33,7 @@ import {
 import { translator } from "@/context/transactions";
 import { minGameAmount } from "@/context/gameTransactions";
 import { useSession } from "next-auth/react";
+import { GameType } from "@/utils/provably-fair";
 
 export default function Dice2() {
   const wallet = useWallet();
@@ -60,6 +61,8 @@ export default function Dice2() {
     houseEdge,
     maxBetAmt,
     language,
+    liveStats,
+    setLiveStats
   } = useGlobalContext();
   const [betAmt, setBetAmt] = useState<number | undefined>();
   const [userInput, setUserInput] = useState<number | undefined>();
@@ -188,6 +191,16 @@ export default function Dice2() {
         soundAlert("/sounds/win.wav");
       } else errorCustom(message);
       const newBetResult = { result: strikeNumber, win };
+
+      setLiveStats([
+        ...liveStats,
+        {
+          game: GameType.dice2,
+          amount: betAmt,
+          result: win ? "Won" : "Lost",
+          pnl: win ? (betAmt * multiplier) - betAmt : -betAmt,
+        }
+      ])
 
       setBetResults((prevResults) => {
         const newResults = [...prevResults, newBetResult];

@@ -24,6 +24,7 @@ import { translator, formatNumber } from "@/context/transactions";
 import { minGameAmount } from "@/context/gameTransactions";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
+import { GameType } from "@/utils/provably-fair";
 
 const Timer = dynamic(() => import("../../components/games/Timer"), {
   ssr: false,
@@ -49,6 +50,8 @@ export default function Options() {
     setShowWalletModal,
     maxBetAmt,
     language,
+    setLiveStats,
+    liveStats
   } = useGlobalContext();
 
   const [livePrice, setLivePrice] = useState(0);
@@ -110,6 +113,19 @@ export default function Options() {
               : res?.data?.amountLost,
           );
         }
+
+        let win = res?.data?.result == "Won"
+
+        setLiveStats([
+          ...liveStats,
+          {
+            game: GameType.options,
+            amount: betAmt!,
+            result: win ? "Won" : "Lost",
+            pnl: win ? (betAmt! * 2) - betAmt! : -betAmt!,
+          }
+        ])
+
         setRefresh(true);
         setLoading(false);
         setBetResults((prevResults) => {
@@ -215,8 +231,8 @@ export default function Options() {
             setBetTime(bet?.betTime);
             setTimeLeft(
               new Date(bet?.betTime).getTime() +
-                bet?.timeFrame * 1000 -
-                Date.now(),
+              bet?.timeFrame * 1000 -
+              Date.now(),
             );
             const remainingTime =
               new Date(bet?.betTime).getTime() +
@@ -345,14 +361,14 @@ export default function Options() {
               <BetButton
                 disabled={
                   !betType ||
-                  !session?.user ||
-                  !coinData ||
-                  (coinData && coinData[0].amount < minGameAmount) ||
-                  (betAmt !== undefined &&
-                    maxBetAmt !== undefined &&
-                    betAmt > maxBetAmt) ||
-                  loading ||
-                  (strikePrice > 0 && !result)
+                    !session?.user ||
+                    !coinData ||
+                    (coinData && coinData[0].amount < minGameAmount) ||
+                    (betAmt !== undefined &&
+                      maxBetAmt !== undefined &&
+                      betAmt > maxBetAmt) ||
+                    loading ||
+                    (strikePrice > 0 && !result)
                     ? true
                     : false
                 }
@@ -390,11 +406,10 @@ export default function Options() {
                     onClick={() => {
                       !loading && setBetInterval(3);
                     }}
-                    className={`${
-                      betInterval === 3
+                    className={`${betInterval === 3
                         ? "border-[#7839C5]"
                         : "border-transparent hover:border-[#7839C580]"
-                    } disabled:pointer-events-none disabled:opacity-50 w-full rounded-[5px] border-[2px] bg-[#202329] py-2 text-xs font-chakra text-white text-opacity-90 transition duration-200`}
+                      } disabled:pointer-events-none disabled:opacity-50 w-full rounded-[5px] border-[2px] bg-[#202329] py-2 text-xs font-chakra text-white text-opacity-90 transition duration-200`}
                   >
                     3 {translator("Min", language)}
                   </button>
@@ -404,11 +419,10 @@ export default function Options() {
                     onClick={() => {
                       !loading && setBetInterval(4);
                     }}
-                    className={`${
-                      betInterval === 4
+                    className={`${betInterval === 4
                         ? "border-[#7839C5]"
                         : "border-transparent hover:border-[#7839C580]"
-                    } disabled:pointer-events-none disabled:opacity-50 w-full rounded-[5px] border-[2px] bg-[#202329] py-2 text-xs font-chakra text-white text-opacity-90 transition duration-200`}
+                      } disabled:pointer-events-none disabled:opacity-50 w-full rounded-[5px] border-[2px] bg-[#202329] py-2 text-xs font-chakra text-white text-opacity-90 transition duration-200`}
                   >
                     4 {translator("Min", language)}
                   </button>
@@ -419,11 +433,10 @@ export default function Options() {
                   onClick={() => {
                     !loading && setBetInterval(5);
                   }}
-                  className={`${
-                    betInterval === 5
+                  className={`${betInterval === 5
                       ? "border-[#7839C5]"
                       : "border-transparent hover:border-[#7839C580]"
-                  } lg:w-[33.33%] disabled:pointer-events-none disabled:opacity-50 w-full rounded-[5px] border-[2px] bg-[#202329] py-2 text-xs font-chakra text-white text-opacity-90 transition duration-200`}
+                    } lg:w-[33.33%] disabled:pointer-events-none disabled:opacity-50 w-full rounded-[5px] border-[2px] bg-[#202329] py-2 text-xs font-chakra text-white text-opacity-90 transition duration-200`}
                 >
                   5 {translator("Min", language)}
                 </button>
@@ -438,11 +451,10 @@ export default function Options() {
                 onClick={() => {
                   setBetType("up");
                 }}
-                className={`${
-                  betType === "up"
+                className={`${betType === "up"
                     ? "border-[#7839C5]"
                     : "border-transparent hover:border-[#7839C580]"
-                } w-full rounded-lg disabled:pointer-events-none disabled:opacity-50 text-center cursor-pointer border-2 bg-[#202329] py-2.5 font-changa text-xl text-white shadow-[0px_4px_15px_0px_rgba(0,0,0,0.25)]`}
+                  } w-full rounded-lg disabled:pointer-events-none disabled:opacity-50 text-center cursor-pointer border-2 bg-[#202329] py-2.5 font-changa text-xl text-white shadow-[0px_4px_15px_0px_rgba(0,0,0,0.25)]`}
               >
                 {translator("UP", language)}
               </button>
@@ -452,11 +464,10 @@ export default function Options() {
                 onClick={() => {
                   setBetType("down");
                 }}
-                className={`${
-                  betType === "down"
+                className={`${betType === "down"
                     ? "border-[#7839C5]"
                     : "border-transparent hover:border-[#7839C580]"
-                } w-full rounded-lg disabled:pointer-events-none disabled:opacity-50 text-center cursor-pointer border-2 bg-[#202329] py-2.5 font-changa text-xl text-white shadow-[0px_4px_15px_0px_rgba(0,0,0,0.25)] `}
+                  } w-full rounded-lg disabled:pointer-events-none disabled:opacity-50 text-center cursor-pointer border-2 bg-[#202329] py-2.5 font-changa text-xl text-white shadow-[0px_4px_15px_0px_rgba(0,0,0,0.25)] `}
               >
                 {translator("DOWN", language)}
               </button>
@@ -467,18 +478,18 @@ export default function Options() {
               <BetButton
                 disabled={
                   !betType ||
-                  !session?.user ||
-                  !coinData ||
-                  (coinData && coinData[0].amount < minGameAmount) ||
-                  (betAmt !== undefined &&
-                    maxBetAmt !== undefined &&
-                    betAmt > maxBetAmt) ||
-                  loading ||
-                  (strikePrice > 0 && !result)
+                    !session?.user ||
+                    !coinData ||
+                    (coinData && coinData[0].amount < minGameAmount) ||
+                    (betAmt !== undefined &&
+                      maxBetAmt !== undefined &&
+                      betAmt > maxBetAmt) ||
+                    loading ||
+                    (strikePrice > 0 && !result)
                     ? true
                     : false
                 }
-                // onClickFunction={onSubmit}
+              // onClickFunction={onSubmit}
               >
                 {loading || (strikePrice > 0 && !result) ? (
                   <Loader />
@@ -505,21 +516,20 @@ export default function Options() {
                   ? translator("Placing bet", language) + "..."
                   : ""
                 : checkResult
-                ? loading || !result
-                  ? translator("Checking result", language) + "..."
-                  : ""
-                : (timeLeft * 50) / (betInterval * 60000) <= 0
-                ? translator("Checking result", language) + "..."
-                : ""}
+                  ? loading || !result
+                    ? translator("Checking result", language) + "..."
+                    : ""
+                  : (timeLeft * 50) / (betInterval * 60000) <= 0
+                    ? translator("Checking result", language) + "..."
+                    : ""}
             </div>
             <div className="flex flex-col items-end">
               <span className="font-chakra font-medium text-xs md:text-sm text-[#F0F0F0] text-opacity-75">
                 ${truncateNumber(strikePrice, 3)}
               </span>
               <span
-                className={`font-chakra ${
-                  betType === "up" ? "text-[#72F238]" : "text-[#CF304A]"
-                } text-xs md:text-base font-bold`}
+                className={`font-chakra ${betType === "up" ? "text-[#72F238]" : "text-[#CF304A]"
+                  } text-xs md:text-base font-bold`}
               >
                 {betType
                   ? betType === "up"
@@ -541,24 +551,22 @@ export default function Options() {
               </span>
               {strikePrice && !result ? (
                 <span
-                  className={`text-sm ${
-                    livePrice - strikePrice > 0
+                  className={`text-sm ${livePrice - strikePrice > 0
                       ? "text-[#72F238]"
                       : "text-[#CF304A]"
-                  } text-opacity-90 font-chakra`}
+                    } text-opacity-90 font-chakra`}
                 >
                   {livePrice - strikePrice > 0 ? "+" : "-"}
                   {truncateNumber(Math.abs(livePrice - strikePrice), 4)}
                 </span>
               ) : (
                 <span
-                  className={`flex text-sm font-chakra font-medium ${
-                    result
+                  className={`flex text-sm font-chakra font-medium ${result
                       ? result === "Won"
                         ? "text-[#72F238]"
                         : "text-[#CF304A]"
                       : "text-[#f0f0f0] test-opacity-75"
-                  }`}
+                    }`}
                 >
                   {result
                     ? result === "Won"
@@ -576,35 +584,32 @@ export default function Options() {
                   style={{ rotate: `${(360 / 50) * index}deg` }}
                 >
                   <div
-                    className={`w-[9px] h-[6px] ${
-                      strikePrice === 0
+                    className={`w-[9px] h-[6px] ${strikePrice === 0
                         ? loading && !checkResult
                           ? "blink_1_50 bg-white"
                           : "blink_3 bg-[#282E3D]"
                         : checkResult
-                        ? loading || !result
-                          ? "blink_1_50 bg-white"
-                          : result === "Won"
-                          ? "bg-[#72F238] bg-opacity-40 blink_3"
-                          : "bg-[#CF304A] bg-opacity-40 blink_3"
-                        : betEnd
-                        ? "blink_1_50 bg-white"
-                        : index >= (timeLeft * 50) / (betInterval * 60000)
-                        ? (timeLeft * 50) / (betInterval * 60000) <= 0
-                          ? "blink_1_50 bg-white"
-                          : "bg-[#282E3D]"
-                        : timeLeft / (betInterval * 60000) < 0.25
-                        ? `bg-[#CF304A] blink_1 ${
-                            index >= (timeLeft * 50) / (betInterval * 60000) - 1
-                              ? "blink_1"
-                              : ""
-                          }`
-                        : `bg-[#D9D9D9] ${
-                            index >= (timeLeft * 50) / (betInterval * 60000) - 1
-                              ? "blink_1"
-                              : ""
-                          }`
-                    }`}
+                          ? loading || !result
+                            ? "blink_1_50 bg-white"
+                            : result === "Won"
+                              ? "bg-[#72F238] bg-opacity-40 blink_3"
+                              : "bg-[#CF304A] bg-opacity-40 blink_3"
+                          : betEnd
+                            ? "blink_1_50 bg-white"
+                            : index >= (timeLeft * 50) / (betInterval * 60000)
+                              ? (timeLeft * 50) / (betInterval * 60000) <= 0
+                                ? "blink_1_50 bg-white"
+                                : "bg-[#282E3D]"
+                              : timeLeft / (betInterval * 60000) < 0.25
+                                ? `bg-[#CF304A] blink_1 ${index >= (timeLeft * 50) / (betInterval * 60000) - 1
+                                  ? "blink_1"
+                                  : ""
+                                }`
+                                : `bg-[#D9D9D9] ${index >= (timeLeft * 50) / (betInterval * 60000) - 1
+                                  ? "blink_1"
+                                  : ""
+                                }`
+                      }`}
                   />
                 </div>
               ))}
