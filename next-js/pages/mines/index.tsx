@@ -835,7 +835,7 @@ export default function Mines() {
                           <p>{truncateNumber(currentProfit, 7)} SOL</p>
                         </div>
                         <div className="flex justify-between items-center text-fomo-green">
-                          <p>{truncateNumber(currentProfitInUSD, 5)}</p>
+                          <p>{truncateNumber(currentProfitInUSD, 5)} USD</p>
                           <p>{truncateNumber(currentMultiplier, 2)}x</p>
                         </div>
                       </div>
@@ -855,7 +855,7 @@ export default function Mines() {
                           <p>{truncateNumber(nextProfit, 7)} SOL</p>
                         </div>
                         <div className="flex justify-between items-center text-fomo-green">
-                          <p>{truncateNumber(nextProfitInUSD, 5)}</p>
+                          <p>{truncateNumber(nextProfitInUSD, 5)} USD</p>
                           <p>{truncateNumber(nextMultiplier, 2)}x</p>
                         </div>
                       </div>
