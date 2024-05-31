@@ -2,6 +2,7 @@ import Draggable from 'react-draggable';
 import { useGlobalContext } from '../GlobalContext';
 import { useEffect, useState } from 'react';
 import { GameType } from "@/utils/provably-fair";
+import LiveGraph from './LiveGraph';
 
 export default function LiveStats() {
     const {
@@ -177,6 +178,8 @@ export default function LiveStats() {
                         </div>
                     </div>
                 </div>
+
+                <LiveGraph />
             </div>
         </Draggable>
     )
