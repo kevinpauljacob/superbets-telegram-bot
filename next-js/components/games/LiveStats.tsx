@@ -73,7 +73,16 @@ export default function LiveStats() {
                 <div className='handle w-full h-16 flex flex-row items-center justify-between p-5 cursor-move select-none'>
                     <h1 className='text-white text-xl font-chakra'>LIVE STATS</h1>
 
-                    <div className='flex flex-row'>
+                    <div className='flex flex-row gap-2'>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 16 16" fill="none" className='cursor-pointer' onClick={() => {
+                            setLiveStats([])
+                        }}>
+                            <path d="M3.74913 12.25C2.90703 11.4109 2.33321 10.3404 2.10048 9.17461C1.86774 8.00878 1.98658 6.80009 2.44192 5.70191C2.89727 4.60373 3.66858 3.66558 4.65799 3.00649C5.6474 2.3474 6.8103 1.9971 7.99913 2.00002" stroke="white" />
+                            <path d="M12.25 3.75C13.0921 4.58917 13.6659 5.65958 13.8987 6.82541C14.1314 7.99124 14.0125 9.19993 13.5572 10.2981C13.1019 11.3963 12.3305 12.3344 11.3411 12.9935C10.3517 13.6526 9.18883 14.0029 8 14" stroke="white" />
+                            <path d="M3.7575 10V12.2425H2" stroke="white" />
+                            <path d="M12.2422 6.00007V3.75757H13.9997" stroke="white" />
+                        </svg>
+
                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 16 16" fill="white" className='cursor-pointer hover:fill-red-400' onClick={() => setShowLiveStats(false)}>
                             <path d="M8.72953 8.00702L12.849 3.91002C13.0465 3.71452 13.0465 3.39802 12.849 3.20302C12.652 3.00752 12.332 3.00752 12.135 3.20302L8.01903 7.29652L3.86503 3.14202C3.66803 2.94452 3.34803 2.94452 3.15103 3.14202C2.95403 3.34002 2.95403 3.66052 3.15103 3.85802L7.30203 8.00952L3.13603 12.1525C2.93903 12.348 2.93903 12.6645 3.13603 12.8595C3.33303 13.055 3.65303 13.055 3.85003 12.8595L8.01253 8.72002L12.15 12.858C12.347 13.0555 12.667 13.0555 12.864 12.858C13.061 12.66 13.061 12.3395 12.864 12.142L8.72953 8.00702Z" fill="current" />
                         </svg>

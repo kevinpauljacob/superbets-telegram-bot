@@ -30,6 +30,7 @@ import { useSession } from "next-auth/react";
 import user from "@/models/staking/user";
 import Decimal from "decimal.js";
 import next from "next";
+import { GameType } from "@/utils/provably-fair";
 Decimal.set({ precision: 9 });
 
 export default function Mines() {
@@ -60,6 +61,8 @@ export default function Mines() {
     houseEdge,
     maxBetAmt,
     language,
+    setLiveStats,
+    liveStats
   } = useGlobalContext();
   const [betAmt, setBetAmt] = useState<number | undefined>();
   const [userInput, setUserInput] = useState<number | undefined>();
@@ -303,6 +306,18 @@ export default function Mines() {
       const lose: boolean = result === "Lost";
       if (win) soundAlert("/sounds/win.wav");
       if (lose) soundAlert("/sounds/bomb.wav");
+
+      if(result !== "Pending") {
+        setLiveStats([
+          ...liveStats,
+          {
+            game: GameType.mines,
+            amount: betAmt!,
+            result: win ? "Won" : "Lost",
+            pnl: win ? (betAmt! * strikeMultiplier) - betAmt! : -betAmt!,
+          }
+        ])
+      }
 
       if (success) {
         setRefresh(true);
