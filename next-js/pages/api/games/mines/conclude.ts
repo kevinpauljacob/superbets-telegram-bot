@@ -44,28 +44,16 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           .status(400)
           .json({ success: false, message: "Missing parameters" });
 
-      let user = await User.findOne({ wallet });
-
-      if (!user)
-        return res
-          .status(400)
-          .json({ success: false, message: "User does not exist !" });
-
       let gameInfo = await Mines.findOne({
         _id: gameId,
         result: "Pending",
+        wallet,
       }).populate("gameSeed");
 
       if (!gameInfo)
         return res
           .status(400)
           .json({ success: false, message: "Game does not exist !" });
-
-      if (gameInfo.wallet !== wallet)
-        return res.status(400).json({
-          success: false,
-          message: "User not authorized to play this game!",
-        });
 
       let {
         nonce,
@@ -75,6 +63,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         amountWon,
         userBets,
         strikeMultiplier,
+        tokenMint,
       } = gameInfo;
 
       if (userBets.length === 0)
@@ -100,34 +89,12 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         minesCount,
       );
 
-      const result = "Won";
-      const userUpdate = await User.findOneAndUpdate(
-        {
-          wallet,
-          deposit: {
-            $elemMatch: {
-              tokenMint: "SOL",
-            },
-          },
-        },
-        {
-          $inc: {
-            "deposit.$.amount": amountWon,
-          },
-        },
-        {
-          new: true,
-        },
-      );
-
-      if (!userUpdate) {
-        throw new Error("Insufficient balance for action!!");
-      }
-
+      const result = amountWon > amount ? "Won" : "Lost";
       const record = await Mines.findOneAndUpdate(
         {
           _id: gameId,
           result: "Pending",
+          wallet,
         },
         {
           result,
@@ -137,6 +104,29 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         },
         { new: true },
       ).populate("gameSeed");
+
+      if (!record)
+        return res
+          .status(400)
+          .json({ success: false, message: "Game already concluded!" });
+
+      await User.findOneAndUpdate(
+        {
+          wallet,
+          deposit: {
+            $elemMatch: {
+              tokenMint,
+            },
+          },
+        },
+        {
+          $inc: {
+            "deposit.$.amount": amountWon,
+          },
+        },
+      );
+
+      const user = await User.findOne({ wallet });
 
       const pointsGained =
         0 * user.numOfGamesPlayed + 1.4 * amount * userData.multiplier;

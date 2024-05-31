@@ -50,28 +50,16 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           .status(400)
           .json({ success: false, message: "Invalid parameters" });
 
-      let user = await User.findOne({ wallet });
-
-      if (!user)
-        return res
-          .status(400)
-          .json({ success: false, message: "User does not exist !" });
-
       let gameInfo = await Mines.findOne({
         _id: gameId,
         result: "Pending",
+        wallet,
       }).populate("gameSeed");
 
       if (!gameInfo)
         return res
           .status(400)
           .json({ success: false, message: "Game does not exist !" });
-
-      if (gameInfo.wallet !== wallet)
-        return res.status(400).json({
-          success: false,
-          message: "User not authorized to play this game!",
-        });
 
       let {
         nonce,
@@ -81,6 +69,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         amountWon,
         amount,
         strikeMultiplier,
+        tokenMint,
       } = gameInfo;
 
       if (userBets.includes(userBet))
@@ -103,6 +92,12 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         .mul(strikeMultiplier)
         .toNumber();
 
+      if (strikeMultiplier > 25)
+        return res.status(400).json({
+          success: false,
+          message: "Max payout exceeded!!",
+        });
+
       const userData = await StakingUser.findOneAndUpdate(
         { wallet },
         {},
@@ -119,6 +114,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           {
             _id: gameId,
             result: "Pending",
+            wallet,
+            userBets: { $ne: userBet },
           },
           {
             result,
@@ -140,12 +137,12 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         if (numBets === 25 - minesCount + 1) {
           result = "Won";
 
-          const userUpdate = await User.findOneAndUpdate(
+          await User.findOneAndUpdate(
             {
               wallet,
               deposit: {
                 $elemMatch: {
-                  tokenMint: "SOL",
+                  tokenMint,
                 },
               },
             },
@@ -154,19 +151,14 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
                 "deposit.$.amount": amountWon,
               },
             },
-            {
-              new: true,
-            },
           );
-
-          if (!userUpdate) {
-            throw new Error("Insufficient balance for action!!");
-          }
 
           record = await Mines.findOneAndUpdate(
             {
               _id: gameId,
+              wallet,
               result: "Pending",
+              userBets: { $ne: userBet },
             },
             {
               result,
@@ -184,6 +176,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           await Mines.findOneAndUpdate(
             {
               _id: gameId,
+              wallet,
               result: "Pending",
             },
             {
@@ -196,6 +189,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       }
 
       if (result !== "Pending") {
+        let user = await User.findOne({ wallet });
+
         const pointsGained =
           0 * user.numOfGamesPlayed + 1.4 * amount * userData.multiplier;
 
