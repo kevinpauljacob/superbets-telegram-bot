@@ -73,7 +73,7 @@ const BetRow: React.FC<BetRowProps> = ({
         {truncateNumber(bet.amount ?? 0, 4)}
       </span>
       <span className="w-full hidden md:block text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
-        {bet.strikeMultiplier ?? 0}
+        {truncateNumber(bet.strikeMultiplier ?? 0)}
       </span>
       {bet.result === "Pending" ? (
         <span className="w-full text-center font-changa text-sm text-opacity-75 text-[#F0F0F0]">
