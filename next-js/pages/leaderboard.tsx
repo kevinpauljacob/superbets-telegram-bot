@@ -51,6 +51,7 @@ export default function Leaderboard() {
                   <div className="flex relative min-w-[4.5rem] h-[4.5rem]">
                     <Image
                       src={pointTier.image}
+                      alt={pointTier.label}
                       layout="fill"
                       objectFit="contain"
                       objectPosition="center"
@@ -148,6 +149,7 @@ export default function Leaderboard() {
                   <div className="flex relative min-w-[1rem] h-[1rem]">
                     <Image
                       src={`/assets/badges/T-${pointTier?.index + 1}.png`}
+                      alt={pointTier.label}
                       layout="fill"
                       objectFit="contain"
                       objectPosition="center"

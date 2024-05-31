@@ -17,13 +17,12 @@ import {
 } from "@bonfida/spl-name-service";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { translationsMap, useGlobalContext } from "@/components/GlobalContext";
-import Sidebar from "@/components/OldSidebar";
 import StoreBanner from "@/components/Banner";
 import FomoExit from "@/components/FomoExit";
 import FomoPlay from "@/components/FomoPlay";
 import FomoSupply from "@/components/FomoSupply";
-import AllBets from "@/components/AllBets";
 import FOMOHead from "@/components/HeadElement";
+import Bets from "@/components/games/Bets";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -69,7 +68,7 @@ export default function Home() {
             <FomoExit />
           </div> */}
           <div className="mb-5">
-            <AllBets />
+            <Bets refresh={true} />
           </div>
         </div>
         {/* <div className="lg:ml-4">

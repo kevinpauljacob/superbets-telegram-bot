@@ -5,6 +5,7 @@ import { GameSeed, Hilo, Mines } from "@/models/games";
 import { generateServerSeed, seedStatus } from "@/utils/provably-fair";
 
 const secret = process.env.NEXTAUTH_SECRET;
+const encryptionKey = Buffer.from(process.env.ENCRYPTION_KEY!, "hex");
 
 export const config = {
   maxDuration: 60,
@@ -86,12 +87,14 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         { projection: { serverSeed: 0 }, new: true },
       );
 
-      const newServerHash = generateServerSeed();
+      const { encryptedServerSeed, serverSeedHash, iv } =
+        generateServerSeed(encryptionKey);
 
       const nextGameSeed = await GameSeed.create({
         wallet,
-        serverSeed: newServerHash.serverSeed,
-        serverSeedHash: newServerHash.serverSeedHash,
+        serverSeed: encryptedServerSeed,
+        serverSeedHash,
+        iv: iv.toString("hex"),
       });
 
       let { serverSeed, ...rest } = nextGameSeed.toObject();

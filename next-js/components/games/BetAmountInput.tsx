@@ -169,6 +169,7 @@ export default function BetAmount({
         </span>
       </div>
       {betAmountsModal &&
+      game !== "mines" &&
       game !== "keno" &&
       game !== "wheel" &&
       game !== "coinflip" &&
@@ -280,7 +281,8 @@ export default function BetAmount({
         </div>
       ) : null}
       {isHovered &&
-      (game === "keno" ||
+      (game === "mines" ||
+        game === "keno" ||
         game === "wheel" ||
         game === "coinflip" ||
         game === "options") ? (

@@ -32,6 +32,7 @@ export default function BalanceModal() {
     walletBalance,
     coinData,
     language,
+    getBalance
   } = useGlobalContext();
 
   const [loading, setLoading] = useState<boolean>(false);
@@ -56,6 +57,7 @@ export default function BalanceModal() {
         else response = await withdraw(wallet, amount, token);
 
         if (response && response.success) {
+          getBalance()
           setShowWalletModal(false);
         } else {
           //   errorCustom(response.message);
@@ -71,6 +73,7 @@ export default function BalanceModal() {
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
+    const amount = parseFloat(e.target.value)
     setAmount(parseFloat(e.target.value));
   };
 

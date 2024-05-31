@@ -2,6 +2,7 @@ import { useWallet } from "@solana/wallet-adapter-react";
 import { useState, useEffect } from "react";
 import { Table } from "../table/Table";
 import { useGlobalContext } from "../GlobalContext";
+import { useRouter } from "next/router";
 
 interface Bet {
   _id: string;
@@ -28,6 +29,9 @@ export default function Bets({ refresh }: { refresh: boolean }) {
   const [allBets, setAllBets] = useState<Bet[]>([]);
 
   const { liveBets } = useGlobalContext();
+
+  const router = useRouter();
+  const home = router.pathname.split("/")[1] === "";
 
   useEffect(() => {
     if (!all) {
@@ -109,14 +113,17 @@ export default function Bets({ refresh }: { refresh: boolean }) {
   }, [all]);
 
   return (
-    <Table
-      all={all}
-      setAll={setAll}
-      page={page}
-      setPage={setPage}
-      maxPages={all ? allBetMaxPages : myBetMaxPages}
-      bets={all ? allBets : myBets}
-      loading={loading}
-    />
+    <div className={`relative w-full ${home ? "mt-[4rem] mb-5:" : ""}`}>
+      <Table
+        all={all}
+        setAll={setAll}
+        page={page}
+        setPage={setPage}
+        maxPages={all ? allBetMaxPages : myBetMaxPages}
+        bets={all ? allBets : myBets}
+        loading={loading}
+      />
+      
+    </div>
   );
 }
