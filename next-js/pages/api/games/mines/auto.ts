@@ -275,6 +275,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         amountWon,
         strikeNumbers,
         strikeMultiplier,
+        pointsGained: userBets.length,
         message,
       });
     } catch (e: any) {
