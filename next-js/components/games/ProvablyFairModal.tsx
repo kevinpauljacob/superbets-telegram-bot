@@ -12,6 +12,7 @@ interface VerificationState {
   nonce: string;
   risk?: string;
   segments?: number;
+  parameter?:number;
   
 }
 
@@ -47,7 +48,7 @@ export default function ProvablyFairModal({
       verificationState.clientSeed,
       parseInt(verificationState.nonce),
       selectedGameType,
-      parameter
+      verificationState.parameter
       
     );
     if (Array.isArray(result)) {
@@ -349,7 +350,22 @@ const renderMines=()=>{
       </div>
     </>
   );
-
+  const renderMinesCount = ()=>{
+    return(
+      <div className="my-4">
+                    <label className="text-xs text-opacity-75 font-changa text-[#F0F0F0]">
+                      {translator("Mines", language)}
+                    </label>
+                    <input
+                      
+                      name="parameter"
+                      value={verificationState.parameter}
+                      onChange={handleChange}
+                      className="bg-[#202329] text-white font-chakra capitalize text-xs font-medium mt-1 rounded-md p-3 w-full relative"
+                    />
+                  </div>
+    )
+  }
   const renderWheel = () => {
     const multipliers = riskToChance[verificationState.risk || "low"];
     const sortedMultipliers = multipliers
@@ -462,7 +478,12 @@ const renderMines=()=>{
           </>
         );
       case GameType.mines:
-        return renderMines();
+        return (
+          <>
+          {renderMines()}
+          {renderMinesCount()}
+          </>
+        );
 
       default:
         return <div>Unsupported game type</div>;

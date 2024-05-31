@@ -1,3 +1,4 @@
+import { count } from "console";
 import crypto from "crypto";
 import Decimal from "decimal.js";
 
@@ -138,6 +139,7 @@ export const generateGameResult = <T extends GameType>(
   gameType: T,
   parameter?: number,
 ): GameResult<T> => {
+  
   switch (gameType) {
     case GameType.dice: {
       let n = getFinalValues({
@@ -276,10 +278,11 @@ export const generateGameResult = <T extends GameType>(
         cursor: 0,
         count: parameter? parameter : 1,
 
-      }).map((e, t) => Math.floor(e * (25 - t)));
+      }).map((e, t) => Math.floor(e * (25 - t)))
 
       const i: Array<number> = [];
-
+      
+      
       for (let e of o) {
         let t = e,
           l = 0;
