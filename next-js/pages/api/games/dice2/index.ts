@@ -75,7 +75,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           .status(400)
           .json({ success: false, message: "Invalid parameters" });
 
-      const strikeMultiplier = new Decimal(100).dividedBy(chance).toDP(4);
+      const strikeMultiplier = new Decimal(100).dividedBy(chance).toDP(6);
       const maxPayout = Decimal.mul(amount, strikeMultiplier);
 
       if (!(maxPayout.toNumber() <= maxPayouts.dice2))
