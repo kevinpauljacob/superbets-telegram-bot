@@ -12,6 +12,7 @@ const encryptionKey = Buffer.from(process.env.ENCRYPTION_KEY!, "hex");
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === "POST") {
     try {
+      //TODO: Check if there are games in pending status, don't execute this api without this change
       return res
         .status(405)
         .json({ success: false, message: "Method not allowed" });
