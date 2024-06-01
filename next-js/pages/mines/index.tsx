@@ -85,6 +85,10 @@ export default function Mines() {
     strikeMultiplier: 0,
     pointsGained: 0,
   });
+  // const [selectTile, setSelectTile] = useState<boolean>(true);
+  const [gameStatus, setGameStatus] = useState<"Not Started" | "Completed">(
+    "Not Started",
+  );
 
   const defaultUserBets = Array.from({ length: 25 }, (_, index) => ({
     result: "",
@@ -177,6 +181,7 @@ export default function Mines() {
           strikeMultiplier: strikeMultiplier,
           pointsGained: pointsGained,
         });
+        setGameStatus("Completed");
         setUserBets(updatedUserBetsWithResult);
         setRefresh(true);
         setBetActive(false);
@@ -196,7 +201,7 @@ export default function Mines() {
   };
 
   const handleAutoPick = async (number: number) => {
-    const updatedUserBets = [...userBets];
+    const updatedUserBets = userBets;
     const currentPickState = updatedUserBets[number - 1].pick;
 
     // Toggle the pick state
@@ -221,6 +226,8 @@ export default function Mines() {
   };
 
   const handlePick = async (number: number) => {
+    soundAlert("/sounds/betButton.wav");
+    // setSelectTile(false);
     setNumBets(numBets + 1);
     try {
       const response = await fetch(`/api/games/mines/pick`, {
@@ -248,7 +255,7 @@ export default function Mines() {
         throw new Error(message);
       }
 
-      const updatedUserBets = [...userBets];
+      const updatedUserBets = userBets;
       updatedUserBets[number - 1] = {
         result: result === "Pending" ? "Pending" : "Lost",
         pick: true,
@@ -286,6 +293,7 @@ export default function Mines() {
           result: result === "Pending" ? "Pending" : "Lost",
           pick: true,
         };
+        setGameStatus("Completed");
         setUserBets(updatedUserBetsWithResult);
         setNumBets(0);
         setCurrentMultiplier(0);
@@ -301,7 +309,10 @@ export default function Mines() {
 
       const win: boolean = result === "Pending";
       const lose: boolean = result === "Lost";
-      if (win) soundAlert("/sounds/win.wav");
+      if (win) {
+        soundAlert("/sounds/win.wav");
+        // setSelectTile(true);
+      }
       if (lose) soundAlert("/sounds/bomb.wav");
 
       if (success) {
@@ -440,6 +451,8 @@ export default function Mines() {
   };
 
   const handleBet = async () => {
+    setGameStatus("Not Started");
+    // setSelectTile(true);
     try {
       if (!wallet.connected || !wallet.publicKey) {
         throw new Error("Wallet not connected");
@@ -501,7 +514,7 @@ export default function Mines() {
   };
 
   const handlePendingGame = async () => {
-    const updatedUserBets = [...userBets];
+    const updatedUserBets = userBets;
     try {
       if (!wallet.connected || !wallet.publicKey) {
         throw new Error("Wallet not connected");
@@ -981,7 +994,7 @@ export default function Mines() {
         </>
       </GameOptions>
       <GameDisplay>
-        <div className="w-full flex justify-between items-center h-[2.125rem] mb-7 sm:mb-0">
+        <div className="w-full flex justify-between items-center h-[2.125rem]">
           <div>
             {isRolling ? (
               <div className="font-chakra text-xs sm:text-sm font-medium text-white text-opacity-75">
@@ -991,7 +1004,7 @@ export default function Mines() {
           </div>
         </div>
         <div
-          className="flex justify-center items-center w-full mb-[1.4rem] sm:my-5"
+          className="flex justify-center items-center w-full"
           onClick={() => {
             setCashoutModal({
               show: false,
@@ -1003,7 +1016,7 @@ export default function Mines() {
         >
           <div className="relative grid grid-cols-5 gap-1.5 sm:gap-2 text-white text-sm md:text-xl font-chakra">
             {cashoutModal.show && (
-              <div className="absolute top-0 left-0 w-full h-full flex items-center justify-center bg-black/40">
+              <div className="absolute top-0 left-0 w-full h-full flex items-center justify-center bg-black/10">
                 <div className="flex flex-col items-center justify-center bg-[#121418] rounded-[5px] border-2 border-fomo-green w-[200px] h-max p-2.5">
                   <p className="text-3xl text-fomo-green font-bold font-chakra mb-2">
                     x{truncateNumber(cashoutModal.strikeMultiplier, 2)}
@@ -1043,7 +1056,9 @@ export default function Mines() {
                         : userBets[index - 1].result === "Lost" &&
                             userBets[index - 1].pick === true
                           ? "border-[#F1323E] bg-[#F1323E33]"
-                          : "border-[#202329] hover:border-white/30"
+                          : gameStatus === "Completed"
+                            ? "bg-transparent border-white/10"
+                            : "bg-[#202329] border-[#202329] hover:border-white/30"
                       : betType === "auto"
                         ? userBets[index - 1].result === "" &&
                           userBets[index - 1].pick === true
@@ -1054,9 +1069,9 @@ export default function Mines() {
                             : userBets[index - 1].result === "Lost" &&
                                 userBets[index - 1].pick === true
                               ? "border-[#F1323E] bg-[#F1323E33]"
-                              : "border-[#202329] hover:border-white/30"
+                              : "bg-[#202329] border-[#202329] hover:border-white/30"
                         : null
-                  }  bg-[#202329] flex items-center justify-center cursor-pointer rounded-md text-center transition-all duration-300 ease-in-out w-[45px] h-[45px] sm:w-[55px] sm:h-[55px] md:w-[80px] md:h-[80px] xl:w-[95px] xl:h-[95px]`}
+                  } flex items-center justify-center cursor-pointer rounded-md text-center transition duration-150 ease-in-out w-[50px] h-[50px] sm:w-[55px] sm:h-[55px] md:w-[80px] md:h-[80px] xl:w-[90px] xl:h-[90px]`}
                   disabled={betType === "manual" && userBets[index - 1].pick}
                   onClick={() =>
                     betType === "auto"
