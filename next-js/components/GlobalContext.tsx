@@ -19,7 +19,7 @@ import { TOKEN_PROGRAM_ID } from "@solana/spl-token";
 import { errorCustom } from "./toasts/ToastGroup";
 import { GameType } from "@/utils/provably-fair";
 
-interface GameStat {
+export interface GameStat {
   game: GameType;
   amount: number;
   pnl: number;
