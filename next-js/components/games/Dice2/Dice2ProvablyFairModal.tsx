@@ -11,7 +11,11 @@ import DraggableBar from "@/components/games/Dice2/DraggableBar";
 import { FaRegCopy } from "react-icons/fa6";
 import CheckPF from "@/public/assets/CheckPF.svg";
 import { MdClose } from "react-icons/md";
-import { errorCustom, successAlert } from "@/components/toasts/ToastGroup";
+import {
+  errorAlert,
+  errorCustom,
+  successAlert,
+} from "@/components/toasts/ToastGroup";
 import ProvablyFairModal from "../ProvablyFairModal";
 import { useGlobalContext } from "@/components/GlobalContext";
 import { translator } from "@/context/transactions";
@@ -124,10 +128,10 @@ export default function Dice2ProvablyFairModal({
       }),
     }).then((res) => res.json());
 
-    if (!data.success) return console.error(data.message);
+    if (!data.success) return errorAlert(data.message);
 
     setModalData(data);
-    successAlert("Successfully changed the server seed")
+    successAlert("Successfully changed the server seed");
     setNewClientSeed(generateClientSeed());
   };
 
@@ -294,9 +298,10 @@ export default function Dice2ProvablyFairModal({
                       {translator("Game", language)}
                     </label>
                     <div className="flex items-center">
-                    <GameSelect
-                      selectedGameType={selectedGameType}
-                      setSelectedGameType={setSelectedGameType}/>
+                      <GameSelect
+                        selectedGameType={selectedGameType}
+                        setSelectedGameType={setSelectedGameType}
+                      />
                     </div>
                   </div>
                   <div>
