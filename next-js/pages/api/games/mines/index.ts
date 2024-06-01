@@ -39,6 +39,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           .json({ success: false, message: "Missing parameters" });
 
       if (
+        typeof amount !== "number" ||
+        !isFinite(amount) ||
         tokenMint !== "SOL" ||
         !(Number.isInteger(minesCount) && 1 <= minesCount && minesCount <= 24)
       )
