@@ -227,6 +227,7 @@ export default function Mines() {
 
   const handlePick = async (number: number) => {
     soundAlert("/sounds/betButton.wav");
+    setIsRolling(true);
     // setSelectTile(false);
     setNumBets(numBets + 1);
     try {
@@ -317,6 +318,7 @@ export default function Mines() {
 
       if (success) {
         setRefresh(true);
+        setIsRolling(false);
       }
     } catch (error) {
       console.error("Error occurred while betting:", error);
@@ -841,14 +843,16 @@ export default function Mines() {
                         </div>
                       </div>
                     </div>
-                    <div className="border border-[#FFFFFF0D] rounded-[5px] font-changa text-white text-xs font-medium p-5 mb-6">
+                    <div className="border border-[#FFFFFF0D] rounded-[5px] font-changa text-white text-sm font-medium p-5 mb-6">
                       <div>
                         <div className="flex justify-between items-center mb-2">
                           <p>Current Profit</p>
                           <p>{truncateNumber(currentProfit, 7)} SOL</p>
                         </div>
                         <div className="flex justify-between items-center text-fomo-green">
-                          <p>{truncateNumber(currentProfitInUSD, 5)} USD</p>
+                          <p className="text-[#94A3B8]">
+                            {truncateNumber(currentProfitInUSD, 5)} USD
+                          </p>
                           <p>{truncateNumber(currentMultiplier, 2)}x</p>
                         </div>
                       </div>
@@ -868,7 +872,9 @@ export default function Mines() {
                           <p>{truncateNumber(nextProfit, 7)} SOL</p>
                         </div>
                         <div className="flex justify-between items-center text-fomo-green">
-                          <p>{truncateNumber(nextProfitInUSD, 5)} USD</p>
+                          <p className="text-[#94A3B8]">
+                            {truncateNumber(nextProfitInUSD, 5)} USD
+                          </p>
                           <p>{truncateNumber(nextMultiplier, 2)}x</p>
                         </div>
                       </div>
