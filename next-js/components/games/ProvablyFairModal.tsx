@@ -12,7 +12,7 @@ interface VerificationState {
   nonce: string;
   risk?: string;
   segments?: number;
-  parameter?:number;
+  parameter?:string;
   
 }
 
@@ -20,14 +20,13 @@ interface Props {
   verificationState: VerificationState;
   setVerificationState: React.Dispatch<React.SetStateAction<VerificationState>>;
   selectedGameType: GameType;
-  parameter?:number;
 }
 
 export default function ProvablyFairModal({
   verificationState,
   setVerificationState,
   selectedGameType,
-  parameter,
+  
 }: Props) {
   const [ strikeNumbers, setStrikeNumbers] = useState<number[]>([]);
   const [strikeNumber, setStrikeNumber] = useState<number>(50.0);
@@ -41,22 +40,22 @@ export default function ProvablyFairModal({
     null,
   );
   const { language } = useGlobalContext();
- 
+
   useEffect(() => {
     const result = generateGameResult(
       verificationState.serverSeed,
       verificationState.clientSeed,
       parseInt(verificationState.nonce),
       selectedGameType,
-      verificationState.parameter
+      parseInt(verificationState.parameter!)
       
     );
     if (Array.isArray(result)) {
       setStrikeNumbers(result);
-      console.log({selectedGameType},result)
+    
     } else {
       setStrikeNumbers([result]);
-      console.log({selectedGameType},result)
+      
       
     }
   }, [verificationState, selectedGameType]);
@@ -351,21 +350,26 @@ const renderMines=()=>{
     </>
   );
   const renderMinesCount = ()=>{
-    return(
+    return (
       <div className="my-4">
-                    <label className="text-xs text-opacity-75 font-changa text-[#F0F0F0]">
-                      {translator("Mines", language)}
-                    </label>
-                    <input
-                      
-                      name="parameter"
-                      value={verificationState.parameter}
-                      onChange={handleChange}
-                      className="bg-[#202329] text-white font-chakra capitalize text-xs font-medium mt-1 rounded-md p-3 w-full relative"
-                    />
-                  </div>
-    )
-  }
+        <label className="text-xs text-opacity-75 font-changa text-[#F0F0F0]">
+          {translator("Mines", language)}
+        </label>
+        <select
+          name="parameter"
+          value={verificationState.parameter}
+          onChange={handleChange}
+          className="bg-[#202329] text-white font-chakra capitalize text-xs font-medium mt-1 rounded-md p-3 w-full relative no-scrollbar"
+        >
+          {Array.from({ length: 24 }, (_, index) => (
+            <option key={index + 1} value={index + 1}>
+              {index + 1}
+            </option>
+          ))}
+        </select>
+      </div>
+    );
+  };
   const renderWheel = () => {
     const multipliers = riskToChance[verificationState.risk || "low"];
     const sortedMultipliers = multipliers

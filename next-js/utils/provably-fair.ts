@@ -226,7 +226,7 @@ export const generateGameResult = <T extends GameType>(
         for (; l <= t; ) a.includes(l) && t++, l++;
         a.push(t);
       }
-      console.log(a)
+      
       return a as GameResult<T>;
     }
 
