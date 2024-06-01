@@ -52,7 +52,7 @@ export default function MinesProvablyFairModal({
   bet,
 }: Props) {
   const [state, setState] = useState<"seeds" | "verify">(
-    modalData.tab ?? "seeds",
+    modalData.tab ?? "seeds"
   );
   const [newClientSeed, setNewClientSeed] = useState<string>(
     generateClientSeed(),
@@ -68,7 +68,7 @@ export default function MinesProvablyFairModal({
     nonce: string;
     risk?: string;
     segments?: number;
-    parameter?:string;
+    parameter?:number;
   }>(
     bet?.gameSeed
       ? {
@@ -81,6 +81,9 @@ export default function MinesProvablyFairModal({
           segments:
             bet.segments ||
             (selectedGameType === GameType.wheel ? 10 : undefined),
+            parameter:
+            bet.minesCount || 
+            (selectedGameType === GameType.mines ? 1 : undefined)
       
         }
       : {

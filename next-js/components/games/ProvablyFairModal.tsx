@@ -12,7 +12,7 @@ interface VerificationState {
   nonce: string;
   risk?: string;
   segments?: number;
-  parameter?:string;
+  parameter?:number;
   
 }
 
@@ -40,14 +40,14 @@ export default function ProvablyFairModal({
     null,
   );
   const { language } = useGlobalContext();
-
+  
   useEffect(() => {
     const result = generateGameResult(
       verificationState.serverSeed,
       verificationState.clientSeed,
       parseInt(verificationState.nonce),
       selectedGameType,
-      parseInt(verificationState.parameter!)
+      verificationState.parameter
       
     );
     if (Array.isArray(result)) {
