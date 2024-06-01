@@ -329,6 +329,12 @@ export default function Mines() {
 
       setIsRolling(true);
       setBetActive(true);
+      setCashoutModal({
+        show: false,
+        amountWon: 0,
+        strikeMultiplier: 0,
+        pointsGained: 0,
+      });
       // setUserBets(defaultUserBets);
       const response = await fetch(`/api/games/mines/auto`, {
         method: "POST",
@@ -350,6 +356,7 @@ export default function Mines() {
         amountWon,
         strikeNumbers,
         strikeMultiplier,
+        pointsGained,
         message,
       } = await response.json();
 
@@ -373,6 +380,12 @@ export default function Mines() {
       if (win) {
         soundAlert("/sounds/win.wav");
         successCustom(message);
+        setCashoutModal({
+          show: true,
+          amountWon: amountWon,
+          strikeMultiplier: strikeMultiplier,
+          pointsGained: pointsGained,
+        });
       }
 
       const lose = result === "Lost";
@@ -403,8 +416,10 @@ export default function Mines() {
         );
         // update count
         if (typeof autoBetCount === "number") {
-          setAutoBetCount(autoBetCount > 0 ? autoBetCount - 1 : 0);
-          autoBetCount === 1 && warningCustom("Auto bet stopped", "top-left");
+          if (autoBetCount === 1) {
+            warningCustom("Auto bet stopped", "top-left");
+          }
+          if (autoBetCount > 1) setAutoBetCount(autoBetCount - 1);
         } else
           setAutoBetCount(
             autoBetCount.length > 12
@@ -616,9 +631,9 @@ export default function Mines() {
             (autoWinChangeReset || autoLossChangeReset
               ? betAmt
               : autoBetCount === "inf"
-              ? Math.max(0, betAmt)
-              : betAmt *
-                (autoLossChange !== null ? autoLossChange / 100.0 : 0));
+                ? Math.max(0, betAmt)
+                : betAmt *
+                  (autoLossChange !== null ? autoLossChange / 100.0 : 0));
       }
       if (
         useAutoConfig &&
@@ -648,7 +663,7 @@ export default function Mines() {
       }
       setTimeout(() => {
         handleAutoBet();
-      }, 500);
+      }, 1000);
     } else {
       setStartAuto(false);
       setUserBets(defaultUserBets);
@@ -685,10 +700,18 @@ export default function Mines() {
             {startAuto && (
               <div
                 onClick={() => {
+                  setUserBets(defaultUserBets);
+                  setUserBetsForAuto([]);
                   soundAlert("/sounds/betbutton.wav");
                   warningCustom("Auto bet stopped", "top-left");
                   setAutoBetCount(0);
                   setStartAuto(false);
+                  setCashoutModal({
+                    show: false,
+                    amountWon: 0,
+                    strikeMultiplier: 0,
+                    pointsGained: 0,
+                  });
                 }}
                 className="cursor-pointer rounded-lg absolute w-full h-full z-20 bg-[#442c62] hover:bg-[#7653A2] focus:bg-[#53307E] flex items-center justify-center font-chakra font-semibold text-2xl tracking-wider text-white"
               >
@@ -744,9 +767,7 @@ export default function Mines() {
                 <BetAmount
                   betAmt={betAmt}
                   setBetAmt={setUserInput}
-                  currentMultiplier={
-                    currentMultiplier === 0 ? 1.04 : currentMultiplier
-                  }
+                  currentMultiplier={25}
                   leastMultiplier={1.04}
                   game="mines"
                   disabled={disableInput}
@@ -814,7 +835,7 @@ export default function Mines() {
                           <p>{truncateNumber(currentProfit, 7)} SOL</p>
                         </div>
                         <div className="flex justify-between items-center text-fomo-green">
-                          <p>{truncateNumber(currentProfitInUSD, 5)}</p>
+                          <p>{truncateNumber(currentProfitInUSD, 5)} USD</p>
                           <p>{truncateNumber(currentMultiplier, 2)}x</p>
                         </div>
                       </div>
@@ -834,7 +855,7 @@ export default function Mines() {
                           <p>{truncateNumber(nextProfit, 7)} SOL</p>
                         </div>
                         <div className="flex justify-between items-center text-fomo-green">
-                          <p>{truncateNumber(nextProfitInUSD, 5)}</p>
+                          <p>{truncateNumber(nextProfitInUSD, 5)} USD</p>
                           <p>{truncateNumber(nextMultiplier, 2)}x</p>
                         </div>
                       </div>
@@ -851,12 +872,12 @@ export default function Mines() {
                           className={`${
                             dropDown ? "" : ""
                           } relative flex h-11 w-full cursor-pointer items-center rounded-[8px] bg-[#202329] px-4`}
-                          onClick={handleDropDown}
+                          onClick={!startAuto ? handleDropDown : undefined}
                         >
                           <div className="bg-transparent text-base text-[#94A3B8] placeholder-[#94A3B8] font-chakra placeholder-opacity-40 outline-none w-full">
                             {minesCount}
                           </div>
-                          {dropDown && (
+                          {!startAuto && dropDown && (
                             <div className="absolute top-14 z-50 max-h-[300px] overflow-y-scroll modalscrollbar left-0 bg-[#202329] border border-[#2A2E38] rounded-[8px] w-full">
                               {options.map((option) => (
                                 <div
@@ -909,6 +930,12 @@ export default function Mines() {
                         warningCustom("Auto bet stopped", "top-left");
                         setAutoBetCount(0);
                         setStartAuto(false);
+                        setCashoutModal({
+                          show: false,
+                          amountWon: 0,
+                          strikeMultiplier: 0,
+                          pointsGained: 0,
+                        });
                       }}
                       className="rounded-lg absolute w-full h-full z-20 bg-[#442c62] hover:bg-[#7653A2] focus:bg-[#53307E] flex items-center justify-center font-chakra font-semibold text-2xl tracking-wider text-white"
                     >
@@ -1014,29 +1041,29 @@ export default function Mines() {
                         userBets[index - 1].pick === true
                         ? "border-[#FCB10F] bg-[#FCB10F33]"
                         : userBets[index - 1].result === "Lost" &&
-                          userBets[index - 1].pick === true
-                        ? "border-[#F1323E] bg-[#F1323E33]"
-                        : "border-[#202329] hover:border-white/30"
+                            userBets[index - 1].pick === true
+                          ? "border-[#F1323E] bg-[#F1323E33]"
+                          : "border-[#202329] hover:border-white/30"
                       : betType === "auto"
-                      ? userBets[index - 1].result === "" &&
-                        userBets[index - 1].pick === true
-                        ? "border-[#FCB10F] bg-[#FCB10F33]"
-                        : userBets[index - 1].result === "Won" &&
+                        ? userBets[index - 1].result === "" &&
                           userBets[index - 1].pick === true
-                        ? "border-[#FCB10F] bg-[#FCB10F33]"
-                        : userBets[index - 1].result === "Lost" &&
-                          userBets[index - 1].pick === true
-                        ? "border-[#F1323E] bg-[#F1323E33]"
-                        : "border-[#202329] hover:border-white/30"
-                      : null
+                          ? "border-[#FCB10F] bg-[#FCB10F33]"
+                          : userBets[index - 1].result === "Won" &&
+                              userBets[index - 1].pick === true
+                            ? "border-[#FCB10F] bg-[#FCB10F33]"
+                            : userBets[index - 1].result === "Lost" &&
+                                userBets[index - 1].pick === true
+                              ? "border-[#F1323E] bg-[#F1323E33]"
+                              : "border-[#202329] hover:border-white/30"
+                        : null
                   }  bg-[#202329] flex items-center justify-center cursor-pointer rounded-md text-center transition-all duration-300 ease-in-out w-[45px] h-[45px] sm:w-[55px] sm:h-[55px] md:w-[80px] md:h-[80px] xl:w-[95px] xl:h-[95px]`}
                   disabled={betType === "manual" && userBets[index - 1].pick}
                   onClick={() =>
                     betType === "auto"
                       ? handleAutoPick(index)
                       : betActive && betType === "manual"
-                      ? handlePick(index)
-                      : null
+                        ? handlePick(index)
+                        : null
                   }
                 >
                   {betType === "manual" &&

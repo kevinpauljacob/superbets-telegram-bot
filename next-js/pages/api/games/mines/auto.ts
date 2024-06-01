@@ -4,6 +4,7 @@ import { NextApiRequest, NextApiResponse } from "next";
 import { GameSeed, Mines, User } from "@/models/games";
 import {
   GameType,
+  decryptServerSeed,
   generateGameResult,
   seedStatus,
 } from "@/utils/provably-fair";
@@ -21,6 +22,7 @@ import {
 } from "@/context/transactions";
 
 const secret = process.env.NEXTAUTH_SECRET;
+const encryptionKey = Buffer.from(process.env.ENCRYPTION_KEY!, "hex");
 
 export const config = {
   maxDuration: 60,
@@ -54,6 +56,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           .json({ success: false, message: "Missing parameters" });
 
       if (
+        typeof amount !== "number" ||
+        !isFinite(amount) ||
         tokenMint !== "SOL" ||
         !(
           Number.isInteger(minesCount) &&
@@ -120,7 +124,17 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         throw new Error("Server hash not found!");
       }
 
-      const { serverSeed, clientSeed, nonce } = activeGameSeed;
+      const {
+        serverSeed: encryptedServerSeed,
+        clientSeed,
+        nonce,
+        iv,
+      } = activeGameSeed;
+      const serverSeed = decryptServerSeed(
+        encryptedServerSeed,
+        encryptionKey,
+        Buffer.from(iv, "hex"),
+      );
 
       const strikeNumbers = generateGameResult(
         serverSeed,
@@ -155,6 +169,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           strikeMultiplier = Decimal.div(25 - i, 25 - i - minesCount)
             .mul(strikeMultiplier)
             .toNumber();
+        strikeMultiplier = Math.min(strikeMultiplier, 25);
 
         amountWon = Decimal.mul(amount, strikeMultiplier)
           .mul(Decimal.sub(1, houseEdge))
@@ -263,6 +278,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         amountWon,
         strikeNumbers,
         strikeMultiplier,
+        pointsGained: userBets.length,
         message,
       });
     } catch (e: any) {
