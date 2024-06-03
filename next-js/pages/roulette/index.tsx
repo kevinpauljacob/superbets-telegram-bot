@@ -43,11 +43,26 @@ const {
   } = useGlobalContext();
 const [betAmt, setBetAmt] = useState<number | undefined>();
 const [currentMultiplier, setCurrentMultiplier] = useState<number>(0);
+const [selectedChip, setSelectedChip] = useState<string | null>(null);
+const [betAmount, setBetAmount] = useState<string>('0');
 
 const [betActive, setBetActive] = useState(false);
 const [betType, setBetType] = useState<"manual" | "auto">("manual");
 const [isRolling, setIsRolling] = useState(false);
 
+const chips = [
+  { id: 1, value: '1', image: '/assets/token-1.svg' },
+  { id: 2, value: '10', image: '/assets/token-10.svg' },
+  { id: 3, value: '100', image: '/assets/token-100.svg' },
+  { id: 4, value: '1K', image: '/assets/token-1k.svg' },
+  { id: 5, value: '10K', image: '/assets/token-10k.svg' },
+  { id: 6, value: '100K', image: '/assets/token-100k.svg' },
+  { id: 7, value: '1M', image: '/assets/token-1M.svg' },
+  { id: 8, value: '10M', image: '/assets/token-10M.svg' },
+  { id: 9, value: '100M', image: '/assets/token-100M.svg' },
+  { id: 10, value: '1B', image: '/assets/token-1B.svg' },
+  { id: 11, value: '10B', image: '/assets/token-10B.svg' },
+];
 const onSubmit = async (data: any) => {
     if (betType === "auto") {
      
@@ -175,6 +190,13 @@ const handleBet = async () => {
       setBetActive(false);
     } */
   };
+  const handleChipClick = (value: string) => {
+    setSelectedChip(value);
+  };
+
+  const handleBetAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setBetAmount(e.target.value);
+  };
 const disableInput = useMemo(() => {
     return betType === "auto" && startAuto
       ? true
@@ -209,6 +231,22 @@ const disableInput = useMemo(() => {
              className="w-full flex flex-col gap-0 "
              autoComplete="off"
              onSubmit={methods.handleSubmit(onSubmit)}>
+      <div className="mb-4">
+        <h3 className="text-white/90 font-changa">Chip Value</h3>
+        <div className="grid grid-cols-6 gap-2 mt-2">
+          {chips.map((chip) => (
+            <div
+              key={chip.id}
+              className={` border rounded cursor-pointer bg-[#1e2024] flex justify-center items-center py-1 ${
+                selectedChip === chip.value ? 'border-white' : 'border-gray-600'
+              }`}
+              onClick={() => handleChipClick(chip.value)}
+            >
+              <img src={chip.image} alt={chip.value} />
+            </div>
+          ))}
+        </div>
+        </div>
                <BetAmount
                betAmt={betAmt}
                setBetAmt={setBetAmt}
