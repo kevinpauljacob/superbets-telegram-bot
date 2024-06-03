@@ -1,7 +1,7 @@
 import { GameStat, useGlobalContext } from "../GlobalContext";
 import { useEffect, useState } from "react";
 import { GameType } from "@/utils/provably-fair";
-import { ResponsiveContainer, AreaChart, Area, XAxis, ReferenceLine, Dot } from 'recharts';
+import { ResponsiveContainer, AreaChart, Area, XAxis, ReferenceLine, Dot, Tooltip } from 'recharts';
 
 const colors = {
     red: "#f1323e",
@@ -15,6 +15,28 @@ export default function LiveGraph() {
     const { liveStats: data, liveCurrentStat } = useGlobalContext();
     const [positiveData, setPositiveData] = useState<GameStat[]>([]);
     const [negativeData, setNegativeData] = useState<GameStat[]>([]);
+    const [hoverValue, setHoverValue] = useState<number | null>(null);
+
+    const CustomTooltip = ({ active, payload, label, coordinate }: any) => {
+        if (active && payload && payload.length) {
+            const value = payload[0].payload.pnl;
+            setHoverValue(value);
+
+            return null
+        }
+
+        setHoverValue(null);
+        return null;
+    };
+
+    const CustomDot = ({ cx, cy, payload, active }: any) => {
+        if (payload.pnl !== 0) {
+            return (
+                <Dot r={5} cx={cx} cy={cy} fill="white" stroke='white' strokeWidth={2} />
+            )
+        }
+        return null;
+    }
 
     useEffect(() => {
         let fdata: GameStat[] = data
@@ -59,8 +81,38 @@ export default function LiveGraph() {
 
                 <XAxis dataKey="index" type="number" domain={[0, data.length - 1]} hide />
 
-                <Area type="monotone" dataKey="pnl" stroke="#00c853" strokeWidth={2} fillOpacity={1} fill="url(#colorpnl)" data={positiveData} />
-                <Area type="monotone" dataKey="pnl" stroke="#d50000" strokeWidth={2} fillOpacity={1} fill="url(#colorpnlNeg)" data={negativeData} />
+                <Area
+                    type="monotone"
+                    dataKey="pnl"
+                    stroke="#00c853"
+                    strokeWidth={2}
+                    fillOpacity={1}
+                    fill="url(#colorpnl)"
+                    data={positiveData}
+                    isAnimationActive={false}
+                    activeDot={<CustomDot />}
+                />
+                <Area
+                    type="monotone"
+                    dataKey="pnl"
+                    stroke="#d50000"
+                    strokeWidth={2}
+                    fillOpacity={1}
+                    fill="url(#colorpnlNeg)"
+                    data={negativeData}
+                    isAnimationActive={false}
+                    activeDot={<CustomDot />}
+                />
+
+                <Tooltip
+                    content={<CustomTooltip />}
+                    cursor={{
+                        stroke: colors.mid,
+                        strokeWidth: 2,
+                        fill: 'none',
+                        strokeDasharray: '3 3'
+                    }}
+                />
 
                 <ReferenceLine y={0} strokeWidth={2} stroke={colors.mid} />
             </AreaChart>
