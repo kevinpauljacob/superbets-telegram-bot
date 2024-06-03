@@ -6,6 +6,7 @@ import { seedStatus } from "@/utils/provably-fair";
 import { minGameAmount } from "@/context/gameTransactions";
 import Decimal from "decimal.js";
 import { maxPayouts } from "@/context/transactions";
+import { SPL_TOKENS } from "@/context/config";
 
 const secret = process.env.NEXTAUTH_SECRET;
 
@@ -41,7 +42,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       if (
         typeof amount !== "number" ||
         !isFinite(amount) ||
-        tokenMint !== "SOL" ||
+        !SPL_TOKENS.some((t) => t.tokenMint === tokenMint) ||
         !(Number.isInteger(minesCount) && 1 <= minesCount && minesCount <= 24)
       )
         return res

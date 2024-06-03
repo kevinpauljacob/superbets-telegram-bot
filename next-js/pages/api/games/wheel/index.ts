@@ -19,6 +19,7 @@ import {
 import { minGameAmount, wsEndpoint } from "@/context/gameTransactions";
 import { riskToChance } from "@/components/games/Wheel/Segments";
 import { Decimal } from "decimal.js";
+import { SPL_TOKENS } from "@/context/config";
 Decimal.set({ precision: 9 });
 
 const secret = process.env.NEXTAUTH_SECRET;
@@ -60,20 +61,22 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           .status(400)
           .json({ success: false, message: "Missing parameters" });
 
-      if (amount < minGameAmount)
-        return res.status(400).json({
-          success: false,
-          message: "Invalid bet amount",
-        });
-
       if (
-        tokenMint !== "SOL" ||
+        typeof amount !== "number" ||
+        !isFinite(amount) ||
+        !SPL_TOKENS.some((t) => t.tokenMint === tokenMint) ||
         !(10 <= segments && segments <= 50 && segments % 10 === 0) ||
         !(risk === "low" || risk === "medium" || risk === "high")
       )
         return res
           .status(400)
           .json({ success: false, message: "Invalid parameters" });
+
+      if (amount < minGameAmount)
+        return res.status(400).json({
+          success: false,
+          message: "Invalid bet amount",
+        });
 
       const item = riskToChance[risk];
       const maxStrikeMultiplier = item.reduce(
@@ -110,7 +113,12 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         { upsert: true, new: true },
       );
       const userTier = userData?.tier ?? 0;
-      const houseEdge = launchPromoEdge ? 0 : houseEdgeTiers[userTier];
+      const isFomoToken =
+        tokenMint === SPL_TOKENS.find((t) => t.tokenName === "FOMO")?.tokenMint
+          ? true
+          : false;
+      const houseEdge =
+        launchPromoEdge || isFomoToken ? 0 : houseEdgeTiers[userTier];
 
       const activeGameSeed = await GameSeed.findOneAndUpdate(
         {
