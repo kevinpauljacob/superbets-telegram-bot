@@ -254,6 +254,11 @@ const disableInput = useMemo(() => {
                leastMultiplier={1.1}
                game="roulette"
                disabled={disableInput}/>
+            <BetButton
+            disabled={disableInput}
+            >
+              {isRolling ? <Loader/> : "BET"}
+              </BetButton>
                
              </form>
            </FormProvider>
