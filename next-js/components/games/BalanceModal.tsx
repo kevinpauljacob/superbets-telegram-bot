@@ -17,10 +17,9 @@ import { IoCloseOutline } from "react-icons/io5";
 import Image from "next/image";
 import { timestampParser } from "@/utils/timestampParser";
 import { useRouter } from "next/router";
-import { SPL_TOKENS } from "@/context/config";
+import { SPL_TOKENS, spl_token } from "@/context/config";
 import { Connection, ParsedAccountData, PublicKey } from "@solana/web3.js";
 import { TOKEN_PROGRAM_ID } from "@solana/spl-token";
-import Link from "next/link";
 
 export default function BalanceModal() {
   const methods = useForm();
@@ -41,7 +40,7 @@ export default function BalanceModal() {
   } = useGlobalContext();
 
   const [loading, setLoading] = useState<boolean>(false);
-  const [selectedToken, setSelectedToken] = useState<string>("SOL");
+  const [selectedToken, setSelectedToken] = useState<spl_token>(SPL_TOKENS[0]);
   const [isSelectModalOpen, setIsSelectModalOpen] = useState<boolean>(false);
   const [amount, setAmount] = useState<number>(0);
   const [historyData, setHistoryData] = useState<any[]>([]);
@@ -60,8 +59,13 @@ export default function BalanceModal() {
 
       try {
         if (actionType === "Deposit")
-          response = await deposit(wallet, amount, selectedToken, campaignId);
-        else response = await withdraw(wallet, amount, selectedToken);
+          response = await deposit(
+            wallet,
+            amount,
+            selectedToken.tokenMint,
+            campaignId,
+          );
+        else response = await withdraw(wallet, amount, selectedToken.tokenMint);
 
         if (response && response.success) {
           getBalance();
@@ -281,27 +285,15 @@ export default function BalanceModal() {
                   className="w-full rounded-md h-11 flex items-center bg-[#202329] px-4 py-2 text-[#94A3B8] text-base font-chakra gap-2 cursor-pointer"
                   onClick={() => setIsSelectModalOpen(!isSelectModalOpen)}
                 >
-                  <img
-                    src={
-                      SPL_TOKENS.find(
-                        (token) => token.tokenName === selectedToken,
-                      )!.icon
-                    }
-                    alt=""
-                    className="w-5 h-5"
-                  />
-                  <span>
-                    {
-                      SPL_TOKENS.find(
-                        (token) => token.tokenName === selectedToken,
-                      )!.tokenName
-                    }
-                  </span>
+                  <img src={selectedToken.icon} alt="" className="w-5 h-5" />
+                  <span>{selectedToken.tokenName}</span>
                   <div className="grow" />
                   <img
                     src="/assets/chevron.svg"
                     alt=""
-                    className={`w-4 h-4 transform ${isSelectModalOpen ? "rotate-180" : ""}`}
+                    className={`w-4 h-4 transform ${
+                      isSelectModalOpen ? "rotate-180" : ""
+                    }`}
                   />
                 </span>
 
@@ -312,7 +304,7 @@ export default function BalanceModal() {
                         key={index}
                         className="w-full h-11 flex flex-row items-center bg-[#202329] px-4 py-2 text-[#94A3B8] text-base font-chakra gap-2 cursor-pointer hover:bg-[#292C32] rounded-md"
                         onClick={() => {
-                          setSelectedToken(token.tokenName);
+                          setSelectedToken(token);
                           setIsSelectModalOpen(false);
                         }}
                       >
@@ -366,12 +358,7 @@ export default function BalanceModal() {
                       0,
                       3,
                     )}{" "}
-                    $
-                    {
-                      SPL_TOKENS.find(
-                        (token) => token.tokenName === selectedToken,
-                      )!.tokenName
-                    }
+                    ${selectedToken.tokenName}
                   </span>
                 </div>
 
@@ -435,19 +422,11 @@ export default function BalanceModal() {
                     {truncateNumber(
                       userTokens.find(
                         (token) =>
-                          token.mintAddress ===
-                          SPL_TOKENS.find(
-                            (coin) => coin.tokenName === selectedToken,
-                          )!.tokenMint,
+                          token.mintAddress === selectedToken.tokenMint,
                       )?.balance ?? 0,
                       3,
                     )}{" "}
-                    $
-                    {
-                      SPL_TOKENS.find(
-                        (token) => token.tokenName === selectedToken,
-                      )!.tokenName
-                    }
+                    ${selectedToken.tokenName}
                   </span>
                 </div>
                 <div
@@ -471,11 +450,7 @@ export default function BalanceModal() {
                     onClick={() => {
                       setAmount(
                         userTokens.find(
-                          (t) =>
-                            t.mintAddress ===
-                            SPL_TOKENS.find(
-                              (coin) => coin.tokenName === selectedToken,
-                            )!.tokenMint,
+                          (t) => t.mintAddress === selectedToken.tokenMint,
                         )!.balance,
                       );
                     }}

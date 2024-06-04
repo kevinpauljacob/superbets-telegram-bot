@@ -120,24 +120,9 @@ export const placeFlip = async (
 export const deposit = async (
   wallet: WalletContextState,
   amount: number,
-  token: string,
+  tokenMint: string,
   campaignId: any = null,
 ) => {
-  let tokenMint: string | null = "";
-  if (!token) {
-    errorCustom("Invalid Token");
-    return { success: true, message: "Invalid Token" };
-  } else {
-    tokenMint =
-      SPL_TOKENS.find((tokenItem) => tokenItem.tokenName === token)
-        ?.tokenMint ?? null;
-  }
-
-  if (!tokenMint) {
-    errorCustom("Invalid Token");
-    return { success: true, message: "Invalid Token" };
-  }
-
   if (amount == 0) {
     errorCustom("Please enter an amount greater than 0");
     return { success: true, message: "Please enter an amount greater than 0" };
@@ -166,7 +151,7 @@ export const deposit = async (
         transactionBase64,
         wallet: wallet.publicKey,
         amount,
-        token,
+        tokenMint,
         blockhashWithExpiryBlockHeight,
         campaignId,
       }),

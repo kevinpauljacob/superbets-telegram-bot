@@ -1,4 +1,11 @@
-export const SPL_TOKENS = [
+export type spl_token = {
+  tokenName: string;
+  tokenMint: string;
+  decimal: number;
+  icon: string;
+};
+
+export const SPL_TOKENS: Array<spl_token> = [
   {
     tokenName: "SOL",
     tokenMint: "SOL", //So11111111111111111111111111111111111111112
