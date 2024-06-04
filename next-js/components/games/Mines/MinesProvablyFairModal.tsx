@@ -10,7 +10,7 @@ import toast from "react-hot-toast";
 import { FaRegCopy } from "react-icons/fa6";
 import { MdClose } from "react-icons/md";
 import CheckPF from "@/public/assets/CheckPF.svg";
-import { errorCustom, successAlert } from "@/components/toasts/ToastGroup";
+import { errorAlert, errorCustom, successAlert } from "@/components/toasts/ToastGroup";
 import ProvablyFairModal from "../ProvablyFairModal";
 import { translator } from "@/context/transactions";
 import { useGlobalContext } from "@/components/GlobalContext";
@@ -52,7 +52,7 @@ export default function MinesProvablyFairModal({
   bet,
 }: Props) {
   const [state, setState] = useState<"seeds" | "verify">(
-    modalData.tab ?? "seeds",
+    modalData.tab ?? "seeds"
   );
   const [newClientSeed, setNewClientSeed] = useState<string>(
     generateClientSeed(),
@@ -68,6 +68,7 @@ export default function MinesProvablyFairModal({
     nonce: string;
     risk?: string;
     segments?: number;
+    parameter?:number;
   }>(
     bet?.gameSeed
       ? {
@@ -80,6 +81,10 @@ export default function MinesProvablyFairModal({
           segments:
             bet.segments ||
             (selectedGameType === GameType.wheel ? 10 : undefined),
+            parameter:
+            bet.minesCount || 
+            (selectedGameType === GameType.mines ? 1 : undefined)
+      
         }
       : {
           clientSeed: "",
@@ -87,6 +92,7 @@ export default function MinesProvablyFairModal({
           nonce: "",
           risk: selectedGameType === GameType.wheel ? "low" : undefined,
           segments: selectedGameType === GameType.wheel ? 10 : undefined,
+        
         },
   );
 
@@ -133,7 +139,7 @@ export default function MinesProvablyFairModal({
       }),
     }).then((res) => res.json());
 
-    if (!data.success) return console.error(data.message);
+    if (!data.success) return errorAlert(data.message);
     successAlert("Successfully changed the server seed")
     setModalData(data);
     setNewClientSeed(generateClientSeed());
@@ -295,8 +301,7 @@ export default function MinesProvablyFairModal({
                       setVerificationState={setVerificationState}
                       verificationState={verificationState}
                       selectedGameType={selectedGameType}
-                      
-                    />
+                       />
                   </div>
                   <div>
                     <label className="text-xs text-opacity-75 font-changa text-[#F0F0F0]">

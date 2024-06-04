@@ -39,6 +39,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           .json({ success: false, message: "Missing parameters" });
 
       if (
+        typeof amount !== "number" ||
+        !isFinite(amount) ||
         tokenMint !== "SOL" ||
         !(Number.isInteger(minesCount) && 1 <= minesCount && minesCount <= 24)
       )
@@ -62,50 +64,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           .json({ success: false, message: "Max payout exceeded" });
 
       await connectDatabase();
-
-      const pendingGame = await Mines.findOne({ wallet, result: "Pending" });
-      if (pendingGame)
-        return res.status(400).json({
-          success: false,
-          gameId: pendingGame._id,
-          message: `Previous game is still pending, gameId:${pendingGame._id}`,
-        });
-
-      let user = await User.findOne({ wallet });
-
-      if (!user)
-        return res
-          .status(400)
-          .json({ success: false, message: "User does not exist !" });
-
-      if (
-        user.deposit.find((d: any) => d.tokenMint === tokenMint)?.amount <
-        amount
-      )
-        return res
-          .status(400)
-          .json({ success: false, message: "Insufficient balance !" });
-
-      const activeGameSeed = await GameSeed.findOneAndUpdate(
-        {
-          wallet,
-          status: seedStatus.ACTIVE,
-        },
-        {
-          $inc: {
-            nonce: 1,
-          },
-        },
-        { new: true },
-      );
-
-      if (!activeGameSeed) {
-        throw new Error("Server hash not found!");
-      }
-
-      const { nonce } = activeGameSeed;
-
-      let result = "Pending";
 
       const userUpdate = await User.findOneAndUpdate(
         {
@@ -132,18 +90,45 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         throw new Error("Insufficient balance for action!!");
       }
 
-      const minesGame = await Mines.create({
-        wallet,
-        amount,
-        minesCount,
-        strikeMultiplier: 1,
-        result,
-        tokenMint,
-        amountWon: 0,
-        amountLost: 0,
-        nonce,
-        gameSeed: activeGameSeed._id,
-      });
+      const activeGameSeed = await GameSeed.findOneAndUpdate(
+        {
+          wallet,
+          status: seedStatus.ACTIVE,
+        },
+        {
+          $inc: {
+            nonce: 1,
+          },
+        },
+        { new: true },
+      );
+
+      if (!activeGameSeed) {
+        throw new Error("Server hash not found!");
+      }
+
+      const { nonce } = activeGameSeed;
+
+      let result = "Pending";
+
+      const minesGame = await Mines.findOneAndUpdate(
+        { wallet, result },
+        {
+          $setOnInsert: {
+            wallet,
+            amount,
+            minesCount,
+            strikeMultiplier: 1,
+            result,
+            tokenMint,
+            amountWon: 0,
+            amountLost: 0,
+            nonce,
+            gameSeed: activeGameSeed._id,
+          },
+        },
+        { upsert: true, new: true, setDefaultsOnInsert: true },
+      );
 
       return res.status(201).json({
         success: true,

@@ -4,11 +4,16 @@ import { NextApiRequest, NextApiResponse } from "next";
 import { GameSeed, Mines, User } from "@/models/games";
 import {
   GameType,
+  decryptServerSeed,
   generateGameResult,
   seedStatus,
 } from "@/utils/provably-fair";
 import StakingUser from "@/models/staking/user";
-import { minGameAmount, wsEndpoint } from "@/context/gameTransactions";
+import {
+  isArrayUnique,
+  minGameAmount,
+  wsEndpoint,
+} from "@/context/gameTransactions";
 import Decimal from "decimal.js";
 import {
   houseEdgeTiers,
@@ -17,6 +22,7 @@ import {
 } from "@/context/transactions";
 
 const secret = process.env.NEXTAUTH_SECRET;
+const encryptionKey = Buffer.from(process.env.ENCRYPTION_KEY!, "hex");
 
 export const config = {
   maxDuration: 60,
@@ -50,6 +56,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           .json({ success: false, message: "Missing parameters" });
 
       if (
+        typeof amount !== "number" ||
+        !isFinite(amount) ||
         tokenMint !== "SOL" ||
         !(
           Number.isInteger(minesCount) &&
@@ -59,7 +67,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         !(userBets.length > 0 && userBets.length <= 25 - minesCount) ||
         !userBets.every(
           (bet: number) => Number.isInteger(bet) && 0 <= bet && bet <= 24,
-        )
+        ) ||
+        !isArrayUnique(userBets)
       )
         return res
           .status(400)
@@ -73,27 +82,30 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
       await connectDatabase();
 
-      const pendingGame = await Mines.findOne({ wallet, result: "Pending" });
-      if (pendingGame)
-        return res.status(400).json({
-          success: false,
-          message: `Previous game is still pending, gameId:${pendingGame._id}`,
-        });
+      const userUpdate = await User.findOneAndUpdate(
+        {
+          wallet,
+          deposit: {
+            $elemMatch: {
+              tokenMint,
+              amount: { $gte: amount },
+            },
+          },
+        },
+        {
+          $inc: {
+            "deposit.$.amount": -amount,
+            numOfGamesPlayed: 1,
+          },
+        },
+        {
+          new: true,
+        },
+      );
 
-      let user = await User.findOne({ wallet });
-
-      if (!user)
-        return res
-          .status(400)
-          .json({ success: false, message: "User does not exist !" });
-
-      if (
-        user.deposit.find((d: any) => d.tokenMint === tokenMint)?.amount <
-        amount
-      )
-        return res
-          .status(400)
-          .json({ success: false, message: "Insufficient balance !" });
+      if (!userUpdate) {
+        throw new Error("Insufficient balance for action!!");
+      }
 
       const activeGameSeed = await GameSeed.findOneAndUpdate(
         {
@@ -112,7 +124,17 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         throw new Error("Server hash not found!");
       }
 
-      const { serverSeed, clientSeed, nonce } = activeGameSeed;
+      const {
+        serverSeed: encryptedServerSeed,
+        clientSeed,
+        nonce,
+        iv,
+      } = activeGameSeed;
+      const serverSeed = decryptServerSeed(
+        encryptedServerSeed,
+        encryptionKey,
+        Buffer.from(iv, "hex"),
+      );
 
       const strikeNumbers = generateGameResult(
         serverSeed,
@@ -122,7 +144,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         minesCount,
       );
 
-      const result = userBets.some((bet) => strikeNumbers.at(bet) === 1)
+      let result = userBets.some((bet) => strikeNumbers.at(bet) === 1)
         ? "Lost"
         : "Won";
 
@@ -140,45 +162,23 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         amountWon = 0,
         amountLost = amount;
 
-      if (result === "Lost") {
-        const userUpdate = await User.findOneAndUpdate(
-          {
-            wallet,
-            deposit: {
-              $elemMatch: {
-                tokenMint,
-                amount: { $gte: amount },
-              },
-            },
-          },
-          {
-            $inc: {
-              "deposit.$.amount": -amount,
-              numOfGamesPlayed: 1,
-            },
-          },
-          {
-            new: true,
-          },
-        );
-
-        if (!userUpdate) {
-          throw new Error("Insufficient balance for action!!");
-        }
-      } else {
+      if (result === "Won") {
         strikeMultiplier = 1;
 
         for (let i = 0; i < numBets; i++)
           strikeMultiplier = Decimal.div(25 - i, 25 - i - minesCount)
             .mul(strikeMultiplier)
             .toNumber();
+        strikeMultiplier = Math.min(strikeMultiplier, 25);
 
         amountWon = Decimal.mul(amount, strikeMultiplier)
           .mul(Decimal.sub(1, houseEdge))
           .toNumber();
         amountLost = 0;
 
-        const userUpdate = await User.findOneAndUpdate(
+        result = amountWon > amount ? "Won" : "Lost";
+
+        await User.findOneAndUpdate(
           {
             wallet,
             deposit: {
@@ -190,38 +190,41 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           },
           {
             $inc: {
-              "deposit.$.amount": Decimal.sub(amountWon, amount),
-              numOfGamesPlayed: 1,
+              "deposit.$.amount": amountWon,
             },
           },
-          {
-            new: true,
-          },
         );
-
-        if (!userUpdate) {
-          throw new Error("Insufficient balance for action!!");
-        }
       }
 
-      const mines = new Mines({
-        wallet,
-        amount,
-        minesCount,
-        strikeMultiplier,
-        strikeNumbers,
-        userBets,
-        result,
-        tokenMint,
-        amountWon,
-        amountLost,
-        nonce,
-        gameSeed: activeGameSeed._id,
-      });
-      await mines.save();
+      const record = await Mines.findOneAndUpdate(
+        { wallet, result: "Pending" },
+        {
+          $setOnInsert: {
+            wallet,
+            amount,
+            minesCount,
+            strikeMultiplier,
+            strikeNumbers,
+            userBets,
+            houseEdge,
+            result,
+            tokenMint,
+            amountWon,
+            amountLost,
+            nonce,
+            gameSeed: activeGameSeed._id,
+          },
+        },
+        { upsert: true, new: true },
+      ).populate("gameSeed");
+
+      if (record?.nonce !== nonce)
+        return res
+          .status(400)
+          .json({ success: false, message: "Pending game found!" });
 
       const pointsGained =
-        0 * user.numOfGamesPlayed + 1.4 * amount * userData.multiplier;
+        0 * userUpdate.numOfGamesPlayed + 1.4 * amount * userData.multiplier;
 
       const points = userData.points + pointsGained;
       const newTier = Object.entries(pointTiers).reduce((prev, next) => {
@@ -242,7 +245,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         },
       );
 
-      const { gameSeed, ...rest } = mines.toObject();
+      const { gameSeed, ...rest } = record.toObject();
       rest.game = GameType.mines;
       rest.userTier = parseInt(newTier);
       rest.gameSeed = { ...gameSeed, serverSeed: undefined };
@@ -275,6 +278,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         amountWon,
         strikeNumbers,
         strikeMultiplier,
+        pointsGained: userBets.length,
         message,
       });
     } catch (e: any) {
