@@ -107,7 +107,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       if (strikeMultiplier > 25)
         return res.status(400).json({
           success: false,
-          message: "Max payout exceeded!!",
+          message: "Max payout of 25 exceeded! Cashout to continue...",
         });
 
       const userData = await StakingUser.findOneAndUpdate(

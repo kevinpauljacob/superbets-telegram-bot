@@ -325,7 +325,8 @@ export default function Mines() {
         setRefresh(true);
         setIsRolling(false);
       }
-    } catch (error) {
+    } catch (error: any) {
+      errorCustom(error.message);
       console.error("Error occurred while betting:", error);
     }
   };

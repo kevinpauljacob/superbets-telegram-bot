@@ -87,6 +87,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       amountWon = Decimal.mul(amountWon, Decimal.sub(1, houseEdge)).toNumber();
 
       const { serverSeed: encryptedServerSeed, clientSeed, iv } = gameSeed;
+
       const serverSeed = decryptServerSeed(
         encryptedServerSeed,
         encryptionKey,
@@ -122,7 +123,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           .status(400)
           .json({ success: false, message: "Game already concluded!" });
 
-      await User.findOneAndUpdate(
+      const user = await User.findOneAndUpdate(
         {
           wallet,
           deposit: {
@@ -136,9 +137,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
             "deposit.$.amount": amountWon,
           },
         },
+        { new: true },
       );
-
-      const user = await User.findOne({ wallet });
 
       const pointsGained =
         0 * user.numOfGamesPlayed + 1.4 * amount * userData.multiplier;
