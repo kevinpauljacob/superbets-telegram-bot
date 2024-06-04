@@ -85,6 +85,11 @@ export default function Mines() {
     strikeMultiplier: 0,
     pointsGained: 0,
   });
+  const [pendingRequests, setPendingRequests] = useState<number[]>([]);
+  const [processing, setProcessing] = useState(false);
+  const [gameStatus, setGameStatus] = useState<"Not Started" | "Completed">(
+    "Not Started",
+  );
 
   const defaultUserBets = Array.from({ length: 25 }, (_, index) => ({
     result: "",
@@ -177,6 +182,7 @@ export default function Mines() {
           strikeMultiplier: strikeMultiplier,
           pointsGained: pointsGained,
         });
+        setGameStatus("Completed");
         setUserBets(updatedUserBetsWithResult);
         setRefresh(true);
         setBetActive(false);
@@ -187,6 +193,8 @@ export default function Mines() {
         setCurrentProfit(0);
         setNextProfit(0);
         setAmountWon(0);
+        setProcessing(false);
+        setPendingRequests([]);
       }
     } catch (error) {
       console.error("Error occurred while betting:", error);
@@ -196,7 +204,7 @@ export default function Mines() {
   };
 
   const handleAutoPick = async (number: number) => {
-    const updatedUserBets = [...userBets];
+    const updatedUserBets = userBets;
     const currentPickState = updatedUserBets[number - 1].pick;
 
     // Toggle the pick state
@@ -221,6 +229,9 @@ export default function Mines() {
   };
 
   const handlePick = async (number: number) => {
+    soundAlert("/sounds/betButton.wav");
+    setIsRolling(true);
+    // setSelectTile(false);
     setNumBets(numBets + 1);
     try {
       const response = await fetch(`/api/games/mines/pick`, {
@@ -248,7 +259,7 @@ export default function Mines() {
         throw new Error(message);
       }
 
-      const updatedUserBets = [...userBets];
+      const updatedUserBets = userBets;
       updatedUserBets[number - 1] = {
         result: result === "Pending" ? "Pending" : "Lost",
         pick: true,
@@ -286,6 +297,7 @@ export default function Mines() {
           result: result === "Pending" ? "Pending" : "Lost",
           pick: true,
         };
+        setGameStatus("Completed");
         setUserBets(updatedUserBetsWithResult);
         setNumBets(0);
         setCurrentMultiplier(0);
@@ -297,21 +309,74 @@ export default function Mines() {
         setBetActive(false);
         errorCustom(message);
         setIsRolling(false);
+        setProcessing(false);
+        setPendingRequests([]);
       }
 
       const win: boolean = result === "Pending";
       const lose: boolean = result === "Lost";
-      if (win) soundAlert("/sounds/win.wav");
+      if (win) {
+        soundAlert("/sounds/win.wav");
+        // setSelectTile(true);
+      }
       if (lose) soundAlert("/sounds/bomb.wav");
 
       if (success) {
         setRefresh(true);
+        setIsRolling(false);
       }
     } catch (error: any) {
       errorCustom(error.message);
+      setNumBets(0);
+      setCurrentMultiplier(0);
+      setNextMultiplier(0);
+      setStrikeMultiplier(1);
+      setCurrentProfit(0);
+      setNextProfit(0);
+      setAmountWon(0);
+      setBetActive(false);
+      setIsRolling(false);
+      setProcessing(false);
+      setPendingRequests([]);
       console.error("Error occurred while betting:", error);
     }
   };
+
+  const processPendingRequests = async () => {
+    if (processing || pendingRequests.length === 0) return;
+
+    setProcessing(true);
+
+    const localPendingRequests = [...pendingRequests];
+
+    for (let i = 0; i < localPendingRequests.length; i++) {
+      const currentRequest = localPendingRequests[i];
+
+      // console.log(`Processing request: ${currentRequest}`);
+      const alreadyPicked = userBets[currentRequest - 1]?.pick;
+      if (alreadyPicked) {
+        // console.warn(`Number ${currentRequest} has already been picked.`);
+      } else {
+        await handlePick(currentRequest);
+      }
+
+      setPendingRequests((prev) =>
+        prev.filter((req) => req !== currentRequest),
+      );
+
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    }
+
+    setProcessing(false);
+  };
+
+  useEffect(() => {
+    if (!processing && pendingRequests.length > 0) {
+      // console.log("Triggering processPendingRequests");
+      processPendingRequests();
+    }
+    // console.log(`Updated pending requests: ${pendingRequests}`);
+  }, [pendingRequests]);
 
   const handleAutoBet = async () => {
     try {
@@ -441,6 +506,8 @@ export default function Mines() {
   };
 
   const handleBet = async () => {
+    setGameStatus("Not Started");
+    // setSelectTile(true);
     try {
       if (!wallet.connected || !wallet.publicKey) {
         throw new Error("Wallet not connected");
@@ -502,7 +569,7 @@ export default function Mines() {
   };
 
   const handlePendingGame = async () => {
-    const updatedUserBets = [...userBets];
+    const updatedUserBets = userBets;
     try {
       if (!wallet.connected || !wallet.publicKey) {
         throw new Error("Wallet not connected");
@@ -784,8 +851,14 @@ export default function Mines() {
                       } relative flex h-11 w-full cursor-pointer items-center rounded-[8px] bg-[#202329] px-4`}
                       onClick={handleDropDown}
                     >
-                      <div className="bg-transparent text-base text-[#94A3B8] placeholder-[#94A3B8] font-chakra placeholder-opacity-40 outline-none w-full">
+                      <div className="flex justify-between items-center bg-transparent text-base text-[#94A3B8] placeholder-[#94A3B8] font-chakra placeholder-opacity-40 outline-none w-full">
                         {minesCount}
+                        <Image
+                          src="/assets/downArrow.png"
+                          alt="arrowDown"
+                          width={14}
+                          height={14}
+                        />
                       </div>
                       {dropDown && (
                         <div className="absolute top-14 z-50 max-h-[300px] overflow-y-scroll modalscrollbar left-0 bg-[#202329] border border-[#2A2E38] rounded-[8px] w-full">
@@ -829,14 +902,16 @@ export default function Mines() {
                         </div>
                       </div>
                     </div>
-                    <div className="border border-[#FFFFFF0D] rounded-[5px] font-changa text-white text-xs font-medium p-5 mb-6">
+                    <div className="border border-[#FFFFFF0D] rounded-[5px] font-changa text-white text-sm font-medium p-5 mb-6">
                       <div>
                         <div className="flex justify-between items-center mb-2">
                           <p>Current Profit</p>
                           <p>{truncateNumber(currentProfit, 7)} SOL</p>
                         </div>
                         <div className="flex justify-between items-center text-fomo-green">
-                          <p>{truncateNumber(currentProfitInUSD, 5)} USD</p>
+                          <p className="text-[#94A3B8]">
+                            {truncateNumber(currentProfitInUSD, 5)} USD
+                          </p>
                           <p>{truncateNumber(currentMultiplier, 2)}x</p>
                         </div>
                       </div>
@@ -856,7 +931,9 @@ export default function Mines() {
                           <p>{truncateNumber(nextProfit, 7)} SOL</p>
                         </div>
                         <div className="flex justify-between items-center text-fomo-green">
-                          <p>{truncateNumber(nextProfitInUSD, 5)} USD</p>
+                          <p className="text-[#94A3B8]">
+                            {truncateNumber(nextProfitInUSD, 5)} USD
+                          </p>
                           <p>{truncateNumber(nextMultiplier, 2)}x</p>
                         </div>
                       </div>
@@ -875,8 +952,14 @@ export default function Mines() {
                           } relative flex h-11 w-full cursor-pointer items-center rounded-[8px] bg-[#202329] px-4`}
                           onClick={!startAuto ? handleDropDown : undefined}
                         >
-                          <div className="bg-transparent text-base text-[#94A3B8] placeholder-[#94A3B8] font-chakra placeholder-opacity-40 outline-none w-full">
+                          <div className="flex justify-between items-center bg-transparent text-base text-[#94A3B8] placeholder-[#94A3B8] font-chakra placeholder-opacity-40 outline-none w-full">
                             {minesCount}
+                            <Image
+                              src="/assets/downArrow.png"
+                              alt="arrowDown"
+                              width={14}
+                              height={14}
+                            />
                           </div>
                           {!startAuto && dropDown && (
                             <div className="absolute top-14 z-50 max-h-[300px] overflow-y-scroll modalscrollbar left-0 bg-[#202329] border border-[#2A2E38] rounded-[8px] w-full">
@@ -982,7 +1065,7 @@ export default function Mines() {
         </>
       </GameOptions>
       <GameDisplay>
-        <div className="w-full flex justify-between items-center h-[2.125rem] mb-7 sm:mb-0">
+        <div className="w-full flex justify-between items-center h-[2.125rem]">
           <div>
             {isRolling ? (
               <div className="font-chakra text-xs sm:text-sm font-medium text-white text-opacity-75">
@@ -992,7 +1075,7 @@ export default function Mines() {
           </div>
         </div>
         <div
-          className="flex justify-center items-center w-full mb-[1.4rem] sm:my-5"
+          className="flex justify-center items-center w-full"
           onClick={() => {
             setCashoutModal({
               show: false,
@@ -1004,7 +1087,7 @@ export default function Mines() {
         >
           <div className="relative grid grid-cols-5 gap-1.5 sm:gap-2 text-white text-sm md:text-xl font-chakra">
             {cashoutModal.show && (
-              <div className="absolute top-0 left-0 w-full h-full flex items-center justify-center bg-black/40">
+              <div className="absolute top-0 left-0 w-full h-full flex items-center justify-center bg-black/10">
                 <div className="flex flex-col items-center justify-center bg-[#121418] rounded-[5px] border-2 border-fomo-green w-[200px] h-max p-2.5">
                   <p className="text-3xl text-fomo-green font-bold font-chakra mb-2">
                     x{truncateNumber(cashoutModal.strikeMultiplier, 2)}
@@ -1044,7 +1127,9 @@ export default function Mines() {
                         : userBets[index - 1].result === "Lost" &&
                             userBets[index - 1].pick === true
                           ? "border-[#F1323E] bg-[#F1323E33]"
-                          : "border-[#202329] hover:border-white/30"
+                          : gameStatus === "Completed"
+                            ? "bg-transparent border-white/10"
+                            : "bg-[#202329] border-[#202329] hover:border-white/30"
                       : betType === "auto"
                         ? userBets[index - 1].result === "" &&
                           userBets[index - 1].pick === true
@@ -1055,15 +1140,20 @@ export default function Mines() {
                             : userBets[index - 1].result === "Lost" &&
                                 userBets[index - 1].pick === true
                               ? "border-[#F1323E] bg-[#F1323E33]"
-                              : "border-[#202329] hover:border-white/30"
+                              : "bg-[#202329] border-[#202329] hover:border-white/30"
                         : null
-                  }  bg-[#202329] flex items-center justify-center cursor-pointer rounded-md text-center transition-all duration-300 ease-in-out w-[45px] h-[45px] sm:w-[55px] sm:h-[55px] md:w-[80px] md:h-[80px] xl:w-[95px] xl:h-[95px]`}
+                  } ${
+                    pendingRequests.includes(index) ? "blink_tile" : ""
+                  } flex items-center active:scale-90 justify-center cursor-pointer rounded-md text-center transition duration-150 ease-in-out w-[50px] h-[50px] sm:w-[55px] sm:h-[55px] md:w-[80px] md:h-[80px] xl:w-[90px] xl:h-[90px]`}
                   disabled={betType === "manual" && userBets[index - 1].pick}
                   onClick={() =>
                     betType === "auto"
                       ? handleAutoPick(index)
                       : betActive && betType === "manual"
-                        ? handlePick(index)
+                        ? setPendingRequests((prevRequests) => [
+                            ...prevRequests,
+                            index,
+                          ])
                         : null
                   }
                 >
