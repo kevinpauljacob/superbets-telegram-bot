@@ -327,6 +327,17 @@ export default function Mines() {
       }
     } catch (error: any) {
       errorCustom(error.message);
+      setNumBets(0);
+      setCurrentMultiplier(0);
+      setNextMultiplier(0);
+      setStrikeMultiplier(1);
+      setCurrentProfit(0);
+      setNextProfit(0);
+      setAmountWon(0);
+      setBetActive(false);
+      setIsRolling(false);
+      setProcessing(false);
+      setPendingRequests([]);
       console.error("Error occurred while betting:", error);
     }
   };
@@ -1133,7 +1144,7 @@ export default function Mines() {
                         : null
                   } ${
                     pendingRequests.includes(index) ? "blink_tile" : ""
-                  } flex items-center justify-center cursor-pointer rounded-md text-center transition duration-150 ease-in-out w-[50px] h-[50px] sm:w-[55px] sm:h-[55px] md:w-[80px] md:h-[80px] xl:w-[90px] xl:h-[90px]`}
+                  } flex items-center active:scale-90 justify-center cursor-pointer rounded-md text-center transition duration-150 ease-in-out w-[50px] h-[50px] sm:w-[55px] sm:h-[55px] md:w-[80px] md:h-[80px] xl:w-[90px] xl:h-[90px]`}
                   disabled={betType === "manual" && userBets[index - 1].pick}
                   onClick={() =>
                     betType === "auto"
