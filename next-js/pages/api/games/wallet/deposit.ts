@@ -17,6 +17,7 @@ import TxnSignature from "../../../../models/txnSignature";
 import { getToken } from "next-auth/jwt";
 import { NextApiRequest, NextApiResponse } from "next";
 import Campaign from "@/models/analytics/campaigns";
+import { SPL_TOKENS } from "@/context/config";
 
 const secret = process.env.NEXTAUTH_SECRET;
 
@@ -30,7 +31,7 @@ type InputType = {
   transactionBase64: string;
   wallet: string;
   amount: number;
-  tokenMint: string;
+  token: string;
   blockhashWithExpiryBlockHeight: BlockhashWithExpiryBlockHeight;
   campaignId: string;
 };
@@ -42,14 +43,14 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         transactionBase64,
         wallet,
         amount,
-        tokenMint,
+        token,
         blockhashWithExpiryBlockHeight,
         campaignId,
       }: InputType = req.body;
 
-      const token = await getToken({ req, secret });
+      const authToken = await getToken({ req, secret });
 
-      if (!token || !token.sub || token.sub != wallet)
+      if (!authToken || !authToken.sub || authToken.sub != wallet)
         return res.status(400).json({
           success: false,
           message: "User wallet not authenticated",
@@ -61,8 +62,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         !wallet ||
         !transactionBase64 ||
         !amount ||
-        !tokenMint ||
-        tokenMint != "SOL" ||
+        !token ||
+        (token != "SOL" && token != "USDC") ||
         !blockhashWithExpiryBlockHeight
       )
         return res
@@ -74,12 +75,29 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           .status(400)
           .json({ success: false, message: "Invalid deposit amount !" });
 
+      let tokenMint: string | null = "";
+      if (!token) {
+        return res
+          .status(400)
+          .json({ success: false, message: "Invalid Token" });
+      } else {
+        tokenMint =
+          SPL_TOKENS.find((tokenItem) => tokenItem.tokenName === token)
+            ?.tokenMint ?? null;
+      }
+
+      if (!tokenMint) {
+        return res
+          .status(400)
+          .json({ success: false, message: "Invalid Token" });
+      }
+
       let { transaction: vTxn } = await createDepositTxn(
         new PublicKey(wallet),
         amount,
         tokenMint,
       );
-
+      console.log("creatin vtxn with", amount, tokenMint);
       const txn = Transaction.from(
         Buffer.from(transactionBase64 as string, "base64"),
       );
@@ -102,7 +120,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       if (!user)
         await User.create({
           wallet,
-          deposit: [{ tokenMint, amount: amount }],
+          deposit: [{ token, amount: amount }],
         });
       else
         await User.findOneAndUpdate(
@@ -110,7 +128,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
             wallet,
             deposit: {
               $elemMatch: {
-                tokenMint,
+                token,
               },
             },
           },
@@ -124,7 +142,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         wallet,
         amount,
         type: true,
-        tokenMint,
+        token,
         txnSignature,
       });
 
@@ -141,7 +159,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       }
       return res.json({
         success: true,
-        message: `${amount} SOL successfully deposited!`,
+        message: `${amount} ${token} successfully deposited!`,
       });
     } catch (e: any) {
       console.log(e);

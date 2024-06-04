@@ -37,7 +37,7 @@ export default function BalanceModal() {
     language,
     userTokens,
     setUserTokens,
-    getBalance
+    getBalance,
   } = useGlobalContext();
 
   const [loading, setLoading] = useState<boolean>(false);
@@ -64,7 +64,7 @@ export default function BalanceModal() {
         else response = await withdraw(wallet, amount, selectedToken);
 
         if (response && response.success) {
-          getBalance()
+          getBalance();
           setShowWalletModal(false);
         } else {
           //   errorCustom(response.message);
@@ -126,7 +126,7 @@ export default function BalanceModal() {
   useEffect(() => {
     handleGetHistory();
   }, []);
-  
+
   interface TokenAccount {
     mintAddress: string;
     balance: number;
@@ -172,6 +172,7 @@ export default function BalanceModal() {
       const fetchAndUpddateToken = () => {
         getTokenAccounts(wallet.publicKey!, connection)
           .then((tokens) => {
+            console.log("gill", tokens);
             setUserTokens([
               {
                 mintAddress: "SOL",
@@ -283,7 +284,7 @@ export default function BalanceModal() {
                   <img
                     src={
                       SPL_TOKENS.find(
-                        (token) => token.tokenMint === selectedToken,
+                        (token) => token.tokenName === selectedToken,
                       )!.icon
                     }
                     alt=""
@@ -292,7 +293,7 @@ export default function BalanceModal() {
                   <span>
                     {
                       SPL_TOKENS.find(
-                        (token) => token.tokenMint === selectedToken,
+                        (token) => token.tokenName === selectedToken,
                       )!.tokenName
                     }
                   </span>
@@ -311,7 +312,7 @@ export default function BalanceModal() {
                         key={index}
                         className="w-full h-11 flex flex-row items-center bg-[#202329] px-4 py-2 text-[#94A3B8] text-base font-chakra gap-2 cursor-pointer hover:bg-[#292C32] rounded-md"
                         onClick={() => {
-                          setSelectedToken(token.tokenMint);
+                          setSelectedToken(token.tokenName);
                           setIsSelectModalOpen(false);
                         }}
                       >
@@ -368,7 +369,7 @@ export default function BalanceModal() {
                     $
                     {
                       SPL_TOKENS.find(
-                        (token) => token.tokenMint === selectedToken,
+                        (token) => token.tokenName === selectedToken,
                       )!.tokenName
                     }
                   </span>
@@ -433,14 +434,18 @@ export default function BalanceModal() {
                   <span className="font-changa font-medium text-sm text-[#94A3B8] text-opacity-90">
                     {truncateNumber(
                       userTokens.find(
-                        (token) => token.mintAddress === selectedToken,
+                        (token) =>
+                          token.mintAddress ===
+                          SPL_TOKENS.find(
+                            (coin) => coin.tokenName === selectedToken,
+                          )!.tokenMint,
                       )?.balance ?? 0,
                       3,
                     )}{" "}
                     $
                     {
                       SPL_TOKENS.find(
-                        (token) => token.tokenMint === selectedToken,
+                        (token) => token.tokenName === selectedToken,
                       )!.tokenName
                     }
                   </span>
@@ -465,8 +470,13 @@ export default function BalanceModal() {
                     className="text-xs font-medium text-white text-opacity-50 bg-[#292C32] hover:bg-[#47484A] focus:bg-[#47484A] transition-all rounded-[5px] py-1.5 px-4"
                     onClick={() => {
                       setAmount(
-                        userTokens.find((t) => t.mintAddress === selectedToken)!
-                          .balance,
+                        userTokens.find(
+                          (t) =>
+                            t.mintAddress ===
+                            SPL_TOKENS.find(
+                              (coin) => coin.tokenName === selectedToken,
+                            )!.tokenMint,
+                        )!.balance,
                       );
                     }}
                   >

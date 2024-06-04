@@ -15,6 +15,7 @@ import React, {
 import { connection } from "../context/gameTransactions";
 import { LAMPORTS_PER_SOL, PublicKey } from "@solana/web3.js";
 import { errorCustom } from "./toasts/ToastGroup";
+import { SPL_TOKENS } from "@/context/config";
 
 interface PointTier {
   index: number;
@@ -354,6 +355,18 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
               balance?.data.deposit.length > 0
             ) {
               setCoinData(balance.data.deposit);
+              let coin = balance.data.deposit[0];
+              let cd = SPL_TOKENS.find((c) => c.tokenMint === coin.tokenMint)!;
+              setSelectedCoin({
+                wallet: "",
+                type: true,
+                amount:
+                  coinData?.find((c) => c.tokenMint === cd.tokenMint)?.amount ||
+                  0,
+                tokenMint: cd.tokenMint,
+                tokenName: cd.tokenName,
+                img: cd.icon,
+              });
             } else {
               // console.log("Could not fetch balance.");
               setCoinData(null);

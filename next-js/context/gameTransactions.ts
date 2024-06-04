@@ -43,7 +43,7 @@ export const placeBet = async (
   betType: string,
   timeFrame: number,
 ) => {
-  const {selectedCoin} = useGlobalContext()
+  const { selectedCoin } = useGlobalContext();
 
   try {
     const res = await fetch(`/api/games/options`, {
@@ -51,7 +51,7 @@ export const placeBet = async (
       body: JSON.stringify({
         wallet: wallet.publicKey,
         amount: amount,
-       tokenMint:selectedCoin?.tokenMint,
+        tokenMint: selectedCoin?.tokenMint,
         betType,
         timeFrame,
       }),
@@ -80,7 +80,7 @@ export const placeFlip = async (
   amount: number,
   flipType: string, // heads / tails
 ) => {
-  const {selectedCoin}=useGlobalContext();
+  const { selectedCoin } = useGlobalContext();
   try {
     if (!wallet.publicKey) throw new Error("Wallet not connected");
 
@@ -92,7 +92,7 @@ export const placeFlip = async (
         wallet: wallet.publicKey,
         amount,
         flipType,
-        tokenMint:selectedCoin?.tokenMint,
+        tokenMint: selectedCoin?.tokenMint,
       }),
       headers: {
         "Content-Type": "application/json",
@@ -111,9 +111,24 @@ export const placeFlip = async (
 export const deposit = async (
   wallet: WalletContextState,
   amount: number,
-  tokenMint: string,
+  token: string,
   campaignId: any = null,
 ) => {
+  let tokenMint: string | null = "";
+  if (!token) {
+    errorCustom("Invalid Token");
+    return { success: true, message: "Invalid Token" };
+  } else {
+    tokenMint =
+      SPL_TOKENS.find((tokenItem) => tokenItem.tokenName === token)
+        ?.tokenMint ?? null;
+  }
+
+  if (!tokenMint) {
+    errorCustom("Invalid Token");
+    return { success: true, message: "Invalid Token" };
+  }
+
   if (amount == 0) {
     errorCustom("Please enter an amount greater than 0");
     return { success: true, message: "Please enter an amount greater than 0" };
@@ -127,6 +142,7 @@ export const deposit = async (
   try {
     let { transaction, blockhashWithExpiryBlockHeight } =
       await createDepositTxn(wallet.publicKey, amount, tokenMint);
+    console.log("creatin txn with", amount, tokenMint);
 
     transaction = await wallet.signTransaction!(transaction);
     const transactionBase64 = transaction
@@ -141,7 +157,7 @@ export const deposit = async (
         transactionBase64,
         wallet: wallet.publicKey,
         amount,
-        tokenMint,
+        token,
         blockhashWithExpiryBlockHeight,
         campaignId,
       }),
@@ -436,7 +452,7 @@ export const rollDice = async (
   amount: number,
   chosenNumbers: number[],
 ) => {
-  const {selectedCoin} = useGlobalContext()
+  const { selectedCoin } = useGlobalContext();
   try {
     if (!wallet.publicKey) throw new Error("Wallet not connected");
 
@@ -474,7 +490,7 @@ export const limboBet = async (
   amount: number,
   multiplier: number,
 ) => {
-  const {selectedCoin} = useGlobalContext()
+  const { selectedCoin } = useGlobalContext();
 
   try {
     if (!wallet.publicKey) throw new Error("Wallet not connected");
