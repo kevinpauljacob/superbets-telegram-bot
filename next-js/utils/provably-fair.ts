@@ -1,3 +1,4 @@
+import { count } from "console";
 import crypto from "crypto";
 import Decimal from "decimal.js";
 
@@ -224,7 +225,7 @@ export const generateGameResult = <T extends GameType>(
         for (; l <= t; ) a.includes(l) && t++, l++;
         a.push(t);
       }
-      console.log(a)
+
       return a as GameResult<T>;
     }
 
@@ -268,14 +269,12 @@ export const generateGameResult = <T extends GameType>(
     }
 
     case GameType.mines: {
-      
       let o = getFinalValues({
         serverSeed,
         clientSeed,
         nonce,
         cursor: 0,
-        count: parameter? parameter : 1,
-
+        count: parameter ? parameter : 1,
       }).map((e, t) => Math.floor(e * (25 - t)));
 
       const i: Array<number> = [];
@@ -290,8 +289,8 @@ export const generateGameResult = <T extends GameType>(
       const mines = Array.from({ length: 25 }, (_, index) =>
         i.includes(index) ? 1 : 0,
       );
-   
-      return mines as GameResult<T>; 
+
+      return mines as GameResult<T>;
     }
 
     // case GameType.hilo: {

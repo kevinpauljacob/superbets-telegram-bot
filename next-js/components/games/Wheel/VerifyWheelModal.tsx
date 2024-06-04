@@ -20,6 +20,7 @@ export interface Wheel {
   result: string;
   strikeNumber: number;
   strikeMultiplier: number;
+  minesCount?:number;
   amountWon: number;
   nonce?: number;
   gameSeed?: {

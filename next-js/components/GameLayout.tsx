@@ -131,7 +131,7 @@ const GameLayout: React.FC<LayoutProps> = ({ children, title }) => {
           })}
         </div>
         <div className="bg-white bg-opacity-10 h-[1px] lg:h-auto w-full lg:w-[1px]" />
-        <div className="fadeInUp flex flex-1 flex-col items-center justify-between gap-0 m-3 lg:m-9 bg-[#0C0F16] rounded-lg p-3 lg:px-10 lg:pt-6 lg:pb-10">
+        <div className="fadeInUp flex flex-1 flex-col items-center justify-between gap-0 m-3 lg:m-9 bg-[#0E0F14] rounded-lg p-3 lg:px-10 lg:pt-6 lg:pb-10">
           {React.Children.map(children, (child) => {
             if (React.isValidElement(child) && child.type === GameDisplay) {
               return child;

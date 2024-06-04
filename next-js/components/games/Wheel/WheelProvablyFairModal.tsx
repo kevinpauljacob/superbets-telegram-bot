@@ -13,7 +13,7 @@ import Arc from "@/components/games/Wheel/Arc";
 import { riskToChance } from "@/components/games/Wheel/Segments";
 import { verify } from "tweetnacl";
 import CheckPF from "@/public/assets/CheckPF.svg";
-import { errorCustom, successAlert } from "@/components/toasts/ToastGroup";
+import { errorAlert, errorCustom, successAlert } from "@/components/toasts/ToastGroup";
 import { useGlobalContext } from "@/components/GlobalContext";
 import { translator } from "@/context/transactions";
 import ProvablyFairModal from "../ProvablyFairModal";
@@ -78,6 +78,7 @@ export default function WheelProvablyFairModal({
     nonce: string;
     risk?: string;
     segments?: number;
+    parameter?: number;
   }>(
     bet?.gameSeed
       ? {
@@ -90,6 +91,9 @@ export default function WheelProvablyFairModal({
           segments:
             bet.segments ||
             (selectedGameType === GameType.wheel ? 10 : undefined),
+          parameter:
+            bet.minesCount ||
+            (selectedGameType === GameType.mines ? 1 : undefined),
         }
       : {
           clientSeed: "",
@@ -97,6 +101,7 @@ export default function WheelProvablyFairModal({
           nonce: "",
           risk: selectedGameType === GameType.wheel ? "low" : undefined,
           segments: selectedGameType === GameType.wheel ? 10 : undefined,
+          parameter: selectedGameType === GameType.mines ? 1 : undefined,
         },
   );
 
@@ -165,10 +170,10 @@ export default function WheelProvablyFairModal({
       }),
     }).then((res) => res.json());
 
-    if (!data.success) return console.error(data.message);
+    if (!data.success) return errorAlert(data.message);
 
     setModalData(data);
-    successAlert("Successfully changed the server seed")
+    successAlert("Successfully changed the server seed");
     setNewClientSeed(generateClientSeed());
   };
 
@@ -335,9 +340,10 @@ export default function WheelProvablyFairModal({
                       {translator("Game", language)}
                     </label>
                     <div className="flex items-center">
-                    <GameSelect
-                      selectedGameType={selectedGameType}
-                      setSelectedGameType={setSelectedGameType}/>
+                      <GameSelect
+                        selectedGameType={selectedGameType}
+                        setSelectedGameType={setSelectedGameType}
+                      />
                     </div>
                   </div>
                   <div>

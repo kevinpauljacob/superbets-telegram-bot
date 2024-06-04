@@ -84,9 +84,7 @@ export default function BetAmount({
   useEffect(() => {
     setMaxBetAmt(
       Math.min(
-        game === "keno" || game === "wheel"
-          ? 20.0
-          : truncateNumber(currentMaxBetAmt, 4),
+        truncateNumber(currentMaxBetAmt, 4),
         coinData && coinData[0]?.amount
           ? truncateNumber(coinData[0].amount, 4)
           : truncateNumber(currentMaxBetAmt, 4),
