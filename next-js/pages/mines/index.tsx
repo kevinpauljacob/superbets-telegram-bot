@@ -85,7 +85,8 @@ export default function Mines() {
     strikeMultiplier: 0,
     pointsGained: 0,
   });
-  // const [selectTile, setSelectTile] = useState<boolean>(true);
+  const [pendingRequests, setPendingRequests] = useState<number[]>([]);
+  const [processing, setProcessing] = useState(false);
   const [gameStatus, setGameStatus] = useState<"Not Started" | "Completed">(
     "Not Started",
   );
@@ -192,6 +193,8 @@ export default function Mines() {
         setCurrentProfit(0);
         setNextProfit(0);
         setAmountWon(0);
+        setProcessing(false);
+        setPendingRequests([]);
       }
     } catch (error) {
       console.error("Error occurred while betting:", error);
@@ -306,6 +309,8 @@ export default function Mines() {
         setBetActive(false);
         errorCustom(message);
         setIsRolling(false);
+        setProcessing(false);
+        setPendingRequests([]);
       }
 
       const win: boolean = result === "Pending";
@@ -324,6 +329,42 @@ export default function Mines() {
       console.error("Error occurred while betting:", error);
     }
   };
+
+  const processPendingRequests = async () => {
+    if (processing || pendingRequests.length === 0) return;
+
+    setProcessing(true);
+
+    const localPendingRequests = [...pendingRequests];
+
+    for (let i = 0; i < localPendingRequests.length; i++) {
+      const currentRequest = localPendingRequests[i];
+
+      // console.log(`Processing request: ${currentRequest}`);
+      const alreadyPicked = userBets[currentRequest - 1]?.pick;
+      if (alreadyPicked) {
+        // console.warn(`Number ${currentRequest} has already been picked.`);
+      } else {
+        await handlePick(currentRequest);
+      }
+
+      setPendingRequests((prev) =>
+        prev.filter((req) => req !== currentRequest),
+      );
+
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    }
+
+    setProcessing(false);
+  };
+
+  useEffect(() => {
+    if (!processing && pendingRequests.length > 0) {
+      // console.log("Triggering processPendingRequests");
+      processPendingRequests();
+    }
+    // console.log(`Updated pending requests: ${pendingRequests}`);
+  }, [pendingRequests]);
 
   const handleAutoBet = async () => {
     try {
@@ -798,8 +839,14 @@ export default function Mines() {
                       } relative flex h-11 w-full cursor-pointer items-center rounded-[8px] bg-[#202329] px-4`}
                       onClick={handleDropDown}
                     >
-                      <div className="bg-transparent text-base text-[#94A3B8] placeholder-[#94A3B8] font-chakra placeholder-opacity-40 outline-none w-full">
+                      <div className="flex justify-between items-center bg-transparent text-base text-[#94A3B8] placeholder-[#94A3B8] font-chakra placeholder-opacity-40 outline-none w-full">
                         {minesCount}
+                        <Image
+                          src="/assets/downArrow.png"
+                          alt="arrowDown"
+                          width={14}
+                          height={14}
+                        />
                       </div>
                       {dropDown && (
                         <div className="absolute top-14 z-50 max-h-[300px] overflow-y-scroll modalscrollbar left-0 bg-[#202329] border border-[#2A2E38] rounded-[8px] w-full">
@@ -893,8 +940,14 @@ export default function Mines() {
                           } relative flex h-11 w-full cursor-pointer items-center rounded-[8px] bg-[#202329] px-4`}
                           onClick={!startAuto ? handleDropDown : undefined}
                         >
-                          <div className="bg-transparent text-base text-[#94A3B8] placeholder-[#94A3B8] font-chakra placeholder-opacity-40 outline-none w-full">
+                          <div className="flex justify-between items-center bg-transparent text-base text-[#94A3B8] placeholder-[#94A3B8] font-chakra placeholder-opacity-40 outline-none w-full">
                             {minesCount}
+                            <Image
+                              src="/assets/downArrow.png"
+                              alt="arrowDown"
+                              width={14}
+                              height={14}
+                            />
                           </div>
                           {!startAuto && dropDown && (
                             <div className="absolute top-14 z-50 max-h-[300px] overflow-y-scroll modalscrollbar left-0 bg-[#202329] border border-[#2A2E38] rounded-[8px] w-full">
@@ -1077,13 +1130,18 @@ export default function Mines() {
                               ? "border-[#F1323E] bg-[#F1323E33]"
                               : "bg-[#202329] border-[#202329] hover:border-white/30"
                         : null
+                  } ${
+                    pendingRequests.includes(index) ? "blink_tile" : ""
                   } flex items-center justify-center cursor-pointer rounded-md text-center transition duration-150 ease-in-out w-[50px] h-[50px] sm:w-[55px] sm:h-[55px] md:w-[80px] md:h-[80px] xl:w-[90px] xl:h-[90px]`}
                   disabled={betType === "manual" && userBets[index - 1].pick}
                   onClick={() =>
                     betType === "auto"
                       ? handleAutoPick(index)
                       : betActive && betType === "manual"
-                        ? handlePick(index)
+                        ? setPendingRequests((prevRequests) => [
+                            ...prevRequests,
+                            index,
+                          ])
                         : null
                   }
                 >

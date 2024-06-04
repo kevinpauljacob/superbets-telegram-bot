@@ -186,6 +186,22 @@ text-shadow-gold {
   animation: blink_dice 0.4s ease-in-out 0s 4;
 }
 
+@keyframes blink_tile {
+  0% {
+    border-color: #202329;
+  }
+  50% {
+    border-color: rgb(255 255 255 / 0.3);
+  }
+  100% {
+    border-color: #202329;
+  }
+}
+
+.blink_tile {
+  animation: blink_tile 1s ease-in-out 0s infinite;
+}
+
 .box-shadow-green {
   box-shadow:
     0 0 7px #00e372,
@@ -567,5 +583,3 @@ input[type="range"] {
   cursor: pointer;
   border-radius: 100%;
 }
-
-
