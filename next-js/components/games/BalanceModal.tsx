@@ -65,6 +65,7 @@ export default function BalanceModal() {
         } else {
           //   errorCustom(response.message);
         }
+        handleGetHistory();
         setLoading(false);
       } catch (e) {
         setLoading(false);
@@ -76,7 +77,7 @@ export default function BalanceModal() {
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
-    const amount = parseFloat(e.target.value)
+    const amount = parseFloat(e.target.value);
     setAmount(parseFloat(e.target.value));
   };
 
@@ -119,8 +120,9 @@ export default function BalanceModal() {
   };
 
   useEffect(() => {
-    if (actionType === "History") handleGetHistory();
-  }, [actionType]);
+    handleGetHistory();
+  }, []);
+  
   interface TokenAccount {
     mintAddress: string;
     balance: number;
@@ -235,7 +237,7 @@ export default function BalanceModal() {
             {translator("Withdraw", language)}
           </button>
           <button
-            className={`w-full border-2 rounded-md py-2 text-white font-semibold text-xs sm:text-sm transition hover:duration-75 ease-in-out ${
+            className={`w-full border-2 rounded-md py-2 text-white font-semibold text-xs sm:text-sm transition hover:duration-75 ease-in-out flex items-center justify-center gap-1 ${
               actionType === "History"
                 ? "bg-[#d9d9d90d] border-transparent text-opacity-90"
                 : "border-[#d9d9d90d] hover:bg-[#9361d1] focus:bg-[#602E9E] text-opacity-50 hover:text-opacity-90"
@@ -243,6 +245,18 @@ export default function BalanceModal() {
             onClick={() => setActionType("History")}
           >
             {translator("History", language)}
+            {historyData.length > 0 && (
+              <div className="bg-[#EFA411] bg-opacity-10 text-[#EFA411] text-[0.625rem] font-sans font-semibold w-5 min-h-5 rounded-full">
+                {
+                  historyData.filter(
+                    (history) =>
+                      !history?.type &&
+                      history?.status &&
+                      history?.status == "review",
+                  ).length
+                }
+              </div>
+            )}
           </button>
         </div>
 
@@ -301,17 +315,17 @@ export default function BalanceModal() {
                         <span>{token.tokenName}</span>
                         <div className="grow" />
                         <span className="text-gray-400">
-                          {actionType === "Deposit" && (
-                          userTokens.find(
-                            (t) => t.mintAddress === token.tokenMint,
-                          ) &&
-                          userTokens.find(
-                            (t) => t.mintAddress === token.tokenMint,
-                          )
-                            ? userTokens.find(
-                                (t) => t.mintAddress === token.tokenMint,
-                              )!.balance
-                            : "0")}
+                          {actionType === "Deposit" &&
+                            (userTokens.find(
+                              (t) => t.mintAddress === token.tokenMint,
+                            ) &&
+                            userTokens.find(
+                              (t) => t.mintAddress === token.tokenMint,
+                            )
+                              ? userTokens.find(
+                                  (t) => t.mintAddress === token.tokenMint,
+                                )!.balance
+                              : "0")}
                           {/** todo: return amount from game wallet */}
                           {actionType === "Withdraw" && "0"}
                         </span>
