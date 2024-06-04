@@ -13,6 +13,7 @@ import { errorCustom, successCustom } from "@/components/toasts/ToastGroup";
 import ProvablyFairModal from "../ProvablyFairModal";
 import { useGlobalContext } from "@/components/GlobalContext";
 import { translator } from "@/context/transactions";
+import GameSelect from "../GameSelect";
 
 export interface PFModalData {
   activeGameSeed: {
@@ -121,7 +122,7 @@ export default function Dice2ProvablyFairModal({
       }),
     }).then((res) => res.json());
 
-    if (!data.success) return console.error(data.message);
+    if (!data.success) return errorCustom(data.message);
 
     setModalData(data);
     successCustom("Successfully changed the server seed")
@@ -291,22 +292,10 @@ export default function Dice2ProvablyFairModal({
                       {translator("Game", language)}
                     </label>
                     <div className="flex items-center">
-                      <select
-                        name="game"
-                        value={selectedGameType}
-                        onChange={(e) =>
-                          setSelectedGameType(e.target.value as GameType)
-                        }
-                        className="bg-[#202329] text-white font-chakra text-xs font-medium mt-1 rounded-md px-5 py-4 w-full relative appearance-none"
-                      >
-                        <option value={GameType.keno}>Keno</option>
-                        <option value={GameType.dice}>Dice</option>
-                        <option value={GameType.coin}>Coin Flip</option>
-
-                        <option value={GameType.dice2}>Dice2</option>
-
-                        <option value={GameType.wheel}>Wheel</option>
-                      </select>
+                      <GameSelect
+                        selectedGameType={selectedGameType}
+                        setSelectedGameType={setSelectedGameType}
+                      />
                     </div>
                   </div>
                   <div>

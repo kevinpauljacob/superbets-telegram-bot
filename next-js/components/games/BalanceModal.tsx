@@ -20,6 +20,7 @@ import { useRouter } from "next/router";
 import { SPL_TOKENS } from "@/context/config";
 import { Connection, ParsedAccountData, PublicKey } from "@solana/web3.js";
 import { TOKEN_PROGRAM_ID } from "@solana/spl-token";
+import Link from "next/link";
 
 export default function BalanceModal() {
   const methods = useForm();
@@ -36,6 +37,7 @@ export default function BalanceModal() {
     language,
     userTokens,
     setUserTokens,
+    getBalance
   } = useGlobalContext();
 
   const [loading, setLoading] = useState<boolean>(false);
@@ -48,6 +50,7 @@ export default function BalanceModal() {
   >("Deposit");
   const historyHeaders = ["Time", "Amount", "Type", "Status"];
   const mobileHistoryHeaders = ["Amount", "Status"];
+  const [checked, setChecked] = useState(false);
 
   const onSubmit = async (data: any) => {
     if (!loading) {
@@ -61,6 +64,7 @@ export default function BalanceModal() {
         else response = await withdraw(wallet, amount, selectedToken);
 
         if (response && response.success) {
+          getBalance()
           setShowWalletModal(false);
         } else {
           //   errorCustom(response.message);
@@ -441,7 +445,6 @@ export default function BalanceModal() {
                     }
                   </span>
                 </div>
-
                 <div
                   className={`group flex h-11 w-full cursor-pointer items-center rounded-[8px] bg-[#202329] pl-4 pr-2.5`}
                 >
@@ -470,7 +473,6 @@ export default function BalanceModal() {
                     {translator("Max", language)}
                   </span>
                 </div>
-
                 <span
                   className={`${
                     methods.formState.errors["amount"]
@@ -550,10 +552,52 @@ export default function BalanceModal() {
             {actionType !== "History" && (
               <button
                 type="submit"
-                className="rounded-[5px] -mt-1 mb-4 border border-[#F200F21A] bg-[#7839C5] hover:bg-[#9361d1] focus:bg-[#602E9E] transition-all py-2.5 font-changa text-base font-medium text-[#F0F0F0] text-opacity-90"
+                className="rounded-[5px] -mt-1 mb-4 disabled:opacity-50 border border-[#F200F21A] bg-[#7839C5] hover:bg-[#9361d1] focus:bg-[#602E9E] transition-all py-2.5 font-changa text-base font-medium text-[#F0F0F0] text-opacity-90"
+                disabled={actionType === "Deposit" && !checked}
               >
                 {loading ? <Loader /> : translator(actionType, language)}
               </button>
+            )}
+            {actionType === "Deposit" && (
+              <div className="flex  gap-2">
+                <div>
+                  <input
+                    type="checkbox"
+                    id="termsCheckbox"
+                    className="opacity-0 absolute h-[18px] w-[18px]"
+                    checked={checked}
+                    onChange={(e) => setChecked(e.target.checked)}
+                    style={{ zIndex: -1 }}
+                  />
+                  <div
+                    className="h-[18px] w-[18px] bg-[#202329] rounded-sm "
+                    onClick={() => setChecked(!checked)}
+                    style={{
+                      backgroundColor: checked ? "gray" : "#202329",
+                    }}
+                  >
+                    {checked && (
+                      <span className="flex items-center justify-center pt-1">
+                        <svg className="text-black h-3 w-3" viewBox="0 0 24 24">
+                          <path
+                            fill="black"
+                            d="M9 19l-7-7 1.41-1.41L9 16.17 20.59 4.59 22 6l-13 13z"
+                          />
+                        </svg>
+                      </span>
+                    )}
+                  </div>
+                </div>
+                <label
+                  htmlFor="termsCheckbox"
+                  className="text-[12px] text-[#94A3B8] font-chakra font-bold w-[397px] h-[47px]   text-justify"
+                  onClick={() => setChecked(!checked)}
+                >
+                  I agree with Privacy Policy and with Terms of Use, Gambling
+                  isn't forbidden by my local authorities and I'm at least 18
+                  years old.
+                </label>
+              </div>
             )}
           </form>
         </FormProvider>

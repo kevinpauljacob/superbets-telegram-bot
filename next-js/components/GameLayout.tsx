@@ -39,9 +39,14 @@ export const GameFooterInfo: React.FC<GameFooterProps> = ({
   amount,
   chance,
 }) => {
- 
-  const { coinData, setShowWalletModal, currentGame, houseEdge, language , selectedCoin } =
-    useGlobalContext();
+  const {
+    coinData,
+    setShowWalletModal,
+    currentGame,
+    houseEdge,
+    language,
+    selectedCoin,
+  } = useGlobalContext();
 
   return (
     <div className="flex px-0 xl:px-4 mb-0 md:mb-[1.4rem] gap-4 flex-row w-full justify-between">
@@ -117,8 +122,9 @@ const GameLayout: React.FC<LayoutProps> = ({ children, title }) => {
   return (
     <div className="flex flex-1 h-fit w-full flex-col items-center justify-start px-3 lg:px-6">
       <FOMOHead
-        title={`${title ? title + " | " : ""
-          }FOMO.wtf - 0% House Edge, Pure Wins`}
+        title={`${
+          title ? title + " | " : ""
+        }FOMO.wtf - 0% House Edge, Pure Wins`}
       />
 
       <div className="fadeInUp w-full min-h-fit lg:min-h-[calc(100vh-13.7rem)] items-stretch bg-[#121418] rounded-2xl flex flex-col-reverse lg:flex-row">
@@ -130,7 +136,7 @@ const GameLayout: React.FC<LayoutProps> = ({ children, title }) => {
           })}
         </div>
         <div className="bg-white bg-opacity-10 h-[1px] lg:h-auto w-full lg:w-[1px]" />
-        <div className="fadeInUp flex flex-1 flex-col items-center justify-between gap-0 m-3 lg:m-9 bg-[#0C0F16] rounded-lg p-3 lg:px-10 lg:pt-6 lg:pb-10">
+        <div className="fadeInUp flex flex-1 flex-col items-center justify-between gap-0 m-3 lg:m-9 bg-[#0E0F14] rounded-lg p-3 lg:px-10 lg:pt-6 lg:pb-10">
           {React.Children.map(children, (child) => {
             if (React.isValidElement(child) && child.type === GameDisplay) {
               return child;

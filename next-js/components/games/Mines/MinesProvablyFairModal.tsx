@@ -1,19 +1,16 @@
 import {
   GameType,
   generateClientSeed,
+  generateGameResult,
 } from "@/utils/provably-fair";
 import Image from "next/image";
 import { useEffect, useState } from "react";
-import { Dice } from "./VerifyDiceModal";
+import { Mines } from "./VerifyMinesModal";
+import toast from "react-hot-toast";
 import { FaRegCopy } from "react-icons/fa6";
 import { MdClose } from "react-icons/md";
 import CheckPF from "@/public/assets/CheckPF.svg";
-import {
-  errorAlert,
-  errorCustom,
-  successAlert,
-  successCustom,
-} from "@/components/toasts/ToastGroup";
+import { errorAlert, errorCustom, successAlert } from "@/components/toasts/ToastGroup";
 import ProvablyFairModal from "../ProvablyFairModal";
 import { translator } from "@/context/transactions";
 import { useGlobalContext } from "@/components/GlobalContext";
@@ -44,10 +41,10 @@ interface Props {
   onClose: () => void;
   modalData: PFModalData;
   setModalData: React.Dispatch<React.SetStateAction<PFModalData>>;
-  bet?: Dice;
+  bet?: Mines;
 }
 
-export default function RollDiceProvablyFairModal({
+export default function MinesProvablyFairModal({
   isOpen,
   onClose,
   modalData,
@@ -55,32 +52,47 @@ export default function RollDiceProvablyFairModal({
   bet,
 }: Props) {
   const [state, setState] = useState<"seeds" | "verify">(
-    modalData.tab ?? "seeds",
-  );
-  const [selectedGameType, setSelectedGameType] = useState<GameType>(
-    GameType.dice,
+    modalData.tab ?? "seeds"
   );
   const [newClientSeed, setNewClientSeed] = useState<string>(
     generateClientSeed(),
   );
 
+  const [selectedGameType, setSelectedGameType] = useState<GameType>(
+    GameType.mines,
+  );
   const { language } = useGlobalContext();
-
   const [verificationState, setVerificationState] = useState<{
     clientSeed: string;
     serverSeed: string;
     nonce: string;
+    risk?: string;
+    segments?: number;
+    parameter?:number;
   }>(
     bet?.gameSeed
       ? {
-          clientSeed: bet.gameSeed?.clientSeed,
-          serverSeed: bet.gameSeed?.serverSeed ?? "",
+          clientSeed: bet.gameSeed.clientSeed,
+          serverSeed: bet.gameSeed.serverSeed ?? "",
           nonce: bet.nonce?.toString() ?? "",
+          risk:
+            bet.risk ||
+            (selectedGameType === GameType.wheel ? "low" : undefined),
+          segments:
+            bet.segments ||
+            (selectedGameType === GameType.wheel ? 10 : undefined),
+            parameter:
+            bet.minesCount || 
+            (selectedGameType === GameType.mines ? 1 : undefined)
+      
         }
       : {
           clientSeed: "",
           serverSeed: "",
           nonce: "",
+          risk: selectedGameType === GameType.wheel ? "low" : undefined,
+          segments: selectedGameType === GameType.wheel ? 10 : undefined,
+        
         },
   );
 
@@ -127,10 +139,9 @@ export default function RollDiceProvablyFairModal({
       }),
     }).then((res) => res.json());
 
-    if (!data.success) return errorCustom(data.message);
-
+    if (!data.success) return errorAlert(data.message);
+    successAlert("Successfully changed the server seed")
     setModalData(data);
-    successCustom("Successfully changed the server seed")
     setNewClientSeed(generateClientSeed());
   };
 
@@ -146,7 +157,7 @@ export default function RollDiceProvablyFairModal({
             handleClose();
           }}
           id="pf-modal-bg"
-          className="absolute z-[150] left-0 top-0 flex h-full w-full items-center justify-center bg-[#33314680] backdrop-blur-[0px] transition-all"
+          className="absolute z-[150] left-0 top-0 flex h-full w-full items-center justify-center bg-black bg-opacity-50 backdrop-blur transition-all"
         >
           <div className="bg-[#121418] max-h-[80dvh]  overflow-y-scroll p-8 rounded-lg z-10 w-11/12 sm:w-[32rem] -mt-[4.7rem] md:mt-0 nobar">
             <div className="flex font-chakra tracking-wider text-2xl font-semibold text-[#F0F0F0] items-center justify-between">
@@ -193,7 +204,7 @@ export default function RollDiceProvablyFairModal({
                     <label className="text-xs font-changa text-opacity-90 text-[#F0F0F0]">
                       {translator("Active Client Seed", language)}
                     </label>
-                    <div className="bg-[#202329] mt-1 rounded-md px-4 py-3 w-full relative flex items-center justify-between">
+                    <div className="bg-[#202329] mt-1 rounded-md px-5 py-4 w-full relative flex items-center justify-between">
                       <span className="truncate text-[#B9B9BA] text-xs font-semibold">
                         {modalData.activeGameSeed.clientSeed}
                       </span>
@@ -209,7 +220,7 @@ export default function RollDiceProvablyFairModal({
                     <label className="text-xs font-changa text-opacity-90 text-[#F0F0F0]">
                       {translator("Active Server Seed (Hashed)", language)}
                     </label>
-                    <div className="bg-[#202329] mt-1 rounded-md px-4 py-3 w-full relative flex items-center justify-between">
+                    <div className="bg-[#202329] mt-1 rounded-md px-5 py-4 w-full relative flex items-center justify-between">
                       <span className="truncate text-[#B9B9BA] text-xs font-semibold">
                         {modalData.activeGameSeed.serverSeedHash}
                       </span>
@@ -231,7 +242,7 @@ export default function RollDiceProvablyFairModal({
                       type="text"
                       name="totalBets"
                       placeholder={modalData.activeGameSeed.nonce.toString()}
-                      className="bg-[#202329] text-[#B9B9BA] text-xs font-semibold mt-1 rounded-md px-4 py-3 w-full relative flex items-center justify-between"
+                      className="bg-[#202329] text-[#B9B9BA] text-xs font-semibold mt-1 rounded-md px-5 py-4 w-full relative flex items-center justify-between"
                       readOnly
                     />
                   </div>
@@ -264,7 +275,7 @@ export default function RollDiceProvablyFairModal({
                       <label className="text-xs font-changa text-opacity-90 text-[#F0F0F0]">
                         {translator("Next Server Seed", language)}
                       </label>
-                      <div className="bg-[#202329] mt-1 rounded-md px-4 py-3 w-full relative flex items-center justify-between">
+                      <div className="bg-[#202329] mt-1 rounded-md px-5 py-4 w-full relative flex items-center justify-between">
                         <span className="truncate text-[#B9B9BA] text-xs font-semibold">
                           {modalData.nextGameSeed.serverSeedHash}
                         </span>
@@ -287,20 +298,19 @@ export default function RollDiceProvablyFairModal({
                 <div className="grid gap-2">
                   <div className="border-2 border-opacity-5 border-[#FFFFFF] md:px-8">
                     <ProvablyFairModal
-                      verificationState={verificationState}
                       setVerificationState={setVerificationState}
+                      verificationState={verificationState}
                       selectedGameType={selectedGameType}
-                    />
+                       />
                   </div>
                   <div>
                     <label className="text-xs text-opacity-75 font-changa text-[#F0F0F0]">
                       {translator("Game", language)}
                     </label>
                     <div className="flex items-center">
-                      <GameSelect
-                        selectedGameType={selectedGameType}
-                        setSelectedGameType={setSelectedGameType}
-                      />
+                    <GameSelect
+                      selectedGameType={selectedGameType}
+                      setSelectedGameType={setSelectedGameType}/>
                     </div>
                   </div>
                   <div>

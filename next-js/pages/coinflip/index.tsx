@@ -210,9 +210,9 @@ export default function Flip() {
             (autoWinChangeReset || autoLossChangeReset
               ? betAmt
               : autoBetCount === "inf"
-              ? Math.max(0, betAmt)
-              : betAmt *
-                (autoLossChange !== null ? autoLossChange / 100.0 : 0));
+                ? Math.max(0, betAmt)
+                : betAmt *
+                  (autoLossChange !== null ? autoLossChange / 100.0 : 0));
 
         // console.log("Current bet amount:", betAmt);
         // console.log("Auto loss change:", autoLossChange);
@@ -225,7 +225,9 @@ export default function Flip() {
         autoBetProfit > 0 &&
         autoBetProfit >= autoStopProfit
       ) {
-        warningCustom("Profit limit reached.", "top-left");
+        setTimeout(() => {
+          warningCustom("Profit limit reached.", "top-left");
+        }, 500);
         setAutoBetCount(0);
         setStartAuto(false);
         return;
@@ -234,9 +236,11 @@ export default function Flip() {
         useAutoConfig &&
         autoStopLoss &&
         autoBetProfit < 0 &&
-        potentialLoss <= -autoStopLoss
+        potentialLoss < -autoStopLoss
       ) {
-        warningCustom("Loss limit reached.", "top-left");
+        setTimeout(() => {
+          warningCustom("Loss limit reached.", "top-left");
+        }, 500);
         setAutoBetCount(0);
         setStartAuto(false);
         return;
@@ -314,6 +318,7 @@ export default function Flip() {
                 !betType ||
                 loading ||
                 !session?.user ||
+                !selectedCoin ||
                 (selectedCoin && selectedCoin.amount < minGameAmount) ||
                 (betAmt !== undefined &&
                   maxBetAmt !== undefined &&
@@ -436,6 +441,7 @@ export default function Flip() {
                       !betType ||
                       loading ||
                       !session?.user ||
+                      !selectedCoin ||
                       (selectedCoin && selectedCoin.amount < minGameAmount) ||
                       (betAmt !== undefined &&
                         maxBetAmt !== undefined &&
@@ -466,10 +472,10 @@ export default function Flip() {
               {flipping
                 ? "Flipping..."
                 : result
-                ? result === "Won"
-                  ? translator("You Won!", language)
-                  : translator("You Lost!", language)
-                : ""}
+                  ? result === "Won"
+                    ? translator("You Won!", language)
+                    : translator("You Lost!", language)
+                  : ""}
             </span>
             <div className="flex items-center gap-2">
               {betResults.map((result, index) => (
@@ -517,16 +523,16 @@ export default function Flip() {
                 betType && loading
                   ? "translateZ1"
                   : result
-                  ? result === "Won"
-                    ? betType === "Tails"
+                    ? result === "Won"
+                      ? betType === "Tails"
+                        ? "z-[100]"
+                        : "z-[10]"
+                      : betType === "Tails"
+                        ? "z-[10]"
+                        : "z-[100]"
+                    : betType === "Tails"
                       ? "z-[100]"
                       : "z-[10]"
-                    : betType === "Tails"
-                    ? "z-[10]"
-                    : "z-[100]"
-                  : betType === "Tails"
-                  ? "z-[100]"
-                  : "z-[10]"
               }`}
             />
             <Image
@@ -539,16 +545,16 @@ export default function Flip() {
                 betType && loading
                   ? "z-[10]"
                   : result
-                  ? result === "Won"
-                    ? betType === "Heads"
-                      ? "z-[100]"
-                      : "z-[1]"
+                    ? result === "Won"
+                      ? betType === "Heads"
+                        ? "z-[100]"
+                        : "z-[1]"
+                      : betType === "Heads"
+                        ? "z-[1]"
+                        : "z-[100]"
                     : betType === "Heads"
-                    ? "z-[1]"
-                    : "z-[100]"
-                  : betType === "Heads"
-                  ? "z-[100]"
-                  : "z-[10]"
+                      ? "z-[100]"
+                      : "z-[10]"
               }`}
             />
           </div>

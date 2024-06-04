@@ -210,8 +210,7 @@ export default function Dice() {
           // update count
           if (typeof autoBetCount === "number") {
             setAutoBetCount(autoBetCount > 0 ? autoBetCount - 1 : 0);
-            autoBetCount === 1 &&
-              warningCustom("Auto bet stopped", "top-left");
+            autoBetCount === 1 && warningCustom("Auto bet stopped", "top-left");
           } else
             setAutoBetCount(
               autoBetCount.length > 12
@@ -275,8 +274,8 @@ export default function Dice() {
     );
     diceElements.forEach((element) => element?.classList.add("blink_dice"));
     setTimeout(() => {
-      diceElements.forEach(
-        (element) => element?.classList.remove("blink_dice"),
+      diceElements.forEach((element) =>
+        element?.classList.remove("blink_dice"),
       );
     }, 2000);
   };
@@ -313,9 +312,9 @@ export default function Dice() {
             (autoWinChangeReset || autoLossChangeReset
               ? betAmt
               : autoBetCount === "inf"
-              ? Math.max(0, betAmt)
-              : betAmt *
-                (autoLossChange !== null ? autoLossChange / 100.0 : 0));
+                ? Math.max(0, betAmt)
+                : betAmt *
+                  (autoLossChange !== null ? autoLossChange / 100.0 : 0));
 
         // console.log("Current bet amount:", betAmt);
         // console.log("Auto loss change:", autoLossChange);
@@ -328,7 +327,9 @@ export default function Dice() {
         autoBetProfit > 0 &&
         autoBetProfit >= autoStopProfit
       ) {
-        warningCustom("Profit limit reached.", "top-left");
+        setTimeout(() => {
+          warningCustom("Profit limit reached.", "top-left");
+        }, 500);
         setAutoBetCount(0);
         setStartAuto(false);
         return;
@@ -337,9 +338,11 @@ export default function Dice() {
         useAutoConfig &&
         autoStopLoss &&
         autoBetProfit < 0 &&
-        potentialLoss <= -autoStopLoss
+        potentialLoss < -autoStopLoss
       ) {
-        warningCustom("Loss limit reached.", "top-left");
+        setTimeout(() => {
+          warningCustom("Loss limit reached.", "top-left");
+        }, 500);
         setAutoBetCount(0);
         setStartAuto(false);
         return;
@@ -406,6 +409,7 @@ export default function Dice() {
                 !session?.user ||
                 selectedFace.length === 0 ||
                 isRolling ||
+                !selectedCoin ||
                 (selectedCoin && selectedCoin.amount < minGameAmount) ||
                 (betAmt !== undefined &&
                   maxBetAmt !== undefined &&
@@ -482,6 +486,7 @@ export default function Dice() {
                       !session?.user ||
                       selectedFace.length === 0 ||
                       isRolling ||
+                      !selectedCoin ||
                       (selectedCoin && selectedCoin.amount < minGameAmount) ||
                       (betAmt !== undefined &&
                         maxBetAmt !== undefined &&
@@ -566,6 +571,7 @@ export default function Dice() {
                 <div
                   key={num}
                   id={`ghost-win-pointer-${num}`}
+                  //@ts-ignore
                   ref={(el) =>
                     (ghostWinPointerRefs.current[num - 1] = el || null)
                   }
@@ -682,8 +688,8 @@ function DiceFace({
                 : "text-[#94A3B8]" // Use selected dice face image if face 1 is selected but not strikeFace
               : "text-[#202329] hover:text-[#47484A] hover:duration-75" // Use regular dice face image if face 1 is not selected
             : strikeFace === diceNumber
-            ? "text-fomo-red" // Use losing dice face image if strikeFace is 1 and face 1 is not selected
-            : "text-[#202329] hover:text-[#47484A] hover:duration-75" // Use regular dice face image if face 1 is not selected and strikeFace is not 1
+              ? "text-fomo-red" // Use losing dice face image if strikeFace is 1 and face 1 is not selected
+              : "text-[#202329] hover:text-[#47484A] hover:duration-75" // Use regular dice face image if face 1 is not selected and strikeFace is not 1
         } cursor-pointer w-10 h-10 md:w-12 md:h-12 transition-all duration-300 ease-in-out dice-face-icon-${diceNumber}`}
       />
     </div>

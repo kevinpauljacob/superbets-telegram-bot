@@ -8,6 +8,7 @@ import { useGlobalContext } from "@/components/GlobalContext";
 import { FaRegCopy } from "react-icons/fa6";
 import { MdClose } from "react-icons/md";
 import { translator } from "@/context/transactions";
+import Loader from "../Loader";
 
 export interface Flip {
   flipType: "heads" | "tails";
@@ -50,6 +51,7 @@ export default function VerifyFlipModal({
 
   //Provably Fair Modal handling
   const [isPFModalOpen, setIsPFModalOpen] = useState(false);
+  const [isLoading, setIsLoading]=useState<boolean>(false);
 
   const openPFModal = () => {
     setIsPFModalOpen(true);
@@ -105,6 +107,30 @@ export default function VerifyFlipModal({
 
     return `${day}-${month}-${year} ${hours}:${minutes} UTC`;
   }
+  const handleSeedClick = async () => {
+    setIsLoading(true);
+    try {
+      const fpData = await getProvablyFairData();
+      if (fpData) setPFModalData({ ...fpData, tab: "seeds" });
+      openPFModal();
+    } catch (error) {
+      console.error("Error fetching provably fair data", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  const handleVerifyClick = async () => {
+    setIsLoading(true);
+    try {
+      const fpData = await getProvablyFairData();
+      if (fpData) setPFModalData({ ...fpData, tab: "verify" });
+      openPFModal();
+    } catch (error) {
+      console.error("Error fetching provably fair data", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <>
@@ -299,29 +325,19 @@ export default function VerifyFlipModal({
                         </div>
                         <button
                           className="bg-[#7839C5] rounded-md w-full text-sm text-white text-opacity-90 text-semibold py-3"
-                          onClick={async () => {
-                            const fpData = await getProvablyFairData();
-                            if (fpData)
-                              setPFModalData({ ...fpData, tab: "seeds" });
-
-                            openPFModal();
-                          }}
-                        >
-                          {translator("Rotate", language)}
+                          onClick={handleSeedClick}
+                          disabled={isLoading}
+                        >  
+                          {isLoading ? <Loader/> : translator("Rotate", language)}
                         </button>
                       </>
                     ) : (
                       <button
                         className="bg-[#7839C5] rounded-md w-full text-sm text-white text-opacity-90 text-semibold py-3"
-                        onClick={async () => {
-                          const fpData = await getProvablyFairData();
-                          if (fpData)
-                            setPFModalData({ ...fpData, tab: "verify" });
-
-                          openPFModal();
-                        }}
+                        onClick={handleVerifyClick}
                       >
-                        {translator("Verify", language)}
+                        {isLoading ? <Loader/> : translator("Verify", language)}
+
                       </button>
                     )}
                   </div>

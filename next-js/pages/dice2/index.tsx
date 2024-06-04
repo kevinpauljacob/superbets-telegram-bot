@@ -53,7 +53,7 @@ export default function Dice2() {
     houseEdge,
     maxBetAmt,
     language,
-    selectedCoin
+    selectedCoin,
   } = useGlobalContext();
   const [betAmt, setBetAmt] = useState<number | undefined>();
   const [userInput, setUserInput] = useState<number | undefined>();
@@ -301,35 +301,37 @@ export default function Dice2() {
             (autoWinChangeReset || autoLossChangeReset
               ? betAmt
               : autoBetCount === "inf"
-              ? Math.max(0, betAmt)
-              : betAmt *
-                (autoLossChange !== null ? autoLossChange / 100.0 : 0));
+                ? Math.max(0, betAmt)
+                : betAmt *
+                  (autoLossChange !== null ? autoLossChange / 100.0 : 0));
 
         // console.log("Current bet amount:", betAmt);
         // console.log("Auto loss change:", autoLossChange);
         // console.log("Auto profit change:", autoWinChange);
         // console.log("Potential loss:", potentialLoss);
       }
-
       if (
         useAutoConfig &&
         autoStopProfit &&
         autoBetProfit > 0 &&
         autoBetProfit >= autoStopProfit
       ) {
-        warningCustom("Profit limit reached.", "top-left");
+        setTimeout(() => {
+          warningCustom("Profit limit reached.", "top-left");
+        }, 500);
         setAutoBetCount(0);
         setStartAuto(false);
-        setUserInput(betAmt);
         return;
       }
       if (
         useAutoConfig &&
         autoStopLoss &&
         autoBetProfit < 0 &&
-        potentialLoss <= -autoStopLoss
+        potentialLoss < -autoStopLoss
       ) {
-        warningCustom("Loss limit reached.", "top-left");
+        setTimeout(() => {
+          warningCustom("Loss limit reached.", "top-left");
+        }, 500);
         setAutoBetCount(0);
         setStartAuto(false);
         return;
@@ -385,6 +387,7 @@ export default function Dice2() {
                 !wallet ||
                 !session?.user ||
                 isRolling ||
+                !selectedCoin ||
                 (selectedCoin && selectedCoin.amount < minGameAmount) ||
                 (betAmt !== undefined &&
                   maxBetAmt !== undefined &&
@@ -458,6 +461,7 @@ export default function Dice2() {
                       !wallet ||
                       !session?.user ||
                       isRolling ||
+                      !selectedCoin ||
                       (selectedCoin && selectedCoin.amount < minGameAmount) ||
                       (betAmt !== undefined &&
                         maxBetAmt !== undefined &&
@@ -567,20 +571,19 @@ export default function Dice2() {
               )}
             </>
           )}
-          {!selectedCoin ||
-            (selectedCoin.amount < minGameAmount && (
-              <div className="w-full rounded-lg bg-[#d9d9d90d] bg-opacity-10 flex items-center px-3 py-3 text-white md:px-6">
-                <div className="w-full text-center font-changa font-medium text-sm md:text-base text-[#F0F0F0] text-opacity-75">
-                  {translator(
-                    "Please deposit funds to start playing. View",
-                    language,
-                  )}{" "}
-                  <Link href="/balance">
-                    <u>{translator("WALLET", language)}</u>
-                  </Link>
-                </div>
+          {(!selectedCoin || selectedCoin.amount < minGameAmount) && (
+            <div className="w-full rounded-lg bg-[#d9d9d90d] bg-opacity-10 flex items-center px-3 py-3 text-white md:px-6">
+              <div className="w-full text-center font-changa font-medium text-sm md:text-base text-[#F0F0F0] text-opacity-75">
+                {translator(
+                  "Please deposit funds to start playing. View",
+                  language,
+                )}{" "}
+                <Link href="/balance">
+                  <u>{translator("WALLET", language)}</u>
+                </Link>
               </div>
-            ))}
+            </div>
+          )}
         </div>
       </GameDisplay>
       <GameTable>

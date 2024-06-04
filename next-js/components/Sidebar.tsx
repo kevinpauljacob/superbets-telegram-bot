@@ -3,7 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useWallet } from "@solana/wallet-adapter-react";
-import { connection, translator } from "@/context/transactions";
+import { connection, fomoToken, translator } from "@/context/transactions";
 import { useGlobalContext } from "./GlobalContext";
 import Home from "@/public/assets/sidebar-icons/Home";
 import FomoExitIcon from "@/public/assets/sidebar-icons/FomoExitIcon";
@@ -295,6 +295,12 @@ export const OpenSidebar = ({
       link: "/wheel", // Update the links to include "/"
       active: false,
     },
+    {
+      src: "",
+      token: "Mines",
+      link: "/mines", // Update the links to include "/"
+      active: false,
+    },
   ]);
 
   const toggleCasinoToken: ToggleGameToken = (index) => {
@@ -307,8 +313,7 @@ export const OpenSidebar = ({
   const [priceChange24h, setPriceChange24h] = useState(0)
   const { language, setFomoPrice } = useGlobalContext();
  
-  const fomoAddress = "Cx9oLynYgC3RrgXzin7U417hNY9D6YB1eMGw4ZMbWJgw";
-  const url = `https://api.dexscreener.com/latest/dex/tokens/${fomoAddress}`;
+  const url = `https://api.dexscreener.com/latest/dex/tokens/${fomoToken}`;
   useEffect(() => {
 
     /// code added to fetch fomo price
@@ -343,7 +348,7 @@ export const OpenSidebar = ({
 
   const openLinkCss =
     "w-full gap-2 flex items-center justify-center text-sm font-semibold text-white text-opacity-50 hover:bg-white/10 transition duration-300 ease-in-out hover:transition hover:duration-300 hover:ease-in-out bg-[#191A1D] rounded-md text-center py-2 mb-2";
-  const priceChangeColor = priceChange24h >= 0 ? 'text-[#72F238]' : 'text-[#F1323E]';
+  const priceChangeColor = priceChange24h >= 0 ? 'text-fomo-green' : 'text-fomo-red';
   return (
     <>
       <div className="w-full">

@@ -84,11 +84,9 @@ export default function BetAmount({
   useEffect(() => {
     setMaxBetAmt(
       Math.min(
-        game === "keno" || game === "wheel"
-          ? 20.0
-          : truncateNumber(currentMaxBetAmt, 4),
-          selectedCoin && selectedCoin?.amount
-          ? truncateNumber(selectedCoin.amount, 4)
+        truncateNumber(currentMaxBetAmt, 4),
+        coinData && coinData[0]?.amount
+          ? truncateNumber(coinData[0].amount, 4)
           : truncateNumber(currentMaxBetAmt, 4),
       ),
     );
@@ -172,6 +170,7 @@ export default function BetAmount({
         </span>
       </div>
       {betAmountsModal &&
+      game !== "mines" &&
       game !== "keno" &&
       game !== "wheel" &&
       game !== "coinflip" &&
@@ -283,7 +282,8 @@ export default function BetAmount({
         </div>
       ) : null}
       {isHovered &&
-      (game === "keno" ||
+      (game === "mines" ||
+        game === "keno" ||
         game === "wheel" ||
         game === "coinflip" ||
         game === "options") ? (

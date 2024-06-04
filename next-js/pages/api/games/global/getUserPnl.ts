@@ -1,7 +1,9 @@
 import connectDatabase from "../../../../utils/database";
 import { NextApiRequest, NextApiResponse } from "next";
 import { gameModelMap, User } from "@/models/games";
-import { GameType, seedStatus } from "@/utils/provably-fair";
+import { GameType, decryptServerSeed, seedStatus } from "@/utils/provably-fair";
+
+const encryptionKey = Buffer.from(process.env.ENCRYPTION_KEY!, "hex");
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === "GET") {
@@ -52,7 +54,12 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
             if (gameSeed.status !== seedStatus.EXPIRED) {
               rest.gameSeed = { ...gameSeed, serverSeed: undefined };
             } else {
-              rest.gameSeed = { ...gameSeed };
+              const serverSeed = decryptServerSeed(
+                gameSeed.serverSeed,
+                encryptionKey,
+                Buffer.from(gameSeed.iv, "hex"),
+              );
+              rest.gameSeed = { ...gameSeed, serverSeed };
             }
 
             return rest;

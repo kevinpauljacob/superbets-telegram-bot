@@ -7,9 +7,12 @@ import {
   seedStatus,
 } from "@/utils/provably-fair";
 
+const encryptionKey = Buffer.from(process.env.ENCRYPTION_KEY!, "hex");
+
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === "POST") {
     try {
+      //TODO: Check if there are games in pending status, don't execute this api without this change
       return res
         .status(405)
         .json({ success: false, message: "Method not allowed" });
@@ -72,12 +75,14 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           { projection: { serverSeed: 0 }, new: true },
         );
 
-        const newServerHash = generateServerSeed();
+        const { encryptedServerSeed, serverSeedHash, iv } =
+          generateServerSeed(encryptionKey);
 
         await GameSeed.create({
           wallet,
-          serverSeed: newServerHash.serverSeed,
-          serverSeedHash: newServerHash.serverSeedHash,
+          serverSeed: encryptedServerSeed,
+          serverSeedHash,
+          iv: iv.toString("hex"),
         });
       }
 

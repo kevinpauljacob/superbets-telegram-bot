@@ -130,7 +130,7 @@ export default function Stake() {
                 </div>
               </div>
               <div className="hidden sm:flex">
-                <Image src={"/assets/stakeLock.svg"} width={60} height={60} />
+                <Image src={"/assets/stakeLock.svg"} alt="Lock" width={60} height={60} />
               </div>
             </div>
           </div>

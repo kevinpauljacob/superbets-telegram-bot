@@ -17,7 +17,6 @@ import {
 } from "@bonfida/spl-name-service";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { translationsMap, useGlobalContext } from "@/components/GlobalContext";
-import Sidebar from "@/components/OldSidebar";
 import StoreBanner from "@/components/Banner";
 import FomoExit from "@/components/FomoExit";
 import FomoPlay from "@/components/FomoPlay";
