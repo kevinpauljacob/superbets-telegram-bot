@@ -28,7 +28,6 @@ export default function LiveStats() {
     ].filter((value, index, self) => self.indexOf(value) === index)
 
     useEffect(() => {
-        console.log("STATS", liveStats)
         if (liveCurrentStat === "All") {
             const wagered = liveStats.reduce((acc, curr) => acc + curr.amount, 0)
             const pnl = liveStats.reduce((acc, curr) => acc + curr.pnl, 0)
