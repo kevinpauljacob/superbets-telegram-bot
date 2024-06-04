@@ -152,6 +152,7 @@ export default function Limbo() {
               amount: betAmt!,
               result: newBetResult.win ? "Won" : "Lost",
               pnl: newBetResult.win ? (betAmt! * targetMultiplier) - betAmt! : -betAmt!,
+              totalPNL: liveStats.length > 0 ? liveStats[liveStats.length - 1].totalPNL + (win ? (betAmt! * targetMultiplier) - betAmt! : -betAmt!) : win ? (betAmt! * targetMultiplier) - betAmt! : -betAmt!
             }
           ])
 

@@ -20,6 +20,7 @@ export default function LiveStats() {
         wins: 0,
         losses: 0
     })
+    const [hoverValue, setHoverValue] = useState<number | null>(null);
 
     const games = [
         "All",
@@ -27,6 +28,7 @@ export default function LiveStats() {
     ].filter((value, index, self) => self.indexOf(value) === index)
 
     useEffect(() => {
+        console.log("STATS", liveStats)
         if (liveCurrentStat === "All") {
             const wagered = liveStats.reduce((acc, curr) => acc + curr.amount, 0)
             const pnl = liveStats.reduce((acc, curr) => acc + curr.pnl, 0)
@@ -179,7 +181,29 @@ export default function LiveStats() {
                     </div>
                 </div>
 
-                <LiveGraph />
+                <div className="bg-[#202329] grow m-4 mt-0 rounded-lg flex flex-col p-3">
+                    <div className='text-white text-[12px] font-chakra flex flex-row items-center justify-start'>
+                        <span className={(hoverValue ? hoverValue : data.pnl) > 0 ? "text-[#72F238]" : "text-[#F1323E]"}>
+                            {(hoverValue ? hoverValue : data.pnl) > 0 ? "+" : ""}
+                            {(hoverValue ? hoverValue : data.pnl).toFixed(4)}
+                        </span>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 14 14" fill="none" className="ml-1">
+                            <g opacity="0.5">
+                                <path d="M7 12.25C9.8995 12.25 12.25 9.8995 12.25 7C12.25 4.10051 9.8995 1.75 7 1.75C4.10051 1.75 1.75 4.10051 1.75 7C1.75 9.8995 4.10051 12.25 7 12.25Z" stroke="#F0F0F0" stroke-width="0.5" />
+                                <path d="M6.12405 10.3906C5.37119 10.1979 4.70389 9.76001 4.22737 9.1461C3.75084 8.5322 3.49219 7.77715 3.49219 7C3.49219 6.22285 3.75084 5.4678 4.22737 4.8539C4.70389 4.23999 5.37119 3.80214 6.12405 3.60938" stroke="#F0F0F0" stroke-width="0.5" />
+                                <path d="M7.875 3.60938C8.62786 3.80214 9.29516 4.23999 9.77168 4.8539C10.2482 5.4678 10.5069 6.22285 10.5069 7C10.5069 7.77715 10.2482 8.5322 9.77168 9.1461C9.29516 9.76001 8.62786 10.1979 7.875 10.3906" stroke="#F0F0F0" stroke-width="0.5" />
+                                <path d="M6.5625 7C6.33044 7 6.10788 6.90781 5.94378 6.74372C5.77969 6.57962 5.6875 6.35706 5.6875 6.125C5.6875 5.89294 5.77969 5.67038 5.94378 5.50628C6.10788 5.34219 6.33044 5.25 6.5625 5.25" stroke="#F0F0F0" stroke-width="0.5" />
+                                <path d="M7.4375 7C7.66956 7 7.89212 7.09219 8.05622 7.25628C8.22031 7.42038 8.3125 7.64294 8.3125 7.875C8.3125 8.10706 8.22031 8.32962 8.05622 8.49372C7.89212 8.65781 7.66956 8.75 7.4375 8.75" stroke="#F0F0F0" stroke-width="0.5" />
+                                <path d="M7 4.375V5.25" stroke="#F0F0F0" stroke-width="0.5" />
+                                <path d="M7 8.75V9.625" stroke="#F0F0F0" stroke-width="0.5" />
+                                <path d="M6.5625 7H7.4375" stroke="#F0F0F0" stroke-width="0.5" />
+                                <path d="M8.3125 5.6875C8.3125 5.6875 7.875 5.25 7.4375 5.25H6.5625" stroke="#F0F0F0" stroke-width="0.5" />
+                                <path d="M5.6875 8.3125C5.6875 8.3125 6.125 8.75 6.5625 8.75H7.4375" stroke="#F0F0F0" stroke-width="0.5" />
+                            </g>
+                        </svg>
+                    </div>
+                    <LiveGraph setHoverValue={setHoverValue} />
+                </div>
             </div>
         </Draggable>
     )

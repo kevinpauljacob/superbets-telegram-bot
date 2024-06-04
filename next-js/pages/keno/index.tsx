@@ -247,6 +247,7 @@ export default function Keno() {
           amount: betAmt,
           result: win ? "Won" : "Lost",
           pnl: win ? (betAmt * strikeMultiplier) - betAmt : -betAmt,
+          totalPNL: liveStats.length > 0 ? liveStats[liveStats.length - 1].totalPNL + (win ? (betAmt * strikeMultiplier) - betAmt : -betAmt) : win ? (betAmt * strikeMultiplier) - betAmt : -betAmt
         }
       ])
 

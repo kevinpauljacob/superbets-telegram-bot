@@ -190,6 +190,7 @@ export default function Dice() {
             amount: betAmt,
             result: isWin ? "Won" : "Lost",
             pnl: isWin ? (betAmt * winningPays) - betAmt : -betAmt,
+            totalPNL: liveStats.length > 0 ? liveStats[liveStats.length - 1].totalPNL + (isWin ? (betAmt * winningPays) - betAmt : -betAmt) : (isWin ? (betAmt * winningPays) - betAmt : -betAmt)
           }
         ])
 

@@ -11,15 +11,14 @@ const colors = {
     mid: "#808796"
 }
 
-export default function LiveGraph() {
+export default function LiveGraph({ setHoverValue }: { setHoverValue: (value: number | null) => void }) {
     const { liveStats: data, liveCurrentStat } = useGlobalContext();
     const [positiveData, setPositiveData] = useState<GameStat[]>([]);
     const [negativeData, setNegativeData] = useState<GameStat[]>([]);
-    const [hoverValue, setHoverValue] = useState<number | null>(null);
 
     const CustomTooltip = ({ active, payload, label, coordinate }: any) => {
         if (active && payload && payload.length) {
-            const value = payload[0].payload.pnl;
+            const value = payload[0].payload.totalPNL;
             setHoverValue(value);
 
             return null
@@ -30,7 +29,7 @@ export default function LiveGraph() {
     };
 
     const CustomDot = ({ cx, cy, payload, active }: any) => {
-        if (payload.pnl !== 0) {
+        if (payload.totalPNL !== 0) {
             return (
                 <Dot r={5} cx={cx} cy={cy} fill="white" stroke='white' strokeWidth={2} />
             )
@@ -47,18 +46,18 @@ export default function LiveGraph() {
         }
 
         for (let i = 0; i < fdata.length - 1; i++) {
-            if (fdata[i].pnl < 0 && fdata[i + 1].pnl > 0) {
-                fdata.splice(i + 1, 0, { pnl: 0, amount: 0, result: "Won", game: GameType.dice });
-            } else if (fdata[i].pnl > 0 && fdata[i + 1].pnl < 0) {
-                fdata.splice(i + 1, 0, { pnl: 0, amount: 0, result: "Won", game: GameType.dice });
+            if (fdata[i].totalPNL < 0 && fdata[i + 1].totalPNL > 0) {
+                fdata.splice(i + 1, 0, { pnl: 0, amount: 0, result: "Won", game: GameType.dice, totalPNL: 0 });
+            } else if (fdata[i].totalPNL > 0 && fdata[i + 1].totalPNL < 0) {
+                fdata.splice(i + 1, 0, { pnl: 0, amount: 0, result: "Won", game: GameType.dice, totalPNL: 0 });
             }
         }
 
         //@ts-ignore
         fdata.forEach((item, index) => item.index = index);
 
-        const positiveD = fdata.map(item => ({ ...item, pnl: item.pnl > 0 ? item.pnl : 0 }));
-        const negativeD = fdata.map(item => ({ ...item, pnl: item.pnl < 0 ? item.pnl : 0 }));
+        const positiveD = fdata.map(item => ({ ...item, totalPNL: item.totalPNL > 0 ? item.totalPNL : 0 }));
+        const negativeD = fdata.map(item => ({ ...item, totalPNL: item.totalPNL < 0 ? item.totalPNL : 0 }));
 
         setPositiveData(positiveD);
         setNegativeData(negativeD);
@@ -66,7 +65,6 @@ export default function LiveGraph() {
 
     return (
         <ResponsiveContainer style={{
-            padding: "15px",
             borderRadius: "10px",
         }}>
             <AreaChart data={negativeData}>
@@ -83,7 +81,7 @@ export default function LiveGraph() {
 
                 <Area
                     type="monotone"
-                    dataKey="pnl"
+                    dataKey="totalPNL"
                     stroke="#00c853"
                     strokeWidth={2}
                     fillOpacity={1}
@@ -94,7 +92,7 @@ export default function LiveGraph() {
                 />
                 <Area
                     type="monotone"
-                    dataKey="pnl"
+                    dataKey="totalPNL"
                     stroke="#d50000"
                     strokeWidth={2}
                     fillOpacity={1}

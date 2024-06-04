@@ -23,6 +23,7 @@ export interface GameStat {
   game: GameType;
   amount: number;
   pnl: number;
+  totalPNL: number;
   result: "Won" | "Lost";
 }
 

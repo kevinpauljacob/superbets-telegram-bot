@@ -123,6 +123,7 @@ export default function Options() {
             amount: betAmt!,
             result: win ? "Won" : "Lost",
             pnl: win ? (betAmt! * 2) - betAmt! : -betAmt!,
+            totalPNL: liveStats.length > 0 ? liveStats[liveStats.length - 1].totalPNL + (win ? (betAmt! * 2) - betAmt! : -betAmt!) : win ? (betAmt! * 2) - betAmt! : -betAmt!
           }
         ])
 

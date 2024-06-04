@@ -142,6 +142,7 @@ export default function Flip() {
                 amount: betAmt,
                 result: win ? "Won" : "Lost",
                 pnl: win ? (betAmt * newBetResult.result) - betAmt : -betAmt,
+                totalPNL: liveStats.length > 0 ? liveStats[liveStats.length - 1].totalPNL + (win ? (betAmt * newBetResult.result) - betAmt : -betAmt) : win ? (betAmt * newBetResult.result) - betAmt : -betAmt,
               }
             ])
 
