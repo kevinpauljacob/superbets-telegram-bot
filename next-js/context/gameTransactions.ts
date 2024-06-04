@@ -9,6 +9,11 @@ import {
 import {
   getAssociatedTokenAddress,
   createTransferInstruction,
+  getAccount,
+  createAssociatedTokenAccountInstruction,
+  createAssociatedTokenAccount,
+  createAssociatedTokenAccountIdempotent,
+  createAssociatedTokenAccountIdempotentInstruction,
 } from "@solana/spl-token";
 import { SPL_TOKENS } from "./config";
 import { WalletContextState } from "@solana/wallet-adapter-react";
@@ -31,7 +36,11 @@ const devPublicKey = new PublicKey(process.env.NEXT_PUBLIC_DEV_PUBLIC_KEY!);
 export const minGameAmount = 1e-6;
 
 export const timeWeightedAvgInterval = 24 * 60 * 60 * 1000;
-export const timeWeightedAvgLimit = 50;
+export const timeWeightedAvgLimit: Record<string, number> = {
+  SOL: 50,
+  USDC: 100,
+  FOMO: 10000,
+};
 export const userLimitMultiplier = 5;
 
 export const optionsEdge = 0.1;
@@ -368,10 +377,13 @@ export const createWithdrawTxn = async (
   const blockhashWithExpiryBlockHeight = await connection.getLatestBlockhash();
   transaction.recentBlockhash = blockhashWithExpiryBlockHeight.blockhash;
 
+  transaction.add(
+    ComputeBudgetProgram.setComputeUnitLimit({ units: 100_000 }),
+    ComputeBudgetProgram.setComputeUnitPrice({ microLamports: 150_000 }),
+  );
+
   if (tokenName === "SOL") {
     transaction.add(
-      ComputeBudgetProgram.setComputeUnitLimit({ units: 100_000 }),
-      ComputeBudgetProgram.setComputeUnitPrice({ microLamports: 150_000 }),
       SystemProgram.transfer({
         fromPubkey: devPublicKey,
         toPubkey: wallet,
@@ -384,9 +396,14 @@ export const createWithdrawTxn = async (
     const tokenId = new PublicKey(tokenMint);
     const userAta = await getAssociatedTokenAddress(tokenId, wallet);
     const devAta = await getAssociatedTokenAddress(tokenId, devPublicKey);
+
     transaction.add(
-      ComputeBudgetProgram.setComputeUnitLimit({ units: 100_000 }),
-      ComputeBudgetProgram.setComputeUnitPrice({ microLamports: 150_000 }),
+      createAssociatedTokenAccountIdempotentInstruction(
+        wallet,
+        userAta,
+        wallet,
+        tokenId,
+      ),
       createTransferInstruction(
         devAta,
         userAta,
@@ -394,8 +411,8 @@ export const createWithdrawTxn = async (
         Math.floor(amount * Math.pow(10, decimal)),
       ),
     );
-    transaction.instructions[2].keys[2].isSigner = true;
-    transaction.instructions[2].keys[2].isWritable = true;
+    transaction.instructions[3].keys[2].isSigner = true;
+    transaction.instructions[3].keys[2].isWritable = true;
   }
 
   return { transaction, blockhashWithExpiryBlockHeight };
