@@ -20,6 +20,7 @@ import {
   launchPromoEdge,
   pointTiers,
 } from "@/context/transactions";
+import { SPL_TOKENS } from "@/context/config";
 
 const secret = process.env.NEXTAUTH_SECRET;
 const encryptionKey = Buffer.from(process.env.ENCRYPTION_KEY!, "hex");
@@ -58,7 +59,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       if (
         typeof amount !== "number" ||
         !isFinite(amount) ||
-        tokenMint !== "SOL" ||
+        !SPL_TOKENS.some((t) => t.tokenMint === tokenMint) ||
         !(
           Number.isInteger(minesCount) &&
           1 <= minesCount &&
@@ -156,7 +157,12 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         { upsert: true, new: true },
       );
       const userTier = userData?.tier ?? 0;
-      const houseEdge = launchPromoEdge ? 0 : houseEdgeTiers[userTier];
+      const isFomoToken =
+        tokenMint === SPL_TOKENS.find((t) => t.tokenName === "FOMO")?.tokenMint
+          ? true
+          : false;
+      const houseEdge =
+        launchPromoEdge || isFomoToken ? 0 : houseEdgeTiers[userTier];
 
       let strikeMultiplier = 0,
         amountWon = 0,

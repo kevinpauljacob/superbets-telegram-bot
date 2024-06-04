@@ -15,6 +15,7 @@ import {
 } from "@/context/transactions";
 import { wsEndpoint } from "@/context/gameTransactions";
 import Decimal from "decimal.js";
+import { SPL_TOKENS } from "@/context/config";
 Decimal.set({ precision: 9 });
 
 const secret = process.env.NEXTAUTH_SECRET;
@@ -116,7 +117,12 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         { upsert: true, new: true },
       );
       const userTier = userData?.tier ?? 0;
-      const houseEdge = launchPromoEdge ? 0 : houseEdgeTiers[userTier];
+      const isFomoToken =
+        tokenMint === SPL_TOKENS.find((t) => t.tokenName === "FOMO")?.tokenMint
+          ? true
+          : false;
+      const houseEdge =
+        launchPromoEdge || isFomoToken ? 0 : houseEdgeTiers[userTier];
 
       let record;
       if (strikeNumbers[userBet] === 1) {

@@ -18,6 +18,7 @@ import {
   pointTiers,
 } from "@/context/transactions";
 import { Decimal } from "decimal.js";
+import { SPL_TOKENS } from "@/context/config";
 Decimal.set({ precision: 9 });
 
 const secret = process.env.NEXTAUTH_SECRET;
@@ -53,21 +54,26 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           message: "User wallet not authenticated",
         });
 
+      if (!wallet || !amount || !flipType || !tokenMint)
+        return res
+          .status(400)
+          .json({ success: false, message: "Missing parameters" });
+
+      if (
+        typeof amount !== "number" ||
+        !isFinite(amount) ||
+        !SPL_TOKENS.some((t) => t.tokenMint === tokenMint) ||
+        !(flipType === "heads" || flipType === "tails")
+      )
+        return res
+          .status(400)
+          .json({ success: false, message: "Invalid parameters" });
+
       if (amount < minGameAmount)
         return res.status(400).json({
           success: false,
           message: "Invalid bet amount",
         });
-
-      if (
-        !wallet ||
-        !amount ||
-        tokenMint !== "SOL" ||
-        !(flipType === "heads" || flipType === "tails")
-      )
-        return res
-          .status(400)
-          .json({ success: false, message: "Missing parameters" });
 
       await connectDatabase();
 
@@ -100,7 +106,12 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         { upsert: true, new: true },
       );
       const userTier = userData?.tier ?? 0;
-      const houseEdge = launchPromoEdge ? 0 : houseEdgeTiers[userTier];
+      const isFomoToken =
+        tokenMint === SPL_TOKENS.find((t) => t.tokenName === "FOMO")?.tokenMint
+          ? true
+          : false;
+      const houseEdge =
+        launchPromoEdge || isFomoToken ? 0 : houseEdgeTiers[userTier];
 
       const activeGameSeed = await GameSeed.findOneAndUpdate(
         {
@@ -158,7 +169,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           wallet,
           deposit: {
             $elemMatch: {
-              tokenMint: tokenMint,
+              tokenMint,
               amount: { $gte: amount },
             },
           },
