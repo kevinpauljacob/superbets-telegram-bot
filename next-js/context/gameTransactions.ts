@@ -321,10 +321,13 @@ export const createDepositTxn = async (
   transaction.feePayer = wallet;
   transaction.recentBlockhash = blockhashWithExpiryBlockHeight.blockhash;
 
+  transaction.add(
+    ComputeBudgetProgram.setComputeUnitLimit({ units: 100_000 }),
+    ComputeBudgetProgram.setComputeUnitPrice({ microLamports: 150_000 }),
+  );
+
   if (tokenName === "SOL")
     transaction.add(
-      ComputeBudgetProgram.setComputeUnitLimit({ units: 100_000 }),
-      ComputeBudgetProgram.setComputeUnitPrice({ microLamports: 150_000 }),
       SystemProgram.transfer({
         fromPubkey: wallet,
         toPubkey: devPublicKey,
@@ -336,8 +339,6 @@ export const createDepositTxn = async (
     const userAta = await getAssociatedTokenAddress(tokenId, wallet);
     const devAta = await getAssociatedTokenAddress(tokenId, devPublicKey);
     transaction.add(
-      ComputeBudgetProgram.setComputeUnitLimit({ units: 100_000 }),
-      ComputeBudgetProgram.setComputeUnitPrice({ microLamports: 150_000 }),
       createTransferInstruction(
         userAta,
         devAta,
@@ -345,6 +346,8 @@ export const createDepositTxn = async (
         Math.floor(amount * Math.pow(10, decimal)),
       ),
     );
+
+    transaction.instructions[2].keys[2].isWritable = true;
   }
 
   return { transaction, blockhashWithExpiryBlockHeight };

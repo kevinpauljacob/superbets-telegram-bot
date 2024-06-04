@@ -31,7 +31,7 @@ type InputType = {
   transactionBase64: string;
   wallet: string;
   amount: number;
-  token: string;
+  tokenMint: string;
   blockhashWithExpiryBlockHeight: BlockhashWithExpiryBlockHeight;
   campaignId: string;
 };
@@ -43,14 +43,14 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         transactionBase64,
         wallet,
         amount,
-        token,
+        tokenMint,
         blockhashWithExpiryBlockHeight,
         campaignId,
       }: InputType = req.body;
 
-      const authToken = await getToken({ req, secret });
+      const token = await getToken({ req, secret });
 
-      if (!authToken || !authToken.sub || authToken.sub != wallet)
+      if (!token || !token.sub || token.sub != wallet)
         return res.status(400).json({
           success: false,
           message: "User wallet not authenticated",
@@ -62,42 +62,29 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         !wallet ||
         !transactionBase64 ||
         !amount ||
-        !token ||
-        (token != "SOL" && token != "USDC") ||
+        !tokenMint ||
         !blockhashWithExpiryBlockHeight
       )
         return res
           .status(400)
           .json({ success: false, message: "Missing parameters" });
 
-      if (amount <= 0)
+      if (
+        typeof amount !== "number" ||
+        !isFinite(amount) ||
+        !(amount > 0) ||
+        !SPL_TOKENS.some((t) => t.tokenMint === tokenMint)
+      )
         return res
           .status(400)
-          .json({ success: false, message: "Invalid deposit amount !" });
-
-      let tokenMint: string | null = "";
-      if (!token) {
-        return res
-          .status(400)
-          .json({ success: false, message: "Invalid Token" });
-      } else {
-        tokenMint =
-          SPL_TOKENS.find((tokenItem) => tokenItem.tokenName === token)
-            ?.tokenMint ?? null;
-      }
-
-      if (!tokenMint) {
-        return res
-          .status(400)
-          .json({ success: false, message: "Invalid Token" });
-      }
+          .json({ success: false, message: "Invalid parameters!" });
 
       let { transaction: vTxn } = await createDepositTxn(
         new PublicKey(wallet),
         amount,
         tokenMint,
       );
-      console.log("creatin vtxn with", amount, tokenMint);
+
       const txn = Transaction.from(
         Buffer.from(transactionBase64 as string, "base64"),
       );
@@ -115,34 +102,40 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
       await TxnSignature.create({ txnSignature });
 
-      let user = await User.findOne({ wallet });
-
-      if (!user)
-        await User.create({
+      const userInfo = await User.findOneAndUpdate(
+        {
           wallet,
-          deposit: [{ token, amount: amount }],
-        });
-      else
-        await User.findOneAndUpdate(
-          {
-            wallet,
-            deposit: {
-              $elemMatch: {
-                token,
-              },
+          deposit: {
+            $elemMatch: {
+              tokenMint,
             },
           },
-          {
-            $inc: { "deposit.$.amount": amount },
-          },
-          { new: true },
-        );
+        },
+        {
+          $inc: { "deposit.$.amount": amount },
+          $setOnInsert: { wallet, deposit: [{ tokenMint, amount }] },
+        },
+        { new: true, upsert: true, setDefaultsOnInsert: true },
+      );
+
+      if (!userInfo) {
+        console.log({
+          wallet,
+          tokenMint,
+          amount,
+          txnSignature,
+        });
+
+        return res
+          .status(400)
+          .json({ success: false, message: "User model not updated!" });
+      }
 
       await Deposit.create({
         wallet,
         amount,
         type: true,
-        token,
+        tokenMint,
         txnSignature,
       });
 
@@ -157,9 +150,12 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           console.log("unable to create campaign !");
         }
       }
+      const tokenName = SPL_TOKENS.find((t) => t.tokenMint === tokenMint)
+        ?.tokenName;
+
       return res.json({
         success: true,
-        message: `${amount} ${token} successfully deposited!`,
+        message: `${amount} ${tokenName} successfully deposited!`,
       });
     } catch (e: any) {
       console.log(e);
