@@ -569,3 +569,27 @@ input[type="range"] {
 }
 
 
+.roulette-table {
+  @apply flex flex-col items-center gap-4;
+}
+
+.tokens {
+  @apply flex gap-2 mb-4;
+}
+
+.token {
+  @apply bg-purple-700 rounded-full w-12 h-12 flex items-center justify-center cursor-pointer;
+}
+
+.token.selected {
+  @apply border-2 border-white;
+}
+
+.number-cell, .column {
+  @apply w-12 h-12 flex items-center justify-center border border-white relative cursor-pointer;
+}
+
+
+.stacked-tokens img {
+  @apply w-6 h-6;
+}

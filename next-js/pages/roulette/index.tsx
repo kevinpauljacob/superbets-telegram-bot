@@ -1,5 +1,5 @@
 import BetSetting from "@/components/BetSetting";
-import { GameLayout, GameOptions } from "@/components/GameLayout";
+import { GameDisplay, GameLayout, GameOptions } from "@/components/GameLayout";
 import { useGlobalContext } from "@/components/GlobalContext";
 import BetAmount from "@/components/games/BetAmountInput";
 import BetButton from "@/components/games/BetButton";
@@ -8,13 +8,27 @@ import { errorCustom } from "@/components/toasts/ToastGroup";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { Wallet } from "iconsax-react";
 import { useSession } from "next-auth/react";
-import { useMemo, useState } from "react";
+import React, { useMemo, useState,  FC, ReactNode } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 
 export default function Roulette(){
 const wallet = useWallet();
 const methods = useForm();
 const {data:session, status} = useSession();
+
+interface BettingArea {
+  id: string;
+  label: string;
+  numbers: number[];
+  type: 'single' | 'split' | 'corner' | 'row' | 'column' | 'predefined';
+  color?:string;
+}
+interface Token {
+  id: number;
+  value: string;
+  image: string;
+}
+
 
 const {
     coinData,
@@ -45,12 +59,13 @@ const [betAmt, setBetAmt] = useState<number | undefined>();
 const [currentMultiplier, setCurrentMultiplier] = useState<number>(0);
 const [selectedChip, setSelectedChip] = useState<string | null>(null);
 const [betAmount, setBetAmount] = useState<string>('0');
-
+const [selectedToken, setSelectedToken] = useState<Token | null>(null);
+const [bets, setBets] = useState<{ areaId: string; token: Token }[]>([]);
 const [betActive, setBetActive] = useState(false);
 const [betType, setBetType] = useState<"manual" | "auto">("manual");
 const [isRolling, setIsRolling] = useState(false);
 
-const chips = [
+const tokens:Token[] = [
   { id: 1, value: '1', image: '/assets/token-1.svg' },
   { id: 2, value: '10', image: '/assets/token-10.svg' },
   { id: 3, value: '100', image: '/assets/token-100.svg' },
@@ -63,6 +78,64 @@ const chips = [
   { id: 10, value: '1B', image: '/assets/token-1B.svg' },
   { id: 11, value: '10B', image: '/assets/token-10B.svg' },
 ];
+const numbersBatch1 = [
+  { id: '1', label: '1', color: 'bg-red-600' },
+  { id: '2', label: '2', color: 'bg-gray-800' },
+  { id: '3', label: '3', color: 'bg-red-600' },
+  { id: '6', label: '6', color: 'bg-gray-800' },
+  { id: '5', label: '5', color: 'bg-red-600' },
+  { id: '4', label: '4', color: 'bg-gray-800' },
+  { id: '7', label: '7', color: 'bg-red-600' },
+  { id: '8', label: '8', color: 'bg-gray-800' },
+  { id: '9', label: '9', color: 'bg-red-600' },
+  { id: '12', label: '12', color: 'bg-red-600' },
+  { id: '11', label: '11', color: 'bg-black' },
+  { id: '10', label: '10', color: 'bg-gray-800' },
+];
+const numbersBatch2 = [
+  { id: '13', label: '13', color: 'bg-black' },
+  { id: '14', label: '14', color: 'bg-red-600' },
+  { id: '15', label: '15', color: 'bg-black' },
+  { id: '16', label: '16', color: 'bg-red-600' },
+  { id: '17', label: '17', color: 'bg-black' },
+  { id: '18', label: '18', color: 'bg-red-600' },
+  { id: '19', label: '19', color: 'bg-red-600' },
+  { id: '20', label: '20', color: 'bg-black' },
+  { id: '21', label: '21', color: 'bg-red-600' },
+  { id: '22', label: '22', color: 'bg-black' },
+  { id: '23', label: '23', color: 'bg-red-600' },
+  { id: '24', label: '24', color: 'bg-black' },
+];
+
+const numbersBatch3 = [
+  { id: '25', label: '25', color: 'bg-red-600' },
+  { id: '26', label: '26', color: 'bg-black' },
+  { id: '27', label: '27', color: 'bg-red-600' },
+  { id: '28', label: '28', color: 'bg-black' },
+  { id: '29', label: '29', color: 'bg-black' },
+  { id: '30', label: '30', color: 'bg-red-600' },
+  { id: '31', label: '31', color: 'bg-black' },
+  { id: '32', label: '32', color: 'bg-red-600' },
+  { id: '33', label: '33', color: 'bg-black' },
+  { id: '34', label: '34', color: 'bg-red-600' },
+  { id: '35', label: '35', color: 'bg-black' },
+  { id: '36', label: '36', color: 'bg-red-600' },
+];
+const columns = [
+  { id: 'col1', label: '2:1', color: 'bg-purple-600' },
+  { id: 'col2', label: '2:1', color: 'bg-purple-600' },
+  { id: 'col3', label: '2:1', color: 'bg-purple-600' },
+];
+const handleTokenClick = (token: Token) => {
+  setSelectedToken(token);
+};
+
+const handleAreaClick = (areaId: string) => {
+  if (selectedToken) {
+    setBets([...bets, { areaId, token: selectedToken }]);
+  }
+};
+
 const onSubmit = async (data: any) => {
     if (betType === "auto") {
      
@@ -202,6 +275,22 @@ const disableInput = useMemo(() => {
       ? true
       : false || isRolling || betActive;
   }, [betType, startAuto, isRolling, betActive]);
+const renderNumberCell = (id:string,label:string,color:string)=>{
+  const placedBets = bets.filter((bet)=> bet.areaId === id);
+  return (
+    <div
+    key={id}
+    className={`number-cell ${color} flex flex-col items-center justify-center border border-white`}
+    onClick={()=>handleAreaClick(id)}>
+  {label}
+  <div className="stacked-tokens flex flex-col-reverse">
+          {placedBets.map((bet, index) => (
+            <img key={index} src={bet.token.image} alt={bet.token.value.toString()} className="w-6 h-6" />
+          ))}
+        </div>
+    </div>
+  )
+}
   return(
     <GameLayout title="Roulette">
     <GameOptions>
@@ -234,13 +323,13 @@ const disableInput = useMemo(() => {
       <div className="mb-4">
         <h3 className="text-white/90 font-changa">Chip Value</h3>
         <div className="grid grid-cols-6 gap-2 mt-2">
-          {chips.map((chip) => (
+          {tokens.map((chip:Token) => (
             <div
               key={chip.id}
-              className={` border rounded cursor-pointer bg-[#1e2024] flex justify-center items-center py-1 ${
+              className={` border rounded cursor-pointer bg-[#1e2024] flex justify-center items-center py-1  ${
                 selectedChip === chip.value ? 'border-white' : 'border-gray-600'
               }`}
-              onClick={() => handleChipClick(chip.value)}
+              onClick={() => handleTokenClick(chip)}
             >
               <img src={chip.image} alt={chip.value} />
             </div>
@@ -265,6 +354,43 @@ const disableInput = useMemo(() => {
          </div>
        </>
     </GameOptions>
+    <GameDisplay>
+    <div className="roulette-table flex flex-col items-center gap-4">
+     
+    <div className="grid grid-cols-5 gap-2">
+        <div className="flex flex-col justify-between">
+          {renderNumberCell('0', '0', 'bg-green-600')}
+        </div>
+        <div className="grid grid-cols-3 grid-rows-4 gap-2">
+          {numbersBatch1.map((number) => renderNumberCell(number.id, number.label, number.color))}
+        </div>
+        <div className="grid grid-cols-3 grid-rows-4 gap-2">
+          {numbersBatch2.map((number) => renderNumberCell(number.id, number.label, number.color))}
+        </div>
+        <div className="grid grid-cols-3 grid-rows-4 gap-2">
+          {numbersBatch3.map((number) => renderNumberCell(number.id, number.label, number.color))}
+        </div>
+        <div className="flex flex-col justify-between">
+          {columns.map((column) => (
+            <div
+              key={column.id}
+              className={`column ${column.color} flex items-center justify-center border border-white text-white text-lg font-bold cursor-pointer`}
+              onClick={() => handleAreaClick(column.id)}
+            >
+              {column.label}
+              <div className="stacked-tokens flex flex-col-reverse">
+                {bets.filter((bet) => bet.areaId === column.id).map((bet, index) => (
+                  <img key={index} src={bet.token.image} alt={bet.token.value.toString()} className="w-6 h-6" />
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+    </GameDisplay>
    </GameLayout>
   )
 }
+
+
