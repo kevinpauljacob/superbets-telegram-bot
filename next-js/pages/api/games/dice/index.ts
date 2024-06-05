@@ -64,10 +64,11 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           .json({ success: false, message: "Missing parameters" });
 
       //check if all values are unique whole numbers between 1 and 6
+      const splToken = SPL_TOKENS.find((t) => t.tokenMint === tokenMint);
       if (
         typeof amount !== "number" ||
         !isFinite(amount) ||
-        !SPL_TOKENS.some((t) => t.tokenMint === tokenMint) ||
+        !splToken ||
         !(
           chosenNumbers &&
           chosenNumbers.length >= 1 &&
@@ -90,7 +91,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
       const strikeMultiplier = new Decimal(6 / chosenNumbers.length);
       const maxPayout = Decimal.mul(amount, strikeMultiplier);
-      if (!(maxPayout.toNumber() <= maxPayouts.dice))
+      if (!(maxPayout.toNumber() <= maxPayouts[splToken.tokenName].dice))
         return res
           .status(400)
           .json({ success: false, message: "Max payout exceeded" });

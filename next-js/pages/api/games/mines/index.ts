@@ -39,10 +39,11 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           .status(400)
           .json({ success: false, message: "Missing parameters" });
 
+      const splToken = SPL_TOKENS.find((t) => t.tokenMint === tokenMint);
       if (
         typeof amount !== "number" ||
         !isFinite(amount) ||
-        !SPL_TOKENS.some((t) => t.tokenMint === tokenMint) ||
+        !splToken ||
         !(Number.isInteger(minesCount) && 1 <= minesCount && minesCount <= 24)
       )
         return res
@@ -59,7 +60,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
       const maxPayout = Decimal.mul(amount, maxStrikeMultiplier);
 
-      if (!(maxPayout.toNumber() <= maxPayouts.mines))
+      if (!(maxPayout.toNumber() <= maxPayouts[splToken.tokenName].mines))
         return res
           .status(400)
           .json({ success: false, message: "Max payout exceeded" });

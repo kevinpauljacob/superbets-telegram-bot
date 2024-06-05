@@ -18,6 +18,7 @@ import Decimal from "decimal.js";
 import {
   houseEdgeTiers,
   launchPromoEdge,
+  maxPayouts,
   pointTiers,
 } from "@/context/transactions";
 import { SPL_TOKENS } from "@/context/config";
@@ -56,10 +57,11 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           .status(400)
           .json({ success: false, message: "Missing parameters" });
 
+      const splToken = SPL_TOKENS.find((t) => t.tokenMint === tokenMint);
       if (
         typeof amount !== "number" ||
         !isFinite(amount) ||
-        !SPL_TOKENS.some((t) => t.tokenMint === tokenMint) ||
+        !splToken ||
         !(
           Number.isInteger(minesCount) &&
           1 <= minesCount &&
@@ -80,6 +82,14 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           success: false,
           message: "Invalid bet amount",
         });
+
+      const maxStrikeMultiplier = 25;
+      const maxPayout = Decimal.mul(amount, maxStrikeMultiplier);
+
+      if (!(maxPayout.toNumber() <= maxPayouts[splToken.tokenName].mines))
+        return res
+          .status(400)
+          .json({ success: false, message: "Max payout exceeded" });
 
       await connectDatabase();
 
@@ -175,7 +185,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           strikeMultiplier = Decimal.div(25 - i, 25 - i - minesCount)
             .mul(strikeMultiplier)
             .toNumber();
-        strikeMultiplier = Math.min(strikeMultiplier, 25);
+        strikeMultiplier = Math.min(strikeMultiplier, maxStrikeMultiplier);
 
         amountWon = Decimal.mul(amount, strikeMultiplier)
           .mul(Decimal.sub(1, houseEdge))

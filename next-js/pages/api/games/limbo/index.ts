@@ -52,10 +52,11 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           .status(400)
           .json({ success: false, message: "Missing parameters" });
 
+      const splToken = SPL_TOKENS.find((t) => t.tokenMint === tokenMint);
       if (
         typeof amount !== "number" ||
         !isFinite(amount) ||
-        !SPL_TOKENS.some((t) => t.tokenMint === tokenMint) ||
+        !splToken ||
         !(1.02 <= multiplier && multiplier <= 50)
       )
         return res
@@ -71,7 +72,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       const strikeMultiplier = multiplier;
       const maxPayout = Decimal.mul(amount, strikeMultiplier);
 
-      if (!(maxPayout.toNumber() <= maxPayouts.limbo))
+      if (!(maxPayout.toNumber() <= maxPayouts[splToken.tokenName].limbo))
         return res
           .status(400)
           .json({ success: false, message: "Max payout exceeded" });
