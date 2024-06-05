@@ -218,7 +218,7 @@ export const TableButtons: React.FC<TableButtonProps> = ({ all, setAll }) => {
         home ? "" : "mt-20"
       }`}
     >
-      <div className="flex items-center">
+      <div className="hidden md:flex items-center ">
         <Image src={Dollar} alt="" width={26} height={26} />
         <span className="font-semibold font-changa text-xl text-white text-opacity-90 pl-3">
           {translator("Bets", language)}
