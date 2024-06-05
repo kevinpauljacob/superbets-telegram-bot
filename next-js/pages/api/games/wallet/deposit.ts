@@ -114,9 +114,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           {
             $push: { deposit: { tokenMint, amount: 0 } },
           },
-          {
-            new: true,
-          },
         );
 
         await User.findOneAndUpdate(
