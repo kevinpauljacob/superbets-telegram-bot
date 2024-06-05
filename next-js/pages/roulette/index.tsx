@@ -8,6 +8,7 @@ import { errorCustom } from "@/components/toasts/ToastGroup";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { Wallet } from "iconsax-react";
 import { useSession } from "next-auth/react";
+import Image from "next/image";
 import React, { useMemo, useState,  FC, ReactNode } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 
@@ -55,16 +56,17 @@ const {
     maxBetAmt,
     language,
   } = useGlobalContext();
-const [betAmt, setBetAmt] = useState<number | undefined>();
-const [currentMultiplier, setCurrentMultiplier] = useState<number>(0);
-const [selectedChip, setSelectedChip] = useState<string | null>(null);
-const [betAmount, setBetAmount] = useState<string>('0');
-const [selectedToken, setSelectedToken] = useState<Token | null>(null);
-const [bets, setBets] = useState<{ areaId: string; token: Token }[]>([]);
-const [betActive, setBetActive] = useState(false);
-const [betType, setBetType] = useState<"manual" | "auto">("manual");
-const [isRolling, setIsRolling] = useState(false);
-
+  const [betAmt, setBetAmt] = useState<number | undefined>();
+  const [currentMultiplier, setCurrentMultiplier] = useState<number>(0);
+  const [selectedChip, setSelectedChip] = useState<string | null>(null);
+  const [betAmount, setBetAmount] = useState<string>('0');
+  const [selectedToken, setSelectedToken] = useState<Token | null>(null);
+  const [bets, setBets] = useState<{ areaId: string; token: Token }[]>([]);
+  const [betActive, setBetActive] = useState(false);
+  const [betType, setBetType] = useState<"manual" | "auto">("manual");
+  const [isRolling, setIsRolling] = useState(false);
+  const [betss, setBetss] = useState<{ areaId: string, token: { image: string } }[]>([]);
+  const SelectedToken = { image: 'path_to_token_image' };
 const tokens:Token[] = [
   { id: 1, value: '1', image: '/assets/token-1.svg' },
   { id: 2, value: '10', image: '/assets/token-10.svg' },
@@ -78,219 +80,40 @@ const tokens:Token[] = [
   { id: 10, value: '1B', image: '/assets/token-1B.svg' },
   { id: 11, value: '10B', image: '/assets/token-10B.svg' },
 ];
-const numbersBatch1 = [
-  { id: '1', label: '1', color: 'bg-red-600' },
-  { id: '2', label: '2', color: 'bg-gray-800' },
-  { id: '3', label: '3', color: 'bg-red-600' },
-  { id: '6', label: '6', color: 'bg-gray-800' },
-  { id: '5', label: '5', color: 'bg-red-600' },
-  { id: '4', label: '4', color: 'bg-gray-800' },
-  { id: '7', label: '7', color: 'bg-red-600' },
-  { id: '8', label: '8', color: 'bg-gray-800' },
-  { id: '9', label: '9', color: 'bg-red-600' },
-  { id: '12', label: '12', color: 'bg-red-600' },
-  { id: '11', label: '11', color: 'bg-black' },
-  { id: '10', label: '10', color: 'bg-gray-800' },
+const rows = [
+  [3, 6, 9, 12, 15, 18, 21, 24, 27, 30, 33, 36],
+  [2, 5, 8, 11, 14, 17, 20, 23, 26, 29, 32, 35],
+  [1, 4, 7, 10, 13, 16, 19, 22, 25, 28, 31, 34],
 ];
-const numbersBatch2 = [
-  { id: '13', label: '13', color: 'bg-black' },
-  { id: '14', label: '14', color: 'bg-red-600' },
-  { id: '15', label: '15', color: 'bg-black' },
-  { id: '16', label: '16', color: 'bg-red-600' },
-  { id: '17', label: '17', color: 'bg-black' },
-  { id: '18', label: '18', color: 'bg-red-600' },
-  { id: '19', label: '19', color: 'bg-red-600' },
-  { id: '20', label: '20', color: 'bg-black' },
-  { id: '21', label: '21', color: 'bg-red-600' },
-  { id: '22', label: '22', color: 'bg-black' },
-  { id: '23', label: '23', color: 'bg-red-600' },
-  { id: '24', label: '24', color: 'bg-black' },
-];
-
-const numbersBatch3 = [
-  { id: '25', label: '25', color: 'bg-red-600' },
-  { id: '26', label: '26', color: 'bg-black' },
-  { id: '27', label: '27', color: 'bg-red-600' },
-  { id: '28', label: '28', color: 'bg-black' },
-  { id: '29', label: '29', color: 'bg-black' },
-  { id: '30', label: '30', color: 'bg-red-600' },
-  { id: '31', label: '31', color: 'bg-black' },
-  { id: '32', label: '32', color: 'bg-red-600' },
-  { id: '33', label: '33', color: 'bg-black' },
-  { id: '34', label: '34', color: 'bg-red-600' },
-  { id: '35', label: '35', color: 'bg-black' },
-  { id: '36', label: '36', color: 'bg-red-600' },
-];
-const columns = [
-  { id: 'col1', label: '2:1', color: 'bg-purple-600' },
-  { id: 'col2', label: '2:1', color: 'bg-purple-600' },
-  { id: 'col3', label: '2:1', color: 'bg-purple-600' },
-];
-const handleTokenClick = (token: Token) => {
-  setSelectedToken(token);
-};
-
-const handleAreaClick = (areaId: string) => {
-  if (selectedToken) {
-    setBets([...bets, { areaId, token: selectedToken }]);
-  }
-};
-
 const onSubmit = async (data: any) => {
     if (betType === "auto") {
      
     }
   };
-const handleBet = async () => {
-/*     try {
-      if (!wallet.connected || !wallet.publicKey) {
-        throw new Error("Wallet not connected");
-      }
-      if (!betAmt || betAmt === 0) {
-        throw new Error("Set Amount.");
-      }
-      if (coinData && coinData[0].amount < betAmt) {
-        throw new Error("Insufficient balance for bet !");
-      }
 
-      setIsRolling(true);
-      setUserBets(defaultUserBets);
-      setCashoutModal({
-        show: false,
-        amountWon: 0,
-        strikeMultiplier: 0,
-        pointsGained: 0,
-      });
-      const response = await fetch(`/api/games/mines`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          wallet: wallet.publicKey,
-          amount: betAmt,
-          tokenMint: "SOL",
-          minesCount: minesCount,
-        }),
-      });
-
-      const { success, message, gameId } = await response.json();
-
-      if (success != true) {
-        if (gameId) {
-          setGameId(gameId);
-          setBetActive(true);
-          setRefresh(true);
-        }
-        throw new Error(message);
-      }
-
-      if (success) {
-        setGameId(gameId);
-        setBetActive(true);
-        setRefresh(true);
-        successCustom(message);
-      }
-    } catch (error: any) {
-      errorCustom(error?.message ?? "Could not make the Bet.");
-      setIsRolling(false);
-      setAutoBetCount(0);
-      setStartAuto(false);
-      console.error("Error occurred while betting:", error);
-    } finally {
-      setIsRolling(false);
-    } */
-  };
-  const handleConclude = async () => {
-/*     try {
-      const response = await fetch(`/api/games/mines/conclude`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          wallet: wallet.publicKey,
-          gameId: gameId,
-        }),
-      });
-
-      const {
-        success,
-        message,
-        result,
-        amountWon,
-        strikeMultiplier,
-        strikeNumbers,
-        pointsGained,
-      } = await response.json();
-
-      if (success != true) {
-        errorCustom(message);
-        throw new Error(message);
-      }
-
-      const win = result === "Won";
-      if (win) {
-        successCustom(message);
-        soundAlert("/sounds/win.wav");
-      } else errorCustom(message);
-
-      if (success) {
-        const updatedUserBetsWithResult = userBets.map((bet, index) => ({
-          ...bet,
-          result: strikeNumbers[index] === 1 ? "Lost" : "Pending",
-        }));
-        setCashoutModal({
-          show: true,
-          amountWon: amountWon,
-          strikeMultiplier: strikeMultiplier,
-          pointsGained: pointsGained,
-        });
-        setUserBets(updatedUserBetsWithResult);
-        setRefresh(true);
-        setBetActive(false);
-        setNumBets(0);
-        setCurrentMultiplier(0);
-        setNextMultiplier(0);
-        setStrikeMultiplier(1);
-        setCurrentProfit(0);
-        setNextProfit(0);
-        setAmountWon(0);
-      }
-    } catch (error) {
-      console.error("Error occurred while betting:", error);
-    } finally {
-      setBetActive(false);
-    } */
-  };
-  const handleChipClick = (value: string) => {
-    setSelectedChip(value);
+  const handlePlaceBet = (areaId: string, token: { image: string }) => {
+    setBetss((prev) => [...prev, { areaId, token }]);
   };
 
-  const handleBetAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setBetAmount(e.target.value);
+  const renderToken = (areaId: string) => {
+    const bet = betss.find((bet) => bet.areaId === areaId);
+    if (bet) {
+      return (
+        <div className="absolute top-0 right-0 bg-purple-600 rounded-full w-6 h-6 flex items-center justify-center">
+          <img src={bet.token.image} alt="token" />
+        </div>
+      );
+    }
+    return null;
   };
+
+
 const disableInput = useMemo(() => {
     return betType === "auto" && startAuto
       ? true
       : false || isRolling || betActive;
   }, [betType, startAuto, isRolling, betActive]);
-const renderNumberCell = (id:string,label:string,color:string)=>{
-  const placedBets = bets.filter((bet)=> bet.areaId === id);
-  return (
-    <div
-    key={id}
-    className={`number-cell ${color} flex flex-col items-center justify-center border border-white`}
-    onClick={()=>handleAreaClick(id)}>
-  {label}
-  <div className="stacked-tokens flex flex-col-reverse">
-          {placedBets.map((bet, index) => (
-            <img key={index} src={bet.token.image} alt={bet.token.value.toString()} className="w-6 h-6" />
-          ))}
-        </div>
-    </div>
-  )
-}
+
   return(
     <GameLayout title="Roulette">
     <GameOptions>
@@ -329,7 +152,7 @@ const renderNumberCell = (id:string,label:string,color:string)=>{
               className={` border rounded cursor-pointer bg-[#1e2024] flex justify-center items-center py-1  ${
                 selectedChip === chip.value ? 'border-white' : 'border-gray-600'
               }`}
-              onClick={() => handleTokenClick(chip)}
+            /*   onClick={() => handleTokenClick(chip)} */
             >
               <img src={chip.image} alt={chip.value} />
             </div>
@@ -355,39 +178,148 @@ const renderNumberCell = (id:string,label:string,color:string)=>{
        </>
     </GameOptions>
     <GameDisplay>
-    <div className="roulette-table flex flex-col items-center gap-4">
-     
-    <div className="grid grid-cols-5 gap-2">
-        <div className="flex flex-col justify-between">
-          {renderNumberCell('0', '0', 'bg-green-600')}
+    <div className="p-4 rounded-lg flex flex-col items-center font-chakra font-semibold text-base">
+      <div className="flex justify-between w-full px-2 text-white mb-1">
+        <div className="flex items-center">
+          <Image
+          src="/assets/Undo.png"
+          width={20}
+          height={20}
+          alt="undo"/>
+          <p className="font-sans text-[16px]">Undo</p>
         </div>
-        <div className="grid grid-cols-3 grid-rows-4 gap-2">
-          {numbersBatch1.map((number) => renderNumberCell(number.id, number.label, number.color))}
+        <div className="flex items-center">
+          <Image
+          src="/assets/clear.png"
+          width={20}
+          height={20}
+          alt="undo"/>
+          <p className="font-sans text-[16px]">Clear</p>
         </div>
-        <div className="grid grid-cols-3 grid-rows-4 gap-2">
-          {numbersBatch2.map((number) => renderNumberCell(number.id, number.label, number.color))}
-        </div>
-        <div className="grid grid-cols-3 grid-rows-4 gap-2">
-          {numbersBatch3.map((number) => renderNumberCell(number.id, number.label, number.color))}
-        </div>
-        <div className="flex flex-col justify-between">
-          {columns.map((column) => (
-            <div
-              key={column.id}
-              className={`column ${column.color} flex items-center justify-center border border-white text-white text-lg font-bold cursor-pointer`}
-              onClick={() => handleAreaClick(column.id)}
-            >
-              {column.label}
-              <div className="stacked-tokens flex flex-col-reverse">
-                {bets.filter((bet) => bet.areaId === column.id).map((bet, index) => (
-                  <img key={index} src={bet.token.image} alt={bet.token.value.toString()} className="w-6 h-6" />
-                ))}
-              </div>
+      </div>
+    <div className="flex items-start w-full align-top">
+      <div
+        className="h-[160px] w-12 flex flex-col justify-center text-center cursor-pointer bg-[#149200] rounded-lg text-white relative border-4 border-transparent mx-1"
+        onClick={() => handlePlaceBet('num-0', SelectedToken)}
+      >
+        0
+        {renderToken('num-0')}
+      </div>
+      <div className="flex-col">
+      <div className="grid grid-cols-14 gap-1 w-full">
+        <div className="col-span-13 grid grid-rows-3 gap-1">
+          {rows.map((row, rowIndex) => (
+            <div key={rowIndex} className="grid grid-cols-12 gap-1">
+              {row.map((number, colIndex) => (
+                <div key={colIndex} className="relative">
+                  <button
+                    data-testid={`roulette-tile-${number}`}
+                    className={`w-12 h-12 flex items-center justify-center ${
+                      number % 2 === 0 ? 'bg-[#2A2E38]' : 'bg-[#F1323E]'
+                    } text-white relative rounded-md border-4 border-transparent`}
+                    onClick={() => handlePlaceBet(`num-${number}`, SelectedToken)}
+                  >
+                    {number}
+                    {renderToken(`num-${number}`)}
+                  </button>
+                  <button
+                    data-testid={`roulette-tile-${number}-top`}
+                    className="absolute w-full h-1 bg-transparent top-0"
+                    onClick={() => handlePlaceBet(`num-${number}-top`, SelectedToken)}
+                  />
+                  <button
+                    data-testid={`roulette-tile-${number}-left`}
+                    className="absolute w-1 h-full bg-transparent left-0"
+                    onClick={() => handlePlaceBet(`num-${number}-left`, SelectedToken)}
+                  />
+                  <button
+                    data-testid={`roulette-tile-${number}-corner`}
+                    className="absolute w-1 h-1 bg-transparent top-0 left-0"
+                    onClick={() => handlePlaceBet(`num-${number}-corner`, SelectedToken)}
+                  />
+                </div>
+              ))}
             </div>
           ))}
         </div>
       </div>
+      <div>
+      <div className="mt-1 grid grid-cols-3 gap-2 w-full">
+      <button
+        className="col-span-1 flex items-center justify-center bg-[#0E0F14] border border-[#26272B] text-white cursor-pointer rounded-md h-12"
+        onClick={() => handlePlaceBet('1-12', SelectedToken)}
+      >
+        1 to 12
+      </button>
+      <button
+        className="col-span-1 flex items-center justify-center bg-[#0E0F14] border border-[#26272B] text-white cursor-pointer rounded-md h-12"
+        onClick={() => handlePlaceBet('13-24', SelectedToken)}
+      >
+        13 to 24
+      </button>
+      <button
+        className="col-span-1 flex items-center justify-center bg-[#0E0F14] border border-[#26272B] text-white cursor-pointer rounded-md h-12"
+        onClick={() => handlePlaceBet('25-36', SelectedToken)}
+      >
+        25 to 36
+      </button>
     </div>
+    <div className="mt-2 grid grid-cols-6 gap-2 w-full">
+      <button
+        className="col-span-1 flex items-center justify-center bg-[#0E0F14] border border-[#26272B] text-white cursor-pointer rounded-md h-12"
+        onClick={() => handlePlaceBet('1-18', SelectedToken)}
+      >
+        1 to 18
+      </button>
+      <button
+        className="col-span-1 flex items-center justify-center bg-[#0E0F14] border border-[#26272B] text-white cursor-pointer rounded-md h-12"
+        onClick={() => handlePlaceBet('even', SelectedToken)}
+      >
+        Even
+      </button>
+      <button
+        className="col-span-1 flex items-center justify-center bg-[#F1323E]  cursor-pointer rounded-md h-12"
+        onClick={() => handlePlaceBet('red', SelectedToken)}
+     / >
+        
+    
+      <button
+        className="col-span-1 flex items-center justify-center bg-[#2A2E38]  cursor-pointer rounded-md h-12"
+        onClick={() => handlePlaceBet('black', SelectedToken)}
+      />
+   
+      <button
+        className="col-span-1 flex items-center justify-center bg-[#0E0F14] border border-[#26272B] text-white cursor-pointer rounded-md h-12"
+        onClick={() => handlePlaceBet('odd', SelectedToken)}
+      >
+        Odd
+      </button>
+      <button
+        className="col-span-1 flex items-center justify-center bg-[#0E0F14] border border-[#26272B] text-white cursor-pointer rounded-md h-12"
+        onClick={() => handlePlaceBet('19-36', SelectedToken)}
+      >
+        19 to 36
+      </button>
+    </div>
+    
+      </div>
+      </div>
+      <div className="flex flex-col justify-between align- gap-1 mx-1">
+        {rows.map((_, rowIndex) => (
+          <div
+            key={`row-${rowIndex}`}
+            className="w-12 h-12 flex items-center justify-center text-center bg-transparent border-2 border-[#26272B] text-white cursor-pointer relative rounded-md"
+            onClick={() => handlePlaceBet(`row-${rowIndex}`, SelectedToken)}
+          >
+            2:1
+            {renderToken(`row-${rowIndex}`)}
+          </div>
+        ))}
+      </div>
+    </div>
+
+  
+  </div>
     </GameDisplay>
    </GameLayout>
   )
