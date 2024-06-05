@@ -8,6 +8,7 @@ import {
 } from "@/context/gameTransactions";
 import { GameSeed, User, Dice } from "@/models/games";
 import {
+  GameTokens,
   GameType,
   decryptServerSeed,
   generateGameResult,
@@ -91,7 +92,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
       const strikeMultiplier = new Decimal(6 / chosenNumbers.length);
       const maxPayout = Decimal.mul(amount, strikeMultiplier);
-      if (!(maxPayout.toNumber() <= maxPayouts[splToken.tokenName].dice))
+      if (!(maxPayout.toNumber() <= maxPayouts[tokenMint as GameTokens].dice))
         return res
           .status(400)
           .json({ success: false, message: "Max payout exceeded" });
@@ -174,12 +175,14 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         amountLost = 0;
       }
 
+      const tokenName = SPL_TOKENS.find(token => token.tokenMint === tokenMint)?.tokenName
+
       const userUpdate = await User.findOneAndUpdate(
         {
           wallet,
           deposit: {
             $elemMatch: {
-              tokenMint,
+              tokenName,
               amount: { $gte: amount },
             },
           },

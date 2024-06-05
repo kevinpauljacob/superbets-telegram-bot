@@ -336,8 +336,6 @@ export default function Options() {
                 disabled={
                   !betType ||
                   !session?.user ||
-                  !selectedCoin ||
-                  (selectedCoin && selectedCoin.amount < minGameAmount) ||
                   (betAmt !== undefined &&
                     maxBetAmt !== undefined &&
                     betAmt > maxBetAmt) ||
@@ -458,8 +456,6 @@ export default function Options() {
                 disabled={
                   !betType ||
                   !session?.user ||
-                  !selectedCoin ||
-                  (selectedCoin && selectedCoin.amount < minGameAmount) ||
                   (betAmt !== undefined &&
                     maxBetAmt !== undefined &&
                     betAmt > maxBetAmt) ||

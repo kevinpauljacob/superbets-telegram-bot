@@ -315,7 +315,6 @@ export const OpenSidebar = ({
  
   const url = `https://api.dexscreener.com/latest/dex/tokens/${fomoToken}`;
   useEffect(() => {
-
     /// code added to fetch fomo price
     const fetchFomoPrice = async () => {
       try {

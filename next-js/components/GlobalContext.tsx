@@ -16,6 +16,7 @@ import { connection } from "../context/gameTransactions";
 import { LAMPORTS_PER_SOL, PublicKey } from "@solana/web3.js";
 import { errorCustom } from "./toasts/ToastGroup";
 import { SPL_TOKENS } from "@/context/config";
+import SOL from "@/public/assets/coins/SOL";
 
 interface PointTier {
   index: number;
@@ -28,12 +29,10 @@ interface TokenAccount {
   balance: number;
 }
 interface CoinBalance {
-  wallet: string;
-  type: boolean;
   amount: number;
   tokenMint: string;
   tokenName: string;
-  img: string;
+  icon: any;
 }
 
 interface ProvablyFairData {
@@ -216,21 +215,17 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
   const [walletBalance, setWalletBalance] = useState(0);
   const [coinData, setCoinData] = useState<CoinBalance[] | null>([
     {
-      wallet: "",
-      type: true,
       amount: 0,
       tokenMint: "SOL",
       tokenName: "SOL",
-      img: "https://upload.wikimedia.org/wikipedia/en/b/b9/Solana_logo.png",
+      icon: SOL,
     },
   ]);
   const [selectedCoin, setSelectedCoin] = useState<CoinBalance>({
-    wallet: "",
-    type: true,
     amount: 0,
     tokenMint: "SOL",
     tokenName: "SOL",
-    img: "https://upload.wikimedia.org/wikipedia/en/b/b9/Solana_logo.png",
+    icon: SOL,
   });
 
   const [showWalletModal, setShowWalletModal] = useState<boolean>(false);
@@ -355,18 +350,10 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
               balance?.data.deposit.length > 0
             ) {
               setCoinData(balance.data.deposit);
-              let coin = balance.data.deposit[0];
-              let cd = SPL_TOKENS.find((c) => c.tokenMint === coin.tokenMint)!;
-              setSelectedCoin({
-                wallet: "",
-                type: true,
-                amount:
-                  coinData?.find((c) => c.tokenMint === cd.tokenMint)?.amount ||
-                  0,
-                tokenMint: cd.tokenMint,
-                tokenName: cd.tokenName,
-                img: cd.icon,
-              });
+              let coin = balance.data.deposit.find(
+                (token: CoinBalance) => token.tokenName === "SOL",
+              );
+              if (coin) setSelectedCoin({ ...coin, icon: SOL });
             } else {
               // console.log("Could not fetch balance.");
               setCoinData(null);

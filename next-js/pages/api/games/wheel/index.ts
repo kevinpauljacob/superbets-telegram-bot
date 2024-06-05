@@ -7,6 +7,7 @@ import {
   GameType,
   seedStatus,
   decryptServerSeed,
+  GameTokens,
 } from "@/utils/provably-fair";
 import StakingUser from "@/models/staking/user";
 import {
@@ -86,7 +87,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       );
       const maxPayout = Decimal.mul(amount, maxStrikeMultiplier);
 
-      if (!(maxPayout.toNumber() <= maxPayouts[splToken.tokenName].wheel))
+      if (!(maxPayout.toNumber() <= maxPayouts[tokenMint as GameTokens].wheel))
         return res
           .status(400)
           .json({ success: false, message: "Max payout exceeded" });

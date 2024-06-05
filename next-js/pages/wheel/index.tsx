@@ -366,8 +366,6 @@ export default function Wheel() {
                 !wallet ||
                 !session?.user ||
                 isRolling ||
-                !selectedCoin ||
-                (selectedCoin && selectedCoin.amount < minGameAmount) ||
                 (betAmt !== undefined &&
                   maxBetAmt !== undefined &&
                   betAmt > maxBetAmt)
@@ -510,8 +508,6 @@ export default function Wheel() {
                       !wallet ||
                       !session?.user ||
                       isRolling ||
-                      !selectedCoin ||
-                      (selectedCoin && selectedCoin.amount < minGameAmount) ||
                       (betAmt !== undefined &&
                         maxBetAmt !== undefined &&
                         betAmt > maxBetAmt)

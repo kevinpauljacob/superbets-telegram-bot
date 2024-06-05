@@ -58,6 +58,7 @@ export default function Flip() {
     setAutoBetProfit,
     useAutoConfig,
     selectedCoin,
+    coinData,
     houseEdge,
     maxBetAmt,
     language,
@@ -93,6 +94,7 @@ export default function Flip() {
       let response = await placeFlip(
         wallet,
         betAmt,
+        selectedCoin.tokenMint,
         betType === "Heads" ? "heads" : "tails",
       );
       if (response.success !== true) {
@@ -318,8 +320,6 @@ export default function Flip() {
                 !betType ||
                 loading ||
                 !session?.user ||
-                !selectedCoin ||
-                (selectedCoin && selectedCoin.amount < minGameAmount) ||
                 (betAmt !== undefined &&
                   maxBetAmt !== undefined &&
                   betAmt > maxBetAmt)
@@ -441,8 +441,6 @@ export default function Flip() {
                       !betType ||
                       loading ||
                       !session?.user ||
-                      !selectedCoin ||
-                      (selectedCoin && selectedCoin.amount < minGameAmount) ||
                       (betAmt !== undefined &&
                         maxBetAmt !== undefined &&
                         betAmt > maxBetAmt)

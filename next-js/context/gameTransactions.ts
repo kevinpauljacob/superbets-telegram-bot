@@ -22,7 +22,6 @@ import {
   successCustom,
   warningCustom,
 } from "@/components/toasts/ToastGroup";
-import { useGlobalContext } from "@/components/GlobalContext";
 
 export const connection = new Connection(
   process.env.NEXT_PUBLIC_RPC!,
@@ -52,15 +51,13 @@ export const placeBet = async (
   betType: string,
   timeFrame: number,
 ) => {
-  const { selectedCoin } = useGlobalContext();
-
   try {
     const res = await fetch(`/api/games/options`, {
       method: "POST",
       body: JSON.stringify({
         wallet: wallet.publicKey,
         amount: amount,
-        tokenMint: selectedCoin?.tokenMint,
+        tokenMint: tokenMint,
         betType,
         timeFrame,
       }),
@@ -87,9 +84,9 @@ export const placeBet = async (
 export const placeFlip = async (
   wallet: WalletContextState,
   amount: number,
+  tokenMint: string,
   flipType: string, // heads / tails
 ) => {
-  const { selectedCoin } = useGlobalContext();
   try {
     if (!wallet.publicKey) throw new Error("Wallet not connected");
 
@@ -101,7 +98,7 @@ export const placeFlip = async (
         wallet: wallet.publicKey,
         amount,
         flipType,
-        tokenMint: selectedCoin?.tokenMint,
+        tokenMint: tokenMint,
       }),
       headers: {
         "Content-Type": "application/json",
@@ -467,9 +464,9 @@ export async function retryTxn(
 export const rollDice = async (
   wallet: WalletContextState,
   amount: number,
+  tokenMint: string,
   chosenNumbers: number[],
 ) => {
-  const { selectedCoin } = useGlobalContext();
   try {
     if (!wallet.publicKey) throw new Error("Wallet not connected");
 
@@ -478,7 +475,7 @@ export const rollDice = async (
       body: JSON.stringify({
         wallet: wallet.publicKey,
         amount: amount,
-        tokenMint: selectedCoin?.tokenMint,
+        tokenMint: tokenMint,
         chosenNumbers,
       }),
       headers: {
@@ -506,9 +503,8 @@ export const limboBet = async (
   wallet: WalletContextState,
   amount: number,
   multiplier: number,
+  tokenMint: string,
 ) => {
-  const { selectedCoin } = useGlobalContext();
-
   try {
     if (!wallet.publicKey) throw new Error("Wallet not connected");
 
@@ -517,7 +513,7 @@ export const limboBet = async (
       body: JSON.stringify({
         wallet: wallet.publicKey,
         amount: amount,
-        tokenMint: selectedCoin?.tokenMint,
+        tokenMint: tokenMint,
         multiplier,
       }),
       headers: {

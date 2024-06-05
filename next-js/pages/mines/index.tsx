@@ -60,6 +60,7 @@ export default function Mines() {
     houseEdge,
     maxBetAmt,
     language,
+    selectedCoin,
   } = useGlobalContext();
   const [betAmt, setBetAmt] = useState<number | undefined>();
   const [userInput, setUserInput] = useState<number | undefined>();
@@ -386,7 +387,7 @@ export default function Mines() {
       if (!betAmt || betAmt === 0) {
         throw new Error("Set Amount.");
       }
-      if (coinData && coinData[0].amount < betAmt) {
+      if (selectedCoin && selectedCoin.amount < betAmt) {
         throw new Error("Insufficient balance for bet !");
       }
       if (userBetsForAuto.length === 0) {
@@ -515,7 +516,7 @@ export default function Mines() {
       if (!betAmt || betAmt === 0) {
         throw new Error("Set Amount.");
       }
-      if (coinData && coinData[0].amount < betAmt) {
+      if (selectedCoin && selectedCoin.amount < betAmt) {
         throw new Error("Insufficient balance for bet !");
       }
 
@@ -535,7 +536,7 @@ export default function Mines() {
         body: JSON.stringify({
           wallet: wallet.publicKey,
           amount: betAmt,
-          tokenMint: "SOL",
+          tokenMint: selectedCoin.tokenMint,
           minesCount: minesCount,
         }),
       });
@@ -791,7 +792,6 @@ export default function Mines() {
                 !wallet ||
                 !session?.user ||
                 isRolling ||
-                (coinData && coinData[0].amount < minGameAmount) ||
                 (betActive &&
                   betType === "manual" &&
                   !userBets.some((bet) => bet.pick)) ||
@@ -1031,7 +1031,6 @@ export default function Mines() {
                       !wallet ||
                       !session?.user ||
                       isRolling ||
-                      (coinData && coinData[0].amount < minGameAmount) ||
                       (betActive &&
                         betType === "manual" &&
                         !userBets.some((bet) => bet.pick)) ||

@@ -172,7 +172,12 @@ export default function Dice() {
         throw new Error("Choose at least 1 face.");
       }
       setIsRolling(true);
-      const res = await rollDice(wallet, betAmt, selectedFace);
+      const res = await rollDice(
+        wallet,
+        betAmt,
+        selectedCoin.tokenMint,
+        selectedFace,
+      );
       if (res.success) {
         const { strikeNumber, result } = res.data;
         const isWin = result === "Won";
@@ -409,8 +414,6 @@ export default function Dice() {
                 !session?.user ||
                 selectedFace.length === 0 ||
                 isRolling ||
-                !selectedCoin ||
-                (selectedCoin && selectedCoin.amount < minGameAmount) ||
                 (betAmt !== undefined &&
                   maxBetAmt !== undefined &&
                   betAmt > maxBetAmt)
@@ -486,8 +489,6 @@ export default function Dice() {
                       !session?.user ||
                       selectedFace.length === 0 ||
                       isRolling ||
-                      !selectedCoin ||
-                      (selectedCoin && selectedCoin.amount < minGameAmount) ||
                       (betAmt !== undefined &&
                         maxBetAmt !== undefined &&
                         betAmt > maxBetAmt)

@@ -2,7 +2,7 @@ import connectDatabase from "@/utils/database";
 import { getToken } from "next-auth/jwt";
 import { NextApiRequest, NextApiResponse } from "next";
 import { GameSeed, Mines, User } from "@/models/games";
-import { seedStatus } from "@/utils/provably-fair";
+import { GameTokens, seedStatus } from "@/utils/provably-fair";
 import { minGameAmount } from "@/context/gameTransactions";
 import Decimal from "decimal.js";
 import { maxPayouts } from "@/context/transactions";
@@ -60,7 +60,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
       const maxPayout = Decimal.mul(amount, maxStrikeMultiplier);
 
-      if (!(maxPayout.toNumber() <= maxPayouts[splToken.tokenName].mines))
+      if (!(maxPayout.toNumber() <= maxPayouts[tokenMint as GameTokens].mines))
         return res
           .status(400)
           .json({ success: false, message: "Max payout exceeded" });

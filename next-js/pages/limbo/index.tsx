@@ -196,7 +196,12 @@ export default function Limbo() {
       setDisplayMultiplier(multiplierLimits[0]);
       setTargetMultiplier(multiplierLimits[0]);
 
-      const response = await limboBet(wallet, betAmt!, inputMultiplier);
+      const response = await limboBet(
+        wallet,
+        betAmt!,
+        inputMultiplier,
+        selectedCoin.tokenMint,
+      );
 
       if (!response.success) throw new Error(response.message);
 
@@ -349,8 +354,6 @@ export default function Limbo() {
               disabled={
                 loading ||
                 !session?.user ||
-                !selectedCoin ||
-                (selectedCoin && selectedCoin.amount < minGameAmount) ||
                 (betAmt !== undefined &&
                   maxBetAmt !== undefined &&
                   betAmt > maxBetAmt)
@@ -432,8 +435,6 @@ export default function Limbo() {
                     disabled={
                       loading ||
                       !session?.user ||
-                      !selectedCoin ||
-                      (selectedCoin && selectedCoin.amount < minGameAmount) ||
                       (betAmt !== undefined &&
                         maxBetAmt !== undefined &&
                         betAmt > maxBetAmt)

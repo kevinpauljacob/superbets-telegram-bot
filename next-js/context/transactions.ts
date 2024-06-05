@@ -11,7 +11,7 @@ import {
 } from "@solana/spl-token";
 import { WalletContextState } from "@solana/wallet-adapter-react";
 import { translationsMap } from "@/components/GlobalContext";
-import { GameType } from "@/utils/provably-fair";
+import { GameTokens, GameType } from "@/utils/provably-fair";
 import { errorCustom, successCustom } from "@/components/toasts/ToastGroup";
 
 export const connection = new Connection(process.env.NEXT_PUBLIC_RPC!);
@@ -205,19 +205,51 @@ export const houseEdgeTiers: Record<number, number> = {
 
 type PayoutValue<T> = number;
 
-export const maxPayouts: { [K in GameType]: PayoutValue<K> } = {
-  [GameType.dice]: 1,
-  [GameType.coin]: 1,
-  [GameType.options]: 1,
-  [GameType.dice2]: 1,
-  [GameType.wheel]: 1,
-  [GameType.plinko]: 1,
-  [GameType.limbo]: 1,
-  [GameType.roulette1]: 1,
-  [GameType.roulette2]: 1,
-  [GameType.keno]: 1,
-  [GameType.mines]: 1,
-  [GameType.hilo]: 1,
+export const maxPayouts: {
+  [K in GameTokens]: { [K in GameType]: PayoutValue<K> };
+} = {
+  [GameTokens.SOL]: {
+    [GameType.dice]: 1,
+    [GameType.coin]: 1,
+    [GameType.options]: 1,
+    [GameType.dice2]: 1,
+    [GameType.wheel]: 1,
+    [GameType.plinko]: 1,
+    [GameType.limbo]: 1,
+    [GameType.roulette1]: 1,
+    [GameType.roulette2]: 1,
+    [GameType.keno]: 1,
+    [GameType.mines]: 1,
+    [GameType.hilo]: 1,
+  },
+  [GameTokens.FOMO]: {
+    [GameType.dice]: 1,
+    [GameType.coin]: 1,
+    [GameType.options]: 1,
+    [GameType.dice2]: 1,
+    [GameType.wheel]: 1,
+    [GameType.plinko]: 1,
+    [GameType.limbo]: 1,
+    [GameType.roulette1]: 1,
+    [GameType.roulette2]: 1,
+    [GameType.keno]: 1,
+    [GameType.mines]: 1,
+    [GameType.hilo]: 1,
+  },
+  [GameTokens.USDC]: {
+    [GameType.dice]: 1,
+    [GameType.coin]: 1,
+    [GameType.options]: 1,
+    [GameType.dice2]: 1,
+    [GameType.wheel]: 1,
+    [GameType.plinko]: 1,
+    [GameType.limbo]: 1,
+    [GameType.roulette1]: 1,
+    [GameType.roulette2]: 1,
+    [GameType.keno]: 1,
+    [GameType.mines]: 1,
+    [GameType.hilo]: 1,
+  },
 };
 
 export const obfuscatePubKey = (address: string) => {

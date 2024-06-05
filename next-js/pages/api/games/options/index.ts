@@ -6,7 +6,7 @@ import { minGameAmount, wsEndpoint } from "@/context/gameTransactions";
 import { Decimal } from "decimal.js";
 import { maintainance, maxPayouts } from "@/context/transactions";
 import StakingUser from "@/models/staking/user";
-import { GameType } from "@/utils/provably-fair";
+import { GameTokens, GameType } from "@/utils/provably-fair";
 import { SPL_TOKENS } from "@/context/config";
 Decimal.set({ precision: 9 });
 
@@ -75,7 +75,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       const strikeMultiplier = new Decimal(2);
       const maxPayout = Decimal.mul(amount, strikeMultiplier);
 
-      if (!(maxPayout.toNumber() <= maxPayouts[splToken.tokenName].options))
+      if (!(maxPayout.toNumber() <= maxPayouts[tokenMint as GameTokens].options))
         return res
           .status(400)
           .json({ success: false, message: "Max payout exceeded" });

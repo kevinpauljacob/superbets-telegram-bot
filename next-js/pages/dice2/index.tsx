@@ -387,8 +387,6 @@ export default function Dice2() {
                 !wallet ||
                 !session?.user ||
                 isRolling ||
-                !selectedCoin ||
-                (selectedCoin && selectedCoin.amount < minGameAmount) ||
                 (betAmt !== undefined &&
                   maxBetAmt !== undefined &&
                   betAmt > maxBetAmt)
@@ -461,8 +459,6 @@ export default function Dice2() {
                       !wallet ||
                       !session?.user ||
                       isRolling ||
-                      !selectedCoin ||
-                      (selectedCoin && selectedCoin.amount < minGameAmount) ||
                       (betAmt !== undefined &&
                         maxBetAmt !== undefined &&
                         betAmt > maxBetAmt)

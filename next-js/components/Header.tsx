@@ -80,7 +80,7 @@ export function Header({
           </div>
 
           {/* left  */}
-          <div className="flex ml-2 mr-2 sm:items-center items-end sm:flex-row">
+          <div className="flex ml-2 lg:mr-2 sm:items-center items-end sm:flex-row">
             <div className="flex gap-8 mr-6 items-end">
               {/* Language selector */}
               <button
