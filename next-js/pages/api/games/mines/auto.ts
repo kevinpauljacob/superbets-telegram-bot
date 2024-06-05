@@ -3,6 +3,7 @@ import { getToken } from "next-auth/jwt";
 import { NextApiRequest, NextApiResponse } from "next";
 import { GameSeed, Mines, User } from "@/models/games";
 import {
+  GameTokens,
   GameType,
   decryptServerSeed,
   generateGameResult,
@@ -86,7 +87,12 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       const maxStrikeMultiplier = 25;
       const maxPayout = Decimal.mul(amount, maxStrikeMultiplier);
 
-      if (!(maxPayout.toNumber() <= maxPayouts[splToken.tokenName].mines))
+      if (
+        !(
+          maxPayout.toNumber() <=
+          maxPayouts[splToken.tokenName as GameTokens].mines
+        )
+      )
         return res
           .status(400)
           .json({ success: false, message: "Max payout exceeded" });
