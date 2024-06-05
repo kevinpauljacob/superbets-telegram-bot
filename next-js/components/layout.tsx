@@ -191,7 +191,7 @@ export default function Layout({ children }: LayoutProps) {
       getWalletBalance();
     }
     setCurrentGame(game);
-  }, [session?.user, showWalletModal, game]);
+  }, [wallet?.publicKey, session?.user, showWalletModal, game]);
 
   return (
     <>
