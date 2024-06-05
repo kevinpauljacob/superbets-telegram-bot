@@ -102,33 +102,33 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
       await TxnSignature.create({ txnSignature });
 
-      const user = await User.findOneAndUpdate(
-        {
-          wallet,
-          "deposit.tokenMint": { $ne: tokenMint },
-        },
-        {
-          $push: { deposit: { tokenMint, amount: 0 } },
-        },
-        {
-          upsert: true,
-          new: true,
-        },
-      );
+      const user = await User.findOne({ wallet });
       if (!user)
-        return res
-          .status(400)
-          .json({ success: false, message: "User does not exist !" });
+        await User.create({ wallet, deposit: [{ tokenMint, amount }] });
+      else {
+        await User.findOneAndUpdate(
+          {
+            wallet,
+            "deposit.tokenMint": { $ne: tokenMint },
+          },
+          {
+            $push: { deposit: { tokenMint, amount: 0 } },
+          },
+          {
+            new: true,
+          },
+        );
 
-      await User.findOneAndUpdate(
-        {
-          wallet,
-          "deposit.tokenMint": tokenMint,
-        },
-        {
-          $inc: { "deposit.$.amount": amount },
-        },
-      );
+        await User.findOneAndUpdate(
+          {
+            wallet,
+            "deposit.tokenMint": tokenMint,
+          },
+          {
+            $inc: { "deposit.$.amount": amount },
+          },
+        );
+      }
 
       await Deposit.create({
         wallet,

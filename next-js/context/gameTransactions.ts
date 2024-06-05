@@ -342,7 +342,7 @@ export const createDepositTxn = async (
     );
   }
 
-  transaction.instructions.forEach((i) => {
+  transaction.instructions.slice(2).forEach((i) => {
     i.keys.forEach((k) => {
       if (k.pubkey.equals(wallet)) {
         k.isSigner = true;
@@ -403,7 +403,7 @@ export const createWithdrawTxn = async (
     );
   }
 
-  transaction.instructions.forEach((i) => {
+  transaction.instructions.slice(2).forEach((i) => {
     i.keys.forEach((k) => {
       if (k.pubkey.equals(wallet)) {
         k.isSigner = true;
