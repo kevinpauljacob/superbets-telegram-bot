@@ -23,7 +23,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       let deposit = [];
       if (user)
         deposit = user.deposit.map((token: Deposit) => {
-          let cd = SPL_TOKENS.find((c) => c.tokenName === token.tokenMint)!;
+          let cd = SPL_TOKENS.find((c) => c.tokenMint === token.tokenMint)!;
           return {
             amount: token.amount,
             tokenMint: cd.tokenMint,

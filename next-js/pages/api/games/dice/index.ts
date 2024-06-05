@@ -175,14 +175,12 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         amountLost = 0;
       }
 
-      const tokenName = SPL_TOKENS.find(token => token.tokenMint === tokenMint)?.tokenName
-
       const userUpdate = await User.findOneAndUpdate(
         {
           wallet,
           deposit: {
             $elemMatch: {
-              tokenName,
+              tokenMint,
               amount: { $gte: amount },
             },
           },
