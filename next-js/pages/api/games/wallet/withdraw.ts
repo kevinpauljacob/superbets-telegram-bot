@@ -97,9 +97,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           .status(400)
           .json({ success: false, message: "Invalid parameters!" });
 
-      const tokenName = SPL_TOKENS.find((t) => t.tokenMint === tokenMint)
-        ?.tokenName!;
-
       await connectDatabase();
 
       let user = await User.findOne({ wallet });
@@ -148,6 +145,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       const userAgg = await Deposit.aggregate([
         {
           $match: {
+            tokenMint,
             createdAt: {
               $gte: new Date(Date.now() - timeWeightedAvgInterval),
             },
@@ -235,7 +233,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         );
       }
 
-      const route = `https://fomowtf.com/api/games/global/getUserVol?wallet=${wallet}`;
+      const route = `https://fomowtf.com/api/games/global/getUserVol?wallet=${wallet}&tokenMint=${tokenMint}`;
 
       let totalVolume = (await (await fetch(route)).json())?.data ?? 0;
 
@@ -281,6 +279,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       // disable global
 
       // netTransfer = 1000000000;
+
+      const tokenName = SPL_TOKENS.find((t) => t.tokenMint === tokenMint)
+        ?.tokenName!;
 
       if (netTransfer > timeWeightedAvgLimit[tokenName]) {
         await Deposit.create({

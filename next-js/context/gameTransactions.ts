@@ -340,9 +340,16 @@ export const createDepositTxn = async (
         Math.floor(amount * Math.pow(10, decimal)),
       ),
     );
-
-    transaction.instructions[2].keys[2].isWritable = true;
   }
+
+  transaction.instructions.forEach((i) => {
+    i.keys.forEach((k) => {
+      if (k.pubkey.equals(wallet)) {
+        k.isSigner = true;
+        k.isWritable = true;
+      }
+    });
+  });
 
   return { transaction, blockhashWithExpiryBlockHeight };
 };
@@ -375,8 +382,6 @@ export const createWithdrawTxn = async (
         lamports: Math.floor(amount * Math.pow(10, 9)),
       }),
     );
-    transaction.instructions[2].keys[1].isSigner = true;
-    transaction.instructions[2].keys[1].isWritable = true;
   } else {
     const tokenId = new PublicKey(tokenMint);
     const userAta = await getAssociatedTokenAddress(tokenId, wallet);
@@ -396,9 +401,16 @@ export const createWithdrawTxn = async (
         Math.floor(amount * Math.pow(10, decimal)),
       ),
     );
-    transaction.instructions[3].keys[2].isSigner = true;
-    transaction.instructions[3].keys[2].isWritable = true;
   }
+
+  transaction.instructions.forEach((i) => {
+    i.keys.forEach((k) => {
+      if (k.pubkey.equals(wallet)) {
+        k.isSigner = true;
+        k.isWritable = true;
+      }
+    });
+  });
 
   return { transaction, blockhashWithExpiryBlockHeight };
 };
