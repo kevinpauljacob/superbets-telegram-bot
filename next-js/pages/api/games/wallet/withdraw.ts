@@ -189,6 +189,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
             {
               $match: {
                 wallet,
+                tokenMint,
                 createdAt: { $gt: blackListedWallet[wallet].date },
               },
             },
