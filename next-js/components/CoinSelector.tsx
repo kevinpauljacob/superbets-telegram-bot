@@ -14,15 +14,20 @@ export default function CoinSelector() {
     setSelectedCoin,
     selectedCoin,
     coinData,
+    startAuto,
   } = useGlobalContext();
   const [showSelectCoinModal, setShowSelectCoinModal] = useState(false);
   const [fiat, setFiat] = useState(false);
   return (
     <div className="relative flex items-center gap-2">
-      <div className="flex flex-col min-w-[8rem]">
+      <div
+        className={`flex flex-col min-w-[8rem] ${startAuto ? "opacity-50" : ""}`}
+      >
         <div
           className="flex flex-row justify-left items-center px-4 py-1 gap-2 border-2 border-white border-opacity-5 rounded-[5px] cursor-pointer"
-          onClick={() => setShowSelectCoinModal(!showSelectCoinModal)}
+          onClick={() => {
+            !startAuto && setShowSelectCoinModal(!showSelectCoinModal);
+          }}
         >
           {selectedCoin.icon && (
             <selectedCoin.icon className="w-6 h-6 -mt-[1px]" />
@@ -44,7 +49,7 @@ export default function CoinSelector() {
         </div>
       </div>
 
-      {showSelectCoinModal && (
+      {!startAuto && showSelectCoinModal && (
         <div className="absolute top-full mt-3 bg-[#202329] w-full rounded-[5px] border-2 border-white border-opacity-10">
           {SPL_TOKENS.map((coin, index) => (
             <div
