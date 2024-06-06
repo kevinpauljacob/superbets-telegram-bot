@@ -228,7 +228,7 @@ export default function Roulette() {
 </button>
                           <button
                             data-testid={`roulette-tile-${number}-top`}
-                            className="absolute w-full h-1 bg-transparent top-0"
+                            className="absolute w-full h-3 bg-transparent -top-2"
                             onClick={() => handlePlaceBet(`num-${number}-top`, SelectedToken)}
                           />
                           <button
@@ -238,7 +238,7 @@ export default function Roulette() {
                           />
                           <button
                             data-testid={`roulette-tile-${number}-corner`}
-                            className="absolute w-6 h-6 bg-transparent -left-5 -top-5 px-[6px]"
+                            className="absolute w-6 h-6 bg-transparent -left-4 -top-5 px-[6px]"
                             onClick={() => handlePlaceBet(`num-${number}-corner`, SelectedToken)}
                           />
                         </div>
