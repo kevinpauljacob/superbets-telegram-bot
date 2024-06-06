@@ -35,6 +35,7 @@ export default function ConfigureAutoModal() {
     language,
     autoConfigState,
     setAutoConfigState,
+    selectedCoin,
   } = useGlobalContext();
 
   const updateAutoConfigState = () => {
@@ -295,13 +296,7 @@ export default function ConfigureAutoModal() {
               <div
                 className={`group flex h-11 w-full cursor-pointer items-center rounded-[8px] bg-[#202329] px-2`}
               >
-                <Image
-                  src={"/assets/sol.png"}
-                  width={16}
-                  height={14}
-                  alt=""
-                  className={``}
-                />
+                <selectedCoin.icon className="w-6 h-6 text-[#94A3B8]" />
                 <input
                   id={"autoStopProfit"}
                   {...methods.register("autoStopProfit", {
@@ -356,13 +351,7 @@ export default function ConfigureAutoModal() {
               <div
                 className={`group flex h-11 w-full cursor-pointer items-center rounded-[8px] bg-[#202329] px-2`}
               >
-                <Image
-                  src={"/assets/sol.png"}
-                  width={16}
-                  height={14}
-                  alt=""
-                  className={``}
-                />
+                <selectedCoin.icon className="w-6 h-6 text-[#94A3B8]" />
                 <input
                   id={"autoStopLoss"}
                   {...methods.register("autoStopLoss", {

@@ -1,10 +1,8 @@
-import {
-  obfuscatePubKey,
-  translator,
-} from "@/context/transactions";
+import { obfuscatePubKey, translator } from "@/context/transactions";
 import { useGlobalContext } from "../GlobalContext";
 import Image from "next/image";
 import { truncateNumber } from "@/context/gameTransactions";
+import { SPL_TOKENS } from "@/context/config";
 
 interface BetRowProps {
   bet: any;
@@ -69,10 +67,10 @@ const BetRow: React.FC<BetRowProps> = ({
         </div>
       </div>
       <span className="w-full hidden md:block text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
-        {truncateNumber(bet.amount ?? 0, 4)}
+        {truncateNumber(bet?.amount ?? 0, 4)}
       </span>
       <span className="w-full hidden md:block text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
-        {truncateNumber(bet.strikeMultiplier ?? 0)}
+        {truncateNumber(bet?.strikeMultiplier ?? 0)}
       </span>
       {bet.result === "Pending" ? (
         <span className="w-full text-center font-changa text-sm text-opacity-75 text-[#F0F0F0]">
@@ -80,11 +78,15 @@ const BetRow: React.FC<BetRowProps> = ({
         </span>
       ) : bet.amountWon > bet.amount ? (
         <span className="w-full text-center font-changa text-sm text-opacity-75 text-fomo-green">
-          {truncateNumber(bet.amountWon, 4)} SOL
+          {truncateNumber(bet?.amountWon, 4)}{" "}
+          {SPL_TOKENS.find((token) => token.tokenMint === bet?.tokenMint)
+            ?.tokenName ?? ""}
         </span>
       ) : (
         <span className="w-full text-center font-changa text-sm text-opacity-75 text-fomo-red">
-          {truncateNumber(bet.amountWon - bet.amount, 4)} SOL
+          {truncateNumber(bet?.amountWon - bet.amount, 4)}{" "}
+          {SPL_TOKENS.find((token) => token.tokenMint === bet?.tokenMint)
+            ?.tokenName ?? ""}
         </span>
       )}
     </div>

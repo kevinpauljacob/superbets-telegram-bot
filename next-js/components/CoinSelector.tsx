@@ -79,7 +79,7 @@ export default function CoinSelector() {
               </span>
             </div>
           ))}
-          <div className="w-full h-[3.5rem] flex items-center justify-between bg-[#0E0F14] bg-opacity-30 px-5">
+          {/* <div className="w-full h-[3.5rem] flex items-center justify-between bg-[#0E0F14] bg-opacity-30 px-5">
             <span className="text-sm font-chakra font-medium leading-3 text-[#F0F0F0] text-opacity-75">
               Display in Fiat
             </span>
@@ -102,7 +102,7 @@ export default function CoinSelector() {
                 ></div>
               </div>
             </button>
-          </div>
+          </div> */}
         </div>
       )}
 

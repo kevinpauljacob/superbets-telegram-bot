@@ -37,6 +37,7 @@ export default function BalanceModal() {
     userTokens,
     setUserTokens,
     getBalance,
+    coinData,
   } = useGlobalContext();
 
   const [loading, setLoading] = useState<boolean>(false);
@@ -85,8 +86,7 @@ export default function BalanceModal() {
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
-    const amount = parseFloat(e.target.value);
-    setAmount(parseFloat(e.target.value));
+    setAmount(Math.abs(parseFloat(e.target.value)));
   };
 
   const modalRef: any = useRef(null);
@@ -285,7 +285,7 @@ export default function BalanceModal() {
                   className="w-full rounded-md h-11 flex items-center bg-[#202329] px-4 py-2 text-[#94A3B8] text-base font-chakra gap-2 cursor-pointer"
                   onClick={() => setIsSelectModalOpen(!isSelectModalOpen)}
                 >
-                  <img src={selectedToken.icon} alt="" className="w-5 h-5" />
+                  <selectedToken.icon className="w-6 h-6" />
                   <span>{selectedToken.tokenName}</span>
                   <div className="grow" />
                   <img
@@ -308,23 +308,22 @@ export default function BalanceModal() {
                           setIsSelectModalOpen(false);
                         }}
                       >
-                        <img src={token.icon} alt="" className="w-5 h-5" />
+                        <token.icon className="" />
                         <span>{token.tokenName}</span>
                         <div className="grow" />
                         <span className="text-gray-400">
                           {actionType === "Deposit" &&
-                            (userTokens.find(
-                              (t) => t.mintAddress === token.tokenMint,
-                            ) &&
-                            userTokens.find(
-                              (t) => t.mintAddress === token.tokenMint,
-                            )
-                              ? userTokens.find(
-                                  (t) => t.mintAddress === token.tokenMint,
-                                )!.balance
-                              : "0")}
-                          {/** todo: return amount from game wallet */}
-                          {actionType === "Withdraw" && "0"}
+                            truncateNumber(
+                              userTokens.find(
+                                (t) => t.mintAddress === token.tokenMint,
+                              )?.balance ?? 0,
+                            )}
+                          {actionType === "Withdraw" &&
+                            truncateNumber(
+                              coinData?.find(
+                                (coin) => coin.tokenMint === token.tokenMint,
+                              )?.amount ?? 0,
+                            )}
                         </span>
                       </div>
                     ))}
@@ -354,9 +353,9 @@ export default function BalanceModal() {
                   </label>
                   <span className="font-changa font-medium text-sm text-[#94A3B8] text-opacity-90">
                     {truncateNumber(
-                      //todo: return amount from game wallet
-                      0,
-                      3,
+                      coinData?.find(
+                        (coin) => coin.tokenMint === selectedToken.tokenMint,
+                      )?.amount ?? 0,
                     )}{" "}
                     ${selectedToken.tokenName}
                   </span>
@@ -375,15 +374,19 @@ export default function BalanceModal() {
                     step={"any"}
                     autoComplete="off"
                     onChange={handleChange}
-                    placeholder={"Amount"}
+                    placeholder={"00.00"}
                     value={amount}
                     className={`flex w-full min-w-0 bg-transparent text-sm text-[#94A3B8] placeholder-[#94A3B8]  placeholder-opacity-40 outline-none`}
                   />
                   <span
                     className="text-xs font-medium text-white text-opacity-50 bg-[#292C32] hover:bg-[#47484A] focus:bg-[#47484A] transition-all rounded-[5px] mr-2 py-1.5 px-4"
                     onClick={() => {
-                      //todo: return amount from game wallet
-                      return 0;
+                      let bal =
+                        coinData?.find(
+                          (coin) => coin.tokenMint === selectedToken.tokenMint,
+                        )?.amount ?? 0;
+                      if (!amount || amount === 0) setAmount(bal / 2);
+                      else setAmount(amount / 2);
                     }}
                   >
                     {translator("Half", language)}
@@ -391,8 +394,11 @@ export default function BalanceModal() {
                   <span
                     className="text-xs font-medium text-white text-opacity-50 bg-[#292C32] hover:bg-[#47484A] focus:bg-[#47484A] transition-all rounded-[5px] py-1.5 px-4"
                     onClick={() => {
-                      //todo: return amount from game wallet
-                      return 0;
+                      let bal =
+                        coinData?.find(
+                          (coin) => coin.tokenMint === selectedToken.tokenMint,
+                        )?.amount ?? 0;
+                      setAmount(bal);
                     }}
                   >
                     {translator("Max", language)}
