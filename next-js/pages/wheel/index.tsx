@@ -33,6 +33,7 @@ import {
 import { translator, formatNumber } from "@/context/transactions";
 import { minGameAmount, truncateNumber } from "@/context/gameTransactions";
 import { useSession } from "next-auth/react";
+import { GameType } from "@/utils/provably-fair";
 
 export default function Wheel() {
   const wallet = useWallet();
@@ -61,6 +62,8 @@ export default function Wheel() {
     houseEdge,
     maxBetAmt,
     language,
+    setLiveStats,
+    liveStats
   } = useGlobalContext();
   const [betAmt, setBetAmt] = useState<number | undefined>();
   const [userInput, setUserInput] = useState<number | undefined>();
@@ -101,14 +104,14 @@ export default function Wheel() {
     segments === 10
       ? 0
       : segments === 20
-      ? 25
-      : segments === 30
-      ? 50
-      : segments === 40
-      ? 75
-      : segments === 50
-      ? 100
-      : null;
+        ? 25
+        : segments === 30
+          ? 50
+          : segments === 40
+            ? 75
+            : segments === 50
+              ? 100
+              : null;
 
   useEffect(() => {
     if (!wheelRef.current) return;
@@ -139,9 +142,8 @@ export default function Wheel() {
     if (wheelRef.current) {
       wheelRef.current.style.transition =
         "transform 3s cubic-bezier(0.4, 0, 0.2, 1)";
-      wheelRef.current.style.transform = `rotate(${
-        delta + 360 + 360 - resultAngle
-      }deg)`;
+      wheelRef.current.style.transform = `rotate(${delta + 360 + 360 - resultAngle
+        }deg)`;
     }
   };
 
@@ -196,6 +198,17 @@ export default function Wheel() {
       const win = result === "Won";
       const newBetResult = { result: strikeMultiplier, win };
 
+      setLiveStats([
+        ...liveStats,
+        {
+          game: GameType.wheel,
+          amount: betAmt!,
+          result: win ? "Won" : "Lost",
+          pnl: win ? (betAmt! * strikeMultiplier) - betAmt! : -betAmt!,
+          totalPNL: liveStats.length > 0 ? liveStats[liveStats.length - 1].totalPNL + (win ? (betAmt * strikeMultiplier) - betAmt : -betAmt) : win ? (betAmt * strikeMultiplier) - betAmt : -betAmt
+        }
+      ])
+
       setBetResults((prevResults) => {
         const newResults = [...prevResults, newBetResult];
         if (newResults.length > 5) {
@@ -229,7 +242,7 @@ export default function Wheel() {
         // update profit / loss
         setAutoBetProfit(
           autoBetProfit +
-            (win ? strikeMultiplier * (1 - houseEdge) - 1 : -1) * betAmt,
+          (win ? strikeMultiplier * (1 - houseEdge) - 1 : -1) * betAmt,
         );
         // update count
         if (typeof autoBetCount === "number") {
@@ -276,12 +289,12 @@ export default function Wheel() {
         potentialLoss =
           autoBetProfit +
           -1 *
-            (autoWinChangeReset || autoLossChangeReset
-              ? betAmt
-              : autoBetCount === "inf"
+          (autoWinChangeReset || autoLossChangeReset
+            ? betAmt
+            : autoBetCount === "inf"
               ? Math.max(0, betAmt)
               : betAmt *
-                (autoLossChange !== null ? autoLossChange / 100.0 : 0));
+              (autoLossChange !== null ? autoLossChange / 100.0 : 0));
 
         // console.log("Current bet amount:", betAmt);
         // console.log("Auto loss change:", autoLossChange);
@@ -369,13 +382,13 @@ export default function Wheel() {
             <BetButton
               disabled={
                 !wallet ||
-                !session?.user ||
-                isRolling ||
-                !coinData ||
-                (coinData && coinData[0].amount < minGameAmount) ||
-                (betAmt !== undefined &&
-                  maxBetAmt !== undefined &&
-                  betAmt > maxBetAmt)
+                  !session?.user ||
+                  isRolling ||
+                  !coinData ||
+                  (coinData && coinData[0].amount < minGameAmount) ||
+                  (betAmt !== undefined &&
+                    maxBetAmt !== undefined &&
+                    betAmt > maxBetAmt)
                   ? true
                   : false
               }
@@ -425,11 +438,10 @@ export default function Wheel() {
                       <button
                         onClick={() => setRisk("low")}
                         type="button"
-                        className={`text-center w-full rounded-[5px] border-[2px] disabled:cursor-not-allowed disabled:opacity-50 bg-[#202329] py-2 text-xs font-chakra text-white text-opacity-90 transition duration-200 ${
-                          risk === "low"
+                        className={`text-center w-full rounded-[5px] border-[2px] disabled:cursor-not-allowed disabled:opacity-50 bg-[#202329] py-2 text-xs font-chakra text-white text-opacity-90 transition duration-200 ${risk === "low"
                             ? "border-[#7839C5]"
                             : "border-transparent hover:border-[#7839C580]"
-                        }`}
+                          }`}
                         disabled={disableInput}
                       >
                         {translator("Low", language)}
@@ -437,11 +449,10 @@ export default function Wheel() {
                       <button
                         onClick={() => setRisk("medium")}
                         type="button"
-                        className={`text-center w-full rounded-[5px] border-[2px] disabled:cursor-not-allowed disabled:opacity-50 bg-[#202329] py-2 text-xs font-chakra text-white text-opacity-90 transition duration-200 ${
-                          risk === "medium"
+                        className={`text-center w-full rounded-[5px] border-[2px] disabled:cursor-not-allowed disabled:opacity-50 bg-[#202329] py-2 text-xs font-chakra text-white text-opacity-90 transition duration-200 ${risk === "medium"
                             ? "border-[#7839C5]"
                             : "border-transparent hover:border-[#7839C580]"
-                        }`}
+                          }`}
                         disabled={disableInput}
                       >
                         {translator("Medium", language)}
@@ -450,11 +461,10 @@ export default function Wheel() {
                     <button
                       onClick={() => setRisk("high")}
                       type="button"
-                      className={`text-center lg:w-[33.33%] w-full rounded-[5px] border-[2px] disabled:cursor-not-allowed disabled:opacity-50 bg-[#202329] py-2 text-xs font-chakra text-white text-opacity-90 transition duration-200 ${
-                        risk === "high"
+                      className={`text-center lg:w-[33.33%] w-full rounded-[5px] border-[2px] disabled:cursor-not-allowed disabled:opacity-50 bg-[#202329] py-2 text-xs font-chakra text-white text-opacity-90 transition duration-200 ${risk === "high"
                           ? "border-[#7839C5]"
                           : "border-transparent hover:border-[#7839C580]"
-                      }`}
+                        }`}
                       disabled={disableInput}
                     >
                       {translator("High", language)}
@@ -513,13 +523,13 @@ export default function Wheel() {
                   <BetButton
                     disabled={
                       !wallet ||
-                      !session?.user ||
-                      isRolling ||
-                      !coinData ||
-                      (coinData && coinData[0].amount < minGameAmount) ||
-                      (betAmt !== undefined &&
-                        maxBetAmt !== undefined &&
-                        betAmt > maxBetAmt)
+                        !session?.user ||
+                        isRolling ||
+                        !coinData ||
+                        (coinData && coinData[0].amount < minGameAmount) ||
+                        (betAmt !== undefined &&
+                          maxBetAmt !== undefined &&
+                          betAmt > maxBetAmt)
                         ? true
                         : false
                     }
@@ -554,17 +564,15 @@ export default function Wheel() {
               width={35}
               height={35}
               id="pointer"
-              className={`${
-                isRolling
+              className={`${isRolling
                   ? "-rotate-[20deg] delay-[500ms] duration-500"
                   : "rotate-0 duration-200"
-              } absolute z-50 -top-3 transition-all ease-[cubic-bezier(0.4,0,0.2,1)]`}
+                } absolute z-50 -top-3 transition-all ease-[cubic-bezier(0.4,0,0.2,1)]`}
             />
             <div
               ref={wheelRef}
-              className={`${
-                isRolling ? "" : ""
-              } relative w-[20rem] h-[20rem] md:w-[25rem] md:h-[25rem] rounded-full overflow-hidden`}
+              className={`${isRolling ? "" : ""
+                } relative w-[20rem] h-[20rem] md:w-[25rem] md:h-[25rem] rounded-full overflow-hidden`}
             >
               {typeof window !== "undefined" && (
                 <svg viewBox="0 0 300 300">
@@ -633,14 +641,14 @@ export default function Wheel() {
                           <div className="border border-white/10 rounded-lg p-3 mt-2">
                             {coinData
                               ? truncateNumber(
-                                  Math.max(
-                                    0,
-                                    (betAmt ?? 0) *
-                                      (segment.multiplier * (1 - houseEdge) -
-                                        1),
-                                  ),
-                                  4,
-                                )
+                                Math.max(
+                                  0,
+                                  (betAmt ?? 0) *
+                                  (segment.multiplier * (1 - houseEdge) -
+                                    1),
+                                ),
+                                4,
+                              )
                               : 0}
                           </div>
                         </div>
@@ -660,18 +668,18 @@ export default function Wheel() {
             </>
           )}
           {(!coinData || (coinData && coinData[0].amount < minGameAmount)) && (
-              <div className="w-full rounded-lg bg-[#d9d9d90d] bg-opacity-10 flex items-center px-3 py-3 text-white md:px-6">
-                <div className="w-full text-center font-changa font-medium text-sm md:text-base text-[#F0F0F0] text-opacity-75">
-                  {translator(
-                    "Please deposit funds to start playing. View",
-                    language,
-                  )}{" "}
-                  <Link href="/balance">
-                    <u>{translator("WALLET", language)}</u>
-                  </Link>
-                </div>
+            <div className="w-full rounded-lg bg-[#d9d9d90d] bg-opacity-10 flex items-center px-3 py-3 text-white md:px-6">
+              <div className="w-full text-center font-changa font-medium text-sm md:text-base text-[#F0F0F0] text-opacity-75">
+                {translator(
+                  "Please deposit funds to start playing. View",
+                  language,
+                )}{" "}
+                <Link href="/balance">
+                  <u>{translator("WALLET", language)}</u>
+                </Link>
               </div>
-            )}
+            </div>
+          )}
         </div>
       </GameDisplay>
       <GameTable>

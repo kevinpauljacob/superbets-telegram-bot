@@ -15,7 +15,7 @@ export default function GameHeader() {
   const router = useRouter();
   const game = router.pathname.split("/")[1];
 
-  const { coinData, getProvablyFairData, setOpenPFModal, language } =
+  const { coinData, houseEdge, setOpenPFModal, language } =
     useGlobalContext();
 
   const fetchGameData = (game: GameType) => {
@@ -110,12 +110,14 @@ export default function GameHeader() {
           </p>
         </div>
         <div className="flex flex-wrap mt-1 justify-end">
-          {/* <div className="hidden md:flex items-center justify-between bg-[#1E2220] rounded-md mx-1.5  my-1 px-2 py-1">
-            <p className="font-light text-xs">Wallet Balance :&nbsp;</p>
-            <p className="text-[#1FCDF0] font-semibold text-xs">
-              {coinData ? coinData[0].amount.toFixed(4) : 0} $SOL
+          <div className="hidden md:flex items-center justify-between bg-[#1E2220] rounded-md mx-1.5  my-1 px-2 py-1">
+            <p className="font-light text-xs">
+              {translator("House Edge", language)} :&nbsp;
             </p>
-          </div> */}
+            <p className="text-[#7839C5] font-semibold text-xs">
+              {houseEdge}%
+            </p>
+          </div>
           <div className="hidden md:flex items-center justify-between bg-[#1E2220] rounded-md mx-1.5  my-1 px-4 py-1">
             <p className="font-thin text-xs">
               {translator("Volume", language)} :&nbsp;

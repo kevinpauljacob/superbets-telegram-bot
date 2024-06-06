@@ -18,6 +18,7 @@ import "@solana/wallet-adapter-react-ui/styles.css";
 import { SessionProvider } from "next-auth/react";
 import InfoBar from "@/components/Infobar";
 import { useEffect } from "react";
+import LiveStats from "@/components/games/LiveStats";
 
 export default function App({
   Component,
@@ -53,6 +54,7 @@ export default function App({
                 id="main-parent"
                 className={`w-[100dvw] h-[100dvh] flex flex-1 flex-col bg-[#0F0F0F] overflow-hidden nobar unselectable`}
               >
+                <LiveStats />
                 <Layout>
                   <Component {...pageProps} />
                 </Layout>
