@@ -482,10 +482,8 @@ export default function Mines() {
         );
         // update count
         if (typeof autoBetCount === "number") {
-          if (autoBetCount === 1) {
-            warningCustom("Auto bet stopped", "top-left");
-          }
-          if (autoBetCount > 1) setAutoBetCount(autoBetCount - 1);
+          setAutoBetCount(autoBetCount > 0 ? autoBetCount - 1 : 0);
+          autoBetCount === 1 && warningCustom("Auto bet stopped", "top-left");
         } else
           setAutoBetCount(
             autoBetCount.length > 12
@@ -712,8 +710,16 @@ export default function Mines() {
         warningCustom("Profit limit reached.", "top-left");
         setAutoBetCount(0);
         setStartAuto(false);
-        setUserBets(defaultUserBets);
-        setUserBetsForAuto([]);
+        setTimeout(() => {
+          setUserBets(defaultUserBets);
+          setUserBetsForAuto([]);
+          setCashoutModal({
+            show: false,
+            amountWon: 0,
+            strikeMultiplier: 0,
+            pointsGained: 0,
+          });
+        }, 2000);
         return;
       }
       if (
@@ -725,8 +731,16 @@ export default function Mines() {
         warningCustom("Loss limit reached.", "top-left");
         setAutoBetCount(0);
         setStartAuto(false);
-        setUserBets(defaultUserBets);
-        setUserBetsForAuto([]);
+        setTimeout(() => {
+          setUserBets(defaultUserBets);
+          setUserBetsForAuto([]);
+          setCashoutModal({
+            show: false,
+            amountWon: 0,
+            strikeMultiplier: 0,
+            pointsGained: 0,
+          });
+        }, 2000);
         return;
       }
       setTimeout(() => {
@@ -734,8 +748,16 @@ export default function Mines() {
       }, 1000);
     } else {
       setStartAuto(false);
-      setUserBets(defaultUserBets);
-      setUserBetsForAuto([]);
+      setTimeout(() => {
+        setUserBets(defaultUserBets);
+        setUserBetsForAuto([]);
+        setCashoutModal({
+          show: false,
+          amountWon: 0,
+          strikeMultiplier: 0,
+          pointsGained: 0,
+        });
+      }, 2000);
       setAutoBetProfit(0);
       setUserInput(betAmt);
     }
@@ -791,7 +813,9 @@ export default function Mines() {
                 !wallet ||
                 !session?.user ||
                 isRolling ||
-                (coinData && coinData[0].amount < minGameAmount) ||
+                (!betActive &&
+                  coinData &&
+                  coinData[0].amount < minGameAmount) ||
                 (betActive &&
                   betType === "manual" &&
                   !userBets.some((bet) => bet.pick)) ||
@@ -1031,7 +1055,9 @@ export default function Mines() {
                       !wallet ||
                       !session?.user ||
                       isRolling ||
-                      (coinData && coinData[0].amount < minGameAmount) ||
+                      (!betActive &&
+                        coinData &&
+                        coinData[0].amount < minGameAmount) ||
                       (betActive &&
                         betType === "manual" &&
                         !userBets.some((bet) => bet.pick)) ||
