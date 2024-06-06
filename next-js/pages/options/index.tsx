@@ -22,6 +22,7 @@ import { translator } from "@/context/transactions";
 import { minGameAmount } from "@/context/gameTransactions";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
+import { GameType } from "@/utils/provably-fair";
 
 const Timer = dynamic(() => import("../../components/games/Timer"), {
   ssr: false,
@@ -38,8 +39,19 @@ export default function Options() {
 
   let checkBet: NodeJS.Timeout | null = null;
 
-  const { getWalletBalance, getBalance, selectedCoin, maxBetAmt, language } =
-    useGlobalContext();
+  const {
+    walletBalance,
+    setWalletBalance,
+    getWalletBalance,
+    getBalance,
+    coinData,
+    setShowWalletModal,
+    maxBetAmt,
+    language,
+    setLiveStats,
+    liveStats,
+    selectedCoin
+  } = useGlobalContext();
 
   const [livePrice, setLivePrice] = useState(0);
   const [user, setUser] = useState<any>();
@@ -100,6 +112,20 @@ export default function Options() {
               : res?.data?.amountLost,
           );
         }
+
+        let win = res?.data?.result == "Won"
+
+        setLiveStats([
+          ...liveStats,
+          {
+            game: GameType.options,
+            amount: betAmt!,
+            result: win ? "Won" : "Lost",
+            pnl: win ? (betAmt! * 2) - betAmt! : -betAmt!,
+            totalPNL: liveStats.length > 0 ? liveStats[liveStats.length - 1].totalPNL + (win ? (betAmt! * 2) - betAmt! : -betAmt!) : win ? (betAmt! * 2) - betAmt! : -betAmt!
+          }
+        ])
+
         setRefresh(true);
         setLoading(false);
         setBetResults((prevResults) => {
@@ -205,8 +231,8 @@ export default function Options() {
             setBetTime(bet?.betTime);
             setTimeLeft(
               new Date(bet?.betTime).getTime() +
-                bet?.timeFrame * 1000 -
-                Date.now(),
+              bet?.timeFrame * 1000 -
+              Date.now(),
             );
             const remainingTime =
               new Date(bet?.betTime).getTime() +
@@ -378,11 +404,10 @@ export default function Options() {
                     onClick={() => {
                       !loading && setBetInterval(3);
                     }}
-                    className={`${
-                      betInterval === 3
+                    className={`${betInterval === 3
                         ? "border-[#7839C5]"
                         : "border-transparent hover:border-[#7839C580]"
-                    } disabled:pointer-events-none disabled:opacity-50 w-full rounded-[5px] border-[2px] bg-[#202329] py-2 text-xs font-chakra text-white text-opacity-90 transition duration-200`}
+                      } disabled:pointer-events-none disabled:opacity-50 w-full rounded-[5px] border-[2px] bg-[#202329] py-2 text-xs font-chakra text-white text-opacity-90 transition duration-200`}
                   >
                     3 {translator("Min", language)}
                   </button>
@@ -392,11 +417,10 @@ export default function Options() {
                     onClick={() => {
                       !loading && setBetInterval(4);
                     }}
-                    className={`${
-                      betInterval === 4
+                    className={`${betInterval === 4
                         ? "border-[#7839C5]"
                         : "border-transparent hover:border-[#7839C580]"
-                    } disabled:pointer-events-none disabled:opacity-50 w-full rounded-[5px] border-[2px] bg-[#202329] py-2 text-xs font-chakra text-white text-opacity-90 transition duration-200`}
+                      } disabled:pointer-events-none disabled:opacity-50 w-full rounded-[5px] border-[2px] bg-[#202329] py-2 text-xs font-chakra text-white text-opacity-90 transition duration-200`}
                   >
                     4 {translator("Min", language)}
                   </button>
@@ -407,11 +431,10 @@ export default function Options() {
                   onClick={() => {
                     !loading && setBetInterval(5);
                   }}
-                  className={`${
-                    betInterval === 5
+                  className={`${betInterval === 5
                       ? "border-[#7839C5]"
                       : "border-transparent hover:border-[#7839C580]"
-                  } lg:w-[33.33%] disabled:pointer-events-none disabled:opacity-50 w-full rounded-[5px] border-[2px] bg-[#202329] py-2 text-xs font-chakra text-white text-opacity-90 transition duration-200`}
+                    } lg:w-[33.33%] disabled:pointer-events-none disabled:opacity-50 w-full rounded-[5px] border-[2px] bg-[#202329] py-2 text-xs font-chakra text-white text-opacity-90 transition duration-200`}
                 >
                   5 {translator("Min", language)}
                 </button>
@@ -426,11 +449,10 @@ export default function Options() {
                 onClick={() => {
                   setBetType("up");
                 }}
-                className={`${
-                  betType === "up"
+                className={`${betType === "up"
                     ? "border-[#7839C5]"
                     : "border-transparent hover:border-[#7839C580]"
-                } w-full rounded-lg disabled:pointer-events-none disabled:opacity-50 text-center cursor-pointer border-2 bg-[#202329] py-2.5 font-changa text-xl text-white shadow-[0px_4px_15px_0px_rgba(0,0,0,0.25)]`}
+                  } w-full rounded-lg disabled:pointer-events-none disabled:opacity-50 text-center cursor-pointer border-2 bg-[#202329] py-2.5 font-changa text-xl text-white shadow-[0px_4px_15px_0px_rgba(0,0,0,0.25)]`}
               >
                 {translator("UP", language)}
               </button>
@@ -440,11 +462,10 @@ export default function Options() {
                 onClick={() => {
                   setBetType("down");
                 }}
-                className={`${
-                  betType === "down"
+                className={`${betType === "down"
                     ? "border-[#7839C5]"
                     : "border-transparent hover:border-[#7839C580]"
-                } w-full rounded-lg disabled:pointer-events-none disabled:opacity-50 text-center cursor-pointer border-2 bg-[#202329] py-2.5 font-changa text-xl text-white shadow-[0px_4px_15px_0px_rgba(0,0,0,0.25)] `}
+                  } w-full rounded-lg disabled:pointer-events-none disabled:opacity-50 text-center cursor-pointer border-2 bg-[#202329] py-2.5 font-changa text-xl text-white shadow-[0px_4px_15px_0px_rgba(0,0,0,0.25)] `}
               >
                 {translator("DOWN", language)}
               </button>
@@ -464,7 +485,7 @@ export default function Options() {
                     ? true
                     : false
                 }
-                // onClickFunction={onSubmit}
+              // onClickFunction={onSubmit}
               >
                 {loading || (strikePrice > 0 && !result) ? (
                   <Loader />
@@ -503,9 +524,8 @@ export default function Options() {
                 ${truncateNumber(strikePrice, 3)}
               </span>
               <span
-                className={`font-chakra ${
-                  betType === "up" ? "text-[#72F238]" : "text-[#CF304A]"
-                } text-xs md:text-base font-bold`}
+                className={`font-chakra ${betType === "up" ? "text-[#72F238]" : "text-[#CF304A]"
+                  } text-xs md:text-base font-bold`}
               >
                 {betType
                   ? betType === "up"
@@ -527,24 +547,22 @@ export default function Options() {
               </span>
               {strikePrice && !result ? (
                 <span
-                  className={`text-sm ${
-                    livePrice - strikePrice > 0
+                  className={`text-sm ${livePrice - strikePrice > 0
                       ? "text-[#72F238]"
                       : "text-[#CF304A]"
-                  } text-opacity-90 font-chakra`}
+                    } text-opacity-90 font-chakra`}
                 >
                   {livePrice - strikePrice > 0 ? "+" : "-"}
                   {truncateNumber(Math.abs(livePrice - strikePrice), 4)}
                 </span>
               ) : (
                 <span
-                  className={`flex text-sm font-chakra font-medium ${
-                    result
+                  className={`flex text-sm font-chakra font-medium ${result
                       ? result === "Won"
                         ? "text-[#72F238]"
                         : "text-[#CF304A]"
                       : "text-[#f0f0f0] test-opacity-75"
-                  }`}
+                    }`}
                 >
                   {result
                     ? result === "Won"
@@ -562,8 +580,7 @@ export default function Options() {
                   style={{ rotate: `${(360 / 50) * index}deg` }}
                 >
                   <div
-                    className={`w-[9px] h-[6px] ${
-                      strikePrice === 0
+                    className={`w-[9px] h-[6px] ${strikePrice === 0
                         ? loading && !checkResult
                           ? "blink_1_50 bg-white"
                           : "blink_3 bg-[#282E3D]"

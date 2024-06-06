@@ -29,6 +29,7 @@ import {
 import { translator } from "@/context/transactions";
 import { minGameAmount, truncateNumber } from "@/context/gameTransactions";
 import { useSession } from "next-auth/react";
+import { GameType } from "@/utils/provably-fair";
 
 export default function Wheel() {
   const wallet = useWallet();
@@ -56,6 +57,8 @@ export default function Wheel() {
     houseEdge,
     maxBetAmt,
     language,
+    setLiveStats,
+    liveStats
   } = useGlobalContext();
   const [betAmt, setBetAmt] = useState<number | undefined>();
   const [userInput, setUserInput] = useState<number | undefined>();
@@ -134,9 +137,8 @@ export default function Wheel() {
     if (wheelRef.current) {
       wheelRef.current.style.transition =
         "transform 3s cubic-bezier(0.4, 0, 0.2, 1)";
-      wheelRef.current.style.transform = `rotate(${
-        delta + 360 + 360 - resultAngle
-      }deg)`;
+      wheelRef.current.style.transform = `rotate(${delta + 360 + 360 - resultAngle
+        }deg)`;
     }
   };
 
@@ -191,6 +193,17 @@ export default function Wheel() {
       const win = result === "Won";
       const newBetResult = { result: strikeMultiplier, win };
 
+      setLiveStats([
+        ...liveStats,
+        {
+          game: GameType.wheel,
+          amount: betAmt!,
+          result: win ? "Won" : "Lost",
+          pnl: win ? (betAmt! * strikeMultiplier) - betAmt! : -betAmt!,
+          totalPNL: liveStats.length > 0 ? liveStats[liveStats.length - 1].totalPNL + (win ? (betAmt * strikeMultiplier) - betAmt : -betAmt) : win ? (betAmt * strikeMultiplier) - betAmt : -betAmt
+        }
+      ])
+
       setBetResults((prevResults) => {
         const newResults = [...prevResults, newBetResult];
         if (newResults.length > 5) {
@@ -224,7 +237,7 @@ export default function Wheel() {
         // update profit / loss
         setAutoBetProfit(
           autoBetProfit +
-            (win ? strikeMultiplier * (1 - houseEdge) - 1 : -1) * betAmt,
+          (win ? strikeMultiplier * (1 - houseEdge) - 1 : -1) * betAmt,
         );
         // update count
         if (typeof autoBetCount === "number") {
@@ -418,11 +431,10 @@ export default function Wheel() {
                       <button
                         onClick={() => setRisk("low")}
                         type="button"
-                        className={`text-center w-full rounded-[5px] border-[2px] disabled:cursor-not-allowed disabled:opacity-50 bg-[#202329] py-2 text-xs font-chakra text-white text-opacity-90 transition duration-200 ${
-                          risk === "low"
+                        className={`text-center w-full rounded-[5px] border-[2px] disabled:cursor-not-allowed disabled:opacity-50 bg-[#202329] py-2 text-xs font-chakra text-white text-opacity-90 transition duration-200 ${risk === "low"
                             ? "border-[#7839C5]"
                             : "border-transparent hover:border-[#7839C580]"
-                        }`}
+                          }`}
                         disabled={disableInput}
                       >
                         {translator("Low", language)}
@@ -430,11 +442,10 @@ export default function Wheel() {
                       <button
                         onClick={() => setRisk("medium")}
                         type="button"
-                        className={`text-center w-full rounded-[5px] border-[2px] disabled:cursor-not-allowed disabled:opacity-50 bg-[#202329] py-2 text-xs font-chakra text-white text-opacity-90 transition duration-200 ${
-                          risk === "medium"
+                        className={`text-center w-full rounded-[5px] border-[2px] disabled:cursor-not-allowed disabled:opacity-50 bg-[#202329] py-2 text-xs font-chakra text-white text-opacity-90 transition duration-200 ${risk === "medium"
                             ? "border-[#7839C5]"
                             : "border-transparent hover:border-[#7839C580]"
-                        }`}
+                          }`}
                         disabled={disableInput}
                       >
                         {translator("Medium", language)}
@@ -443,11 +454,10 @@ export default function Wheel() {
                     <button
                       onClick={() => setRisk("high")}
                       type="button"
-                      className={`text-center lg:w-[33.33%] w-full rounded-[5px] border-[2px] disabled:cursor-not-allowed disabled:opacity-50 bg-[#202329] py-2 text-xs font-chakra text-white text-opacity-90 transition duration-200 ${
-                        risk === "high"
+                      className={`text-center lg:w-[33.33%] w-full rounded-[5px] border-[2px] disabled:cursor-not-allowed disabled:opacity-50 bg-[#202329] py-2 text-xs font-chakra text-white text-opacity-90 transition duration-200 ${risk === "high"
                           ? "border-[#7839C5]"
                           : "border-transparent hover:border-[#7839C580]"
-                      }`}
+                        }`}
                       disabled={disableInput}
                     >
                       {translator("High", language)}
@@ -545,17 +555,15 @@ export default function Wheel() {
               width={35}
               height={35}
               id="pointer"
-              className={`${
-                isRolling
+              className={`${isRolling
                   ? "-rotate-[20deg] delay-[500ms] duration-500"
                   : "rotate-0 duration-200"
-              } absolute z-50 -top-3 transition-all ease-[cubic-bezier(0.4,0,0.2,1)]`}
+                } absolute z-50 -top-3 transition-all ease-[cubic-bezier(0.4,0,0.2,1)]`}
             />
             <div
               ref={wheelRef}
-              className={`${
-                isRolling ? "" : ""
-              } relative w-[20rem] h-[20rem] md:w-[25rem] md:h-[25rem] rounded-full overflow-hidden`}
+              className={`${isRolling ? "" : ""
+                } relative w-[20rem] h-[20rem] md:w-[25rem] md:h-[25rem] rounded-full overflow-hidden`}
             >
               {typeof window !== "undefined" && (
                 <svg viewBox="0 0 300 300">
@@ -623,14 +631,14 @@ export default function Wheel() {
                           <div className="border border-white/10 rounded-lg p-3 mt-2">
                             {selectedCoin
                               ? truncateNumber(
-                                  Math.max(
-                                    0,
-                                    (betAmt ?? 0) *
-                                      (segment.multiplier * (1 - houseEdge) -
-                                        1),
-                                  ),
-                                  4,
-                                )
+                                Math.max(
+                                  0,
+                                  (betAmt ?? 0) *
+                                  (segment.multiplier * (1 - houseEdge) -
+                                    1),
+                                ),
+                                4,
+                              )
                               : 0}
                           </div>
                         </div>

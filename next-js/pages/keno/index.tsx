@@ -26,6 +26,7 @@ import {
 import { translator } from "@/context/transactions";
 import { minGameAmount, truncateNumber } from "@/context/gameTransactions";
 import { useSession } from "next-auth/react";
+import { GameType } from "@/utils/provably-fair";
 
 export default function Keno() {
   const wallet = useWallet();
@@ -54,6 +55,8 @@ export default function Keno() {
     houseEdge,
     maxBetAmt,
     language,
+    liveStats,
+    setLiveStats,
   } = useGlobalContext();
   const [betAmt, setBetAmt] = useState<number | undefined>();
   const [userInput, setUserInput] = useState<number | undefined>();
@@ -231,6 +234,17 @@ export default function Keno() {
 
       const win = result === "Won";
       if (win) soundAlert("/sounds/win.wav");
+
+      setLiveStats([
+        ...liveStats,
+        {
+          game: GameType.keno,
+          amount: betAmt,
+          result: win ? "Won" : "Lost",
+          pnl: win ? (betAmt * strikeMultiplier) - betAmt : -betAmt,
+          totalPNL: liveStats.length > 0 ? liveStats[liveStats.length - 1].totalPNL + (win ? (betAmt * strikeMultiplier) - betAmt : -betAmt) : win ? (betAmt * strikeMultiplier) - betAmt : -betAmt
+        }
+      ])
 
       // auto options
       if (betType === "auto") {

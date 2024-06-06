@@ -584,8 +584,8 @@ export default function BalanceModal() {
                   className="text-[12px] text-[#94A3B8] font-chakra font-bold w-[397px] h-[47px]   text-justify"
                   onClick={() => setChecked(!checked)}
                 >
-                  I agree with Privacy Policy and with Terms of Use, Gambling
-                  isn't forbidden by my local authorities and I'm at least 18
+                  I agree with the Privacy Policy and with the Terms of Use, Gambling
+                  is not forbidden by my local authorities and I am at least 18
                   years old.
                 </label>
               </div>
