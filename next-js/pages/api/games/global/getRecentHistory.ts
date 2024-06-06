@@ -3,7 +3,6 @@ import { NextApiRequest, NextApiResponse } from "next";
 import { gameModelMap } from "@/models/games";
 import { GameType } from "@/utils/provably-fair";
 import StakingUser from "@/models/staking/user";
-import { pointTiers } from "@/context/transactions";
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === "GET") {
@@ -16,6 +15,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         amount: number;
         amountWon: number;
         result: string;
+        tokenMint: string;
         createdAt: any;
       }[] = [];
 
@@ -26,13 +26,15 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         const gameInfo = (
           await model.find({ result: "Won" }).sort({ createdAt: -1 }).limit(10)
         ).map((record) => {
-          const { wallet, amount, amountWon, result, createdAt } = record;
+          const { wallet, amount, amountWon, result, createdAt, tokenMint } =
+            record;
           return {
             game,
             wallet,
             amount,
             amountWon,
             result,
+            tokenMint,
             createdAt,
           };
         });
