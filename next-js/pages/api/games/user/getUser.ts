@@ -6,22 +6,21 @@ import Deposit from "@/models/games/deposit";
 
 interface Deposit {
   amount: number;
-  tokenMint: string; //this is token name, i.e SOL, USDC, FOMO etc
+  tokenMint: string;
 }
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === "GET") {
     try {
       await connectDatabase();
-      // const { searchParams } = req.nextUrl;
-      // const wallet = searchParams.get("wallet");
 
       const wallet = req.query.wallet;
 
       let user = await User.findOne({ wallet });
 
       let deposit = [];
-      if (user)
+      if (user) {
+        user = user.toObject();
         deposit = user.deposit.map((token: Deposit) => {
           let cd = SPL_TOKENS.find((c) => c.tokenMint === token.tokenMint)!;
           return {
@@ -31,6 +30,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
             img: cd.icon,
           };
         });
+      }
 
       return res.json({
         success: true,
