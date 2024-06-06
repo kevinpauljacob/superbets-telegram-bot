@@ -39,10 +39,6 @@ export default function Stake() {
   const wallet = useWallet();
 
   const {
-    setSolBal,
-    userData,
-    setUserData,
-    fomoBalance,
     setFomoBalance,
     language,
     globalInfo,

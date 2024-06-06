@@ -15,15 +15,7 @@ export default function Store() {
   const wallet = useWallet();
 
   const {
-    setSolBal,
-    userData,
-    setUserData,
-    fomoBalance,
     setFomoBalance,
-    language,
-    loading,
-    globalInfo,
-    setGlobalInfo,
     getGlobalInfo,
     getUserDetails,
   } = useGlobalContext();
