@@ -31,6 +31,7 @@ export default function SubHeader() {
     amountWon: number;
     result: "Won" | "Lost";
     userTier: number;
+    tokenMint: string;
   };
   const [cards, setCards] = useState<Array<Card>>([]);
 
@@ -120,7 +121,7 @@ export default function SubHeader() {
                   </span>
                 </div>
                 <p className="text-[#72F238] font-changa text-sm mt-1">
-                  +{truncateNumber(card.amountWon ?? 0, 2)} SOL
+                  +{truncateNumber(card.amountWon ?? 0, 2)} {SPL_TOKENS.find(token => token.tokenMint === card.tokenMint)?.tokenName ?? ""}
                 </p>
               </div>
             </Link>

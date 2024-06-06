@@ -9,7 +9,7 @@ export default function ProfitBox({
   multiplier: number;
   amount: number;
 }) {
-  const { houseEdge, language } = useGlobalContext();
+  const { houseEdge, language, selectedCoin } = useGlobalContext();
 
   return (
     <div className="mb-0 flex w-full flex-col">
@@ -29,7 +29,7 @@ export default function ProfitBox({
             Math.max(0, amount * (multiplier * (1 - houseEdge) - 1)),
             4,
           )}{" "}
-          $SOL
+          ${selectedCoin.tokenName}
         </span>
       </div>
     </div>

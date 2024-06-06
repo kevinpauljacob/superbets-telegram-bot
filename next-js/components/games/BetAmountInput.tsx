@@ -259,7 +259,7 @@ export default function BetAmount({
                   </span>
                   ) is{" "}
                   <span className="text-white/80 font-medium">
-                    {currentMaxBetAmt.toFixed(2)} SOL
+                    {currentMaxBetAmt.toFixed(2)} {selectedCoin.tokenName}
                   </span>
                   . {translator("Your current wallet balance is", language)}{" "}
                   <span className="text-white/80 font-medium">
@@ -269,7 +269,7 @@ export default function BetAmount({
                   </span>{" "}
                   . {translator("The maximum amount you can bet in this game is", language)}{" "}
                   <span className="text-white/80 font-medium">
-                    {highestMaxBetAmt} SOL
+                    {highestMaxBetAmt} {selectedCoin.tokenName}
                   </span>
                   .
                 </span> */}
@@ -319,7 +319,7 @@ export default function BetAmount({
               )}
               <span className="text-white/90 font-semibold">
                 {" "}
-                {currentMaxBetAmt.toFixed(2)} SOL
+                {currentMaxBetAmt.toFixed(2)} {selectedCoin.tokenName}
               </span>
                .
             </span>
@@ -330,7 +330,7 @@ export default function BetAmount({
             </span>
             <span className="flex items-center justify-center gap-1">
               {currentMaxBetAmt.toFixed(2)}
-              <Image src="/assets/sol.png" alt="coins" height="11" width="14" />
+              <selectedCoin.icon className="w-5 h-5 -mt-[1px]" />
             </span>
           </div>
         </div>

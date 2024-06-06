@@ -188,7 +188,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       return res.json({
         success: true,
         data: { betTime, strikePrice },
-        message: `${amount} SOL successfully deposited!`,
+        message: `${amount} ${splToken.tokenName} successfully deposited!`,
       });
     } catch (e: any) {
       console.log(e);

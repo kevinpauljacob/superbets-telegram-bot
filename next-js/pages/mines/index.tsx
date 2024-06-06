@@ -125,18 +125,18 @@ export default function Mines() {
   useEffect(() => {
     const fetchPrice = async () => {
       try {
-        const response = await fetch("https://price.jup.ag/v6/price?ids=SOL");
+        const response = await fetch(`https://price.jup.ag/v6/price?ids=${selectedCoin.tokenName}`);
         const data = await response.json();
-        const solPrice = data.data.SOL.price;
-        setCurrentProfitInUSD(currentProfit * solPrice);
-        setNextProfitInUSD(nextProfit * solPrice);
+        const coinPrice = data?.data[selectedCoin.tokenName]?.price ?? 0;
+        setCurrentProfitInUSD(currentProfit * coinPrice);
+        setNextProfitInUSD(nextProfit * coinPrice);
       } catch (error: any) {
         throw new Error(error.message);
       }
     };
 
     fetchPrice();
-  }, [currentProfit, nextProfit]);
+  }, [currentProfit, nextProfit, pendingRequests, betActive]);
 
   const handleConclude = async () => {
     try {
@@ -411,7 +411,7 @@ export default function Mines() {
         body: JSON.stringify({
           wallet: wallet.publicKey,
           amount: betAmt,
-          tokenMint: "SOL",
+          tokenMint: selectedCoin.tokenMint,
           minesCount: minesCount,
           userBets: userBetsForAuto,
         }),
@@ -906,7 +906,7 @@ export default function Mines() {
                       <div>
                         <div className="flex justify-between items-center mb-2">
                           <p>Current Profit</p>
-                          <p>{truncateNumber(currentProfit, 7)} SOL</p>
+                          <p>{truncateNumber(currentProfit, 7)} {selectedCoin.tokenName}</p>
                         </div>
                         <div className="flex justify-between items-center text-fomo-green">
                           <p className="text-[#94A3B8]">
@@ -928,7 +928,7 @@ export default function Mines() {
                       <div>
                         <div className="flex justify-between items-center mb-2">
                           <p>Profit on next tile</p>
-                          <p>{truncateNumber(nextProfit, 7)} SOL</p>
+                          <p>{truncateNumber(nextProfit, 7)} {selectedCoin.tokenName}</p>
                         </div>
                         <div className="flex justify-between items-center text-fomo-green">
                           <p className="text-[#94A3B8]">
@@ -1099,7 +1099,7 @@ export default function Mines() {
                     <div className="flex gap-2 items-center">
                       <Image
                         src="/assets/gem.svg"
-                        alt="SOL"
+                        alt="Gem"
                         width={20}
                         height={20}
                       />

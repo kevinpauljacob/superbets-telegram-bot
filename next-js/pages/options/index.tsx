@@ -146,7 +146,7 @@ export default function Options() {
       let res = await placeBet(
         wallet,
         betAmt,
-        "SOL",
+        selectedCoin.tokenMint,
         betType === "up" ? "betUp" : "betDown",
         betInterval,
       );
@@ -520,7 +520,7 @@ export default function Options() {
           <div className="flex flex-1 flex-col justify-center items-center relative py-4 mb-6 md:mb-6">
             <div className="flex flex-col items-center absolute w-[14rem] h-[14rem] justify-start pt-14">
               <span className="font-chakra text-sm text-[#94A3B8] text-opacity-75 mb-[1.4rem]">
-                $SOL
+                ${selectedCoin.tokenName}
               </span>
               <span className="font-chakra text-2xl text-white font-semibold text-opacity-90 mb-2">
                 ${truncateNumber(livePrice, 3)}

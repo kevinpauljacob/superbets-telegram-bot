@@ -177,7 +177,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         data: { amountWon, amountLost, result },
         message: `${result} ${
           result == "Won" ? amountWon.toFixed(4) : amountLost.toFixed(4)
-        } SOL!`,
+        } ${SPL_TOKENS.find((token) => token.tokenMint === tokenMint)?.tokenName ?? ""}!`,
       });
     } catch (e: any) {
       console.log(e);

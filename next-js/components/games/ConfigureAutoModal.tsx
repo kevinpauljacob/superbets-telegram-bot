@@ -289,7 +289,7 @@ export default function ConfigureAutoModal() {
                   {translator("Stop On Profit", language)}
                 </label>
                 {/* <span className="text-[#94A3B8] text-opacity-90 font-changa font-medium text-sm">
-                  {coinData ? coinData[0]?.amount.toFixed(4) : 0} $SOL
+                  {coinData ? coinData[0]?.amount.toFixed(4) : 0} ${selectedCoin.tokenName}
                 </span> */}
               </div>
 
@@ -344,7 +344,7 @@ export default function ConfigureAutoModal() {
                   {translator("Stop On Loss", language)}
                 </label>
                 {/* <span className="text-[#94A3B8] text-opacity-90 font-changa font-medium text-sm">
-                  {coinData ? coinData[0]?.amount.toFixed(4) : 0} $SOL
+                  {coinData ? coinData[0]?.amount.toFixed(4) : 0} ${selectedCoin.tokenName}
                 </span> */}
               </div>
 

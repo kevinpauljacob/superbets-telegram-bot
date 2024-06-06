@@ -272,7 +272,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         },
         message: `${result} ${
           result == "Won" ? amountWon.toFixed(4) : amountLost.toFixed(4)
-        } SOL!`,
+        } ${splToken.tokenName}!`,
       });
     } catch (e: any) {
       console.log(e);

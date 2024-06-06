@@ -693,7 +693,7 @@ export default function Keno() {
                                       4,
                                     )
                                   : 0}{" "}
-                                SOL
+                                {selectedCoin.tokenName}
                               </div>
                             </div>
                             <div className="w-1/2">

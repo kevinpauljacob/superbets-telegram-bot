@@ -617,8 +617,7 @@ export default function Wheel() {
                               {translator("Profit", language)}
                             </span>
                             <span>
-                              {/* {coinData ? coinData[0]?.amount.toFixed(4) : 0} $SOL */}
-                              SOL
+                              {selectedCoin.tokenName}
                             </span>
                           </div>
                           <div className="border border-white/10 rounded-lg p-3 mt-2">

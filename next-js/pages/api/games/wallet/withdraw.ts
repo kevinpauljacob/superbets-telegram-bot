@@ -281,8 +281,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
       // netTransfer = 1000000000;
 
-      const tokenName = SPL_TOKENS.find((t) => t.tokenMint === tokenMint)
-        ?.tokenName!;
+      const tokenName = SPL_TOKENS.find(
+        (t) => t.tokenMint === tokenMint,
+      )?.tokenName!;
 
       if (netTransfer > timeWeightedAvgLimit[tokenName]) {
         await Deposit.create({
@@ -344,7 +345,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
       return res.json({
         success: true,
-        message: `${amount} SOL successfully withdrawn!`,
+        message: `${amount} ${SPL_TOKENS.find((token) => token.tokenMint === tokenMint)?.tokenName ?? ""} successfully withdrawn!`,
       });
     } catch (e: any) {
       console.log(e);

@@ -122,7 +122,9 @@ export default function Limbo() {
           const win = result === "Won";
           if (win) {
             soundAlert("/sounds/win.wav");
-            successCustom(`Won ${resultAmount.toFixed(4)} SOL!`);
+            successCustom(
+              `Won ${resultAmount.toFixed(4)} ${selectedCoin.tokenName}!`,
+            );
           } else result && errorCustom("Better luck next time!");
           const newBetResult = { result: targetMultiplier, win };
           setLastMultipliers((prevResults) => {
@@ -515,7 +517,7 @@ export default function Limbo() {
                         4,
                       )
                     : 0.0}{" "}
-                  $SOL
+                  ${selectedCoin.tokenName}
                 </span>
               </div>
 

@@ -79,7 +79,7 @@ export const GameFooterInfo: React.FC<GameFooterProps> = ({
                     1),
                 4,
               )}{" "}
-              $SOL
+              ${selectedCoin.tokenName}
             </span>
           </div>
 
