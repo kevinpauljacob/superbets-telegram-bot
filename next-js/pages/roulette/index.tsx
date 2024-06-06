@@ -82,31 +82,43 @@ export default function Roulette() {
   const [currentMultiplier, setCurrentMultiplier] = useState<number>(0);
   const [selectedChip, setSelectedChip] = useState<string | null>(null);
   const [betAmount, setBetAmount] = useState<string>('0');
-  const [selectedToken, setSelectedToken] = useState<Token | null>(null);
+  const [selectedToken, setSelectedToken] = useState<Token | null>(tokens[0]);
   const [bets, setBets] = useState<{ areaId: string; token: Token }[]>([]);
   const [betActive, setBetActive] = useState(false);
   const [betType, setBetType] = useState<"manual" | "auto">("manual");
   const [isRolling, setIsRolling] = useState(false);
   const [betss, setBetss] = useState<{ areaId: string, token: { image: string } }[]>([]);
   const [hoveredButton, setHoveredButton] = useState<string | null>(null);
-  const SelectedToken = { image: 'path_to_token_image' };
-
+  const [hoveredRow, setHoveredRow] = useState<number | null>(null);
+ 
+ console.log(hoveredRow)
+ console.log(rows[hoveredRow||0])
   const onSubmit = async (data: any) => {
     if (betType === "auto") {
       // Auto bet logic
     }
   };
 
-  const handlePlaceBet = (areaId: string, token: { image: string }) => {
-    setBetss((prev) => [...prev, { areaId, token }]);
+  const handlePlaceBet = (areaId: string, token: Token|null) => {
+    if (token) {
+      setBetss((prev) => [...prev, { areaId, token }]);
+    } else {
+      // Handle error if token is null
+      errorCustom("Please select a token before placing a bet.");
+    }
   };
 
   const renderToken = (areaId: string) => {
     const bet = betss.find((bet) => bet.areaId === areaId);
     if (bet) {
       return (
-        <div className="absolute top-0 right-0 bg-purple-600 rounded-full w-6 h-6 flex items-center justify-center">
-          <img src={bet.token.image} alt="token" />
+        <div className="absolute inset-0 flex items-center justify-center">
+      
+          <Image
+          width={40}
+          height={40}
+          src={bet.token.image}
+          alt="token"/>
         </div>
       );
     }
@@ -118,7 +130,7 @@ export default function Roulette() {
       ? true
       : false || isRolling || betActive;
   }, [betType, startAuto, isRolling, betActive]);
-
+ 
   return (
     <GameLayout title="Roulette">
       <GameOptions>
@@ -152,7 +164,7 @@ export default function Roulette() {
                         key={chip.id}
                         className={`border rounded cursor-pointer bg-[#1e2024] flex justify-center items-center py-1 ${selectedChip === chip.value ? 'border-white' : 'border-gray-600'}`
                       }
-                    
+                      onClick={()=>setSelectedToken(chip)}
                       >
                         <img src={chip.image} alt={chip.value} />
                       </div>
@@ -190,6 +202,7 @@ export default function Roulette() {
               <p className="font-sans text-[16px]">Undo</p>
             </div>
             <div className="flex items-center">
+           
               <Image
                 src="/assets/clear.png"
                 width={20}
@@ -201,14 +214,14 @@ export default function Roulette() {
           </div>
           <div className="flex items-start w-full align-top">
             <div
-              className="h-[160px] w-12 flex flex-col justify-center text-center cursor-pointer bg-[#149200] rounded-lg text-white relative border-4 border-transparent mx-1"
-              onClick={() => handlePlaceBet('num-0', SelectedToken)}
+              className="h-[153px] w-12 flex flex-col justify-center text-center cursor-pointer bg-[#149200] rounded-lg text-white relative border-4 border-transparent mx-1 hover:bg-[#55BA78] hover:border-[2px] hover:border-slate-300"
+              onClick={() => handlePlaceBet('num-0', selectedToken)}
             >
               0
               {renderToken('num-0')}
             </div>
-            <div className="flex-col">
-              <div className="grid grid-cols-14 gap-1 w-full">
+            <div className="flex-col ">
+              <div className="grid grid-cols-14 gap-1 w-full mb-[7px]">
                 <div className="col-span-13 grid grid-rows-3 gap-1">
                   {rows.map((row, rowIndex) => (
                     <div key={rowIndex} className="grid grid-cols-12 gap-1">
@@ -216,12 +229,12 @@ export default function Roulette() {
                         <div key={colIndex} className="relative">
                         <button
   data-testid={`roulette-tile-${number}`}
-  className={`w-[48px] h-[48px] flex items-center justify-center ${ predefinedBets.red.includes(number) ?  'bg-[#F1323E] hover:border hover:border-slate-200 hover:bg-[#FF5C67]':'bg-[#2A2E38] hover:border hover:border-slate-200 hover:bg-[#4D5361]'} text-white relative rounded-md border-4 border-transparent ${
+  className={`w-[48px] h-[48px] flex items-center justify-center relative ${ predefinedBets.red.includes(number) ?  'bg-[#F1323E] hover:border hover:border-slate-200 hover:bg-[#FF5C67]':'bg-[#2A2E38] hover:border hover:border-slate-200 hover:bg-[#4D5361]'} text-white rounded-md border-4 border-transparent ${
     hoveredButton && predefinedBets[hoveredButton as PredefinedBetType]?.includes(number)
-      ? '   overlay border-[2px] border-slate-300 '
+      ? 'overlay border-[2px] border-slate-300 '
       : ''
-  } `}
-  onClick={() => handlePlaceBet(`num-${number}`, SelectedToken)}
+  } ${(hoveredRow !== null && hoveredRow !== undefined) && rows[hoveredRow]?.includes(number) ? 'overlay border-[2px] border-slate-300 ': ''}`}
+  onClick={() => selectedToken && handlePlaceBet(`num-${number}`, selectedToken)}
 >
   {number}
   {renderToken(`num-${number}`)}
@@ -229,17 +242,17 @@ export default function Roulette() {
                           <button
                             data-testid={`roulette-tile-${number}-top`}
                             className="absolute w-full h-3 bg-transparent -top-2"
-                            onClick={() => handlePlaceBet(`num-${number}-top`, SelectedToken)}
+                            onClick={() => handlePlaceBet(`num-${number}-top`,selectedToken)}
                           />
                           <button
                             data-testid={`roulette-tile-${number}-left`}
                             className="absolute w-3 h-full bg-transparent -left-2 px-2 top-0"
-                            onClick={() => handlePlaceBet(`num-${number}-left`, SelectedToken)}
+                            onClick={() => handlePlaceBet(`num-${number}-left`,selectedToken)}
                           />
                           <button
                             data-testid={`roulette-tile-${number}-corner`}
                             className="absolute w-6 h-6 bg-transparent -left-4 -top-5 px-[6px]"
-                            onClick={() => handlePlaceBet(`num-${number}-corner`, SelectedToken)}
+                            onClick={() => handlePlaceBet(`num-${number}-corner`,selectedToken)}
                           />
                         </div>
                       ))}
@@ -249,78 +262,93 @@ export default function Roulette() {
               </div>
               <div className="mt-1 grid grid-cols-3 gap-2 w-full">
                 <button
-                  className="col-span-1 flex items-center justify-center bg-[#0E0F14] border border-[#26272B] text-white cursor-pointer rounded-md h-12 hover:border hover:border-slate-200 hover:bg-[#4D5361]"
+                 className="relative col-span-1 flex items-center justify-center bg-[#0E0F14] border border-[#26272B] text-white cursor-pointer rounded-md h-12 hover:border hover:border-slate-200 hover:bg-[#4D5361]"
                   onMouseEnter={() => setHoveredButton('1-12')}
                   onMouseLeave={() => setHoveredButton(null)}
-                  onClick={() => handlePlaceBet('1-12', SelectedToken)}
+                  onClick={() => handlePlaceBet('1-12',selectedToken)}
                 >
                   1 to 12
+                  {renderToken('1-12')}
                 </button>
                 <button
-                  className="col-span-1 flex items-center justify-center bg-[#0E0F14] border border-[#26272B] text-white cursor-pointer rounded-md h-12 hover:border hover:border-slate-200 hover:bg-[#4D5361]"
+                  className="relative col-span-1 flex items-center justify-center bg-[#0E0F14] border border-[#26272B] text-white cursor-pointer rounded-md h-12 hover:border hover:border-slate-200 hover:bg-[#4D5361]"
                   onMouseEnter={() => setHoveredButton('13-24')}
                   onMouseLeave={() => setHoveredButton(null)}
-                  onClick={() => handlePlaceBet('13-24', SelectedToken)}
+                  onClick={() => handlePlaceBet('13-24',selectedToken)}
                 >
                   13 to 24
+                  {renderToken('13-24')}
+
                 </button>
                 <button
-                  className="col-span-1 flex items-center justify-center bg-[#0E0F14] border border-[#26272B] text-white cursor-pointer rounded-md h-12 hover:border hover:border-slate-200 hover:bg-[#4D5361]"
+                  className="relative col-span-1 flex items-center justify-center bg-[#0E0F14] border border-[#26272B] text-white cursor-pointer rounded-md h-12 hover:border hover:border-slate-200 hover:bg-[#4D5361]"
                   onMouseEnter={() => setHoveredButton('25-36')}
                   onMouseLeave={() => setHoveredButton(null)}
-                  onClick={() => handlePlaceBet('25-36', SelectedToken)}
+                  onClick={() => handlePlaceBet('25-36',selectedToken)}
                 >
                   25 to 36
+                  {renderToken('25-36')}
+
                 </button>
               </div>
               <div className="mt-2 grid grid-cols-6 gap-2 w-full">
                 <button
-                  className="col-span-1 flex items-center justify-center bg-[#0E0F14] border border-[#26272B] text-white cursor-pointer rounded-md h-12 hover:border hover:border-slate-200 hover:bg-[#4D5361]"
+                  className="relative col-span-1 flex items-center justify-center bg-[#0E0F14] border border-[#26272B] text-white cursor-pointer rounded-md h-12 hover:border hover:border-slate-200 hover:bg-[#4D5361]"
                   onMouseEnter={() => setHoveredButton('1-18')}
                   onMouseLeave={() => setHoveredButton(null)}
-                  onClick={() => handlePlaceBet('1-18', SelectedToken)}
+                  onClick={() => handlePlaceBet('1-18',selectedToken)}
                 >
                   1 to 18
+                  {renderToken('1-18')}
+
                 </button>
                 <button
-                  className="col-span-1 flex items-center justify-center bg-[#0E0F14] border border-[#26272B] text-white cursor-pointer rounded-md h-12 hover:border hover:border-slate-200 hover:bg-[#4D5361]"
+                  className="relative col-span-1 flex items-center justify-center bg-[#0E0F14] border border-[#26272B] text-white cursor-pointer rounded-md h-12 hover:border hover:border-slate-200 hover:bg-[#4D5361]"
                   onMouseEnter={() => setHoveredButton('even')}
                   onMouseLeave={() => setHoveredButton(null)}
-                  onClick={() => handlePlaceBet('even', SelectedToken)}
+                  onClick={() => handlePlaceBet('even',selectedToken)}
                 >
                   Even
+                  {renderToken('even')}
+
                 </button>
                 <button
-                  className="col-span-1 flex items-center justify-center bg-[#F1323E] cursor-pointer rounded-md h-12 hover:border hover:border-slate-200 hover:bg-[#FF5C67]"
+                  className="relative col-span-1 flex items-center justify-center bg-[#F1323E] cursor-pointer rounded-md h-12 hover:border hover:border-slate-200 hover:bg-[#FF5C67]"
                   onMouseEnter={() => setHoveredButton('red')}
                   onMouseLeave={() => setHoveredButton(null)}
-                  onClick={() => handlePlaceBet('red', SelectedToken)}
+                  onClick={() => handlePlaceBet('red',selectedToken)}
                 >
+                  {renderToken('red')}
                   
                 </button>
                 <button
-                  className="col-span-1 flex items-center justify-center bg-[#2A2E38] cursor-pointer rounded-md h-12 hover:border hover:border-slate-200 hover:bg-[#4D5361]"
+                  className="relative col-span-1 flex items-center justify-center bg-[#2A2E38] cursor-pointer rounded-md h-12 hover:border hover:border-slate-200 hover:bg-[#4D5361]"
                   onMouseEnter={() => setHoveredButton('black')}
                   onMouseLeave={() => setHoveredButton(null)}
-                  onClick={() => handlePlaceBet('black', SelectedToken)}
+                  onClick={() => handlePlaceBet('black',selectedToken)}
                 >
+                  {renderToken('black')}
                   
                 </button>
                 <button
-                  className="col-span-1 flex items-center justify-center bg-[#0E0F14] border border-[#26272B] text-white cursor-pointer rounded-md h-12 hover:border hover:border-slate-200 hover:bg-[#4D5361]"
+                  className="relative col-span-1 flex items-center justify-center bg-[#0E0F14] border border-[#26272B] text-white cursor-pointer rounded-md h-12 hover:border hover:border-slate-200 hover:bg-[#4D5361]"
                   onMouseEnter={() => setHoveredButton('odd')}
                   onMouseLeave={() => setHoveredButton(null)}
-                  onClick={() => handlePlaceBet('odd', SelectedToken)}
+                  onClick={() => handlePlaceBet('odd',selectedToken)}
                 >
                   Odd
+                  {renderToken('odd')}
+
                 </button>
                 <button
-                  className="col-span-1 flex items-center justify-center bg-[#0E0F14] border border-[#26272B] text-white cursor-pointer rounded-md h-12 hover:border hover:border-slate-200 hover:bg-[#4D5361]"
+                  className="relative col-span-1 flex items-center justify-center bg-[#0E0F14] border border-[#26272B] text-white cursor-pointer rounded-md h-12 hover:border hover:border-slate-200 hover:bg-[#4D5361]"
                   onMouseEnter={() => setHoveredButton('19-36')}
                   onMouseLeave={() => setHoveredButton(null)}
-                  onClick={() => handlePlaceBet('19-36', SelectedToken)}
+                  onClick={() => handlePlaceBet('19-36',selectedToken)}
                 >
                   19 to 36
+                  {renderToken('19-36')}
+
                 </button>
               </div>
             </div>
@@ -328,10 +356,10 @@ export default function Roulette() {
               {rows.map((_, rowIndex) => (
                 <div
                   key={`row-${rowIndex}`}
-                  className="w-12 h-12 flex items-center justify-center text-center bg-transparent border-2 border-[#26272B] text-white cursor-pointer relative rounded-md"
-                  onMouseEnter={() => setHoveredButton(`row-${rowIndex + 1}`)}
-                  onMouseLeave={() => setHoveredButton(null)}
-                  onClick={() => handlePlaceBet(`row-${rowIndex}`, SelectedToken)}
+                  className="w-[48px] h-[48px]  flex items-center justify-center text-center bg-transparent border-2 border-[#26272B] text-white cursor-pointer relative rounded-md hover:border hover:border-slate-200 hover:bg-[#4D5361]"
+                  onMouseEnter={() => setHoveredRow(rowIndex)}
+                  onMouseLeave={() => setHoveredRow(null)}
+                  onClick={() => handlePlaceBet(`row-${rowIndex}`,selectedToken)}
                 >
                   2:1
                   {renderToken(`row-${rowIndex}`)}
