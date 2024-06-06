@@ -16,7 +16,6 @@ import {
 import { GlobalProvider } from "@/components/GlobalContext";
 import "@solana/wallet-adapter-react-ui/styles.css";
 import { SessionProvider } from "next-auth/react";
-import InfoBar from "@/components/Infobar";
 import { useEffect } from "react";
 import LiveStats from "@/components/games/LiveStats";
 

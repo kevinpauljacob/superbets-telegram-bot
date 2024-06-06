@@ -2,24 +2,20 @@ import React, { useState, useEffect, useMemo } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useWallet } from "@solana/wallet-adapter-react";
-import { toast } from "react-hot-toast";
 import BetSetting from "@/components/BetSetting";
 import DraggableBar from "@/components/games/Dice2/DraggableBar";
 import { useGlobalContext } from "@/components/GlobalContext";
 import {
   GameDisplay,
-  GameFooterInfo,
   GameLayout,
   GameOptions,
   GameTable,
 } from "@/components/GameLayout";
 import { FormProvider, useForm } from "react-hook-form";
-import { BsInfinity } from "react-icons/bs";
 import Loader from "@/components/games/Loader";
 import BetAmount from "@/components/games/BetAmountInput";
 import BetButton from "@/components/games/BetButton";
 import ResultsSlider from "@/components/ResultsSlider";
-import showInfoToast from "@/components/games/toasts/toasts";
 import { loopSound, soundAlert } from "@/utils/soundUtils";
 import Bets from "../../components/games/Bets";
 import ConfigureAutoButton from "@/components/ConfigureAutoButton";
@@ -38,12 +34,10 @@ import { GameType } from "@/utils/provably-fair";
 export default function Dice2() {
   const wallet = useWallet();
   const methods = useForm();
-  const { data: session, status } = useSession();
+  const { data: session } = useSession();
   const {
-    coinData,
     getBalance,
     getWalletBalance,
-    setShowAutoModal,
     autoWinChange,
     autoLossChange,
     autoWinChangeReset,
@@ -57,10 +51,10 @@ export default function Dice2() {
     autoBetProfit,
     setAutoBetProfit,
     useAutoConfig,
-    setUseAutoConfig,
     houseEdge,
     maxBetAmt,
     language,
+    selectedCoin,
     liveStats,
     setLiveStats
   } = useGlobalContext();
@@ -161,7 +155,7 @@ export default function Dice2() {
       if (!betAmt || betAmt === 0) {
         throw new Error("Set Amount.");
       }
-      if (coinData && coinData[0].amount < betAmt) {
+      if (selectedCoin && selectedCoin.amount < betAmt) {
         throw new Error("Insufficient balance for bet !");
       }
       setIsRolling(true);
@@ -173,7 +167,7 @@ export default function Dice2() {
         body: JSON.stringify({
           wallet: wallet.publicKey,
           amount: betAmt,
-          tokenMint: "SOL",
+          tokenMint: selectedCoin?.tokenMint,
           chance: chance,
           direction: rollType === "over" ? "over" : "under",
         }),
@@ -321,9 +315,9 @@ export default function Dice2() {
             (autoWinChangeReset || autoLossChangeReset
               ? betAmt
               : autoBetCount === "inf"
-              ? Math.max(0, betAmt)
-              : betAmt *
-                (autoLossChange !== null ? autoLossChange / 100.0 : 0));
+                ? Math.max(0, betAmt)
+                : betAmt *
+                  (autoLossChange !== null ? autoLossChange / 100.0 : 0));
 
         // console.log("Current bet amount:", betAmt);
         // console.log("Auto loss change:", autoLossChange);
@@ -384,10 +378,6 @@ export default function Dice2() {
     } else if (wallet.connected) handleBet();
   };
 
-  useEffect(() => {
-    console.log("jil", coinData, minGameAmount);
-  }, []);
-
   return (
     <GameLayout title="Dice 2">
       <GameOptions>
@@ -411,8 +401,6 @@ export default function Dice2() {
                 !wallet ||
                 !session?.user ||
                 isRolling ||
-                coinData === null ||
-                (coinData && coinData[0].amount < minGameAmount) ||
                 (betAmt !== undefined &&
                   maxBetAmt !== undefined &&
                   betAmt > maxBetAmt)
@@ -485,8 +473,6 @@ export default function Dice2() {
                       !wallet ||
                       !session?.user ||
                       isRolling ||
-                      coinData === null ||
-                      (coinData && coinData[0].amount < minGameAmount) ||
                       (betAmt !== undefined &&
                         maxBetAmt !== undefined &&
                         betAmt > maxBetAmt)
@@ -528,7 +514,7 @@ export default function Dice2() {
           />
         </div>
         <div className="flex px-0 xl:px-4 mb-0 md:mb-[1.4rem] gap-4 flex-row w-full justify-between">
-          {coinData && coinData[0].amount > minGameAmount && (
+          {selectedCoin && selectedCoin.amount > minGameAmount && (
             <>
               <div className="flex flex-col w-full">
                 <span className="text-[#F0F0F0] font-changa font-semibold text-xs mb-1">
@@ -595,7 +581,7 @@ export default function Dice2() {
               )}
             </>
           )}
-          {(!coinData || (coinData && coinData[0].amount < minGameAmount)) && (
+          {(!selectedCoin || selectedCoin.amount < minGameAmount) && (
             <div className="w-full rounded-lg bg-[#d9d9d90d] bg-opacity-10 flex items-center px-3 py-3 text-white md:px-6">
               <div className="w-full text-center font-changa font-medium text-sm md:text-base text-[#F0F0F0] text-opacity-75">
                 {translator(

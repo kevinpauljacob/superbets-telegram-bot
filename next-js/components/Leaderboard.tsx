@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useWallet } from "@solana/wallet-adapter-react";
-import toast from "react-hot-toast";
-import Head from "next/head";
-import { User, obfuscatePubKey, pointTiers } from "@/context/transactions";
+import { obfuscatePubKey, pointTiers } from "@/context/transactions";
 import { useGlobalContext } from "./GlobalContext";
 import Image from "next/legacy/image";
 import { errorCustom } from "./toasts/ToastGroup";
@@ -10,7 +8,7 @@ import { errorCustom } from "./toasts/ToastGroup";
 function Leaderboard() {
   const wallet = useWallet();
 
-  const { language, getUserDetails, pointTier } = useGlobalContext();
+  const { getUserDetails, pointTier } = useGlobalContext();
 
   const [maxPages, setMaxPages] = useState<number>(0);
 

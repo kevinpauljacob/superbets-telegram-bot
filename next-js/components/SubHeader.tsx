@@ -10,16 +10,19 @@ import { useEffect, useRef, useState } from "react";
 import { GameType } from "@/utils/provably-fair";
 import { useRouter } from "next/router";
 import useWebSocket from "react-use-websocket";
-import { formatNumber, translator } from "@/context/transactions";
+import { translator } from "@/context/transactions";
+import { SPL_TOKENS } from "@/context/config";
+import CoinSelector from "./CoinSelector";
 
 export default function SubHeader() {
   const router = useRouter();
   const {
-    coinData,
-    showWalletModal,
     setShowWalletModal,
     setLiveBets,
     language,
+    setSelectedCoin,
+    selectedCoin,
+    coinData,
     showLiveStats,
     setShowLiveStats,
     showFullScreen,
@@ -34,6 +37,7 @@ export default function SubHeader() {
     amountWon: number;
     result: "Won" | "Lost";
     userTier: number;
+    tokenMint: string;
   };
   const [cards, setCards] = useState<Array<Card>>([]);
 
@@ -91,8 +95,9 @@ export default function SubHeader() {
   return (
     <div className="flex flex-col w-full z-[80] absolute top-0 right-0">
       <div
-        className={`${router.pathname === "/" ? "flex" : "hidden md:flex"
-          } w-full text-white h-[4.4rem] flex items-center border-b border-[#1E2220] px-4 lg:pl-4 lg:pr-4 bg-[#121418]`}
+        className={`${
+          router.pathname === "/" ? "flex" : "hidden md:flex"
+        } w-full text-white h-[4.4rem] flex items-center border-b border-[#1E2220] px-4 lg:px-6 bg-[#121418]`}
       >
         <div className="flex w-full items-center overflow-x-auto no-scrollbar">
           <div ref={endOfListRef} />
@@ -122,7 +127,7 @@ export default function SubHeader() {
                   </span>
                 </div>
                 <p className="text-[#72F238] font-changa text-sm mt-1">
-                  +{truncateNumber(card.amountWon ?? 0, 2)} SOL
+                  +{truncateNumber(card.amountWon ?? 0, 2)} {SPL_TOKENS.find(token => token.tokenMint === card.tokenMint)?.tokenName ?? ""}
                 </p>
               </div>
             </Link>
@@ -168,25 +173,7 @@ export default function SubHeader() {
         <div className="h-10 border border-white border-opacity-5 rounded-[5px] mx-4" />
 
         <div className="hidden md:flex items-center md:min-w-fit">
-          <div className="flex items-center gap-2">
-            <div className="flex items-center h-10 px-4 py-1 gap-2 border-2 border-white border-opacity-5 rounded-[5px]">
-              <Image src={"/assets/sol.png"} alt="" width={20} height={17} />
-              <span className="font-chakra text-2xl text-[#94A3B8]">
-                {truncateNumber(coinData ? coinData[0].amount : 0, 4)}
-              </span>
-            </div>
-            <div
-              onClick={() => {
-                setShowWalletModal(true);
-              }}
-              className="flex items-center h-10 px-4 py-2 gap-1.5 bg-[#7839C5] hover:bg-[#9361d1] focus:bg-[#602E9E] transition-all cursor-pointer rounded-[5px]"
-            >
-              <Image src={"/assets/wallet.png"} alt="" width={20} height={20} />
-              <span className="text-sm leading-3 mt-0.5 text-white text-opacity-90">
-                {translator("Wallet", language)}
-              </span>
-            </div>
-          </div>
+         <CoinSelector />
         </div>
       </div>
       <div
@@ -194,27 +181,7 @@ export default function SubHeader() {
           } md:hidden items-center justify-between my-4 mx-2 rounded-[5px] bg-[#121418] py-3 px-4 md:min-w-fit`}
       >
         <Image src={"/assets/wallet2.png"} alt="" width={30} height={30} />
-        <div className="flex items-center gap-2">
-          {/* balance */}
-          <div className="flex items-center h-[2.3rem] px-4 gap-1.5 border-2 border-white border-opacity-5 rounded-[5px]">
-            <Image src={"/assets/sol.png"} alt="" width={14} height={14} />
-            <span className="text-base font-chakra leading-3 mt-0.5 text-[#94A3B8]">
-              {truncateNumber(coinData ? coinData[0].amount : 0, 3)}
-            </span>
-          </div>
-          {/* wallet button  */}
-          <div
-            onClick={() => {
-              setShowWalletModal(true);
-            }}
-            className="flex items-center h-[2.3rem] px-5 gap-1 bg-[#7839C5] hover:bg-[#9361d1] focus:bg-[#602E9E] transition-all cursor-pointer rounded-[5px]"
-          >
-            <Image src={"/assets/wallet.png"} alt="" width={15} height={15} />
-            <span className="text-xs mt-0.5 text-white text-opacity-90">
-              {translator("Wallet", language)}
-            </span>
-          </div>
-        </div>
+        <CoinSelector />
       </div>
     </div>
   );

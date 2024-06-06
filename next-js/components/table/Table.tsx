@@ -350,6 +350,7 @@ export const Table: React.FC<TableProps> = ({
 
   useEffect(() => {
     if (router.query.table === "high-rollers") {
+      // to-do conversions
       // filter amount >= 2 SOL
       setDisplayBets(bets.filter((bet) => bet.amount >= 2));
     } else {

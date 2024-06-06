@@ -1,8 +1,6 @@
 import React, { useState, useEffect, useMemo } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import { useWallet } from "@solana/wallet-adapter-react";
-import { toast } from "react-hot-toast";
 import BetSetting from "@/components/BetSetting";
 import { useGlobalContext } from "@/components/GlobalContext";
 import {
@@ -12,11 +10,9 @@ import {
   GameTable,
 } from "@/components/GameLayout";
 import { FormProvider, useForm } from "react-hook-form";
-import { BsInfinity } from "react-icons/bs";
 import Loader from "@/components/games/Loader";
 import BetAmount from "@/components/games/BetAmountInput";
 import BetButton from "@/components/games/BetButton";
-import showInfoToast from "@/components/games/toasts/toasts";
 import { riskToChance } from "@/components/games/Keno/RiskToChance";
 import Bets from "../../components/games/Bets";
 import { soundAlert } from "@/utils/soundUtils";
@@ -27,7 +23,7 @@ import {
   successCustom,
   warningCustom,
 } from "@/components/toasts/ToastGroup";
-import { translator, formatNumber } from "@/context/transactions";
+import { translator } from "@/context/transactions";
 import { minGameAmount, truncateNumber } from "@/context/gameTransactions";
 import { useSession } from "next-auth/react";
 import { GameType } from "@/utils/provably-fair";
@@ -37,7 +33,6 @@ export default function Keno() {
   const methods = useForm();
   const { data: session, status } = useSession();
   const {
-    coinData,
     getBalance,
     getWalletBalance,
     setShowAutoModal,
@@ -54,7 +49,7 @@ export default function Keno() {
     autoBetProfit,
     setAutoBetProfit,
     useAutoConfig,
-    setUseAutoConfig,
+    selectedCoin,
     kenoRisk,
     setKenoRisk,
     houseEdge,
@@ -192,7 +187,7 @@ export default function Keno() {
       if (!betAmt || betAmt === 0) {
         throw new Error("Set Amount.");
       }
-      if (coinData && coinData[0].amount < betAmt) {
+      if (selectedCoin && selectedCoin.amount < betAmt) {
         throw new Error("Insufficient balance for bet !");
       }
 
@@ -206,7 +201,7 @@ export default function Keno() {
         body: JSON.stringify({
           wallet: wallet.publicKey,
           amount: betAmt,
-          tokenMint: "SOL",
+          tokenMint: selectedCoin?.tokenMint,
           chosenNumbers: chosenNumbers,
           risk: kenoRisk,
         }),
@@ -324,9 +319,9 @@ export default function Keno() {
             (autoWinChangeReset || autoLossChangeReset
               ? betAmt
               : autoBetCount === "inf"
-              ? Math.max(0, betAmt)
-              : betAmt *
-                (autoLossChange !== null ? autoLossChange / 100.0 : 0));
+                ? Math.max(0, betAmt)
+                : betAmt *
+                  (autoLossChange !== null ? autoLossChange / 100.0 : 0));
 
         // console.log("Current bet amount:", betAmt);
         // console.log("Auto loss change:", autoLossChange);
@@ -447,8 +442,6 @@ export default function Keno() {
                 !wallet ||
                 !session?.user ||
                 isRolling ||
-                !coinData ||
-                (coinData && coinData[0].amount < minGameAmount) ||
                 (betAmt !== undefined &&
                   maxBetAmt !== undefined &&
                   betAmt > maxBetAmt)
@@ -584,8 +577,6 @@ export default function Keno() {
                       !wallet ||
                       !session?.user ||
                       isRolling ||
-                      !coinData ||
-                      (coinData && coinData[0].amount < minGameAmount) ||
                       (betAmt !== undefined &&
                         maxBetAmt !== undefined &&
                         betAmt > maxBetAmt)
@@ -631,14 +622,14 @@ export default function Keno() {
                     chosenNumbers.includes(number)
                       ? "bg-[#7839C5] border-transparent"
                       : strikeNumbers.includes(number)
-                      ? chosenNumbers.includes(number)
-                        ? "bg-black border-fomo-green"
-                        : chosenNumbers.length === 0
-                        ? "bg-[#202329] border-transparent"
-                        : "bg-black border-fomo-red text-fomo-red"
-                      : chosenNumbers.includes(number)
-                      ? "bg-[#7839C5] border-transparent"
-                      : "bg-[#202329] border-transparent"
+                        ? chosenNumbers.includes(number)
+                          ? "bg-black border-fomo-green"
+                          : chosenNumbers.length === 0
+                            ? "bg-[#202329] border-transparent"
+                            : "bg-black border-fomo-red text-fomo-red"
+                        : chosenNumbers.includes(number)
+                          ? "bg-[#7839C5] border-transparent"
+                          : "bg-[#202329] border-transparent"
                   } rounded-md text-center border-2 transition-all duration-300 ease-in-out w-[1.75rem] h-[1.75rem] sm:w-[3.4375rem] sm:h-[3.4375rem] md:w-[3.75rem] md:h-[3.75rem] xl:w-[3.8rem] xl:h-[3.8rem]`}
                 >
                   {strikeNumbers.includes(number) &&
@@ -647,7 +638,7 @@ export default function Keno() {
                       {number}
                     </div>
                   ) : (
-                    <div>{number}</div> 
+                    <div>{number}</div>
                   )}
                 </div>
               ),
@@ -655,8 +646,8 @@ export default function Keno() {
           </div>
         </div>
         <div className="relative flex w-full justify-between px-0 xl:px-4 mb-0 px:mb-6 gap-4">
-          {coinData &&
-            coinData[0].amount > minGameAmount &&
+          {selectedCoin &&
+            selectedCoin.amount > minGameAmount &&
             chosenNumbers.length > 0 && (
               <div className="w-full">
                 <div className="flex justify-between gap-[3px] sm:gap-3.5 lg:gap-2 2xl:gap-3.5 text-white w-full">
@@ -706,7 +697,7 @@ export default function Keno() {
                                 </span>
                               </div>
                               <div className="border border-white/10 rounded-[5px] p-3 mt-2">
-                                {coinData
+                                {selectedCoin
                                   ? truncateNumber(
                                       Math.max(
                                         0,
@@ -716,7 +707,7 @@ export default function Keno() {
                                       4,
                                     )
                                   : 0}{" "}
-                                SOL
+                                {selectedCoin.tokenName}
                               </div>
                             </div>
                             <div className="w-1/2">
@@ -736,7 +727,7 @@ export default function Keno() {
               </div>
             )}
 
-          {!coinData || (coinData && coinData[0].amount < minGameAmount) ? (
+          {!selectedCoin || selectedCoin.amount < minGameAmount ? (
             <div className="w-full rounded-lg bg-[#d9d9d90d] bg-opacity-10 flex items-center px-3 py-3 text-white md:px-6">
               <div className="w-full text-center font-changa font-medium text-sm md:text-base text-[#F0F0F0] text-opacity-75">
                 {translator(
@@ -748,7 +739,7 @@ export default function Keno() {
                 </Link>
               </div>
             </div>
-          ) : coinData && chosenNumbers.length === 0 ? (
+          ) : selectedCoin && chosenNumbers.length === 0 ? (
             <div className="w-full rounded-lg bg-[#d9d9d90d] bg-opacity-10 flex items-center px-3 py-3 text-white md:px-6">
               <div className="w-full text-center font-changa font-medium text-sm md:text-base text-[#F0F0F0] text-opacity-75">
                 {translator("Pick up to 10 numbers", language)}

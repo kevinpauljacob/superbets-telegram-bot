@@ -4,6 +4,7 @@ import { NextApiRequest, NextApiResponse } from "next";
 import { wsEndpoint, minGameAmount } from "@/context/gameTransactions";
 import { Coin, GameSeed, User } from "@/models/games";
 import {
+  GameTokens,
   GameType,
   decryptServerSeed,
   generateGameResult,
@@ -18,6 +19,7 @@ import {
   pointTiers,
 } from "@/context/transactions";
 import { Decimal } from "decimal.js";
+import { SPL_TOKENS } from "@/context/config";
 Decimal.set({ precision: 9 });
 
 const secret = process.env.NEXTAUTH_SECRET;
@@ -53,28 +55,34 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           message: "User wallet not authenticated",
         });
 
+      if (!wallet || !amount || !flipType || !tokenMint)
+        return res
+          .status(400)
+          .json({ success: false, message: "Missing parameters" });
+
+      const splToken = SPL_TOKENS.find((t) => t.tokenMint === tokenMint);
+      if (
+        typeof amount !== "number" ||
+        !isFinite(amount) ||
+        !splToken ||
+        !(flipType === "heads" || flipType === "tails")
+      )
+        return res
+          .status(400)
+          .json({ success: false, message: "Invalid parameters" });
+
       if (amount < minGameAmount)
         return res.status(400).json({
           success: false,
           message: "Invalid bet amount",
         });
 
-      if (
-        !wallet ||
-        !amount ||
-        tokenMint !== "SOL" ||
-        !(flipType === "heads" || flipType === "tails")
-      )
-        return res
-          .status(400)
-          .json({ success: false, message: "Missing parameters" });
-
       await connectDatabase();
 
       const strikeMultiplier = 2;
       const maxPayout = Decimal.mul(amount, strikeMultiplier);
 
-      if (!(maxPayout.toNumber() <= maxPayouts.coinflip))
+      if (!(maxPayout.toNumber() <= maxPayouts[tokenMint as GameTokens].coinflip))
         return res
           .status(400)
           .json({ success: false, message: "Max payout exceeded" });
@@ -100,7 +108,12 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         { upsert: true, new: true },
       );
       const userTier = userData?.tier ?? 0;
-      const houseEdge = launchPromoEdge ? 0 : houseEdgeTiers[userTier];
+      const isFomoToken =
+        tokenMint === SPL_TOKENS.find((t) => t.tokenName === "FOMO")?.tokenMint
+          ? true
+          : false;
+      const houseEdge =
+        launchPromoEdge || isFomoToken ? 0 : houseEdgeTiers[userTier];
 
       const activeGameSeed = await GameSeed.findOneAndUpdate(
         {
@@ -158,7 +171,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           wallet,
           deposit: {
             $elemMatch: {
-              tokenMint: tokenMint,
+              tokenMint,
               amount: { $gte: amount },
             },
           },

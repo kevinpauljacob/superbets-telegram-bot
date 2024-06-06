@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import dynamic from "next/dynamic";
 import { useWallet } from "@solana/wallet-adapter-react";
-import toast from "react-hot-toast";
 import { placeFlip } from "../../context/gameTransactions";
 import Image from "next/image";
 import { FormProvider, useForm } from "react-hook-form";
@@ -14,13 +13,9 @@ import {
   GameOptions,
   GameTable,
 } from "@/components/GameLayout";
-import { BsInfinity } from "react-icons/bs";
 import Loader from "@/components/games/Loader";
 import BetAmount from "@/components/games/BetAmountInput";
 import BetButton from "@/components/games/BetButton";
-import ResultsSlider from "@/components/ResultsSlider";
-import showInfoToast from "@/components/games/toasts/toasts";
-import BalanceAlert from "@/components/games/BalanceAlert";
 import Bets from "../../components/games/Bets";
 import { soundAlert } from "@/utils/soundUtils";
 import ConfigureAutoButton from "@/components/ConfigureAutoButton";
@@ -48,11 +43,8 @@ export default function Flip() {
   const { data: session, status } = useSession();
 
   const {
-    coinData,
     getBalance,
     getWalletBalance,
-    setShowWalletModal,
-    setShowAutoModal,
     autoWinChange,
     autoLossChange,
     autoWinChangeReset,
@@ -66,7 +58,8 @@ export default function Flip() {
     autoBetProfit,
     setAutoBetProfit,
     useAutoConfig,
-    setUseAutoConfig,
+    selectedCoin,
+    coinData,
     houseEdge,
     maxBetAmt,
     language,
@@ -96,7 +89,7 @@ export default function Flip() {
       if (!betAmt || betAmt === 0) {
         throw new Error("Set Amount.");
       }
-      if (coinData && coinData[0].amount < betAmt) {
+      if (selectedCoin && selectedCoin.amount < betAmt) {
         throw new Error("Insufficient balance for bet !");
       }
 
@@ -104,6 +97,7 @@ export default function Flip() {
       let response = await placeFlip(
         wallet,
         betAmt,
+        selectedCoin.tokenMint,
         betType === "Heads" ? "heads" : "tails",
       );
       if (response.success !== true) {
@@ -232,9 +226,9 @@ export default function Flip() {
             (autoWinChangeReset || autoLossChangeReset
               ? betAmt
               : autoBetCount === "inf"
-              ? Math.max(0, betAmt)
-              : betAmt *
-                (autoLossChange !== null ? autoLossChange / 100.0 : 0));
+                ? Math.max(0, betAmt)
+                : betAmt *
+                  (autoLossChange !== null ? autoLossChange / 100.0 : 0));
 
         // console.log("Current bet amount:", betAmt);
         // console.log("Auto loss change:", autoLossChange);
@@ -340,8 +334,6 @@ export default function Flip() {
                 !betType ||
                 loading ||
                 !session?.user ||
-                !coinData ||
-                (coinData && coinData[0].amount < minGameAmount) ||
                 (betAmt !== undefined &&
                   maxBetAmt !== undefined &&
                   betAmt > maxBetAmt)
@@ -463,8 +455,6 @@ export default function Flip() {
                       !betType ||
                       loading ||
                       !session?.user ||
-                      !coinData ||
-                      (coinData && coinData[0].amount < minGameAmount) ||
                       (betAmt !== undefined &&
                         maxBetAmt !== undefined &&
                         betAmt > maxBetAmt)
@@ -494,10 +484,10 @@ export default function Flip() {
               {flipping
                 ? "Flipping..."
                 : result
-                ? result === "Won"
-                  ? translator("You Won!", language)
-                  : translator("You Lost!", language)
-                : ""}
+                  ? result === "Won"
+                    ? translator("You Won!", language)
+                    : translator("You Lost!", language)
+                  : ""}
             </span>
             <div className="flex items-center gap-2">
               {betResults.map((result, index) => (
@@ -545,16 +535,16 @@ export default function Flip() {
                 betType && loading
                   ? "translateZ1"
                   : result
-                  ? result === "Won"
-                    ? betType === "Tails"
+                    ? result === "Won"
+                      ? betType === "Tails"
+                        ? "z-[100]"
+                        : "z-[10]"
+                      : betType === "Tails"
+                        ? "z-[10]"
+                        : "z-[100]"
+                    : betType === "Tails"
                       ? "z-[100]"
                       : "z-[10]"
-                    : betType === "Tails"
-                    ? "z-[10]"
-                    : "z-[100]"
-                  : betType === "Tails"
-                  ? "z-[100]"
-                  : "z-[10]"
               }`}
             />
             <Image
@@ -567,16 +557,16 @@ export default function Flip() {
                 betType && loading
                   ? "z-[10]"
                   : result
-                  ? result === "Won"
-                    ? betType === "Heads"
-                      ? "z-[100]"
-                      : "z-[1]"
+                    ? result === "Won"
+                      ? betType === "Heads"
+                        ? "z-[100]"
+                        : "z-[1]"
+                      : betType === "Heads"
+                        ? "z-[1]"
+                        : "z-[100]"
                     : betType === "Heads"
-                    ? "z-[1]"
-                    : "z-[100]"
-                  : betType === "Heads"
-                  ? "z-[100]"
-                  : "z-[10]"
+                      ? "z-[100]"
+                      : "z-[10]"
               }`}
             />
           </div>

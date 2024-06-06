@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { useSession } from "next-auth/react";
 import toast from "react-hot-toast";
@@ -6,17 +6,16 @@ import { connection, fomoToken, formatNumber, translator } from "@/context/trans
 import { LAMPORTS_PER_SOL, PublicKey } from "@solana/web3.js";
 import { useGlobalContext } from "@/components/GlobalContext";
 import { getAssociatedTokenAddressSync } from "@solana/spl-token";
-import StoreBanner from "@/components/Banner";
 import StoreCard from "@/components/StoreCard";
-import { errorCustom } from "@/components/toasts/ToastGroup";
 import FOMOHead from "@/components/HeadElement";
 import { getFOMOBalance } from "./stake";
 
 export default function Store() {
-  const { data: session, status } = useSession();
+  const { data: session } = useSession();
   const wallet = useWallet();
 
   const {
+    setSolBal,
     userData,
     setUserData,
     fomoBalance,
@@ -27,7 +26,6 @@ export default function Store() {
     setGlobalInfo,
     getGlobalInfo,
     getUserDetails,
-    setLivePrice,
   } = useGlobalContext();
 
 

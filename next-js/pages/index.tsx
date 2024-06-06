@@ -39,12 +39,6 @@ export default function Home() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
   useEffect(() => {
-    if (wallet?.publicKey && !showWalletModal) {
-      getBalance();
-    }
-  }, [wallet?.publicKey, showWalletModal]);
-
-  useEffect(() => {
     //@ts-ignore
     setLanguage(localStorage.getItem("language") ?? "en");
   }, []);

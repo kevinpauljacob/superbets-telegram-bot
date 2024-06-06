@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef, useMemo } from "react";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { rollDice } from "@/context/gameTransactions";
-import { toast } from "react-hot-toast";
 import BetSetting from "@/components/BetSetting";
 import { useGlobalContext } from "@/components/GlobalContext";
 import {
@@ -12,7 +11,6 @@ import {
   GameTable,
 } from "@/components/GameLayout";
 import { FormProvider, useForm } from "react-hook-form";
-import { BsInfinity } from "react-icons/bs";
 import Loader from "@/components/games/Loader";
 import WinPointer from "@/public/assets/WinPointer";
 import DicePointer from "@/public/assets/DicePointer";
@@ -24,7 +22,6 @@ import Dice5 from "@/public/assets/Dice5";
 import Dice6 from "@/public/assets/Dice6";
 import BetAmount from "@/components/games/BetAmountInput";
 import BetButton from "@/components/games/BetButton";
-import showInfoToast from "@/components/games/toasts/toasts";
 import { loopSound, soundAlert } from "@/utils/soundUtils";
 import Bets from "../../components/games/Bets";
 import AutoCount from "@/components/AutoCount";
@@ -41,7 +38,7 @@ export default function Dice() {
   const { data: session, status } = useSession();
 
   const {
-    coinData,
+    selectedCoin,
     getBalance,
     getWalletBalance,
     setShowAutoModal,
@@ -171,14 +168,19 @@ export default function Dice() {
       if (!betAmt || betAmt === 0) {
         throw new Error("Set Amount.");
       }
-      if (coinData && coinData[0].amount < betAmt) {
+      if (selectedCoin && selectedCoin.amount < betAmt) {
         throw new Error("Insufficient balance for bet !");
       }
       if (selectedFace.length === 0) {
         throw new Error("Choose at least 1 face.");
       }
       setIsRolling(true);
-      const res = await rollDice(wallet, betAmt, selectedFace);
+      const res = await rollDice(
+        wallet,
+        betAmt,
+        selectedCoin.tokenMint,
+        selectedFace,
+      );
       if (res.success) {
         const { strikeNumber, result } = res.data;
         const isWin = result === "Won";
@@ -292,8 +294,8 @@ export default function Dice() {
     );
     diceElements.forEach((element) => element?.classList.add("blink_dice"));
     setTimeout(() => {
-      diceElements.forEach(
-        (element) => element?.classList.remove("blink_dice"),
+      diceElements.forEach((element) =>
+        element?.classList.remove("blink_dice"),
       );
     }, 2000);
   };
@@ -327,12 +329,12 @@ export default function Dice() {
         potentialLoss =
           autoBetProfit +
           -1 *
-          (autoWinChangeReset || autoLossChangeReset
-            ? betAmt
-            : autoBetCount === "inf"
-              ? Math.max(0, betAmt)
-              : betAmt *
-              (autoLossChange !== null ? autoLossChange / 100.0 : 0));
+            (autoWinChangeReset || autoLossChangeReset
+              ? betAmt
+              : autoBetCount === "inf"
+                ? Math.max(0, betAmt)
+                : betAmt *
+                  (autoLossChange !== null ? autoLossChange / 100.0 : 0));
 
         // console.log("Current bet amount:", betAmt);
         // console.log("Auto loss change:", autoLossChange);
@@ -424,14 +426,12 @@ export default function Dice() {
             <BetButton
               disabled={
                 !wallet ||
-                  !session?.user ||
-                  selectedFace.length === 0 ||
-                  isRolling ||
-                  !coinData ||
-                  (coinData && coinData[0].amount < minGameAmount) ||
-                  (betAmt !== undefined &&
-                    maxBetAmt !== undefined &&
-                    betAmt > maxBetAmt)
+                !session?.user ||
+                selectedFace.length === 0 ||
+                isRolling ||
+                (betAmt !== undefined &&
+                  maxBetAmt !== undefined &&
+                  betAmt > maxBetAmt)
                   ? true
                   : false
               }
@@ -501,14 +501,12 @@ export default function Dice() {
                   <BetButton
                     disabled={
                       !wallet ||
-                        !session?.user ||
-                        selectedFace.length === 0 ||
-                        isRolling ||
-                        !coinData ||
-                        (coinData && coinData[0].amount < minGameAmount) ||
-                        (betAmt !== undefined &&
-                          maxBetAmt !== undefined &&
-                          betAmt > maxBetAmt)
+                      !session?.user ||
+                      selectedFace.length === 0 ||
+                      isRolling ||
+                      (betAmt !== undefined &&
+                        maxBetAmt !== undefined &&
+                        betAmt > maxBetAmt)
                         ? true
                         : false
                     }
@@ -704,7 +702,7 @@ function DiceFace({
             : strikeFace === diceNumber
               ? "text-fomo-red" // Use losing dice face image if strikeFace is 1 and face 1 is not selected
               : "text-[#202329] hover:text-[#47484A] hover:duration-75" // Use regular dice face image if face 1 is not selected and strikeFace is not 1
-          } cursor-pointer w-10 h-10 md:w-12 md:h-12 transition-all duration-300 ease-in-out dice-face-icon-${diceNumber}`}
+        } cursor-pointer w-10 h-10 md:w-12 md:h-12 transition-all duration-300 ease-in-out dice-face-icon-${diceNumber}`}
       />
     </div>
   );

@@ -12,11 +12,11 @@ import React, {
   ReactNode,
   useEffect,
 } from "react";
-import toast from "react-hot-toast";
 import { connection } from "../context/gameTransactions";
 import { LAMPORTS_PER_SOL, PublicKey } from "@solana/web3.js";
-import { TOKEN_PROGRAM_ID } from "@solana/spl-token";
 import { errorCustom } from "./toasts/ToastGroup";
+import { SPL_TOKENS } from "@/context/config";
+import SOL from "@/public/assets/coins/SOL";
 import { GameType } from "@/utils/provably-fair";
 
 export interface GameStat {
@@ -33,12 +33,15 @@ interface PointTier {
   image: string;
   label: string;
 }
-
+interface TokenAccount {
+  mintAddress: string;
+  balance: number;
+}
 interface CoinBalance {
-  wallet: string;
-  type: boolean;
   amount: number;
   tokenMint: string;
+  tokenName: string;
+  icon: any;
 }
 
 interface ProvablyFairData {
@@ -110,6 +113,9 @@ interface GlobalContextProps {
 
   coinData: CoinBalance[] | null;
   setCoinData: (coinData: CoinBalance[] | null) => void;
+
+  selectedCoin: CoinBalance;
+  setSelectedCoin: (selectedCoin: CoinBalance) => void;
 
   showWalletModal: boolean;
   setShowWalletModal: React.Dispatch<React.SetStateAction<boolean>>;
@@ -192,6 +198,8 @@ interface GlobalContextProps {
   setKenoRisk: React.Dispatch<
     React.SetStateAction<"classic" | "low" | "medium" | "high">
   >;
+  userTokens: TokenAccount[]; // Add this line
+  setUserTokens: React.Dispatch<React.SetStateAction<TokenAccount[]>>;
 }
 
 const GlobalContext = createContext<GlobalContextProps | undefined>(undefined);
@@ -202,9 +210,10 @@ interface GlobalProviderProps {
 
 export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
   const wallet = useWallet();
+
   const [loading, setLoading] = useState(false);
   const [language, setLanguage] = useState<"en" | "ru" | "ko" | "ch">("en");
-
+  const [userTokens, setUserTokens] = useState<TokenAccount[]>([]);
   const [userData, setUserData] = useState<User | null>(null);
   const [stake, setStake] = useState(true);
   const [stakeAmount, setStakeAmount] = useState<number>(0);
@@ -225,12 +234,19 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
   const [walletBalance, setWalletBalance] = useState(0);
   const [coinData, setCoinData] = useState<CoinBalance[] | null>([
     {
-      wallet: "",
-      type: true,
       amount: 0,
       tokenMint: "SOL",
+      tokenName: "SOL",
+      icon: SOL,
     },
   ]);
+  const [selectedCoin, setSelectedCoin] = useState<CoinBalance>({
+    amount: 0,
+    tokenMint: "SOL",
+    tokenName: "SOL",
+    icon: SOL,
+  });
+
   const [showWalletModal, setShowWalletModal] = useState<boolean>(false);
   const [isVerifyModalOpen, setIsVerifyModalOpen] = useState<boolean>(false);
   const [verifyModalData, setVerifyModalData] = useState({});
@@ -273,30 +289,6 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
   const [kenoRisk, setKenoRisk] = useState<
     "classic" | "low" | "medium" | "high"
   >("classic");
-
-  useEffect(() => {
-    const fetchFomoPrice = async () => {
-      try {
-        let data = await fetch(
-          "https://price.jup.ag/v4/price?ids=FOMO&vsToken=USDC",
-        ).then((res) => res.json());
-        // console.log(data);
-        setFomoPrice(data?.data?.FOMO?.price ?? 0);
-      } catch (e) {
-        console.log(e);
-        setFomoPrice(0);
-        // errorCustom("Could not fetch fomo live price.");
-      }
-    };
-
-    fetchFomoPrice();
-
-    let intervalId = setInterval(async () => {
-      fetchFomoPrice();
-    }, 10000);
-
-    return () => clearInterval(intervalId);
-  }, []);
 
   const openVerifyModal = () => {
     setIsVerifyModalOpen(true);
@@ -382,6 +374,10 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
               balance?.data.deposit.length > 0
             ) {
               setCoinData(balance.data.deposit);
+              let coin = balance.data.deposit.find(
+                (token: CoinBalance) => token.tokenName === "SOL",
+              );
+              if (coin) setSelectedCoin({ ...coin, icon: SOL });
             } else {
               // console.log("Could not fetch balance.");
               setCoinData(null);
@@ -498,6 +494,10 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
         getWalletBalance,
         getBalance,
         getProvablyFairData,
+        selectedCoin,
+        setSelectedCoin,
+        userTokens,
+        setUserTokens,
         liveStats,
         setLiveStats,
         showLiveStats,

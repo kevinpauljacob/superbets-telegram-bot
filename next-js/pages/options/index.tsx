@@ -2,7 +2,6 @@ import Bets from "../../components/games/Bets";
 import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import { useWallet } from "@solana/wallet-adapter-react";
-import toast from "react-hot-toast";
 import Loader from "../../components/games/Loader";
 import { placeBet, truncateNumber } from "../../context/gameTransactions";
 import { checkResult as checkResultAPI } from "../../context/gameTransactions";
@@ -17,10 +16,9 @@ import {
 } from "@/components/GameLayout";
 import BetAmount from "@/components/games/BetAmountInput";
 import BetButton from "@/components/games/BetButton";
-import BalanceAlert from "@/components/games/BalanceAlert";
 import { soundAlert } from "@/utils/soundUtils";
 import { errorCustom, successCustom } from "@/components/toasts/ToastGroup";
-import { translator, formatNumber } from "@/context/transactions";
+import { translator } from "@/context/transactions";
 import { minGameAmount } from "@/context/gameTransactions";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
@@ -51,7 +49,8 @@ export default function Options() {
     maxBetAmt,
     language,
     setLiveStats,
-    liveStats
+    liveStats,
+    selectedCoin
   } = useGlobalContext();
 
   const [livePrice, setLivePrice] = useState(0);
@@ -162,7 +161,7 @@ export default function Options() {
         return;
       }
 
-      if (betAmt > coinData![0].amount) {
+      if (betAmt > selectedCoin!.amount) {
         errorCustom("Insufficient balance to place bet");
         setBetType(null);
         setCheckResult(false);
@@ -173,7 +172,7 @@ export default function Options() {
       let res = await placeBet(
         wallet,
         betAmt,
-        "SOL",
+        selectedCoin.tokenMint,
         betType === "up" ? "betUp" : "betDown",
         betInterval,
       );
@@ -307,7 +306,7 @@ export default function Options() {
       setLoading(false);
       setResult(null);
       setBetEnd(false);
-      setBetTime(undefined)
+      setBetTime(undefined);
       setBetInterval(3);
       setStrikePrice(0);
       // setBetAmt(0.1);
@@ -362,14 +361,12 @@ export default function Options() {
               <BetButton
                 disabled={
                   !betType ||
-                    !session?.user ||
-                    !coinData ||
-                    (coinData && coinData[0].amount < minGameAmount) ||
-                    (betAmt !== undefined &&
-                      maxBetAmt !== undefined &&
-                      betAmt > maxBetAmt) ||
-                    loading ||
-                    (strikePrice > 0 && !result)
+                  !session?.user ||
+                  (betAmt !== undefined &&
+                    maxBetAmt !== undefined &&
+                    betAmt > maxBetAmt) ||
+                  loading ||
+                  (strikePrice > 0 && !result)
                     ? true
                     : false
                 }
@@ -479,14 +476,12 @@ export default function Options() {
               <BetButton
                 disabled={
                   !betType ||
-                    !session?.user ||
-                    !coinData ||
-                    (coinData && coinData[0].amount < minGameAmount) ||
-                    (betAmt !== undefined &&
-                      maxBetAmt !== undefined &&
-                      betAmt > maxBetAmt) ||
-                    loading ||
-                    (strikePrice > 0 && !result)
+                  !session?.user ||
+                  (betAmt !== undefined &&
+                    maxBetAmt !== undefined &&
+                    betAmt > maxBetAmt) ||
+                  loading ||
+                  (strikePrice > 0 && !result)
                     ? true
                     : false
                 }
@@ -545,7 +540,7 @@ export default function Options() {
           <div className="flex flex-1 flex-col justify-center items-center relative py-4 mb-6 md:mb-6">
             <div className="flex flex-col items-center absolute w-[14rem] h-[14rem] justify-start pt-14">
               <span className="font-chakra text-sm text-[#94A3B8] text-opacity-75 mb-[1.4rem]">
-                $SOL
+                ${selectedCoin.tokenName}
               </span>
               <span className="font-chakra text-2xl text-white font-semibold text-opacity-90 mb-2">
                 ${truncateNumber(livePrice, 3)}
@@ -602,15 +597,19 @@ export default function Options() {
                                 ? "blink_1_50 bg-white"
                                 : "bg-[#282E3D]"
                               : timeLeft / (betInterval * 60000) < 0.25
-                                ? `bg-[#CF304A] blink_1 ${index >= (timeLeft * 50) / (betInterval * 60000) - 1
-                                  ? "blink_1"
-                                  : ""
-                                }`
-                                : `bg-[#D9D9D9] ${index >= (timeLeft * 50) / (betInterval * 60000) - 1
-                                  ? "blink_1"
-                                  : ""
-                                }`
-                      }`}
+                                ? `bg-[#CF304A] blink_1 ${
+                                    index >=
+                                    (timeLeft * 50) / (betInterval * 60000) - 1
+                                      ? "blink_1"
+                                      : ""
+                                  }`
+                                : `bg-[#D9D9D9] ${
+                                    index >=
+                                    (timeLeft * 50) / (betInterval * 60000) - 1
+                                      ? "blink_1"
+                                      : ""
+                                  }`
+                    }`}
                   />
                 </div>
               ))}
