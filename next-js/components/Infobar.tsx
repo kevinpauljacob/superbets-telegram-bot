@@ -16,6 +16,7 @@ export default function InfoBar() {
   });
 
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [animationClass, setAnimationClass] = useState('slide-in');
   const slides = [
     {
       label: translator("Unique Players", language),
@@ -44,8 +45,12 @@ export default function InfoBar() {
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setCurrentSlide((prevSlide) => (prevSlide + 1) % slides.length);
-    }, 2000);
+      setAnimationClass('slide-out'); // Start by fading out the current slide
+      setTimeout(() => {
+        setCurrentSlide((prevSlide) => (prevSlide + 1) % slides.length);
+        setAnimationClass('slide-in');
+      }, 500); // This should match the duration of the slide-out animation in globals.css
+    }, 2000); // Total time each slide is shown
     return () => clearInterval(interval);
   }, [slides.length]);
 
@@ -53,7 +58,7 @@ export default function InfoBar() {
     <div className="w-full min-h-[2rem] z-[100] bg-[linear-gradient(90deg,#1D3B7C_0%,#1D3B7C_100%)] text-[#E7E7E7] text-opacity-70 flex items-center justify-center text-xs gap-5">
       {/* samll screens (mobile) */}
       <div className="w-full flex md:hidden justify-center ">
-          <div className="flex items-center gap-1">
+          <div key={currentSlide} className={`flex items-center gap-1 ${animationClass}`}>
             <span className="text-[#e7e7e7] text-opacity-70 text-xs font-normal">
               {slides[currentSlide].label} :
             </span>
