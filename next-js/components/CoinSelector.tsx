@@ -21,10 +21,10 @@ export default function CoinSelector() {
   return (
     <div className="relative flex items-center gap-2">
       <div
-        className={`flex flex-col min-w-[8rem] ${startAuto ? "opacity-50" : ""}`}
+        className={`flex flex-col min-w-[8rem] h-10 ${startAuto ? "opacity-50" : ""}`}
       >
         <div
-          className="flex flex-row justify-left items-center px-4 py-1 gap-2 border-2 border-white border-opacity-5 rounded-[5px] cursor-pointer"
+          className="flex flex-row justify-left items-center px-4 py-[2px] h-10 gap-2 border-2 border-white border-opacity-5 rounded-[5px] cursor-pointer"
           onClick={() => {
             !startAuto && setShowSelectCoinModal(!showSelectCoinModal);
           }}
