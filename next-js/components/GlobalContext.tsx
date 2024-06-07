@@ -374,10 +374,11 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
               balance?.data.deposit.length > 0
             ) {
               setCoinData(balance.data.deposit);
+              let prevCoin = selectedCoin
               let coin = balance.data.deposit.find(
-                (token: CoinBalance) => token.tokenName === "SOL",
+                (token: CoinBalance) => token.tokenName === prevCoin.tokenName,
               );
-              if (coin) setSelectedCoin({ ...coin, icon: SOL });
+              if (coin) setSelectedCoin({ ...coin, icon: prevCoin.icon });
             } else {
               // console.log("Could not fetch balance.");
               setCoinData(null);
