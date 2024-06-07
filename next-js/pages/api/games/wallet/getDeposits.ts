@@ -1,6 +1,7 @@
 import connectDatabase from "../../../../utils/database";
 import Deposit from "../../../../models/games/deposit";
 import { NextApiRequest, NextApiResponse } from "next";
+import { SPL_TOKENS } from "@/context/config";
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === "GET") {
@@ -14,7 +15,20 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
       await connectDatabase();
 
-      let deposits = await Deposit.find({ wallet });
+      let deposits = await Deposit.find(
+        { wallet },
+        {},
+        { sort: { createdAt: -1 } },
+      ).then((deposits) => {
+        return deposits.map((deposit: any) => {
+          const { tokenMint, ...rest } = deposit.toObject();
+          const tokenName = SPL_TOKENS.find(
+            (t) => t.tokenMint === deposit.tokenMint,
+          )?.tokenName;
+
+          return { tokenName, ...rest };
+        });
+      });
 
       return res.json({
         success: true,
