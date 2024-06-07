@@ -414,7 +414,7 @@ export const Table: React.FC<TableProps> = ({
               </div>
             </div>
           </div>
-          {!home && maxPages>1 && (
+          {!home && displayBets.length > 0 && (
             <TablePagination
               page={page}
               setPage={setPage}
