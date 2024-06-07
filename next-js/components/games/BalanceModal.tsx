@@ -513,7 +513,7 @@ export default function BalanceModal() {
                           {timestampParser(data.createdAt)}
                         </td>
                         <td className="w-full text-center font-changa text-xs font-light text-[#F0F0F0] text-opacity-75">
-                          {truncateNumber(data.amount, 4)} {data.tokenMint}
+                          {truncateNumber(data.amount, 4)} {data.tokenName}
                         </td>
                         <td className="hidden sm:block w-full text-center font-changa text-xs font-light text-[#F0F0F0] text-opacity-75">
                           {data.type ? "Deposit" : "Withdraw"}
