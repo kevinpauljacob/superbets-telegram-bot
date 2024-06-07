@@ -63,7 +63,7 @@ export default function Mines() {
     language,
     selectedCoin,
     setLiveStats,
-    liveStats
+    liveStats,
   } = useGlobalContext();
   const [betAmt, setBetAmt] = useState<number | undefined>();
   const [userInput, setUserInput] = useState<number | undefined>();
@@ -128,7 +128,9 @@ export default function Mines() {
   useEffect(() => {
     const fetchPrice = async () => {
       try {
-        const response = await fetch(`https://price.jup.ag/v6/price?ids=${selectedCoin.tokenName}`);
+        const response = await fetch(
+          `https://price.jup.ag/v6/price?ids=${selectedCoin.tokenName}`,
+        );
         const data = await response.json();
         const coinPrice = data?.data[selectedCoin.tokenName]?.price ?? 0;
         setCurrentProfitInUSD(currentProfit * coinPrice);
@@ -325,17 +327,23 @@ export default function Mines() {
       }
       if (lose) soundAlert("/sounds/bomb.wav");
 
-      if(result !== "Pending") {
+      if (result !== "Pending") {
         setLiveStats([
           ...liveStats,
           {
             game: GameType.mines,
             amount: betAmt!,
             result: win ? "Won" : "Lost",
-            pnl: win ? (betAmt! * strikeMultiplier) - betAmt! : -betAmt!,
-            totalPNL: liveStats.length > 0 ? liveStats[liveStats.length - 1].totalPNL + (win ? (betAmt! * strikeMultiplier) - betAmt! : -betAmt!) : win ? (betAmt! * strikeMultiplier) - betAmt! : -betAmt!
-          }
-        ])
+            pnl: win ? betAmt! * strikeMultiplier - betAmt! : -betAmt!,
+            totalPNL:
+              liveStats.length > 0
+                ? liveStats[liveStats.length - 1].totalPNL +
+                  (win ? betAmt! * strikeMultiplier - betAmt! : -betAmt!)
+                : win
+                  ? betAmt! * strikeMultiplier - betAmt!
+                  : -betAmt!,
+          },
+        ]);
       }
 
       if (success) {
@@ -499,10 +507,8 @@ export default function Mines() {
         );
         // update count
         if (typeof autoBetCount === "number") {
-          if (autoBetCount === 1) {
-            warningCustom("Auto bet stopped", "top-left");
-          }
-          if (autoBetCount > 1) setAutoBetCount(autoBetCount - 1);
+          setAutoBetCount(autoBetCount > 0 ? autoBetCount - 1 : 0);
+          autoBetCount === 1 && warningCustom("Auto bet stopped", "top-left");
         } else
           setAutoBetCount(
             autoBetCount.length > 12
@@ -729,8 +735,16 @@ export default function Mines() {
         warningCustom("Profit limit reached.", "top-left");
         setAutoBetCount(0);
         setStartAuto(false);
-        setUserBets(defaultUserBets);
-        setUserBetsForAuto([]);
+        setTimeout(() => {
+          setUserBets(defaultUserBets);
+          setUserBetsForAuto([]);
+          setCashoutModal({
+            show: false,
+            amountWon: 0,
+            strikeMultiplier: 0,
+            pointsGained: 0,
+          });
+        }, 2000);
         return;
       }
       if (
@@ -742,8 +756,16 @@ export default function Mines() {
         warningCustom("Loss limit reached.", "top-left");
         setAutoBetCount(0);
         setStartAuto(false);
-        setUserBets(defaultUserBets);
-        setUserBetsForAuto([]);
+        setTimeout(() => {
+          setUserBets(defaultUserBets);
+          setUserBetsForAuto([]);
+          setCashoutModal({
+            show: false,
+            amountWon: 0,
+            strikeMultiplier: 0,
+            pointsGained: 0,
+          });
+        }, 2000);
         return;
       }
       setTimeout(() => {
@@ -751,8 +773,16 @@ export default function Mines() {
       }, 1000);
     } else {
       setStartAuto(false);
-      setUserBets(defaultUserBets);
-      setUserBetsForAuto([]);
+      setTimeout(() => {
+        setUserBets(defaultUserBets);
+        setUserBetsForAuto([]);
+        setCashoutModal({
+          show: false,
+          amountWon: 0,
+          strikeMultiplier: 0,
+          pointsGained: 0,
+        });
+      }, 2000);
       setAutoBetProfit(0);
       setUserInput(betAmt);
     }
@@ -808,6 +838,9 @@ export default function Mines() {
                 !wallet ||
                 !session?.user ||
                 isRolling ||
+                (!betActive &&
+                  coinData &&
+                  coinData[0].amount < minGameAmount) ||
                 (betActive &&
                   betType === "manual" &&
                   !userBets.some((bet) => bet.pick)) ||
@@ -922,7 +955,10 @@ export default function Mines() {
                       <div>
                         <div className="flex justify-between items-center mb-2">
                           <p>Current Profit</p>
-                          <p>{truncateNumber(currentProfit, 7)} {selectedCoin.tokenName}</p>
+                          <p>
+                            {truncateNumber(currentProfit, 7)}{" "}
+                            {selectedCoin.tokenName}
+                          </p>
                         </div>
                         <div className="flex justify-between items-center text-fomo-green">
                           <p className="text-[#94A3B8]">
@@ -944,7 +980,10 @@ export default function Mines() {
                       <div>
                         <div className="flex justify-between items-center mb-2">
                           <p>Profit on next tile</p>
-                          <p>{truncateNumber(nextProfit, 7)} {selectedCoin.tokenName}</p>
+                          <p>
+                            {truncateNumber(nextProfit, 7)}{" "}
+                            {selectedCoin.tokenName}
+                          </p>
                         </div>
                         <div className="flex justify-between items-center text-fomo-green">
                           <p className="text-[#94A3B8]">
@@ -1047,6 +1086,9 @@ export default function Mines() {
                       !wallet ||
                       !session?.user ||
                       isRolling ||
+                      (!betActive &&
+                        coinData &&
+                        coinData[0].amount < minGameAmount) ||
                       (betActive &&
                         betType === "manual" &&
                         !userBets.some((bet) => bet.pick)) ||
