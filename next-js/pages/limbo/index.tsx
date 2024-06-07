@@ -79,7 +79,8 @@ export default function Limbo() {
     maxBetAmt,
     language,
     setLiveStats,
-    liveStats
+    liveStats,
+    enableSounds,
   } = useGlobalContext();
 
   const multiplierLimits = [1.02, 50];
@@ -124,7 +125,7 @@ export default function Limbo() {
 
           const win = result === "Won";
           if (win) {
-            soundAlert("/sounds/win.wav");
+            soundAlert("/sounds/win.wav", enableSounds);
             successCustom(
               `Won ${resultAmount.toFixed(4)} ${selectedCoin.tokenName}!`,
             );
@@ -144,10 +145,18 @@ export default function Limbo() {
               game: GameType.limbo,
               amount: betAmt!,
               result: newBetResult.win ? "Won" : "Lost",
-              pnl: newBetResult.win ? (betAmt! * targetMultiplier) - betAmt! : -betAmt!,
-              totalPNL: liveStats.length > 0 ? liveStats[liveStats.length - 1].totalPNL + (win ? (betAmt! * targetMultiplier) - betAmt! : -betAmt!) : win ? (betAmt! * targetMultiplier) - betAmt! : -betAmt!
-            }
-          ])
+              pnl: newBetResult.win
+                ? betAmt! * targetMultiplier - betAmt!
+                : -betAmt!,
+              totalPNL:
+                liveStats.length > 0
+                  ? liveStats[liveStats.length - 1].totalPNL +
+                    (win ? betAmt! * targetMultiplier - betAmt! : -betAmt!)
+                  : win
+                    ? betAmt! * targetMultiplier - betAmt!
+                    : -betAmt!,
+            },
+          ]);
 
           // auto options
           if (betSetting === "auto" && betAmt !== undefined) {
@@ -356,7 +365,7 @@ export default function Limbo() {
             {startAuto && (
               <div
                 onClick={() => {
-                  soundAlert("/sounds/betbutton.wav");
+                  soundAlert("/sounds/betbutton.wav", enableSounds);
                   warningCustom("Auto bet stopped", "top-left");
                   setAutoBetCount(0);
                   setStartAuto(false);
@@ -437,7 +446,7 @@ export default function Limbo() {
                   {startAuto && (
                     <div
                       onClick={() => {
-                        soundAlert("/sounds/betbutton.wav");
+                        soundAlert("/sounds/betbutton.wav", enableSounds);
                         warningCustom("Auto bet stopped", "top-left");
                         setAutoBetCount(0);
                         setStartAuto(false);

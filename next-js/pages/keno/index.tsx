@@ -57,6 +57,7 @@ export default function Keno() {
     language,
     liveStats,
     setLiveStats,
+    enableSounds,
   } = useGlobalContext();
   const [betAmt, setBetAmt] = useState<number | undefined>();
   const [userInput, setUserInput] = useState<number | undefined>();
@@ -133,7 +134,7 @@ export default function Keno() {
       await new Promise((resolve) => setTimeout(resolve, 100));
 
       setChosenNumbers((prevNumbers) => [...prevNumbers, randomNumber]);
-      soundAlert("/sounds/betbutton.wav");
+      soundAlert("/sounds/betbutton.wav", enableSounds);
       randomNumbers.push(randomNumber);
       ++randomCount;
     }
@@ -222,9 +223,9 @@ export default function Keno() {
           await new Promise((resolve) => setTimeout(resolve, 200));
 
           if (chosenNumbers.includes(number)) {
-            soundAlert("/sounds/win3.wav");
+            soundAlert("/sounds/win3.wav", enableSounds);
           } else {
-            soundAlert("/sounds/betbutton.wav");
+            soundAlert("/sounds/betbutton.wav", enableSounds);
           }
           setStrikeNumbers((prevNumbers) => [...prevNumbers, number]);
         }
@@ -233,7 +234,7 @@ export default function Keno() {
       else errorCustom(message);
 
       const win = result === "Won";
-      if (win) soundAlert("/sounds/win.wav");
+      if (win) soundAlert("/sounds/win.wav", enableSounds);
 
       setLiveStats([
         ...liveStats,
@@ -241,10 +242,16 @@ export default function Keno() {
           game: GameType.keno,
           amount: betAmt,
           result: win ? "Won" : "Lost",
-          pnl: win ? (betAmt * strikeMultiplier) - betAmt : -betAmt,
-          totalPNL: liveStats.length > 0 ? liveStats[liveStats.length - 1].totalPNL + (win ? (betAmt * strikeMultiplier) - betAmt : -betAmt) : win ? (betAmt * strikeMultiplier) - betAmt : -betAmt
-        }
-      ])
+          pnl: win ? betAmt * strikeMultiplier - betAmt : -betAmt,
+          totalPNL:
+            liveStats.length > 0
+              ? liveStats[liveStats.length - 1].totalPNL +
+                (win ? betAmt * strikeMultiplier - betAmt : -betAmt)
+              : win
+                ? betAmt * strikeMultiplier - betAmt
+                : -betAmt,
+        },
+      ]);
 
       // auto options
       if (betType === "auto") {
@@ -427,7 +434,7 @@ export default function Keno() {
             {startAuto && (
               <div
                 onClick={() => {
-                  soundAlert("/sounds/betbutton.wav");
+                  soundAlert("/sounds/betbutton.wav", enableSounds);
                   warningCustom("Auto bet stopped", "top-left");
                   setAutoBetCount(0);
                   setStartAuto(false);
@@ -562,7 +569,7 @@ export default function Keno() {
                   {startAuto && (
                     <div
                       onClick={() => {
-                        soundAlert("/sounds/betbutton.wav");
+                        soundAlert("/sounds/betbutton.wav", enableSounds);
                         warningCustom("Auto bet stopped", "top-left");
                         setAutoBetCount(0);
                         setStartAuto(false);
@@ -614,7 +621,7 @@ export default function Keno() {
                   key={number}
                   onClick={() => {
                     handleChosenNumber(number);
-                    soundAlert("/sounds/betbutton.wav");
+                    soundAlert("/sounds/betbutton.wav", enableSounds);
                   }}
                   className={`flex items-center justify-center cursor-pointer ${
                     !isRolling &&
