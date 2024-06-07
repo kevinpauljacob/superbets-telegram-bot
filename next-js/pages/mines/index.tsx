@@ -175,7 +175,7 @@ export default function Mines() {
       const win = result === "Won";
       if (win) {
         successCustom(message);
-        soundAlert("/sounds/win.wav", enableSounds);
+        soundAlert("/sounds/win.wav", !enableSounds);
       } else errorCustom(message);
 
       if (success) {
@@ -236,7 +236,7 @@ export default function Mines() {
   };
 
   const handlePick = async (number: number) => {
-    soundAlert("/sounds/betButton.wav", enableSounds);
+    soundAlert("/sounds/betButton.wav", !enableSounds);
     setIsRolling(true);
     // setSelectTile(false);
     setNumBets(numBets + 1);
@@ -323,10 +323,10 @@ export default function Mines() {
       const win: boolean = result === "Pending";
       const lose: boolean = result === "Lost";
       if (win) {
-        soundAlert("/sounds/win.wav", enableSounds);
+        soundAlert("/sounds/win.wav", !enableSounds);
         // setSelectTile(true);
       }
-      if (lose) soundAlert("/sounds/bomb.wav", enableSounds);
+      if (lose) soundAlert("/sounds/bomb.wav", !enableSounds);
 
       if (result !== "Pending") {
         setLiveStats([
@@ -470,7 +470,7 @@ export default function Mines() {
 
       const win = result === "Won";
       if (win) {
-        soundAlert("/sounds/win.wav", enableSounds);
+        soundAlert("/sounds/win.wav", !enableSounds);
         successCustom(message);
         setCashoutModal({
           show: true,
@@ -482,7 +482,7 @@ export default function Mines() {
 
       const lose = result === "Lost";
       if (lose) {
-        soundAlert("/sounds/bomb.wav", enableSounds);
+        soundAlert("/sounds/bomb.wav", !enableSounds);
         errorCustom(message);
       }
 
@@ -818,7 +818,7 @@ export default function Mines() {
                 onClick={() => {
                   setUserBets(defaultUserBets);
                   setUserBetsForAuto([]);
-                  soundAlert("/sounds/betbutton.wav", enableSounds);
+                  soundAlert("/sounds/betbutton.wav", !enableSounds);
                   warningCustom("Auto bet stopped", "top-left");
                   setAutoBetCount(0);
                   setStartAuto(false);
@@ -1068,7 +1068,7 @@ export default function Mines() {
                       onClick={() => {
                         setUserBets(defaultUserBets);
                         setUserBetsForAuto([]);
-                        soundAlert("/sounds/betbutton.wav", enableSounds);
+                        soundAlert("/sounds/betbutton.wav", !enableSounds);
                         warningCustom("Auto bet stopped", "top-left");
                         setAutoBetCount(0);
                         setStartAuto(false);

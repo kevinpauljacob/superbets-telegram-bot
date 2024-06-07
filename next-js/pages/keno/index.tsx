@@ -134,7 +134,7 @@ export default function Keno() {
       await new Promise((resolve) => setTimeout(resolve, 100));
 
       setChosenNumbers((prevNumbers) => [...prevNumbers, randomNumber]);
-      soundAlert("/sounds/betbutton.wav", enableSounds);
+      soundAlert("/sounds/betbutton.wav", !enableSounds);
       randomNumbers.push(randomNumber);
       ++randomCount;
     }
@@ -223,9 +223,9 @@ export default function Keno() {
           await new Promise((resolve) => setTimeout(resolve, 200));
 
           if (chosenNumbers.includes(number)) {
-            soundAlert("/sounds/win3.wav", enableSounds);
+            soundAlert("/sounds/win3.wav", !enableSounds);
           } else {
-            soundAlert("/sounds/betbutton.wav", enableSounds);
+            soundAlert("/sounds/betbutton.wav", !enableSounds);
           }
           setStrikeNumbers((prevNumbers) => [...prevNumbers, number]);
         }
@@ -234,7 +234,7 @@ export default function Keno() {
       else errorCustom(message);
 
       const win = result === "Won";
-      if (win) soundAlert("/sounds/win.wav", enableSounds);
+      if (win) soundAlert("/sounds/win.wav", !enableSounds);
 
       setLiveStats([
         ...liveStats,
@@ -434,7 +434,7 @@ export default function Keno() {
             {startAuto && (
               <div
                 onClick={() => {
-                  soundAlert("/sounds/betbutton.wav", enableSounds);
+                  soundAlert("/sounds/betbutton.wav", !enableSounds);
                   warningCustom("Auto bet stopped", "top-left");
                   setAutoBetCount(0);
                   setStartAuto(false);
@@ -569,7 +569,7 @@ export default function Keno() {
                   {startAuto && (
                     <div
                       onClick={() => {
-                        soundAlert("/sounds/betbutton.wav", enableSounds);
+                        soundAlert("/sounds/betbutton.wav", !enableSounds);
                         warningCustom("Auto bet stopped", "top-left");
                         setAutoBetCount(0);
                         setStartAuto(false);
@@ -621,7 +621,7 @@ export default function Keno() {
                   key={number}
                   onClick={() => {
                     handleChosenNumber(number);
-                    soundAlert("/sounds/betbutton.wav", enableSounds);
+                    soundAlert("/sounds/betbutton.wav", !enableSounds);
                   }}
                   className={`flex items-center justify-center cursor-pointer ${
                     !isRolling &&

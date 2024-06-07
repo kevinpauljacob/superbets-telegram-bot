@@ -183,7 +183,7 @@ export default function Dice2() {
       const win = result === "Won";
       if (win) {
         successCustom(message);
-        soundAlert("/sounds/win.wav", enableSounds);
+        soundAlert("/sounds/win.wav", !enableSounds);
       } else errorCustom(message);
       const newBetResult = { result: strikeNumber, win };
 
@@ -393,7 +393,7 @@ export default function Dice2() {
             {startAuto && (
               <div
                 onClick={() => {
-                  soundAlert("/sounds/betbutton.wav", enableSounds);
+                  soundAlert("/sounds/betbutton.wav", !enableSounds);
                   warningCustom("Auto bet stopped", "top-left");
                   setAutoBetCount(0);
                   setStartAuto(false);
@@ -465,7 +465,7 @@ export default function Dice2() {
                   {startAuto && (
                     <div
                       onClick={() => {
-                        soundAlert("/sounds/betbutton.wav", enableSounds);
+                        soundAlert("/sounds/betbutton.wav", !enableSounds);
                         warningCustom("Auto bet stopped", "top-left");
                         setAutoBetCount(0);
                         setStartAuto(false);

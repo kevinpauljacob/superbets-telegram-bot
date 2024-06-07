@@ -114,7 +114,7 @@ export default function Flip() {
               : errorCustom(response?.message);
 
             const win = response?.data?.result === "Won";
-            if (win) soundAlert("/sounds/win.wav", enableSounds);
+            if (win) soundAlert("/sounds/win.wav", !enableSounds);
             const newBetResult = { result: response?.data?.strikeNumber, win };
 
             setBetResults((prevResults) => {
@@ -326,7 +326,7 @@ export default function Flip() {
             {startAuto && (
               <div
                 onClick={() => {
-                  soundAlert("/sounds/betbutton.wav", enableSounds);
+                  soundAlert("/sounds/betbutton.wav", !enableSounds);
                   warningCustom("Auto bet stopped", "top-left");
                   setAutoBetCount(0);
                   setStartAuto(false);
@@ -447,7 +447,7 @@ export default function Flip() {
                   {startAuto && (
                     <div
                       onClick={() => {
-                        soundAlert("/sounds/betbutton.wav", enableSounds);
+                        soundAlert("/sounds/betbutton.wav", !enableSounds);
                         warningCustom("Auto bet stopped", "top-left");
                         setAutoBetCount(0);
                         setStartAuto(false);

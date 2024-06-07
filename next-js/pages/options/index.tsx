@@ -102,7 +102,7 @@ export default function Options() {
       if (res.success) {
         if (res?.data?.result == "Won") {
           successCustom(res?.message);
-          soundAlert("/sounds/win.wav", enableSounds);
+          soundAlert("/sounds/win.wav", !enableSounds);
         } else errorCustom(res?.message);
         if (!result) {
           console.log("updating");

@@ -125,7 +125,7 @@ export default function Limbo() {
 
           const win = result === "Won";
           if (win) {
-            soundAlert("/sounds/win.wav", enableSounds);
+            soundAlert("/sounds/win.wav", !enableSounds);
             successCustom(
               `Won ${resultAmount.toFixed(4)} ${selectedCoin.tokenName}!`,
             );
@@ -365,7 +365,7 @@ export default function Limbo() {
             {startAuto && (
               <div
                 onClick={() => {
-                  soundAlert("/sounds/betbutton.wav", enableSounds);
+                  soundAlert("/sounds/betbutton.wav", !enableSounds);
                   warningCustom("Auto bet stopped", "top-left");
                   setAutoBetCount(0);
                   setStartAuto(false);
@@ -446,7 +446,7 @@ export default function Limbo() {
                   {startAuto && (
                     <div
                       onClick={() => {
-                        soundAlert("/sounds/betbutton.wav", enableSounds);
+                        soundAlert("/sounds/betbutton.wav", !enableSounds);
                         warningCustom("Auto bet stopped", "top-left");
                         setAutoBetCount(0);
                         setStartAuto(false);

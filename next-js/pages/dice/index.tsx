@@ -203,7 +203,7 @@ export default function Dice() {
           },
         ]);
 
-        if (isWin) soundAlert("/sounds/win.wav", enableSounds);
+        if (isWin) soundAlert("/sounds/win.wav", !enableSounds);
         const newBetResults = [
           ...(betResults.length <= 4 ? betResults : betResults.slice(-4)),
           { face: strikeNumber, win: isWin },
@@ -212,7 +212,7 @@ export default function Dice() {
         setShowPointer(true);
         setStrikeFace(strikeNumber);
         setRefresh(true);
-        loopSound("/sounds/diceshake.wav", 0.3, enableSounds);
+        loopSound("/sounds/diceshake.wav", 0.3, !enableSounds);
 
         // auto options
         if (betType === "auto") {
@@ -420,7 +420,7 @@ export default function Dice() {
             {startAuto && (
               <div
                 onClick={() => {
-                  soundAlert("/sounds/betbutton.wav", enableSounds);
+                  soundAlert("/sounds/betbutton.wav", !enableSounds);
                   warningCustom("Auto bet stopped", "top-left");
                   setAutoBetCount(0);
                   setStartAuto(false);
@@ -495,7 +495,7 @@ export default function Dice() {
                   {startAuto && (
                     <div
                       onClick={() => {
-                        soundAlert("/sounds/betbutton.wav", enableSounds);
+                        soundAlert("/sounds/betbutton.wav", !enableSounds);
                         warningCustom("Auto bet stopped", "top-left");
                         setAutoBetCount(0);
                         setStartAuto(false);
@@ -700,7 +700,7 @@ function DiceFace({
     <div
       onClick={() => {
         handleClick(diceNumber);
-        soundAlert("/sounds/betbutton.wav", enableSounds);
+        soundAlert("/sounds/betbutton.wav", !enableSounds);
       }}
     >
       <Icon
