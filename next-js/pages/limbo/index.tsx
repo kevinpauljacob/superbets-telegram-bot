@@ -29,6 +29,8 @@ import { translator } from "@/context/transactions";
 import { minGameAmount } from "@/context/gameTransactions";
 import { useSession } from "next-auth/react";
 import { GameType } from "@/utils/provably-fair";
+import { handleSignIn } from "@/components/ConnectWallet";
+import { useWalletModal } from "@solana/wallet-adapter-react-ui";
 
 function useInterval(callback: Function, delay: number | null) {
   const savedCallback = useRef<Function | null>(null);
@@ -53,6 +55,7 @@ function useInterval(callback: Function, delay: number | null) {
 
 export default function Limbo() {
   const wallet = useWallet();
+  const walletModal = useWalletModal();
   const methods = useForm();
   const { data: session, status } = useSession();
 
@@ -566,9 +569,16 @@ export default function Limbo() {
                   "Please deposit funds to start playing. View",
                   language,
                 )}{" "}
-                <Link href="/balance">
-                  <u>{translator("WALLET", language)}</u>
-                </Link>
+                <u
+                  onClick={() => {
+                    wallet.connected && status === "authenticated"
+                      ? setShowWalletModal(true)
+                      : handleSignIn(wallet, walletModal);
+                  }}
+                  className="cursor-pointer"
+                >
+                  {translator("WALLET", language)}
+                </u>
               </div>
             </div>
           )}

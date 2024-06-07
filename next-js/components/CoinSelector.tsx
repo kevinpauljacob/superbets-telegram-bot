@@ -5,8 +5,16 @@ import { truncateNumber } from "@/context/gameTransactions";
 import { SPL_TOKENS } from "@/context/config";
 import { translator } from "@/context/transactions";
 import SOL from "@/public/assets/coins/SOL";
+import { useSession } from "next-auth/react";
+import { useWallet } from "@solana/wallet-adapter-react";
+import { useWalletModal } from "@solana/wallet-adapter-react-ui";
+import { handleSignIn } from "./ConnectWallet";
 
 export default function CoinSelector() {
+  const { data: session, status } = useSession();
+  const wallet = useWallet();
+  const walletModal = useWalletModal();
+
   const {
     setShowWalletModal,
     setLiveBets,
@@ -113,7 +121,9 @@ export default function CoinSelector() {
 
       <div
         onClick={() => {
-          setShowWalletModal(true);
+          wallet.connected && status === "authenticated"
+            ? setShowWalletModal(true)
+            : handleSignIn(wallet, walletModal);
         }}
         className="flex items-center h-[2.3rem] md:h-10 px-5 md:px-4 py-0 md:py-2 gap-1 md:gap-1.5 bg-[#7839C5] hover:bg-[#9361d1] focus:bg-[#602E9E] transition-all cursor-pointer rounded-[5px]"
       >
