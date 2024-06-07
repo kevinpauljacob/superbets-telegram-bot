@@ -911,7 +911,7 @@ export default function Mines() {
                         />
                       </div>
                       {dropDown && (
-                        <div className="absolute -top-[200px] lg:top-14 z-[150] max-h-[195px] lg:max-h-[335px] xl:max-h-[380px] overflow-y-scroll modalscrollbar left-0 bg-[#202329] border border-[#2A2E38] rounded-[8px] w-full">
+                        <div className="absolute -top-[200px] lg:top-14 z-[150] max-h-[195px] lg:max-h-[335px] xl:max-h-[380px] overflow-y-scroll modalscrollbar left-0 bg-[#202329] border-2 border-[#2A2E38] rounded-[8px] w-full">
                           {options.map((option) => (
                             <div
                               key={option.key}
@@ -1019,7 +1019,7 @@ export default function Mines() {
                             />
                           </div>
                           {!startAuto && dropDown && (
-                            <div className="absolute -top-[200px] lg:top-14 z-[150] max-h-[195px] lg:max-h-[335px] xl:max-h-[380px] overflow-y-scroll modalscrollbar left-0 bg-[#202329] border border-[#2A2E38] rounded-[8px] w-full">
+                            <div className="absolute -top-[200px] lg:top-14 z-[150] max-h-[195px] lg:max-h-[335px] xl:max-h-[380px] overflow-y-scroll modalscrollbar left-0 bg-[#202329] border-2 border-[#2A2E38] rounded-[8px] w-full">
                               {options.map((option) => (
                                 <div
                                   key={option.key}
