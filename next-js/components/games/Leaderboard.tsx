@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useWallet } from "@solana/wallet-adapter-react";
-import toast from "react-hot-toast";
 import { obfuscatePubKey } from "@/context/transactions";
-import Head from "next/head";
 import { errorCustom } from "../toasts/ToastGroup";
 import FOMOHead from "../HeadElement";
 

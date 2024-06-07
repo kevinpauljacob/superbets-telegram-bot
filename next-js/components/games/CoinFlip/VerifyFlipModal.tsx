@@ -1,5 +1,4 @@
-import { GameType, seedStatus } from "@/utils/provably-fair";
-import Image from "next/image";
+import { seedStatus } from "@/utils/provably-fair";
 import { useState } from "react";
 import { IoIosArrowDown, IoMdCopy } from "react-icons/io";
 import CoinFlipProvablyFairModal, {
@@ -10,6 +9,7 @@ import { FaRegCopy } from "react-icons/fa6";
 import { MdClose } from "react-icons/md";
 import { translator } from "@/context/transactions";
 import Loader from "../Loader";
+import { SPL_TOKENS } from "@/context/config";
 
 export interface Flip {
   flipType: "heads" | "tails";
@@ -21,6 +21,7 @@ export interface Flip {
   segments?: number;
   amountWon: number;
   nonce?: number;
+  tokenMint: string;
   gameSeed?: {
     status: seedStatus;
     clientSeed: string;
@@ -158,7 +159,7 @@ export default function VerifyFlipModal({
                   Flip
                 </div>
                 <div className="text-white font-chakra text-xs font-medium">
-                  {flip.amount.toFixed(4)} $SOL
+                  {flip.amount.toFixed(4)} ${SPL_TOKENS.find(token => token.tokenMint===flip.tokenMint)?.tokenName ?? ""}
                 </div>
               </button>
               <button className="px-1 py-3 flex flex-col items-center justify-center w-full text-white rounded-md bg-[#202329]">
@@ -174,7 +175,7 @@ export default function VerifyFlipModal({
                   {translator("Payout", language)}
                 </div>
                 <div className="text-white font-chakra text-xs font-medium">
-                  {flip.amountWon.toFixed(4)} $SOL
+                  {flip.amountWon.toFixed(4)} ${SPL_TOKENS.find(token => token.tokenMint===flip.tokenMint)?.tokenName ?? ""}
                 </div>
               </button>
             </div>

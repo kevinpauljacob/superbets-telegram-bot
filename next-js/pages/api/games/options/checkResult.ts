@@ -11,6 +11,7 @@ import {
 import { GameType } from "@/utils/provably-fair";
 import { optionsEdge, wsEndpoint } from "@/context/gameTransactions";
 import { Decimal } from "decimal.js";
+import { SPL_TOKENS } from "@/context/config";
 Decimal.set({ precision: 9 });
 
 const secret = process.env.NEXTAUTH_SECRET;
@@ -44,12 +45,14 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           .status(400)
           .json({ success: false, message: "User does not exist !" });
 
-      let bet = await Option.findOne({ wallet, result: "Pending" });
+      const bet = await Option.findOne({ wallet, result: "Pending" });
       if (!bet)
         return res.status(400).json({
           success: false,
           message: "No active bets on this account",
         });
+
+      const { tokenMint, betEndTime, amount, betType, strikePrice } = bet;
 
       const userData = await StakingUser.findOneAndUpdate(
         { wallet },
@@ -57,15 +60,19 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         { upsert: true, new: true },
       );
       const userTier = userData?.tier ?? 0;
+      const isFomoToken =
+        tokenMint === SPL_TOKENS.find((t) => t.tokenName === "FOMO")?.tokenMint
+          ? true
+          : false;
       const houseEdge =
-        optionsEdge + (launchPromoEdge ? 0 : houseEdgeTiers[userTier]);
-      // const houseEdge = launchPromoEdge ? 0 : houseEdgeTiers[userTier];
+        optionsEdge +
+        (launchPromoEdge || isFomoToken ? 0 : houseEdgeTiers[userTier]);
 
       await new Promise((r) => setTimeout(r, 2000));
 
       let betEndPrice = await fetch(
         `https://hermes.pyth.network/api/get_price_feed?id=0xef0d8b6fda2ceba41da15d4095d1da392a0d2f8ed0c6c7bc0f4cfac8c280b56d&publish_time=${Math.floor(
-          new Date(bet.betEndTime).getTime() / 1000,
+          new Date(betEndTime).getTime() / 1000,
         )}`,
       )
         .then((res) => res.json())
@@ -73,14 +80,14 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
       let result = "Lost";
       let amountWon = new Decimal(0);
-      let amountLost = bet.amount;
+      let amountLost = amount;
 
       if (
-        (bet.betType === "betUp" && betEndPrice > bet.strikePrice) ||
-        (bet.betType === "betDown" && betEndPrice < bet.strikePrice)
+        (betType === "betUp" && betEndPrice > strikePrice) ||
+        (betType === "betDown" && betEndPrice < strikePrice)
       ) {
         result = "Won";
-        amountWon = Decimal.mul(bet.amount, 2).mul(Decimal.sub(1, houseEdge));
+        amountWon = Decimal.mul(amount, 2).mul(Decimal.sub(1, houseEdge));
         amountLost = 0;
       }
 
@@ -89,7 +96,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           wallet,
           deposit: {
             $elemMatch: {
-              tokenMint: "SOL",
+              tokenMint,
             },
           },
           isOptionOngoing: true,
@@ -123,7 +130,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       );
 
       const pointsGained =
-        0 * user.numOfGamesPlayed + 1.4 * bet.amount * userData.multiplier;
+        0 * user.numOfGamesPlayed + 1.4 * amount * userData.multiplier;
 
       const points = userData.points + pointsGained;
       const newTier = Object.entries(pointTiers).reduce((prev, next) => {
@@ -170,7 +177,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         data: { amountWon, amountLost, result },
         message: `${result} ${
           result == "Won" ? amountWon.toFixed(4) : amountLost.toFixed(4)
-        } SOL!`,
+        } ${SPL_TOKENS.find((token) => token.tokenMint === tokenMint)?.tokenName ?? ""}!`,
       });
     } catch (e: any) {
       console.log(e);

@@ -1,28 +1,20 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import Bets from "../../components/games/Bets";
 import { useWallet } from "@solana/wallet-adapter-react";
-import toast from "react-hot-toast";
-import HistoryTable from "@/components/games/Limbo/VerifyLimboModal";
 import { FormProvider, useForm } from "react-hook-form";
 import { useGlobalContext } from "@/components/GlobalContext";
 import BetSetting from "@/components/BetSetting";
 import {
   GameDisplay,
-  GameFooterInfo,
   GameLayout,
   GameOptions,
   GameTable,
 } from "@/components/GameLayout";
-import Spinner from "@/components/Spinner";
-import { MultiplierHistory } from "@/components/games/Limbo/MultiplierHistory";
 import { limboBet, truncateNumber } from "@/context/gameTransactions";
 import BetAmount from "@/components/games/BetAmountInput";
 import BetButton from "@/components/games/BetButton";
 import Loader from "../../components/games/Loader";
-import { BsInfinity } from "react-icons/bs";
 import ResultsSlider from "@/components/ResultsSlider";
-import BalanceAlert from "@/components/games/BalanceAlert";
-import showInfoToast from "@/components/games/toasts/toasts";
 import Link from "next/link";
 import { soundAlert } from "@/utils/soundUtils";
 import ConfigureAutoButton from "@/components/ConfigureAutoButton";
@@ -33,9 +25,10 @@ import {
   successCustom,
   warningCustom,
 } from "@/components/toasts/ToastGroup";
-import { translator, formatNumber } from "@/context/transactions";
+import { translator } from "@/context/transactions";
 import { minGameAmount } from "@/context/gameTransactions";
 import { useSession } from "next-auth/react";
+import { GameType } from "@/utils/provably-fair";
 
 function useInterval(callback: Function, delay: number | null) {
   const savedCallback = useRef<Function | null>(null);
@@ -64,7 +57,6 @@ export default function Limbo() {
   const { data: session, status } = useSession();
 
   const {
-    coinData,
     getBalance,
     getWalletBalance,
     setShowWalletModal,
@@ -82,10 +74,12 @@ export default function Limbo() {
     autoBetProfit,
     setAutoBetProfit,
     useAutoConfig,
-    setUseAutoConfig,
+    selectedCoin,
     houseEdge,
     maxBetAmt,
     language,
+    setLiveStats,
+    liveStats
   } = useGlobalContext();
 
   const multiplierLimits = [1.02, 50];
@@ -131,7 +125,9 @@ export default function Limbo() {
           const win = result === "Won";
           if (win) {
             soundAlert("/sounds/win.wav");
-            successCustom(`Won ${resultAmount.toFixed(4)} SOL!`);
+            successCustom(
+              `Won ${resultAmount.toFixed(4)} ${selectedCoin.tokenName}!`,
+            );
           } else result && errorCustom("Better luck next time!");
           const newBetResult = { result: targetMultiplier, win };
           setLastMultipliers((prevResults) => {
@@ -141,6 +137,17 @@ export default function Limbo() {
             }
             return newResults;
           });
+
+          setLiveStats([
+            ...liveStats,
+            {
+              game: GameType.limbo,
+              amount: betAmt!,
+              result: newBetResult.win ? "Won" : "Lost",
+              pnl: newBetResult.win ? (betAmt! * targetMultiplier) - betAmt! : -betAmt!,
+              totalPNL: liveStats.length > 0 ? liveStats[liveStats.length - 1].totalPNL + (win ? (betAmt! * targetMultiplier) - betAmt! : -betAmt!) : win ? (betAmt! * targetMultiplier) - betAmt! : -betAmt!
+            }
+          ])
 
           // auto options
           if (betSetting === "auto" && betAmt !== undefined) {
@@ -192,7 +199,7 @@ export default function Limbo() {
       if (!betAmt || betAmt === 0) {
         throw new Error("Set Amount.");
       }
-      if (coinData && coinData[0].amount < betAmt) {
+      if (selectedCoin && selectedCoin.amount < betAmt) {
         throw new Error("Insufficient balance for bet !");
       }
       if (inputMultiplier < multiplierLimits[0]) {
@@ -205,7 +212,12 @@ export default function Limbo() {
       setDisplayMultiplier(multiplierLimits[0]);
       setTargetMultiplier(multiplierLimits[0]);
 
-      const response = await limboBet(wallet, betAmt!, inputMultiplier);
+      const response = await limboBet(
+        wallet,
+        betAmt!,
+        inputMultiplier,
+        selectedCoin.tokenMint,
+      );
 
       if (!response.success) throw new Error(response.message);
 
@@ -262,9 +274,9 @@ export default function Limbo() {
             (autoWinChangeReset || autoLossChangeReset
               ? betAmt
               : autoBetCount === "inf"
-              ? Math.max(0, betAmt)
-              : betAmt *
-                (autoLossChange !== null ? autoLossChange / 100.0 : 0));
+                ? Math.max(0, betAmt)
+                : betAmt *
+                  (autoLossChange !== null ? autoLossChange / 100.0 : 0));
 
         // console.log("Current bet amount:", betAmt);
         // console.log("Auto loss change:", autoLossChange);
@@ -358,8 +370,6 @@ export default function Limbo() {
               disabled={
                 loading ||
                 !session?.user ||
-                !coinData ||
-                (coinData && coinData[0].amount < minGameAmount) ||
                 (betAmt !== undefined &&
                   maxBetAmt !== undefined &&
                   betAmt > maxBetAmt)
@@ -441,8 +451,6 @@ export default function Limbo() {
                     disabled={
                       loading ||
                       !session?.user ||
-                      !coinData ||
-                      (coinData && coinData[0].amount < minGameAmount) ||
                       (betAmt !== undefined &&
                         maxBetAmt !== undefined &&
                         betAmt > maxBetAmt)
@@ -497,7 +505,7 @@ export default function Limbo() {
         </div>
 
         <div className="flex px-0 xl:px-4 mb-0 md:mb-[1.4rem] gap-4 flex-row w-full justify-between font-changa font-semibold">
-          {coinData && coinData[0].amount > minGameAmount && (
+          {selectedCoin && selectedCoin.amount > minGameAmount && (
             <>
               <MultiplierInput
                 inputMultiplier={inputMultiplier}
@@ -523,7 +531,7 @@ export default function Limbo() {
                         4,
                       )
                     : 0.0}{" "}
-                  $SOL
+                  ${selectedCoin.tokenName}
                 </span>
               </div>
 
@@ -542,7 +550,7 @@ export default function Limbo() {
             </>
           )}
 
-          {(!coinData || (coinData && coinData[0].amount < minGameAmount)) && (
+          {(!selectedCoin || selectedCoin.amount < minGameAmount) && (
             <div className="w-full rounded-lg bg-[#d9d9d90d] bg-opacity-10 flex items-center px-3 py-3 text-white md:px-6">
               <div className="w-full text-center font-changa font-medium text-sm md:text-base text-[#F0F0F0] text-opacity-75">
                 {translator(

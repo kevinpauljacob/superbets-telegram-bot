@@ -12,11 +12,20 @@ import React, {
   ReactNode,
   useEffect,
 } from "react";
-import toast from "react-hot-toast";
 import { connection } from "../context/gameTransactions";
 import { LAMPORTS_PER_SOL, PublicKey } from "@solana/web3.js";
-import { TOKEN_PROGRAM_ID } from "@solana/spl-token";
 import { errorCustom } from "./toasts/ToastGroup";
+import { SPL_TOKENS } from "@/context/config";
+import SOL from "@/public/assets/coins/SOL";
+import { GameType } from "@/utils/provably-fair";
+
+export interface GameStat {
+  game: GameType;
+  amount: number;
+  pnl: number;
+  totalPNL: number;
+  result: "Won" | "Lost";
+}
 
 interface PointTier {
   index: number;
@@ -24,12 +33,15 @@ interface PointTier {
   image: string;
   label: string;
 }
-
+interface TokenAccount {
+  mintAddress: string;
+  balance: number;
+}
 interface CoinBalance {
-  wallet: string;
-  type: boolean;
   amount: number;
   tokenMint: string;
+  tokenName: string;
+  icon: any;
 }
 
 interface ProvablyFairData {
@@ -102,6 +114,9 @@ interface GlobalContextProps {
   coinData: CoinBalance[] | null;
   setCoinData: (coinData: CoinBalance[] | null) => void;
 
+  selectedCoin: CoinBalance;
+  setSelectedCoin: (selectedCoin: CoinBalance) => void;
+
   showWalletModal: boolean;
   setShowWalletModal: React.Dispatch<React.SetStateAction<boolean>>;
 
@@ -145,6 +160,16 @@ interface GlobalContextProps {
   setAutoBetProfit: React.Dispatch<React.SetStateAction<number>>;
   liveBets: any[];
   setLiveBets: React.Dispatch<React.SetStateAction<any[]>>;
+  liveStats: GameStat[];
+  setLiveStats: React.Dispatch<React.SetStateAction<GameStat[]>>;
+  liveCurrentStat: GameType | "All";
+  setLiveCurrentStat: React.Dispatch<React.SetStateAction<GameType | "All">>;
+  showLiveStats: boolean;
+  setShowLiveStats: React.Dispatch<React.SetStateAction<boolean>>;
+  showFullScreen: boolean;
+  setShowFullScreen: React.Dispatch<React.SetStateAction<boolean>>;
+  enableSounds: boolean;
+  setEnableSounds: React.Dispatch<React.SetStateAction<boolean>>;
 
   autoConfigState: Map<string, AutoConfigOptions>;
   setAutoConfigState: React.Dispatch<
@@ -173,6 +198,8 @@ interface GlobalContextProps {
   setKenoRisk: React.Dispatch<
     React.SetStateAction<"classic" | "low" | "medium" | "high">
   >;
+  userTokens: TokenAccount[]; // Add this line
+  setUserTokens: React.Dispatch<React.SetStateAction<TokenAccount[]>>;
 }
 
 const GlobalContext = createContext<GlobalContextProps | undefined>(undefined);
@@ -183,9 +210,10 @@ interface GlobalProviderProps {
 
 export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
   const wallet = useWallet();
+
   const [loading, setLoading] = useState(false);
   const [language, setLanguage] = useState<"en" | "ru" | "ko" | "ch">("en");
-
+  const [userTokens, setUserTokens] = useState<TokenAccount[]>([]);
   const [userData, setUserData] = useState<User | null>(null);
   const [stake, setStake] = useState(true);
   const [stakeAmount, setStakeAmount] = useState<number>(0);
@@ -206,12 +234,19 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
   const [walletBalance, setWalletBalance] = useState(0);
   const [coinData, setCoinData] = useState<CoinBalance[] | null>([
     {
-      wallet: "",
-      type: true,
       amount: 0,
       tokenMint: "SOL",
+      tokenName: "SOL",
+      icon: SOL,
     },
   ]);
+  const [selectedCoin, setSelectedCoin] = useState<CoinBalance>({
+    amount: 0,
+    tokenMint: "SOL",
+    tokenName: "SOL",
+    icon: SOL,
+  });
+
   const [showWalletModal, setShowWalletModal] = useState<boolean>(false);
   const [isVerifyModalOpen, setIsVerifyModalOpen] = useState<boolean>(false);
   const [verifyModalData, setVerifyModalData] = useState({});
@@ -235,6 +270,11 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
   const [autoBetProfit, setAutoBetProfit] = useState<number>(0);
 
   const [liveBets, setLiveBets] = useState<any[]>([]);
+  const [liveStats, setLiveStats] = useState<GameStat[]>([]);
+  const [showLiveStats, setShowLiveStats] = useState<boolean>(false);
+  const [liveCurrentStat, setLiveCurrentStat] = useState<GameType | "All">("All");
+  const [showFullScreen, setShowFullScreen] = useState<boolean>(false);
+  const [enableSounds, setEnableSounds] = useState<boolean>(true);
 
   const [autoConfigState, setAutoConfigState] = useState<
     Map<string, AutoConfigOptions>
@@ -249,30 +289,6 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
   const [kenoRisk, setKenoRisk] = useState<
     "classic" | "low" | "medium" | "high"
   >("classic");
-
-  useEffect(() => {
-    const fetchFomoPrice = async () => {
-      try {
-        let data = await fetch(
-          "https://price.jup.ag/v4/price?ids=FOMO&vsToken=USDC",
-        ).then((res) => res.json());
-        // console.log(data);
-        setFomoPrice(data?.data?.FOMO?.price ?? 0);
-      } catch (e) {
-        console.log(e);
-        setFomoPrice(0);
-        // errorCustom("Could not fetch fomo live price.");
-      }
-    };
-
-    fetchFomoPrice();
-
-    let intervalId = setInterval(async () => {
-      fetchFomoPrice();
-    }, 10000);
-
-    return () => clearInterval(intervalId);
-  }, []);
 
   const openVerifyModal = () => {
     setIsVerifyModalOpen(true);
@@ -358,6 +374,10 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
               balance?.data.deposit.length > 0
             ) {
               setCoinData(balance.data.deposit);
+              let coin = balance.data.deposit.find(
+                (token: CoinBalance) => token.tokenName === "SOL",
+              );
+              if (coin) setSelectedCoin({ ...coin, icon: SOL });
             } else {
               // console.log("Could not fetch balance.");
               setCoinData(null);
@@ -474,6 +494,20 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
         getWalletBalance,
         getBalance,
         getProvablyFairData,
+        selectedCoin,
+        setSelectedCoin,
+        userTokens,
+        setUserTokens,
+        liveStats,
+        setLiveStats,
+        showLiveStats,
+        setShowLiveStats,
+        showFullScreen,
+        setShowFullScreen,
+        enableSounds,
+        setEnableSounds,
+        liveCurrentStat,
+        setLiveCurrentStat
       }}
     >
       {children}
@@ -897,11 +931,11 @@ export const translationsMap = {
     ch: "您可以在此游戏中下注的最高金额为",
   },
   "The more you stake, the less fees you pay and the bigger your points multiplier":
-    {
-      ru: "Чем больше вы ставите, тем меньше вы платите комиссий и тем выше ваш множитель очков",
-      ko: "더 많이 걸수록 수수료가 적게 들고 포인트 배수가 커집니다",
-      ch: "投注金额越大，您支付的费用越少，积分乘数越大",
-    },
+  {
+    ru: "Чем больше вы ставите, тем меньше вы платите комиссий и тем выше ваш множитель очков",
+    ko: "더 많이 걸수록 수수료가 적게 들고 포인트 배수가 커집니다",
+    ch: "投注金额越大，您支付的费用越少，积分乘数越大",
+  },
   WALLET: {
     ru: "КОШЕЛЕК",
     ko: "지갑",
@@ -1003,11 +1037,11 @@ export const translationsMap = {
     ch: "待定",
   },
   "FOMO wtf casino games are currently in beta and will be undergoing audit shortly. FOMO wtf EXIT games has gone through audit performed by OtterSec in December 2023.":
-    {
-      ru: "Игры казино FOMO wtf находятся в бета-тестировании и вскоре будут проходить аудит. Игры FOMO wtf EXIT прошли аудит, проведенный OtterSec в декабре 2023 года.",
-      ko: "FOMO wtf 카지노 게임은 현재 베타 버전이며 곧 감사를 받을 예정입니다. FOMO wtf EXIT 게임은 2023년 12월 OtterSec에 의해 감사를 받았습니다.",
-      ch: "FOMO wtf赌场游戏目前处于测试阶段，将很快进行审计。 FOMO wtf EXIT游戏已于2023年12月由OtterSec进行了审计。",
-    },
+  {
+    ru: "Игры казино FOMO wtf находятся в бета-тестировании и вскоре будут проходить аудит. Игры FOMO wtf EXIT прошли аудит, проведенный OtterSec в декабре 2023 года.",
+    ko: "FOMO wtf 카지노 게임은 현재 베타 버전이며 곧 감사를 받을 예정입니다. FOMO wtf EXIT 게임은 2023년 12월 OtterSec에 의해 감사를 받았습니다.",
+    ch: "FOMO wtf赌场游戏目前处于测试阶段，将很快进行审计。 FOMO wtf EXIT游戏已于2023年12月由OtterSec进行了审计。",
+  },
   Services: {
     ru: "Услуги",
     ko: "서비스",
@@ -1307,6 +1341,11 @@ export const translationsMap = {
     ru: "Сначала нужно повернуть пару семян, чтобы проверить эту ставку.",
     ko: "베팅자는 먼저 시드 페어를 회전해야 합니다.",
     ch: "投注者首先需要旋转种子对。",
+  },
+  "House Edge": {
+    ru: "Край дома",
+    ko: "하우스 엣지",
+    ch: "庄家优势",
   },
   "I agree with Privacy Policy and with Terms of Use, Gambling isn't forbidden by my local authorities and I'm at least 18 years old.":
     {
