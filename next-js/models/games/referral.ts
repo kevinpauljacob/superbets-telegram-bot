@@ -23,7 +23,6 @@ const ReferralSchema = new Schema(
     },
     referralCode: {
       type: String,
-      required: true,
       unique: true,
     },
     referredByChain: [
