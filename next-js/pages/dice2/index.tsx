@@ -215,7 +215,7 @@ export default function Dice2() {
       setStrikeNumber(strikeNumber);
       setResult(win);
       setRefresh(true);
-      loopSound("/sounds/diceshake.wav", 0.3, enableSounds);
+      loopSound("/sounds/diceshake.wav", 0.3, !enableSounds);
 
       // auto options
       if (betType === "auto") {

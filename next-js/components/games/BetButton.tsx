@@ -18,7 +18,7 @@ export default function BetButton({
 
   useEffect(() => {
     const handleClick = () => {
-      soundAlert("/sounds/betbutton.wav", enableSounds);
+      soundAlert("/sounds/betbutton.wav", !enableSounds);
     };
 
     const buttonElement = betButtonRef.current;
