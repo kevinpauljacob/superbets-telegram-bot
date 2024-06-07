@@ -32,10 +32,10 @@ export default function CoinSelector() {
           {selectedCoin.icon && (
             <selectedCoin.icon className="w-6 h-6 -mt-[1px]" />
           )}
-          <span className="font-chakra text-base md:text-2xl text-[#94A3B8]">
+          <span className="font-chakra font-medium text-base md:text-2xl text-[#94A3B8]">
             {(selectedCoin?.amount ?? 0).toLocaleString("en-US", {
-              minimumFractionDigits: 3,
-              maximumFractionDigits: 3,
+              minimumFractionDigits: 4,
+              maximumFractionDigits: 4,
             })}
           </span>
           <div className="grow" />
