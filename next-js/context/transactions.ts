@@ -252,6 +252,14 @@ export const maxPayouts: {
   },
 };
 
+export const commissionLevels = {
+  0: 25,
+  1: 3.5,
+  2: 2.5,
+  3: 2,
+  4: 1,
+};
+
 export const obfuscatePubKey = (address: string) => {
   return (
     address?.substring(0, 4) + "..." + address?.substring(address.length - 4)

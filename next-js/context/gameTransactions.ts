@@ -9,10 +9,6 @@ import {
 import {
   getAssociatedTokenAddress,
   createTransferInstruction,
-  getAccount,
-  createAssociatedTokenAccountInstruction,
-  createAssociatedTokenAccount,
-  createAssociatedTokenAccountIdempotent,
   createAssociatedTokenAccountIdempotentInstruction,
 } from "@solana/spl-token";
 import { SPL_TOKENS } from "./config";
