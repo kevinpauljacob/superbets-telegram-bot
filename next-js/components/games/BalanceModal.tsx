@@ -255,7 +255,7 @@ export default function BalanceModal() {
           >
             {translator("History", language)}
             {historyData.length > 0 && (
-              <div className="bg-[#EFA411] bg-opacity-10 text-[#EFA411] text-[0.625rem] font-sans font-semibold w-5 min-h-5 rounded-full">
+              <div className="flex items-center justify-center bg-[#EFA411] bg-opacity-10 text-[#EFA411] text-[0.625rem] font-sans font-semibold w-5 min-h-5 rounded-full">
                 {
                   historyData.filter(
                     (history) =>
@@ -298,11 +298,11 @@ export default function BalanceModal() {
                 </span>
 
                 {isSelectModalOpen && (
-                  <div className="absolute z-[100] top-[calc(100%+10px)] left-0 w-full bg-[#202329] rounded-md shadow-md">
+                  <div className="absolute z-[100] top-[calc(100%+10px)] left-0 w-full bg-[#202329] rounded-[5px] border-2 border-white border-opacity-10">
                     {SPL_TOKENS.map((token, index) => (
                       <div
                         key={index}
-                        className="w-full h-11 flex flex-row items-center bg-[#202329] px-4 py-2 text-[#94A3B8] text-base font-chakra gap-2 cursor-pointer hover:bg-[#292C32] rounded-md"
+                        className="w-full h-11 flex flex-row items-center border-y  border-white border-opacity-10  bg-[#202329] px-4 py-2 text-[#94A3B8] text-base font-chakra gap-2 cursor-pointer hover:bg-[#292C32]"
                         onClick={() => {
                           setSelectedToken(token);
                           setIsSelectModalOpen(false);
@@ -513,7 +513,7 @@ export default function BalanceModal() {
                           {timestampParser(data.createdAt)}
                         </td>
                         <td className="w-full text-center font-changa text-xs font-light text-[#F0F0F0] text-opacity-75">
-                          {truncateNumber(data.amount, 4)} SOL
+                          {truncateNumber(data.amount, 4)} {data.tokenName}
                         </td>
                         <td className="hidden sm:block w-full text-center font-changa text-xs font-light text-[#F0F0F0] text-opacity-75">
                           {data.type ? "Deposit" : "Withdraw"}

@@ -14,11 +14,11 @@ export default function BetButton({
   onClickFunction?: (data: any) => void;
 }) {
   const betButtonRef = useRef<HTMLButtonElement>(null);
-  const { language, coinData, selectedCoin } = useGlobalContext();
+  const { language, coinData, selectedCoin, enableSounds } = useGlobalContext();
 
   useEffect(() => {
     const handleClick = () => {
-      soundAlert("/sounds/betbutton.wav");
+      soundAlert("/sounds/betbutton.wav", enableSounds);
     };
 
     const buttonElement = betButtonRef.current;

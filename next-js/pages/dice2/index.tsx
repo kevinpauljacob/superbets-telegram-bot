@@ -56,7 +56,8 @@ export default function Dice2() {
     language,
     selectedCoin,
     liveStats,
-    setLiveStats
+    setLiveStats,
+    enableSounds,
   } = useGlobalContext();
   const [betAmt, setBetAmt] = useState<number | undefined>();
   const [userInput, setUserInput] = useState<number | undefined>();
@@ -182,7 +183,7 @@ export default function Dice2() {
       const win = result === "Won";
       if (win) {
         successCustom(message);
-        soundAlert("/sounds/win.wav");
+        soundAlert("/sounds/win.wav", !enableSounds);
       } else errorCustom(message);
       const newBetResult = { result: strikeNumber, win };
 
@@ -192,10 +193,16 @@ export default function Dice2() {
           game: GameType.dice2,
           amount: betAmt,
           result: win ? "Won" : "Lost",
-          pnl: win ? (betAmt * multiplier) - betAmt : -betAmt,
-          totalPNL: liveStats.length > 0 ? liveStats[liveStats.length - 1].totalPNL + (win ? (betAmt * multiplier) - betAmt : -betAmt) : win ? (betAmt * multiplier) - betAmt : -betAmt
-        }
-      ])
+          pnl: win ? betAmt * multiplier - betAmt : -betAmt,
+          totalPNL:
+            liveStats.length > 0
+              ? liveStats[liveStats.length - 1].totalPNL +
+                (win ? betAmt * multiplier - betAmt : -betAmt)
+              : win
+                ? betAmt * multiplier - betAmt
+                : -betAmt,
+        },
+      ]);
 
       setBetResults((prevResults) => {
         const newResults = [...prevResults, newBetResult];
@@ -208,7 +215,7 @@ export default function Dice2() {
       setStrikeNumber(strikeNumber);
       setResult(win);
       setRefresh(true);
-      loopSound("/sounds/diceshake.wav", 0.3);
+      loopSound("/sounds/diceshake.wav", 0.3, enableSounds);
 
       // auto options
       if (betType === "auto") {
@@ -386,7 +393,7 @@ export default function Dice2() {
             {startAuto && (
               <div
                 onClick={() => {
-                  soundAlert("/sounds/betbutton.wav");
+                  soundAlert("/sounds/betbutton.wav", !enableSounds);
                   warningCustom("Auto bet stopped", "top-left");
                   setAutoBetCount(0);
                   setStartAuto(false);
@@ -458,7 +465,7 @@ export default function Dice2() {
                   {startAuto && (
                     <div
                       onClick={() => {
-                        soundAlert("/sounds/betbutton.wav");
+                        soundAlert("/sounds/betbutton.wav", !enableSounds);
                         warningCustom("Auto bet stopped", "top-left");
                         setAutoBetCount(0);
                         setStartAuto(false);

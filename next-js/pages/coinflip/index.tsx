@@ -65,6 +65,7 @@ export default function Flip() {
     language,
     liveStats,
     setLiveStats,
+    enableSounds,
   } = useGlobalContext();
 
   const [betAmt, setBetAmt] = useState<number | undefined>();
@@ -113,7 +114,7 @@ export default function Flip() {
               : errorCustom(response?.message);
 
             const win = response?.data?.result === "Won";
-            if (win) soundAlert("/sounds/win.wav");
+            if (win) soundAlert("/sounds/win.wav", !enableSounds);
             const newBetResult = { result: response?.data?.strikeNumber, win };
 
             setBetResults((prevResults) => {
@@ -135,10 +136,16 @@ export default function Flip() {
                 game: GameType.coin,
                 amount: betAmt,
                 result: win ? "Won" : "Lost",
-                pnl: win ? (betAmt * newBetResult.result) - betAmt : -betAmt,
-                totalPNL: liveStats.length > 0 ? liveStats[liveStats.length - 1].totalPNL + (win ? (betAmt * newBetResult.result) - betAmt : -betAmt) : win ? (betAmt * newBetResult.result) - betAmt : -betAmt,
-              }
-            ])
+                pnl: win ? betAmt * newBetResult.result - betAmt : -betAmt,
+                totalPNL:
+                  liveStats.length > 0
+                    ? liveStats[liveStats.length - 1].totalPNL +
+                      (win ? betAmt * newBetResult.result - betAmt : -betAmt)
+                    : win
+                      ? betAmt * newBetResult.result - betAmt
+                      : -betAmt,
+              },
+            ]);
 
             // auto options
             if (betSetting === "auto") {
@@ -319,7 +326,7 @@ export default function Flip() {
             {startAuto && (
               <div
                 onClick={() => {
-                  soundAlert("/sounds/betbutton.wav");
+                  soundAlert("/sounds/betbutton.wav", !enableSounds);
                   warningCustom("Auto bet stopped", "top-left");
                   setAutoBetCount(0);
                   setStartAuto(false);
@@ -440,7 +447,7 @@ export default function Flip() {
                   {startAuto && (
                     <div
                       onClick={() => {
-                        soundAlert("/sounds/betbutton.wav");
+                        soundAlert("/sounds/betbutton.wav", !enableSounds);
                         warningCustom("Auto bet stopped", "top-left");
                         setAutoBetCount(0);
                         setStartAuto(false);

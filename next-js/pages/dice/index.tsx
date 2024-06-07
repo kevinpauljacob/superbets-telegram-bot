@@ -61,7 +61,8 @@ export default function Dice() {
     maxBetAmt,
     language,
     liveStats,
-    setLiveStats
+    setLiveStats,
+    enableSounds,
   } = useGlobalContext();
 
   const [userInput, setUserInput] = useState<number | undefined>();
@@ -191,12 +192,18 @@ export default function Dice() {
             game: GameType.dice,
             amount: betAmt,
             result: isWin ? "Won" : "Lost",
-            pnl: isWin ? (betAmt * winningPays) - betAmt : -betAmt,
-            totalPNL: liveStats.length > 0 ? liveStats[liveStats.length - 1].totalPNL + (isWin ? (betAmt * winningPays) - betAmt : -betAmt) : (isWin ? (betAmt * winningPays) - betAmt : -betAmt)
-          }
-        ])
+            pnl: isWin ? betAmt * winningPays - betAmt : -betAmt,
+            totalPNL:
+              liveStats.length > 0
+                ? liveStats[liveStats.length - 1].totalPNL +
+                  (isWin ? betAmt * winningPays - betAmt : -betAmt)
+                : isWin
+                  ? betAmt * winningPays - betAmt
+                  : -betAmt,
+          },
+        ]);
 
-        if (isWin) soundAlert("/sounds/win.wav");
+        if (isWin) soundAlert("/sounds/win.wav", !enableSounds);
         const newBetResults = [
           ...(betResults.length <= 4 ? betResults : betResults.slice(-4)),
           { face: strikeNumber, win: isWin },
@@ -205,7 +212,7 @@ export default function Dice() {
         setShowPointer(true);
         setStrikeFace(strikeNumber);
         setRefresh(true);
-        loopSound("/sounds/diceshake.wav", 0.3);
+        loopSound("/sounds/diceshake.wav", 0.3, !enableSounds);
 
         // auto options
         if (betType === "auto") {
@@ -225,7 +232,7 @@ export default function Dice() {
           // update profit / loss
           setAutoBetProfit(
             autoBetProfit +
-            (isWin ? winningPays * (1 - houseEdge) - 1 : -1) * betAmt,
+              (isWin ? winningPays * (1 - houseEdge) - 1 : -1) * betAmt,
           );
           // update count
           if (typeof autoBetCount === "number") {
@@ -413,7 +420,7 @@ export default function Dice() {
             {startAuto && (
               <div
                 onClick={() => {
-                  soundAlert("/sounds/betbutton.wav");
+                  soundAlert("/sounds/betbutton.wav", !enableSounds);
                   warningCustom("Auto bet stopped", "top-left");
                   setAutoBetCount(0);
                   setStartAuto(false);
@@ -488,7 +495,7 @@ export default function Dice() {
                   {startAuto && (
                     <div
                       onClick={() => {
-                        soundAlert("/sounds/betbutton.wav");
+                        soundAlert("/sounds/betbutton.wav", !enableSounds);
                         warningCustom("Auto bet stopped", "top-left");
                         setAutoBetCount(0);
                         setStartAuto(false);
@@ -536,8 +543,8 @@ export default function Dice() {
                   {selectedFace.length === 0
                     ? translator("Choose Upto 5 Faces", language)
                     : `${selectedFace.length
-                      .toString()
-                      .padStart(2, "0")}/0${translator("5 Faces", language)}`}
+                        .toString()
+                        .padStart(2, "0")}/0${translator("5 Faces", language)}`}
                 </div>
               )}
             </div>
@@ -545,8 +552,9 @@ export default function Dice() {
               {betResults.map((result, index) => (
                 <div
                   key={index}
-                  className={`${result.win ? "text-fomo-green" : "text-fomo-red"
-                    }`}
+                  className={`${
+                    result.win ? "text-fomo-green" : "text-fomo-red"
+                  }`}
                 >
                   {result.face === 1 && <Dice1 className="w-7 h-7" />}
                   {result.face === 2 && <Dice2 className="w-7 h-7" />}
@@ -562,18 +570,20 @@ export default function Dice() {
           <div className="relative w-full my-16 md:my-20">
             {/* win pointer  */}
             <div
-              className={`${showPointer ? "opacity-100" : "opacity-0"
-                } transition-all duration-300 h-4 bg-transparent flex w-full`}
+              className={`${
+                showPointer ? "opacity-100" : "opacity-0"
+              } transition-all duration-300 h-4 bg-transparent flex w-full`}
             >
               <div
                 ref={topWinPointerRef}
                 className="absolute -top-[1rem] z-[10] transition-all ease-in-out duration-300"
               >
                 <WinPointer
-                  className={`relative ${selectedFace.includes(strikeFace)
+                  className={`relative ${
+                    selectedFace.includes(strikeFace)
                       ? "text-fomo-green"
                       : "text-fomo-red"
-                    }`}
+                  }`}
                 />
               </div>
             </div>
@@ -685,15 +695,17 @@ function DiceFace({
   handleClick: (number: number) => void;
   Icon: any;
 }) {
+  const { enableSounds } = useGlobalContext();
   return (
     <div
       onClick={() => {
         handleClick(diceNumber);
-        soundAlert("/sounds/betbutton.wav");
+        soundAlert("/sounds/betbutton.wav", !enableSounds);
       }}
     >
       <Icon
-        className={`${selectedFaces[diceNumber]
+        className={`${
+          selectedFaces[diceNumber]
             ? selectedFace.includes(diceNumber)
               ? strikeFace === diceNumber
                 ? "text-fomo-green" // Use winning dice face image if strikeFace is 1
