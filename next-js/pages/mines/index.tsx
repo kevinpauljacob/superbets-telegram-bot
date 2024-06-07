@@ -907,10 +907,11 @@ export default function Mines() {
                           alt="arrowDown"
                           width={14}
                           height={14}
+                          className={`${dropDown ? "transform transition-all rotate-180" : "transition-all"}`}
                         />
                       </div>
                       {dropDown && (
-                        <div className="absolute top-14 z-50 max-h-[300px] overflow-y-scroll modalscrollbar left-0 bg-[#202329] border border-[#2A2E38] rounded-[8px] w-full">
+                        <div className="absolute -top-[200px] lg:top-14 z-[150] max-h-[195px] lg:max-h-[335px] xl:max-h-[380px] overflow-y-scroll modalscrollbar left-0 bg-[#202329] border border-[#2A2E38] rounded-[8px] w-full">
                           {options.map((option) => (
                             <div
                               key={option.key}
@@ -1014,10 +1015,11 @@ export default function Mines() {
                               alt="arrowDown"
                               width={14}
                               height={14}
+                              className={`${dropDown ? "transform transition-all rotate-180" : "transition-all"}`}
                             />
                           </div>
                           {!startAuto && dropDown && (
-                            <div className="absolute top-14 z-50 max-h-[300px] overflow-y-scroll modalscrollbar left-0 bg-[#202329] border border-[#2A2E38] rounded-[8px] w-full">
+                            <div className="absolute -top-[200px] lg:top-14 z-[150] max-h-[195px] lg:max-h-[335px] xl:max-h-[380px] overflow-y-scroll modalscrollbar left-0 bg-[#202329] border border-[#2A2E38] rounded-[8px] w-full">
                               {options.map((option) => (
                                 <div
                                   key={option.key}

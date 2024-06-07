@@ -581,7 +581,7 @@ export default function BalanceModal() {
                 </div>
                 <label
                   htmlFor="termsCheckbox"
-                  className="text-[12px] text-[#94A3B8] font-chakra font-bold w-[397px] h-[47px]   text-justify"
+                  className="text-[10px] xs:text-[11px] sm2:text-[12px] text-[#94A3B8] font-chakra font-bold w-[397px] h-[47px]   text-justify"
                   onClick={() => setChecked(!checked)}
                 >
                   I agree with the Privacy Policy and with the Terms of Use, Gambling
