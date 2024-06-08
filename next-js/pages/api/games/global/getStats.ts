@@ -2,6 +2,7 @@ import connectDatabase from "../../../../utils/database";
 import { NextApiRequest, NextApiResponse } from "next";
 import { gameModelMap } from "@/models/games";
 import { GameType } from "@/utils/provably-fair";
+import Stats from "@/models/games/gameStats";
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === "GET") {
@@ -16,34 +17,18 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
       await connectDatabase();
 
-      const model = gameModelMap[game as keyof typeof gameModelMap];
+      const stats = await Stats.find({}).lean();
 
-      //count the unique wallets and aggregate amount field from Model
-      const stats = await model
-        .aggregate([
-          {
-            $group: {
-              _id: null,
-              volume: { $sum: "$amount" },
-              wallets: { $addToSet: "$wallet" },
-            },
-          },
-          {
-            $addFields: {
-              players: { $size: "$wallets" },
-            },
-          },
-          {
-            $project: {
-              wallets: 0,
-            },
-          },
-        ])
-        .then((res) => res[0]);
+      const gameStats = stats.find((item) => item?.game === game);
+
+      if (!gameStats)
+        return res
+          .status(400)
+          .json({ success: false, message: "Stat not found!" });
 
       return res.json({
         success: true,
-        stats,
+        stats: gameStats,
         message: `Data fetch successful !`,
       });
     } catch (e: any) {

@@ -98,7 +98,7 @@ export default function Dice() {
       setStrikeFace(0);
       setShowPointer(false);
       if (selectedFace.length >= 5 && !selectedFace.includes(newFace)) {
-        errorCustom("You can only select up to 5 faces");
+        errorCustom(translator("You can only select up to 5 faces", language));
         return;
       }
 
@@ -164,16 +164,16 @@ export default function Dice() {
     // );
     try {
       if (!wallet.connected || !wallet.publicKey) {
-        throw new Error("Wallet not connected");
+        throw new Error(translator("Wallet not connected", language));
       }
       if (!betAmt || betAmt === 0) {
-        throw new Error("Set Amount.");
+        throw new Error(translator("Set Amount.", language));
       }
       if (selectedCoin && selectedCoin.amount < betAmt) {
-        throw new Error("Insufficient balance for bet !");
+        throw new Error(translator("Insufficient balance for bet !", language));
       }
       if (selectedFace.length === 0) {
-        throw new Error("Choose at least 1 face.");
+        throw new Error(translator("Choose at least 1 face.", language));
       }
       setIsRolling(true);
       const res = await rollDice(
@@ -237,7 +237,7 @@ export default function Dice() {
           // update count
           if (typeof autoBetCount === "number") {
             setAutoBetCount(autoBetCount > 0 ? autoBetCount - 1 : 0);
-            autoBetCount === 1 && warningCustom("Auto bet stopped", "top-left");
+            autoBetCount === 1 && warningCustom(translator("Auto bet stopped", language), "top-left");
           } else
             setAutoBetCount(
               autoBetCount.length > 12
@@ -246,10 +246,10 @@ export default function Dice() {
             );
         }
       } else {
-        throw new Error(res?.message ?? "Could not make the Bet.");
+        throw new Error(translator(res?.message ?? "Could not make the Bet.", language));
       }
     } catch (e: any) {
-      errorCustom(e?.message ?? "Could not make the Bet.");
+      errorCustom(translator(e?.message ?? "Could not make the Bet.", language));
       setIsRolling(false);
       setAutoBetCount(0);
       setStartAuto(false);
@@ -355,7 +355,10 @@ export default function Dice() {
         autoBetProfit >= autoStopProfit
       ) {
         setTimeout(() => {
-          warningCustom("Profit limit reached.", "top-left");
+          warningCustom(
+            translator("Profit limit reached.", language),
+            "top-left",
+          );
         }, 500);
         setAutoBetCount(0);
         setStartAuto(false);
@@ -368,7 +371,10 @@ export default function Dice() {
         potentialLoss < -autoStopLoss
       ) {
         setTimeout(() => {
-          warningCustom("Loss limit reached.", "top-left");
+          warningCustom(
+            translator("Loss limit reached.", language),
+            "top-left",
+          );
         }, 500);
         setAutoBetCount(0);
         setStartAuto(false);
@@ -385,7 +391,7 @@ export default function Dice() {
   const onSubmit = async (data: any) => {
     if (betType === "auto") {
       if (betAmt === 0) {
-        errorCustom("Set Amount.");
+        errorCustom(translator("Set Amount.", language));
         return;
       }
       if (typeof autoBetCount === "number" && autoBetCount <= 0) {
@@ -421,7 +427,7 @@ export default function Dice() {
               <div
                 onClick={() => {
                   soundAlert("/sounds/betbutton.wav", !enableSounds);
-                  warningCustom("Auto bet stopped", "top-left");
+                  warningCustom(translator("Auto bet stopped", language), "top-left");
                   setAutoBetCount(0);
                   setStartAuto(false);
                 }}
@@ -496,7 +502,7 @@ export default function Dice() {
                     <div
                       onClick={() => {
                         soundAlert("/sounds/betbutton.wav", !enableSounds);
-                        warningCustom("Auto bet stopped", "top-left");
+                        warningCustom(translator("Auto bet stopped", language), "top-left");
                         setAutoBetCount(0);
                         setStartAuto(false);
                       }}

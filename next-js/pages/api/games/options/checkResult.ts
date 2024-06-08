@@ -12,6 +12,7 @@ import { GameType } from "@/utils/provably-fair";
 import { optionsEdge, wsEndpoint } from "@/context/gameTransactions";
 import { Decimal } from "decimal.js";
 import { SPL_TOKENS } from "@/context/config";
+import updateGameStats from "../global/updateGameStats";
 Decimal.set({ precision: 9 });
 
 const secret = process.env.NEXTAUTH_SECRET;
@@ -128,6 +129,13 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         },
         { new: true },
       );
+
+      if (!record)
+        return res
+          .status(400)
+          .json({ success: false, message: "Game already concluded!" });
+
+      await updateGameStats(GameType.options, wallet, amount, tokenMint);
 
       const pointsGained =
         0 * user.numOfGamesPlayed + 1.4 * amount * userData.multiplier;

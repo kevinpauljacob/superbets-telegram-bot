@@ -484,7 +484,7 @@ export default function BalanceModal() {
                       key={index}
                       className={`hidden sm:block w-full text-center font-changa text-[10px] font-light text-[#F0F0F0] text-opacity-75`}
                     >
-                      {header}
+                      {translator(header, language)}
                     </th>
                   ))}
                   {mobileHistoryHeaders.map((header, index) => (
@@ -492,7 +492,7 @@ export default function BalanceModal() {
                       key={index}
                       className={`sm:hidden w-full text-center font-changa text-[10px] font-light text-[#F0F0F0] text-opacity-75`}
                     >
-                      {header}
+                      {translator(header, language)}
                     </th>
                   ))}
                 </tr>
@@ -516,7 +516,9 @@ export default function BalanceModal() {
                           {truncateNumber(data.amount, 4)} {data.tokenName}
                         </td>
                         <td className="hidden sm:block w-full text-center font-changa text-xs font-light text-[#F0F0F0] text-opacity-75">
-                          {data.type ? "Deposit" : "Withdraw"}
+                          {data.type
+                            ? translator("Deposit", language)
+                            : translator("Withdraw", language)}
                         </td>
                         <td
                           className={`w-full text-center font-changa text-xs font-light ${
@@ -526,14 +528,14 @@ export default function BalanceModal() {
                           }`}
                         >
                           {data.status === "completed"
-                            ? "Completed"
-                            : "Pending"}
+                            ? translator("Completed", language)
+                            : translator("Pending", language)}
                         </td>
                       </tr>
                     ))
                   ) : (
                     <span className="flex items-center justify-center w-full text-center font-changa text-[#F0F0F080]">
-                      No data.
+                      {translator("No Data.", language)}
                     </span>
                   )}
                 </div>
