@@ -2,21 +2,51 @@ import { translator } from "@/context/transactions";
 import { useGlobalContext } from "./GlobalContext";
 import { useState, useEffect } from "react";
 import dynamic from "next/dynamic";
+import { useRouter } from "next/router";
 
 const CountdownTimer = dynamic(() => import("./CountdownTimer"), {
   ssr: false,
 });
 
+export interface Coins {
+  SOL: number;
+  EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v: number;
+  Cx9oLynYgC3RrgXzin7U417hNY9D6YB1eMGw4ZMbWJgw: number;
+}
+
 export default function InfoBar() {
   const { language } = useGlobalContext();
+  const router = useRouter();
 
   const [stats, setStats] = useState({
-    totalVolume: 0,
+    totalVolume: {
+      SOL: 0,
+      EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v: 0,
+      Cx9oLynYgC3RrgXzin7U417hNY9D6YB1eMGw4ZMbWJgw: 0,
+    },
     totalPlayers: 0,
   });
 
   const [currentSlide, setCurrentSlide] = useState(0);
   const [animationClass, setAnimationClass] = useState("slide-in");
+  const [volume, setVolume] = useState<number>(0);
+
+  const getVolume = async (totalVolume: Coins) => {
+    const mintIds = Object.keys(totalVolume).join(",");
+    const data = await (
+      await fetch(`https://price.jup.ag/v6/price?ids=${mintIds}&vsToken=SOL`)
+    ).json();
+
+    let volume = 0;
+
+    for (const [mintId, amount] of Object.entries(totalVolume)) {
+      const price = data?.data[mintId]?.price ?? 0;
+      volume += amount * price;
+    }
+
+    setVolume(volume);
+  };
+
   const slides = [
     {
       label: translator("Unique Players", language),
@@ -24,7 +54,7 @@ export default function InfoBar() {
     },
     {
       label: translator("Total Volume", language),
-      value: `${(stats.totalVolume ?? 0).toLocaleString("en-US", {
+      value: `${volume.toLocaleString("en-US", {
         minimumFractionDigits: 0,
         maximumFractionDigits: 2,
       })} SOL`,
@@ -43,9 +73,12 @@ export default function InfoBar() {
     fetch("/api/games/global/getAggStats")
       .then((res) => res.json())
       .then((data) => {
-        if (data.success) setStats(data.stats);
+        if (data.success && data?.stats?.totalVolumes) {
+          setStats(data?.stats?.totalVolumes);
+          getVolume(data?.stats?.totalVolumes);
+        }
       });
-  }, []);
+  }, [router.pathname]);
 
   useEffect(() => {
     const interval = setInterval(() => {

@@ -20,6 +20,7 @@ import {
 } from "@/context/transactions";
 import { Decimal } from "decimal.js";
 import { SPL_TOKENS } from "@/context/config";
+import updateGameStats from "../global/updateGameStats";
 Decimal.set({ precision: 9 });
 
 const secret = process.env.NEXTAUTH_SECRET;
@@ -82,7 +83,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       const strikeMultiplier = 2;
       const maxPayout = Decimal.mul(amount, strikeMultiplier);
 
-      if (!(maxPayout.toNumber() <= maxPayouts[tokenMint as GameTokens].coinflip))
+      if (
+        !(maxPayout.toNumber() <= maxPayouts[tokenMint as GameTokens].coinflip)
+      )
         return res
           .status(400)
           .json({ success: false, message: "Max payout exceeded" });
@@ -206,6 +209,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         gameSeed: activeGameSeed._id,
       });
       await coin.save();
+
+      await updateGameStats(GameType.coin, wallet, amount, tokenMint);
 
       const pointsGained =
         0 * user.numOfGamesPlayed + 1.4 * amount * userData.multiplier;

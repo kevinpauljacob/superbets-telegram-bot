@@ -272,7 +272,9 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
   const [liveBets, setLiveBets] = useState<any[]>([]);
   const [liveStats, setLiveStats] = useState<GameStat[]>([]);
   const [showLiveStats, setShowLiveStats] = useState<boolean>(false);
-  const [liveCurrentStat, setLiveCurrentStat] = useState<GameType | "All">("All");
+  const [liveCurrentStat, setLiveCurrentStat] = useState<GameType | "All">(
+    "All",
+  );
   const [showFullScreen, setShowFullScreen] = useState<boolean>(false);
   const [enableSounds, setEnableSounds] = useState<boolean>(true);
 
@@ -321,7 +323,11 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
         const userTier = Object.entries(pointTiers).reduce((prev, next) => {
           return points >= next[1]?.limit ? next : prev;
         })[0];
-        setHouseEdge(launchPromoEdge ? 0 : houseEdgeTiers[parseInt(userTier)]);
+        setHouseEdge(
+          launchPromoEdge || selectedCoin.tokenName === "FOMO"
+            ? 0
+            : houseEdgeTiers[parseInt(userTier)],
+        );
       } catch (e) {
         // errorCustom("Unable to fetch balance.");
         console.error(e);
@@ -374,7 +380,7 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
               balance?.data.deposit.length > 0
             ) {
               setCoinData(balance.data.deposit);
-              let prevCoin = selectedCoin
+              let prevCoin = selectedCoin;
               let coin = balance.data.deposit.find(
                 (token: CoinBalance) => token.tokenName === prevCoin.tokenName,
               );
@@ -508,7 +514,7 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
         enableSounds,
         setEnableSounds,
         liveCurrentStat,
-        setLiveCurrentStat
+        setLiveCurrentStat,
       }}
     >
       {children}
@@ -932,11 +938,11 @@ export const translationsMap = {
     ch: "您可以在此游戏中下注的最高金额为",
   },
   "The more you stake, the less fees you pay and the bigger your points multiplier":
-  {
-    ru: "Чем больше вы ставите, тем меньше вы платите комиссий и тем выше ваш множитель очков",
-    ko: "더 많이 걸수록 수수료가 적게 들고 포인트 배수가 커집니다",
-    ch: "投注金额越大，您支付的费用越少，积分乘数越大",
-  },
+    {
+      ru: "Чем больше вы ставите, тем меньше вы платите комиссий и тем выше ваш множитель очков",
+      ko: "더 많이 걸수록 수수료가 적게 들고 포인트 배수가 커집니다",
+      ch: "投注金额越大，您支付的费用越少，积分乘数越大",
+    },
   WALLET: {
     ru: "КОШЕЛЕК",
     ko: "지갑",
@@ -1038,11 +1044,11 @@ export const translationsMap = {
     ch: "待定",
   },
   "FOMO wtf casino games are currently in beta and will be undergoing audit shortly. FOMO wtf EXIT games has gone through audit performed by OtterSec in December 2023.":
-  {
-    ru: "Игры казино FOMO wtf находятся в бета-тестировании и вскоре будут проходить аудит. Игры FOMO wtf EXIT прошли аудит, проведенный OtterSec в декабре 2023 года.",
-    ko: "FOMO wtf 카지노 게임은 현재 베타 버전이며 곧 감사를 받을 예정입니다. FOMO wtf EXIT 게임은 2023년 12월 OtterSec에 의해 감사를 받았습니다.",
-    ch: "FOMO wtf赌场游戏目前处于测试阶段，将很快进行审计。 FOMO wtf EXIT游戏已于2023年12月由OtterSec进行了审计。",
-  },
+    {
+      ru: "Игры казино FOMO wtf находятся в бета-тестировании и вскоре будут проходить аудит. Игры FOMO wtf EXIT прошли аудит, проведенный OtterSec в декабре 2023 года.",
+      ko: "FOMO wtf 카지노 게임은 현재 베타 버전이며 곧 감사를 받을 예정입니다. FOMO wtf EXIT 게임은 2023년 12월 OtterSec에 의해 감사를 받았습니다.",
+      ch: "FOMO wtf赌场游戏目前处于测试阶段，将很快进行审计。 FOMO wtf EXIT游戏已于2023年12月由OtterSec进行了审计。",
+    },
   Services: {
     ru: "Услуги",
     ko: "서비스",

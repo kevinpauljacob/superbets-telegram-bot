@@ -682,8 +682,9 @@ export default function Mines() {
   };
 
   useEffect(() => {
-    if (wallet.connected && wallet?.publicKey) handlePendingGame();
-  }, [wallet.connected, wallet.publicKey]);
+    if (wallet.connected && wallet?.publicKey && status === "authenticated")
+      handlePendingGame();
+  }, [wallet.connected, wallet.publicKey, status]);
 
   const disableInput = useMemo(() => {
     return betType === "auto" && startAuto
