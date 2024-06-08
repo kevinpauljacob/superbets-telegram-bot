@@ -22,9 +22,7 @@ export default function LiveStats() {
   });
   const [hoverValue, setHoverValue] = useState<number | null>(null);
 
-  const games = ["All", ...liveStats.map((game) => game.game)].filter(
-    (value, index, self) => self.indexOf(value) === index,
-  );
+  const games = ["All", ...Object.values(GameType)]
 
   useEffect(() => {
     if (liveCurrentStat === "All") {
@@ -154,7 +152,7 @@ export default function LiveStats() {
           </div>
 
           {isDropdownOpen && (
-            <div className="absolute w-[89%] mt-12 p-2 max-h-40 bg-[#202329] rounded-md overflow-y-auto nobar">
+            <div className="absolute w-[89%] mt-12 p-2 max-h-40 bg-[#202329] rounded-md overflow-y-auto modalscrollbar border border-red-200">
               {games.map((game, index) => (
                 <div
                   key={index}

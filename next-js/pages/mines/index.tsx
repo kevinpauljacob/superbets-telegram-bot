@@ -328,25 +328,6 @@ export default function Mines() {
       }
       if (lose) soundAlert("/sounds/bomb.wav", !enableSounds);
 
-      if (result !== "Pending") {
-        setLiveStats([
-          ...liveStats,
-          {
-            game: GameType.mines,
-            amount: betAmt!,
-            result: win ? "Won" : "Lost",
-            pnl: win ? betAmt! * strikeMultiplier - betAmt! : -betAmt!,
-            totalPNL:
-              liveStats.length > 0
-                ? liveStats[liveStats.length - 1].totalPNL +
-                  (win ? betAmt! * strikeMultiplier - betAmt! : -betAmt!)
-                : win
-                  ? betAmt! * strikeMultiplier - betAmt!
-                  : -betAmt!,
-          },
-        ]);
-      }
-
       if (success) {
         setRefresh(true);
         setIsRolling(false);
