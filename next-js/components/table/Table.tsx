@@ -237,7 +237,7 @@ export const TableButtons: React.FC<TableButtonProps> = ({ all, setAll }) => {
               setAll(false);
               setHighRollers(false);
             } else {
-              errorCustom("Wallet not connected");
+              errorCustom(translator("Wallet not connected", language));
             }
           }}
           label={translator("My Bets", language)}

@@ -59,7 +59,8 @@ export default function StakeFomo() {
         response = await unstakeFOMO(wallet, stakeAmount, fomoToken);
       }
       // console.log(response);
-      if (response && response.success) await getFOMOBalance(wallet, setFomoBalance);
+      if (response && response.success)
+        await getFOMOBalance(wallet, setFomoBalance);
 
       getUserDetails();
       getGlobalInfo();
@@ -67,7 +68,9 @@ export default function StakeFomo() {
     } catch (e) {
       setLoading(false);
       console.error(e);
-      errorCustom("Something went wrong, please try again");
+      errorCustom(
+        translator("Something went wrong, please try again", language),
+      );
     }
   };
 
@@ -222,7 +225,7 @@ export default function StakeFomo() {
             handleSetMaxStake();
           }}
         >
-          Max
+          {translator("Max", language)}
         </button>
       </div>
 
