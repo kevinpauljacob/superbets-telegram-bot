@@ -317,7 +317,7 @@ export default function Options() {
       }
       return;
     } else {
-      if (!wallet.publicKey) errorCustom("Wallet not connected");
+      if (!wallet.publicKey) errorCustom(translator("Wallet not connected", language));
       else {
         if (
           betType &&
