@@ -26,6 +26,14 @@ export default function LiveStats() {
 
   useEffect(() => {
     if (liveCurrentStat === "All") {
+      console.log(liveStats)
+      if (liveStats.length === 0) return setData({
+        wagered: 0,
+        pnl: 0,
+        wins: 0,
+        losses: 0,
+      });
+
       const wagered = liveStats.reduce((acc, curr) => acc + curr.amount, 0);
       const pnl = liveStats.reduce((acc, curr) => acc + curr.pnl, 0);
       let wins = 0;
@@ -152,7 +160,7 @@ export default function LiveStats() {
           </div>
 
           {isDropdownOpen && (
-            <div className="absolute w-[89%] mt-12 p-2 max-h-40 bg-[#202329] rounded-md overflow-y-auto modalscrollbar border border-red-200">
+            <div className="absolute w-[89%] mt-12 p-2 max-h-40 bg-[#202329] rounded-md overflow-y-auto modalscrollbar">
               {games.map((game, index) => (
                 <div
                   key={index}
