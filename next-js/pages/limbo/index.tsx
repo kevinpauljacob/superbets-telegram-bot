@@ -140,33 +140,6 @@ export default function Limbo() {
           });
 
           if (betAmt) {
-            console.log({
-              game: GameType.limbo,
-              amount: betAmt,
-              result: newBetResult.win ? "Won" : "Lost",
-              pnl: newBetResult.win
-                ? (betAmt * inputMultiplier) - betAmt
-                : -betAmt,
-              totalPNL:
-                liveStats.length > 0 && [liveStats.length - 1]
-                  ? liveStats[liveStats.length - 1].totalPNL +
-                  (win ? (betAmt * inputMultiplier) - betAmt : -betAmt)
-                  : win
-                    ? (betAmt * inputMultiplier) - betAmt
-                    : -betAmt,
-            })
-
-            console.log("Amount: ", betAmt)
-            console.log("Result: ", newBetResult.win ? "Won" : "Lost")
-            console.log("PnL: ", newBetResult.win ? (betAmt * inputMultiplier) - betAmt : -betAmt)
-            console.log("Total PnL: ", liveStats.length > 0 && [liveStats.length - 1]
-              ? liveStats[liveStats.length - 1].totalPNL +
-              (win ? (betAmt * inputMultiplier) - betAmt : -betAmt)
-              : win
-                ? (betAmt * inputMultiplier) - betAmt
-                : -betAmt)
-            console.log("Multiplier: ", inputMultiplier)
-
             setLiveStats([
               ...liveStats,
               {
