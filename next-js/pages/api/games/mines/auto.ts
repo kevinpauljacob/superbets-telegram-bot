@@ -23,6 +23,7 @@ import {
   pointTiers,
 } from "@/context/transactions";
 import { SPL_TOKENS } from "@/context/config";
+import updateGameStats from "../global/updateGameStats";
 
 const secret = process.env.NEXTAUTH_SECRET;
 const encryptionKey = Buffer.from(process.env.ENCRYPTION_KEY!, "hex");
@@ -182,7 +183,10 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
       let strikeMultiplier = 0,
         amountWon = 0,
-        amountLost = amount;
+        amountLost = amount,
+        feeGenerated = 0;
+
+      const addGame = !userUpdate.gamesPlayed.includes(GameType.mines);
 
       if (result === "Won") {
         strikeMultiplier = 1;
@@ -197,6 +201,10 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           .mul(Decimal.sub(1, houseEdge))
           .toNumber();
         amountLost = 0;
+
+        feeGenerated = Decimal.mul(amount, strikeMultiplier)
+          .sub(amountWon)
+          .toNumber();
 
         result = amountWon > amount ? "Won" : "Lost";
 
@@ -214,6 +222,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
             $inc: {
               "deposit.$.amount": amountWon,
             },
+            ...(addGame ? { $addToSet: { gamesPlayed: GameType.mines } } : {}),
           },
         );
       }
@@ -244,6 +253,14 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         return res
           .status(400)
           .json({ success: false, message: "Pending game found!" });
+
+      await updateGameStats(
+        GameType.mines,
+        tokenMint,
+        amount,
+        addGame,
+        feeGenerated,
+      );
 
       const pointsGained =
         0 * userUpdate.numOfGamesPlayed + 1.4 * amount * userData.multiplier;

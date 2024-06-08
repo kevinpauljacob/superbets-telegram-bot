@@ -15,7 +15,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         {
           $group: {
             _id: null,
-            players: { $addToSet: "$wallet" },
+            wallets: { $addToSet: "$wallet" },
           },
         },
         {
@@ -40,7 +40,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         stats: {
           totalVolumes,
           totalPlayers,
-          gameStats,
         },
         message: `Data fetch successful!`,
       });

@@ -6,8 +6,13 @@ import { gameModelMap } from "@/models/games";
 import GameUser from "@/models/games/gameUser";
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
-  if (req.method === "GET") {
+  if (req.method === "POST") {
     try {
+      return res.status(400).json({
+        success: false,
+        message: "This endpoint is disabled.",
+      });
+
       await connectDatabase();
 
       for (const [_, value] of Object.entries(GameType)) {
@@ -37,6 +42,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
             },
           ])
           .then((res) => res[0]);
+
+        if (!walletStats?.numOfWallets) continue;
 
         await GameUser.updateMany(
           {

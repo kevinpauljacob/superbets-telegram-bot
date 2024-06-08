@@ -18,8 +18,9 @@ export default function InfoBar() {
   const { language } = useGlobalContext();
   const router = useRouter();
 
+  //TODO: Don't hardcode the mint addresses here
   const [stats, setStats] = useState({
-    totalVolume: {
+    totalVolumes: {
       SOL: 0,
       EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v: 0,
       Cx9oLynYgC3RrgXzin7U417hNY9D6YB1eMGw4ZMbWJgw: 0,
@@ -73,9 +74,9 @@ export default function InfoBar() {
     fetch("/api/games/global/getAggStats")
       .then((res) => res.json())
       .then((data) => {
-        if (data.success && data?.stats?.totalVolumes) {
-          setStats(data?.stats?.totalVolumes);
-          getVolume(data?.stats?.totalVolumes);
+        if (data.success) {
+          setStats(data.stats);
+          getVolume(data.stats.totalVolumes);
         }
       });
   }, [router.pathname]);
