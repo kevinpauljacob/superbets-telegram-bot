@@ -105,7 +105,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         {
           $inc: {
             "deposit.$.amount": amountWon,
-            numOfGamesPlayed: 1,
           },
           isOptionOngoing: false,
         },

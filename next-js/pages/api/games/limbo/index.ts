@@ -161,6 +161,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         amountLost = Math.max(new Decimal(amount).sub(amountWon).toNumber(), 0);
       }
 
+      const addGame = !user.gamesPlayed.includes(GameType.limbo);
+
       const userUpdate = await User.findOneAndUpdate(
         {
           wallet,
@@ -176,6 +178,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
             "deposit.$.amount": amountWon.sub(amount),
             numOfGamesPlayed: 1,
           },
+          ...(addGame ? { $addToSet: { gamesPlayed: GameType.limbo } } : {}),
         },
         {
           new: true,
@@ -202,7 +205,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       });
       await limbo.save();
 
-      await updateGameStats(GameType.limbo, wallet, amount, tokenMint);
+      await updateGameStats(GameType.limbo, tokenMint, amount, addGame);
 
       const pointsGained =
         0 * user.numOfGamesPlayed + 1.4 * amount * userData.multiplier;

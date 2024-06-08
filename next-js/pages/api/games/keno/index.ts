@@ -189,6 +189,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         0,
       );
 
+      const addGame = !user.gamesPlayed.includes(GameType.keno);
+
       const userUpdate = await User.findOneAndUpdate(
         {
           wallet,
@@ -204,6 +206,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
             "deposit.$.amount": amountWon.sub(amount),
             numOfGamesPlayed: 1,
           },
+          ...(addGame ? { $addToSet: { gamesPlayed: GameType.keno } } : {}),
         },
         {
           new: true,
@@ -232,7 +235,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       });
       await keno.save();
 
-      await updateGameStats(GameType.keno, wallet, amount, tokenMint);
+      await updateGameStats(GameType.keno, tokenMint, amount, addGame);
 
       const pointsGained =
         0 * user.numOfGamesPlayed + 1.4 * amount * userData.multiplier;

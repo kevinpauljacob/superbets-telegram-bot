@@ -176,6 +176,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         amountLost = 0;
       }
 
+      const addGame = !user.gamesPlayed.includes(GameType.dice);
+
       const userUpdate = await User.findOneAndUpdate(
         {
           wallet,
@@ -191,6 +193,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
             "deposit.$.amount": amountWon.minus(amount).toNumber(),
             numOfGamesPlayed: 1,
           },
+          ...(addGame ? { $addToSet: { gamesPlayed: GameType.dice } } : {}),
         },
         {
           new: true,
@@ -217,7 +220,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       });
       await dice.save();
 
-      await updateGameStats(GameType.dice, wallet, amount, tokenMint);
+      await updateGameStats(GameType.dice, tokenMint, amount, addGame);
 
       const pointsGained =
         0 * user.numOfGamesPlayed + 1.4 * amount * userData.multiplier;

@@ -1,23 +1,42 @@
 import GameStats from "@/models/games/gameStats";
+import { GameType } from "@/utils/provably-fair";
 
 async function updateGameStats(
-  game: string,
-  wallet: string,
+  game: GameType,
+  tokenMint: string,
   amount: number,
-  token: string,
+  incrementWallets: boolean,
 ) {
-  try {
-    const updateQuery: any = {
-      $inc: {},
-      $addToSet: { wallets: wallet },
-    };
-    updateQuery.$inc[`volumes.${token}`] = amount;
+  const gameStat = await GameStats.findOne({ game });
 
-    await GameStats.updateOne({ game }, updateQuery, { upsert: true });
-
-    console.log(`Successfully updated ${token} volume for game ${game}`);
-  } catch (error) {
-    console.error("Error updating game stats:", error);
+  const numOfWallets = incrementWallets ? 1 : 0;
+  if (!gameStat) {
+    await GameStats.create({
+      game,
+      volume: { [tokenMint]: amount },
+      numOfWallets,
+    });
+  } else {
+    if (!(tokenMint in gameStat.volume))
+      await GameStats.updateOne(
+        { game },
+        {
+          $set: {
+            [`volume.${tokenMint}`]: amount,
+            numOfWallets,
+          },
+        },
+      );
+    else
+      await GameStats.updateOne(
+        { game },
+        {
+          $inc: {
+            [`volume.${tokenMint}`]: amount,
+            numOfWallets,
+          },
+        },
+      );
   }
 }
 
