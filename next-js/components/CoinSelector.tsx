@@ -18,13 +18,30 @@ export default function CoinSelector() {
   } = useGlobalContext();
   const [showSelectCoinModal, setShowSelectCoinModal] = useState(false);
   const [fiat, setFiat] = useState(false);
+
+  function formatAmount(amount: number) {
+    const integerPartLength = Math.floor(amount).toString().length;
+    let minimumFractionDigits = 0;
+    let maximumFractionDigits = 0;
+
+    if (integerPartLength < 5) {
+      minimumFractionDigits = 5 - integerPartLength;
+      maximumFractionDigits = 5 - integerPartLength;
+    }
+
+    return amount.toLocaleString("en-US", {
+      minimumFractionDigits: minimumFractionDigits,
+      maximumFractionDigits: maximumFractionDigits,
+    });
+  }
+
   return (
     <div className="relative flex items-center gap-2">
       <div
         className={`flex flex-col min-w-[8rem] h-10 ${startAuto ? "opacity-50" : ""}`}
       >
         <div
-          className="flex flex-row justify-left items-center px-4 py-[2px] h-10 gap-2 border-2 border-white border-opacity-5 rounded-[5px] cursor-pointer"
+          className="flex flex-row justify-left items-center px-4 py-[2px] h-10 gap-2 border-2 border-white border-opacity-5 transition-all hover:bg-[#26282C]/50 hover:transition-all rounded-[5px] cursor-pointer"
           onClick={() => {
             !startAuto && setShowSelectCoinModal(!showSelectCoinModal);
           }}
@@ -32,11 +49,8 @@ export default function CoinSelector() {
           {selectedCoin.icon && (
             <selectedCoin.icon className="w-6 h-6 -mt-[1px]" />
           )}
-          <span className="font-chakra font-medium text-base md:text-2xl text-[#94A3B8]">
-            {(selectedCoin?.amount ?? 0).toLocaleString("en-US", {
-              minimumFractionDigits: 4,
-              maximumFractionDigits: 4,
-            })}
+          <span className="font-chakra font-medium text-base text-[#94A3B8]">
+            {formatAmount(selectedCoin.amount ?? 0)}
           </span>
           <div className="grow" />
           <Image
