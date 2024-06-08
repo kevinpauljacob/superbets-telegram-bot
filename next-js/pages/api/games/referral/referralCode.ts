@@ -10,7 +10,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       if (!wallet)
         return res
           .status(400)
-          .json({ success: false, message: "Wallet is required !" });
+          .json({ success: false, message: "Wallet is required!" });
 
       await connectDatabase();
 
@@ -19,7 +19,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       return res.json({
         success: true,
         data: referral,
-        message: `Data fetch successful !`,
+        message: `Data fetch successful!`,
       });
     } else if (req.method === "POST") {
       const { wallet, referralCode } = req.body;
@@ -57,12 +57,12 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       return res.json({
         success: true,
         data: referral,
-        message: `Referral code set successfully !`,
+        message: `Referral code set successfully!`,
       });
     } else
       return res
         .status(405)
-        .json({ success: false, message: "Method not allowed" });
+        .json({ success: false, message: "Method not allowed!" });
   } catch (e: any) {
     console.log(e);
     return res.status(500).json({ success: false, message: e.message });
