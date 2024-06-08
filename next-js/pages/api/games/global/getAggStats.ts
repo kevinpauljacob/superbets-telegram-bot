@@ -1,42 +1,46 @@
 import connectDatabase from "../../../../utils/database";
 import { NextApiRequest, NextApiResponse } from "next";
-import Stats from "@/models/games/gameStats";
+import { GameStats, User } from "@/models/games";
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === "GET") {
     try {
-      // await fetch("/api/games/global/backfill-stats");
       await connectDatabase();
 
-      const stats = await Stats.find({}).lean();
+      const gameStats = await GameStats.find().lean();
 
       // Calculate the total volume and total unique players
-      const totalVolumes = {
-        SOL: 0,
-        EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v: 0,
-        Cx9oLynYgC3RrgXzin7U417hNY9D6YB1eMGw4ZMbWJgw: 0,
-      };
-      const allUsers = new Set<string>();
+      const totalVolumes: Record<string, number> = {};
+      const totalPlayers = await User.aggregate([
+        {
+          $group: {
+            _id: null,
+            players: { $addToSet: "$wallet" },
+          },
+        },
+        {
+          $addFields: {
+            totalPlayers: { $size: "$wallets" },
+          },
+        },
+      ]).then((res) => res[0].totalPlayers);
 
-      stats.forEach((game) => {
-        if (game.volume) {
-          totalVolumes.SOL += game.volume.SOL;
-          totalVolumes.EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v +=
-            game.volume.EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v;
-          totalVolumes.Cx9oLynYgC3RrgXzin7U417hNY9D6YB1eMGw4ZMbWJgw +=
-            game.volume.Cx9oLynYgC3RrgXzin7U417hNY9D6YB1eMGw4ZMbWJgw;
-        }
-        game.wallets.forEach((wallet: string) => allUsers.add(wallet));
+      gameStats.forEach((stat) => {
+        Object.keys(stat.volume).forEach((key) => {
+          if (totalVolumes[key]) {
+            totalVolumes[key] += stat.volume[key];
+          } else {
+            totalVolumes[key] = stat.volume[key];
+          }
+        });
       });
-
-      const totalPlayers = allUsers.size;
 
       return res.json({
         success: true,
         stats: {
           totalVolumes,
           totalPlayers,
-          games: stats,
+          gameStats,
         },
         message: `Data fetch successful!`,
       });

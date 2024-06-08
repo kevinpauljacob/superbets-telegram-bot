@@ -10,6 +10,7 @@ async function updateGameStats(
   const gameStat = await GameStats.findOne({ game });
 
   const numOfWallets = incrementWallets ? 1 : 0;
+
   if (!gameStat) {
     await GameStats.create({
       game,

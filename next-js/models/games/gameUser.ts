@@ -33,9 +33,7 @@ const gameUserSchema = new Schema(
       default: 0,
       required: true,
     },
-    gamesPlayed: {
-      type: [String],
-    },
+    gamesPlayed: [String],
   },
   { timestamps: true },
 );
