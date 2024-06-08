@@ -373,10 +373,8 @@ export default function Mines() {
 
     setProcessing(true);
 
-    const localPendingRequests = [...pendingRequests];
-
-    for (let i = 0; i < localPendingRequests.length; i++) {
-      const currentRequest = localPendingRequests[i];
+    for (let i = 0; i < pendingRequests.length; i++) {
+      const currentRequest = pendingRequests[i];
 
       // console.log(`Processing request: ${currentRequest}`);
       const alreadyPicked = userBets[currentRequest - 1]?.pick;
@@ -402,7 +400,7 @@ export default function Mines() {
       processPendingRequests();
     }
     // console.log(`Updated pending requests: ${pendingRequests}`);
-  }, [pendingRequests]);
+  }, [pendingRequests, processing]);
 
   const handleAutoBet = async () => {
     try {

@@ -139,7 +139,7 @@ export default function SubHeader() {
 
         <div
           className={`${
-            router.pathname === "/" ? "hidden" : "hidden md:flex"
+            router.pathname === "/" ? "hidden md:flex" : "hidden md:flex"
           } h-10 border border-white border-opacity-5 rounded-[5px] mx-4`}
         />
 
@@ -158,7 +158,7 @@ export default function SubHeader() {
 
         <div
           className={`${
-            router.pathname === "/" ? "hidden" : "hidden md:flex"
+            router.pathname === "/" ? "hidden md:flex" : "hidden md:flex"
           } border-2 border-[#26282C] rounded-[5px] p-[0.563rem] cursor-pointer transition-all hover:bg-[#26282C]/50 hover:transition-all ${showLiveStats ? "bg-[#26282C] border-[#26282C] hover:bg-[#26282C]" : ""}`}
           onClick={() => setShowLiveStats(!showLiveStats)}
         >
@@ -185,7 +185,7 @@ export default function SubHeader() {
 
         <div
           className={`${
-            router.pathname === "/" ? "hidden" : "hidden md:flex"
+            router.pathname === "/" ? "hidden md:flex" : "hidden md:flex"
           } border-2 border-[#26282C] rounded-[5px] p-[0.563rem] cursor-pointer ml-3 transition-all hover:bg-[#26282C]/50 hover:transition-all ${enableSounds ? "bg-[#26282C] border-[#26282C] hover:bg-[#26282C]" : ""}`}
           onClick={() => setEnableSounds(!enableSounds)}
         >
@@ -237,7 +237,7 @@ export default function SubHeader() {
 
         <div
           className={`${
-            router.pathname === "/" ? "hidden" : "hidden md:flex"
+            router.pathname === "/" ? "hidden md:flex" : "hidden md:flex"
           } h-10 border border-white border-opacity-5 rounded-[5px] mx-4`}
         />
 
