@@ -5,7 +5,10 @@ const GameStatsSchema: Schema = new Schema({
   volume: {
     type: Map,
     of: Number,
-    required: true,
+  },
+  feeGenerated: {
+    type: Map,
+    of: Number,
   },
   numOfWallets: {
     type: Number,

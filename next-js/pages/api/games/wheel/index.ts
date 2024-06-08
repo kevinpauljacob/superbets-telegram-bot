@@ -164,6 +164,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       let result = "Lost";
       let amountWon = new Decimal(0);
       let amountLost = amount;
+      let feeGenerated = 0;
 
       let strikeMultiplier = 0;
 
@@ -178,12 +179,18 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
                 Decimal.sub(1, houseEdge),
               );
               amountLost = 0;
+
+              feeGenerated = Decimal.mul(amount, strikeMultiplier)
+                .mul(houseEdge)
+                .toNumber();
             }
             isFound = true;
             break;
           }
         }
       }
+
+      const addGame = !user.gamesPlayed.includes(GameType.wheel);
 
       const userUpdate = await User.findOneAndUpdate(
         {
@@ -200,6 +207,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
             "deposit.$.amount": amountWon.sub(amount),
             numOfGamesPlayed: 1,
           },
+          ...(addGame ? { $addToSet: { gamesPlayed: GameType.wheel } } : {}),
         },
         {
           new: true,
@@ -227,7 +235,13 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       });
       await wheel.save();
 
-      await updateGameStats(GameType.wheel, wallet, amount, tokenMint);
+      await updateGameStats(
+        GameType.wheel,
+        tokenMint,
+        amount,
+        addGame,
+        feeGenerated,
+      );
 
       const pointsGained =
         0 * user.numOfGamesPlayed + 1.4 * amount * userData.multiplier;

@@ -16,6 +16,7 @@ import {
 import { wsEndpoint } from "@/context/gameTransactions";
 import Decimal from "decimal.js";
 import { SPL_TOKENS } from "@/context/config";
+import updateGameStats from "../global/updateGameStats";
 Decimal.set({ precision: 9 });
 
 const secret = process.env.NEXTAUTH_SECRET;
@@ -154,6 +155,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
         if (numBets + 1 === 25 - minesCount) {
           result = "Won";
+          const feeGenerated = Decimal.mul(amount, strikeMultiplier)
+            .mul(houseEdge)
+            .toNumber();
 
           await User.findOneAndUpdate(
             {
@@ -190,6 +194,14 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
               new: true,
             },
           ).populate("gameSeed");
+
+          await updateGameStats(
+            GameType.mines,
+            tokenMint,
+            0,
+            false,
+            feeGenerated,
+          );
         } else {
           await Mines.findOneAndUpdate(
             {
@@ -260,8 +272,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           result === "Won"
             ? "Congratulations! You won!"
             : result === "Lost"
-            ? "Better luck next time!"
-            : "Game in progress",
+              ? "Better luck next time!"
+              : "Game in progress",
         result,
         ...(result === "Pending" ? {} : { strikeNumbers }),
         strikeMultiplier,

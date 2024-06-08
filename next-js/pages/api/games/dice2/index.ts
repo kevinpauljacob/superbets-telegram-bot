@@ -160,6 +160,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       let result = "Lost";
       let amountWon = new Decimal(0);
       let amountLost = amount;
+      let feeGenerated = 0;
 
       if (
         (direction === "over" && strikeNumber > 100 - chance) ||
@@ -168,6 +169,10 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         result = "Won";
         amountWon = strikeMultiplier.mul(amount).mul(Decimal.sub(1, houseEdge));
         amountLost = Math.max(new Decimal(amount).sub(amountWon).toNumber(), 0);
+
+        feeGenerated = Decimal.mul(amount, strikeMultiplier)
+          .mul(houseEdge)
+          .toNumber();
       }
 
       const addGame = !user.gamesPlayed.includes(GameType.dice2);
@@ -215,7 +220,13 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       });
       await dice2.save();
 
-      await updateGameStats(GameType.dice2, tokenMint, amount, addGame);
+      await updateGameStats(
+        GameType.dice2,
+        tokenMint,
+        amount,
+        addGame,
+        feeGenerated,
+      );
 
       const pointsGained =
         0 * user.numOfGamesPlayed + 1.4 * amount * userData.multiplier;

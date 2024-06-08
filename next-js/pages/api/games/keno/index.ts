@@ -189,6 +189,10 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         0,
       );
 
+      const feeGenerated = Decimal.mul(amount, strikeMultiplier)
+        .mul(houseEdge)
+        .toNumber();
+
       const addGame = !user.gamesPlayed.includes(GameType.keno);
 
       const userUpdate = await User.findOneAndUpdate(
@@ -235,7 +239,13 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       });
       await keno.save();
 
-      await updateGameStats(GameType.keno, tokenMint, amount, addGame);
+      await updateGameStats(
+        GameType.keno,
+        tokenMint,
+        amount,
+        addGame,
+        feeGenerated,
+      );
 
       const pointsGained =
         0 * user.numOfGamesPlayed + 1.4 * amount * userData.multiplier;

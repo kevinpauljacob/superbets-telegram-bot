@@ -150,6 +150,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       let result = "Lost";
       let amountWon = new Decimal(0);
       let amountLost = amount;
+      let feeGenerated = 0;
 
       const chance = new Decimal(100).div(strikeMultiplier).toNumber();
 
@@ -159,6 +160,10 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           Decimal.sub(1, houseEdge),
         );
         amountLost = Math.max(new Decimal(amount).sub(amountWon).toNumber(), 0);
+
+        feeGenerated = Decimal.mul(amount, strikeMultiplier)
+          .mul(houseEdge)
+          .toNumber();
       }
 
       const addGame = !user.gamesPlayed.includes(GameType.limbo);
@@ -205,7 +210,13 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       });
       await limbo.save();
 
-      await updateGameStats(GameType.limbo, tokenMint, amount, addGame);
+      await updateGameStats(
+        GameType.limbo,
+        tokenMint,
+        amount,
+        addGame,
+        feeGenerated,
+      );
 
       const pointsGained =
         0 * user.numOfGamesPlayed + 1.4 * amount * userData.multiplier;

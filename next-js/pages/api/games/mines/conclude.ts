@@ -91,8 +91,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       const houseEdge =
         launchPromoEdge || isFomoToken ? 0 : houseEdgeTiers[userTier];
 
-      amountWon = Decimal.mul(amountWon, Decimal.sub(1, houseEdge)).toNumber();
-
       const { serverSeed: encryptedServerSeed, clientSeed, iv } = gameSeed;
 
       const serverSeed = decryptServerSeed(
@@ -130,7 +128,11 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           .status(400)
           .json({ success: false, message: "Game already concluded!" });
 
-      await updateGameStats(GameType.mines, wallet, amount, tokenMint);
+      const feeGenerated = Decimal.mul(amount, strikeMultiplier)
+        .mul(houseEdge)
+        .toNumber();
+
+      await updateGameStats(GameType.mines, tokenMint, 0, false, feeGenerated);
 
       const user = await User.findOneAndUpdate(
         {

@@ -6,6 +6,7 @@ async function updateGameStats(
   tokenMint: string,
   amount: number,
   incrementWallets: boolean,
+  feeGenerated: number,
 ) {
   const gameStat = await GameStats.findOne({ game });
 
@@ -15,6 +16,7 @@ async function updateGameStats(
     await GameStats.create({
       game,
       volume: { [tokenMint]: amount },
+      feeGenerated: { [tokenMint]: feeGenerated },
       numOfWallets,
     });
   } else {
@@ -24,6 +26,7 @@ async function updateGameStats(
         {
           $set: {
             [`volume.${tokenMint}`]: amount,
+            [`feeGenerated.${tokenMint}`]: feeGenerated,
             numOfWallets,
           },
         },
@@ -34,6 +37,7 @@ async function updateGameStats(
         {
           $inc: {
             [`volume.${tokenMint}`]: amount,
+            [`feeGenerated.${tokenMint}`]: feeGenerated,
             numOfWallets,
           },
         },

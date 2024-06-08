@@ -166,7 +166,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       });
       await record.save();
 
-      await updateGameStats(GameType.options, tokenMint, amount, addGame);
+      await updateGameStats(GameType.options, tokenMint, amount, addGame, 0);
 
       const userData = await StakingUser.findOneAndUpdate(
         { wallet },

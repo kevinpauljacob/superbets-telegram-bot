@@ -82,6 +82,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       let result = "Lost";
       let amountWon = new Decimal(0);
       let amountLost = amount;
+      let feeGenerated = 0;
 
       if (
         (betType === "betUp" && betEndPrice > strikePrice) ||
@@ -90,6 +91,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         result = "Won";
         amountWon = Decimal.mul(amount, 2).mul(Decimal.sub(1, houseEdge));
         amountLost = 0;
+
+        feeGenerated = Decimal.mul(amount, 2).mul(houseEdge).toNumber();
       }
 
       const status = await User.findOneAndUpdate(
@@ -134,7 +137,13 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           .status(400)
           .json({ success: false, message: "Game already concluded!" });
 
-      await updateGameStats(GameType.options, wallet, amount, tokenMint);
+      await updateGameStats(
+        GameType.options,
+        tokenMint,
+        0,
+        false,
+        feeGenerated,
+      );
 
       const pointsGained =
         0 * user.numOfGamesPlayed + 1.4 * amount * userData.multiplier;
