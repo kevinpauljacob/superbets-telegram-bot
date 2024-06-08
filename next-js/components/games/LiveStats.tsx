@@ -26,7 +26,6 @@ export default function LiveStats() {
 
   useEffect(() => {
     if (liveCurrentStat === "All") {
-      console.log(liveStats)
       if (liveStats.length === 0) return setData({
         wagered: 0,
         pnl: 0,
