@@ -1,7 +1,11 @@
 import mongoose, { Schema } from "mongoose";
 
 const GameStatsSchema: Schema = new Schema({
-  game: { type: String, required: true },
+  game: {
+    type: String,
+    required: true,
+    unique: true,
+  },
   volume: {
     type: Map,
     of: Number,

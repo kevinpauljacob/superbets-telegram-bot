@@ -8,8 +8,9 @@ async function updateGameStats(
   incrementWallets: boolean,
   feeGenerated: number,
 ) {
-  const gameStat = await GameStats.findOne({ game });
-  console.log(gameStat);
+  const gameStat = await GameStats.findOne({ game }).then((res) =>
+    res.toJSON(),
+  );
 
   const numOfWallets = incrementWallets ? 1 : 0;
 
@@ -21,7 +22,7 @@ async function updateGameStats(
       numOfWallets,
     });
   } else {
-    if (!(tokenMint in gameStat.volume))
+    if (!gameStat.volume.hasOwnProperty(tokenMint))
       await GameStats.updateOne(
         { game },
         {
