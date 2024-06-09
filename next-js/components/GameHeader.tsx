@@ -41,7 +41,7 @@ export default function GameHeader() {
               ...prev[game],
               stats: {
                 volume: volume,
-                players: data?.stats?.wallets?.length ?? 0,
+                players: data?.stats?.numOfWallets ?? 0,
                 balance: 0,
               },
             },

@@ -77,6 +77,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           gameStats.volume[stat._id] = stat.volume;
         });
 
+        console.log(gameStats);
+
         await GameStats.create(gameStats);
       }
 

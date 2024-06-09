@@ -9,6 +9,7 @@ async function updateGameStats(
   feeGenerated: number,
 ) {
   const gameStat = await GameStats.findOne({ game });
+  console.log(gameStat);
 
   const numOfWallets = incrementWallets ? 1 : 0;
 
@@ -27,6 +28,8 @@ async function updateGameStats(
           $set: {
             [`volume.${tokenMint}`]: amount,
             [`feeGenerated.${tokenMint}`]: feeGenerated,
+          },
+          $inc: {
             numOfWallets,
           },
         },
