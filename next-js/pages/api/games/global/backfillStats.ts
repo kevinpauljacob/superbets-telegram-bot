@@ -1,9 +1,8 @@
 import connectDatabase from "../../../../utils/database";
 import { NextApiRequest, NextApiResponse } from "next";
-import GameStats from "@/models/games/gameStats";
 import { GameType } from "@/utils/provably-fair";
-import { gameModelMap } from "@/models/games";
-import GameUser from "@/models/games/gameUser";
+import { gameModelMap, GameStats, User } from "@/models/games";
+import StakingUser from "@/models/staking/user";
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === "POST") {
@@ -14,6 +13,14 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       });
 
       await connectDatabase();
+
+      // Remove 'tier' field from all documents in 'StakingUser' collection
+      await StakingUser.updateMany(
+        {},
+        {
+          $unset: { tier: "" },
+        },
+      );
 
       for (const [_, value] of Object.entries(GameType)) {
         const game = value;
@@ -45,7 +52,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
         if (!walletStats?.numOfWallets) continue;
 
-        await GameUser.updateMany(
+        await User.updateMany(
           {
             wallet: { $in: walletStats.wallets },
           },
