@@ -121,7 +121,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
       let user = await User.findOne({ wallet });
 
-      const stakeAmount = user?.stakedAmount ?? 0;
+      const stakeAmount = userData?.stakedAmount ?? 0;
       const stakingTier = Object.entries(stakingTiers).reduce((prev, next) => {
         return stakeAmount >= next[1]?.limit ? next : prev;
       })[0];

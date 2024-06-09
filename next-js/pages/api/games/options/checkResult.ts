@@ -62,7 +62,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         { upsert: true, new: true },
       );
 
-      const stakeAmount = user?.stakedAmount ?? 0;
+      const stakeAmount = userData?.stakedAmount ?? 0;
       const stakingTier = Object.entries(stakingTiers).reduce((prev, next) => {
         return stakeAmount >= next[1]?.limit ? next : prev;
       })[0];
@@ -72,7 +72,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           : false;
       const houseEdge =
         optionsEdge +
-        (launchPromoEdge || isFomoToken ? 0 : houseEdgeTiers[parseInt(stakingTier)]);
+        (launchPromoEdge || isFomoToken
+          ? 0
+          : houseEdgeTiers[parseInt(stakingTier)]);
 
       await new Promise((r) => setTimeout(r, 2000));
 

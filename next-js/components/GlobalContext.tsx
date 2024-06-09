@@ -321,7 +321,7 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
         if (success) {
           setUserData(user);
         } else console.error(message);
-        
+
         const stakeAmount = user?.stakedAmount ?? 0;
         const stakingTier = Object.entries(stakingTiers).reduce(
           (prev, next) => {
