@@ -348,7 +348,7 @@ export default function Roulette() {
       <GameDisplay>
         <div className="p-4 rounded-lg flex flex-col items-center font-chakra font-semibold text-base">
           <div className="flex justify-between w-full px-2 text-white mb-1">
-            <div className="flex items-center cursor-pointer hover:opacity-90"
+          <div className="flex items-center cursor-pointer hover:opacity-90"
             onClick={undoLastBet}>
               <Image
                 src="/assets/Undo.png"
@@ -409,7 +409,7 @@ export default function Roulette() {
                                   : ''
                               } ${
                                 hoveredColumn && hoveredColumn.includes(number)
-                                  ? 'overlay border-[2px] border-blue-500'
+                                  ? 'overlay border-[2px] border-white'
                                   : ''
                               }`}
                               onClick={() => selectedToken && handlePlaceBet(`num-${number}`, selectedToken)}
