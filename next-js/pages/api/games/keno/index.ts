@@ -16,6 +16,7 @@ import {
   maintainance,
   maxPayouts,
   pointTiers,
+  stakingTiers,
 } from "@/context/transactions";
 import {
   isArrayUnique,
@@ -127,13 +128,19 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         {},
         { upsert: true, new: true },
       );
-      const userTier = userData?.tier ?? 0;
+
+      const stakeAmount = userData?.stakedAmount ?? 0;
+      const stakingTier = Object.entries(stakingTiers).reduce((prev, next) => {
+        return stakeAmount >= next[1]?.limit ? next : prev;
+      })[0];
       const isFomoToken =
         tokenMint === SPL_TOKENS.find((t) => t.tokenName === "FOMO")?.tokenMint
           ? true
           : false;
       const houseEdge =
-        launchPromoEdge || isFomoToken ? 0 : houseEdgeTiers[userTier];
+        launchPromoEdge || isFomoToken
+          ? 0
+          : houseEdgeTiers[parseInt(stakingTier)];
 
       const activeGameSeed = await GameSeed.findOneAndUpdate(
         {
@@ -189,6 +196,12 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         0,
       );
 
+      const feeGenerated = Decimal.mul(amount, strikeMultiplier)
+        .mul(houseEdge)
+        .toNumber();
+
+      const addGame = !user.gamesPlayed.includes(GameType.keno);
+
       const userUpdate = await User.findOneAndUpdate(
         {
           wallet,
@@ -204,6 +217,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
             "deposit.$.amount": amountWon.sub(amount),
             numOfGamesPlayed: 1,
           },
+          ...(addGame ? { $addToSet: { gamesPlayed: GameType.keno } } : {}),
         },
         {
           new: true,
@@ -232,7 +246,13 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       });
       await keno.save();
 
-      await updateGameStats(GameType.keno, wallet, amount, tokenMint);
+      await updateGameStats(
+        GameType.keno,
+        tokenMint,
+        amount,
+        addGame,
+        feeGenerated,
+      );
 
       const pointsGained =
         0 * user.numOfGamesPlayed + 1.4 * amount * userData.multiplier;
@@ -249,9 +269,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         {
           $inc: {
             points: pointsGained,
-          },
-          $set: {
-            tier: newTier,
           },
         },
       );

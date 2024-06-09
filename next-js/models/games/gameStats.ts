@@ -1,15 +1,23 @@
 import mongoose, { Schema } from "mongoose";
 
-const StatsSchema: Schema = new Schema({
+const GameStatsSchema: Schema = new Schema({
   game: { type: String, required: true },
   volume: {
-    SOL: { type: Number, required: true },
-    EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v: { type: Number, required: true }, //USDC
-    Cx9oLynYgC3RrgXzin7U417hNY9D6YB1eMGw4ZMbWJgw: { type: Number, required: true }, //FOMO
+    type: Map,
+    of: Number,
   },
-  wallets: { type: [String], required: true },
+  feeGenerated: {
+    type: Map,
+    of: Number,
+  },
+  numOfWallets: {
+    type: Number,
+    required: true,
+    default: 0,
+  },
 });
 
-const Stats = mongoose.models.Stats || mongoose.model("Stats", StatsSchema);
+const GameStats =
+  mongoose.models.GameStats || mongoose.model("GameStats", GameStatsSchema);
 
-export default Stats;
+export default GameStats;

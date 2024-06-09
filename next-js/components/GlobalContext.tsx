@@ -3,6 +3,7 @@ import {
   houseEdgeTiers,
   launchPromoEdge,
   pointTiers,
+  stakingTiers,
   translator,
 } from "@/context/transactions";
 import { useWallet } from "@solana/wallet-adapter-react";
@@ -320,14 +321,18 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
         if (success) {
           setUserData(user);
         } else console.error(message);
-        let points = user?.points ?? 0;
-        const userTier = Object.entries(pointTiers).reduce((prev, next) => {
-          return points >= next[1]?.limit ? next : prev;
-        })[0];
+
+        const stakeAmount = user?.stakedAmount ?? 0;
+        const stakingTier = Object.entries(stakingTiers).reduce(
+          (prev, next) => {
+            return stakeAmount >= next[1]?.limit ? next : prev;
+          },
+        )[0];
+
         setHouseEdge(
           launchPromoEdge || selectedCoin.tokenName === "FOMO"
             ? 0
-            : houseEdgeTiers[parseInt(userTier)],
+            : houseEdgeTiers[parseInt(stakingTier)],
         );
       } catch (e) {
         // errorCustom("Unable to fetch balance.");
