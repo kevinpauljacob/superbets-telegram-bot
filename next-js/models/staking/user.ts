@@ -21,11 +21,6 @@ const userSchema = new mongoose.Schema(
       default: 0,
       required: true,
     },
-    tier: {
-      type: Number,
-      default: 0,
-      required: true,
-    },
     multiplier: {
       type: Number,
       default: 0.5,

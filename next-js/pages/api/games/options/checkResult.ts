@@ -7,6 +7,7 @@ import {
   houseEdgeTiers,
   launchPromoEdge,
   pointTiers,
+  stakingTiers,
 } from "@/context/transactions";
 import { GameType } from "@/utils/provably-fair";
 import { optionsEdge, wsEndpoint } from "@/context/gameTransactions";
@@ -60,14 +61,18 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         {},
         { upsert: true, new: true },
       );
-      const userTier = userData?.tier ?? 0;
+
+      const stakeAmount = user?.stakedAmount ?? 0;
+      const stakingTier = Object.entries(stakingTiers).reduce((prev, next) => {
+        return stakeAmount >= next[1]?.limit ? next : prev;
+      })[0];
       const isFomoToken =
         tokenMint === SPL_TOKENS.find((t) => t.tokenName === "FOMO")?.tokenMint
           ? true
           : false;
       const houseEdge =
         optionsEdge +
-        (launchPromoEdge || isFomoToken ? 0 : houseEdgeTiers[userTier]);
+        (launchPromoEdge || isFomoToken ? 0 : houseEdgeTiers[parseInt(stakingTier)]);
 
       await new Promise((r) => setTimeout(r, 2000));
 
@@ -160,9 +165,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         {
           $inc: {
             points: pointsGained,
-          },
-          $set: {
-            tier: newTier,
           },
         },
       );

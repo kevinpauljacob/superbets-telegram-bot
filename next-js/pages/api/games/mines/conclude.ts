@@ -12,6 +12,7 @@ import {
   houseEdgeTiers,
   launchPromoEdge,
   pointTiers,
+  stakingTiers,
 } from "@/context/transactions";
 import { wsEndpoint } from "@/context/gameTransactions";
 import { Decimal } from "decimal.js";
@@ -71,6 +72,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         userBets,
         strikeMultiplier,
         tokenMint,
+        houseEdge
       } = gameInfo;
 
       if (userBets.length === 0)
@@ -83,13 +85,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         {},
         { upsert: true, new: true },
       );
-      const userTier = userData?.tier ?? 0;
-      const isFomoToken =
-        tokenMint === SPL_TOKENS.find((t) => t.tokenName === "FOMO")?.tokenMint
-          ? true
-          : false;
-      const houseEdge =
-        launchPromoEdge || isFomoToken ? 0 : houseEdgeTiers[userTier];
 
       const { serverSeed: encryptedServerSeed, clientSeed, iv } = gameSeed;
 
@@ -116,8 +111,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         },
         {
           result,
-          houseEdge,
-          amountWon,
           $set: { strikeNumbers },
         },
         { new: true },
@@ -166,9 +159,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         {
           $inc: {
             points: pointsGained,
-          },
-          $set: {
-            tier: newTier,
           },
         },
       );

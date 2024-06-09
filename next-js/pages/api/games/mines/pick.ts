@@ -12,6 +12,7 @@ import {
   houseEdgeTiers,
   launchPromoEdge,
   pointTiers,
+  stakingTiers,
 } from "@/context/transactions";
 import { wsEndpoint } from "@/context/gameTransactions";
 import Decimal from "decimal.js";
@@ -117,13 +118,21 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         {},
         { upsert: true, new: true },
       );
-      const userTier = userData?.tier ?? 0;
+
+      let user = await User.findOne({ wallet });
+
+      const stakeAmount = user?.stakedAmount ?? 0;
+      const stakingTier = Object.entries(stakingTiers).reduce((prev, next) => {
+        return stakeAmount >= next[1]?.limit ? next : prev;
+      })[0];
       const isFomoToken =
         tokenMint === SPL_TOKENS.find((t) => t.tokenName === "FOMO")?.tokenMint
           ? true
           : false;
       const houseEdge =
-        launchPromoEdge || isFomoToken ? 0 : houseEdgeTiers[userTier];
+        launchPromoEdge || isFomoToken
+          ? 0
+          : houseEdgeTiers[parseInt(stakingTier)];
 
       let record;
       if (strikeNumbers[userBet] === 1) {
@@ -211,6 +220,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
             },
             {
               $push: { userBets: userBet },
+              houseEdge,
               amountWon,
               strikeMultiplier,
             },
@@ -219,8 +229,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       }
 
       if (result !== "Pending") {
-        let user = await User.findOne({ wallet });
-
         const pointsGained =
           0 * user.numOfGamesPlayed + 1.4 * amount * userData.multiplier;
 
