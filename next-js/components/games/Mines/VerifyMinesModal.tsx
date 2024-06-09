@@ -9,6 +9,7 @@ import { translator } from "@/context/transactions";
 import Image from "next/image";
 import Bets from "../Bets";
 import Loader from "../Loader";
+import { SPL_TOKENS } from "@/context/config";
 
 export interface Mines {
   createdAt: string;
@@ -24,6 +25,7 @@ export interface Mines {
   strikeMultiplier: number;
   amountWon: number;
   nonce?: number;
+  tokenMint: string;
   gameSeed?: {
     status: seedStatus;
     clientSeed: string;
@@ -56,7 +58,7 @@ export default function VerifyDice2Modal({
   //Provably Fair Modal handling
   const [isPFModalOpen, setIsPFModalOpen] = useState(false);
 
-  const [isLoading, setIsLoading]=useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const openPFModal = () => {
     setIsPFModalOpen(true);
   };
@@ -166,7 +168,9 @@ export default function VerifyDice2Modal({
                   {translator("Bet", language)}
                 </div>
                 <div className="text-white font-chakra text-xs font-medium">
-                  {bet.amount.toFixed(4)} $SOL
+                  {bet.amount.toFixed(4)} $
+                  {SPL_TOKENS.find((token) => token.tokenMint === bet.tokenMint)
+                    ?.tokenName ?? ""}
                 </div>
               </button>
               <button className="px-1 py-3 flex flex-col items-center justify-center w-full text-white rounded-md bg-[#202329]">
@@ -182,7 +186,9 @@ export default function VerifyDice2Modal({
                   {translator("Payout", language)}
                 </div>
                 <div className="text-white font-chakra text-xs font-medium">
-                  {bet.amountWon?.toFixed(4)} $SOL
+                  {bet.amountWon?.toFixed(4)} $
+                  {SPL_TOKENS.find((token) => token.tokenMint === bet.tokenMint)
+                    ?.tokenName ?? ""}
                 </div>
               </button>
             </div>
@@ -198,8 +204,8 @@ export default function VerifyDice2Modal({
                             ? bet.strikeNumbers[number - 1] === 0
                               ? "border-[#FCB10F] bg-[#FCB10F33]"
                               : bet.strikeNumbers[number - 1] === 1
-                              ? "border-[#F1323E] bg-[#F1323E33]"
-                              : ""
+                                ? "border-[#F1323E] bg-[#F1323E33]"
+                                : ""
                             : "bg-[#202329]"
                         } flex items-center justify-center cursor-pointer rounded-md text-center transition-all duration-300 ease-in-out 
           lg2:w-[48px] lg2:h-[48px] md:w-[45px] md:h-[45px] sm:w-[43px] sm:h-[43px] sm2:w-[40px]
@@ -299,7 +305,7 @@ export default function VerifyDice2Modal({
                       <label className="text-xs font-changa text-opacity-90 text-[#F0F0F0]">
                         {translator("Server Seed", language)}{" "}
                         {bet.gameSeed?.status !== seedStatus.EXPIRED
-                          ? "(Hashed)"
+                          ?  translator("(Hashed)", language)
                           : ""}
                       </label>
                       <div className="bg-[#202329] mt-1 rounded-md px-4 py-3 w-full relative flex items-center justify-between">

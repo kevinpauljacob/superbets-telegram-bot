@@ -1,5 +1,6 @@
 import { soundAlert } from "@/utils/soundUtils";
 import React, { useState, useEffect, useRef, RefObject } from "react";
+import { useGlobalContext } from "@/components/GlobalContext";
 
 function debounce(func: any, timeout = 100) {
   let timer: any;
@@ -29,6 +30,7 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
   rollType,
   draggable = true,
 }) => {
+  const { enableSounds } = useGlobalContext();
   const [isDragging, setIsDragging] = useState(false);
 
   const progressBarRef: RefObject<HTMLDivElement> =
@@ -73,7 +75,7 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
   };
 
   const debouncedSoundAlert = debounce(() => {
-    soundAlert("/sounds/slider.wav");
+    soundAlert("/sounds/slider.wav", !enableSounds);
     // console.log("debounced");
   });
 

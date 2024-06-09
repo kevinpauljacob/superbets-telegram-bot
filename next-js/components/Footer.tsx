@@ -9,8 +9,16 @@ import logo from "@/public/assets/logowhite.svg";
 import { MdOutlineLanguage } from "react-icons/md";
 import { FaChevronUp } from "react-icons/fa6";
 import { translator } from "@/context/transactions";
+import { useWallet } from "@solana/wallet-adapter-react";
+import { useWalletModal } from "@solana/wallet-adapter-react-ui";
+import { useSession } from "next-auth/react";
+import { handleSignIn } from "./ConnectWallet";
 
 function Footer() {
+  const { data: session, status } = useSession();
+  const wallet = useWallet();
+  const walletModal = useWalletModal();
+
   const { language, setLanguage, setShowWalletModal } = useGlobalContext();
   const [langSelect, setLangSelect] = useState(false);
   const router = useRouter();
@@ -58,7 +66,11 @@ function Footer() {
                 </Link>
                 <span
                   className="hover:cursor-pointer hover:underline decoration-1"
-                  onClick={() => setShowWalletModal(true)}
+                  onClick={() => {
+                    wallet.connected && status === "authenticated"
+                      ? setShowWalletModal(true)
+                      : handleSignIn(wallet, walletModal);
+                  }}
                 >
                   {translator("Wallet", language)}
                 </span>
@@ -131,12 +143,12 @@ function Footer() {
                 {language === "en"
                   ? "English"
                   : language === "ru"
-                  ? "Русский"
-                  : language === "ko"
-                  ? "한국인"
-                  : language === "ch"
-                  ? "中国人"
-                  : ""}
+                    ? "Русский"
+                    : language === "ko"
+                      ? "한국인"
+                      : language === "ch"
+                        ? "中国人"
+                        : ""}
               </span>
               <FaChevronUp className="w-3 h-3 text-white" />
               {langSelect && (

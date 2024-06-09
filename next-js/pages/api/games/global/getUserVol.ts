@@ -2,16 +2,23 @@ import connectDatabase from "../../../../utils/database";
 import { NextApiRequest, NextApiResponse } from "next";
 import { gameModelMap, User } from "@/models/games";
 import { GameType } from "@/utils/provably-fair";
+import { SPL_TOKENS } from "@/context/config";
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === "GET") {
     try {
       const wallet = req.query.wallet;
+      const tokenMint = req.query.tokenMint;
 
       if (!wallet)
         return res
           .status(400)
           .json({ success: false, message: "Invalid wallet" });
+
+      if (!SPL_TOKENS.some((t) => t.tokenMint === tokenMint))
+        return res
+          .status(400)
+          .json({ success: false, message: "Invalid token mint" });
 
       await connectDatabase();
 
@@ -29,6 +36,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           {
             $match: {
               wallet,
+              tokenMint,
             },
           },
           {
@@ -53,7 +61,10 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       console.log(e);
       return res.status(500).json({ success: false, message: e.message });
     }
-  }
+  } else
+    return res
+      .status(405)
+      .json({ success: false, message: "Method not allowed" });
 }
 
 export default handler;

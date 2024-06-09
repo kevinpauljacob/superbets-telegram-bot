@@ -5,8 +5,9 @@ import KenoProvablyFairModal, { PFModalData } from "./KenoProvablyFairModal";
 import { useGlobalContext } from "@/components/GlobalContext";
 import { FaRegCopy } from "react-icons/fa6";
 import { MdClose } from "react-icons/md";
-import {translator} from "@/context/transactions";
+import { translator } from "@/context/transactions";
 import Loader from "../Loader";
+import { SPL_TOKENS } from "@/context/config";
 
 export interface Keno {
   createdAt: string;
@@ -15,11 +16,12 @@ export interface Keno {
   result: string;
   risk: string;
   strikeNumbers: number[];
-  segments:number;
+  segments: number;
   chosenNumbers: number[];
   strikeMultiplier: number;
   amountWon: number;
   nonce?: number;
+  tokenMint: string;
   gameSeed?: {
     status: seedStatus;
     clientSeed: string;
@@ -52,7 +54,7 @@ export default function VerifyDice2Modal({
 
   //Provably Fair Modal handling
   const [isPFModalOpen, setIsPFModalOpen] = useState(false);
-  const [isLoading, setIsLoading]=useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const openPFModal = () => {
     setIsPFModalOpen(true);
@@ -61,7 +63,7 @@ export default function VerifyDice2Modal({
   const closePFModal = () => {
     setIsPFModalOpen(false);
   };
-  console.log("Kenobet",bet)
+  console.log("Kenobet", bet);
   const [PFModalData, setPFModalData] = useState<PFModalData>({
     activeGameSeed: {
       wallet: "",
@@ -101,7 +103,6 @@ export default function VerifyDice2Modal({
   const Capitalize = (str: string) => {
     return str?.charAt(0).toUpperCase() + str?.slice(1);
   };
-
 
   function formatDate(dateString: string) {
     const date = new Date(dateString);
@@ -163,7 +164,9 @@ export default function VerifyDice2Modal({
                   {translator("Bet", language)}
                 </div>
                 <div className="text-white font-chakra text-xs font-medium">
-                  {bet.amount.toFixed(4)} $SOL
+                  {bet.amount.toFixed(4)} $
+                  {SPL_TOKENS.find((token) => token.tokenMint === bet.tokenMint)
+                    ?.tokenName ?? ""}
                 </div>
               </button>
               <button className="px-1 py-3 flex flex-col items-center justify-center w-full text-white rounded-md bg-[#202329]">
@@ -179,7 +182,9 @@ export default function VerifyDice2Modal({
                   {translator("Payout", language)}
                 </div>
                 <div className="text-white font-chakra text-xs font-medium">
-                  {bet.amountWon?.toFixed(4)} $SOL
+                  {bet.amountWon?.toFixed(4)} $
+                  {SPL_TOKENS.find((token) => token.tokenMint === bet.tokenMint)
+                    ?.tokenName ?? ""}
                 </div>
               </button>
             </div>
@@ -195,11 +200,11 @@ export default function VerifyDice2Modal({
                           bet.chosenNumbers?.includes(number)
                             ? "bg-[#7839C5]"
                             : bet.strikeNumbers?.includes(number) &&
-                              bet.chosenNumbers?.includes(number)
-                            ? "bg-black border-2 border-fomo-green"
-                            : bet.chosenNumbers?.includes(number)
-                            ? "bg-black border-2 border-fomo-red text-fomo-red"
-                            : "bg-[#202329]"
+                                bet.chosenNumbers?.includes(number)
+                              ? "bg-black border-2 border-fomo-green"
+                              : bet.chosenNumbers?.includes(number)
+                                ? "bg-black border-2 border-fomo-red text-fomo-red"
+                                : "bg-[#202329]"
                         } rounded-md text-center transition-all duration-300 ease-in-out lg2:w-[45px] lg2:h-[45px] md:w-[42px] md:h-[42px] sm:w-[40px] sm:h-[40px] sm2:w-[38px] sm2:h-[38px] xs:w-[36px] xs:h-[36px] w-[30px] h-[30px]`}
                       >
                         {bet.strikeNumbers?.includes(number) &&
@@ -283,7 +288,7 @@ export default function VerifyDice2Modal({
                       <label className="text-xs font-changa text-opacity-90 text-[#F0F0F0]">
                         {translator("Server Seed", language)}{" "}
                         {bet.gameSeed?.status !== seedStatus.EXPIRED
-                          ? "(Hashed)"
+                          ?  translator("(Hashed)", language)
                           : ""}
                       </label>
                       <div className="bg-[#202329] mt-1 rounded-md px-4 py-3 w-full relative flex items-center justify-between">
@@ -307,7 +312,10 @@ export default function VerifyDice2Modal({
                     {bet.wallet !== wallet ? (
                       <>
                         <div className="text-xs text-[#94A3B8] font-changa text-opacity-75 text-center">
-                          {translator("The bettor must first rotate their seed pair to verify this bet.", language)}
+                          {translator(
+                            "The bettor must first rotate their seed pair to verify this bet.",
+                            language,
+                          )}
                         </div>
                         <button
                           className="bg-[#7839C5] rounded-md w-full text-sm text-white text-opacity-90 text-semibold py-3 disabled:opacity-70"
@@ -319,13 +327,20 @@ export default function VerifyDice2Modal({
                     ) : bet.gameSeed?.status !== seedStatus.EXPIRED ? (
                       <>
                         <div className="text-xs text-[#94A3B8] font-changa text-opacity-75 text-center">
-                          {translator("To verify this bet, you first need to rotate your seed pair.", language)}
+                          {translator(
+                            "To verify this bet, you first need to rotate your seed pair.",
+                            language,
+                          )}
                         </div>
                         <button
                           className="bg-[#7839C5] rounded-md w-full text-sm text-white text-opacity-90 text-semibold py-3"
                           onClick={handleSeedClick}
                         >
-                          {isLoading ? <Loader/> : translator("Rotate", language)}
+                          {isLoading ? (
+                            <Loader />
+                          ) : (
+                            translator("Rotate", language)
+                          )}
                         </button>
                       </>
                     ) : (
@@ -333,7 +348,11 @@ export default function VerifyDice2Modal({
                         className="bg-[#7839C5] rounded-md w-full text-sm text-white text-opacity-90 text-semibold py-3"
                         onClick={handleVerifyClick}
                       >
-                       {isLoading ? <Loader/> : translator("Verify", language)}
+                        {isLoading ? (
+                          <Loader />
+                        ) : (
+                          translator("Verify", language)
+                        )}
                       </button>
                     )}
                   </div>

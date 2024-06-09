@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef, useMemo } from "react";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { rollDice } from "@/context/gameTransactions";
-import { toast } from "react-hot-toast";
 import BetSetting from "@/components/BetSetting";
 import { useGlobalContext } from "@/components/GlobalContext";
 import {
@@ -12,7 +11,6 @@ import {
   GameTable,
 } from "@/components/GameLayout";
 import { FormProvider, useForm } from "react-hook-form";
-import { BsInfinity } from "react-icons/bs";
 import Loader from "@/components/games/Loader";
 import WinPointer from "@/public/assets/WinPointer";
 import DicePointer from "@/public/assets/DicePointer";
@@ -24,7 +22,6 @@ import Dice5 from "@/public/assets/Dice5";
 import Dice6 from "@/public/assets/Dice6";
 import BetAmount from "@/components/games/BetAmountInput";
 import BetButton from "@/components/games/BetButton";
-import showInfoToast from "@/components/games/toasts/toasts";
 import { loopSound, soundAlert } from "@/utils/soundUtils";
 import Bets from "../../components/games/Bets";
 import AutoCount from "@/components/AutoCount";
@@ -33,6 +30,7 @@ import { errorCustom, warningCustom } from "@/components/toasts/ToastGroup";
 import { translator } from "@/context/transactions";
 import { minGameAmount } from "@/context/gameTransactions";
 import { useSession } from "next-auth/react";
+import { GameType } from "@/utils/provably-fair";
 
 export default function Dice() {
   const wallet = useWallet();
@@ -40,7 +38,7 @@ export default function Dice() {
   const { data: session, status } = useSession();
 
   const {
-    coinData,
+    selectedCoin,
     getBalance,
     getWalletBalance,
     setShowAutoModal,
@@ -62,6 +60,9 @@ export default function Dice() {
     houseEdge,
     maxBetAmt,
     language,
+    liveStats,
+    setLiveStats,
+    enableSounds,
   } = useGlobalContext();
 
   const [userInput, setUserInput] = useState<number | undefined>();
@@ -97,7 +98,7 @@ export default function Dice() {
       setStrikeFace(0);
       setShowPointer(false);
       if (selectedFace.length >= 5 && !selectedFace.includes(newFace)) {
-        errorCustom("You can only select up to 5 faces");
+        errorCustom(translator("You can only select up to 5 faces", language));
         return;
       }
 
@@ -163,23 +164,46 @@ export default function Dice() {
     // );
     try {
       if (!wallet.connected || !wallet.publicKey) {
-        throw new Error("Wallet not connected");
+        throw new Error(translator("Wallet not connected", language));
       }
       if (!betAmt || betAmt === 0) {
-        throw new Error("Set Amount.");
+        throw new Error(translator("Set Amount.", language));
       }
-      if (coinData && coinData[0].amount < betAmt) {
-        throw new Error("Insufficient balance for bet !");
+      if (selectedCoin && selectedCoin.amount < betAmt) {
+        throw new Error(translator("Insufficient balance for bet !", language));
       }
       if (selectedFace.length === 0) {
-        throw new Error("Choose at least 1 face.");
+        throw new Error(translator("Choose at least 1 face.", language));
       }
       setIsRolling(true);
-      const res = await rollDice(wallet, betAmt, selectedFace);
+      const res = await rollDice(
+        wallet,
+        betAmt,
+        selectedCoin.tokenMint,
+        selectedFace,
+      );
       if (res.success) {
         const { strikeNumber, result } = res.data;
         const isWin = result === "Won";
-        if (isWin) soundAlert("/sounds/win.wav");
+
+        setLiveStats([
+          ...liveStats,
+          {
+            game: GameType.dice,
+            amount: betAmt,
+            result: isWin ? "Won" : "Lost",
+            pnl: isWin ? betAmt * winningPays - betAmt : -betAmt,
+            totalPNL:
+              liveStats.length > 0
+                ? liveStats[liveStats.length - 1].totalPNL +
+                  (isWin ? betAmt * winningPays - betAmt : -betAmt)
+                : isWin
+                  ? betAmt * winningPays - betAmt
+                  : -betAmt,
+          },
+        ]);
+
+        if (isWin) soundAlert("/sounds/win.wav", !enableSounds);
         const newBetResults = [
           ...(betResults.length <= 4 ? betResults : betResults.slice(-4)),
           { face: strikeNumber, win: isWin },
@@ -188,7 +212,7 @@ export default function Dice() {
         setShowPointer(true);
         setStrikeFace(strikeNumber);
         setRefresh(true);
-        loopSound("/sounds/diceshake.wav", 0.3);
+        loopSound("/sounds/diceshake.wav", 0.3, !enableSounds);
 
         // auto options
         if (betType === "auto") {
@@ -213,7 +237,7 @@ export default function Dice() {
           // update count
           if (typeof autoBetCount === "number") {
             setAutoBetCount(autoBetCount > 0 ? autoBetCount - 1 : 0);
-            autoBetCount === 1 && warningCustom("Auto bet stopped", "top-left");
+            autoBetCount === 1 && warningCustom(translator("Auto bet stopped", language), "top-left");
           } else
             setAutoBetCount(
               autoBetCount.length > 12
@@ -222,10 +246,10 @@ export default function Dice() {
             );
         }
       } else {
-        throw new Error(res?.message ?? "Could not make the Bet.");
+        throw new Error(translator(res?.message ?? "Could not make the Bet.", language));
       }
     } catch (e: any) {
-      errorCustom(e?.message ?? "Could not make the Bet.");
+      errorCustom(translator(e?.message ?? "Could not make the Bet.", language));
       setIsRolling(false);
       setAutoBetCount(0);
       setStartAuto(false);
@@ -277,8 +301,8 @@ export default function Dice() {
     );
     diceElements.forEach((element) => element?.classList.add("blink_dice"));
     setTimeout(() => {
-      diceElements.forEach(
-        (element) => element?.classList.remove("blink_dice"),
+      diceElements.forEach((element) =>
+        element?.classList.remove("blink_dice"),
       );
     }, 2000);
   };
@@ -315,9 +339,9 @@ export default function Dice() {
             (autoWinChangeReset || autoLossChangeReset
               ? betAmt
               : autoBetCount === "inf"
-              ? Math.max(0, betAmt)
-              : betAmt *
-                (autoLossChange !== null ? autoLossChange / 100.0 : 0));
+                ? Math.max(0, betAmt)
+                : betAmt *
+                  (autoLossChange !== null ? autoLossChange / 100.0 : 0));
 
         // console.log("Current bet amount:", betAmt);
         // console.log("Auto loss change:", autoLossChange);
@@ -331,7 +355,10 @@ export default function Dice() {
         autoBetProfit >= autoStopProfit
       ) {
         setTimeout(() => {
-          warningCustom("Profit limit reached.", "top-left");
+          warningCustom(
+            translator("Profit limit reached.", language),
+            "top-left",
+          );
         }, 500);
         setAutoBetCount(0);
         setStartAuto(false);
@@ -344,7 +371,10 @@ export default function Dice() {
         potentialLoss < -autoStopLoss
       ) {
         setTimeout(() => {
-          warningCustom("Loss limit reached.", "top-left");
+          warningCustom(
+            translator("Loss limit reached.", language),
+            "top-left",
+          );
         }, 500);
         setAutoBetCount(0);
         setStartAuto(false);
@@ -361,7 +391,7 @@ export default function Dice() {
   const onSubmit = async (data: any) => {
     if (betType === "auto") {
       if (betAmt === 0) {
-        errorCustom("Set Amount.");
+        errorCustom(translator("Set Amount.", language));
         return;
       }
       if (typeof autoBetCount === "number" && autoBetCount <= 0) {
@@ -396,8 +426,8 @@ export default function Dice() {
             {startAuto && (
               <div
                 onClick={() => {
-                  soundAlert("/sounds/betbutton.wav");
-                  warningCustom("Auto bet stopped", "top-left");
+                  soundAlert("/sounds/betbutton.wav", !enableSounds);
+                  warningCustom(translator("Auto bet stopped", language), "top-left");
                   setAutoBetCount(0);
                   setStartAuto(false);
                 }}
@@ -412,8 +442,6 @@ export default function Dice() {
                 !session?.user ||
                 selectedFace.length === 0 ||
                 isRolling ||
-                !coinData ||
-                (coinData && coinData[0].amount < minGameAmount) ||
                 (betAmt !== undefined &&
                   maxBetAmt !== undefined &&
                   betAmt > maxBetAmt)
@@ -473,8 +501,8 @@ export default function Dice() {
                   {startAuto && (
                     <div
                       onClick={() => {
-                        soundAlert("/sounds/betbutton.wav");
-                        warningCustom("Auto bet stopped", "top-left");
+                        soundAlert("/sounds/betbutton.wav", !enableSounds);
+                        warningCustom(translator("Auto bet stopped", language), "top-left");
                         setAutoBetCount(0);
                         setStartAuto(false);
                       }}
@@ -489,8 +517,6 @@ export default function Dice() {
                       !session?.user ||
                       selectedFace.length === 0 ||
                       isRolling ||
-                      !coinData ||
-                      (coinData && coinData[0].amount < minGameAmount) ||
                       (betAmt !== undefined &&
                         maxBetAmt !== undefined &&
                         betAmt > maxBetAmt)
@@ -675,11 +701,12 @@ function DiceFace({
   handleClick: (number: number) => void;
   Icon: any;
 }) {
+  const { enableSounds } = useGlobalContext();
   return (
     <div
       onClick={() => {
         handleClick(diceNumber);
-        soundAlert("/sounds/betbutton.wav");
+        soundAlert("/sounds/betbutton.wav", !enableSounds);
       }}
     >
       <Icon
@@ -691,8 +718,8 @@ function DiceFace({
                 : "text-[#94A3B8]" // Use selected dice face image if face 1 is selected but not strikeFace
               : "text-[#202329] hover:text-[#47484A] hover:duration-75" // Use regular dice face image if face 1 is not selected
             : strikeFace === diceNumber
-            ? "text-fomo-red" // Use losing dice face image if strikeFace is 1 and face 1 is not selected
-            : "text-[#202329] hover:text-[#47484A] hover:duration-75" // Use regular dice face image if face 1 is not selected and strikeFace is not 1
+              ? "text-fomo-red" // Use losing dice face image if strikeFace is 1 and face 1 is not selected
+              : "text-[#202329] hover:text-[#47484A] hover:duration-75" // Use regular dice face image if face 1 is not selected and strikeFace is not 1
         } cursor-pointer w-10 h-10 md:w-12 md:h-12 transition-all duration-300 ease-in-out dice-face-icon-${diceNumber}`}
       />
     </div>

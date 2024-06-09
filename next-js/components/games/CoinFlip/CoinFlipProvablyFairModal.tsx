@@ -1,11 +1,9 @@
 import {
   GameType,
   generateClientSeed,
-  generateGameResult,
 } from "@/utils/provably-fair";
 import { useEffect, useState } from "react";
 import { Flip } from "./VerifyFlipModal";
-import toast from "react-hot-toast";
 import { FaRegCopy } from "react-icons/fa6";
 import { MdClose } from "react-icons/md";
 import Image from "next/image";
@@ -14,6 +12,7 @@ import {
   errorAlert,
   errorCustom,
   successAlert,
+  successCustom,
 } from "@/components/toasts/ToastGroup";
 import { translator } from "@/context/transactions";
 import { useGlobalContext } from "@/components/GlobalContext";
@@ -125,7 +124,7 @@ export default function CoinFlipProvablyFairModal({
 
   const handleSetClientSeed = async () => {
     if (!/^[\x00-\x7F]*$/.test(newClientSeed) || newClientSeed.trim() === "")
-      return errorCustom("Invalid client seed");
+      return errorCustom(translator("Invalid client seed", language));
 
     let data = await fetch(`/api/games/gameSeed/change`, {
       method: "POST",
@@ -141,7 +140,7 @@ export default function CoinFlipProvablyFairModal({
     if (!data.success) return errorAlert(data.message);
 
     setModalData(data);
-    successAlert("Successfully changed the server seed");
+    successCustom("Successfully changed the server seed");
 
     setNewClientSeed(generateClientSeed());
   };

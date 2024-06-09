@@ -2,10 +2,11 @@ import connectDatabase from "@/utils/database";
 import { getToken } from "next-auth/jwt";
 import { NextApiRequest, NextApiResponse } from "next";
 import { GameSeed, Mines, User } from "@/models/games";
-import { seedStatus } from "@/utils/provably-fair";
+import { GameTokens, seedStatus } from "@/utils/provably-fair";
 import { minGameAmount } from "@/context/gameTransactions";
 import Decimal from "decimal.js";
 import { maxPayouts } from "@/context/transactions";
+import { SPL_TOKENS } from "@/context/config";
 
 const secret = process.env.NEXTAUTH_SECRET;
 
@@ -38,10 +39,11 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           .status(400)
           .json({ success: false, message: "Missing parameters" });
 
+      const splToken = SPL_TOKENS.find((t) => t.tokenMint === tokenMint);
       if (
         typeof amount !== "number" ||
         !isFinite(amount) ||
-        tokenMint !== "SOL" ||
+        !splToken ||
         !(Number.isInteger(minesCount) && 1 <= minesCount && minesCount <= 24)
       )
         return res
@@ -58,7 +60,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
       const maxPayout = Decimal.mul(amount, maxStrikeMultiplier);
 
-      if (!(maxPayout.toNumber() <= maxPayouts.mines))
+      if (!(maxPayout.toNumber() <= maxPayouts[tokenMint as GameTokens].mines))
         return res
           .status(400)
           .json({ success: false, message: "Max payout exceeded" });
