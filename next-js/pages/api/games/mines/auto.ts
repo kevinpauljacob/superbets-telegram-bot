@@ -10,10 +10,7 @@ import {
   seedStatus,
 } from "@/utils/provably-fair";
 import StakingUser from "@/models/staking/user";
-import {
-  minGameAmount,
-  wsEndpoint,
-} from "@/context/gameTransactions";
+import { minGameAmount, wsEndpoint } from "@/context/config";
 import Decimal from "decimal.js";
 import {
   houseEdgeTiers,

@@ -27,7 +27,7 @@ import {
   warningCustom,
 } from "@/components/toasts/ToastGroup";
 import { translator, truncateNumber } from "@/context/transactions";
-import { minGameAmount } from "@/context/gameTransactions";
+import { minGameAmount } from "@/context/config";
 import { useSession } from "next-auth/react";
 import { GameType } from "@/utils/provably-fair";
 import { handleSignIn } from "@/components/ConnectWallet";

@@ -1,7 +1,7 @@
 import connectDatabase from "../../../../utils/database";
 import { getToken } from "next-auth/jwt";
 import { NextApiRequest, NextApiResponse } from "next";
-import { wsEndpoint, minGameAmount } from "@/context/gameTransactions";
+import { wsEndpoint, minGameAmount } from "@/context/config";
 import { Coin, GameSeed, User } from "@/models/games";
 import {
   GameTokens,

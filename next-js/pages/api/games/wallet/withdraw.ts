@@ -9,7 +9,7 @@ import {
   timeWeightedAvgInterval,
   timeWeightedAvgLimit,
   userLimitMultiplier,
-} from "../../../../context/gameTransactions";
+} from "@/context/config";
 import connectDatabase from "../../../../utils/database";
 import Deposit from "../../../../models/games/deposit";
 import User from "../../../../models/games/gameUser";

@@ -14,7 +14,7 @@ import {
   pointTiers,
   stakingTiers,
 } from "@/context/transactions";
-import { wsEndpoint } from "@/context/gameTransactions";
+import { wsEndpoint } from "@/context/config";
 import { Decimal } from "decimal.js";
 import { SPL_TOKENS } from "@/context/config";
 import updateGameStats from "../global/updateGameStats";
@@ -72,7 +72,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         userBets,
         strikeMultiplier,
         tokenMint,
-        houseEdge
+        houseEdge,
       } = gameInfo;
 
       if (userBets.length === 0)

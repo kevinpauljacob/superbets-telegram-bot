@@ -19,7 +19,7 @@ import {
   pointTiers,
   stakingTiers,
 } from "@/context/transactions";
-import { minGameAmount, wsEndpoint } from "@/context/gameTransactions";
+import { minGameAmount, wsEndpoint } from "@/context/config";
 import { riskToChance } from "@/components/games/Keno/RiskToChance";
 import { Decimal } from "decimal.js";
 import { SPL_TOKENS } from "@/context/config";

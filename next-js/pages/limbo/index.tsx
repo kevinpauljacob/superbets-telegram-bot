@@ -25,7 +25,7 @@ import {
   warningCustom,
 } from "@/components/toasts/ToastGroup";
 import { limboBet, translator, truncateNumber } from "@/context/transactions";
-import { minGameAmount } from "@/context/gameTransactions";
+import { minGameAmount } from "@/context/config";
 import { useSession } from "next-auth/react";
 import { GameType } from "@/utils/provably-fair";
 import { handleSignIn } from "@/components/ConnectWallet";
@@ -184,7 +184,10 @@ export default function Limbo() {
             if (typeof autoBetCount === "number") {
               setAutoBetCount(autoBetCount > 0 ? autoBetCount - 1 : 0);
               autoBetCount === 1 &&
-                warningCustom(translator("Auto bet stopped", language), "top-left");
+                warningCustom(
+                  translator("Auto bet stopped", language),
+                  "top-left",
+                );
             } else
               setAutoBetCount(
                 autoBetCount.length > 12
@@ -205,9 +208,7 @@ export default function Limbo() {
   const bet = async () => {
     try {
       if (!wallet.publicKey) {
-        throw new Error(
-          translator("Wallet not connected", language),
-        );;
+        throw new Error(translator("Wallet not connected", language));
       }
       if (!betAmt || betAmt === 0) {
         throw new Error(translator("Set Amount.", language));
@@ -376,7 +377,10 @@ export default function Limbo() {
               <div
                 onClick={() => {
                   soundAlert("/sounds/betbutton.wav", !enableSounds);
-                  warningCustom(translator("Auto bet stopped", language), "top-left");
+                  warningCustom(
+                    translator("Auto bet stopped", language),
+                    "top-left",
+                  );
                   setAutoBetCount(0);
                   setStartAuto(false);
                 }}
@@ -457,7 +461,10 @@ export default function Limbo() {
                     <div
                       onClick={() => {
                         soundAlert("/sounds/betbutton.wav", !enableSounds);
-                        warningCustom(translator("Auto bet stopped", language), "top-left");
+                        warningCustom(
+                          translator("Auto bet stopped", language),
+                          "top-left",
+                        );
                         setAutoBetCount(0);
                         setStartAuto(false);
                       }}

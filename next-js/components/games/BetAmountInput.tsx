@@ -5,7 +5,7 @@ import { GameTokens, GameType } from "@/utils/provably-fair";
 import { maxPayouts, truncateNumber } from "@/context/transactions";
 import Image from "next/image";
 import { translator } from "@/context/transactions";
-import { minGameAmount } from "@/context/gameTransactions";
+import { minGameAmount } from "@/context/config";
 import { riskToChance } from "./Keno/RiskToChance";
 import { SPL_TOKENS } from "@/context/config";
 export default function BetAmount({

@@ -3,7 +3,7 @@ import { getToken } from "next-auth/jwt";
 import { NextApiRequest, NextApiResponse } from "next";
 import { GameSeed, Mines, User } from "@/models/games";
 import { GameTokens, GameType, seedStatus } from "@/utils/provably-fair";
-import { minGameAmount, wsEndpoint } from "@/context/gameTransactions";
+import { minGameAmount, wsEndpoint } from "@/context/config";
 import Decimal from "decimal.js";
 import { maxPayouts } from "@/context/transactions";
 import StakingUser from "@/models/staking/user";

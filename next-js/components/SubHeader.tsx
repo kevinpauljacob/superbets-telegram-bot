@@ -1,7 +1,7 @@
 import Image from "next/image";
 import { useGlobalContext } from "./GlobalContext";
 import Link from "next/link";
-import { wsEndpoint } from "@/context/gameTransactions";
+import { wsEndpoint } from "@/context/config";
 import { useEffect, useRef, useState } from "react";
 import { GameType } from "@/utils/provably-fair";
 import { useRouter } from "next/router";
