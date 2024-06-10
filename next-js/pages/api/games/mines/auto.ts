@@ -24,7 +24,7 @@ import {
   stakingTiers,
 } from "@/context/transactions";
 import { SPL_TOKENS } from "@/context/config";
-import updateGameStats from "../global/updateGameStats";
+import updateGameStats from "../../../../utils/updateGameStats";
 
 const secret = process.env.NEXTAUTH_SECRET;
 const encryptionKey = Buffer.from(process.env.ENCRYPTION_KEY!, "hex");

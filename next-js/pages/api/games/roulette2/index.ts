@@ -15,7 +15,7 @@ import {
 } from "@/context/transactions";
 import { wsEndpoint } from "@/context/gameTransactions";
 import { Decimal } from "decimal.js";
-import updateGameStats from "../global/updateGameStats";
+import updateGameStats from "../../../../utils/updateGameStats";
 Decimal.set({ precision: 9 });
 
 const secret = process.env.NEXTAUTH_SECRET;

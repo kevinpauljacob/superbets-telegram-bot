@@ -20,7 +20,7 @@ import {
 import { minGameAmount, wsEndpoint } from "@/context/gameTransactions";
 import { Decimal } from "decimal.js";
 import { SPL_TOKENS } from "@/context/config";
-import updateGameStats from "../global/updateGameStats";
+import updateGameStats from "../../../../utils/updateGameStats";
 Decimal.set({ precision: 9 });
 
 const secret = process.env.NEXTAUTH_SECRET;
