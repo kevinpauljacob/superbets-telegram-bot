@@ -15,11 +15,11 @@ import Decimal from "decimal.js";
 import {
   houseEdgeTiers,
   isArrayUnique,
-  launchPromoEdge,
   maxPayouts,
   pointTiers,
   stakingTiers,
 } from "@/context/transactions";
+import { launchPromoEdge } from "@/context/config";
 import { SPL_TOKENS } from "@/context/config";
 import updateGameStats from "../../../../utils/updateGameStats";
 

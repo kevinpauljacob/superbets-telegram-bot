@@ -30,12 +30,6 @@ const stakingPublicKey = new PublicKey(
   process.env.NEXT_PUBLIC_STAKING_PUBLIC_KEY!,
 );
 
-export const fomoToken = "Cx9oLynYgC3RrgXzin7U417hNY9D6YB1eMGw4ZMbWJgw";
-
-export const launchPromoEdge = false;
-
-export const maintainance = false;
-
 export interface User {
   wallet: string;
   solAmount: number;

@@ -2,6 +2,8 @@ import FOMO from "@/public/assets/coins/FOMO";
 import SOL from "@/public/assets/coins/SOL";
 import USDC from "@/public/assets/coins/USDC";
 
+const environment = process.env.NEXT_PUBLIC_ENVIRONMENT || "development";
+
 export type spl_token = {
   tokenName: string;
   tokenMint: string;
@@ -9,7 +11,7 @@ export type spl_token = {
   icon: any;
 };
 
-export const SPL_TOKENS: Array<spl_token> = [
+const SPL_TOKENS: Array<spl_token> = [
   {
     tokenName: "SOL",
     tokenMint: "SOL", //So11111111111111111111111111111111111111112
@@ -36,16 +38,63 @@ export const SPL_TOKENS: Array<spl_token> = [
   // },
 ];
 
-export const wsEndpoint = process.env.NEXT_PUBLIC_WS_ENDPOINT!;
+let wsEndpoint: string;
 
-export const minGameAmount = 0.000001;
+let minGameAmount: number;
 
-export const timeWeightedAvgInterval = 24 * 60 * 60 * 1000;
-export const timeWeightedAvgLimit: Record<string, number> = {
-  SOL: 50,
-  USDC: 100,
-  FOMO: 10000,
+let timeWeightedAvgInterval: number;
+let timeWeightedAvgLimit: Record<string, number>;
+let userLimitMultiplier: number;
+
+let optionsEdge: number;
+
+let launchPromoEdge = false;
+let maintainance = false;
+
+if (environment === "development") {
+  wsEndpoint = "wss://fomo-staking-1.onrender.com";
+
+  minGameAmount = 0.000001;
+
+  timeWeightedAvgInterval = 24 * 60 * 60 * 1000;
+  timeWeightedAvgLimit = {
+    SOL: 50,
+    USDC: 100,
+    FOMO: 10000,
+  };
+  userLimitMultiplier = 5;
+
+  optionsEdge = 0.1;
+  launchPromoEdge = false;
+  maintainance = false;
+} else if (environment === "production") {
+  //TODO: Add production config
+
+  wsEndpoint = "";
+
+  minGameAmount = 0.000001;
+
+  timeWeightedAvgInterval = 24 * 60 * 60 * 1000;
+  timeWeightedAvgLimit = {
+    SOL: 50,
+    USDC: 100,
+    FOMO: 10000,
+  };
+  userLimitMultiplier = 5;
+
+  optionsEdge = 0.1;
+  launchPromoEdge = false;
+  maintainance = false;
+}
+
+export {
+  SPL_TOKENS,
+  wsEndpoint,
+  minGameAmount,
+  timeWeightedAvgInterval,
+  timeWeightedAvgLimit,
+  userLimitMultiplier,
+  optionsEdge,
+  launchPromoEdge,
+  maintainance,
 };
-export const userLimitMultiplier = 5;
-
-export const optionsEdge = 0.1;

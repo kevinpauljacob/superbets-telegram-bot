@@ -1,11 +1,7 @@
 import { useEffect } from "react";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { useSession } from "next-auth/react";
-import toast from "react-hot-toast";
-import { connection, fomoToken, formatNumber, translator } from "@/context/transactions";
-import { LAMPORTS_PER_SOL, PublicKey } from "@solana/web3.js";
 import { useGlobalContext } from "@/components/GlobalContext";
-import { getAssociatedTokenAddressSync } from "@solana/spl-token";
 import StoreCard from "@/components/StoreCard";
 import FOMOHead from "@/components/HeadElement";
 import { getFOMOBalance } from "./stake";

@@ -13,12 +13,11 @@ import StakingUser from "@/models/staking/user";
 import {
   houseEdgeTiers,
   isArrayUnique,
-  launchPromoEdge,
-  maintainance,
   maxPayouts,
   pointTiers,
   stakingTiers,
 } from "@/context/transactions";
+import { launchPromoEdge, maintainance } from "@/context/config";
 import { minGameAmount, wsEndpoint } from "@/context/config";
 import { riskToChance } from "@/components/games/Keno/RiskToChance";
 import { Decimal } from "decimal.js";

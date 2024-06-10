@@ -5,10 +5,10 @@ import { getToken } from "next-auth/jwt";
 import StakingUser from "@/models/staking/user";
 import {
   houseEdgeTiers,
-  launchPromoEdge,
   pointTiers,
   stakingTiers,
 } from "@/context/transactions";
+import { launchPromoEdge } from "@/context/config";
 import { GameType } from "@/utils/provably-fair";
 import { optionsEdge, wsEndpoint } from "@/context/config";
 import { Decimal } from "decimal.js";
