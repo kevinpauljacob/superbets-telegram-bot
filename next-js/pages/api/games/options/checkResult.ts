@@ -3,11 +3,7 @@ import { Option, User } from "../../../../models/games";
 import { NextApiRequest, NextApiResponse } from "next";
 import { getToken } from "next-auth/jwt";
 import StakingUser from "@/models/staking/user";
-import {
-  houseEdgeTiers,
-  pointTiers,
-  stakingTiers,
-} from "@/context/transactions";
+import { houseEdgeTiers, pointTiers, stakingTiers } from "@/context/config";
 import { launchPromoEdge } from "@/context/config";
 import { GameType } from "@/utils/provably-fair";
 import { optionsEdge, wsEndpoint } from "@/context/config";

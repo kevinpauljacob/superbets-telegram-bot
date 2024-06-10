@@ -15,7 +15,7 @@ import {
   maxPayouts,
   pointTiers,
   stakingTiers,
-} from "@/context/transactions";
+} from "@/context/config";
 import { launchPromoEdge, maintainance } from "@/context/config";
 import { minGameAmount, wsEndpoint } from "@/context/config";
 import { riskToChance } from "@/components/games/Wheel/Segments";

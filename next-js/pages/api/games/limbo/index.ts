@@ -15,7 +15,7 @@ import {
   maxPayouts,
   pointTiers,
   stakingTiers,
-} from "@/context/transactions";
+} from "@/context/config";
 import { launchPromoEdge } from "@/context/config";
 import { minGameAmount, wsEndpoint } from "@/context/config";
 import { Decimal } from "decimal.js";

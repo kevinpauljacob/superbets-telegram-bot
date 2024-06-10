@@ -1,10 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useWallet } from "@solana/wallet-adapter-react";
-import {
-  obfuscatePubKey,
-  pointTiers,
-  translator,
-} from "@/context/transactions";
+import { obfuscatePubKey, translator } from "@/context/transactions";
+import { pointTiers } from "@/context/config";
 import { useGlobalContext } from "./GlobalContext";
 import Image from "next/legacy/image";
 import { errorCustom } from "./toasts/ToastGroup";

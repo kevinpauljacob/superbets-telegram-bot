@@ -1,9 +1,9 @@
 import { Connection, Keypair, PublicKey, Transaction } from "@solana/web3.js";
 import {
   createWithdrawTxn,
-  stakingTiers,
   verifyTransaction,
 } from "../../../../context/transactions";
+import { stakingTiers } from "@/context/config";
 import connectDatabase from "../../../../utils/database";
 import User from "../../../../models/staking/user";
 

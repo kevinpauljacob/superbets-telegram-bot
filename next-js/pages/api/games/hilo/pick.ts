@@ -4,7 +4,7 @@ import { NextApiRequest, NextApiResponse } from "next";
 import { Hilo, User } from "@/models/games";
 import { generateGameResult, GameType } from "@/utils/provably-fair";
 import StakingUser from "@/models/staking/user";
-import { houseEdgeTiers, pointTiers } from "@/context/transactions";
+import { houseEdgeTiers, pointTiers } from "@/context/config";
 import { launchPromoEdge } from "@/context/config";
 import { wsEndpoint } from "@/context/config";
 import { Decimal } from "decimal.js";
