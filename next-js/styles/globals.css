@@ -186,6 +186,22 @@ text-shadow-gold {
   animation: blink_dice 0.4s ease-in-out 0s 4;
 }
 
+@keyframes blink_tile {
+  0% {
+    border-color: #fcb10f;
+  }
+  50% {
+    border-color: #fcb10f80;
+  }
+  100% {
+    border-color: #fcb10f;
+  }
+}
+
+.blink_tile {
+  animation: blink_tile 1s ease-in-out 0s infinite;
+}
+
 .box-shadow-green {
   box-shadow:
     0 0 7px #00e372,
@@ -568,4 +584,34 @@ input[type="range"] {
   border-radius: 100%;
 }
 
+/* animation for Infobar */
+/* globals.css */
+@keyframes slideInFromLeft {
+  from {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
 
+@keyframes slideOutToRight {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
+
+.slide-in {
+  animation: slideInFromLeft 1.5s ease-in-out forwards;
+}
+
+.slide-out {
+  animation: slideOutToRight 1.5s ease-in-out forwards;
+}

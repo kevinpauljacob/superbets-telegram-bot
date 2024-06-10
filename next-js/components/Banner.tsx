@@ -1,6 +1,4 @@
 import Image from "next/image";
-import BannerLeft from "/public/assets/storeBannerLeft.svg";
-import BannerRight from "/public/assets/storeBannerRight.svg";
 import Link from "next/link";
 
 export default function StoreBanner() {
@@ -19,7 +17,7 @@ export default function StoreBanner() {
     },
   ];
   return (
-    <div className="relative w-full flex flex-row overflow-x-auto no-scrollbar overflow-hidden">
+    <div className="relative w-full flex flex-row overflow-x-auto no-scrollbar overflow-hidden max-h-52 sm:max-h-full ">
       {games.map((game, index) => (
         <div
           key={index}

@@ -3,8 +3,10 @@ import { getToken } from "next-auth/jwt";
 import { NextApiRequest, NextApiResponse } from "next";
 import { GameSeed, Hilo, Mines } from "@/models/games";
 import { generateServerSeed, seedStatus } from "@/utils/provably-fair";
+import mongoose from "mongoose";
 
 const secret = process.env.NEXTAUTH_SECRET;
+const encryptionKey = Buffer.from(process.env.ENCRYPTION_KEY!, "hex");
 
 export const config = {
   maxDuration: 60,
@@ -16,42 +18,65 @@ type InputType = {
 };
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
-  if (req.method === "POST") {
+  if (req.method !== "POST") {
+    return res
+      .status(405)
+      .json({ success: false, message: "Method not allowed" });
+  }
+
+  try {
+    const { wallet, clientSeed }: InputType = req.body;
+
+    const token = await getToken({ req, secret });
+
+    if (!token || !token.sub || token.sub !== wallet) {
+      return res.status(400).json({
+        success: false,
+        message: "User wallet not authenticated",
+      });
+    }
+
+    if (
+      !wallet ||
+      !clientSeed ||
+      clientSeed.trim() === "" ||
+      !/^[\x00-\x7F]*$/.test(clientSeed)
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "Missing or invalid parameters",
+      });
+    }
+
+    await connectDatabase();
+
+    const session = await mongoose.startSession();
+    session.startTransaction();
+
     try {
-      let { wallet, clientSeed }: InputType = req.body;
+      const pendingMines = await Mines.findOne({
+        wallet,
+        result: "Pending",
+      }).session(session);
 
-      const token = await getToken({ req, secret });
-
-      if (!token || !token.sub || token.sub != wallet)
+      if (pendingMines) {
+        await session.abortTransaction();
+        session.endSession();
         return res.status(400).json({
           success: false,
-          message: "User wallet not authenticated",
+          message: "Pending mines game!",
         });
-
-      await connectDatabase();
-
-      if (
-        !wallet ||
-        !clientSeed ||
-        clientSeed.trim() === "" ||
-        !/^[\x00-\x7F]*$/.test(clientSeed)
-      ) {
-        return res
-          .status(400)
-          .json({ success: false, message: "Missing or invalid parameters" });
       }
 
-      // const pendingMines = await Mines.findOne({ wallet, result: "Pending" });
-      // if (pendingMines)
-      //   return res
-      //     .status(400)
-      //     .json({ success: false, message: "Pending mines game" });
-
-      // const pendingHilo = await Hilo.findOne({ wallet, result: "Pending" });
-      // if (pendingHilo)
-      //   return res
-      //     .status(400)
-      //     .json({ success: false, message: "Pending hilo game" });
+      // const pendingHilo = await Hilo.findOne({ wallet, result: "Pending" }).session(session);
+      // if (pendingHilo) {
+      //   await session.abortTransaction();
+      //   session.endSession();
+      //   return res.status(400).json({
+      //     success: false,
+      //     message: "Pending hilo game!",
+      //   });
+      // }
 
       const expiredGameSeed = await GameSeed.findOneAndUpdate(
         {
@@ -65,6 +90,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         },
         {
           new: true,
+          session,
         },
       );
 
@@ -83,34 +109,41 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
             status: seedStatus.ACTIVE,
           },
         },
-        { projection: { serverSeed: 0 }, new: true },
+        { projection: { serverSeed: 0 }, new: true, session },
       );
 
-      const newServerHash = generateServerSeed();
+      const { encryptedServerSeed, serverSeedHash, iv } =
+        generateServerSeed(encryptionKey);
 
-      const nextGameSeed = await GameSeed.create({
-        wallet,
-        serverSeed: newServerHash.serverSeed,
-        serverSeedHash: newServerHash.serverSeedHash,
-      });
+      const nextGameSeed = await GameSeed.create(
+        [
+          {
+            wallet,
+            serverSeed: encryptedServerSeed,
+            serverSeedHash,
+            iv: iv.toString("hex"),
+          },
+        ],
+        { session },
+      ).then((res) => res.at(0));
+
+      await session.commitTransaction();
+      session.endSession();
 
       let { serverSeed, ...rest } = nextGameSeed.toObject();
-
-      console.log(rest);
 
       return res.status(201).json({
         success: true,
         activeGameSeed,
         nextGameSeed: rest,
       });
-    } catch (e: any) {
-      console.log(e);
-      return res.status(500).json({ success: false, message: e.message });
+    } catch (error: any) {
+      await session.abortTransaction();
+      session.endSession();
+      return res.status(500).json({ success: false, message: error.message });
     }
-  } else {
-    return res
-      .status(405)
-      .json({ success: false, message: "Method not allowed" });
+  } catch (e: any) {
+    return res.status(500).json({ success: false, message: e.message });
   }
 }
 

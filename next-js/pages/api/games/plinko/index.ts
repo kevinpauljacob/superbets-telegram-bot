@@ -110,7 +110,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       const maxStrikeMultiplier = multiplier.at(-1)!;
       const maxPayout = Decimal.mul(amount, maxStrikeMultiplier);
 
-      if (!(maxPayout.toNumber() <= maxPayouts.plinko))
+      if (!(maxPayout.toNumber() <= maxPayouts[tokenMint].plinko))
         return res
           .status(400)
           .json({ success: false, message: "Max payout exceeded" });

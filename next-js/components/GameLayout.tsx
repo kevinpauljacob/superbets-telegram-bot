@@ -1,13 +1,19 @@
-import Head from "next/head";
 import React, { ReactNode } from "react";
 import GameHeader from "./GameHeader";
-import { Table } from "./table/Table";
 import { useGlobalContext } from "./GlobalContext";
-import { formatNumber, translator } from "@/context/transactions";
-import { minGameAmount, truncateNumber } from "@/context/gameTransactions";
+import { translator } from "@/context/transactions";
+import {
+  minGameAmount,
+  optionsEdge,
+  truncateNumber,
+} from "@/context/gameTransactions";
 import Link from "next/link";
 import FomoPlay from "./FomoPlay";
 import FOMOHead from "./HeadElement";
+import { useSession } from "next-auth/react";
+import { useWallet } from "@solana/wallet-adapter-react";
+import { useWalletModal } from "@solana/wallet-adapter-react-ui";
+import { handleSignIn } from "./ConnectWallet";
 
 interface LayoutProps {
   children: ReactNode;
@@ -37,11 +43,21 @@ export const GameFooterInfo: React.FC<GameFooterProps> = ({
   amount,
   chance,
 }) => {
-  const { coinData, setShowWalletModal, houseEdge, language } =
-    useGlobalContext();
+  const { data: session, status } = useSession();
+  const wallet = useWallet();
+  const walletModal = useWalletModal();
+  const {
+    coinData,
+    setShowWalletModal,
+    currentGame,
+    houseEdge,
+    language,
+    selectedCoin,
+  } = useGlobalContext();
+
   return (
     <div className="flex px-0 xl:px-4 mb-0 md:mb-[1.4rem] gap-4 flex-row w-full justify-between">
-      {coinData && coinData[0].amount > minGameAmount && (
+      {selectedCoin && selectedCoin.amount > minGameAmount && (
         <>
           {multiplier !== undefined ? (
             <div className="flex flex-col w-full">
@@ -61,8 +77,16 @@ export const GameFooterInfo: React.FC<GameFooterProps> = ({
               {translator("Profit", language)}
             </span>
             <span className="bg-[#202329] font-chakra text-xs text-white rounded-md px-2 md:px-5 py-3">
-              {truncateNumber(amount * (multiplier * (1 - houseEdge) - 1), 4)}{" "}
-              $SOL
+              {truncateNumber(
+                amount *
+                  (multiplier *
+                    (1 -
+                      (currentGame == "options" ? optionsEdge : 0) +
+                      houseEdge) -
+                    1),
+                4,
+              )}{" "}
+              ${selectedCoin.tokenName}
             </span>
           </div>
 
@@ -79,8 +103,8 @@ export const GameFooterInfo: React.FC<GameFooterProps> = ({
         </>
       )}
 
-      {!coinData ||
-        (coinData[0].amount < minGameAmount && (
+      {!selectedCoin ||
+        (selectedCoin.amount < minGameAmount && (
           <div className="w-full rounded-lg bg-[#d9d9d90d] bg-opacity-10 flex items-center px-3 py-3 text-white md:px-6">
             <div className="w-full text-center font-changa font-medium text-sm md:text-base text-[#F0F0F0] text-opacity-75">
               {translator(
@@ -89,8 +113,11 @@ export const GameFooterInfo: React.FC<GameFooterProps> = ({
               )}{" "}
               <u
                 onClick={() => {
-                  setShowWalletModal(true);
+                  wallet.connected && status === "authenticated"
+                    ? setShowWalletModal(true)
+                    : handleSignIn(wallet, walletModal);
                 }}
+                className="cursor-pointer"
               >
                 {translator("WALLET", language)}
               </u>
@@ -119,7 +146,7 @@ const GameLayout: React.FC<LayoutProps> = ({ children, title }) => {
           })}
         </div>
         <div className="bg-white bg-opacity-10 h-[1px] lg:h-auto w-full lg:w-[1px]" />
-        <div className="fadeInUp flex flex-1 flex-col items-center justify-between gap-0 m-3 lg:m-9 bg-[#0C0F16] rounded-lg p-3 lg:px-10 lg:pt-6 lg:pb-10">
+        <div className="fadeInUp flex flex-1 flex-col items-center justify-between gap-0 m-3 lg:m-9 bg-[#0E0F14] rounded-lg p-3 lg:px-10 lg:pt-6 lg:pb-10">
           {React.Children.map(children, (child) => {
             if (React.isValidElement(child) && child.type === GameDisplay) {
               return child;

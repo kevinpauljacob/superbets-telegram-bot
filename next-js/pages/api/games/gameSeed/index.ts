@@ -9,6 +9,7 @@ import {
 } from "@/utils/provably-fair";
 
 const secret = process.env.NEXTAUTH_SECRET;
+const encryptionKey = Buffer.from(process.env.ENCRYPTION_KEY!, "hex");
 
 export const config = {
   maxDuration: 60,
@@ -39,8 +40,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           .json({ success: false, message: "Missing parameters" });
 
       const clientSeed = generateClientSeed();
-      const serverSeedInfo1 = generateServerSeed();
-      const serverSeedInfo2 = generateServerSeed();
+      const serverSeedInfo1 = generateServerSeed(encryptionKey);
+      const serverSeedInfo2 = generateServerSeed(encryptionKey);
 
       const activeGameSeed = await GameSeed.findOneAndUpdate(
         {
@@ -50,8 +51,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         {
           $setOnInsert: {
             clientSeed,
-            serverSeed: serverSeedInfo1.serverSeed,
+            serverSeed: serverSeedInfo1.encryptedServerSeed,
             serverSeedHash: serverSeedInfo1.serverSeedHash,
+            iv: serverSeedInfo1.iv.toString("hex"),
           },
         },
         {
@@ -73,8 +75,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         {
           $setOnInsert: {
             clientSeed,
-            serverSeed: serverSeedInfo2.serverSeed,
+            serverSeed: serverSeedInfo2.encryptedServerSeed,
             serverSeedHash: serverSeedInfo2.serverSeedHash,
+            iv: serverSeedInfo2.iv.toString("hex"),
           },
         },
         {

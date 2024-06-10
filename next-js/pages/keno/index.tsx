@@ -1,8 +1,6 @@
 import React, { useState, useEffect, useMemo } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import { useWallet } from "@solana/wallet-adapter-react";
-import { toast } from "react-hot-toast";
 import BetSetting from "@/components/BetSetting";
 import { useGlobalContext } from "@/components/GlobalContext";
 import {
@@ -12,11 +10,9 @@ import {
   GameTable,
 } from "@/components/GameLayout";
 import { FormProvider, useForm } from "react-hook-form";
-import { BsInfinity } from "react-icons/bs";
 import Loader from "@/components/games/Loader";
 import BetAmount from "@/components/games/BetAmountInput";
 import BetButton from "@/components/games/BetButton";
-import showInfoToast from "@/components/games/toasts/toasts";
 import { riskToChance } from "@/components/games/Keno/RiskToChance";
 import Bets from "../../components/games/Bets";
 import { soundAlert } from "@/utils/soundUtils";
@@ -27,16 +23,19 @@ import {
   successCustom,
   warningCustom,
 } from "@/components/toasts/ToastGroup";
-import { translator, formatNumber } from "@/context/transactions";
+import { translator } from "@/context/transactions";
 import { minGameAmount, truncateNumber } from "@/context/gameTransactions";
 import { useSession } from "next-auth/react";
+import { GameType } from "@/utils/provably-fair";
+import { handleSignIn } from "@/components/ConnectWallet";
+import { useWalletModal } from "@solana/wallet-adapter-react-ui";
 
 export default function Keno() {
   const wallet = useWallet();
+  const walletModal = useWalletModal();
   const methods = useForm();
   const { data: session, status } = useSession();
   const {
-    coinData,
     getBalance,
     getWalletBalance,
     setShowAutoModal,
@@ -53,12 +52,16 @@ export default function Keno() {
     autoBetProfit,
     setAutoBetProfit,
     useAutoConfig,
-    setUseAutoConfig,
+    selectedCoin,
     kenoRisk,
     setKenoRisk,
     houseEdge,
     maxBetAmt,
     language,
+    liveStats,
+    setLiveStats,
+    enableSounds,
+    setShowWalletModal,
   } = useGlobalContext();
   const [betAmt, setBetAmt] = useState<number | undefined>();
   const [userInput, setUserInput] = useState<number | undefined>();
@@ -135,7 +138,7 @@ export default function Keno() {
       await new Promise((resolve) => setTimeout(resolve, 100));
 
       setChosenNumbers((prevNumbers) => [...prevNumbers, randomNumber]);
-      soundAlert("/sounds/betbutton.wav");
+      soundAlert("/sounds/betbutton.wav", !enableSounds);
       randomNumbers.push(randomNumber);
       ++randomCount;
     }
@@ -184,13 +187,15 @@ export default function Keno() {
   const handleBet = async () => {
     try {
       if (!wallet.connected || !wallet.publicKey) {
-        throw new Error("Wallet not connected");
+        throw new Error(
+          translator("Wallet not connected", language),
+        );;
       }
       if (!betAmt || betAmt === 0) {
-        throw new Error("Set Amount.");
+        throw new Error(translator("Set Amount.", language));
       }
-      if (coinData && coinData[0].amount < betAmt) {
-        throw new Error("Insufficient balance for bet !");
+      if (selectedCoin && selectedCoin.amount < betAmt) {
+        throw new Error(translator("Insufficient balance for bet !", language));
       }
 
       setIsRolling(true);
@@ -203,7 +208,7 @@ export default function Keno() {
         body: JSON.stringify({
           wallet: wallet.publicKey,
           amount: betAmt,
-          tokenMint: "SOL",
+          tokenMint: selectedCoin?.tokenMint,
           chosenNumbers: chosenNumbers,
           risk: kenoRisk,
         }),
@@ -224,9 +229,9 @@ export default function Keno() {
           await new Promise((resolve) => setTimeout(resolve, 200));
 
           if (chosenNumbers.includes(number)) {
-            soundAlert("/sounds/win3.wav");
+            soundAlert("/sounds/win3.wav", !enableSounds);
           } else {
-            soundAlert("/sounds/betbutton.wav");
+            soundAlert("/sounds/betbutton.wav", !enableSounds);
           }
           setStrikeNumbers((prevNumbers) => [...prevNumbers, number]);
         }
@@ -235,7 +240,24 @@ export default function Keno() {
       else errorCustom(message);
 
       const win = result === "Won";
-      if (win) soundAlert("/sounds/win.wav");
+      if (win) soundAlert("/sounds/win.wav", !enableSounds);
+
+      setLiveStats([
+        ...liveStats,
+        {
+          game: GameType.keno,
+          amount: betAmt,
+          result: win ? "Won" : "Lost",
+          pnl: win ? betAmt * strikeMultiplier - betAmt : -betAmt,
+          totalPNL:
+            liveStats.length > 0
+              ? liveStats[liveStats.length - 1].totalPNL +
+                (win ? betAmt * strikeMultiplier - betAmt : -betAmt)
+              : win
+                ? betAmt * strikeMultiplier - betAmt
+                : -betAmt,
+        },
+      ]);
 
       // auto options
       if (betType === "auto") {
@@ -259,7 +281,7 @@ export default function Keno() {
         );
         // update count
         if (typeof autoBetCount === "number") {
-          autoBetCount === 1 && warningCustom("Auto bet stopped", "top-right");
+          autoBetCount === 1 && warningCustom(translator("Auto bet stopped", language), "top-left");
         } else
           setAutoBetCount(
             autoBetCount.length > 12
@@ -268,7 +290,7 @@ export default function Keno() {
           );
       }
     } catch (error: any) {
-      errorCustom(error?.message ?? "Could not make the Bet.");
+      errorCustom(translator(error?.message ?? "Could not make the Bet.", language));
       setIsRolling(false);
       setAutoBetCount(0);
       setStartAuto(false);
@@ -310,9 +332,9 @@ export default function Keno() {
             (autoWinChangeReset || autoLossChangeReset
               ? betAmt
               : autoBetCount === "inf"
-              ? Math.max(0, betAmt)
-              : betAmt *
-                (autoLossChange !== null ? autoLossChange / 100.0 : 0));
+                ? Math.max(0, betAmt)
+                : betAmt *
+                  (autoLossChange !== null ? autoLossChange / 100.0 : 0));
 
         // console.log("Current bet amount:", betAmt);
         // console.log("Auto loss change:", autoLossChange);
@@ -325,7 +347,12 @@ export default function Keno() {
         autoBetProfit > 0 &&
         autoBetProfit >= autoStopProfit
       ) {
-        warningCustom("Profit limit reached.", "top-right");
+        setTimeout(() => {
+          warningCustom(
+            translator("Profit limit reached.", language),
+            "top-left",
+          );
+        }, 500);
         setAutoBetCount(0);
         setStartAuto(false);
         return;
@@ -334,9 +361,14 @@ export default function Keno() {
         useAutoConfig &&
         autoStopLoss &&
         autoBetProfit < 0 &&
-        potentialLoss <= -autoStopLoss
+        potentialLoss < -autoStopLoss
       ) {
-        warningCustom("Loss limit reached.", "top-right");
+        setTimeout(() => {
+          warningCustom(
+            translator("Loss limit reached.", language),
+            "top-left",
+          );
+        }, 500);
         setAutoBetCount(0);
         setStartAuto(false);
         return;
@@ -354,7 +386,7 @@ export default function Keno() {
   const onSubmit = async (data: any) => {
     if (betType === "auto") {
       if (betAmt === 0) {
-        errorCustom("Set Amount.");
+        errorCustom(translator("Set Amount.", language));
         return;
       }
       if (typeof autoBetCount === "number" && autoBetCount <= 0) {
@@ -414,8 +446,8 @@ export default function Keno() {
             {startAuto && (
               <div
                 onClick={() => {
-                  soundAlert("/sounds/betbutton.wav");
-                  warningCustom("Auto bet stopped", "top-right");
+                  soundAlert("/sounds/betbutton.wav", !enableSounds);
+                  warningCustom(translator("Auto bet stopped", language), "top-left");
                   setAutoBetCount(0);
                   setStartAuto(false);
                 }}
@@ -429,7 +461,6 @@ export default function Keno() {
                 !wallet ||
                 !session?.user ||
                 isRolling ||
-                (coinData && coinData[0].amount < minGameAmount) ||
                 (betAmt !== undefined &&
                   maxBetAmt !== undefined &&
                   betAmt > maxBetAmt)
@@ -550,8 +581,8 @@ export default function Keno() {
                   {startAuto && (
                     <div
                       onClick={() => {
-                        soundAlert("/sounds/betbutton.wav");
-                        warningCustom("Auto bet stopped", "top-right");
+                        soundAlert("/sounds/betbutton.wav", !enableSounds);
+                        warningCustom(translator("Auto bet stopped", language), "top-left");
                         setAutoBetCount(0);
                         setStartAuto(false);
                       }}
@@ -565,7 +596,6 @@ export default function Keno() {
                       !wallet ||
                       !session?.user ||
                       isRolling ||
-                      (coinData && coinData[0].amount < minGameAmount) ||
                       (betAmt !== undefined &&
                         maxBetAmt !== undefined &&
                         betAmt > maxBetAmt)
@@ -586,10 +616,10 @@ export default function Keno() {
         </>
       </GameOptions>
       <GameDisplay>
-        <div className="w-full flex justify-between items-center">
-          <div className="hidden sm:absolute top-10 left-12">
+        <div className="w-full flex justify-between items-center h-[2.125rem] mb-7 sm:mb-0">
+          <div>
             {isRolling ? (
-              <div className="font-chakra text-sm font-medium text-white text-opacity-75">
+              <div className="font-chakra text-xs sm:text-sm font-medium text-white text-opacity-75">
                 {translator("Betting", language)}...
               </div>
             ) : null}
@@ -603,7 +633,7 @@ export default function Keno() {
                   key={number}
                   onClick={() => {
                     handleChosenNumber(number);
-                    soundAlert("/sounds/betbutton.wav");
+                    soundAlert("/sounds/betbutton.wav", !enableSounds);
                   }}
                   className={`flex items-center justify-center cursor-pointer ${
                     !isRolling &&
@@ -611,14 +641,14 @@ export default function Keno() {
                     chosenNumbers.includes(number)
                       ? "bg-[#7839C5] border-transparent"
                       : strikeNumbers.includes(number)
-                      ? chosenNumbers.includes(number)
-                        ? "bg-black border-fomo-green"
-                        : chosenNumbers.length === 0
-                        ? "bg-[#202329] border-transparent"
-                        : "bg-black border-fomo-red text-fomo-red"
-                      : chosenNumbers.includes(number)
-                      ? "bg-[#7839C5] border-transparent"
-                      : "bg-[#202329] border-transparent"
+                        ? chosenNumbers.includes(number)
+                          ? "bg-black border-fomo-green"
+                          : chosenNumbers.length === 0
+                            ? "bg-[#202329] border-transparent"
+                            : "bg-black border-fomo-red text-fomo-red"
+                        : chosenNumbers.includes(number)
+                          ? "bg-[#7839C5] border-transparent"
+                          : "bg-[#202329] border-transparent"
                   } rounded-md text-center border-2 transition-all duration-300 ease-in-out w-[1.75rem] h-[1.75rem] sm:w-[3.4375rem] sm:h-[3.4375rem] md:w-[3.75rem] md:h-[3.75rem] xl:w-[3.8rem] xl:h-[3.8rem]`}
                 >
                   {strikeNumbers.includes(number) &&
@@ -635,8 +665,8 @@ export default function Keno() {
           </div>
         </div>
         <div className="relative flex w-full justify-between px-0 xl:px-4 mb-0 px:mb-6 gap-4">
-          {coinData &&
-            coinData[0].amount > minGameAmount &&
+          {selectedCoin &&
+            selectedCoin.amount > minGameAmount &&
             chosenNumbers.length > 0 && (
               <div className="w-full">
                 <div className="flex justify-between gap-[3px] sm:gap-3.5 lg:gap-2 2xl:gap-3.5 text-white w-full">
@@ -686,7 +716,7 @@ export default function Keno() {
                                 </span>
                               </div>
                               <div className="border border-white/10 rounded-[5px] p-3 mt-2">
-                                {coinData
+                                {selectedCoin
                                   ? truncateNumber(
                                       Math.max(
                                         0,
@@ -696,7 +726,7 @@ export default function Keno() {
                                       4,
                                     )
                                   : 0}{" "}
-                                SOL
+                                {selectedCoin.tokenName}
                               </div>
                             </div>
                             <div className="w-1/2">
@@ -716,26 +746,32 @@ export default function Keno() {
               </div>
             )}
 
-          {!coinData ||
-            (coinData[0].amount < minGameAmount ? (
-              <div className="w-full rounded-lg bg-[#d9d9d90d] bg-opacity-10 flex items-center px-3 py-3 text-white md:px-6">
-                <div className="w-full text-center font-changa font-medium text-sm md:text-base text-[#F0F0F0] text-opacity-75">
-                  {translator(
-                    "Please deposit funds to start playing. View",
-                    language,
-                  )}{" "}
-                  <Link href="/balance">
-                    <u>{translator("WALLET", language)}</u>
-                  </Link>
-                </div>
+          {!selectedCoin || selectedCoin.amount < minGameAmount ? (
+            <div className="w-full rounded-lg bg-[#d9d9d90d] bg-opacity-10 flex items-center px-3 py-3 text-white md:px-6">
+              <div className="w-full text-center font-changa font-medium text-sm md:text-base text-[#F0F0F0] text-opacity-75">
+                {translator(
+                  "Please deposit funds to start playing. View",
+                  language,
+                )}{" "}
+                <u
+                  onClick={() => {
+                    wallet.connected && status === "authenticated"
+                      ? setShowWalletModal(true)
+                      : handleSignIn(wallet, walletModal);
+                  }}
+                  className="cursor-pointer"
+                >
+                  {translator("WALLET", language)}
+                </u>
               </div>
-            ) : coinData && chosenNumbers.length === 0 ? (
-              <div className="w-full rounded-lg bg-[#d9d9d90d] bg-opacity-10 flex items-center px-3 py-3 text-white md:px-6">
-                <div className="w-full text-center font-changa font-medium text-sm md:text-base text-[#F0F0F0] text-opacity-75">
-                  {translator("Pick up to 10 numbers", language)}
-                </div>
+            </div>
+          ) : selectedCoin && chosenNumbers.length === 0 ? (
+            <div className="w-full rounded-lg bg-[#d9d9d90d] bg-opacity-10 flex items-center px-3 py-3 text-white md:px-6">
+              <div className="w-full text-center font-changa font-medium text-sm md:text-base text-[#F0F0F0] text-opacity-75">
+                {translator("Pick up to 10 numbers", language)}
               </div>
-            ) : null)}
+            </div>
+          ) : null}
         </div>
       </GameDisplay>
       <GameTable>

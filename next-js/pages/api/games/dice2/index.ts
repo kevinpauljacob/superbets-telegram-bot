@@ -6,19 +6,26 @@ import {
   generateGameResult,
   GameType,
   seedStatus,
+  decryptServerSeed,
+  GameTokens,
 } from "@/utils/provably-fair";
 import StakingUser from "@/models/staking/user";
 import {
   houseEdgeTiers,
   launchPromoEdge,
+  maintainance,
   maxPayouts,
   pointTiers,
+  stakingTiers,
 } from "@/context/transactions";
 import { minGameAmount, wsEndpoint } from "@/context/gameTransactions";
 import { Decimal } from "decimal.js";
+import { SPL_TOKENS } from "@/context/config";
+import updateGameStats from "../global/updateGameStats";
 Decimal.set({ precision: 9 });
 
 const secret = process.env.NEXTAUTH_SECRET;
+const encryptionKey = Buffer.from(process.env.ENCRYPTION_KEY!, "hex");
 
 export const config = {
   maxDuration: 60,
@@ -38,6 +45,12 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       let { wallet, amount, tokenMint, chance, direction }: InputType =
         req.body;
 
+      if (maintainance)
+        return res.status(400).json({
+          success: false,
+          message: "Under maintenance",
+        });
+
       const token = await getToken({ req, secret });
 
       if (!token || !token.sub || token.sub != wallet)
@@ -51,14 +64,11 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           .status(400)
           .json({ success: false, message: "Missing parameters" });
 
-      if (amount < minGameAmount)
-        return res.status(400).json({
-          success: false,
-          message: "Invalid bet amount",
-        });
-
+      const splToken = SPL_TOKENS.find((t) => t.tokenMint === tokenMint);
       if (
-        tokenMint !== "SOL" ||
+        typeof amount !== "number" ||
+        !isFinite(amount) ||
+        !splToken ||
         !(2 <= chance && chance <= 98) ||
         !(direction === "over" || direction === "under")
       )
@@ -66,10 +76,16 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           .status(400)
           .json({ success: false, message: "Invalid parameters" });
 
-      const strikeMultiplier = new Decimal(100).dividedBy(chance).toDP(2);
+      if (amount < minGameAmount)
+        return res.status(400).json({
+          success: false,
+          message: "Invalid bet amount",
+        });
+
+      const strikeMultiplier = new Decimal(100).dividedBy(chance).toDP(6);
       const maxPayout = Decimal.mul(amount, strikeMultiplier);
 
-      if (!(maxPayout.toNumber() < maxPayouts.dice2))
+      if (!(maxPayout.toNumber() <= maxPayouts[tokenMint as GameTokens].dice2))
         return res
           .status(400)
           .json({ success: false, message: "Max payout exceeded" });
@@ -96,8 +112,19 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         {},
         { upsert: true, new: true },
       );
-      const userTier = userData?.tier ?? 0;
-      const houseEdge = launchPromoEdge ? 0 : houseEdgeTiers[userTier];
+
+      const stakeAmount = userData?.stakedAmount ?? 0;
+      const stakingTier = Object.entries(stakingTiers).reduce((prev, next) => {
+        return stakeAmount >= next[1]?.limit ? next : prev;
+      })[0];
+      const isFomoToken =
+        tokenMint === SPL_TOKENS.find((t) => t.tokenName === "FOMO")?.tokenMint
+          ? true
+          : false;
+      const houseEdge =
+        launchPromoEdge || isFomoToken
+          ? 0
+          : houseEdgeTiers[parseInt(stakingTier)];
 
       const activeGameSeed = await GameSeed.findOneAndUpdate(
         {
@@ -116,7 +143,17 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         throw new Error("Server hash not found!");
       }
 
-      const { serverSeed, clientSeed, nonce } = activeGameSeed;
+      const {
+        serverSeed: encryptedServerSeed,
+        clientSeed,
+        nonce,
+        iv,
+      } = activeGameSeed;
+      const serverSeed = decryptServerSeed(
+        encryptedServerSeed,
+        encryptionKey,
+        Buffer.from(iv, "hex"),
+      );
 
       const strikeNumber = generateGameResult(
         serverSeed,
@@ -130,6 +167,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       let result = "Lost";
       let amountWon = new Decimal(0);
       let amountLost = amount;
+      let feeGenerated = 0;
 
       if (
         (direction === "over" && strikeNumber > 100 - chance) ||
@@ -138,7 +176,13 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         result = "Won";
         amountWon = strikeMultiplier.mul(amount).mul(Decimal.sub(1, houseEdge));
         amountLost = Math.max(new Decimal(amount).sub(amountWon).toNumber(), 0);
+
+        feeGenerated = Decimal.mul(amount, strikeMultiplier)
+          .mul(houseEdge)
+          .toNumber();
       }
+
+      const addGame = !user.gamesPlayed.includes(GameType.dice2);
 
       const userUpdate = await User.findOneAndUpdate(
         {
@@ -155,6 +199,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
             "deposit.$.amount": amountWon.sub(amount),
             numOfGamesPlayed: 1,
           },
+          ...(addGame ? { $addToSet: { gamesPlayed: GameType.dice2 } } : {}),
         },
         {
           new: true,
@@ -182,6 +227,14 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       });
       await dice2.save();
 
+      await updateGameStats(
+        GameType.dice2,
+        tokenMint,
+        amount,
+        addGame,
+        feeGenerated,
+      );
+
       const pointsGained =
         0 * user.numOfGamesPlayed + 1.4 * amount * userData.multiplier;
 
@@ -197,9 +250,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         {
           $inc: {
             points: pointsGained,
-          },
-          $set: {
-            tier: newTier,
           },
         },
       );

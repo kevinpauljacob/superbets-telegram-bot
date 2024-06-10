@@ -1,5 +1,5 @@
 import { useWallet } from "@solana/wallet-adapter-react";
-import { ReactNode } from "react";
+import { ReactNode, useEffect } from "react";
 import toast from "react-hot-toast";
 import BetRow from "../games/BetRow";
 import { useGlobalContext } from "../GlobalContext";
@@ -8,6 +8,9 @@ import Loader from "../games/Loader";
 import { errorCustom } from "../toasts/ToastGroup";
 import { translator } from "@/context/transactions";
 import { useRouter } from "next/router";
+import Image from "next/image";
+import Dollar from "@/public/assets/dollar.png";
+import { useState } from "react";
 
 interface PaginationProps {
   page: number;
@@ -180,32 +183,91 @@ interface TableButtonProps {
   setAll: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
+interface ButtonProps {
+  active: boolean;
+  onClick: () => void;
+  label: string;
+}
+
+export const TButton: React.FC<ButtonProps> = ({ active, onClick, label }) => {
+  return (
+    <button
+      onClick={onClick}
+      className={`${
+        active
+          ? "bg-[#202329] text-opacity-90"
+          : "bg-transparent hover:bg-[#9361d1] focus:bg-[#602E9E] text-opacity-50 hover:text-opacity-90"
+      } transform rounded-[5px] px-[1.2rem] py-2 font-medium tracking-wider font-sans text-sm text-white transition duration-200 flex items-center`}
+    >
+      {label}
+    </button>
+  );
+};
+
 export const TableButtons: React.FC<TableButtonProps> = ({ all, setAll }) => {
   const wallet = useWallet();
+  const router = useRouter();
   const { language } = useGlobalContext();
+  const [highRollers, setHighRollers] = useState(false);
+
+  const home = router.pathname.split("/")[1] === "";
+
   return (
-    <div className="mt-[1rem] md:mt-[3.5rem] flex w-full items-center justify-center gap-4 md:justify-start">
-      <button
-        onClick={() => {
-          if (wallet.publicKey) setAll(false);
-          else errorCustom("Wallet not connected");
-        }}
-        className={`${
-          all ? "bg-[#202329] hover:bg-[#47484A]" : "bg-[#7839C5]"
-        } w-full transform rounded-[5px] px-8 py-2 font-changa text-xl text-white transition duration-200 md:w-fit`}
-      >
-        {translator("My Bets", language)}
-      </button>
-      <button
-        onClick={() => {
-          setAll(true);
-        }}
-        className={`${
-          all ? "bg-[#7839C5]" : "bg-[#202329] hover:bg-[#47484A]"
-        } w-full transform rounded-[5px] px-8 py-2 font-changa text-xl text-white transition duration-200 md:w-fit`}
-      >
-        {translator("All Bets", language)}
-      </button>
+    <div
+      className={`flex flex-col md:flex-row justify-between items-center ${
+        home ? "" : "mt-20"
+      }`}
+    >
+      <div className="hidden md:flex items-center ">
+        <Image src={Dollar} alt="" width={26} height={26} />
+        <span className="font-semibold font-changa text-xl text-white text-opacity-90 pl-3">
+          {translator("Bets", language)}
+        </span>
+      </div>
+      <div className="flex w-full md:w-auto items-center gap-2 justify-center md:justify-end border-2 p-1.5 rounded-lg border-white border-opacity-[5%]">
+        <TButton
+          active={!all && !highRollers}
+          onClick={() => {
+            const { table, ...rest } = router.query;
+            router.push({
+              pathname: router.pathname,
+              query: { ...rest },
+            });
+            if (wallet.publicKey) {
+              setAll(false);
+              setHighRollers(false);
+            } else {
+              errorCustom(translator("Wallet not connected", language));
+            }
+          }}
+          label={translator("My Bets", language)}
+        />
+        <TButton
+          active={all}
+          onClick={() => {
+            setAll(true);
+            setHighRollers(false);
+            const { table, ...rest } = router.query;
+            router.push({
+              pathname: router.pathname,
+              query: { ...rest },
+            });
+          }}
+          label={translator("All Bets", language)}
+        />
+        <TButton
+          active={highRollers}
+          onClick={() => {
+            setAll(false);
+            setHighRollers(true);
+            router.push({
+              pathname: router.pathname,
+              query: { table: "high-rollers" },
+            });
+          }}
+          label={translator("High Rollers", language)}
+        />
+      </div>
     </div>
   );
 };
@@ -222,7 +284,7 @@ export const TableHeader = ({ all, setAll }: TableButtonProps) => {
   const { language } = useGlobalContext();
   return (
     <>
-      <div className="mb-[1.4rem] hidden md:flex w-full flex-row items-center gap-2 bg-[#121418] py-1 rounded-[5px]">
+      <div className="mb-[1.125rem] hidden md:flex w-full flex-row items-center gap-2 bg-[#121418] py-1 rounded-[5px]">
         {!all
           ? headers.map((header, index) => (
               <span
@@ -274,7 +336,7 @@ export const Table: React.FC<TableProps> = ({
 }) => {
   const transactionsPerPage = 10;
   const router = useRouter();
-
+  const [displayBets, setDisplayBets] = useState(bets);
   const home = router.pathname.split("/")[1] === "";
 
   const {
@@ -286,43 +348,65 @@ export const Table: React.FC<TableProps> = ({
     language,
   } = useGlobalContext();
 
+  useEffect(() => {
+    if (router.query.table === "high-rollers") {
+      // to-do conversions
+      // filter amount >= 2 SOL
+      setDisplayBets(bets.filter((bet) => bet.amount >= 2));
+    } else {
+      setDisplayBets(bets);
+    }
+  }, [router.query, bets]);
+
   return (
     <div
       className={`flex w-full flex-col
         ${loading ? " h-[50rem]" : ""}
         ${home ? "" : "pb-10"}`}
     >
-      {!home && <TableButtons all={all} setAll={setAll} />}
+      <TableButtons all={all} setAll={setAll} />
       {loading ? (
         <div className="h-20">
           <Loader />
         </div>
       ) : (
         <>
-          <div className={`scrollbar w-full ${home ? "" : "mt-8 pb-8"}`}>
+          <div
+            className={`scrollbar w-full ${
+              home ? "mt-[1.125rem]" : "mt-[1.125rem] pb-8"
+            }`}
+          >
             <div className="flex w-full md:min-w-[50rem] flex-col items-center">
               <TableHeader all={all} setAll={setAll} />
-              <div className="flex flex-col items-center w-full max-h-[36rem] overflow-hidden">
-                {bets?.length ? (
-                  (home
-                    ? bets
-                    : bets.slice(
-                        page * transactionsPerPage - transactionsPerPage,
-                        page * transactionsPerPage,
-                      )
-                  ).map((bet, index) => (
-                    <div
-                      key={index}
-                      className="mb-2.5 flex w-full flex-row items-center gap-2 rounded-[5px] bg-[#121418] hover:bg-[#1f2024] py-3"
-                    >
-                      <BetRow
-                        bet={bet}
-                        all={all}
-                        openModal={openModal}
-                        setVerifyModalData={setVerifyModalData}
+              <div className="relative flex flex-col items-center w-full max-h-[36rem] overflow-hidden">
+                {displayBets?.length ? (
+                  <>
+                    {(home
+                      ? displayBets.slice(0, 10)
+                      : displayBets.slice(
+                          page * transactionsPerPage - transactionsPerPage,
+                          page * transactionsPerPage,
+                        )
+                    ).map((bet, index) => (
+                      <div
+                        key={index}
+                        className="mb-2.5 flex w-full flex-row items-center gap-2 rounded-[5px] bg-[#121418] hover:bg-[#1f2024] py-3"
+                      >
+                        <BetRow
+                          bet={bet}
+                          all={all}
+                          openModal={openModal}
+                          setVerifyModalData={setVerifyModalData}
+                        />
+                      </div>
+                    ))}
+                    {home && (
+                      <div
+                        className="absolute inset-x-0 bottom-0 h-[11rem] bg-[linear-gradient(0deg,#0F0F0F_0%,rgba(15,15,15,0.00)_100%)] pointer-events-none"
+                        style={{ zIndex: 1 }}
                       />
-                    </div>
-                  ))
+                    )}
+                  </>
                 ) : (
                   <span className="font-changa text-[#F0F0F080]">
                     {translator("No Bets made.", language)}
@@ -331,7 +415,7 @@ export const Table: React.FC<TableProps> = ({
               </div>
             </div>
           </div>
-          {!home && (
+          {!home && displayBets.length > 0 && (
             <TablePagination
               page={page}
               setPage={setPage}

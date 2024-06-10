@@ -2,7 +2,6 @@ import Bets from "../../components/games/Bets";
 import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import { useWallet } from "@solana/wallet-adapter-react";
-import toast from "react-hot-toast";
 import Loader from "../../components/games/Loader";
 import { placeBet, truncateNumber } from "../../context/gameTransactions";
 import { checkResult as checkResultAPI } from "../../context/gameTransactions";
@@ -17,12 +16,13 @@ import {
 } from "@/components/GameLayout";
 import BetAmount from "@/components/games/BetAmountInput";
 import BetButton from "@/components/games/BetButton";
-import BalanceAlert from "@/components/games/BalanceAlert";
 import { soundAlert } from "@/utils/soundUtils";
 import { errorCustom, successCustom } from "@/components/toasts/ToastGroup";
-import { translator, formatNumber } from "@/context/transactions";
+import { translator } from "@/context/transactions";
 import { minGameAmount } from "@/context/gameTransactions";
 import { useSession } from "next-auth/react";
+import { useRouter } from "next/router";
+import { GameType } from "@/utils/provably-fair";
 
 const Timer = dynamic(() => import("../../components/games/Timer"), {
   ssr: false,
@@ -35,6 +35,9 @@ export default function Options() {
   const wallet = useWallet();
   const methods = useForm();
   const { data: session, status } = useSession();
+  const router = useRouter();
+
+  let checkBet: NodeJS.Timeout | null = null;
 
   const {
     walletBalance,
@@ -45,6 +48,10 @@ export default function Options() {
     setShowWalletModal,
     maxBetAmt,
     language,
+    setLiveStats,
+    liveStats,
+    selectedCoin,
+    enableSounds,
   } = useGlobalContext();
 
   const [livePrice, setLivePrice] = useState(0);
@@ -62,7 +69,6 @@ export default function Options() {
   const [loading, setLoading] = useState(false);
   const [refresh, setRefresh] = useState(true);
   const [betTime, setBetTime] = useState();
-  const [betEndPrice, setBetEndPrice] = useState<number>();
   const [betResults, setBetResults] = useState<
     { result: number; win: boolean }[]
   >([]);
@@ -73,42 +79,78 @@ export default function Options() {
       : 0,
   );
 
+  const handleBeforeUnload = () => {
+    if (checkBet) {
+      console.log("clearing");
+      clearTimeout(checkBet);
+    }
+  };
+
+  useEffect(() => {
+    router.events.on("routeChangeStart", handleBeforeUnload);
+
+    return () => {
+      router.events.off("routeChangeStart", handleBeforeUnload);
+    };
+  }, [router.events]);
+
   const getResult = async () => {
     setLoading(true);
     setCheckResult(true);
     try {
-      checkResultAPI(wallet).then((res) => {
-        if (res.success) {
-          if (res?.data?.result == "Won") {
-            successCustom(res?.message);
-            soundAlert("/sounds/win.wav");
-          } else errorCustom(res?.message);
+      let res = await checkResultAPI(wallet);
+      if (res.success) {
+        if (res?.data?.result == "Won") {
+          successCustom(res?.message);
+          soundAlert("/sounds/win.wav", !enableSounds);
+        } else errorCustom(res?.message);
+        if (!result) {
+          console.log("updating");
           setResult(res?.data?.result);
           setResultAmt(
             res?.data?.result == "Won"
               ? res?.data?.amountWon
               : res?.data?.amountLost,
           );
-
-          setBetResults((prevResults) => {
-            const newResults = [
-              ...prevResults,
-              {
-                result: res?.data?.amountWon,
-                win: res?.data?.result === "Won",
-              },
-            ];
-            if (newResults.length > 6) {
-              newResults.shift();
-            }
-            return newResults;
-          });
-          setRefresh(true);
-        } else {
-          throw Error(res?.message ?? "Could not fetch result!");
         }
+
+        let win = res?.data?.result == "Won";
+
+        setLiveStats([
+          ...liveStats,
+          {
+            game: GameType.options,
+            amount: betAmt!,
+            result: win ? "Won" : "Lost",
+            pnl: win ? betAmt! * 2 - betAmt! : -betAmt!,
+            totalPNL:
+              liveStats.length > 0
+                ? liveStats[liveStats.length - 1].totalPNL +
+                  (win ? betAmt! * 2 - betAmt! : -betAmt!)
+                : win
+                  ? betAmt! * 2 - betAmt!
+                  : -betAmt!,
+          },
+        ]);
+
+        setRefresh(true);
         setLoading(false);
-      });
+        setBetResults((prevResults) => {
+          const newResults = [
+            ...prevResults,
+            {
+              result: res?.data?.amountWon,
+              win: res?.data?.result === "Won",
+            },
+          ];
+          if (newResults.length > 6) {
+            newResults.shift();
+          }
+          return newResults;
+        });
+      } else {
+        throw Error(res?.message ?? "Could not fetch result!");
+      }
     } catch (e: any) {
       errorCustom(e?.message ?? "Could not fetch result.");
       setResult(null);
@@ -126,7 +168,7 @@ export default function Options() {
         return;
       }
 
-      if (betAmt > coinData![0].amount) {
+      if (betAmt > selectedCoin!.amount) {
         errorCustom("Insufficient balance to place bet");
         setBetType(null);
         setCheckResult(false);
@@ -137,35 +179,27 @@ export default function Options() {
       let res = await placeBet(
         wallet,
         betAmt,
-        "SOL",
+        selectedCoin.tokenMint,
         betType === "up" ? "betUp" : "betDown",
         betInterval,
       );
       if (res.success) {
-        successCustom(res?.message ?? "Bet placed");
+        // successCustom(res?.message ?? "Bet placed");
         setRefresh(true);
-        setStrikePrice(res?.data?.strikePrice);
-        setBetTime(res?.data?.betTime);
-        setTimeLeft(
-          new Date(res?.data?.betTime).getTime() +
-            betInterval * 60000 -
-            Date.now(),
-        );
-        setTimeout(async () => {
-          setBetEnd(true);
-          setCheckResult(true);
-
-          let betEndPrice = await fetch(
-            `https://hermes.pyth.network/api/get_price_feed?id=0xef0d8b6fda2ceba41da15d4095d1da392a0d2f8ed0c6c7bc0f4cfac8c280b56d&publish_time=${Math.floor(
-              (new Date(res?.data?.betTime).getTime() + betInterval * 60000) /
-                1000,
-            )}`,
-          )
-            .then((res) => res.json())
-            .then((data) => data.price.price * Math.pow(10, data.price.expo));
-          setBetEndPrice(betEndPrice);
-          getResult();
-        }, betInterval * 60000);
+        getActiveBet();
+        // setStrikePrice(res?.data?.strikePrice);
+        // setBetTime(res?.data?.betTime);
+        // setTimeLeft(
+        //   new Date(res?.data?.betTime).getTime() +
+        //     betInterval * 60000 -
+        //     Date.now(),
+        // );
+        // checkBet = setTimeout(async () => {
+        //   console.log("getting old result");
+        //   setBetEnd(true);
+        //   setCheckResult(true);
+        //   getResult();
+        // }, betInterval * 60000);
       } else {
         setCheckResult(false);
         setBetEnd(false);
@@ -179,10 +213,15 @@ export default function Options() {
       setBetEnd(false);
       setLoading(false);
     }
+    return () => {
+      if (checkBet) {
+        clearTimeout(checkBet);
+      }
+    };
   };
 
   const getActiveBet = async () => {
-    if (!wallet || !wallet.publicKey) return;
+    if (!wallet || !wallet.publicKey || loading) return;
     setLoading(true);
     try {
       fetch(
@@ -199,31 +238,21 @@ export default function Options() {
             setBetTime(bet?.betTime);
             setTimeLeft(
               new Date(bet?.betTime).getTime() +
-                betInterval * 60000 -
+                bet?.timeFrame * 1000 -
                 Date.now(),
             );
             const remainingTime =
               new Date(bet?.betTime).getTime() +
-              betInterval * 60000 -
+              bet?.timeFrame * 1000 -
               Date.now();
-            setTimeout(async () => {
-              setBetEnd(true);
-              setCheckResult(true);
-
-              let betEndPrice = await fetch(
-                `https://hermes.pyth.network/api/get_price_feed?id=0xef0d8b6fda2ceba41da15d4095d1da392a0d2f8ed0c6c7bc0f4cfac8c280b56d&publish_time=${Math.floor(
-                  new Date(bet.betEndTime).getTime() / 1000,
-                )}`,
-              )
-                .then((res) => res.json())
-                .then(
-                  (data) => data.price.price * Math.pow(10, data.price.expo),
-                );
-              setBetEndPrice(betEndPrice);
-              if (!checkResult) getResult();
-            }, remainingTime);
-
             setBetEnd(new Date(bet.betEndTime!).getTime() < Date.now());
+            if (!checkBet) {
+              checkBet = setTimeout(async () => {
+                setBetEnd(true);
+                setCheckResult(true);
+                if (!checkResult) getResult();
+              }, remainingTime);
+            }
           }
           setLoading(false);
         });
@@ -231,6 +260,11 @@ export default function Options() {
       setLoading(false);
       console.error(e);
     }
+    return () => {
+      if (checkBet) {
+        clearTimeout(checkBet);
+      }
+    };
   };
 
   useEffect(() => {
@@ -242,7 +276,12 @@ export default function Options() {
   }, [wallet?.publicKey, refresh]);
 
   useEffect(() => {
-    getActiveBet();
+    if (wallet?.publicKey && status === "authenticated") {
+      getActiveBet();
+      if (checkBet) {
+        clearTimeout(checkBet);
+      }
+    }
   }, [wallet.publicKey]);
 
   useEffect(() => {
@@ -269,13 +308,16 @@ export default function Options() {
       setLoading(false);
       setResult(null);
       setBetEnd(false);
+      setBetTime(undefined);
       setBetInterval(3);
       setStrikePrice(0);
-      setBetAmt(0.1);
-      setBetEndPrice(0);
+      // setBetAmt(0.1);
+      if (checkBet) {
+        clearTimeout(checkBet);
+      }
       return;
     } else {
-      if (!wallet.publicKey) errorCustom("Wallet not connected");
+      if (!wallet.publicKey) errorCustom(translator("Wallet not connected", language));
       else {
         if (
           betType &&
@@ -322,8 +364,6 @@ export default function Options() {
                 disabled={
                   !betType ||
                   !session?.user ||
-                  !coinData ||
-                  (coinData && coinData[0].amount < minGameAmount) ||
                   (betAmt !== undefined &&
                     maxBetAmt !== undefined &&
                     betAmt > maxBetAmt) ||
@@ -444,8 +484,6 @@ export default function Options() {
                 disabled={
                   !betType ||
                   !session?.user ||
-                  !coinData ||
-                  (coinData && coinData[0].amount < minGameAmount) ||
                   (betAmt !== undefined &&
                     maxBetAmt !== undefined &&
                     betAmt > maxBetAmt) ||
@@ -481,12 +519,12 @@ export default function Options() {
                   ? translator("Placing bet", language) + "..."
                   : ""
                 : checkResult
-                ? loading && !result
-                  ? translator("Checking result", language) + "..."
-                  : ""
-                : (timeLeft * 50) / (betInterval * 60000) <= 0
-                ? translator("Checking result", language) + "..."
-                : ""}
+                  ? loading || !result
+                    ? translator("Checking result", language) + "..."
+                    : ""
+                  : (timeLeft * 50) / (betInterval * 60000) <= 0
+                    ? translator("Checking result", language) + "..."
+                    : ""}
             </div>
             <div className="flex flex-col items-end">
               <span className="font-chakra font-medium text-xs md:text-sm text-[#F0F0F0] text-opacity-75">
@@ -510,7 +548,7 @@ export default function Options() {
           <div className="flex flex-1 flex-col justify-center items-center relative py-4 mb-6 md:mb-6">
             <div className="flex flex-col items-center absolute w-[14rem] h-[14rem] justify-start pt-14">
               <span className="font-chakra text-sm text-[#94A3B8] text-opacity-75 mb-[1.4rem]">
-                $SOL
+                ${selectedCoin.tokenName}
               </span>
               <span className="font-chakra text-2xl text-white font-semibold text-opacity-90 mb-2">
                 ${truncateNumber(livePrice, 3)}
@@ -558,28 +596,30 @@ export default function Options() {
                           ? "blink_1_50 bg-white"
                           : "blink_3 bg-[#282E3D]"
                         : checkResult
-                        ? loading && !result
-                          ? "blink_1_50 bg-white"
-                          : result === "Won"
-                          ? "bg-[#72F238] bg-opacity-40 blink_3"
-                          : "bg-[#CF304A] bg-opacity-40 blink_3"
-                        : betEnd
-                        ? "blink_1_50 bg-white"
-                        : index >= (timeLeft * 50) / (betInterval * 60000)
-                        ? (timeLeft * 50) / (betInterval * 60000) <= 0
-                          ? "blink_1_50 bg-white"
-                          : "bg-[#282E3D]"
-                        : timeLeft / (betInterval * 60000) < 0.25
-                        ? `bg-[#CF304A] blink_1 ${
-                            index >= (timeLeft * 50) / (betInterval * 60000) - 1
-                              ? "blink_1"
-                              : ""
-                          }`
-                        : `bg-[#D9D9D9] ${
-                            index >= (timeLeft * 50) / (betInterval * 60000) - 1
-                              ? "blink_1"
-                              : ""
-                          }`
+                          ? loading || !result
+                            ? "blink_1_50 bg-white"
+                            : result === "Won"
+                              ? "bg-[#72F238] bg-opacity-40 blink_3"
+                              : "bg-[#CF304A] bg-opacity-40 blink_3"
+                          : betEnd
+                            ? "blink_1_50 bg-white"
+                            : index >= (timeLeft * 50) / (betInterval * 60000)
+                              ? (timeLeft * 50) / (betInterval * 60000) <= 0
+                                ? "blink_1_50 bg-white"
+                                : "bg-[#282E3D]"
+                              : timeLeft / (betInterval * 60000) < 0.25
+                                ? `bg-[#CF304A] blink_1 ${
+                                    index >=
+                                    (timeLeft * 50) / (betInterval * 60000) - 1
+                                      ? "blink_1"
+                                      : ""
+                                  }`
+                                : `bg-[#D9D9D9] ${
+                                    index >=
+                                    (timeLeft * 50) / (betInterval * 60000) - 1
+                                      ? "blink_1"
+                                      : ""
+                                  }`
                     }`}
                   />
                 </div>

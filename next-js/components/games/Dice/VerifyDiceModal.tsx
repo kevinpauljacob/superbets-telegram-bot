@@ -9,6 +9,8 @@ import { useGlobalContext } from "@/components/GlobalContext";
 import { FaRegCopy } from "react-icons/fa6";
 import { MdClose } from "react-icons/md";
 import { translator } from "@/context/transactions";
+import Loader from "../Loader";
+import { SPL_TOKENS } from "@/context/config";
 
 export interface Dice {
   createdAt: string;
@@ -19,6 +21,7 @@ export interface Dice {
   strikeNumber: number;
   amountWon: number;
   nonce?: number;
+  tokenMint: string;
   gameSeed?: {
     status: seedStatus;
     clientSeed: string;
@@ -49,6 +52,7 @@ export default function VerifyDiceModal({
   const { bet } = modalData;
   const { getProvablyFairData, language } = useGlobalContext();
   const [isPFModalOpen, setIsPFModalOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const openPFModal = () => {
     setIsPFModalOpen(true);
@@ -103,7 +107,30 @@ export default function VerifyDiceModal({
 
     return `${day}-${month}-${year} ${hours}:${minutes} UTC`;
   }
-
+  const handleSeedClick = async () => {
+    setIsLoading(true);
+    try {
+      const fpData = await getProvablyFairData();
+      if (fpData) setPFModalData({ ...fpData, tab: "seeds" });
+      openPFModal();
+    } catch (error) {
+      console.error("Error fetching provably fair data", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  const handleVerifyClick = async () => {
+    setIsLoading(true);
+    try {
+      const fpData = await getProvablyFairData();
+      if (fpData) setPFModalData({ ...fpData, tab: "verify" });
+      openPFModal();
+    } catch (error) {
+      console.error("Error fetching provably fair data", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
   return (
     <>
       {isOpen && (
@@ -129,7 +156,9 @@ export default function VerifyDiceModal({
                   {translator("Bet", language)}
                 </div>
                 <div className="text-white font-chakra text-xs font-medium">
-                  {bet.amount.toFixed(4)} $SOL
+                  {bet.amount.toFixed(4)} $
+                  {SPL_TOKENS.find((token) => token.tokenMint === bet.tokenMint)
+                    ?.tokenName ?? ""}
                 </div>
               </button>
               <button className="px-1 py-3 flex flex-col items-center justify-center w-full text-white rounded-md bg-[#202329]">
@@ -145,7 +174,9 @@ export default function VerifyDiceModal({
                   {translator("Payout", language)}
                 </div>
                 <div className="text-white font-chakra text-xs font-medium">
-                  {bet.amountWon.toFixed(4)} $SOL
+                  {bet.amountWon.toFixed(4)} $
+                  {SPL_TOKENS.find((token) => token.tokenMint === bet.tokenMint)
+                    ?.tokenName ?? ""}
                 </div>
               </button>
             </div>
@@ -189,8 +220,8 @@ export default function VerifyDiceModal({
                               ? `/assets/winDiceFace${face}.png`
                               : `/assets/lossDiceFace${face}.png`
                             : bet.chosenNumbers?.includes(face)
-                            ? `/assets/selectedDiceFace${face}.png`
-                            : `/assets/diceFace${face}.png`
+                              ? `/assets/selectedDiceFace${face}.png`
+                              : `/assets/diceFace${face}.png`
                         }
                         width={50}
                         height={50}
@@ -285,7 +316,7 @@ export default function VerifyDiceModal({
                       <label className="text-xs font-changa text-opacity-90 text-[#F0F0F0]">
                         {translator("Server Seed", language)}{" "}
                         {bet.gameSeed?.status !== seedStatus.EXPIRED
-                          ? "(Hashed)"
+                          ?  translator("(Hashed)", language)
                           : ""}
                       </label>
                       <div className="bg-[#202329] mt-1 rounded-md px-4 py-3 w-full relative flex items-center justify-between">
@@ -309,7 +340,10 @@ export default function VerifyDiceModal({
                     {bet.wallet !== wallet ? (
                       <>
                         <div className="text-xs text-[#94A3B8] font-changa text-opacity-75 text-center">
-                          {translator("The bettor must first rotate their seed pair to verify this bet.", language)}
+                          {translator(
+                            "The bettor must first rotate their seed pair to verify this bet.",
+                            language,
+                          )}
                         </div>
                         <button
                           className="bg-[#7839C5] rounded-md w-full text-sm text-white text-opacity-90 text-semibold py-3 disabled:opacity-70"
@@ -321,33 +355,32 @@ export default function VerifyDiceModal({
                     ) : bet.gameSeed?.status !== seedStatus.EXPIRED ? (
                       <>
                         <div className="text-xs text-[#94A3B8] font-changa text-opacity-75 text-center">
-                          {translator("To verify this bet, you first need to rotate your seed pair.", language)}
+                          {translator(
+                            "To verify this bet, you first need to rotate your seed pair.",
+                            language,
+                          )}
                         </div>
                         <button
                           className="bg-[#7839C5] rounded-md w-full text-sm text-white text-opacity-90 text-semibold py-3"
-                          onClick={async () => {
-                            const fpData = await getProvablyFairData();
-                            if (fpData)
-                              setPFModalData({ ...fpData, tab: "seeds" });
-
-                            openPFModal();
-                          }}
+                          onClick={handleSeedClick}
                         >
-                          {translator("Rotate", language)}
+                          {isLoading ? (
+                            <Loader />
+                          ) : (
+                            translator("Rotate", language)
+                          )}
                         </button>
                       </>
                     ) : (
                       <button
                         className="bg-[#7839C5] rounded-md w-full text-sm text-white text-opacity-90 text-semibold py-3"
-                        onClick={async () => {
-                          const fpData = await getProvablyFairData();
-                          if (fpData)
-                            setPFModalData({ ...fpData, tab: "verify" });
-
-                          openPFModal();
-                        }}
+                        onClick={handleVerifyClick}
                       >
-                        {translator("Verify", language)}
+                        {isLoading ? (
+                          <Loader />
+                        ) : (
+                          translator("Verify", language)
+                        )}
                       </button>
                     )}
                   </div>

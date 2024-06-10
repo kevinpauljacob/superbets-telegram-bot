@@ -12,6 +12,7 @@ interface VerificationState {
   nonce: string;
   risk?: string;
   segments?: number;
+  parameter?: number;
 }
 
 interface Props {
@@ -23,7 +24,6 @@ interface Props {
 export default function ProvablyFairModal({
   verificationState,
   setVerificationState,
-
   selectedGameType,
 }: Props) {
   const [strikeNumbers, setStrikeNumbers] = useState<number[]>([]);
@@ -38,12 +38,14 @@ export default function ProvablyFairModal({
     null,
   );
   const { language } = useGlobalContext();
+
   useEffect(() => {
     const result = generateGameResult(
       verificationState.serverSeed,
       verificationState.clientSeed,
       parseInt(verificationState.nonce),
       selectedGameType,
+      verificationState.parameter,
     );
     if (Array.isArray(result)) {
       setStrikeNumbers(result);
@@ -139,7 +141,9 @@ export default function ProvablyFairModal({
               strikeNumbers.includes(number)
                 ? "bg-black border-2 border-fomo-green"
                 : "bg-[#202329]"
-            } rounded-md text-center transition-all duration-300 ease-in-out lg2:w-[45px] lg2:h-[45px] md:w-[42px] md:h-[42px] sm:w-[40px] sm:h-[40px] sm2:w-[38px] sm2:h-[38px] w-[30px] h-[30px]`}
+            } rounded-md text-center transition-all duration-300 ease-in-out 
+            lg2:w-[45px] lg2:h-[45px] md:w-[42px] md:h-[42px] sm:w-[40px] sm:h-[40px]
+             sm2:w-[38px] sm2:h-[38px] w-[30px] h-[30px]`}
           >
             {strikeNumbers.includes(number) ? (
               <div className="flex justify-center items-center bg-[#FFD100] text-black rounded-full lg2:w-[32px] lg2:h-[32px] md:w-[32px] md:h-[32px] sm:w-[28px] sm:h-[28px] w-[25px] h-[25px]">
@@ -153,7 +157,44 @@ export default function ProvablyFairModal({
       </div>
     </div>
   );
-
+  const renderMines = () => {
+    return (
+      <div className="flex justify-center items-center w-full p-2">
+        <div className="grid grid-cols-5 gap-1 sm:gap-2 text-white text-sm md:text-xl font-chakra">
+          {Array.from({ length: 25 }, (_, index) => index + 1).map((index) => (
+            <button
+              key={index}
+              className={` bg-[#202329] flex items-center justify-center cursor-pointer rounded-md text-center transition-all duration-300 ease-in-out 
+             lg2:w-[45px] lg2:h-[45px] md:w-[42px] md:h-[42px] sm:w-[40px] sm:h-[40px]
+             sm2:w-[38px] sm2:h-[38px] w-[30px] h-[30px]`}
+            >
+              {strikeNumbers[index - 1] === 0 ? (
+                <div className="w-full h-full flex items-center justify-center p-1.5 sm:p-3">
+                  <Image
+                    src="/assets/gem.svg"
+                    alt="Gem"
+                    layout="responsive"
+                    height={100}
+                    width={100}
+                  />
+                </div>
+              ) : strikeNumbers[index - 1] === 1 ? (
+                <div className="w-full h-full flex items-center justify-center p-1.5 sm:p-3">
+                  <Image
+                    src="/assets/mine.svg"
+                    alt="Mine"
+                    layout="responsive"
+                    height={100}
+                    width={100}
+                  />
+                </div>
+              ) : null}
+            </button>
+          ))}
+        </div>
+      </div>
+    );
+  };
   const renderDice = () => (
     <div className="lg2:px-8 md:px-6 px-4 pt-10 pb-4">
       <div className="relative w-full mb-8 xl:mb-6">
@@ -299,7 +340,31 @@ export default function ProvablyFairModal({
       </div>
     </>
   );
-
+  const renderMinesCount = () => {
+    return (
+      <div className="my-4">
+        <label className="text-xs text-opacity-75 font-changa text-[#F0F0F0]">
+          {translator("Mines", language)}
+        </label>
+        <select
+          name="parameter"
+          value={verificationState.parameter}
+          onChange={handleChange}
+          className="bg-[#202329] text-white font-chakra capitalize text-xs font-medium mt-1 rounded-md p-3 w-full relative no-scrollbar"
+        >
+          {Array.from({ length: 24 }, (_, index) => (
+            <option
+              key={index + 1}
+              value={index + 1}
+              selected={index + 1 === 3}
+            >
+              {index + 1}
+            </option>
+          ))}
+        </select>
+      </div>
+    );
+  };
   const renderWheel = () => {
     const multipliers = riskToChance[verificationState.risk || "low"];
     const sortedMultipliers = multipliers
@@ -411,6 +476,14 @@ export default function ProvablyFairModal({
             {renderRiskAndSegments()}
           </>
         );
+      case GameType.mines:
+        return (
+          <>
+            {renderMines()}
+            {renderMinesCount()}
+          </>
+        );
+
       default:
         return <div>Unsupported game type</div>;
     }

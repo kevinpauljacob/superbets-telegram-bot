@@ -11,7 +11,6 @@ import {
   verifyFrontendTransaction,
   timeWeightedAvgInterval,
   timeWeightedAvgLimit,
-  isArrayUnique,
   userLimitMultiplier,
 } from "../../../../context/gameTransactions";
 import connectDatabase from "../../../../utils/database";
@@ -23,6 +22,9 @@ import { bs58 } from "@project-serum/anchor/dist/cjs/utils/bytes";
 import TxnSignature from "../../../../models/txnSignature";
 import { NextApiRequest, NextApiResponse } from "next";
 import { v4 as uuidv4 } from "uuid";
+import { GameType } from "@/utils/provably-fair";
+import { gameModelMap } from "@/models/games";
+import { SPL_TOKENS } from "@/context/config";
 
 const secret = process.env.NEXTAUTH_SECRET;
 
@@ -49,6 +51,13 @@ type Totals = {
   withdrawalTotal: number;
 };
 
+const blackListedWallet: any = {
+  EkBEqMcFqZeLCEpsyEP6xbE8Y2Fq3dBYxaqs3yJJW55w: {
+    amount: 1000,
+    date: new Date(1716554434000),
+  },
+};
+
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === "POST") {
     try {
@@ -67,24 +76,28 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           error: "User wallet not authenticated",
         });
 
-      await connectDatabase();
-
       if (
         !wallet ||
         !transactionBase64 ||
         !amount ||
         !tokenMint ||
-        tokenMint != "SOL" ||
         !blockhashWithExpiryBlockHeight
       )
         return res
           .status(400)
           .json({ success: false, message: "Missing parameters" });
 
-      if (amount <= 0)
+      if (
+        typeof amount !== "number" ||
+        !isFinite(amount) ||
+        !(amount > 0) ||
+        !SPL_TOKENS.some((t) => t.tokenMint === tokenMint)
+      )
         return res
           .status(400)
-          .json({ success: false, message: "Invalid withdraw amount !" });
+          .json({ success: false, message: "Invalid parameters!" });
+
+      await connectDatabase();
 
       let user = await User.findOne({ wallet });
 
@@ -128,10 +141,11 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
             "You have a pending withdrawal. Please wait for it to be processed !",
         });
 
-      // //Check if the time weighted average exceeds the limit
+      //Check if the time weighted average exceeds the limit
       const userAgg = await Deposit.aggregate([
         {
           $match: {
+            tokenMint,
             createdAt: {
               $gte: new Date(Date.now() - timeWeightedAvgInterval),
             },
@@ -154,12 +168,56 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         },
       ]);
 
+      // if wallet is blacklisted restrict withdrawal till Vol condition met
+
+      if (Object.keys(blackListedWallet).includes(wallet)) {
+        const user = await User.findOne({ wallet });
+        if (!user)
+          return res.json({
+            success: true,
+            data: [],
+            message: "No data found",
+          });
+
+        let totalVolume = 0;
+
+        for (const [_, value] of Object.entries(GameType)) {
+          const game = value;
+          const model = gameModelMap[game as keyof typeof gameModelMap];
+
+          const res = await model.aggregate([
+            {
+              $match: {
+                wallet,
+                tokenMint,
+                createdAt: { $gt: blackListedWallet[wallet].date },
+              },
+            },
+            {
+              $group: {
+                _id: null,
+                amount: { $sum: "$amount" },
+              },
+            },
+          ]);
+
+          if (res.length > 0) {
+            totalVolume += res[0].amount;
+          }
+        }
+
+        if (totalVolume < blackListedWallet[wallet].amount)
+          throw new Error(
+            "Withdraw failed ! Insufficient volume for processing withdrawal",
+          );
+      }
+
       const result = await User.findOneAndUpdate(
         {
           wallet,
           deposit: {
             $elemMatch: {
-              tokenMint: tokenMint,
+              tokenMint,
               amount: { $gte: amount },
             },
           },
@@ -176,15 +234,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         );
       }
 
-      const initialTotals: Totals = { depositTotal: 0, withdrawalTotal: 0 };
-
-      const transferAgg = userAgg.reduce<Totals>((acc, current) => {
-        acc.depositTotal += current.depositTotal;
-        acc.withdrawalTotal += current.withdrawalTotal;
-        return acc;
-      }, initialTotals);
-
-      const route = `https://fomowtf.com/api/games/global/getUserVol?wallet=${wallet}`;
+      const route = `https://fomowtf.com/api/games/global/getUserVol?wallet=${wallet}&tokenMint=${tokenMint}`;
 
       let totalVolume = (await (await fetch(route)).json())?.data ?? 0;
 
@@ -214,12 +264,28 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         });
       }
 
+      const initialTotals: Totals = { depositTotal: 0, withdrawalTotal: 0 };
+
+      const transferAgg = userAgg.reduce<Totals>((acc, current) => {
+        acc.depositTotal += current.depositTotal;
+        acc.withdrawalTotal += current.withdrawalTotal;
+        return acc;
+      }, initialTotals);
+
       const netTransfer =
         (transferAgg.withdrawalTotal ?? 0) -
         (transferAgg.depositTotal ?? 0) +
         amount;
 
-      if (netTransfer > timeWeightedAvgLimit) {
+      // disable global
+
+      // netTransfer = 1000000000;
+
+      const tokenName = SPL_TOKENS.find(
+        (t) => t.tokenMint === tokenMint,
+      )?.tokenName!;
+
+      if (netTransfer > timeWeightedAvgLimit[tokenName]) {
         await Deposit.create({
           wallet,
           amount,
@@ -279,7 +345,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
       return res.json({
         success: true,
-        message: `${amount} SOL successfully withdrawn!`,
+        message: `${amount} ${SPL_TOKENS.find((token) => token.tokenMint === tokenMint)?.tokenName ?? ""} successfully withdrawn!`,
       });
     } catch (e: any) {
       console.log(e);

@@ -6,14 +6,14 @@ import {
 import { useEffect, useState } from "react";
 import { Limbo } from "./VerifyLimboModal";
 import Image from "next/image";
-import toast from "react-hot-toast";
 import { FaRegCopy } from "react-icons/fa6";
 import { MdClose } from "react-icons/md";
 import CheckPF from "@/public/assets/CheckPF.svg";
-import { errorCustom } from "@/components/toasts/ToastGroup";
+import { errorCustom, successCustom } from "@/components/toasts/ToastGroup";
 import { translator } from "@/context/transactions";
 import { useGlobalContext } from "@/components/GlobalContext";
 import ProvablyFairModal from "../ProvablyFairModal";
+import GameSelect from "../GameSelect";
 
 export interface PFModalData {
   activeGameSeed: {
@@ -126,7 +126,7 @@ export default function LimboProvablyFairModal({
         generateGameResult(
           name === "serverSeed" ? value : serverSeed,
           name === "clientSeed" ? value : clientSeed,
-          parseInt(name === "nonce" ? value : nonce),
+          parseInt(name === "no nce" ? value : nonce),
           GameType.limbo,
         )
       ).toFixed(2),
@@ -135,7 +135,7 @@ export default function LimboProvablyFairModal({
 
   const handleSetClientSeed = async () => {
     if (!/^[\x00-\x7F]*$/.test(newClientSeed) || newClientSeed.trim() === "")
-      return errorCustom("Invalid client seed");
+      return errorCustom(translator("Invalid client seed", language));;
 
     let data = await fetch(`/api/games/gameSeed/change`, {
       method: "POST",
@@ -148,9 +148,10 @@ export default function LimboProvablyFairModal({
       }),
     }).then((res) => res.json());
 
-    if (!data.success) return console.error(data.message);
+    if (!data.success) return errorCustom(data.message);
 
     setModalData(data);
+    successCustom("Successfully changed the server seed")
     setNewClientSeed(generateClientSeed());
   };
 
@@ -318,22 +319,10 @@ export default function LimboProvablyFairModal({
                     {translator("Game", language)}
                   </label>
                   <div className="flex items-center">
-                    <select
-                      name="game"
-                      value={selectedGameType}
-                      onChange={(e) =>
-                        setSelectedGameType(e.target.value as GameType)
-                      }
-                      className="bg-[#202329] text-white font-chakra text-xs font-medium mt-1 rounded-md px-5 py-4 w-full relative appearance-none"
-                    >
-                      <option value={GameType.keno}>Keno</option>
-                      <option value={GameType.dice}>Dice</option>
-                      <option value={GameType.coin}>Coin Flip</option>
-
-                      <option value={GameType.dice2}>Dice2</option>
-                      <option value={GameType.limbo}>Limbo</option>
-                      <option value={GameType.wheel}>Wheel</option>
-                    </select>
+                    <GameSelect
+                      selectedGameType={selectedGameType}
+                      setSelectedGameType={setSelectedGameType}
+                    />
                   </div>
                 </div>
                 <div>

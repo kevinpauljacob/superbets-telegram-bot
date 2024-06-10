@@ -1,39 +1,47 @@
-import { Header } from "@/components/Header";
-import InfoBar from "@/components/Infobar";
 import StakeFomo from "@/components/StakeFomo";
 import StakeStats from "@/components/StakeStats";
 import Image from "next/legacy/image";
 import { useEffect, useState } from "react";
-import { useWallet } from "@solana/wallet-adapter-react";
+import { WalletContextState, useWallet } from "@solana/wallet-adapter-react";
 import { useSession } from "next-auth/react";
-import { Inter } from "next/font/google";
 import {
   connection,
   fomoToken,
-  formatNumber,
   translator,
 } from "@/context/transactions";
-import { LAMPORTS_PER_SOL, PublicKey } from "@solana/web3.js";
+import { PublicKey } from "@solana/web3.js";
 import { useGlobalContext } from "@/components/GlobalContext";
 import { getAssociatedTokenAddressSync } from "@solana/spl-token";
-import { errorCustom } from "@/components/toasts/ToastGroup";
 import FOMOHead from "@/components/HeadElement";
 import { truncateNumber } from "@/context/gameTransactions";
-const inter = Inter({ subsets: ["latin"] });
+
+export async function getFOMOBalance(
+  wallet: WalletContextState,
+  setFomoBalance: any,
+) {
+  if (wallet && wallet.publicKey)
+    try {
+      let address = new PublicKey(fomoToken);
+      const ata = getAssociatedTokenAddressSync(address, wallet.publicKey);
+      const res = await connection.getTokenAccountBalance(ata, "recent");
+
+      res.value.uiAmount
+        ? setFomoBalance(res.value.uiAmount)
+        : setFomoBalance(0);
+    } catch (e) {
+      // errorCustom("Unable to fetch balance.");
+      console.error(e);
+    }
+}
 
 export default function Stake() {
-  const { data: session, status } = useSession();
+  const { data: session } = useSession();
   const wallet = useWallet();
 
   const {
-    userData,
-    setUserData,
-    solBal,
-    setSolBal,
+    setFomoBalance,
     language,
-    loading,
     globalInfo,
-    setGlobalInfo,
     getGlobalInfo,
     getUserDetails,
     setLivePrice,
@@ -61,23 +69,9 @@ export default function Stake() {
     return () => clearInterval(intervalId);
   }, []);
 
-  const getWalletBalance = async () => {
-    if (wallet && wallet.publicKey)
-      try {
-        let address = new PublicKey(fomoToken);
-        const ata = getAssociatedTokenAddressSync(address, wallet.publicKey);
-        const res = await connection.getTokenAccountBalance(ata, "recent");
-
-        res.value.uiAmount ? setSolBal(res.value.uiAmount) : setSolBal(0);
-      } catch (e) {
-        // errorCustom("Unable to fetch balance.");
-        console.error(e);
-      }
-  };
-
   useEffect(() => {
     if (session?.user && wallet && wallet.publicKey) {
-      getWalletBalance();
+      getFOMOBalance(wallet, setFomoBalance);
       getUserDetails();
     }
     getGlobalInfo();
@@ -132,7 +126,7 @@ export default function Stake() {
                 </div>
               </div>
               <div className="hidden sm:flex">
-                <Image src={"/assets/stakeLock.svg"} width={60} height={60} />
+                <Image src={"/assets/stakeLock.svg"} alt="Lock" width={60} height={60} />
               </div>
             </div>
           </div>

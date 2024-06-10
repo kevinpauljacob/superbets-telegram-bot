@@ -2,7 +2,7 @@ import "@/styles/globals.css";
 import Layout from "@/components/layout";
 import { WalletModalProvider } from "@solana/wallet-adapter-react-ui";
 import type { AppProps } from "next/app";
-import { Toaster } from "react-hot-toast";
+import toast, { Toaster, useToasterStore } from "react-hot-toast";
 import {
   ConnectionProvider,
   WalletProvider,
@@ -16,8 +16,8 @@ import {
 import { GlobalProvider } from "@/components/GlobalContext";
 import "@solana/wallet-adapter-react-ui/styles.css";
 import { SessionProvider } from "next-auth/react";
-import InfoBar from "@/components/Infobar";
 import { useEffect } from "react";
+import LiveStats from "@/components/games/LiveStats";
 
 export default function App({
   Component,
@@ -31,6 +31,18 @@ export default function App({
     new LedgerWalletAdapter(),
   ];
 
+  // toast limitier
+  const { toasts } = useToasterStore();
+
+  const TOAST_LIMIT = 8;
+
+  useEffect(() => {
+    toasts
+      .filter((t) => t.visible)
+      .filter((_, i) => i >= TOAST_LIMIT)
+      .forEach((t) => toast.dismiss(t.id));
+  }, [toasts]);
+
   return (
     <ConnectionProvider endpoint={endpoint}>
       <WalletProvider wallets={wallets} autoConnect>
@@ -38,9 +50,10 @@ export default function App({
           <SessionProvider session={pageProps.session} refetchInterval={0}>
             <GlobalProvider>
               <div
-              id="main-parent"
+                id="main-parent"
                 className={`w-[100dvw] h-[100dvh] flex flex-1 flex-col bg-[#0F0F0F] overflow-hidden nobar unselectable`}
               >
+                <LiveStats />
                 <Layout>
                   <Component {...pageProps} />
                 </Layout>

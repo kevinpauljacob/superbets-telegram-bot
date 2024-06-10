@@ -1,22 +1,18 @@
 import { useGlobalContext } from "@/components/GlobalContext";
 import LeaderboardTable from "@/components/Leaderboard";
 import {
-  formatNumber,
   obfuscatePubKey,
-  stakingTiers,
   pointTiers,
   translator,
 } from "@/context/transactions";
 import { useWallet } from "@solana/wallet-adapter-react";
 import Image from "next/legacy/image";
-import { useRouter } from "next/router";
 import { useEffect } from "react";
 import { truncateNumber } from "@/context/gameTransactions";
 import FOMOHead from "@/components/HeadElement";
 
 export default function Leaderboard() {
   const wallet = useWallet();
-  const router = useRouter();
   const { language, userData, pointTier, setPointTier } = useGlobalContext();
 
   useEffect(() => {
@@ -51,6 +47,7 @@ export default function Leaderboard() {
                   <div className="flex relative min-w-[4.5rem] h-[4.5rem]">
                     <Image
                       src={pointTier.image}
+                      alt={pointTier.label}
                       layout="fill"
                       objectFit="contain"
                       objectPosition="center"
@@ -148,6 +145,7 @@ export default function Leaderboard() {
                   <div className="flex relative min-w-[1rem] h-[1rem]">
                     <Image
                       src={`/assets/badges/T-${pointTier?.index + 1}.png`}
+                      alt={pointTier.label}
                       layout="fill"
                       objectFit="contain"
                       objectPosition="center"

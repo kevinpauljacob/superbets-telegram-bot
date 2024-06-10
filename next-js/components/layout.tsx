@@ -5,10 +5,9 @@ import InfoBar from "./Infobar";
 import Sidebar from "./Sidebar";
 import MobileSidebar from "./MobileSidebar";
 import SubHeader from "./SubHeader";
-import GameHeader from "./GameHeader";
 import { useGlobalContext } from "./GlobalContext";
 import BalanceModal from "./games/BalanceModal";
-import { useSession } from "next-auth/react";
+import { signOut, useSession } from "next-auth/react";
 import MobileNavbar from "./MobileNavbar";
 import VerifyFlipModal from "./games/CoinFlip/VerifyFlipModal";
 import VerifyDiceModal from "./games/Dice/VerifyDiceModal";
@@ -16,12 +15,14 @@ import VerifyDice2Modal from "./games/Dice2/VerifyDice2Modal";
 import VerifyLimboModal from "./games/Limbo/VerifyLimboModal";
 import VerifyWheelModal from "./games/Wheel/VerifyWheelModal";
 import VerifyKenoModal from "./games/Keno/VerifyKenoModal";
+import VerifyMinesModal from "./games/Mines/VerifyMinesModal";
 import { Flip } from "./games/CoinFlip/VerifyFlipModal";
 import { Dice2 } from "./games/Dice2/VerifyDice2Modal";
 import { Dice } from "./games/Dice/VerifyDiceModal";
 import { Limbo } from "./games/Limbo/VerifyLimboModal";
 import { Wheel } from "./games/Wheel/VerifyWheelModal";
 import { Keno } from "./games/Keno/VerifyKenoModal";
+import { Mines } from "./games/Mines/VerifyMinesModal";
 import { GameType } from "@/utils/provably-fair";
 import ConfigureAutoModal from "./games/ConfigureAutoModal";
 import RollDiceProvablyFairModal from "./games/Dice/DiceProvablyFairModal";
@@ -30,10 +31,10 @@ import CoinFlipProvablyFairModal from "./games/CoinFlip/CoinFlipProvablyFairModa
 import LimboProvablyFairModal from "./games/Limbo/LimboProvablyFairModal";
 import WheelProvablyFairModal from "./games/Wheel/WheelProvablyFairModal";
 import KenoProvablyFairModal from "./games/Keno/KenoProvablyFairModal";
+import MinesProvablyFairModal from "./games/Mines/MinesProvablyFairModal";
 import Footer from "./Footer";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { soundAlert } from "@/utils/soundUtils";
-import { errorCustom, successCustom, warningCustom } from "./toasts/ToastGroup";
 
 interface LayoutProps {
   children: ReactNode;
@@ -43,18 +44,13 @@ export default function Layout({ children }: LayoutProps) {
   const router = useRouter();
   const wallet = useWallet();
   const game = router.pathname.split("/")[1];
-  const { data: session, status } = useSession();
+  const { data: session } = useSession();
 
   const {
-    coinData,
     showWalletModal,
-    setShowWalletModal,
-    walletBalance,
     getBalance,
     getWalletBalance,
     isVerifyModalOpen,
-    setIsVerifyModalOpen,
-    openVerifyModal,
     closeVerifyModal,
     verifyModalData,
     sidebar,
@@ -66,23 +62,17 @@ export default function Layout({ children }: LayoutProps) {
     openPFModal,
     setOpenPFModal,
     getProvablyFairData,
-    currentGame,
     setCurrentGame,
     setUseAutoConfig,
     autoConfigState,
-    autoWinChange,
     setAutoWinChange,
-    autoLossChange,
     setAutoLossChange,
-    autoStopProfit,
     setAutoStopProfit,
-    autoStopLoss,
     setAutoStopLoss,
-    autoWinChangeReset,
     setAutoWinChangeReset,
-    autoLossChangeReset,
     setAutoLossChangeReset,
-    showAutoModal,
+    getUserDetails,
+    selectedCoin
   } = useGlobalContext();
 
   const [modalData, setModalData] = useState({
@@ -117,6 +107,7 @@ export default function Layout({ children }: LayoutProps) {
     soundAlert("/sounds/diceshake.wav", true);
     soundAlert("/sounds/slider.wav", true);
     soundAlert("/sounds/win.wav", true);
+    soundAlert("/sounds/bomb.wav", true);
   }, []);
 
   useEffect(() => {
@@ -126,7 +117,37 @@ export default function Layout({ children }: LayoutProps) {
         if (pfData) setModalData(pfData);
       }
     })();
+
+    if (wallet?.publicKey && session?.user)
+      localStorage.setItem("connectedAccountKey", wallet.publicKey.toBase58());
   }, [wallet.publicKey, session?.user]);
+
+  // useEffect(() => {
+  //   const interval = setInterval(() => {
+  //     const storedKey = localStorage.getItem("connectedAccountKey");
+
+  //     if ("solana" in window) {
+  //       const provider = window.solana;
+
+  //       //@ts-ignore
+  //       if (provider?.publicKey) {
+  //         //@ts-ignore
+  //         // console.log("checking", provider?.publicKey.toBase58());
+  //         //@ts-ignore
+  //         if (storedKey && storedKey !== provider.publicKey.toBase58()) {
+  //           (async () => {
+  //             // console.log("Account changed");
+  //             localStorage.removeItem("connectedAccountKey");
+  //             await wallet.disconnect();
+  //             await signOut();
+  //           })();
+  //         }
+  //       }
+  //     }
+  //   }, 5000);
+
+  //   return () => clearInterval(interval);
+  // }, []);
 
   const toggleSidebar = () => {
     setSidebar(!sidebar);
@@ -170,9 +191,16 @@ export default function Layout({ children }: LayoutProps) {
     if (session?.user && !showWalletModal) {
       getBalance();
       getWalletBalance();
+      getUserDetails();
     }
     setCurrentGame(game);
-  }, [session?.user, showWalletModal, game]);
+  }, [wallet?.publicKey, session?.user, showWalletModal, game]);
+
+  useEffect(() => {
+    if (session?.user) {
+      getUserDetails();
+    }
+  }, [wallet?.publicKey, session?.user, game, selectedCoin]);
 
   return (
     <>
@@ -249,6 +277,13 @@ export default function Layout({ children }: LayoutProps) {
           modalData={{ bet: (verifyModalData as Keno)! }}
           wallet={wallet.publicKey?.toBase58()}
         />
+      ) : verifyModalData.game === GameType.mines ? (
+        <VerifyMinesModal
+          isOpen={isVerifyModalOpen}
+          onClose={closeVerifyModal}
+          modalData={{ bet: (verifyModalData as Mines)! }}
+          wallet={wallet.publicKey?.toBase58()}
+        />
       ) : null}
 
       {/* pf modals  */}
@@ -289,6 +324,13 @@ export default function Layout({ children }: LayoutProps) {
         />
       ) : game === GameType.keno ? (
         <KenoProvablyFairModal
+          isOpen={openPFModal}
+          onClose={closePfModal}
+          modalData={modalData}
+          setModalData={setModalData}
+        />
+      ) : game === GameType.mines ? (
+        <MinesProvablyFairModal
           isOpen={openPFModal}
           onClose={closePfModal}
           modalData={modalData}
