@@ -1,22 +1,18 @@
 import { useGlobalContext } from "@/components/GlobalContext";
 import LeaderboardTable from "@/components/Leaderboard";
 import {
-  formatNumber,
   obfuscatePubKey,
-  stakingTiers,
   pointTiers,
   translator,
+  truncateNumber,
 } from "@/context/transactions";
 import { useWallet } from "@solana/wallet-adapter-react";
 import Image from "next/legacy/image";
-import { useRouter } from "next/router";
 import { useEffect } from "react";
-import { truncateNumber } from "@/context/gameTransactions";
 import FOMOHead from "@/components/HeadElement";
 
 export default function Leaderboard() {
   const wallet = useWallet();
-  const router = useRouter();
   const { language, userData, pointTier, setPointTier } = useGlobalContext();
 
   useEffect(() => {

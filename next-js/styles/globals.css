@@ -186,6 +186,22 @@ text-shadow-gold {
   animation: blink_dice 0.4s ease-in-out 0s 4;
 }
 
+@keyframes blink_tile {
+  0% {
+    border-color: #fcb10f;
+  }
+  50% {
+    border-color: #fcb10f80;
+  }
+  100% {
+    border-color: #fcb10f;
+  }
+}
+
+.blink_tile {
+  animation: blink_tile 1s ease-in-out 0s infinite;
+}
+
 .box-shadow-green {
   box-shadow:
     0 0 7px #00e372,
@@ -578,4 +594,35 @@ input[type="range"] {
   background-color: rgba(255, 255, 255, 0.1); /* White color with 20% opacity */
   pointer-events: none; /* Ensure the overlay does not block interactions */
   /* Ensure the overlay has the same rounded corners as the button */
+/* animation for Infobar */
+/* globals.css */
+}
+@keyframes slideInFromLeft {
+  from {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideOutToRight {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
+
+.slide-in {
+  animation: slideInFromLeft 1.5s ease-in-out forwards;
+}
+
+.slide-out {
+  animation: slideOutToRight 1.5s ease-in-out forwards;
 }

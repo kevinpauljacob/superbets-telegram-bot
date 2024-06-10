@@ -1,17 +1,13 @@
-import { useState, useEffect, use } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useGlobalContext } from "../GlobalContext";
-import { GameType } from "@/utils/provably-fair";
-import { maxPayouts } from "@/context/transactions";
+import { GameTokens, GameType } from "@/utils/provably-fair";
+import { maxPayouts, truncateNumber } from "@/context/transactions";
 import Image from "next/image";
-import BalanceAlert from "./BalanceAlert";
-import { FaInfo } from "react-icons/fa6";
-import { Game, InfoCircle } from "iconsax-react";
-import { BsInfoCircleFill } from "react-icons/bs";
-import DicePointer from "@/public/assets/DicePointer";
 import { translator } from "@/context/transactions";
-import { minGameAmount, truncateNumber } from "@/context/gameTransactions";
+import { minGameAmount } from "@/context/config";
 import { riskToChance } from "./Keno/RiskToChance";
+import { SPL_TOKENS } from "@/context/config";
 export default function BetAmount({
   betAmt,
   setBetAmt,
@@ -28,8 +24,14 @@ export default function BetAmount({
   disabled?: boolean;
 }) {
   const methods = useForm();
-  const { coinData, maxBetAmt, setMaxBetAmt, language, kenoRisk } =
-    useGlobalContext();
+  const {
+    coinData,
+    maxBetAmt,
+    setMaxBetAmt,
+    language,
+    kenoRisk,
+    selectedCoin,
+  } = useGlobalContext();
 
   //Temperory max bet
   const multipliersForRisk = riskToChance[kenoRisk];
@@ -45,7 +47,10 @@ export default function BetAmount({
   useEffect(() => {
     if (leastMultiplier !== undefined) {
       setHighestMaxBetAmt(
-        (maxPayouts[game as GameType] / leastMultiplier).toFixed(2),
+        (
+          maxPayouts[selectedCoin.tokenMint as GameTokens][game as GameType] /
+          leastMultiplier
+        ).toFixed(2),
       );
     }
   }, [leastMultiplier, game, kenoRisk]);
@@ -61,8 +66,12 @@ export default function BetAmount({
 
     if (tempBetAmt !== undefined && effectiveMultiplier !== undefined) {
       let calculatedMaxBetAmt =
-        maxPayouts[game as GameType] / currentMultiplier;
+        maxPayouts[selectedCoin.tokenMint as GameTokens][game as GameType] /
+        currentMultiplier;
 
+      if (selectedCoin?.amount == undefined && selectedCoin?.amount == 0) {
+        setCurrentMaxBetAmt(0);
+      }
       setCurrentMaxBetAmt(
         isFinite(calculatedMaxBetAmt) ? calculatedMaxBetAmt : 0,
       );
@@ -79,18 +88,19 @@ export default function BetAmount({
         methods.clearErrors("amount");
       }
     }
-  }, [tempBetAmt, betAmt, currentMultiplier, game]);
+  }, [tempBetAmt, betAmt, currentMultiplier, game, selectedCoin]);
 
   useEffect(() => {
     setMaxBetAmt(
       Math.min(
         truncateNumber(currentMaxBetAmt, 4),
-        coinData && coinData[0]?.amount
-          ? truncateNumber(coinData[0].amount, 4)
+        selectedCoin && selectedCoin?.amount
+          ? truncateNumber(selectedCoin.amount, 4)
           : truncateNumber(currentMaxBetAmt, 4),
       ),
     );
-  }, [currentMaxBetAmt, coinData]);
+    console.log(selectedCoin);
+  }, [currentMaxBetAmt, coinData, selectedCoin]);
 
   const handleSetMaxBet = () => {
     setBetAmt(maxBetAmt);
@@ -101,8 +111,8 @@ export default function BetAmount({
     if (betAmt || coinData) {
       let newBetAmt =
         !betAmt || betAmt === 0
-          ? coinData
-            ? coinData[0]?.amount / 2
+          ? selectedCoin
+            ? selectedCoin.amount / 2
             : 0
           : betAmt! / 2;
 
@@ -118,11 +128,11 @@ export default function BetAmount({
   };
 
   const handleDoubleBet = () => {
-    if (betAmt !== undefined || coinData) {
+    if (betAmt !== undefined || selectedCoin) {
       const newBetAmt =
         betAmt === 0
-          ? coinData
-            ? parseFloat((coinData[0]?.amount * 2).toFixed(4))
+          ? selectedCoin
+            ? parseFloat((selectedCoin.amount * 2).toFixed(4))
             : 0
           : parseFloat(((betAmt ?? 0) * 2).toFixed(4));
 
@@ -149,7 +159,10 @@ export default function BetAmount({
         </label>
         <span className="flex items-center text-[#94A3B8] text-opacity-90 font-changa text-xs gap-2">
           <span className="cursor-pointer" onClick={handleSetMaxBet}>
-            {maxBetAmt} $SOL
+            {maxBetAmt} $
+            {SPL_TOKENS.find(
+              (token) => token.tokenMint === selectedCoin?.tokenMint,
+            )?.tokenName || "Unknown Token"}
           </span>
           <span
             className={`group font-chakra font-medium cursor-pointer underline hover:text-opacity-100 transition-all duration-300 text-white ${
@@ -246,7 +259,7 @@ export default function BetAmount({
                   </span>
                   ) is{" "}
                   <span className="text-white/80 font-medium">
-                    {currentMaxBetAmt.toFixed(2)} SOL
+                    {currentMaxBetAmt.toFixed(2)} {selectedCoin.tokenName}
                   </span>
                   . {translator("Your current wallet balance is", language)}{" "}
                   <span className="text-white/80 font-medium">
@@ -256,7 +269,7 @@ export default function BetAmount({
                   </span>{" "}
                   . {translator("The maximum amount you can bet in this game is", language)}{" "}
                   <span className="text-white/80 font-medium">
-                    {highestMaxBetAmt} SOL
+                    {highestMaxBetAmt} {selectedCoin.tokenName}
                   </span>
                   .
                 </span> */}
@@ -272,7 +285,7 @@ export default function BetAmount({
                 {translator("Balance", language)}
               </span>
               <span className="text-xs font-medium">
-                {coinData ? (coinData[0]?.amount).toFixed(2) : 0.0}
+                {selectedCoin ? selectedCoin.amount.toFixed(2) : 0.0}
               </span>
             </div>
           </div>
@@ -306,7 +319,7 @@ export default function BetAmount({
               )}
               <span className="text-white/90 font-semibold">
                 {" "}
-                {currentMaxBetAmt.toFixed(2)} SOL
+                {currentMaxBetAmt.toFixed(2)} {selectedCoin.tokenName}
               </span>
                .
             </span>
@@ -317,7 +330,7 @@ export default function BetAmount({
             </span>
             <span className="flex items-center justify-center gap-1">
               {currentMaxBetAmt.toFixed(2)}
-              <Image src="/assets/sol.png" alt="coins" height="11" width="14" />
+              <selectedCoin.icon className="w-5 h-5 -mt-[1px]" />
             </span>
           </div>
         </div>

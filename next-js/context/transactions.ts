@@ -4,24 +4,35 @@ import {
   Transaction,
   SystemProgram,
   ComputeBudgetProgram,
+  BlockhashWithExpiryBlockHeight,
 } from "@solana/web3.js";
 import {
   getAssociatedTokenAddress,
   createTransferInstruction,
+  createAssociatedTokenAccountIdempotentInstruction,
 } from "@solana/spl-token";
-import toast from "react-hot-toast";
 import { WalletContextState } from "@solana/wallet-adapter-react";
 import { translationsMap } from "@/components/GlobalContext";
-import { GameType } from "@/utils/provably-fair";
-import { errorCustom, successCustom } from "@/components/toasts/ToastGroup";
+import { GameTokens, GameType } from "@/utils/provably-fair";
+import {
+  errorCustom,
+  successCustom,
+  warningCustom,
+} from "@/components/toasts/ToastGroup";
+import { SPL_TOKENS } from "./config";
 
 export const connection = new Connection(process.env.NEXT_PUBLIC_RPC!);
 
-const devPublicKey = new PublicKey(process.env.NEXT_PUBLIC_DEV_PUBLIC_KEY!);
+const casinoPublicKey = new PublicKey(
+  process.env.NEXT_PUBLIC_CASINO_PUBLIC_KEY!,
+);
+const stakingPublicKey = new PublicKey(
+  process.env.NEXT_PUBLIC_STAKING_PUBLIC_KEY!,
+);
 
 export const fomoToken = "Cx9oLynYgC3RrgXzin7U417hNY9D6YB1eMGw4ZMbWJgw";
 
-export const launchPromoEdge = true;
+export const launchPromoEdge = false;
 
 export const maintainance = false;
 
@@ -206,19 +217,51 @@ export const houseEdgeTiers: Record<number, number> = {
 
 type PayoutValue<T> = number;
 
-export const maxPayouts: { [K in GameType]: PayoutValue<K> } = {
-  [GameType.dice]: 1,
-  [GameType.coin]: 1,
-  [GameType.options]: 1,
-  [GameType.dice2]: 1,
-  [GameType.wheel]: 1,
-  [GameType.plinko]: 1,
-  [GameType.limbo]: 1,
-  [GameType.roulette1]: 1,
-  [GameType.roulette2]: 1,
-  [GameType.keno]: 1,
-  [GameType.mines]: 1,
-  [GameType.hilo]: 1,
+export const maxPayouts: {
+  [K in GameTokens]: { [K in GameType]: PayoutValue<K> };
+} = {
+  [GameTokens.SOL]: {
+    [GameType.dice]: 1,
+    [GameType.coin]: 1,
+    [GameType.options]: 1,
+    [GameType.dice2]: 1,
+    [GameType.wheel]: 1,
+    [GameType.plinko]: 1,
+    [GameType.limbo]: 1,
+    [GameType.roulette1]: 1,
+    [GameType.roulette2]: 1,
+    [GameType.keno]: 1,
+    [GameType.mines]: 1,
+    [GameType.hilo]: 1,
+  },
+  [GameTokens.FOMO]: {
+    [GameType.dice]: 1,
+    [GameType.coin]: 1,
+    [GameType.options]: 1,
+    [GameType.dice2]: 1,
+    [GameType.wheel]: 1,
+    [GameType.plinko]: 1,
+    [GameType.limbo]: 1,
+    [GameType.roulette1]: 1,
+    [GameType.roulette2]: 1,
+    [GameType.keno]: 1,
+    [GameType.mines]: 1,
+    [GameType.hilo]: 1,
+  },
+  [GameTokens.USDC]: {
+    [GameType.dice]: 1,
+    [GameType.coin]: 1,
+    [GameType.options]: 1,
+    [GameType.dice2]: 1,
+    [GameType.wheel]: 1,
+    [GameType.plinko]: 1,
+    [GameType.limbo]: 1,
+    [GameType.roulette1]: 1,
+    [GameType.roulette2]: 1,
+    [GameType.keno]: 1,
+    [GameType.mines]: 1,
+    [GameType.hilo]: 1,
+  },
 };
 
 export const obfuscatePubKey = (address: string) => {
@@ -272,11 +315,13 @@ export const stakeFOMO = async (
     return { success: true, message: "Wallet not connected" };
   }
   try {
-    let { transaction, blockhash } = await createDepositTxn(
-      wallet.publicKey,
-      amount,
-      tokenMint,
-    );
+    let { transaction, blockhashWithExpiryBlockHeight } =
+      await createDepositTxn(
+        wallet.publicKey,
+        amount,
+        tokenMint,
+        stakingPublicKey,
+      );
 
     transaction = await wallet.signTransaction!(transaction);
 
@@ -289,7 +334,7 @@ export const stakeFOMO = async (
     const res = await fetch(`/api/staking/wallet/stake`, {
       method: "POST",
       body: JSON.stringify({
-        blockhash,
+        blockhashWithExpiryBlockHeight,
         transactionBase64,
         wallet: wallet.publicKey,
         amount,
@@ -332,11 +377,13 @@ export const unstakeFOMO = async (
   }
 
   try {
-    let { transaction, blockhash } = await createWithdrawTxn(
-      wallet.publicKey!,
-      amount,
-      tokenMint,
-    );
+    let { transaction, blockhashWithExpiryBlockHeight } =
+      await createWithdrawTxn(
+        wallet.publicKey!,
+        amount,
+        tokenMint,
+        stakingPublicKey,
+      );
 
     transaction = await wallet.signTransaction!(transaction);
     const transactionBase64 = transaction
@@ -352,7 +399,7 @@ export const unstakeFOMO = async (
         wallet: wallet.publicKey,
         amount,
         tokenMint,
-        blockhash,
+        blockhashWithExpiryBlockHeight,
       }),
       headers: {
         "Content-Type": "application/json",
@@ -399,20 +446,24 @@ export const createDepositTxn = async (
   wallet: PublicKey,
   amount: number,
   tokenMint: string,
+  devPublicKey: PublicKey,
 ) => {
   let transaction = new Transaction();
+  let { tokenName, decimal } = SPL_TOKENS.find(
+    (data) => data.tokenMint === tokenMint,
+  )!;
 
-  let tokenName = "FOMO";
-  let decimal = 9;
-
+  const blockhashWithExpiryBlockHeight = await connection.getLatestBlockhash();
   transaction.feePayer = wallet;
-  const blockhash = await connection.getLatestBlockhash();
-  transaction.recentBlockhash = blockhash.blockhash;
+  transaction.recentBlockhash = blockhashWithExpiryBlockHeight.blockhash;
+
+  transaction.add(
+    ComputeBudgetProgram.setComputeUnitLimit({ units: 100_000 }),
+    ComputeBudgetProgram.setComputeUnitPrice({ microLamports: 150_000 }),
+  );
 
   if (tokenName === "SOL")
     transaction.add(
-      ComputeBudgetProgram.setComputeUnitLimit({ units: 100_000 }),
-      ComputeBudgetProgram.setComputeUnitPrice({ microLamports: 400_000 }),
       SystemProgram.transfer({
         fromPubkey: wallet,
         toPubkey: devPublicKey,
@@ -424,8 +475,6 @@ export const createDepositTxn = async (
     const userAta = await getAssociatedTokenAddress(tokenId, wallet);
     const devAta = await getAssociatedTokenAddress(tokenId, devPublicKey);
     transaction.add(
-      ComputeBudgetProgram.setComputeUnitLimit({ units: 100_000 }),
-      ComputeBudgetProgram.setComputeUnitPrice({ microLamports: 400_000 }),
       createTransferInstruction(
         userAta,
         devAta,
@@ -433,47 +482,61 @@ export const createDepositTxn = async (
         Math.floor(amount * Math.pow(10, decimal)),
       ),
     );
-
-    transaction.instructions[2].keys[2].isWritable = true;
   }
 
-  return { transaction, blockhash };
+  transaction.instructions.slice(2).forEach((i) => {
+    i.keys.forEach((k) => {
+      if (k.pubkey.equals(wallet)) {
+        k.isSigner = true;
+        k.isWritable = true;
+      }
+    });
+  });
+
+  return { transaction, blockhashWithExpiryBlockHeight };
 };
 
 export const createWithdrawTxn = async (
   wallet: PublicKey,
   amount: number,
   tokenMint: string,
+  devPublicKey: PublicKey,
 ) => {
   let transaction = new Transaction();
 
-  let tokenName = "FOMO";
-  let decimal = 9;
+  let { tokenName, decimal } = SPL_TOKENS.find(
+    (data) => data.tokenMint === tokenMint,
+  )!;
 
   transaction.feePayer = wallet;
-  const blockhash = await connection.getLatestBlockhash();
-  transaction.recentBlockhash = blockhash.blockhash;
+  const blockhashWithExpiryBlockHeight = await connection.getLatestBlockhash();
+  transaction.recentBlockhash = blockhashWithExpiryBlockHeight.blockhash;
+
+  transaction.add(
+    ComputeBudgetProgram.setComputeUnitLimit({ units: 100_000 }),
+    ComputeBudgetProgram.setComputeUnitPrice({ microLamports: 150_000 }),
+  );
 
   if (tokenName === "SOL") {
     transaction.add(
-      ComputeBudgetProgram.setComputeUnitLimit({ units: 100_000 }),
-      ComputeBudgetProgram.setComputeUnitPrice({ microLamports: 150_000 }),
       SystemProgram.transfer({
         fromPubkey: devPublicKey,
         toPubkey: wallet,
         lamports: Math.floor(amount * Math.pow(10, 9)),
       }),
     );
-    transaction.instructions[0].keys[1].isSigner = true;
-    transaction.instructions[0].keys[1].isWritable = true;
   } else {
     const tokenId = new PublicKey(tokenMint);
     const userAta = await getAssociatedTokenAddress(tokenId, wallet);
     const devAta = await getAssociatedTokenAddress(tokenId, devPublicKey);
 
     transaction.add(
-      ComputeBudgetProgram.setComputeUnitLimit({ units: 100_000 }),
-      ComputeBudgetProgram.setComputeUnitPrice({ microLamports: 150_000 }),
+      createAssociatedTokenAccountIdempotentInstruction(
+        wallet,
+        userAta,
+        wallet,
+        tokenId,
+      ),
       createTransferInstruction(
         devAta,
         userAta,
@@ -481,10 +544,414 @@ export const createWithdrawTxn = async (
         Math.floor(amount * Math.pow(10, decimal)),
       ),
     );
-
-    transaction.instructions[2].keys[2].isSigner = true;
-    transaction.instructions[2].keys[2].isWritable = true;
   }
 
-  return { transaction, blockhash };
+  transaction.instructions.slice(2).forEach((i) => {
+    i.keys.forEach((k) => {
+      if (k.pubkey.equals(wallet)) {
+        k.isSigner = true;
+        k.isWritable = true;
+      }
+    });
+  });
+
+  return { transaction, blockhashWithExpiryBlockHeight };
+};
+
+export const deposit = async (
+  wallet: WalletContextState,
+  amount: number,
+  tokenMint: string,
+  campaignId: any = null,
+) => {
+  if (amount == 0) {
+    errorCustom("Please enter an amount greater than 0");
+    return { success: true, message: "Please enter an amount greater than 0" };
+  }
+
+  if (!wallet.publicKey) {
+    errorCustom("Wallet not connected");
+    return { success: true, message: "Wallet not connected" };
+  }
+
+  try {
+    let { transaction, blockhashWithExpiryBlockHeight } =
+      await createDepositTxn(
+        wallet.publicKey,
+        amount,
+        tokenMint,
+        casinoPublicKey,
+      );
+    console.log("creatin txn with", amount, tokenMint);
+
+    transaction = await wallet.signTransaction!(transaction);
+    const transactionBase64 = transaction
+      .serialize({
+        requireAllSignatures: false,
+      })
+      .toString("base64");
+
+    const res = await fetch(`/api/games/wallet/deposit`, {
+      method: "POST",
+      body: JSON.stringify({
+        transactionBase64,
+        wallet: wallet.publicKey,
+        amount,
+        tokenMint,
+        blockhashWithExpiryBlockHeight,
+        campaignId,
+      }),
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    const { success, message } = await res.json();
+
+    if (success === false) {
+      if (message.includes("limit exceeded"))
+        warningCustom(message, "bottom-right", 8000);
+      else errorCustom(message);
+      throw new Error(message);
+    }
+
+    successCustom("Deposit successfull!");
+
+    return { success: true, message };
+  } catch (error) {
+    // errorCustom("Unexpected error!");
+    return { success: false, message: error };
+  }
+};
+
+export const withdraw = async (
+  wallet: WalletContextState,
+  amount: number,
+  tokenMint: string,
+) => {
+  if (amount == 0) {
+    errorCustom("Please enter an amount greater than 0");
+    return { success: true, message: "Please enter an amount greater than 0" };
+  }
+
+  if (!wallet.publicKey) {
+    errorCustom("Wallet not connected");
+    return { success: true, message: "Wallet not connected" };
+  }
+
+  try {
+    let { transaction, blockhashWithExpiryBlockHeight } =
+      await createWithdrawTxn(
+        wallet.publicKey!,
+        amount,
+        tokenMint,
+        casinoPublicKey,
+      );
+
+    transaction = await wallet.signTransaction!(transaction);
+    const transactionBase64 = transaction
+      .serialize({
+        requireAllSignatures: false,
+      })
+      .toString("base64");
+
+    const res = await fetch(`/api/games/wallet/withdraw`, {
+      method: "POST",
+      body: JSON.stringify({
+        transactionBase64,
+        wallet: wallet.publicKey,
+        amount,
+        tokenMint,
+        blockhashWithExpiryBlockHeight,
+      }),
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    const { success, message } = await res.json();
+
+    if (success === false) {
+      if (message.includes("limit exceeded"))
+        warningCustom(message, "bottom-right", 8000);
+      else errorCustom(message);
+      throw new Error(message);
+    }
+
+    successCustom("Withdrawal successfull!");
+
+    return { success: true, message };
+  } catch (error) {
+    // errorCustom("Unexpected error!");
+
+    return { success: true, message: error };
+  }
+};
+
+export const verifyFrontendTransaction = (
+  transaction: Transaction,
+  verificationTransaction: Transaction,
+) => {
+  const transactionInstructions = JSON.stringify(
+    transaction.instructions.filter(
+      (i) => !i.programId.equals(ComputeBudgetProgram.programId),
+    ),
+  );
+
+  const verificationTransactionInstructions = JSON.stringify(
+    verificationTransaction.instructions.filter(
+      (i) => !i.programId.equals(ComputeBudgetProgram.programId),
+    ),
+  );
+
+  console.log(transactionInstructions, verificationTransactionInstructions);
+
+  return transactionInstructions === verificationTransactionInstructions;
+};
+
+export async function retryTxn(
+  connection: Connection,
+  transaction: Transaction,
+  blockhashContext: BlockhashWithExpiryBlockHeight,
+) {
+  const { blockhash, lastValidBlockHeight } = blockhashContext;
+  let blockheight = await connection.getBlockHeight();
+
+  let flag = true;
+
+  let finalTxn = "";
+
+  let txn = "";
+
+  let j = 0;
+
+  while (blockheight < lastValidBlockHeight && flag) {
+    txn = await connection.sendRawTransaction(transaction.serialize(), {
+      skipPreflight: true,
+      maxRetries: 0,
+    });
+    await new Promise((r) => setTimeout(r, 2000));
+    console.log("retry count: ", ++j);
+    connection
+      .confirmTransaction({
+        lastValidBlockHeight,
+        blockhash,
+        signature: txn,
+      })
+      .then((data) => {
+        if ((data.value as any).confirmationStatus) {
+          console.log("confirmed txn", data.value, txn);
+          finalTxn = txn;
+          flag = false;
+        }
+      })
+      .catch((e) => {
+        finalTxn = "";
+        flag = false;
+        console.log(e);
+      });
+
+    blockheight = await connection.getBlockHeight();
+  }
+
+  if (finalTxn) return finalTxn;
+  else throw new Error("Transaction could not be confirmed !");
+}
+
+export const placeBet = async (
+  wallet: WalletContextState,
+  amount: number,
+  tokenMint: string,
+  betType: string,
+  timeFrame: number,
+) => {
+  try {
+    const res = await fetch(`/api/games/options`, {
+      method: "POST",
+      body: JSON.stringify({
+        wallet: wallet.publicKey,
+        amount: amount,
+        tokenMint: tokenMint,
+        betType,
+        timeFrame,
+      }),
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    const { success, message, data } = await res.json();
+
+    if (success === false) {
+      errorCustom(message);
+      throw new Error(message);
+    }
+
+    successCustom("Bet placed successfully!");
+
+    return { success, message, data };
+  } catch (error) {
+    return { success: false, message: "Unexpected error", data: null };
+  }
+};
+
+export const placeFlip = async (
+  wallet: WalletContextState,
+  amount: number,
+  tokenMint: string,
+  flipType: string, // heads / tails
+) => {
+  try {
+    if (!wallet.publicKey) throw new Error("Wallet not connected");
+
+    if (flipType == null) throw new Error("Invalid flip type");
+
+    const res = await fetch(`/api/games/coin`, {
+      method: "POST",
+      body: JSON.stringify({
+        wallet: wallet.publicKey,
+        amount,
+        flipType,
+        tokenMint: tokenMint,
+      }),
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    const { success, message, data } = await res.json();
+    if (!success) throw new Error(message);
+
+    return { success, message, data };
+  } catch (error: any) {
+    return { success: false, message: error.message, data: null };
+  }
+};
+
+export const checkResult = async (wallet: WalletContextState) => {
+  try {
+    const res = await fetch(`/api/games/options/checkResult`, {
+      method: "POST",
+      body: JSON.stringify({
+        wallet: wallet.publicKey,
+      }),
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    const { success, message, data } = await res.json();
+
+    if (success === false) {
+      errorCustom(message);
+      throw new Error(message);
+    }
+
+    return { success, message, data };
+  } catch (error: any) {
+    // errorCustom("Unexpected error! Please try again.");
+
+    return {
+      success: false,
+      message: "Unexpected error! Please try again",
+      data: null,
+    };
+  }
+};
+
+export const getDecimals = async (owner: any, tokenMint: any) => {
+  try {
+    let ownerTokenAccount = await getAssociatedTokenAddress(tokenMint, owner);
+    const tokenAccount: any =
+      await connection.getParsedAccountInfo(ownerTokenAccount);
+    let decimal = tokenAccount.value.data.parsed.info.tokenAmount.decimals;
+    return decimal;
+  } catch {
+    return null;
+  }
+};
+
+export const rollDice = async (
+  wallet: WalletContextState,
+  amount: number,
+  tokenMint: string,
+  chosenNumbers: number[],
+) => {
+  try {
+    if (!wallet.publicKey) throw new Error("Wallet not connected");
+
+    const res = await fetch(`/api/games/dice`, {
+      method: "POST",
+      body: JSON.stringify({
+        wallet: wallet.publicKey,
+        amount: amount,
+        tokenMint: tokenMint,
+        chosenNumbers,
+      }),
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    const { success, message, data } = await res.json();
+
+    if (success != true) {
+      errorCustom(message);
+      throw new Error(message);
+    }
+
+    if (data.result == "Won") successCustom(message);
+    else errorCustom(message);
+
+    return { success, message, data };
+  } catch (error) {
+    return { success: false, message: "Unexpected error", data: null };
+  }
+};
+
+export const limboBet = async (
+  wallet: WalletContextState,
+  amount: number,
+  multiplier: number,
+  tokenMint: string,
+) => {
+  try {
+    if (!wallet.publicKey) throw new Error("Wallet not connected");
+
+    const res = await fetch(`/api/games/limbo`, {
+      method: "POST",
+      body: JSON.stringify({
+        wallet: wallet.publicKey,
+        amount: amount,
+        tokenMint: tokenMint,
+        multiplier,
+      }),
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    const data = await res.json();
+
+    return data;
+  } catch (error: any) {
+    return { success: false, message: error.message, data: null };
+  }
+};
+
+export function trimStringToLength(str: string, desiredLength: number): string {
+  return (
+    str.substring(0, desiredLength) +
+    "..." +
+    str.substring(str.length - desiredLength, str.length)
+  );
+}
+
+export const truncateNumber = (num: number, numOfDecimals: number = 4) => {
+  const [whole, decimal] = num.toFixed(9).split(".");
+  return parseFloat(whole + "." + (decimal || "").slice(0, numOfDecimals));
+};
+
+export const isArrayUnique = (arr: number[]) => {
+  return new Set(arr).size === arr.length;
 };

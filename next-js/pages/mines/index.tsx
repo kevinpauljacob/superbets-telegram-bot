@@ -24,12 +24,13 @@ import {
   successCustom,
   warningCustom,
 } from "@/components/toasts/ToastGroup";
-import { translator, formatNumber } from "@/context/transactions";
-import { minGameAmount, truncateNumber } from "@/context/gameTransactions";
+import { translator, truncateNumber } from "@/context/transactions";
+import { minGameAmount } from "@/context/config";
 import { useSession } from "next-auth/react";
 import user from "@/models/staking/user";
 import Decimal from "decimal.js";
 import next from "next";
+import { GameType } from "@/utils/provably-fair";
 Decimal.set({ precision: 9 });
 
 export default function Mines() {
@@ -60,6 +61,10 @@ export default function Mines() {
     houseEdge,
     maxBetAmt,
     language,
+    selectedCoin,
+    setLiveStats,
+    liveStats,
+    enableSounds,
   } = useGlobalContext();
   const [betAmt, setBetAmt] = useState<number | undefined>();
   const [userInput, setUserInput] = useState<number | undefined>();
@@ -85,6 +90,11 @@ export default function Mines() {
     strikeMultiplier: 0,
     pointsGained: 0,
   });
+  const [pendingRequests, setPendingRequests] = useState<number[]>([]);
+  const [processing, setProcessing] = useState(false);
+  const [gameStatus, setGameStatus] = useState<"Not Started" | "Completed">(
+    "Not Started",
+  );
 
   const defaultUserBets = Array.from({ length: 25 }, (_, index) => ({
     result: "",
@@ -119,18 +129,20 @@ export default function Mines() {
   useEffect(() => {
     const fetchPrice = async () => {
       try {
-        const response = await fetch("https://price.jup.ag/v6/price?ids=SOL");
+        const response = await fetch(
+          `https://price.jup.ag/v6/price?ids=${selectedCoin.tokenName}`,
+        );
         const data = await response.json();
-        const solPrice = data.data.SOL.price;
-        setCurrentProfitInUSD(currentProfit * solPrice);
-        setNextProfitInUSD(nextProfit * solPrice);
+        const coinPrice = data?.data[selectedCoin.tokenName]?.price ?? 0;
+        setCurrentProfitInUSD(currentProfit * coinPrice);
+        setNextProfitInUSD(nextProfit * coinPrice);
       } catch (error: any) {
         throw new Error(error.message);
       }
     };
 
     fetchPrice();
-  }, [currentProfit, nextProfit]);
+  }, [currentProfit, nextProfit, pendingRequests, betActive]);
 
   const handleConclude = async () => {
     try {
@@ -163,7 +175,7 @@ export default function Mines() {
       const win = result === "Won";
       if (win) {
         successCustom(message);
-        soundAlert("/sounds/win.wav");
+        soundAlert("/sounds/win.wav", !enableSounds);
       } else errorCustom(message);
 
       if (success) {
@@ -177,6 +189,7 @@ export default function Mines() {
           strikeMultiplier: strikeMultiplier,
           pointsGained: pointsGained,
         });
+        setGameStatus("Completed");
         setUserBets(updatedUserBetsWithResult);
         setRefresh(true);
         setBetActive(false);
@@ -187,6 +200,8 @@ export default function Mines() {
         setCurrentProfit(0);
         setNextProfit(0);
         setAmountWon(0);
+        setProcessing(false);
+        setPendingRequests([]);
       }
     } catch (error) {
       console.error("Error occurred while betting:", error);
@@ -196,7 +211,7 @@ export default function Mines() {
   };
 
   const handleAutoPick = async (number: number) => {
-    const updatedUserBets = [...userBets];
+    const updatedUserBets = userBets;
     const currentPickState = updatedUserBets[number - 1].pick;
 
     // Toggle the pick state
@@ -221,6 +236,9 @@ export default function Mines() {
   };
 
   const handlePick = async (number: number) => {
+    soundAlert("/sounds/betbutton.wav", !enableSounds);
+    setIsRolling(true);
+    // setSelectTile(false);
     setNumBets(numBets + 1);
     try {
       const response = await fetch(`/api/games/mines/pick`, {
@@ -248,7 +266,7 @@ export default function Mines() {
         throw new Error(message);
       }
 
-      const updatedUserBets = [...userBets];
+      const updatedUserBets = userBets;
       updatedUserBets[number - 1] = {
         result: result === "Pending" ? "Pending" : "Lost",
         pick: true,
@@ -286,6 +304,7 @@ export default function Mines() {
           result: result === "Pending" ? "Pending" : "Lost",
           pick: true,
         };
+        setGameStatus("Completed");
         setUserBets(updatedUserBetsWithResult);
         setNumBets(0);
         setCurrentMultiplier(0);
@@ -297,31 +316,102 @@ export default function Mines() {
         setBetActive(false);
         errorCustom(message);
         setIsRolling(false);
+        setProcessing(false);
+        setPendingRequests([]);
       }
 
       const win: boolean = result === "Pending";
       const lose: boolean = result === "Lost";
-      if (win) soundAlert("/sounds/win.wav");
-      if (lose) soundAlert("/sounds/bomb.wav");
+      if (win) {
+        soundAlert("/sounds/win.wav", !enableSounds);
+        // setSelectTile(true);
+      }
+      if (lose) soundAlert("/sounds/bomb.wav", !enableSounds);
+
+      if (result !== "Pending") {
+        setLiveStats([
+          ...liveStats,
+          {
+            game: GameType.mines,
+            amount: betAmt!,
+            result: win ? "Won" : "Lost",
+            pnl: win ? betAmt! * strikeMultiplier - betAmt! : -betAmt!,
+            totalPNL:
+              liveStats.length > 0
+                ? liveStats[liveStats.length - 1].totalPNL +
+                  (win ? betAmt! * strikeMultiplier - betAmt! : -betAmt!)
+                : win
+                  ? betAmt! * strikeMultiplier - betAmt!
+                  : -betAmt!,
+          },
+        ]);
+      }
 
       if (success) {
         setRefresh(true);
+        setIsRolling(false);
       }
-    } catch (error) {
+    } catch (error: any) {
+      errorCustom(error.message);
+      setNumBets(0);
+      setCurrentMultiplier(0);
+      setNextMultiplier(0);
+      setStrikeMultiplier(1);
+      setCurrentProfit(0);
+      setNextProfit(0);
+      setAmountWon(0);
+      setBetActive(false);
+      setIsRolling(false);
+      setProcessing(false);
+      setPendingRequests([]);
       console.error("Error occurred while betting:", error);
     }
   };
 
+  const processPendingRequests = async () => {
+    if (processing || pendingRequests.length === 0) return;
+
+    setProcessing(true);
+
+    for (let i = 0; i < pendingRequests.length; i++) {
+      const currentRequest = pendingRequests[i];
+
+      // console.log(`Processing request: ${currentRequest}`);
+      const alreadyPicked = userBets[currentRequest - 1]?.pick;
+      if (alreadyPicked) {
+        // console.warn(`Number ${currentRequest} has already been picked.`);
+      } else {
+        await handlePick(currentRequest);
+      }
+
+      setPendingRequests((prev) =>
+        prev.filter((req) => req !== currentRequest),
+      );
+
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    }
+
+    setProcessing(false);
+  };
+
+  useEffect(() => {
+    if (!processing && pendingRequests.length > 0) {
+      // console.log("Triggering processPendingRequests");
+      processPendingRequests();
+    }
+    // console.log(`Updated pending requests: ${pendingRequests}`);
+  }, [pendingRequests, processing]);
+
   const handleAutoBet = async () => {
     try {
       if (!wallet.connected || !wallet.publicKey) {
-        throw new Error("Wallet not connected");
+        throw new Error(translator("Wallet not connected", language));
       }
       if (!betAmt || betAmt === 0) {
-        throw new Error("Set Amount.");
+        throw new Error(translator("Set Amount.", language));
       }
-      if (coinData && coinData[0].amount < betAmt) {
-        throw new Error("Insufficient balance for bet !");
+      if (selectedCoin && selectedCoin.amount < betAmt) {
+        throw new Error(translator("Insufficient balance for bet !", language));
       }
       if (userBetsForAuto.length === 0) {
         throw new Error("Select at least one tile to bet on.");
@@ -344,7 +434,7 @@ export default function Mines() {
         body: JSON.stringify({
           wallet: wallet.publicKey,
           amount: betAmt,
-          tokenMint: "SOL",
+          tokenMint: selectedCoin.tokenMint,
           minesCount: minesCount,
           userBets: userBetsForAuto,
         }),
@@ -378,7 +468,7 @@ export default function Mines() {
 
       const win = result === "Won";
       if (win) {
-        soundAlert("/sounds/win.wav");
+        soundAlert("/sounds/win.wav", !enableSounds);
         successCustom(message);
         setCashoutModal({
           show: true,
@@ -390,7 +480,7 @@ export default function Mines() {
 
       const lose = result === "Lost";
       if (lose) {
-        soundAlert("/sounds/bomb.wav");
+        soundAlert("/sounds/bomb.wav", !enableSounds);
         errorCustom(message);
       }
 
@@ -416,10 +506,9 @@ export default function Mines() {
         );
         // update count
         if (typeof autoBetCount === "number") {
-          if (autoBetCount === 1) {
-            warningCustom("Auto bet stopped", "top-left");
-          }
-          if (autoBetCount > 1) setAutoBetCount(autoBetCount - 1);
+          setAutoBetCount(autoBetCount > 0 ? autoBetCount - 1 : 0);
+          autoBetCount === 1 &&
+            warningCustom(translator("Auto bet stopped", language), "top-left");
         } else
           setAutoBetCount(
             autoBetCount.length > 12
@@ -428,7 +517,9 @@ export default function Mines() {
           );
       }
     } catch (error: any) {
-      errorCustom(error?.message ?? "Could not make the Bet.");
+      errorCustom(
+        translator(error?.message ?? "Could not make the Bet.", language),
+      );
       setIsRolling(false);
       setAutoBetCount(0);
       setStartAuto(false);
@@ -440,15 +531,17 @@ export default function Mines() {
   };
 
   const handleBet = async () => {
+    setGameStatus("Not Started");
+    // setSelectTile(true);
     try {
       if (!wallet.connected || !wallet.publicKey) {
-        throw new Error("Wallet not connected");
+        throw new Error(translator("Wallet not connected", language));
       }
       if (!betAmt || betAmt === 0) {
-        throw new Error("Set Amount.");
+        throw new Error(translator("Set Amount.", language));
       }
-      if (coinData && coinData[0].amount < betAmt) {
-        throw new Error("Insufficient balance for bet !");
+      if (selectedCoin && selectedCoin.amount < betAmt) {
+        throw new Error(translator("Insufficient balance for bet !", language));
       }
 
       setIsRolling(true);
@@ -467,7 +560,7 @@ export default function Mines() {
         body: JSON.stringify({
           wallet: wallet.publicKey,
           amount: betAmt,
-          tokenMint: "SOL",
+          tokenMint: selectedCoin.tokenMint,
           minesCount: minesCount,
         }),
       });
@@ -490,7 +583,9 @@ export default function Mines() {
         successCustom(message);
       }
     } catch (error: any) {
-      errorCustom(error?.message ?? "Could not make the Bet.");
+      errorCustom(
+        translator(error?.message ?? "Could not make the Bet.", language),
+      );
       setIsRolling(false);
       setAutoBetCount(0);
       setStartAuto(false);
@@ -501,10 +596,10 @@ export default function Mines() {
   };
 
   const handlePendingGame = async () => {
-    const updatedUserBets = [...userBets];
+    const updatedUserBets = userBets;
     try {
       if (!wallet.connected || !wallet.publicKey) {
-        throw new Error("Wallet not connected");
+        throw new Error(translator("Wallet not connected", language));
       }
       setUserBets(defaultUserBets);
       const response = await fetch(`/api/games/mines/pendingGame`, {
@@ -517,24 +612,24 @@ export default function Mines() {
         }),
       });
 
-      const {
-        success,
-        message,
-        userBets,
-        amount,
-        amountWon,
-        gameId,
-        minesCount,
-        strikeMultiplier,
-        result,
-      } = await response.json();
+      const { success, message, pendingGame, result } = await response.json();
 
-      if (success != true) {
+      if (success === false) {
         throw new Error(message);
       }
 
       if (success) {
         if (result === true) {
+          const {
+            userBets,
+            amount,
+            amountWon,
+            _id: gameId,
+            minesCount,
+            strikeMultiplier,
+            tokenMint,
+          } = pendingGame;
+
           setCurrentMultiplier(strikeMultiplier);
           setCurrentProfit(amountWon);
 
@@ -576,13 +671,15 @@ export default function Mines() {
           setBetAmt(amount);
           setGameId(gameId);
           setBetActive(true);
-          successCustom(message ?? "Pending game found!");
+          successCustom(translator(message ?? "Pending game found!", language));
         }
 
         setRefresh(true);
       }
     } catch (error: any) {
-      errorCustom(error?.message ?? "Could not fetch pending game.");
+      errorCustom(
+        translator(error?.message ?? "Could not fetch pending game.", language),
+      );
       setAutoBetCount(0);
       setStartAuto(false);
       console.error("Error occurred while fetching pending game:", error);
@@ -590,8 +687,9 @@ export default function Mines() {
   };
 
   useEffect(() => {
-    if (wallet.connected && wallet?.publicKey) handlePendingGame();
-  }, [wallet.connected, wallet.publicKey]);
+    if (wallet.connected && wallet?.publicKey && status === "authenticated")
+      handlePendingGame();
+  }, [wallet.connected, wallet.publicKey, status]);
 
   const disableInput = useMemo(() => {
     return betType === "auto" && startAuto
@@ -641,11 +739,22 @@ export default function Mines() {
         autoBetProfit > 0 &&
         autoBetProfit >= autoStopProfit
       ) {
-        warningCustom("Profit limit reached.", "top-left");
+        warningCustom(
+          translator("Profit limit reached.", language),
+          "top-left",
+        );
         setAutoBetCount(0);
         setStartAuto(false);
-        setUserBets(defaultUserBets);
-        setUserBetsForAuto([]);
+        setTimeout(() => {
+          setUserBets(defaultUserBets);
+          setUserBetsForAuto([]);
+          setCashoutModal({
+            show: false,
+            amountWon: 0,
+            strikeMultiplier: 0,
+            pointsGained: 0,
+          });
+        }, 2000);
         return;
       }
       if (
@@ -654,11 +763,19 @@ export default function Mines() {
         autoBetProfit < 0 &&
         potentialLoss <= -autoStopLoss
       ) {
-        warningCustom("Loss limit reached.", "top-left");
+        warningCustom(translator("Loss limit reached.", language), "top-left");
         setAutoBetCount(0);
         setStartAuto(false);
-        setUserBets(defaultUserBets);
-        setUserBetsForAuto([]);
+        setTimeout(() => {
+          setUserBets(defaultUserBets);
+          setUserBetsForAuto([]);
+          setCashoutModal({
+            show: false,
+            amountWon: 0,
+            strikeMultiplier: 0,
+            pointsGained: 0,
+          });
+        }, 2000);
         return;
       }
       setTimeout(() => {
@@ -666,8 +783,16 @@ export default function Mines() {
       }, 1000);
     } else {
       setStartAuto(false);
-      setUserBets(defaultUserBets);
-      setUserBetsForAuto([]);
+      setTimeout(() => {
+        setUserBets(defaultUserBets);
+        setUserBetsForAuto([]);
+        setCashoutModal({
+          show: false,
+          amountWon: 0,
+          strikeMultiplier: 0,
+          pointsGained: 0,
+        });
+      }, 2000);
       setAutoBetProfit(0);
       setUserInput(betAmt);
     }
@@ -676,7 +801,7 @@ export default function Mines() {
   const onSubmit = async (data: any) => {
     if (betType === "auto") {
       if (betAmt === 0) {
-        errorCustom("Set Amount.");
+        errorCustom(translator("Set Amount.", language));
         return;
       }
       if (typeof autoBetCount === "number" && autoBetCount <= 0) {
@@ -702,8 +827,11 @@ export default function Mines() {
                 onClick={() => {
                   setUserBets(defaultUserBets);
                   setUserBetsForAuto([]);
-                  soundAlert("/sounds/betbutton.wav");
-                  warningCustom("Auto bet stopped", "top-left");
+                  soundAlert("/sounds/betbutton.wav", !enableSounds);
+                  warningCustom(
+                    translator("Auto bet stopped", language),
+                    "top-left",
+                  );
                   setAutoBetCount(0);
                   setStartAuto(false);
                   setCashoutModal({
@@ -723,7 +851,9 @@ export default function Mines() {
                 !wallet ||
                 !session?.user ||
                 isRolling ||
-                (coinData && coinData[0].amount < minGameAmount) ||
+                (!betActive &&
+                  coinData &&
+                  coinData[0].amount < minGameAmount) ||
                 (betActive &&
                   betType === "manual" &&
                   !userBets.some((bet) => bet.pick)) ||
@@ -783,11 +913,18 @@ export default function Mines() {
                       } relative flex h-11 w-full cursor-pointer items-center rounded-[8px] bg-[#202329] px-4`}
                       onClick={handleDropDown}
                     >
-                      <div className="bg-transparent text-base text-[#94A3B8] placeholder-[#94A3B8] font-chakra placeholder-opacity-40 outline-none w-full">
+                      <div className="flex justify-between items-center bg-transparent text-base text-[#94A3B8] placeholder-[#94A3B8] font-chakra placeholder-opacity-40 outline-none w-full">
                         {minesCount}
+                        <Image
+                          src="/assets/downArrow.png"
+                          alt="arrowDown"
+                          width={14}
+                          height={14}
+                          className={`${dropDown ? "transform transition-all rotate-180" : "transition-all"}`}
+                        />
                       </div>
                       {dropDown && (
-                        <div className="absolute top-14 z-50 max-h-[300px] overflow-y-scroll modalscrollbar left-0 bg-[#202329] border border-[#2A2E38] rounded-[8px] w-full">
+                        <div className="absolute -top-[200px] lg:top-14 z-[150] max-h-[195px] lg:max-h-[335px] xl:max-h-[380px] overflow-y-scroll modalscrollbar left-0 bg-[#202329] border-2 border-[#2A2E38] rounded-[8px] w-full">
                           {options.map((option) => (
                             <div
                               key={option.key}
@@ -828,14 +965,19 @@ export default function Mines() {
                         </div>
                       </div>
                     </div>
-                    <div className="border border-[#FFFFFF0D] rounded-[5px] font-changa text-white text-xs font-medium p-5 mb-6">
+                    <div className="border border-[#FFFFFF0D] rounded-[5px] font-changa text-white text-sm font-medium p-5 mb-6">
                       <div>
                         <div className="flex justify-between items-center mb-2">
                           <p>Current Profit</p>
-                          <p>{truncateNumber(currentProfit, 7)} SOL</p>
+                          <p>
+                            {truncateNumber(currentProfit, 7)}{" "}
+                            {selectedCoin.tokenName}
+                          </p>
                         </div>
                         <div className="flex justify-between items-center text-fomo-green">
-                          <p>{truncateNumber(currentProfitInUSD, 5)} USD</p>
+                          <p className="text-[#94A3B8]">
+                            {truncateNumber(currentProfitInUSD, 5)} USD
+                          </p>
                           <p>{truncateNumber(currentMultiplier, 2)}x</p>
                         </div>
                       </div>
@@ -852,10 +994,15 @@ export default function Mines() {
                       <div>
                         <div className="flex justify-between items-center mb-2">
                           <p>Profit on next tile</p>
-                          <p>{truncateNumber(nextProfit, 7)} SOL</p>
+                          <p>
+                            {truncateNumber(nextProfit, 7)}{" "}
+                            {selectedCoin.tokenName}
+                          </p>
                         </div>
                         <div className="flex justify-between items-center text-fomo-green">
-                          <p>{truncateNumber(nextProfitInUSD, 5)} USD</p>
+                          <p className="text-[#94A3B8]">
+                            {truncateNumber(nextProfitInUSD, 5)} USD
+                          </p>
                           <p>{truncateNumber(nextMultiplier, 2)}x</p>
                         </div>
                       </div>
@@ -874,11 +1021,18 @@ export default function Mines() {
                           } relative flex h-11 w-full cursor-pointer items-center rounded-[8px] bg-[#202329] px-4`}
                           onClick={!startAuto ? handleDropDown : undefined}
                         >
-                          <div className="bg-transparent text-base text-[#94A3B8] placeholder-[#94A3B8] font-chakra placeholder-opacity-40 outline-none w-full">
+                          <div className="flex justify-between items-center bg-transparent text-base text-[#94A3B8] placeholder-[#94A3B8] font-chakra placeholder-opacity-40 outline-none w-full">
                             {minesCount}
+                            <Image
+                              src="/assets/downArrow.png"
+                              alt="arrowDown"
+                              width={14}
+                              height={14}
+                              className={`${dropDown ? "transform transition-all rotate-180" : "transition-all"}`}
+                            />
                           </div>
                           {!startAuto && dropDown && (
-                            <div className="absolute top-14 z-50 max-h-[300px] overflow-y-scroll modalscrollbar left-0 bg-[#202329] border border-[#2A2E38] rounded-[8px] w-full">
+                            <div className="absolute -top-[200px] lg:top-14 z-[150] max-h-[195px] lg:max-h-[335px] xl:max-h-[380px] overflow-y-scroll modalscrollbar left-0 bg-[#202329] border-2 border-[#2A2E38] rounded-[8px] w-full">
                               {options.map((option) => (
                                 <div
                                   key={option.key}
@@ -926,8 +1080,11 @@ export default function Mines() {
                       onClick={() => {
                         setUserBets(defaultUserBets);
                         setUserBetsForAuto([]);
-                        soundAlert("/sounds/betbutton.wav");
-                        warningCustom("Auto bet stopped", "top-left");
+                        soundAlert("/sounds/betbutton.wav", !enableSounds);
+                        warningCustom(
+                          translator("Auto bet stopped", language),
+                          "top-left",
+                        );
                         setAutoBetCount(0);
                         setStartAuto(false);
                         setCashoutModal({
@@ -947,7 +1104,9 @@ export default function Mines() {
                       !wallet ||
                       !session?.user ||
                       isRolling ||
-                      (coinData && coinData[0].amount < minGameAmount) ||
+                      (!betActive &&
+                        coinData &&
+                        coinData[0].amount < minGameAmount) ||
                       (betActive &&
                         betType === "manual" &&
                         !userBets.some((bet) => bet.pick)) ||
@@ -981,7 +1140,7 @@ export default function Mines() {
         </>
       </GameOptions>
       <GameDisplay>
-        <div className="w-full flex justify-between items-center h-[2.125rem] mb-7 sm:mb-0">
+        <div className="w-full flex justify-between items-center h-[2.125rem]">
           <div>
             {isRolling ? (
               <div className="font-chakra text-xs sm:text-sm font-medium text-white text-opacity-75">
@@ -991,7 +1150,7 @@ export default function Mines() {
           </div>
         </div>
         <div
-          className="flex justify-center items-center w-full mb-[1.4rem] sm:my-5"
+          className="flex justify-center items-center w-full"
           onClick={() => {
             setCashoutModal({
               show: false,
@@ -1003,25 +1162,20 @@ export default function Mines() {
         >
           <div className="relative grid grid-cols-5 gap-1.5 sm:gap-2 text-white text-sm md:text-xl font-chakra">
             {cashoutModal.show && (
-              <div className="absolute top-0 left-0 w-full h-full flex items-center justify-center bg-black/40">
+              <div className="absolute top-0 left-0 w-full h-full flex items-center justify-center bg-black/10">
                 <div className="flex flex-col items-center justify-center bg-[#121418] rounded-[5px] border-2 border-fomo-green w-[200px] h-max p-2.5">
                   <p className="text-3xl text-fomo-green font-bold font-chakra mb-2">
                     x{truncateNumber(cashoutModal.strikeMultiplier, 2)}
                   </p>
                   <div className="flex items-center justify-between bg-[#202329] rounded-[3px] text-sm font-bold font-chakra text-white w-full p-2.5">
                     <div className="flex gap-2 items-center">
-                      <Image
-                        src="/assets/sol.svg"
-                        alt="SOL"
-                        width={20}
-                        height={20}
-                      />
+                      <selectedCoin.icon className="w-5 h-5" />
                       <p>{truncateNumber(cashoutModal.amountWon, 6)}</p>
                     </div>
                     <div className="flex gap-2 items-center">
                       <Image
                         src="/assets/gem.svg"
-                        alt="SOL"
+                        alt="Gem"
                         width={20}
                         height={20}
                       />
@@ -1043,7 +1197,9 @@ export default function Mines() {
                         : userBets[index - 1].result === "Lost" &&
                             userBets[index - 1].pick === true
                           ? "border-[#F1323E] bg-[#F1323E33]"
-                          : "border-[#202329] hover:border-white/30"
+                          : gameStatus === "Completed"
+                            ? "bg-transparent border-white/10"
+                            : "bg-[#202329] border-[#202329] hover:border-white/30"
                       : betType === "auto"
                         ? userBets[index - 1].result === "" &&
                           userBets[index - 1].pick === true
@@ -1054,15 +1210,20 @@ export default function Mines() {
                             : userBets[index - 1].result === "Lost" &&
                                 userBets[index - 1].pick === true
                               ? "border-[#F1323E] bg-[#F1323E33]"
-                              : "border-[#202329] hover:border-white/30"
+                              : "bg-[#202329] border-[#202329] hover:border-white/30"
                         : null
-                  }  bg-[#202329] flex items-center justify-center cursor-pointer rounded-md text-center transition-all duration-300 ease-in-out w-[45px] h-[45px] sm:w-[55px] sm:h-[55px] md:w-[80px] md:h-[80px] xl:w-[95px] xl:h-[95px]`}
+                  } ${
+                    pendingRequests.includes(index) ? "blink_tile" : ""
+                  } flex items-center active:scale-90 justify-center cursor-pointer rounded-md text-center transition duration-150 ease-in-out w-[50px] h-[50px] sm:w-[55px] sm:h-[55px] md:w-[80px] md:h-[80px] xl:w-[90px] xl:h-[90px]`}
                   disabled={betType === "manual" && userBets[index - 1].pick}
                   onClick={() =>
                     betType === "auto"
                       ? handleAutoPick(index)
                       : betActive && betType === "manual"
-                        ? handlePick(index)
+                        ? setPendingRequests((prevRequests) => [
+                            ...prevRequests,
+                            index,
+                          ])
                         : null
                   }
                 >

@@ -1,25 +1,19 @@
-import { Header } from "@/components/Header";
-import InfoBar from "@/components/Infobar";
 import StakeFomo from "@/components/StakeFomo";
 import StakeStats from "@/components/StakeStats";
 import Image from "next/legacy/image";
 import { useEffect, useState } from "react";
 import { WalletContextState, useWallet } from "@solana/wallet-adapter-react";
 import { useSession } from "next-auth/react";
-import { Inter } from "next/font/google";
 import {
   connection,
   fomoToken,
-  formatNumber,
   translator,
+  truncateNumber,
 } from "@/context/transactions";
-import { LAMPORTS_PER_SOL, PublicKey } from "@solana/web3.js";
+import { PublicKey } from "@solana/web3.js";
 import { useGlobalContext } from "@/components/GlobalContext";
 import { getAssociatedTokenAddressSync } from "@solana/spl-token";
-import { errorCustom } from "@/components/toasts/ToastGroup";
 import FOMOHead from "@/components/HeadElement";
-import { truncateNumber } from "@/context/gameTransactions";
-const inter = Inter({ subsets: ["latin"] });
 
 export async function getFOMOBalance(
   wallet: WalletContextState,
@@ -41,18 +35,13 @@ export async function getFOMOBalance(
 }
 
 export default function Stake() {
-  const { data: session, status } = useSession();
+  const { data: session } = useSession();
   const wallet = useWallet();
 
   const {
-    userData,
-    setUserData,
-    fomoBalance,
     setFomoBalance,
     language,
-    loading,
     globalInfo,
-    setGlobalInfo,
     getGlobalInfo,
     getUserDetails,
     setLivePrice,

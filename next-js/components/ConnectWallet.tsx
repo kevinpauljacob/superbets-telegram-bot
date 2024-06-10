@@ -1,15 +1,51 @@
-import { useWallet } from "@solana/wallet-adapter-react";
+import { WalletContextState, useWallet } from "@solana/wallet-adapter-react";
 import { getCsrfToken, signIn, signOut, useSession } from "next-auth/react";
 import { buildAuthTx } from "./../utils/signinMessage";
-import bs58 from "bs58";
 import { useEffect } from "react";
-import { useWalletModal } from "@solana/wallet-adapter-react-ui";
+import {
+  WalletModalContextState,
+  useWalletModal,
+} from "@solana/wallet-adapter-react-ui";
 import {
   connection,
   obfuscatePubKey,
   translator,
 } from "@/context/transactions";
 import { useGlobalContext } from "./GlobalContext";
+import Loader from "./games/Loader";
+
+export const handleSignIn = async (
+  wallet: WalletContextState,
+  walletModal: WalletModalContextState,
+) => {
+  try {
+    if (!wallet.connected) {
+      walletModal.setVisible(true);
+    }
+
+    if (!wallet.publicKey || !wallet.signTransaction) return;
+
+    let nonce = await getCsrfToken();
+
+    // Create tx
+    const tx = buildAuthTx(nonce!);
+    tx.feePayer = wallet.publicKey; // not sure if needed but set this properly
+    tx.recentBlockhash = (await connection.getLatestBlockhash()).blockhash; // same as line above
+
+    // Encode and send tx to signer, decode and sign
+    let signedTx = await wallet.signTransaction(tx);
+
+    // Encode, send back, decode and verify signedTx signature
+    await signIn("credentials", {
+      redirect: false,
+      nonce,
+      txn: signedTx.serialize().toString("base64"),
+    });
+  } catch (error) {
+    wallet.disconnect();
+    console.log(error);
+  }
+};
 
 export default function ConnectWallet() {
   const { data: session, status } = useSession();
@@ -19,52 +55,32 @@ export default function ConnectWallet() {
 
   const { language, setLanguage } = useGlobalContext();
 
-  const handleSignIn = async () => {
-    try {
-      if (!wallet.connected) {
-        walletModal.setVisible(true);
-      }
-
-      if (!wallet.publicKey || !wallet.signTransaction) return;
-
-      let nonce = await getCsrfToken();
-
-      // Create tx
-      const tx = buildAuthTx(nonce!);
-      tx.feePayer = wallet.publicKey; // not sure if needed but set this properly
-      tx.recentBlockhash = (await connection.getLatestBlockhash()).blockhash; // same as line above
-
-      // Encode and send tx to signer, decode and sign
-      let signedTx = await wallet.signTransaction(tx);
-
-      // Encode, send back, decode and verify signedTx signature
-      await signIn("credentials", {
-        redirect: false,
-        nonce,
-        txn: signedTx.serialize().toString("base64"),
-      });
-    } catch (error) {
-      wallet.disconnect();
-      console.log(error);
-    }
-  };
-
   useEffect(() => {
     if (wallet.connected && status == "unauthenticated") {
-      handleSignIn();
+      handleSignIn(wallet, walletModal);
     }
   }, [wallet.connected]);
+
+  useEffect(() => {
+    console.log(status);
+  }, [status]);
 
   return (
     <>
       {!session && (
         <button
-          onClick={handleSignIn}
-          className="bg-[#192634] hover:bg-[#121D28] transition-all w-full sm:w-fit flex rounded-md px-5 py-2"
+          onClick={() => {
+            handleSignIn(wallet, walletModal);
+          }}
+          className="bg-[#192634] hover:bg-[#121D28] transition-all w-full sm:w-fit flex items-center rounded-md min-w-32 min-h-9 px-5"
         >
-          <span className="connect-wallet text-white font-semibold rounded-md text-sm">
-            {translator("Connect Wallet", language)}
-          </span>
+          {wallet.connected && status === "unauthenticated" ? (
+            <Loader className="scale-75" />
+          ) : (
+            <span className="connect-wallet text-white font-semibold rounded-md text-sm">
+              {translator("Connect Wallet", language)}
+            </span>
+          )}
         </button>
       )}
 

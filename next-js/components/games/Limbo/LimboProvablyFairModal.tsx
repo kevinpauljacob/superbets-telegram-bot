@@ -6,11 +6,10 @@ import {
 import { useEffect, useState } from "react";
 import { Limbo } from "./VerifyLimboModal";
 import Image from "next/image";
-import toast from "react-hot-toast";
 import { FaRegCopy } from "react-icons/fa6";
 import { MdClose } from "react-icons/md";
 import CheckPF from "@/public/assets/CheckPF.svg";
-import { errorCustom, successAlert } from "@/components/toasts/ToastGroup";
+import { errorCustom, successCustom } from "@/components/toasts/ToastGroup";
 import { translator } from "@/context/transactions";
 import { useGlobalContext } from "@/components/GlobalContext";
 import ProvablyFairModal from "../ProvablyFairModal";
@@ -136,7 +135,7 @@ export default function LimboProvablyFairModal({
 
   const handleSetClientSeed = async () => {
     if (!/^[\x00-\x7F]*$/.test(newClientSeed) || newClientSeed.trim() === "")
-      return errorCustom("Invalid client seed");
+      return errorCustom(translator("Invalid client seed", language));;
 
     let data = await fetch(`/api/games/gameSeed/change`, {
       method: "POST",
@@ -149,10 +148,10 @@ export default function LimboProvablyFairModal({
       }),
     }).then((res) => res.json());
 
-    if (!data.success) return console.error(data.message);
+    if (!data.success) return errorCustom(data.message);
 
     setModalData(data);
-    successAlert("Successfully changed the server seed")
+    successCustom("Successfully changed the server seed")
     setNewClientSeed(generateClientSeed());
   };
 
@@ -320,9 +319,10 @@ export default function LimboProvablyFairModal({
                     {translator("Game", language)}
                   </label>
                   <div className="flex items-center">
-                  <GameSelect
+                    <GameSelect
                       selectedGameType={selectedGameType}
-                      setSelectedGameType={setSelectedGameType}/>
+                      setSelectedGameType={setSelectedGameType}
+                    />
                   </div>
                 </div>
                 <div>

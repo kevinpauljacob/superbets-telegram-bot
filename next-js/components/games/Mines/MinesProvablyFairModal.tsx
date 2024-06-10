@@ -10,7 +10,7 @@ import toast from "react-hot-toast";
 import { FaRegCopy } from "react-icons/fa6";
 import { MdClose } from "react-icons/md";
 import CheckPF from "@/public/assets/CheckPF.svg";
-import { errorCustom, successAlert } from "@/components/toasts/ToastGroup";
+import { errorAlert, errorCustom, successAlert } from "@/components/toasts/ToastGroup";
 import ProvablyFairModal from "../ProvablyFairModal";
 import { translator } from "@/context/transactions";
 import { useGlobalContext } from "@/components/GlobalContext";
@@ -126,7 +126,7 @@ export default function MinesProvablyFairModal({
 
   const handleSetClientSeed = async () => {
     if (!/^[\x00-\x7F]*$/.test(newClientSeed) || newClientSeed.trim() === "")
-      return errorCustom("Invalid client seed");
+      return errorCustom(translator("Invalid client seed", language));;
 
     let data = await fetch(`/api/games/gameSeed/change`, {
       method: "POST",
@@ -139,7 +139,7 @@ export default function MinesProvablyFairModal({
       }),
     }).then((res) => res.json());
 
-    if (!data.success) return console.error(data.message);
+    if (!data.success) return errorAlert(data.message);
     successAlert("Successfully changed the server seed")
     setModalData(data);
     setNewClientSeed(generateClientSeed());

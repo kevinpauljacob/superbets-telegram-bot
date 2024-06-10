@@ -14,7 +14,7 @@ import {
   maxPayouts,
   pointTiers,
 } from "@/context/transactions";
-import { minGameAmount, wsEndpoint } from "@/context/gameTransactions";
+import { minGameAmount, wsEndpoint } from "@/context/config";
 import { Decimal } from "decimal.js";
 Decimal.set({ precision: 9 });
 
@@ -113,7 +113,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       // const maxStrikeMultiplier = multiplier.at(-1)!;
       // const maxPayout = Decimal.mul(amount, maxStrikeMultiplier);
 
-      // if (!(maxPayout.toNumber() <= maxPayouts.plinko))
+      // if (!(maxPayout.toNumber() <= maxPayouts[tokenMint as GameTokens].plinko))
       //   return res
       //     .status(400)
       //     .json({ success: false, message: "Max payout exceeded" });

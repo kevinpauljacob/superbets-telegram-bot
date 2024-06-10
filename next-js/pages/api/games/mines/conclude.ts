@@ -12,9 +12,12 @@ import {
   houseEdgeTiers,
   launchPromoEdge,
   pointTiers,
+  stakingTiers,
 } from "@/context/transactions";
-import { wsEndpoint } from "@/context/gameTransactions";
+import { wsEndpoint } from "@/context/config";
 import { Decimal } from "decimal.js";
+import { SPL_TOKENS } from "@/context/config";
+import updateGameStats from "../../../../utils/updateGameStats";
 Decimal.set({ precision: 9 });
 
 const secret = process.env.NEXTAUTH_SECRET;
@@ -69,6 +72,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         userBets,
         strikeMultiplier,
         tokenMint,
+        houseEdge,
       } = gameInfo;
 
       if (userBets.length === 0)
@@ -81,12 +85,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         {},
         { upsert: true, new: true },
       );
-      const userTier = userData?.tier ?? 0;
-      const houseEdge = launchPromoEdge ? 0 : houseEdgeTiers[userTier];
-
-      amountWon = Decimal.mul(amountWon, Decimal.sub(1, houseEdge)).toNumber();
 
       const { serverSeed: encryptedServerSeed, clientSeed, iv } = gameSeed;
+
       const serverSeed = decryptServerSeed(
         encryptedServerSeed,
         encryptionKey,
@@ -110,8 +111,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         },
         {
           result,
-          houseEdge,
-          amountWon,
           $set: { strikeNumbers },
         },
         { new: true },
@@ -122,7 +121,13 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           .status(400)
           .json({ success: false, message: "Game already concluded!" });
 
-      await User.findOneAndUpdate(
+      const feeGenerated = Decimal.mul(amount, strikeMultiplier)
+        .mul(houseEdge)
+        .toNumber();
+
+      await updateGameStats(GameType.mines, tokenMint, 0, false, feeGenerated);
+
+      const user = await User.findOneAndUpdate(
         {
           wallet,
           deposit: {
@@ -136,9 +141,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
             "deposit.$.amount": amountWon,
           },
         },
+        { new: true },
       );
-
-      const user = await User.findOne({ wallet });
 
       const pointsGained =
         0 * user.numOfGamesPlayed + 1.4 * amount * userData.multiplier;
@@ -155,9 +159,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         {
           $inc: {
             points: pointsGained,
-          },
-          $set: {
-            tier: newTier,
           },
         },
       );
