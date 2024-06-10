@@ -10,6 +10,7 @@ import { translator } from "@/context/transactions";
 import Image from "next/image";
 import { warningCustom } from "../toasts/ToastGroup";
 import { useRouter } from "next/router";
+import { AdaptiveModal, AdaptiveModalContent } from "../AdaptiveModal";
 
 export default function ConfigureAutoModal() {
   const methods = useForm();
@@ -67,15 +68,6 @@ export default function ConfigureAutoModal() {
     });
   };
 
-  const handleClose = () => {
-    //@ts-ignore
-    document.addEventListener("click", function (event) {
-      //@ts-ignore
-      var targetId = event.target.id;
-      if (targetId && targetId === "modal-bg") setShowAutoModal(false);
-    });
-  };
-
   const onSubmit = async (data: any) => {
     if (
       parseFloat(data.autoWinChange) ||
@@ -120,29 +112,15 @@ export default function ConfigureAutoModal() {
   }, [showAutoModal]);
 
   return showAutoModal ? (
-    <div
-      onClick={() => {
-        handleClose();
-      }}
-      id="modal-bg"
-      className="absolute z-[150] left-0 top-0 flex h-full w-full items-center justify-center bg-[#33314680] backdrop-blur-[0px] transition-all"
-    >
-      <div
-        id="modal-box"
-        className="relative flex w-[95%] max-w-[30rem] flex-col rounded-md bg-[#121418] p-7"
+    <AdaptiveModal open={showAutoModal} onOpenChange={()=>setShowAutoModal(false)} >
+      <AdaptiveModalContent
+        className="flex h-[85%] sm:h-auto sm:w-[95%] sm:max-w-[30rem]  flex-col rounded-md bg-[#121418] p-7"
       >
-        <div className="flex items-center w-full mb-7 gap-2 mt-2">
+        <div className="flex justify-center sm:justify-start items-center w-full mb-7 gap-2 mt-2">
           <span className=" text-[1.5rem] tracking-wide leading-5 mt-1 font-chakra font-bold text-[#e7e7e7]">
             {translator("Configure Auto", language)}
           </span>
         </div>
-
-        <IoCloseOutline
-          onClick={() => {
-            setShowAutoModal(false);
-          }}
-          className="w-9 h-9 cursor-pointer text-[#fcfcfc] absolute top-0 right-0 mt-3 mr-5 hover:bg-[#26282c] transition-all p-1.5 rounded-full"
-        />
 
         <FormProvider {...methods}>
           <form
@@ -451,8 +429,8 @@ export default function ConfigureAutoModal() {
             </button>
           </form>
         </FormProvider>
-      </div>
-    </div>
+      </AdaptiveModalContent>
+    </AdaptiveModal>
   ) : (
     <></>
   );

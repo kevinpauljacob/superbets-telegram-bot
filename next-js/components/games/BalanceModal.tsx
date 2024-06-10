@@ -15,6 +15,7 @@ import { timestampParser } from "@/utils/timestampParser";
 import { formatNumber } from "@/context/transactions";
 import { useRouter } from "next/router";
 import Link from "next/link";
+import { AdaptiveModal,AdaptiveModalContent} from "../AdaptiveModal";
 
 export default function BalanceModal() {
   const methods = useForm();
@@ -77,24 +78,6 @@ export default function BalanceModal() {
     setAmount(parseFloat(e.target.value));
   };
 
-  const modalRef: any = useRef(null);
-
-  useEffect(() => {
-    const handleClickOutside = (event: any) => {
-      if (modalRef.current && !modalRef.current.contains(event.target)) {
-        setShowWalletModal(false);
-      }
-    };
-
-    if (showWalletModal) {
-      document.addEventListener("mousedown", handleClickOutside);
-    }
-
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [showWalletModal]);
-
   const handleGetHistory = async () => {
     // console.log("Getting History");
     try {
@@ -120,13 +103,9 @@ export default function BalanceModal() {
   }, [actionType]);
 
   return (
-    <div className="absolute z-[150] left-0 top-0 flex h-full w-full items-center justify-center bg-[#33314680] backdrop-blur-[0px] transition-all">
-      <div
-        id="modal-box"
-        ref={modalRef}
-        className="relative flex w-[95%] max-w-[30rem] flex-col rounded-md bg-[#121418] p-7"
-      >
-        <div className="flex items-center w-full mb-7 gap-2 mt-2">
+    <AdaptiveModal open={showWalletModal} onOpenChange={()=>setShowWalletModal(false)} >
+      <AdaptiveModalContent className="bg-[#121418] h-[80%] sm:h-auto flex sm:w-[95%] sm:max-w-[30rem] flex-col rounded-md p-7 overflow-y-scroll nobar">
+        <div className="flex justify-center sm:justify-start items-center w-full mb-7 gap-2 mt-2">
           <Image
             src={"/assets/wallet_color.png"}
             alt=""
@@ -137,13 +116,6 @@ export default function BalanceModal() {
             {translator("Wallet", language)}
           </span>
         </div>
-
-        <IoCloseOutline
-          onClick={() => {
-            setShowWalletModal(false);
-          }}
-          className="w-9 h-9 cursor-pointer text-[#fcfcfc] absolute top-0 right-0 mt-3 mr-5 hover:bg-[#26282c] transition-all p-1.5 rounded-full"
-        />
 
         <div className="w-full flex mb-8 mt-2 gap-2">
           <button
@@ -429,7 +401,7 @@ export default function BalanceModal() {
             )}
           </form>
         </FormProvider>
-      </div>
-    </div>
+      </AdaptiveModalContent>
+    </AdaptiveModal>
   );
 }
