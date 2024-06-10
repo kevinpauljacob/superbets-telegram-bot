@@ -17,7 +17,6 @@ import { LAMPORTS_PER_SOL, PublicKey } from "@solana/web3.js";
 import { errorCustom } from "./toasts/ToastGroup";
 import { SPL_TOKENS } from "@/context/config";
 import SOL from "@/public/assets/coins/SOL";
-
 import { GameType } from "@/utils/provably-fair";
 
 export interface GameStat {
@@ -376,10 +375,9 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
             ) {
               setCoinData(balance.data.deposit);
               let coin = balance.data.deposit.find(
-                (token: CoinBalance) => token.tokenName === selectedCoin.tokenMint,
+                (token: CoinBalance) => token.tokenName === "SOL",
               );
-              let token = SPL_TOKENS.find(x => x.tokenMint === selectedCoin.tokenMint)!;
-              if (coin) setSelectedCoin({ ...coin, icon: token.icon });
+              if (coin) setSelectedCoin({ ...coin, icon: SOL });
             } else {
               // console.log("Could not fetch balance.");
               setCoinData(null);
@@ -1350,9 +1348,9 @@ export const translationsMap = {
     ch: "庄家优势",
   },
   "I agree with Privacy Policy and with Terms of Use, Gambling isn't forbidden by my local authorities and I'm at least 18 years old.":
-  {
-    ru: "Я согласен с Политикой конфиденциальности и Условиями использования, азартные игры не запрещены моими местными властями, и мне исполнилось 18 лет.",
-    ko: "개인정보 보호정책 및 이용 약관에 동의하며, 도박은 현지 당국에 의해 금지되지 않으며 나는 18세 이상입니다.",
-    ch: "我同意隐私政策和使用条款，赌博未被当地政府禁止并且我已满18岁。",
-  },
+    {
+      ru: "Я согласен с Политикой конфиденциальности и Условиями использования, азартные игры не запрещены моими местными властями, и мне исполнилось 18 лет.",
+      ko: "개인정보 보호정책 및 이용 약관에 동의하며, 도박은 현지 당국에 의해 금지되지 않으며 나는 18세 이상입니다.",
+      ch: "我同意隐私政策和使用条款，赌博未被当地政府禁止并且我已满18岁。",
+    },
 };
