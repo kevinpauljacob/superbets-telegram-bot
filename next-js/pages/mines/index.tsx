@@ -62,9 +62,8 @@ export default function Mines() {
     maxBetAmt,
     language,
     selectedCoin,
-    setLiveStats,
-    liveStats,
     enableSounds,
+    updatePNL,
   } = useGlobalContext();
   const [betAmt, setBetAmt] = useState<number | undefined>();
   const [userInput, setUserInput] = useState<number | undefined>();
@@ -116,31 +115,6 @@ export default function Mines() {
   const handleDropDown = () => {
     setDropDown(!dropDown);
   };
-
-  const UpdatePNL = (win: boolean, amount: number, multiplier: number) => {
-    console.log("Win: ", win);
-    console.log("Amount: ", amount);
-    console.log("Multiplier: ", multiplier);
-
-    setLiveStats([
-      ...liveStats,
-      {
-        game: GameType.mines,
-        amount: amount,
-        result: win ? "Won" : "Lost",
-        pnl: win
-          ? (amount * multiplier) - amount
-          : -amount,
-        totalPNL:
-          liveStats.length > 0
-            ? liveStats[liveStats.length - 1].totalPNL +
-            (win ? (amount * multiplier) - amount : -amount)
-            : win
-              ? (amount * multiplier) - amount
-              : -amount,
-      },
-    ]);
-  }
 
   useEffect(() => {
     if (numBets === 0) {
@@ -214,7 +188,12 @@ export default function Mines() {
           strikeMultiplier: strikeMultiplier,
           pointsGained: pointsGained,
         });
-        UpdatePNL(win, betAmt!, strikeMultiplier);
+        updatePNL(
+          GameType.mines,
+          win,
+          betAmt!,
+          strikeMultiplier,
+        );
         setGameStatus("Completed");
         setUserBets(updatedUserBetsWithResult);
         setRefresh(true);
@@ -354,7 +333,12 @@ export default function Mines() {
       }
       if (lose) {
         soundAlert("/sounds/bomb.wav", !enableSounds);
-        UpdatePNL(false, betAmt!, 1);
+        updatePNL(
+          GameType.mines,
+          false,
+          betAmt!,
+          1,
+        );
       }
 
       if (success) {

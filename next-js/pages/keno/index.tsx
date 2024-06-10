@@ -58,10 +58,9 @@ export default function Keno() {
     houseEdge,
     maxBetAmt,
     language,
-    liveStats,
-    setLiveStats,
     enableSounds,
     setShowWalletModal,
+    updatePNL,
   } = useGlobalContext();
   const [betAmt, setBetAmt] = useState<number | undefined>();
   const [userInput, setUserInput] = useState<number | undefined>();
@@ -242,22 +241,12 @@ export default function Keno() {
       const win = result === "Won";
       if (win) soundAlert("/sounds/win.wav", !enableSounds);
 
-      setLiveStats([
-        ...liveStats,
-        {
-          game: GameType.keno,
-          amount: betAmt,
-          result: win ? "Won" : "Lost",
-          pnl: win ? betAmt * strikeMultiplier - betAmt : -betAmt,
-          totalPNL:
-            liveStats.length > 0
-              ? liveStats[liveStats.length - 1].totalPNL +
-                (win ? betAmt * strikeMultiplier - betAmt : -betAmt)
-              : win
-                ? betAmt * strikeMultiplier - betAmt
-                : -betAmt,
-        },
-      ]);
+      updatePNL(
+        GameType.keno,
+        win,
+        betAmt,
+        strikeMultiplier,
+      );
 
       // auto options
       if (betType === "auto") {

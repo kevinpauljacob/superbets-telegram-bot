@@ -81,9 +81,8 @@ export default function Limbo() {
     houseEdge,
     maxBetAmt,
     language,
-    setLiveStats,
-    liveStats,
     enableSounds,
+    updatePNL,
   } = useGlobalContext();
 
   const multiplierLimits = [1.02, 50];
@@ -143,24 +142,12 @@ export default function Limbo() {
           });
 
           if (betAmt) {
-            setLiveStats([
-              ...liveStats,
-              {
-                game: GameType.limbo,
-                amount: betAmt,
-                result: newBetResult.win ? "Won" : "Lost",
-                pnl: newBetResult.win
-                  ? (betAmt * inputMultiplier) - betAmt
-                  : -betAmt,
-                totalPNL:
-                  liveStats.length > 0
-                    ? liveStats[liveStats.length - 1].totalPNL +
-                    (win ? (betAmt * inputMultiplier) - betAmt : -betAmt)
-                    : win
-                      ? (betAmt * inputMultiplier) - betAmt
-                      : -betAmt,
-              },
-            ]);
+            updatePNL(
+              GameType.limbo,
+              newBetResult.win,
+              betAmt,
+              inputMultiplier,
+            );
           }
 
           // auto options
