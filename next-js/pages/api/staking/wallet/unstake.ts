@@ -126,7 +126,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
       let txnSignature = "";
       try {
-        txnSignature = await connection.sendRawTransaction(txn.serialize());
+        txnSignature = await connection.sendRawTransaction(txn.serialize(), {
+          skipPreflight: true,
+        });
 
         const confirmationRes = await connection.confirmTransaction(
           {

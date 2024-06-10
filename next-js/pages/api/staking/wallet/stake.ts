@@ -80,7 +80,10 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           .json({ success: false, message: "Transaction verification failed" });
       console.log("Transaction verified");
 
-      const txnSignature = await connection.sendRawTransaction(txn.serialize());
+      const txnSignature = await connection.sendRawTransaction(
+        txn.serialize(),
+        { skipPreflight: true },
+      );
 
       const confirmationRes = await connection.confirmTransaction(
         {
