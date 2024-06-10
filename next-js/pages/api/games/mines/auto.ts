@@ -10,14 +10,11 @@ import {
   seedStatus,
 } from "@/utils/provably-fair";
 import StakingUser from "@/models/staking/user";
-import {
-  isArrayUnique,
-  minGameAmount,
-  wsEndpoint,
-} from "@/context/gameTransactions";
+import { minGameAmount, wsEndpoint } from "@/context/config";
 import Decimal from "decimal.js";
 import {
   houseEdgeTiers,
+  isArrayUnique,
   launchPromoEdge,
   maxPayouts,
   pointTiers,

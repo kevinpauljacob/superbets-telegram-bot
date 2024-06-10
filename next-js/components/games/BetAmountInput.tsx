@@ -2,10 +2,10 @@ import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useGlobalContext } from "../GlobalContext";
 import { GameTokens, GameType } from "@/utils/provably-fair";
-import { maxPayouts } from "@/context/transactions";
+import { maxPayouts, truncateNumber } from "@/context/transactions";
 import Image from "next/image";
 import { translator } from "@/context/transactions";
-import { minGameAmount, truncateNumber } from "@/context/gameTransactions";
+import { minGameAmount } from "@/context/config";
 import { riskToChance } from "./Keno/RiskToChance";
 import { SPL_TOKENS } from "@/context/config";
 export default function BetAmount({

@@ -13,7 +13,7 @@ import {
   launchPromoEdge,
   pointTiers,
 } from "@/context/transactions";
-import { wsEndpoint } from "@/context/gameTransactions";
+import { wsEndpoint } from "@/context/config";
 import { Decimal } from "decimal.js";
 import updateGameStats from "../../../../utils/updateGameStats";
 Decimal.set({ precision: 9 });

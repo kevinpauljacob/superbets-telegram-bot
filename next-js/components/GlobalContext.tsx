@@ -1,5 +1,6 @@
 import {
   User,
+  connection,
   houseEdgeTiers,
   launchPromoEdge,
   pointTiers,
@@ -14,10 +15,8 @@ import React, {
   ReactNode,
   useEffect,
 } from "react";
-import { connection } from "../context/gameTransactions";
 import { LAMPORTS_PER_SOL, PublicKey } from "@solana/web3.js";
 import { errorCustom } from "./toasts/ToastGroup";
-import { SPL_TOKENS } from "@/context/config";
 import SOL from "@/public/assets/coins/SOL";
 import { GameType } from "@/utils/provably-fair";
 

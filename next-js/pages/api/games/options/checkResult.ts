@@ -10,7 +10,7 @@ import {
   stakingTiers,
 } from "@/context/transactions";
 import { GameType } from "@/utils/provably-fair";
-import { optionsEdge, wsEndpoint } from "@/context/gameTransactions";
+import { optionsEdge, wsEndpoint } from "@/context/config";
 import { Decimal } from "decimal.js";
 import { SPL_TOKENS } from "@/context/config";
 import updateGameStats from "../../../../utils/updateGameStats";

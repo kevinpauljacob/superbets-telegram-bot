@@ -1,7 +1,10 @@
-import { obfuscatePubKey, translator } from "@/context/transactions";
+import {
+  obfuscatePubKey,
+  translator,
+  truncateNumber,
+} from "@/context/transactions";
 import { useGlobalContext } from "../GlobalContext";
 import Image from "next/image";
-import { truncateNumber } from "@/context/gameTransactions";
 import { SPL_TOKENS } from "@/context/config";
 
 interface BetRowProps {
