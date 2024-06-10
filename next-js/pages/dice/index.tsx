@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo } from "react";
 import { useWallet } from "@solana/wallet-adapter-react";
-import { rollDice } from "@/context/gameTransactions";
 import BetSetting from "@/components/BetSetting";
 import { useGlobalContext } from "@/components/GlobalContext";
 import {
@@ -27,7 +26,7 @@ import Bets from "../../components/games/Bets";
 import AutoCount from "@/components/AutoCount";
 import ConfigureAutoButton from "@/components/ConfigureAutoButton";
 import { errorCustom, warningCustom } from "@/components/toasts/ToastGroup";
-import { translator } from "@/context/transactions";
+import { rollDice, translator } from "@/context/transactions";
 import { minGameAmount } from "@/context/gameTransactions";
 import { useSession } from "next-auth/react";
 import { GameType } from "@/utils/provably-fair";

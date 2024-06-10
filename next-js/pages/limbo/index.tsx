@@ -10,7 +10,6 @@ import {
   GameOptions,
   GameTable,
 } from "@/components/GameLayout";
-import { limboBet, truncateNumber } from "@/context/gameTransactions";
 import BetAmount from "@/components/games/BetAmountInput";
 import BetButton from "@/components/games/BetButton";
 import Loader from "../../components/games/Loader";
@@ -25,7 +24,7 @@ import {
   successCustom,
   warningCustom,
 } from "@/components/toasts/ToastGroup";
-import { translator } from "@/context/transactions";
+import { limboBet, translator, truncateNumber } from "@/context/transactions";
 import { minGameAmount } from "@/context/gameTransactions";
 import { useSession } from "next-auth/react";
 import { GameType } from "@/utils/provably-fair";

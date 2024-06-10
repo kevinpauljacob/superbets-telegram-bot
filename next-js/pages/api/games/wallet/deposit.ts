@@ -1,14 +1,10 @@
 import {
   BlockhashWithExpiryBlockHeight,
   Connection,
+  Keypair,
   PublicKey,
   Transaction,
 } from "@solana/web3.js";
-import {
-  createDepositTxn,
-  retryTxn,
-  verifyFrontendTransaction,
-} from "../../../../context/gameTransactions";
 import connectDatabase from "../../../../utils/database";
 import Deposit from "../../../../models/games/deposit";
 import User from "../../../../models/games/gameUser";
@@ -18,10 +14,20 @@ import { getToken } from "next-auth/jwt";
 import { NextApiRequest, NextApiResponse } from "next";
 import Campaign from "@/models/analytics/campaigns";
 import { SPL_TOKENS } from "@/context/config";
+import {
+  createDepositTxn,
+  retryTxn,
+  verifyFrontendTransaction,
+} from "@/context/transactions";
+import { bs58 } from "@project-serum/anchor/dist/cjs/utils/bytes";
 
 const secret = process.env.NEXTAUTH_SECRET;
 
 const connection = new Connection(process.env.BACKEND_RPC!, "confirmed");
+
+const devWalletKey = Keypair.fromSecretKey(
+  bs58.decode(process.env.CASINO_KEYPAIR!),
+);
 
 export const config = {
   maxDuration: 60,
@@ -83,6 +89,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         new PublicKey(wallet),
         amount,
         tokenMint,
+        devWalletKey.publicKey,
       );
 
       const txn = Transaction.from(
@@ -146,8 +153,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           console.log("unable to create campaign !");
         }
       }
-      const tokenName = SPL_TOKENS.find((t) => t.tokenMint === tokenMint)
-        ?.tokenName;
+      const tokenName = SPL_TOKENS.find(
+        (t) => t.tokenMint === tokenMint,
+      )?.tokenName;
 
       return res.json({
         success: true,

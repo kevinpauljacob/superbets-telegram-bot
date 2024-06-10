@@ -1,4 +1,4 @@
-import { truncateNumber } from "@/context/gameTransactions";
+import { truncateNumber } from "@/context/transactions";
 
 interface MultiplierHistoryProps {
   multiplierHistory: number[];

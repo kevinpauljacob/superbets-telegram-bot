@@ -1,16 +1,12 @@
 import Image from "next/image";
 import { useGlobalContext } from "./GlobalContext";
 import Link from "next/link";
-import {
-  wsEndpoint,
-  trimStringToLength,
-  truncateNumber,
-} from "@/context/gameTransactions";
+import { wsEndpoint } from "@/context/gameTransactions";
 import { useEffect, useRef, useState } from "react";
 import { GameType } from "@/utils/provably-fair";
 import { useRouter } from "next/router";
 import useWebSocket from "react-use-websocket";
-import { translator } from "@/context/transactions";
+import { trimStringToLength, truncateNumber } from "@/context/transactions";
 import { SPL_TOKENS } from "@/context/config";
 import CoinSelector from "./CoinSelector";
 

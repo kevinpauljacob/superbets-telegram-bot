@@ -4,7 +4,6 @@ import { NextApiRequest, NextApiResponse } from "next";
 import {
   wsEndpoint,
   minGameAmount,
-  isArrayUnique,
 } from "@/context/gameTransactions";
 import { GameSeed, User, Dice } from "@/models/games";
 import {
@@ -17,6 +16,7 @@ import {
 import StakingUser from "@/models/staking/user";
 import {
   houseEdgeTiers,
+  isArrayUnique,
   launchPromoEdge,
   maintainance,
   maxPayouts,

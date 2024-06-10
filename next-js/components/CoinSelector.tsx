@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useGlobalContext } from "./GlobalContext";
 import Image from "next/image";
-import { truncateNumber } from "@/context/gameTransactions";
 import { SPL_TOKENS } from "@/context/config";
 import { translator } from "@/context/transactions";
 import SOL from "@/public/assets/coins/SOL";

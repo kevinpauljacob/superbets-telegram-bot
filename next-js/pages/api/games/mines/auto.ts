@@ -11,13 +11,13 @@ import {
 } from "@/utils/provably-fair";
 import StakingUser from "@/models/staking/user";
 import {
-  isArrayUnique,
   minGameAmount,
   wsEndpoint,
 } from "@/context/gameTransactions";
 import Decimal from "decimal.js";
 import {
   houseEdgeTiers,
+  isArrayUnique,
   launchPromoEdge,
   maxPayouts,
   pointTiers,

@@ -1,12 +1,8 @@
 import React, { ReactNode } from "react";
 import GameHeader from "./GameHeader";
 import { useGlobalContext } from "./GlobalContext";
-import { translator } from "@/context/transactions";
-import {
-  minGameAmount,
-  optionsEdge,
-  truncateNumber,
-} from "@/context/gameTransactions";
+import { translator, truncateNumber } from "@/context/transactions";
+import { minGameAmount, optionsEdge } from "@/context/gameTransactions";
 import Link from "next/link";
 import FomoPlay from "./FomoPlay";
 import FOMOHead from "./HeadElement";

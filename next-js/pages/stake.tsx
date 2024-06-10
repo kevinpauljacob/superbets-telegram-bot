@@ -8,12 +8,12 @@ import {
   connection,
   fomoToken,
   translator,
+  truncateNumber,
 } from "@/context/transactions";
 import { PublicKey } from "@solana/web3.js";
 import { useGlobalContext } from "@/components/GlobalContext";
 import { getAssociatedTokenAddressSync } from "@solana/spl-token";
 import FOMOHead from "@/components/HeadElement";
-import { truncateNumber } from "@/context/gameTransactions";
 
 export async function getFOMOBalance(
   wallet: WalletContextState,
