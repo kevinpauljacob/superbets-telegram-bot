@@ -9,7 +9,7 @@ async function updateGameStats(
   feeGenerated: number,
 ) {
   const gameStat = await GameStats.findOne({ game }).then((res) =>
-    res.toJSON(),
+    res?.toJSON(),
   );
 
   const numOfWallets = incrementWallets ? 1 : 0;
