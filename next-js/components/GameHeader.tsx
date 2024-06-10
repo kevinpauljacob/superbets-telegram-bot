@@ -5,24 +5,45 @@ import { GameType } from "@/utils/provably-fair";
 import { useGlobalContext } from "./GlobalContext";
 import { translator } from "@/context/transactions";
 import { truncateNumber } from "@/context/gameTransactions";
+import { Coins } from "./Infobar";
 
 export default function GameHeader() {
   const router = useRouter();
   const game = router.pathname.split("/")[1];
 
-  const { coinData, houseEdge, setOpenPFModal, language } =
-    useGlobalContext();
+  const { coinData, houseEdge, setOpenPFModal, language } = useGlobalContext();
 
-  const fetchGameData = (game: GameType) => {
+  const getVolume = async (totalVolume: Coins): Promise<number> => {
+    const mintIds = Object.keys(totalVolume).join(",");
+    const data = await (
+      await fetch(`https://price.jup.ag/v6/price?ids=${mintIds}&vsToken=SOL`)
+    ).json();
+
+    let volume = 0;
+
+    for (const [mintId, amount] of Object.entries(totalVolume)) {
+      const price = data?.data[mintId]?.price ?? 0;
+      volume += amount * price;
+    }
+
+    return volume;
+  };
+
+  const fetchGameData = async (game: GameType) => {
     fetch(`/api/games/global/getStats?game=${game}`)
       .then((res) => res.json())
-      .then((data) => {
-        if (data.success) {
+      .then(async (data: any) => {
+        if (data?.success) {
+          const volume = await getVolume(data?.stats?.volume);
           setGameData((prev) => ({
             ...prev,
             [game]: {
               ...prev[game],
-              stats: data.stats,
+              stats: {
+                volume: volume,
+                players: data?.stats?.numOfWallets ?? 0,
+                balance: 0,
+              },
             },
           }));
         }
@@ -109,9 +130,7 @@ export default function GameHeader() {
             <p className="font-light text-xs">
               {translator("House Edge", language)} :&nbsp;
             </p>
-            <p className="text-[#7839C5] font-semibold text-xs">
-              {houseEdge}%
-            </p>
+            <p className="text-[#7839C5] font-semibold text-xs">{houseEdge}%</p>
           </div>
           <div className="hidden md:flex items-center justify-between bg-[#1E2220] rounded-md mx-1.5  my-1 px-4 py-1">
             <p className="font-thin text-xs">

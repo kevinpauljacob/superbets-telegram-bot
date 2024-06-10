@@ -3,6 +3,8 @@ import {
   houseEdgeTiers,
   launchPromoEdge,
   pointTiers,
+  stakingTiers,
+  translator,
 } from "@/context/transactions";
 import { useWallet } from "@solana/wallet-adapter-react";
 import React, {
@@ -272,7 +274,9 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
   const [liveBets, setLiveBets] = useState<any[]>([]);
   const [liveStats, setLiveStats] = useState<GameStat[]>([]);
   const [showLiveStats, setShowLiveStats] = useState<boolean>(false);
-  const [liveCurrentStat, setLiveCurrentStat] = useState<GameType | "All">("All");
+  const [liveCurrentStat, setLiveCurrentStat] = useState<GameType | "All">(
+    "All",
+  );
   const [showFullScreen, setShowFullScreen] = useState<boolean>(false);
   const [enableSounds, setEnableSounds] = useState<boolean>(true);
 
@@ -317,11 +321,19 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
         if (success) {
           setUserData(user);
         } else console.error(message);
-        let points = user?.points ?? 0;
-        const userTier = Object.entries(pointTiers).reduce((prev, next) => {
-          return points >= next[1]?.limit ? next : prev;
-        })[0];
-        setHouseEdge(launchPromoEdge ? 0 : houseEdgeTiers[parseInt(userTier)]);
+
+        const stakeAmount = user?.stakedAmount ?? 0;
+        const stakingTier = Object.entries(stakingTiers).reduce(
+          (prev, next) => {
+            return stakeAmount >= next[1]?.limit ? next : prev;
+          },
+        )[0];
+
+        setHouseEdge(
+          launchPromoEdge || selectedCoin.tokenName === "FOMO"
+            ? 0
+            : houseEdgeTiers[parseInt(stakingTier)],
+        );
       } catch (e) {
         // errorCustom("Unable to fetch balance.");
         console.error(e);
@@ -374,10 +386,11 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
               balance?.data.deposit.length > 0
             ) {
               setCoinData(balance.data.deposit);
+              let prevCoin = selectedCoin;
               let coin = balance.data.deposit.find(
-                (token: CoinBalance) => token.tokenName === "SOL",
+                (token: CoinBalance) => token.tokenName === prevCoin.tokenName,
               );
-              if (coin) setSelectedCoin({ ...coin, icon: SOL });
+              if (coin) setSelectedCoin({ ...coin, icon: prevCoin.icon });
             } else {
               // console.log("Could not fetch balance.");
               setCoinData(null);
@@ -409,7 +422,9 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
         if (data.success) return data;
         else return null;
       } catch (e) {
-        errorCustom("Unable to fetch provably fair data.");
+        errorCustom(
+          translator("Unable to fetch provably fair data.", language),
+        );
         return null;
       }
   };
@@ -507,7 +522,7 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
         enableSounds,
         setEnableSounds,
         liveCurrentStat,
-        setLiveCurrentStat
+        setLiveCurrentStat,
       }}
     >
       {children}
@@ -931,11 +946,11 @@ export const translationsMap = {
     ch: "您可以在此游戏中下注的最高金额为",
   },
   "The more you stake, the less fees you pay and the bigger your points multiplier":
-  {
-    ru: "Чем больше вы ставите, тем меньше вы платите комиссий и тем выше ваш множитель очков",
-    ko: "더 많이 걸수록 수수료가 적게 들고 포인트 배수가 커집니다",
-    ch: "投注金额越大，您支付的费用越少，积分乘数越大",
-  },
+    {
+      ru: "Чем больше вы ставите, тем меньше вы платите комиссий и тем выше ваш множитель очков",
+      ko: "더 많이 걸수록 수수료가 적게 들고 포인트 배수가 커집니다",
+      ch: "投注金额越大，您支付的费用越少，积分乘数越大",
+    },
   WALLET: {
     ru: "КОШЕЛЕК",
     ko: "지갑",
@@ -1037,11 +1052,11 @@ export const translationsMap = {
     ch: "待定",
   },
   "FOMO wtf casino games are currently in beta and will be undergoing audit shortly. FOMO wtf EXIT games has gone through audit performed by OtterSec in December 2023.":
-  {
-    ru: "Игры казино FOMO wtf находятся в бета-тестировании и вскоре будут проходить аудит. Игры FOMO wtf EXIT прошли аудит, проведенный OtterSec в декабре 2023 года.",
-    ko: "FOMO wtf 카지노 게임은 현재 베타 버전이며 곧 감사를 받을 예정입니다. FOMO wtf EXIT 게임은 2023년 12월 OtterSec에 의해 감사를 받았습니다.",
-    ch: "FOMO wtf赌场游戏目前处于测试阶段，将很快进行审计。 FOMO wtf EXIT游戏已于2023年12月由OtterSec进行了审计。",
-  },
+    {
+      ru: "Игры казино FOMO wtf находятся в бета-тестировании и вскоре будут проходить аудит. Игры FOMO wtf EXIT прошли аудит, проведенный OtterSec в декабре 2023 года.",
+      ko: "FOMO wtf 카지노 게임은 현재 베타 버전이며 곧 감사를 받을 예정입니다. FOMO wtf EXIT 게임은 2023년 12월 OtterSec에 의해 감사를 받았습니다.",
+      ch: "FOMO wtf赌场游戏目前处于测试阶段，将很快进行审计。 FOMO wtf EXIT游戏已于2023年12月由OtterSec进行了审计。",
+    },
   Services: {
     ru: "Услуги",
     ko: "서비스",
@@ -1353,4 +1368,219 @@ export const translationsMap = {
       ko: "개인정보 보호정책 및 이용 약관에 동의하며, 도박은 현지 당국에 의해 금지되지 않으며 나는 18세 이상입니다.",
       ch: "我同意隐私政策和使用条款，赌博未被当地政府禁止并且我已满18岁。",
     },
+  "High Rollers": {
+    ru: "Крупные игроки",
+    ko: "하이 롤러",
+    ch: "大赌客",
+  },
+  "No Bets Made.": {
+    ru: "Ставок не сделано.",
+    ko: "베팅 없음.",
+    ch: "没有下注。",
+  },
+  "Set Bet Count.": {
+    ru: "Установить количество ставок.",
+    ko: "베팅 횟수 설정.",
+    ch: "设置投注次数。",
+  },
+  "Set Amount.": {
+    ru: "Установить сумму.",
+    ko: "금액 설정.",
+    ch: "设置金额。",
+  },
+  "Choose amount, interval and type.": {
+    ru: "Выберите сумму, интервал и тип.",
+    ko: "금액, 간격 및 유형 선택.",
+    ch: "选择金额，间隔和类型。",
+  },
+  "Wallet not connected": {
+    ru: "Кошелек не подключен",
+    ko: "지갑이 연결되지 않았습니다",
+    ch: "钱包未连接",
+  },
+  "Insufficient balance for bet !": {
+    ru: "Недостаточно баланса для ставки!",
+    ko: "베��에 필요한 잔액이 부족합니다!",
+    ch: "投注所需的余额不足！",
+  },
+  "Profit Limit reached.": {
+    ru: "Достигнут предел прибыли.",
+    ko: "이익 한도 도달.",
+    ch: "达到盈利限制。",
+  },
+  "Loss Limit reached.": {
+    ru: "Достигнут предел убытков.",
+    ko: "손실 한도 도달.",
+    ch: "达到损失限制。",
+  },
+  "Auto bet stopped": {
+    ru: "Автоставка остановлена",
+    ko: "자동 베팅 중지됨",
+    ch: "自动投注停止",
+  },
+  "Could not make the Bet.": {
+    ru: "Не удалось сделать ставку.",
+    ko: "베팅을 할 수 없습니다.",
+    ch: "无法下注。",
+  },
+  "Could not fetch result!": {
+    ru: "Не удалось получить результат!",
+    ko: "결과를 가져올 수 없습니다!",
+    ch: "无法获取结果！",
+  },
+  "Invalid amount": {
+    ru: "Неверная сумма",
+    ko: "잘못된 금액",
+    ch: "无效金额",
+  },
+  "Could not place bet.": {
+    ru: "Не удалось разместить ставку.",
+    ko: "베팅을 할 수 없습니다.",
+    ch: "无法下注。",
+  },
+  "Better luck next time!": {
+    ru: "Следующая попытка!",
+    ko: "다음 시도!",
+    ch: "下次试试吧！",
+  },
+  "10 numbers can be selected at max": {
+    ru: "Максимум 10 чисел можно выбрать",
+    ko: "최대 10개의 숫자를 선택할 수 있습니다",
+    ch: "最多选择10个数字",
+  },
+  "You can only select up to 5 faces": {
+    ru: "Вы можете выбрать только до 5 лиц",
+    ko: "최대 5개의 얼굴만 선택할 수 있습니다",
+    ch: "您最多只能选择5张脸",
+  },
+  "Choose at least 1 face": {
+    ru: "Выберите по крайней мере 1 лицо",
+    ko: "최소 1개의 얼굴을 선택하십시오",
+    ch: "至少选择1张脸",
+  },
+  Rank: {
+    ru: "Ранг",
+    ko: "랭크",
+    ch: "等级",
+  },
+  Points: {
+    ru: "Баллы",
+    ko: "포인트",
+    ch: "积分",
+  },
+  "Your level progress": {
+    ru: "Ваш прогресс уровня",
+    ko: "당신의 레벨 진행 상황",
+    ch: "您的等级进度",
+  },
+  BRONZE: {
+    ru: "Бронза",
+    ko: "브론즈",
+    ch: "青铜",
+  },
+  "Boost Your Tier by Staking!": {
+    ru: "Ставьте, чтобы увеличить свой уровень!",
+    ko: "스테이킹하여 당신의 등급을 증가시키십시오!",
+    ch: "通过质押来提高您的等级！",
+  },
+  "You can stake your $FOMO to obtain higher multiplier for your points!": {
+    ru: "Вы можете заложить свой $FOMO, чтобы получить более высокий множитель для ваших очков!",
+    ko: "당신의 포인트에 더 높은 배수를 얻기 위해 $FOMO를 스테이크 할 수 있습니다!",
+    ch: "您可以抵押您的$FOMO以获得更高的积分倍数！",
+  },
+  "Current Multiplier": {
+    ru: "Текущий множитель",
+    ko: "현재 배수",
+    ch: "当前倍数",
+  },
+  "Congratulations! You won!": {
+    ru: "Поздравляем! Ты выиграл!",
+    ko: "축하해요! 당신이 이겼어요!",
+    ch: "恭喜！你赢了！",
+  },
+  "Invalid strike number!": {
+    ru: "Неверный номер удара!",
+    ko: "잘못된 스트라이크 번호!",
+    ch: "无效的罢工号！",
+  },
+  "To verify this bet, you first need to rotate your seed pair.": {
+    ru: "Чтобы проверить эту ставку, сначала нужно повернуть пару семян.",
+    ko: "이 베팅을 확인하려면 먼저 시드 페어를 회전해야 합니다.",
+    ch: "要验证此投注，您首先需要旋转种子对。",
+  },
+  Flip: {
+    ru: "Флип",
+    ko: "플립",
+    ch: "翻转",
+  },
+  "(Hashed)": {
+    ru: "(Хешировано)",
+    ko: "(해시 처리됨)",
+    ch: "(已散列)",
+  },
+  "No data.": {
+    ru: "Нет данных.",
+    ko: "데이터 없음.",
+    ch: "没有数据。",
+  },
+  Completed: {
+    ru: "Завершено",
+    ko: "완료",
+    ch: "已完成",
+  },
+  Time: {
+    ru: "Время",
+    ko: "시간",
+    ch: "时间",
+  },
+  Status: {
+    ru: "Статус",
+    ko: "상태",
+    ch: "状态",
+  },
+  Type: {
+    ru: "Тип",
+    ko: "유형",
+    ch: "类型",
+  },
+  PLATINUM: {
+    ru: "Платина",
+    ko: "백금",
+    ch: "铂金",
+  },
+  ELITE: {
+    ru: "Элита",
+    ko: "엘리트",
+    ch: "精英",
+  },
+  SUPREME: {
+    ru: "Суприм",
+    ko: "최고",
+    ch: "至尊",
+  },
+  LEGENDARY: {
+    ru: "Легендарный",
+    ko: "전설",
+    ch: "传奇",
+  },
+  MYTHICAL: {
+    ru: "Мифический",
+    ko: "신화",
+    ch: "神话",
+  },
+  SILVER: {
+    ru: "Серебро",
+    ko: "은",
+    ch: "银",
+  },
+  GOLD: {
+    ru: "Золото",
+    ko: "금",
+    ch: "金",
+  },
+  "Could not fetch leaderboard.": {
+    ru: "Не удалось получить доску лидеров.",
+    ko: "리더 보드를 가져올 수 없습니다.",
+    ch: "无法获取排行榜。",
+  },
 };

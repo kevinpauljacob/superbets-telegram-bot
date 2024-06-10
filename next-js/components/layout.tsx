@@ -71,6 +71,8 @@ export default function Layout({ children }: LayoutProps) {
     setAutoStopLoss,
     setAutoWinChangeReset,
     setAutoLossChangeReset,
+    getUserDetails,
+    selectedCoin
   } = useGlobalContext();
 
   const [modalData, setModalData] = useState({
@@ -189,9 +191,16 @@ export default function Layout({ children }: LayoutProps) {
     if (session?.user && !showWalletModal) {
       getBalance();
       getWalletBalance();
+      getUserDetails();
     }
     setCurrentGame(game);
   }, [wallet?.publicKey, session?.user, showWalletModal, game]);
+
+  useEffect(() => {
+    if (session?.user) {
+      getUserDetails();
+    }
+  }, [wallet?.publicKey, session?.user, game, selectedCoin]);
 
   return (
     <>

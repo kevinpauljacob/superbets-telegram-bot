@@ -1,57 +1,56 @@
 import connectDatabase from "../../../../utils/database";
 import { NextApiRequest, NextApiResponse } from "next";
-import { gameModelMap, User } from "@/models/games";
-import { GameType } from "@/utils/provably-fair";
+import { GameStats, User } from "@/models/games";
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === "GET") {
     try {
       await connectDatabase();
 
-      let totalVolume = 0;
-      let totalPlayers = 0;
+      const gameStats = await GameStats.find().lean();
 
-      for (const [_, value] of Object.entries(GameType)) {
-        const game = value;
-        const model = gameModelMap[game as keyof typeof gameModelMap];
-
-        const stats = await model
-          .aggregate([
-            {
-              $group: {
-                _id: null,
-                volume: { $sum: "$amount" },
-              },
-            },
-          ])
-          .then((res) => res[0]);
-
-        if (stats?.volume) totalVolume += stats.volume;
-      }
-
-      await User.aggregate([
+      // Calculate the total volume and total unique players
+      const totalVolumes: Record<string, number> = {};
+      const totalPlayers = await User.aggregate([
         {
           $group: {
             _id: null,
-            players: { $sum: 1 },
+            wallets: { $addToSet: "$wallet" },
           },
         },
-      ]).then((res) => {
-        totalPlayers = res[0].players;
+        {
+          $addFields: {
+            totalPlayers: { $size: "$wallets" },
+          },
+        },
+      ]).then((res) => res[0].totalPlayers);
+
+      gameStats.forEach((stat) => {
+        Object.keys(stat.volume).forEach((key) => {
+          if (totalVolumes[key]) {
+            totalVolumes[key] += stat.volume[key];
+          } else {
+            totalVolumes[key] = stat.volume[key];
+          }
+        });
       });
 
       return res.json({
         success: true,
         stats: {
-          totalVolume,
+          totalVolumes,
           totalPlayers,
         },
-        message: `Data fetch successful !`,
+        message: `Data fetch successful!`,
       });
     } catch (e: any) {
       console.log(e);
       return res.status(500).json({ success: false, message: e.message });
     }
+  } else {
+    return res
+      .status(405)
+      .json({ success: false, message: "Method not allowed" });
   }
 }
 

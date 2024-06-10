@@ -153,7 +153,7 @@ export default function WheelProvablyFairModal({
 
   const handleSetClientSeed = async () => {
     if (!/^[\x00-\x7F]*$/.test(newClientSeed) || newClientSeed.trim() === "")
-      return errorCustom("Invalid client seed");
+      return errorCustom(translator("Invalid client seed", language));;
 
     let data = await fetch(`/api/games/gameSeed/change`, {
       method: "POST",

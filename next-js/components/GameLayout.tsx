@@ -10,6 +10,10 @@ import {
 import Link from "next/link";
 import FomoPlay from "./FomoPlay";
 import FOMOHead from "./HeadElement";
+import { useSession } from "next-auth/react";
+import { useWallet } from "@solana/wallet-adapter-react";
+import { useWalletModal } from "@solana/wallet-adapter-react-ui";
+import { handleSignIn } from "./ConnectWallet";
 
 interface LayoutProps {
   children: ReactNode;
@@ -39,6 +43,9 @@ export const GameFooterInfo: React.FC<GameFooterProps> = ({
   amount,
   chance,
 }) => {
+  const { data: session, status } = useSession();
+  const wallet = useWallet();
+  const walletModal = useWalletModal();
   const {
     coinData,
     setShowWalletModal,
@@ -106,8 +113,11 @@ export const GameFooterInfo: React.FC<GameFooterProps> = ({
               )}{" "}
               <u
                 onClick={() => {
-                  setShowWalletModal(true);
+                  wallet.connected && status === "authenticated"
+                    ? setShowWalletModal(true)
+                    : handleSignIn(wallet, walletModal);
                 }}
+                className="cursor-pointer"
               >
                 {translator("WALLET", language)}
               </u>

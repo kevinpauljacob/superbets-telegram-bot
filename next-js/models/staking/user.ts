@@ -21,11 +21,6 @@ const userSchema = new mongoose.Schema(
       default: 0,
       required: true,
     },
-    tier: {
-      type: Number,
-      default: 0,
-      required: true,
-    },
     multiplier: {
       type: Number,
       default: 0.5,
@@ -36,6 +31,8 @@ const userSchema = new mongoose.Schema(
       default: 0,
       required: true,
     },
+    //TODO: remove this field after docs are updated
+    tier:Number,
   },
   { timestamps: true },
 );

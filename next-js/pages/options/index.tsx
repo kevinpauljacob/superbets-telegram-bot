@@ -246,11 +246,8 @@ export default function Options() {
               bet?.timeFrame * 1000 -
               Date.now();
             setBetEnd(new Date(bet.betEndTime!).getTime() < Date.now());
-            if (checkBet) console.log("checkbet exist");
-            else console.log("checkbet no exist");
             if (!checkBet) {
               checkBet = setTimeout(async () => {
-                console.log("getting result");
                 setBetEnd(true);
                 setCheckResult(true);
                 if (!checkResult) getResult();
@@ -279,11 +276,9 @@ export default function Options() {
   }, [wallet?.publicKey, refresh]);
 
   useEffect(() => {
-    if (wallet?.publicKey) {
+    if (wallet?.publicKey && status === "authenticated") {
       getActiveBet();
-      console.log("from here");
       if (checkBet) {
-        console.log("change clearing");
         clearTimeout(checkBet);
       }
     }
@@ -322,7 +317,7 @@ export default function Options() {
       }
       return;
     } else {
-      if (!wallet.publicKey) errorCustom("Wallet not connected");
+      if (!wallet.publicKey) errorCustom(translator("Wallet not connected", language));
       else {
         if (
           betType &&

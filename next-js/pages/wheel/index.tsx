@@ -30,9 +30,12 @@ import { translator } from "@/context/transactions";
 import { minGameAmount, truncateNumber } from "@/context/gameTransactions";
 import { useSession } from "next-auth/react";
 import { GameType } from "@/utils/provably-fair";
+import { handleSignIn } from "@/components/ConnectWallet";
+import { useWalletModal } from "@solana/wallet-adapter-react-ui";
 
 export default function Wheel() {
   const wallet = useWallet();
+  const walletModal = useWalletModal();
   const methods = useForm();
   const { data: session, status } = useSession();
   const wheelRef = useRef<HTMLDivElement>(null);
@@ -60,6 +63,7 @@ export default function Wheel() {
     setLiveStats,
     liveStats,
     enableSounds,
+    setShowWalletModal,
   } = useGlobalContext();
   const [betAmt, setBetAmt] = useState<number | undefined>();
   const [userInput, setUserInput] = useState<number | undefined>();
@@ -147,13 +151,15 @@ export default function Wheel() {
   const handleBet = async () => {
     try {
       if (!wallet.connected || !wallet.publicKey) {
-        throw new Error("Wallet not connected");
+        throw new Error(
+          translator("Wallet not connected", language),
+        );;
       }
       if (!betAmt || betAmt === 0) {
-        throw new Error("Set Amount.");
+        throw new Error(translator("Set Amount.", language));
       }
       if (selectedCoin && selectedCoin.amount < betAmt) {
-        throw new Error("Insufficient balance for bet !");
+        throw new Error(translator("Insufficient balance for bet !", language));
       }
 
       setIsRolling(true);
@@ -250,7 +256,7 @@ export default function Wheel() {
         // update count
         if (typeof autoBetCount === "number") {
           setAutoBetCount(autoBetCount > 0 ? autoBetCount - 1 : 0);
-          autoBetCount === 1 && warningCustom("Auto bet stopped", "top-left");
+          autoBetCount === 1 && warningCustom(translator("Auto bet stopped", language), "top-left");
         } else
           setAutoBetCount(
             autoBetCount.length > 12
@@ -259,7 +265,7 @@ export default function Wheel() {
           );
       }
     } catch (error: any) {
-      errorCustom(error?.message ?? "Could not make the Bet.");
+      errorCustom(translator(error?.message ?? "Could not make the Bet.", language));
       setIsRolling(false);
       setAutoBetCount(0);
       setStartAuto(false);
@@ -311,7 +317,10 @@ export default function Wheel() {
         autoBetProfit >= autoStopProfit
       ) {
         setTimeout(() => {
-          warningCustom("Profit limit reached.", "top-left");
+          warningCustom(
+            translator("Profit limit reached.", language),
+            "top-left",
+          );
         }, 500);
         setAutoBetCount(0);
         setStartAuto(false);
@@ -324,7 +333,10 @@ export default function Wheel() {
         potentialLoss < -autoStopLoss
       ) {
         setTimeout(() => {
-          warningCustom("Loss limit reached.", "top-left");
+          warningCustom(
+            translator("Loss limit reached.", language),
+            "top-left",
+          );
         }, 500);
         setAutoBetCount(0);
         setStartAuto(false);
@@ -343,7 +355,7 @@ export default function Wheel() {
   const onSubmit = async (data: any) => {
     if (betType === "auto") {
       if (betAmt === 0) {
-        errorCustom("Set Amount.");
+        errorCustom(translator("Set Amount.", language));
         return;
       }
       if (typeof autoBetCount === "number" && autoBetCount <= 0) {
@@ -373,7 +385,7 @@ export default function Wheel() {
               <div
                 onClick={() => {
                   soundAlert("/sounds/betbutton.wav", !enableSounds);
-                  warningCustom("Auto bet stopped", "top-left");
+                  warningCustom(translator("Auto bet stopped", language), "top-left");
                   setAutoBetCount(0);
                   setStartAuto(false);
                 }}
@@ -515,7 +527,7 @@ export default function Wheel() {
                     <div
                       onClick={() => {
                         soundAlert("/sounds/betbutton.wav", !enableSounds);
-                        warningCustom("Auto bet stopped", "top-left");
+                        warningCustom(translator("Auto bet stopped", language), "top-left");
                         setAutoBetCount(0);
                         setStartAuto(false);
                       }}
@@ -675,9 +687,16 @@ export default function Wheel() {
                   "Please deposit funds to start playing. View",
                   language,
                 )}{" "}
-                <Link href="/balance">
-                  <u>{translator("WALLET", language)}</u>
-                </Link>
+                <u
+                  onClick={() => {
+                    wallet.connected && status === "authenticated"
+                      ? setShowWalletModal(true)
+                      : handleSignIn(wallet, walletModal);
+                  }}
+                  className="cursor-pointer"
+                >
+                  {translator("WALLET", language)}
+                </u>
               </div>
             </div>
           )}
