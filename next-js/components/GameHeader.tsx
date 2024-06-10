@@ -129,7 +129,9 @@ export default function GameHeader() {
             <p className="font-light text-xs">
               {translator("House Edge", language)} :&nbsp;
             </p>
-            <p className="text-[#7839C5] font-semibold text-xs">{houseEdge}%</p>
+            <p className="text-[#7839C5] font-semibold text-xs">
+              {houseEdge * 100}%
+            </p>
           </div>
           <div className="hidden md:flex items-center justify-between bg-[#1E2220] rounded-md mx-1.5  my-1 px-4 py-1">
             <p className="font-thin text-xs">
