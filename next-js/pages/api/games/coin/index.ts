@@ -1,7 +1,7 @@
 import connectDatabase from "../../../../utils/database";
 import { getToken } from "next-auth/jwt";
 import { NextApiRequest, NextApiResponse } from "next";
-import { wsEndpoint, minGameAmount } from "@/context/gameTransactions";
+import { wsEndpoint, minGameAmount } from "@/context/config";
 import { Coin, GameSeed, User } from "@/models/games";
 import {
   GameTokens,
@@ -17,10 +17,11 @@ import {
   maintainance,
   maxPayouts,
   pointTiers,
+  stakingTiers,
 } from "@/context/transactions";
 import { Decimal } from "decimal.js";
 import { SPL_TOKENS } from "@/context/config";
-import updateGameStats from "../global/updateGameStats";
+import updateGameStats from "../../../../utils/updateGameStats";
 Decimal.set({ precision: 9 });
 
 const secret = process.env.NEXTAUTH_SECRET;
@@ -110,13 +111,19 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         {},
         { upsert: true, new: true },
       );
-      const userTier = userData?.tier ?? 0;
+
+      const stakeAmount = userData?.stakedAmount ?? 0;
+      const stakingTier = Object.entries(stakingTiers).reduce((prev, next) => {
+        return stakeAmount >= next[1]?.limit ? next : prev;
+      })[0];
       const isFomoToken =
         tokenMint === SPL_TOKENS.find((t) => t.tokenName === "FOMO")?.tokenMint
           ? true
           : false;
       const houseEdge =
-        launchPromoEdge || isFomoToken ? 0 : houseEdgeTiers[userTier];
+        launchPromoEdge || isFomoToken
+          ? 0
+          : houseEdgeTiers[parseInt(stakingTier)];
 
       const activeGameSeed = await GameSeed.findOneAndUpdate(
         {
@@ -157,6 +164,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       let result = "Lost";
       let amountWon = new Decimal(0);
       let amountLost = amount;
+      let feeGenerated = 0;
 
       if (
         (flipType === "heads" && strikeNumber === 1) ||
@@ -167,7 +175,13 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           Decimal.sub(1, houseEdge),
         );
         amountLost = 0;
+
+        feeGenerated = Decimal.mul(amount, strikeMultiplier)
+          .mul(houseEdge)
+          .toNumber();
       }
+
+      const addGame = !user.gamesPlayed.includes(GameType.coin);
 
       const userUpdate = await User.findOneAndUpdate(
         {
@@ -184,6 +198,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
             "deposit.$.amount": amountWon.sub(amount),
             numOfGamesPlayed: 1,
           },
+          ...(addGame ? { $addToSet: { gamesPlayed: GameType.coin } } : {}),
         },
         {
           new: true,
@@ -210,7 +225,13 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       });
       await coin.save();
 
-      await updateGameStats(GameType.coin, wallet, amount, tokenMint);
+      await updateGameStats(
+        GameType.coin,
+        tokenMint,
+        amount,
+        addGame,
+        feeGenerated,
+      );
 
       const pointsGained =
         0 * user.numOfGamesPlayed + 1.4 * amount * userData.multiplier;
@@ -227,9 +248,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         {
           $inc: {
             points: pointsGained,
-          },
-          $set: {
-            tier: newTier,
           },
         },
       );

@@ -1,8 +1,7 @@
 import connectDatabase from "../../../../utils/database";
 import { NextApiRequest, NextApiResponse } from "next";
-import { gameModelMap } from "@/models/games";
+import { GameStats } from "@/models/games";
 import { GameType } from "@/utils/provably-fair";
-import Stats from "@/models/games/gameStats";
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === "GET") {
@@ -17,9 +16,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
       await connectDatabase();
 
-      const stats = await Stats.find({}).lean();
-
-      const gameStats = stats.find((item) => item?.game === game);
+      const gameStats = await GameStats.findOne({ game }).lean();
 
       if (!gameStats)
         return res

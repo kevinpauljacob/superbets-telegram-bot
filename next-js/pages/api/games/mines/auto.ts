@@ -10,19 +10,18 @@ import {
   seedStatus,
 } from "@/utils/provably-fair";
 import StakingUser from "@/models/staking/user";
-import {
-  isArrayUnique,
-  minGameAmount,
-  wsEndpoint,
-} from "@/context/gameTransactions";
+import { minGameAmount, wsEndpoint } from "@/context/config";
 import Decimal from "decimal.js";
 import {
   houseEdgeTiers,
+  isArrayUnique,
   launchPromoEdge,
   maxPayouts,
   pointTiers,
+  stakingTiers,
 } from "@/context/transactions";
 import { SPL_TOKENS } from "@/context/config";
+import updateGameStats from "../../../../utils/updateGameStats";
 
 const secret = process.env.NEXTAUTH_SECRET;
 const encryptionKey = Buffer.from(process.env.ENCRYPTION_KEY!, "hex");
@@ -99,7 +98,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
       await connectDatabase();
 
-      const userUpdate = await User.findOneAndUpdate(
+      const user = await User.findOneAndUpdate(
         {
           wallet,
           deposit: {
@@ -120,7 +119,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         },
       );
 
-      if (!userUpdate) {
+      if (!user) {
         throw new Error("Insufficient balance for action!!");
       }
 
@@ -172,17 +171,26 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         {},
         { upsert: true, new: true },
       );
-      const userTier = userData?.tier ?? 0;
+
+      const stakeAmount = userData?.stakedAmount ?? 0;
+      const stakingTier = Object.entries(stakingTiers).reduce((prev, next) => {
+        return stakeAmount >= next[1]?.limit ? next : prev;
+      })[0];
       const isFomoToken =
         tokenMint === SPL_TOKENS.find((t) => t.tokenName === "FOMO")?.tokenMint
           ? true
           : false;
       const houseEdge =
-        launchPromoEdge || isFomoToken ? 0 : houseEdgeTiers[userTier];
+        launchPromoEdge || isFomoToken
+          ? 0
+          : houseEdgeTiers[parseInt(stakingTier)];
 
       let strikeMultiplier = 0,
         amountWon = 0,
-        amountLost = amount;
+        amountLost = amount,
+        feeGenerated = 0;
+
+      const addGame = !user.gamesPlayed.includes(GameType.mines);
 
       if (result === "Won") {
         strikeMultiplier = 1;
@@ -197,6 +205,10 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           .mul(Decimal.sub(1, houseEdge))
           .toNumber();
         amountLost = 0;
+
+        feeGenerated = Decimal.mul(amount, strikeMultiplier)
+          .sub(amountWon)
+          .toNumber();
 
         result = amountWon > amount ? "Won" : "Lost";
 
@@ -214,6 +226,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
             $inc: {
               "deposit.$.amount": amountWon,
             },
+            ...(addGame ? { $addToSet: { gamesPlayed: GameType.mines } } : {}),
           },
         );
       }
@@ -245,8 +258,16 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           .status(400)
           .json({ success: false, message: "Pending game found!" });
 
+      await updateGameStats(
+        GameType.mines,
+        tokenMint,
+        amount,
+        addGame,
+        feeGenerated,
+      );
+
       const pointsGained =
-        0 * userUpdate.numOfGamesPlayed + 1.4 * amount * userData.multiplier;
+        0 * user.numOfGamesPlayed + 1.4 * amount * userData.multiplier;
 
       const points = userData.points + pointsGained;
       const newTier = Object.entries(pointTiers).reduce((prev, next) => {
@@ -260,9 +281,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         {
           $inc: {
             points: pointsGained,
-          },
-          $set: {
-            tier: newTier,
           },
         },
       );

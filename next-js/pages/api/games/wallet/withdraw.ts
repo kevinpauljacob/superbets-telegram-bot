@@ -6,13 +6,10 @@ import {
   Transaction,
 } from "@solana/web3.js";
 import {
-  createWithdrawTxn,
-  retryTxn,
-  verifyFrontendTransaction,
   timeWeightedAvgInterval,
   timeWeightedAvgLimit,
   userLimitMultiplier,
-} from "../../../../context/gameTransactions";
+} from "@/context/config";
 import connectDatabase from "../../../../utils/database";
 import Deposit from "../../../../models/games/deposit";
 import User from "../../../../models/games/gameUser";
@@ -25,13 +22,18 @@ import { v4 as uuidv4 } from "uuid";
 import { GameType } from "@/utils/provably-fair";
 import { gameModelMap } from "@/models/games";
 import { SPL_TOKENS } from "@/context/config";
+import {
+  createWithdrawTxn,
+  retryTxn,
+  verifyFrontendTransaction,
+} from "@/context/transactions";
 
 const secret = process.env.NEXTAUTH_SECRET;
 
 const connection = new Connection(process.env.BACKEND_RPC!, "confirmed");
 
 const devWalletKey = Keypair.fromSecretKey(
-  bs58.decode(process.env.DEV_KEYPAIR!),
+  bs58.decode(process.env.CASINO_KEYPAIR!),
 );
 
 export const config = {
@@ -118,6 +120,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         new PublicKey(wallet),
         amount,
         tokenMint,
+        devWalletKey.publicKey,
       );
 
       const txn = Transaction.from(

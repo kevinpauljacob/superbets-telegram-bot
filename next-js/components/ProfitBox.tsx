@@ -1,6 +1,5 @@
 import { useGlobalContext } from "./GlobalContext";
-import { translator } from "@/context/transactions";
-import { truncateNumber } from "@/context/gameTransactions";
+import { translator, truncateNumber } from "@/context/transactions";
 
 export default function ProfitBox({
   multiplier,

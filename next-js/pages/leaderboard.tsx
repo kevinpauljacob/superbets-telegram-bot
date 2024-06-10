@@ -4,11 +4,11 @@ import {
   obfuscatePubKey,
   pointTiers,
   translator,
+  truncateNumber,
 } from "@/context/transactions";
 import { useWallet } from "@solana/wallet-adapter-react";
 import Image from "next/legacy/image";
 import { useEffect } from "react";
-import { truncateNumber } from "@/context/gameTransactions";
 import FOMOHead from "@/components/HeadElement";
 
 export default function Leaderboard() {
