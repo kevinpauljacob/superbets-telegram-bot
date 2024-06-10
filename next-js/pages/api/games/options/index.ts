@@ -8,7 +8,7 @@ import { maintainance, maxPayouts } from "@/context/transactions";
 import StakingUser from "@/models/staking/user";
 import { GameTokens, GameType } from "@/utils/provably-fair";
 import { SPL_TOKENS } from "@/context/config";
-import updateGameStats from "../global/updateGameStats";
+import updateGameStats from "../../../../utils/updateGameStats";
 Decimal.set({ precision: 9 });
 
 const secret = process.env.NEXTAUTH_SECRET;
