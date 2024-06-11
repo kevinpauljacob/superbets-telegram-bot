@@ -41,11 +41,15 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         .status(400)
         .json({ success: false, message: "Referrer not found!" });
 
+    if (referrer.wallet === wallet)
+      return res
+        .status(400)
+        .json({ success: false, message: "You can't refer yourself!" });
+
     const referredByChain = [referrer._id, ...referrer.referredByChain].slice(
       0,
       5,
     );
-    console.log("referredByChain", referredByChain);
 
     const referral = await Referral.findOneAndUpdate(
       {
@@ -57,7 +61,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           referredByChain,
         },
       },
-      { upsert: true },
+      { upsert: true, new: true },
     );
 
     return res.json({

@@ -44,7 +44,12 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         },
       },
       { upsert: true },
-    );
+    ).catch((e) => {
+      return res.status(400).json({
+        success: false,
+        message: "This referral code is already in use!",
+      });
+    });
 
     return res.json({
       success: true,

@@ -18,7 +18,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
     await connectDatabase();
 
-    const referral = await Referral.findOne({ wallet });
+    const referral = await Referral.findOne({ wallet }).lean();
 
     return res.json({
       success: true,
