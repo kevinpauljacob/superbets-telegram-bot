@@ -273,7 +273,7 @@ if (environment === "development") {
   wsEndpoint = "wss://fomo-staking-1.onrender.com";
 
   minGameAmount = 0.000001;
-  minAmtFactor = 10 ** -4;
+  minAmtFactor = 10 ** -6;
 
   timeWeightedAvgInterval = 24 * 60 * 60 * 1000;
   timeWeightedAvgLimit = {
@@ -335,6 +335,7 @@ if (environment === "development") {
   wsEndpoint = "wss://ws.fomowtf.com";
 
   minGameAmount = 0.001;
+  minAmtFactor = 10 ** -3;
 
   timeWeightedAvgInterval = 24 * 60 * 60 * 1000;
   timeWeightedAvgLimit = {
