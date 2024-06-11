@@ -42,13 +42,13 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       await connectDatabase();
 
       const referral = await Referral.findOne({ wallet });
-      const a = await Referral.findOne({
+      const referred = await Referral.find({
         referredByChain: { $in: [referral._id] },
       });
 
       return res.json({
         success: true,
-        data: a,
+        data: referred,
         message: `Data fetch successful!`,
       });
     } else if (req.method === "POST") {
@@ -79,16 +79,21 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
       await connectDatabase();
 
-      const info = await Referral.findOne({ wallet });
+      const referral = await Referral.findOne({ wallet });
 
-      if (!info)
+      if (!referral)
         return res
           .status(400)
           .json({ success: false, message: "Wallet info not found!" });
 
-      const earnings = info.earnings.map((e: any) => {
+      const earnings = referral.unclaimedEarnings.map((e: any) => {
         return { tokenMint: e.tokenMint, amount: e.amount };
       });
+
+      referral.unclaimedEarnings.forEach((e: any) => {
+        e.amount = 0;
+      });
+      referral.save();
 
       const { transaction: vTxn } = await createClaimEarningsTxn(
         new PublicKey(wallet),

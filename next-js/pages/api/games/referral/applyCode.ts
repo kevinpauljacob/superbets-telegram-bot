@@ -1,6 +1,9 @@
 import connectDatabase from "../../../../utils/database";
 import { NextApiRequest, NextApiResponse } from "next";
 import { Referral } from "@/models/games";
+import { getToken } from "next-auth/jwt";
+
+const secret = process.env.NEXTAUTH_SECRET;
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
@@ -10,6 +13,13 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         .json({ success: false, message: "Method not allowed!" });
 
     const { wallet, referralCode } = req.body;
+
+    const token = await getToken({ req, secret });
+
+      if (!token || !token.sub || token.sub != wallet)
+        return res.send({
+          error: "User wallet not authenticated",
+        });
 
     if (!wallet || !referralCode)
       return res
@@ -43,7 +53,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         referredByChain: [],
       },
       {
-        $setOnInsert: {
+        $set: {
           referredByChain,
         },
       },

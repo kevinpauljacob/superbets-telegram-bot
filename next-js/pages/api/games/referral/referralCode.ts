@@ -1,6 +1,9 @@
 import connectDatabase from "../../../../utils/database";
 import { NextApiRequest, NextApiResponse } from "next";
 import { Referral } from "@/models/games";
+import { getToken } from "next-auth/jwt";
+
+const secret = process.env.NEXTAUTH_SECRET;
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
@@ -24,6 +27,13 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     } else if (req.method === "POST") {
       const { wallet, referralCode } = req.body;
 
+      const token = await getToken({ req, secret });
+
+      if (!token || !token.sub || token.sub != wallet)
+        return res.send({
+          error: "User wallet not authenticated",
+        });
+
       if (!wallet || !referralCode)
         return res
           .status(400)
@@ -35,12 +45,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           .status(400)
           .json({ success: false, message: "Invalid referral code!" });
 
-      if (await Referral.findOne({ referralCode }))
-        return res
-          .status(400)
-          .json({ success: false, message: "Referral code already exists!" });
+      await connectDatabase();
 
-      const referral = await Referral.findOneAndUpdate(
+      await Referral.findOneAndUpdate(
         {
           wallet,
         },
@@ -52,11 +59,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         { upsert: true },
       );
 
-      await connectDatabase();
-
       return res.json({
         success: true,
-        data: referral,
         message: `Referral code set successfully!`,
       });
     } else

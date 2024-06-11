@@ -1,4 +1,4 @@
-import mongoose, { Schema, Document } from "mongoose";
+import mongoose, { Schema } from "mongoose";
 
 const AmountSchema = new Schema({
   amount: {
@@ -38,17 +38,7 @@ const ReferralSchema = new Schema(
   { timestamps: true },
 );
 
-interface IReferral extends Document {
-  wallet: string;
-  referralCode: string;
-  referredByChain: Schema.Types.ObjectId[];
-  volume: (typeof AmountSchema)[];
-  totalEarnings: (typeof AmountSchema)[];
-  unclaimedEarnings: (typeof AmountSchema)[];
-}
-
 const Referral =
-  mongoose.models.Referral ||
-  mongoose.model<IReferral>("Referral", ReferralSchema);
+  mongoose.models.Referral || mongoose.model("Referral", ReferralSchema);
 
 export default Referral;
