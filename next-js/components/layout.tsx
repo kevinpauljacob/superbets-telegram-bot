@@ -35,7 +35,7 @@ import MinesProvablyFairModal from "./games/Mines/MinesProvablyFairModal";
 import Footer from "./Footer";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { soundAlert } from "@/utils/soundUtils";
-import { maxPayouts, minAmtFactor } from "@/context/transactions";
+import { maxPayouts, minAmtFactor } from "@/context/config";
 
 interface LayoutProps {
   children: ReactNode;
