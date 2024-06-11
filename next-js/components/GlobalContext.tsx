@@ -19,6 +19,7 @@ import { LAMPORTS_PER_SOL, PublicKey } from "@solana/web3.js";
 import { errorCustom } from "./toasts/ToastGroup";
 import SOL from "@/public/assets/coins/SOL";
 import { GameType } from "@/utils/provably-fair";
+import { SPL_TOKENS } from "@/context/config";
 
 export interface GameStat {
   game: GameType;
@@ -206,6 +207,7 @@ interface GlobalContextProps {
   userTokens: TokenAccount[]; // Add this line
   setUserTokens: React.Dispatch<React.SetStateAction<TokenAccount[]>>;
   updatePNL: (game: GameType, win: boolean, betAmount: number, multiplier: number) => void;
+  liveTokenPrice: LiveTokenPrice[];
 }
 
 const GlobalContext = createContext<GlobalContextProps | undefined>(undefined);
@@ -407,6 +409,13 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
     return prices
   }
 
+  useEffect(() => {
+    updateLivePrices()
+    setInterval(() => {
+      updateLivePrices()
+    }, 5 * 60 * 1000)
+  }, [])
+
   const getWalletBalance = async () => {
     if (wallet && wallet.publicKey)
       try {
@@ -567,7 +576,8 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
         setEnableSounds,
         liveCurrentStat,
         setLiveCurrentStat,
-        updatePNL
+        updatePNL,
+        liveTokenPrice
       }}
     >
       {children}
