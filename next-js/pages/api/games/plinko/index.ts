@@ -77,6 +77,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
       // let { wallet, amount, tokenMint, rows, risk }: InputType = req.body;
 
+      // const minGameAmount =
+      //   maxPayouts[tokenMint as GameTokens]["plinko" as GameType] * minAmtFactor;
+
       // const token = await getToken({ req, secret });
 
       // if (!token || !token.sub || token.sub != wallet)

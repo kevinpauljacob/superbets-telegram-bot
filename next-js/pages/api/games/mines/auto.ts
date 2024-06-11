@@ -10,12 +10,13 @@ import {
   seedStatus,
 } from "@/utils/provably-fair";
 import StakingUser from "@/models/staking/user";
-import { minGameAmount, wsEndpoint } from "@/context/config";
+import { wsEndpoint } from "@/context/config";
 import Decimal from "decimal.js";
 import { isArrayUnique } from "@/context/transactions";
 import {
   houseEdgeTiers,
   maxPayouts,
+  minAmtFactor,
   pointTiers,
   stakingTiers,
 } from "@/context/config";
@@ -43,6 +44,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     try {
       let { wallet, amount, tokenMint, minesCount, userBets }: InputType =
         req.body;
+
+      const minGameAmount =
+        maxPayouts[tokenMint as GameTokens]["mines" as GameType] * minAmtFactor;
 
       const token = await getToken({ req, secret });
 

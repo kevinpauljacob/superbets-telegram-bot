@@ -13,6 +13,7 @@ import StakingUser from "@/models/staking/user";
 import {
   houseEdgeTiers,
   maxPayouts,
+  minAmtFactor,
   pointTiers,
   stakingTiers,
 } from "@/context/config";
@@ -43,6 +44,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === "POST") {
     try {
       let { wallet, amount, tokenMint, segments, risk }: InputType = req.body;
+
+      const minGameAmount =
+        maxPayouts[tokenMint as GameTokens]["wheel" as GameType] * minAmtFactor;
 
       if (maintainance)
         return res.status(400).json({

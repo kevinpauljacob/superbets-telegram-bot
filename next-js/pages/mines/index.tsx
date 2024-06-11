@@ -25,7 +25,6 @@ import {
   warningCustom,
 } from "@/components/toasts/ToastGroup";
 import { translator, truncateNumber } from "@/context/transactions";
-import { minGameAmount } from "@/context/config";
 import { useSession } from "next-auth/react";
 import user from "@/models/staking/user";
 import Decimal from "decimal.js";
@@ -65,6 +64,7 @@ export default function Mines() {
     setLiveStats,
     liveStats,
     enableSounds,
+    minGameAmount,
   } = useGlobalContext();
   const [betAmt, setBetAmt] = useState<number | undefined>();
   const [userInput, setUserInput] = useState<number | undefined>();
@@ -341,8 +341,8 @@ export default function Mines() {
                 ? liveStats[liveStats.length - 1].totalPNL +
                   (win ? betAmt! * strikeMultiplier - betAmt! : -betAmt!)
                 : win
-                  ? betAmt! * strikeMultiplier - betAmt!
-                  : -betAmt!,
+                ? betAmt! * strikeMultiplier - betAmt!
+                : -betAmt!,
           },
         ]);
       }
@@ -352,18 +352,25 @@ export default function Mines() {
         setIsRolling(false);
       }
     } catch (error: any) {
+      if (
+        error.message != "Max payout of 25 exceeded! Cashout to continue..."
+      ) {
+        setNumBets(0);
+        setCurrentMultiplier(0);
+        setNextMultiplier(0);
+        setStrikeMultiplier(1);
+        setCurrentProfit(0);
+        setNextProfit(0);
+        setAmountWon(0);
+        setBetActive(false);
+        setIsRolling(false);
+        setProcessing(false);
+        setPendingRequests([]);
+      } else {
+        setRefresh(true);
+        setIsRolling(false);
+      }
       errorCustom(error.message);
-      setNumBets(0);
-      setCurrentMultiplier(0);
-      setNextMultiplier(0);
-      setStrikeMultiplier(1);
-      setCurrentProfit(0);
-      setNextProfit(0);
-      setAmountWon(0);
-      setBetActive(false);
-      setIsRolling(false);
-      setProcessing(false);
-      setPendingRequests([]);
       console.error("Error occurred while betting:", error);
     }
   };
@@ -729,9 +736,9 @@ export default function Mines() {
             (autoWinChangeReset || autoLossChangeReset
               ? betAmt
               : autoBetCount === "inf"
-                ? Math.max(0, betAmt)
-                : betAmt *
-                  (autoLossChange !== null ? autoLossChange / 100.0 : 0));
+              ? Math.max(0, betAmt)
+              : betAmt *
+                (autoLossChange !== null ? autoLossChange / 100.0 : 0));
       }
       if (
         useAutoConfig &&
@@ -851,9 +858,6 @@ export default function Mines() {
                 !wallet ||
                 !session?.user ||
                 isRolling ||
-                (!betActive &&
-                  coinData &&
-                  coinData[0].amount < minGameAmount) ||
                 (betActive &&
                   betType === "manual" &&
                   !userBets.some((bet) => bet.pick)) ||
@@ -920,7 +924,11 @@ export default function Mines() {
                           alt="arrowDown"
                           width={14}
                           height={14}
-                          className={`${dropDown ? "transform transition-all rotate-180" : "transition-all"}`}
+                          className={`${
+                            dropDown
+                              ? "transform transition-all rotate-180"
+                              : "transition-all"
+                          }`}
                         />
                       </div>
                       {dropDown && (
@@ -1028,7 +1036,11 @@ export default function Mines() {
                               alt="arrowDown"
                               width={14}
                               height={14}
-                              className={`${dropDown ? "transform transition-all rotate-180" : "transition-all"}`}
+                              className={`${
+                                dropDown
+                                  ? "transform transition-all rotate-180"
+                                  : "transition-all"
+                              }`}
                             />
                           </div>
                           {!startAuto && dropDown && (
@@ -1195,23 +1207,23 @@ export default function Mines() {
                         userBets[index - 1].pick === true
                         ? "border-[#FCB10F] bg-[#FCB10F33]"
                         : userBets[index - 1].result === "Lost" &&
-                            userBets[index - 1].pick === true
-                          ? "border-[#F1323E] bg-[#F1323E33]"
-                          : gameStatus === "Completed"
-                            ? "bg-transparent border-white/10"
-                            : "bg-[#202329] border-[#202329] hover:border-white/30"
-                      : betType === "auto"
-                        ? userBets[index - 1].result === "" &&
                           userBets[index - 1].pick === true
-                          ? "border-[#FCB10F] bg-[#FCB10F33]"
-                          : userBets[index - 1].result === "Won" &&
-                              userBets[index - 1].pick === true
-                            ? "border-[#FCB10F] bg-[#FCB10F33]"
-                            : userBets[index - 1].result === "Lost" &&
-                                userBets[index - 1].pick === true
-                              ? "border-[#F1323E] bg-[#F1323E33]"
-                              : "bg-[#202329] border-[#202329] hover:border-white/30"
-                        : null
+                        ? "border-[#F1323E] bg-[#F1323E33]"
+                        : gameStatus === "Completed"
+                        ? "bg-transparent border-white/10"
+                        : "bg-[#202329] border-[#202329] hover:border-white/30"
+                      : betType === "auto"
+                      ? userBets[index - 1].result === "" &&
+                        userBets[index - 1].pick === true
+                        ? "border-[#FCB10F] bg-[#FCB10F33]"
+                        : userBets[index - 1].result === "Won" &&
+                          userBets[index - 1].pick === true
+                        ? "border-[#FCB10F] bg-[#FCB10F33]"
+                        : userBets[index - 1].result === "Lost" &&
+                          userBets[index - 1].pick === true
+                        ? "border-[#F1323E] bg-[#F1323E33]"
+                        : "bg-[#202329] border-[#202329] hover:border-white/30"
+                      : null
                   } ${
                     pendingRequests.includes(index) ? "blink_tile" : ""
                   } flex items-center active:scale-90 justify-center cursor-pointer rounded-md text-center transition duration-150 ease-in-out w-[50px] h-[50px] sm:w-[55px] sm:h-[55px] md:w-[80px] md:h-[80px] xl:w-[90px] xl:h-[90px]`}
@@ -1220,11 +1232,11 @@ export default function Mines() {
                     betType === "auto"
                       ? handleAutoPick(index)
                       : betActive && betType === "manual"
-                        ? setPendingRequests((prevRequests) => [
-                            ...prevRequests,
-                            index,
-                          ])
-                        : null
+                      ? setPendingRequests((prevRequests) => [
+                          ...prevRequests,
+                          index,
+                        ])
+                      : null
                   }
                 >
                   {betType === "manual" &&

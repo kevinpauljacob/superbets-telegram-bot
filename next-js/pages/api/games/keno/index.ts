@@ -14,6 +14,7 @@ import { isArrayUnique } from "@/context/transactions";
 import {
   houseEdgeTiers,
   maxPayouts,
+  minAmtFactor,
   pointTiers,
   stakingTiers,
 } from "@/context/config";
@@ -45,6 +46,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     try {
       let { wallet, amount, tokenMint, chosenNumbers, risk }: InputType =
         req.body;
+
+      const minGameAmount =
+        maxPayouts[tokenMint as GameTokens]["keno" as GameType] * minAmtFactor;
 
       if (maintainance)
         return res.status(400).json({

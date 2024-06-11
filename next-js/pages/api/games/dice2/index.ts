@@ -13,6 +13,7 @@ import StakingUser from "@/models/staking/user";
 import {
   houseEdgeTiers,
   maxPayouts,
+  minAmtFactor,
   pointTiers,
   stakingTiers,
 } from "@/context/config";
@@ -43,6 +44,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     try {
       let { wallet, amount, tokenMint, chance, direction }: InputType =
         req.body;
+
+      const minGameAmount =
+        maxPayouts[tokenMint as GameTokens]["dice2" as GameType] * minAmtFactor;
 
       if (maintainance)
         return res.status(400).json({

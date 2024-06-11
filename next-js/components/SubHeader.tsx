@@ -16,7 +16,6 @@ export default function SubHeader() {
     setShowWalletModal,
     setLiveBets,
     language,
-    setSelectedCoin,
     selectedCoin,
     coinData,
     showLiveStats,

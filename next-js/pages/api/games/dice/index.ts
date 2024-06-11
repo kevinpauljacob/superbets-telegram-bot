@@ -1,7 +1,7 @@
 import connectDatabase from "../../../../utils/database";
 import { getToken } from "next-auth/jwt";
 import { NextApiRequest, NextApiResponse } from "next";
-import { wsEndpoint, minGameAmount } from "@/context/config";
+import { wsEndpoint } from "@/context/config";
 import { GameSeed, User, Dice } from "@/models/games";
 import {
   GameTokens,
@@ -15,6 +15,7 @@ import { isArrayUnique } from "@/context/transactions";
 import {
   houseEdgeTiers,
   maxPayouts,
+  minAmtFactor,
   pointTiers,
   stakingTiers,
 } from "@/context/config";
@@ -42,6 +43,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === "POST") {
     try {
       let { wallet, amount, tokenMint, chosenNumbers }: InputType = req.body;
+
+      const minGameAmount =
+        maxPayouts[tokenMint as GameTokens]["dice" as GameType] * minAmtFactor;
 
       if (maintainance)
         return res.status(400).json({
