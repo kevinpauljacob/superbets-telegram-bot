@@ -38,7 +38,7 @@ export const SPL_TOKENS: Array<spl_token> = [
 
 export const wsEndpoint = process.env.NEXT_PUBLIC_WS_ENDPOINT!;
 
-export const minGameAmount = 0.000001;
+// export const minGameAmount = 0.000001;
 
 export const timeWeightedAvgInterval = 24 * 60 * 60 * 1000;
 export const timeWeightedAvgLimit: Record<string, number> = {

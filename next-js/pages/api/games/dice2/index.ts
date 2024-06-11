@@ -15,10 +15,11 @@ import {
   launchPromoEdge,
   maintainance,
   maxPayouts,
+  minAmtFactor,
   pointTiers,
   stakingTiers,
 } from "@/context/transactions";
-import { minGameAmount, wsEndpoint } from "@/context/config";
+import { wsEndpoint } from "@/context/config";
 import { Decimal } from "decimal.js";
 import { SPL_TOKENS } from "@/context/config";
 import updateGameStats from "../../../../utils/updateGameStats";
@@ -44,6 +45,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     try {
       let { wallet, amount, tokenMint, chance, direction }: InputType =
         req.body;
+
+      const minGameAmount =
+        maxPayouts[tokenMint as GameTokens]["dice2" as GameType] * minAmtFactor;
 
       if (maintainance)
         return res.status(400).json({

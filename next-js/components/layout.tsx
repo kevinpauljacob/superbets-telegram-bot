@@ -23,7 +23,7 @@ import { Limbo } from "./games/Limbo/VerifyLimboModal";
 import { Wheel } from "./games/Wheel/VerifyWheelModal";
 import { Keno } from "./games/Keno/VerifyKenoModal";
 import { Mines } from "./games/Mines/VerifyMinesModal";
-import { GameType } from "@/utils/provably-fair";
+import { GameTokens, GameType } from "@/utils/provably-fair";
 import ConfigureAutoModal from "./games/ConfigureAutoModal";
 import RollDiceProvablyFairModal from "./games/Dice/DiceProvablyFairModal";
 import Dice2ProvablyFairModal from "./games/Dice2/Dice2ProvablyFairModal";
@@ -35,6 +35,7 @@ import MinesProvablyFairModal from "./games/Mines/MinesProvablyFairModal";
 import Footer from "./Footer";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { soundAlert } from "@/utils/soundUtils";
+import { maxPayouts, minAmtFactor } from "@/context/transactions";
 
 interface LayoutProps {
   children: ReactNode;
@@ -72,7 +73,9 @@ export default function Layout({ children }: LayoutProps) {
     setAutoWinChangeReset,
     setAutoLossChangeReset,
     getUserDetails,
-    selectedCoin
+    selectedCoin,
+    minGameAmount,
+    setMinGameAmount,
   } = useGlobalContext();
 
   const [modalData, setModalData] = useState({
@@ -200,6 +203,10 @@ export default function Layout({ children }: LayoutProps) {
     if (session?.user) {
       getUserDetails();
     }
+    setMinGameAmount(
+      maxPayouts[selectedCoin.tokenMint as GameTokens][game as GameType] *
+        minAmtFactor,
+    );
   }, [wallet?.publicKey, session?.user, game, selectedCoin]);
 
   return (

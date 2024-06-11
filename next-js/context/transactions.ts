@@ -215,6 +215,8 @@ export const houseEdgeTiers: Record<number, number> = {
   7: 0,
 };
 
+export const minAmtFactor = 10 ** -3;
+
 type PayoutValue<T> = number;
 
 export const maxPayouts: {

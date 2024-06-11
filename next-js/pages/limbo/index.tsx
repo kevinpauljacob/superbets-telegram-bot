@@ -25,7 +25,6 @@ import {
   warningCustom,
 } from "@/components/toasts/ToastGroup";
 import { limboBet, translator, truncateNumber } from "@/context/transactions";
-import { minGameAmount } from "@/context/config";
 import { useSession } from "next-auth/react";
 import { GameType } from "@/utils/provably-fair";
 import { handleSignIn } from "@/components/ConnectWallet";
@@ -83,6 +82,7 @@ export default function Limbo() {
     setLiveStats,
     liveStats,
     enableSounds,
+    minGameAmount,
   } = useGlobalContext();
 
   const multiplierLimits = [1.02, 50];
@@ -155,8 +155,8 @@ export default function Limbo() {
                   ? liveStats[liveStats.length - 1].totalPNL +
                     (win ? betAmt! * targetMultiplier - betAmt! : -betAmt!)
                   : win
-                    ? betAmt! * targetMultiplier - betAmt!
-                    : -betAmt!,
+                  ? betAmt! * targetMultiplier - betAmt!
+                  : -betAmt!,
             },
           ]);
 
@@ -288,9 +288,9 @@ export default function Limbo() {
             (autoWinChangeReset || autoLossChangeReset
               ? betAmt
               : autoBetCount === "inf"
-                ? Math.max(0, betAmt)
-                : betAmt *
-                  (autoLossChange !== null ? autoLossChange / 100.0 : 0));
+              ? Math.max(0, betAmt)
+              : betAmt *
+                (autoLossChange !== null ? autoLossChange / 100.0 : 0));
 
         // console.log("Current bet amount:", betAmt);
         // console.log("Auto loss change:", autoLossChange);

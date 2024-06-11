@@ -14,10 +14,11 @@ import {
   houseEdgeTiers,
   launchPromoEdge,
   maxPayouts,
+  minAmtFactor,
   pointTiers,
   stakingTiers,
 } from "@/context/transactions";
-import { minGameAmount, wsEndpoint } from "@/context/config";
+import { wsEndpoint } from "@/context/config";
 import { Decimal } from "decimal.js";
 import { SPL_TOKENS } from "@/context/config";
 import updateGameStats from "../../../../utils/updateGameStats";
@@ -41,6 +42,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === "POST") {
     try {
       let { wallet, amount, tokenMint, multiplier }: InputType = req.body;
+
+      const minGameAmount =
+        maxPayouts[tokenMint as GameTokens]["limbo" as GameType] * minAmtFactor;
 
       const token = await getToken({ req, secret });
 

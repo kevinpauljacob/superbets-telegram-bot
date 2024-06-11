@@ -30,13 +30,8 @@ export default function BetAmount({
     language,
     kenoRisk,
     selectedCoin,
+    minGameAmount,
   } = useGlobalContext();
-
-  const [minGameAmount, setMinGameAmount] = useState<number>(0.01);
-
-  useEffect(() => {
-    setMinGameAmount(maxPayouts[selectedCoin.tokenMint as GameTokens][game as GameType] * 10 ** -3)
-  }, [selectedCoin])
 
   //Temperory max bet
   const multipliersForRisk = riskToChance[kenoRisk];
@@ -170,8 +165,9 @@ export default function BetAmount({
             )?.tokenName || "Unknown Token"}
           </span>
           <span
-            className={`group font-chakra font-medium cursor-pointer underline hover:text-opacity-100 transition-all duration-300 text-white ${betAmountsModal ? "text-opacity-100" : "text-opacity-50"
-              }`}
+            className={`group font-chakra font-medium cursor-pointer underline hover:text-opacity-100 transition-all duration-300 text-white ${
+              betAmountsModal ? "text-opacity-100" : "text-opacity-50"
+            }`}
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
             onClick={() => {
@@ -184,11 +180,11 @@ export default function BetAmount({
         </span>
       </div>
       {betAmountsModal &&
-        game !== "mines" &&
-        game !== "keno" &&
-        game !== "wheel" &&
-        game !== "coinflip" &&
-        game !== "options" ? (
+      game !== "mines" &&
+      game !== "keno" &&
+      game !== "wheel" &&
+      game !== "coinflip" &&
+      game !== "options" ? (
         <div className="fadeInDown_04 relative flex flex-col items-center gap-3 bg-[#0C0F16] rounded-[5px] px-6 pt-7 pb-4 mt-2 mb-1.5">
           <div className="flex items-center border-b border-white/10 h-full w-full px-3 pb-8 pt-3">
             <div className="relative h-[4px] rounded-full bg-[#2A2E38] w-full mx-3">
@@ -203,8 +199,9 @@ export default function BetAmount({
               <div
                 className="absolute rounded-full h-[5px] bg-[#8795A8] z-10"
                 style={{
-                  width: `${(currentMaxBetAmt / Number(highestMaxBetAmt)) * 100
-                    }%`,
+                  width: `${
+                    (currentMaxBetAmt / Number(highestMaxBetAmt)) * 100
+                  }%`,
                 }}
               >
                 <div className="relative">
@@ -295,14 +292,15 @@ export default function BetAmount({
         </div>
       ) : null}
       {isHovered &&
-        (game === "mines" ||
-          game === "keno" ||
-          game === "wheel" ||
-          game === "coinflip" ||
-          game === "options") ? (
+      (game === "mines" ||
+        game === "keno" ||
+        game === "wheel" ||
+        game === "coinflip" ||
+        game === "options") ? (
         <div
-          className={`absolute z-[1000] ${game === "options" ? "top-[1rem]" : "-top-[5.2rem]"
-            } min-w-full fadeIn flex items-center gap-3 bg-[#0C0F16] rounded-[5px] p-3 mt-2 mb-1.5 `}
+          className={`absolute z-[1000] ${
+            game === "options" ? "top-[1rem]" : "-top-[5.2rem]"
+          } min-w-full fadeIn flex items-center gap-3 bg-[#0C0F16] rounded-[5px] p-3 mt-2 mb-1.5 `}
         >
           <div className="flex items-center border-r lg:border-0 min-[1412px]:border-r border-white/10 text-[#94A3B8] text-chakra text-[11px] font-medium h-11 w-[80%] lg:w-full min-[1412px]:w-[80%]">
             <span className="flex items-center justify-center bg-[#202329]/50 rounded-[8px] h-[49px] min-w-[49px]">
@@ -395,10 +393,11 @@ export default function BetAmount({
       </div>
 
       <span
-        className={`${methods.formState.errors["amount"]
-          ? "opacity-100 mt-1.5"
-          : "opacity-0 h-0"
-          } flex items-center gap-1 text-xs text-[#D92828]`}
+        className={`${
+          methods.formState.errors["amount"]
+            ? "opacity-100 mt-1.5"
+            : "opacity-0 h-0"
+        } flex items-center gap-1 text-xs text-[#D92828]`}
       >
         {methods.formState.errors["amount"]
           ? methods.formState.errors["amount"]!.message!.toString()

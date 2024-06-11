@@ -1,8 +1,8 @@
 import React, { ReactNode } from "react";
 import GameHeader from "./GameHeader";
 import { useGlobalContext } from "./GlobalContext";
-import { translator, truncateNumber } from "@/context/transactions";
-import { minGameAmount, optionsEdge } from "@/context/config";
+import { maxPayouts, translator, truncateNumber } from "@/context/transactions";
+import { optionsEdge } from "@/context/config";
 import Link from "next/link";
 import FomoPlay from "./FomoPlay";
 import FOMOHead from "./HeadElement";
@@ -10,6 +10,7 @@ import { useSession } from "next-auth/react";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { useWalletModal } from "@solana/wallet-adapter-react-ui";
 import { handleSignIn } from "./ConnectWallet";
+import { GameTokens, GameType } from "@/utils/provably-fair";
 
 interface LayoutProps {
   children: ReactNode;
@@ -49,6 +50,7 @@ export const GameFooterInfo: React.FC<GameFooterProps> = ({
     houseEdge,
     language,
     selectedCoin,
+    minGameAmount,
   } = useGlobalContext();
 
   return (
