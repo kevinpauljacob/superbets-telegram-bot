@@ -521,7 +521,6 @@ export default function Mines() {
         translator(error?.message ?? "Could not make the Bet.", language),
       );
       setIsRolling(false);
-      setAutoBetCount(0);
       setStartAuto(false);
       console.error("Error occurred while betting:", error);
     } finally {
@@ -783,16 +782,18 @@ export default function Mines() {
       }, 1000);
     } else {
       setStartAuto(false);
-      setTimeout(() => {
-        setUserBets(defaultUserBets);
-        setUserBetsForAuto([]);
-        setCashoutModal({
-          show: false,
-          amountWon: 0,
-          strikeMultiplier: 0,
-          pointsGained: 0,
-        });
-      }, 2000);
+      if (startAuto === false && userBets.some((bet) => bet.result !== "")) {
+        setTimeout(() => {
+          setUserBets(defaultUserBets);
+          setUserBetsForAuto([]);
+          setCashoutModal({
+            show: false,
+            amountWon: 0,
+            strikeMultiplier: 0,
+            pointsGained: 0,
+          });
+        }, 2000);
+      }
       setAutoBetProfit(0);
       setUserInput(betAmt);
     }
@@ -800,10 +801,10 @@ export default function Mines() {
 
   const onSubmit = async (data: any) => {
     if (betType === "auto") {
-      if (betAmt === 0) {
-        errorCustom(translator("Set Amount.", language));
-        return;
-      }
+      // if (betAmt === 0) {
+      //   errorCustom(translator("Set Amount.", language));
+      //   return;
+      // }
       if (typeof autoBetCount === "number" && autoBetCount <= 0) {
         errorCustom("Set Bet Count.");
         return;
@@ -853,6 +854,9 @@ export default function Mines() {
                   !session?.user ||
                   isRolling ||
                   (coinData && coinData[0].amount < minGameAmount) ||
+                  (betType === "auto" && !userBets.some((bet) => bet.pick)) ||
+                  autoBetCount === 0 ||
+                  Number.isNaN(autoBetCount) ||
                   (betAmt !== undefined &&
                     maxBetAmt !== undefined &&
                     betAmt > maxBetAmt)
@@ -1112,6 +1116,10 @@ export default function Mines() {
                         !session?.user ||
                         isRolling ||
                         (coinData && coinData[0].amount < minGameAmount) ||
+                        (betType === "auto" &&
+                          !userBets.some((bet) => bet.pick)) ||
+                        autoBetCount === 0 ||
+                        Number.isNaN(autoBetCount) ||
                         (betAmt !== undefined &&
                           maxBetAmt !== undefined &&
                           betAmt > maxBetAmt)
