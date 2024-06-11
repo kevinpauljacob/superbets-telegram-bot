@@ -10,17 +10,16 @@ import {
   GameTokens,
 } from "@/utils/provably-fair";
 import StakingUser from "@/models/staking/user";
+import { isArrayUnique } from "@/context/transactions";
 import {
   houseEdgeTiers,
-  isArrayUnique,
-  launchPromoEdge,
-  maintainance,
   maxPayouts,
   minAmtFactor,
   pointTiers,
   stakingTiers,
-} from "@/context/transactions";
-import { wsEndpoint } from "@/context/config";
+} from "@/context/config";
+import { launchPromoEdge, maintainance } from "@/context/config";
+import { minGameAmount, wsEndpoint } from "@/context/config";
 import { riskToChance } from "@/components/games/Keno/RiskToChance";
 import { Decimal } from "decimal.js";
 import { SPL_TOKENS } from "@/context/config";

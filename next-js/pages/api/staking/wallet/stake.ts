@@ -1,10 +1,9 @@
 import { Connection, Keypair, PublicKey, Transaction } from "@solana/web3.js";
 import {
   createDepositTxn,
-  fomoToken,
-  stakingTiers,
   verifyTransaction,
 } from "../../../../context/transactions";
+import { stakingTiers } from "@/context/config";
 import connectDatabase from "../../../../utils/database";
 import User from "../../../../models/staking/user";
 import TxnSignature from "../../../../models/txnSignature";
@@ -12,6 +11,7 @@ import TxnSignature from "../../../../models/txnSignature";
 import { getToken } from "next-auth/jwt";
 import { NextApiRequest, NextApiResponse } from "next";
 import { bs58 } from "@project-serum/anchor/dist/cjs/utils/bytes";
+import { SPL_TOKENS } from "@/context/config";
 
 const secret = process.env.NEXTAUTH_SECRET;
 
@@ -45,6 +45,10 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         });
 
       await connectDatabase();
+
+      const fomoToken = SPL_TOKENS.find(
+        (token) => token.tokenName === "FOMO",
+      )?.tokenMint!;
 
       if (
         !wallet ||

@@ -1,12 +1,6 @@
-import {
-  User,
-  connection,
-  houseEdgeTiers,
-  launchPromoEdge,
-  pointTiers,
-  stakingTiers,
-  translator,
-} from "@/context/transactions";
+import { User, connection, translator } from "@/context/transactions";
+import { houseEdgeTiers, pointTiers, stakingTiers } from "@/context/config";
+import { launchPromoEdge } from "@/context/config";
 import { useWallet } from "@solana/wallet-adapter-react";
 import React, {
   createContext,

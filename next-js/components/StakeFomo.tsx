@@ -1,8 +1,6 @@
 import { useContext, useEffect, useState } from "react";
 import { useGlobalContext } from "./GlobalContext";
 import {
-  connection,
-  fomoToken,
   stakeFOMO,
   translator,
   truncateNumber,
@@ -14,6 +12,7 @@ import Spinner from "./Spinner";
 import { useSession } from "next-auth/react";
 import { errorCustom } from "./toasts/ToastGroup";
 import { getFOMOBalance } from "@/pages/stake";
+import { SPL_TOKENS } from "@/context/config";
 
 const MinAmount = 0.01;
 
@@ -40,6 +39,10 @@ export default function StakeFomo() {
   const handleRequest = async () => {
     setLoading(true);
     let response: { success: boolean; message: string };
+    const fomoToken = SPL_TOKENS.find(
+      (token) => token.tokenName === "FOMO",
+    )?.tokenMint!;
+
     try {
       if (stake) {
         if (stakeAmount > fomoBalance) {

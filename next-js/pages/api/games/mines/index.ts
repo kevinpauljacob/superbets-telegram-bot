@@ -5,7 +5,7 @@ import { GameSeed, Mines, User } from "@/models/games";
 import { GameTokens, GameType, seedStatus } from "@/utils/provably-fair";
 import { wsEndpoint } from "@/context/config";
 import Decimal from "decimal.js";
-import { maxPayouts, minAmtFactor } from "@/context/transactions";
+import { maxPayouts, minAmtFactor } from "@/context/config";
 import StakingUser from "@/models/staking/user";
 import { SPL_TOKENS } from "@/context/config";
 import updateGameStats from "../../../../utils/updateGameStats";

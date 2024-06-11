@@ -8,13 +8,9 @@ import {
   seedStatus,
 } from "@/utils/provably-fair";
 import StakingUser from "@/models/staking/user";
-import {
-  houseEdgeTiers,
-  launchPromoEdge,
-  maxPayouts,
-  pointTiers,
-} from "@/context/transactions";
-import { wsEndpoint } from "@/context/config";
+import { houseEdgeTiers, maxPayouts, pointTiers } from "@/context/config";
+import { launchPromoEdge } from "@/context/config";
+import { minGameAmount, wsEndpoint } from "@/context/config";
 import { Decimal } from "decimal.js";
 Decimal.set({ precision: 9 });
 

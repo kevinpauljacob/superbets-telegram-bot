@@ -12,14 +12,13 @@ import {
 import StakingUser from "@/models/staking/user";
 import {
   houseEdgeTiers,
-  launchPromoEdge,
-  maintainance,
   maxPayouts,
   minAmtFactor,
   pointTiers,
   stakingTiers,
-} from "@/context/transactions";
-import { wsEndpoint } from "@/context/config";
+} from "@/context/config";
+import { launchPromoEdge, maintainance } from "@/context/config";
+import { minGameAmount, wsEndpoint } from "@/context/config";
 import { riskToChance } from "@/components/games/Wheel/Segments";
 import { Decimal } from "decimal.js";
 import { SPL_TOKENS } from "@/context/config";

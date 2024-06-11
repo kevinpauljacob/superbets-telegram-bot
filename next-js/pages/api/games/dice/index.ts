@@ -11,16 +11,15 @@ import {
   seedStatus,
 } from "@/utils/provably-fair";
 import StakingUser from "@/models/staking/user";
+import { isArrayUnique } from "@/context/transactions";
 import {
   houseEdgeTiers,
-  isArrayUnique,
-  launchPromoEdge,
-  maintainance,
   maxPayouts,
   minAmtFactor,
   pointTiers,
   stakingTiers,
-} from "@/context/transactions";
+} from "@/context/config";
+import { launchPromoEdge, maintainance } from "@/context/config";
 import { Decimal } from "decimal.js";
 import { SPL_TOKENS } from "@/context/config";
 import updateGameStats from "../../../../utils/updateGameStats";

@@ -13,13 +13,12 @@ import {
 import StakingUser from "@/models/staking/user";
 import {
   houseEdgeTiers,
-  launchPromoEdge,
-  maintainance,
   maxPayouts,
   minAmtFactor,
   pointTiers,
   stakingTiers,
-} from "@/context/transactions";
+} from "@/context/config";
+import { launchPromoEdge, maintainance } from "@/context/config";
 import { Decimal } from "decimal.js";
 import { SPL_TOKENS } from "@/context/config";
 import updateGameStats from "../../../../utils/updateGameStats";

@@ -4,7 +4,7 @@ import { getToken } from "next-auth/jwt";
 import { NextApiRequest, NextApiResponse } from "next";
 import { wsEndpoint } from "@/context/config";
 import { Decimal } from "decimal.js";
-import { maintainance, maxPayouts, minAmtFactor } from "@/context/transactions";
+import { maxPayouts, minAmtFactor, maintainance } from "@/context/config";
 import StakingUser from "@/models/staking/user";
 import { GameTokens, GameType } from "@/utils/provably-fair";
 import { SPL_TOKENS } from "@/context/config";

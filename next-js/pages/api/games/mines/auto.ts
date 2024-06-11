@@ -12,15 +12,15 @@ import {
 import StakingUser from "@/models/staking/user";
 import { wsEndpoint } from "@/context/config";
 import Decimal from "decimal.js";
+import { isArrayUnique } from "@/context/transactions";
 import {
   houseEdgeTiers,
-  isArrayUnique,
-  launchPromoEdge,
   maxPayouts,
   minAmtFactor,
   pointTiers,
   stakingTiers,
-} from "@/context/transactions";
+} from "@/context/config";
+import { launchPromoEdge } from "@/context/config";
 import { SPL_TOKENS } from "@/context/config";
 import updateGameStats from "../../../../utils/updateGameStats";
 
@@ -93,7 +93,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       if (
         !(
           maxPayout.toNumber() <=
-          maxPayouts[splToken.tokenName as GameTokens].mines
+          maxPayouts[splToken.tokenMint as GameTokens].mines
         )
       )
         return res
