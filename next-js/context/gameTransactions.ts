@@ -9,9 +9,9 @@ import {
 import {
   getAssociatedTokenAddress,
   createTransferInstruction,
+  createAssociatedTokenAccountIdempotentInstruction,
 } from "@solana/spl-token";
 import { SPL_TOKENS } from "./config";
-import toast from "react-hot-toast";
 import { WalletContextState } from "@solana/wallet-adapter-react";
 import {
   errorCustom,
@@ -31,7 +31,11 @@ const devPublicKey = new PublicKey(process.env.NEXT_PUBLIC_DEV_PUBLIC_KEY!);
 export const minGameAmount = 1e-6;
 
 export const timeWeightedAvgInterval = 24 * 60 * 60 * 1000;
-export const timeWeightedAvgLimit = 50;
+export const timeWeightedAvgLimit: Record<string, number> = {
+  SOL: 50,
+  USDC: 100,
+  FOMO: 10000,
+};
 export const userLimitMultiplier = 5;
 
 export const optionsEdge = 0.1;
@@ -49,7 +53,7 @@ export const placeBet = async (
       body: JSON.stringify({
         wallet: wallet.publicKey,
         amount: amount,
-        tokenMint,
+        tokenMint: tokenMint,
         betType,
         timeFrame,
       }),
@@ -76,6 +80,7 @@ export const placeBet = async (
 export const placeFlip = async (
   wallet: WalletContextState,
   amount: number,
+  tokenMint: string,
   flipType: string, // heads / tails
 ) => {
   try {
@@ -89,7 +94,7 @@ export const placeFlip = async (
         wallet: wallet.publicKey,
         amount,
         flipType,
-        tokenMint: "SOL",
+        tokenMint: tokenMint,
       }),
       headers: {
         "Content-Type": "application/json",
@@ -124,6 +129,7 @@ export const deposit = async (
   try {
     let { transaction, blockhashWithExpiryBlockHeight } =
       await createDepositTxn(wallet.publicKey, amount, tokenMint);
+    console.log("creatin txn with", amount, tokenMint);
 
     transaction = await wallet.signTransaction!(transaction);
     const transactionBase64 = transaction
@@ -302,10 +308,13 @@ export const createDepositTxn = async (
   transaction.feePayer = wallet;
   transaction.recentBlockhash = blockhashWithExpiryBlockHeight.blockhash;
 
+  transaction.add(
+    ComputeBudgetProgram.setComputeUnitLimit({ units: 100_000 }),
+    ComputeBudgetProgram.setComputeUnitPrice({ microLamports: 150_000 }),
+  );
+
   if (tokenName === "SOL")
     transaction.add(
-      ComputeBudgetProgram.setComputeUnitLimit({ units: 100_000 }),
-      ComputeBudgetProgram.setComputeUnitPrice({ microLamports: 150_000 }),
       SystemProgram.transfer({
         fromPubkey: wallet,
         toPubkey: devPublicKey,
@@ -317,8 +326,6 @@ export const createDepositTxn = async (
     const userAta = await getAssociatedTokenAddress(tokenId, wallet);
     const devAta = await getAssociatedTokenAddress(tokenId, devPublicKey);
     transaction.add(
-      ComputeBudgetProgram.setComputeUnitLimit({ units: 100_000 }),
-      ComputeBudgetProgram.setComputeUnitPrice({ microLamports: 150_000 }),
       createTransferInstruction(
         userAta,
         devAta,
@@ -327,6 +334,15 @@ export const createDepositTxn = async (
       ),
     );
   }
+
+  transaction.instructions.slice(2).forEach((i) => {
+    i.keys.forEach((k) => {
+      if (k.pubkey.equals(wallet)) {
+        k.isSigner = true;
+        k.isWritable = true;
+      }
+    });
+  });
 
   return { transaction, blockhashWithExpiryBlockHeight };
 };
@@ -346,25 +362,31 @@ export const createWithdrawTxn = async (
   const blockhashWithExpiryBlockHeight = await connection.getLatestBlockhash();
   transaction.recentBlockhash = blockhashWithExpiryBlockHeight.blockhash;
 
+  transaction.add(
+    ComputeBudgetProgram.setComputeUnitLimit({ units: 100_000 }),
+    ComputeBudgetProgram.setComputeUnitPrice({ microLamports: 150_000 }),
+  );
+
   if (tokenName === "SOL") {
     transaction.add(
-      ComputeBudgetProgram.setComputeUnitLimit({ units: 100_000 }),
-      ComputeBudgetProgram.setComputeUnitPrice({ microLamports: 150_000 }),
       SystemProgram.transfer({
         fromPubkey: devPublicKey,
         toPubkey: wallet,
         lamports: Math.floor(amount * Math.pow(10, 9)),
       }),
     );
-    transaction.instructions[2].keys[1].isSigner = true;
-    transaction.instructions[2].keys[1].isWritable = true;
   } else {
     const tokenId = new PublicKey(tokenMint);
     const userAta = await getAssociatedTokenAddress(tokenId, wallet);
     const devAta = await getAssociatedTokenAddress(tokenId, devPublicKey);
+
     transaction.add(
-      ComputeBudgetProgram.setComputeUnitLimit({ units: 100_000 }),
-      ComputeBudgetProgram.setComputeUnitPrice({ microLamports: 150_000 }),
+      createAssociatedTokenAccountIdempotentInstruction(
+        wallet,
+        userAta,
+        wallet,
+        tokenId,
+      ),
       createTransferInstruction(
         devAta,
         userAta,
@@ -372,9 +394,16 @@ export const createWithdrawTxn = async (
         Math.floor(amount * Math.pow(10, decimal)),
       ),
     );
-    transaction.instructions[2].keys[2].isSigner = true;
-    transaction.instructions[2].keys[2].isWritable = true;
   }
+
+  transaction.instructions.slice(2).forEach((i) => {
+    i.keys.forEach((k) => {
+      if (k.pubkey.equals(wallet)) {
+        k.isSigner = true;
+        k.isWritable = true;
+      }
+    });
+  });
 
   return { transaction, blockhashWithExpiryBlockHeight };
 };
@@ -428,9 +457,78 @@ export async function retryTxn(
   else throw new Error("Transaction could not be confirmed !");
 }
 
+export const createClaimEarningsTxn = async (
+  wallet: PublicKey,
+  earnings: Array<{
+    tokenMint: string;
+    amount: number;
+  }>,
+) => {
+  const transaction = new Transaction();
+
+  transaction.feePayer = wallet;
+  const blockhashWithExpiryBlockHeight = await connection.getLatestBlockhash();
+  transaction.recentBlockhash = blockhashWithExpiryBlockHeight.blockhash;
+
+  transaction.add(
+    ComputeBudgetProgram.setComputeUnitLimit({ units: 100_000 }),
+    ComputeBudgetProgram.setComputeUnitPrice({ microLamports: 150_000 }),
+  );
+
+  for (let earning of earnings) {
+    let splToken = SPL_TOKENS.find(
+      (data) => data.tokenMint === earning.tokenMint,
+    );
+    if (!splToken) throw new Error("Invalid tokenMint provided!");
+
+    const { tokenName, decimal } = splToken;
+
+    if (tokenName === "SOL") {
+      transaction.add(
+        SystemProgram.transfer({
+          fromPubkey: devPublicKey,
+          toPubkey: wallet,
+          lamports: Math.floor(earning.amount * Math.pow(10, 9)),
+        }),
+      );
+    } else {
+      const tokenId = new PublicKey(earning.tokenMint);
+      const userAta = await getAssociatedTokenAddress(tokenId, wallet);
+      const devAta = await getAssociatedTokenAddress(tokenId, devPublicKey);
+
+      transaction.add(
+        createAssociatedTokenAccountIdempotentInstruction(
+          wallet,
+          userAta,
+          wallet,
+          tokenId,
+        ),
+        createTransferInstruction(
+          devAta,
+          userAta,
+          devPublicKey,
+          Math.floor(earning.amount * Math.pow(10, decimal)),
+        ),
+      );
+    }
+  }
+
+  transaction.instructions.slice(2).forEach((i) => {
+    i.keys.forEach((k) => {
+      if (k.pubkey.equals(wallet)) {
+        k.isSigner = true;
+        k.isWritable = true;
+      }
+    });
+  });
+
+  return { transaction, blockhashWithExpiryBlockHeight };
+};
+
 export const rollDice = async (
   wallet: WalletContextState,
   amount: number,
+  tokenMint: string,
   chosenNumbers: number[],
 ) => {
   try {
@@ -441,7 +539,7 @@ export const rollDice = async (
       body: JSON.stringify({
         wallet: wallet.publicKey,
         amount: amount,
-        tokenMint: "SOL",
+        tokenMint: tokenMint,
         chosenNumbers,
       }),
       headers: {
@@ -469,6 +567,7 @@ export const limboBet = async (
   wallet: WalletContextState,
   amount: number,
   multiplier: number,
+  tokenMint: string,
 ) => {
   try {
     if (!wallet.publicKey) throw new Error("Wallet not connected");
@@ -478,7 +577,7 @@ export const limboBet = async (
       body: JSON.stringify({
         wallet: wallet.publicKey,
         amount: amount,
-        tokenMint: "SOL",
+        tokenMint: tokenMint,
         multiplier,
       }),
       headers: {

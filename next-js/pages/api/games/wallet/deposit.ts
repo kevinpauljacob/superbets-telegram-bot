@@ -17,6 +17,7 @@ import TxnSignature from "../../../../models/txnSignature";
 import { getToken } from "next-auth/jwt";
 import { NextApiRequest, NextApiResponse } from "next";
 import Campaign from "@/models/analytics/campaigns";
+import { SPL_TOKENS } from "@/context/config";
 
 const secret = process.env.NEXTAUTH_SECRET;
 
@@ -62,17 +63,21 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         !transactionBase64 ||
         !amount ||
         !tokenMint ||
-        tokenMint != "SOL" ||
         !blockhashWithExpiryBlockHeight
       )
         return res
           .status(400)
           .json({ success: false, message: "Missing parameters" });
 
-      if (amount <= 0)
+      if (
+        typeof amount !== "number" ||
+        !isFinite(amount) ||
+        !(amount > 0) ||
+        !SPL_TOKENS.some((t) => t.tokenMint === tokenMint)
+      )
         return res
           .status(400)
-          .json({ success: false, message: "Invalid deposit amount !" });
+          .json({ success: false, message: "Invalid parameters!" });
 
       let { transaction: vTxn } = await createDepositTxn(
         new PublicKey(wallet),
@@ -97,28 +102,30 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
       await TxnSignature.create({ txnSignature });
 
-      let user = await User.findOne({ wallet });
-
+      const user = await User.findOne({ wallet });
       if (!user)
-        await User.create({
-          wallet,
-          deposit: [{ tokenMint, amount: amount }],
-        });
-      else
+        await User.create({ wallet, deposit: [{ tokenMint, amount }] });
+      else {
         await User.findOneAndUpdate(
           {
             wallet,
-            deposit: {
-              $elemMatch: {
-                tokenMint,
-              },
-            },
+            "deposit.tokenMint": { $ne: tokenMint },
+          },
+          {
+            $push: { deposit: { tokenMint, amount: 0 } },
+          },
+        );
+
+        await User.findOneAndUpdate(
+          {
+            wallet,
+            "deposit.tokenMint": tokenMint,
           },
           {
             $inc: { "deposit.$.amount": amount },
           },
-          { new: true },
         );
+      }
 
       await Deposit.create({
         wallet,
@@ -139,9 +146,12 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           console.log("unable to create campaign !");
         }
       }
+      const tokenName = SPL_TOKENS.find((t) => t.tokenMint === tokenMint)
+        ?.tokenName;
+
       return res.json({
         success: true,
-        message: `${amount} SOL successfully deposited!`,
+        message: `${amount} ${tokenName} successfully deposited!`,
       });
     } catch (e: any) {
       console.log(e);

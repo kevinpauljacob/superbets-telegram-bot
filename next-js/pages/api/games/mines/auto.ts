@@ -3,6 +3,7 @@ import { getToken } from "next-auth/jwt";
 import { NextApiRequest, NextApiResponse } from "next";
 import { GameSeed, Mines, User } from "@/models/games";
 import {
+  GameTokens,
   GameType,
   decryptServerSeed,
   generateGameResult,
@@ -21,6 +22,7 @@ import {
   maxPayouts,
   pointTiers,
 } from "@/context/transactions";
+import { SPL_TOKENS } from "@/context/config";
 
 const secret = process.env.NEXTAUTH_SECRET;
 const encryptionKey = Buffer.from(process.env.ENCRYPTION_KEY!, "hex");
@@ -56,10 +58,11 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           .status(400)
           .json({ success: false, message: "Missing parameters" });
 
+      const splToken = SPL_TOKENS.find((t) => t.tokenMint === tokenMint);
       if (
         typeof amount !== "number" ||
         !isFinite(amount) ||
-        tokenMint !== "SOL" ||
+        !splToken ||
         !(
           Number.isInteger(minesCount) &&
           1 <= minesCount &&
@@ -84,7 +87,12 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       const maxStrikeMultiplier = 25;
       const maxPayout = Decimal.mul(amount, maxStrikeMultiplier);
 
-      if (!(maxPayout.toNumber() <= maxPayouts.mines))
+      if (
+        !(
+          maxPayout.toNumber() <=
+          maxPayouts[splToken.tokenName as GameTokens].mines
+        )
+      )
         return res
           .status(400)
           .json({ success: false, message: "Max payout exceeded" });
@@ -165,7 +173,12 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         { upsert: true, new: true },
       );
       const userTier = userData?.tier ?? 0;
-      const houseEdge = launchPromoEdge ? 0 : houseEdgeTiers[userTier];
+      const isFomoToken =
+        tokenMint === SPL_TOKENS.find((t) => t.tokenName === "FOMO")?.tokenMint
+          ? true
+          : false;
+      const houseEdge =
+        launchPromoEdge || isFomoToken ? 0 : houseEdgeTiers[userTier];
 
       let strikeMultiplier = 0,
         amountWon = 0,

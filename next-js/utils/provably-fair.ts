@@ -110,6 +110,12 @@ export enum seedStatus {
   NEXT = "NEXT",
 }
 
+export enum GameTokens {
+  SOL = "SOL",
+  USDC = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+  FOMO = "Cx9oLynYgC3RrgXzin7U417hNY9D6YB1eMGw4ZMbWJgw"
+}
+
 export enum GameType {
   dice = "dice",
   coin = "coinflip",

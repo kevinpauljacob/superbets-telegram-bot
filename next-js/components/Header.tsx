@@ -6,7 +6,6 @@ import { MdOutlineLanguage } from "react-icons/md";
 import { FaChevronDown } from "react-icons/fa6";
 import ConnectWallet from "./ConnectWallet";
 import { useRouter } from "next/router";
-import { translator } from "@/context/transactions";
 import Staking from "/public/assets/Stake1.svg";
 import Leaderboard from "/public/assets/Leaderboard1.svg";
 import Store from "/public/assets/store1.svg";
@@ -81,7 +80,7 @@ export function Header({
           </div>
 
           {/* left  */}
-          <div className="flex ml-2 mr-2 sm:items-center items-end sm:flex-row">
+          <div className="flex ml-2 lg:mr-2 sm:items-center items-end sm:flex-row">
             <div className="flex gap-8 mr-6 items-end">
               {/* Language selector */}
               <button

@@ -1,7 +1,6 @@
 import { useWallet } from "@solana/wallet-adapter-react";
 import { getCsrfToken, signIn, signOut, useSession } from "next-auth/react";
 import { buildAuthTx } from "./../utils/signinMessage";
-import bs58 from "bs58";
 import { useEffect } from "react";
 import { useWalletModal } from "@solana/wallet-adapter-react-ui";
 import {

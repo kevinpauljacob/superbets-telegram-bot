@@ -46,7 +46,7 @@ export default function Sidebar({
   const wallet = useWallet();
   const router = useRouter();
 
-  const { language, setMobileSidebar } =
+  const { language, setMobileSidebar, userTokens, setUserTokens } =
     useGlobalContext();
 
   const [showExitTokens, setShowExitTokens] = useState<boolean>(false);
@@ -315,7 +315,6 @@ export const OpenSidebar = ({
  
   const url = `https://api.dexscreener.com/latest/dex/tokens/${fomoToken}`;
   useEffect(() => {
-
     /// code added to fetch fomo price
     const fetchFomoPrice = async () => {
       try {

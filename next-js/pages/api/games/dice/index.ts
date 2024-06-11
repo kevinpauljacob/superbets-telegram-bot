@@ -8,6 +8,7 @@ import {
 } from "@/context/gameTransactions";
 import { GameSeed, User, Dice } from "@/models/games";
 import {
+  GameTokens,
   GameType,
   decryptServerSeed,
   generateGameResult,
@@ -22,6 +23,7 @@ import {
   pointTiers,
 } from "@/context/transactions";
 import { Decimal } from "decimal.js";
+import { SPL_TOKENS } from "@/context/config";
 Decimal.set({ precision: 9 });
 
 const secret = process.env.NEXTAUTH_SECRET;
@@ -57,19 +59,17 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           message: "User wallet not authenticated",
         });
 
-      if (amount < minGameAmount)
-        return res.status(400).json({
-          success: false,
-          message: "Invalid bet amount",
-        });
-
-      if (!wallet || !amount || tokenMint !== "SOL")
+      if (!wallet || !amount || !tokenMint)
         return res
           .status(400)
           .json({ success: false, message: "Missing parameters" });
 
       //check if all values are unique whole numbers between 1 and 6
+      const splToken = SPL_TOKENS.find((t) => t.tokenMint === tokenMint);
       if (
+        typeof amount !== "number" ||
+        !isFinite(amount) ||
+        !splToken ||
         !(
           chosenNumbers &&
           chosenNumbers.length >= 1 &&
@@ -84,9 +84,15 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           .status(400)
           .json({ success: false, message: "Invalid chosen numbers" });
 
+      if (amount < minGameAmount)
+        return res.status(400).json({
+          success: false,
+          message: "Invalid bet amount",
+        });
+
       const strikeMultiplier = new Decimal(6 / chosenNumbers.length);
       const maxPayout = Decimal.mul(amount, strikeMultiplier);
-      if (!(maxPayout.toNumber() <= maxPayouts.dice))
+      if (!(maxPayout.toNumber() <= maxPayouts[tokenMint as GameTokens].dice))
         return res
           .status(400)
           .json({ success: false, message: "Max payout exceeded" });
@@ -114,7 +120,12 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         { upsert: true, new: true },
       );
       const userTier = userData?.tier ?? 0;
-      const houseEdge = launchPromoEdge ? 0 : houseEdgeTiers[userTier];
+      const isFomoToken =
+        tokenMint === SPL_TOKENS.find((t) => t.tokenName === "FOMO")?.tokenMint
+          ? true
+          : false;
+      const houseEdge =
+        launchPromoEdge || isFomoToken ? 0 : houseEdgeTiers[userTier];
 
       const activeGameSeed = await GameSeed.findOneAndUpdate(
         {
@@ -169,7 +180,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           wallet,
           deposit: {
             $elemMatch: {
-              tokenMint: tokenMint,
+              tokenMint,
               amount: { $gte: amount },
             },
           },
@@ -261,7 +272,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         },
         message: `${result} ${
           result == "Won" ? amountWon.toFixed(4) : amountLost.toFixed(4)
-        } SOL!`,
+        } ${splToken.tokenName}!`,
       });
     } catch (e: any) {
       console.log(e);

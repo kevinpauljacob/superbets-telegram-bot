@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef, useMemo } from "react";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { rollDice } from "@/context/gameTransactions";
-import { toast } from "react-hot-toast";
 import BetSetting from "@/components/BetSetting";
 import { useGlobalContext } from "@/components/GlobalContext";
 import {
@@ -12,7 +11,6 @@ import {
   GameTable,
 } from "@/components/GameLayout";
 import { FormProvider, useForm } from "react-hook-form";
-import { BsInfinity } from "react-icons/bs";
 import Loader from "@/components/games/Loader";
 import WinPointer from "@/public/assets/WinPointer";
 import DicePointer from "@/public/assets/DicePointer";
@@ -24,7 +22,6 @@ import Dice5 from "@/public/assets/Dice5";
 import Dice6 from "@/public/assets/Dice6";
 import BetAmount from "@/components/games/BetAmountInput";
 import BetButton from "@/components/games/BetButton";
-import showInfoToast from "@/components/games/toasts/toasts";
 import { loopSound, soundAlert } from "@/utils/soundUtils";
 import Bets from "../../components/games/Bets";
 import AutoCount from "@/components/AutoCount";
@@ -33,6 +30,7 @@ import { errorCustom, warningCustom } from "@/components/toasts/ToastGroup";
 import { translator } from "@/context/transactions";
 import { minGameAmount } from "@/context/gameTransactions";
 import { useSession } from "next-auth/react";
+import { GameType } from "@/utils/provably-fair";
 
 export default function Dice() {
   const wallet = useWallet();
@@ -40,7 +38,7 @@ export default function Dice() {
   const { data: session, status } = useSession();
 
   const {
-    coinData,
+    selectedCoin,
     getBalance,
     getWalletBalance,
     setShowAutoModal,
@@ -62,6 +60,8 @@ export default function Dice() {
     houseEdge,
     maxBetAmt,
     language,
+    liveStats,
+    setLiveStats
   } = useGlobalContext();
 
   const [userInput, setUserInput] = useState<number | undefined>();
@@ -168,17 +168,34 @@ export default function Dice() {
       if (!betAmt || betAmt === 0) {
         throw new Error("Set Amount.");
       }
-      if (coinData && coinData[0].amount < betAmt) {
+      if (selectedCoin && selectedCoin.amount < betAmt) {
         throw new Error("Insufficient balance for bet !");
       }
       if (selectedFace.length === 0) {
         throw new Error("Choose at least 1 face.");
       }
       setIsRolling(true);
-      const res = await rollDice(wallet, betAmt, selectedFace);
+      const res = await rollDice(
+        wallet,
+        betAmt,
+        selectedCoin.tokenMint,
+        selectedFace,
+      );
       if (res.success) {
         const { strikeNumber, result } = res.data;
         const isWin = result === "Won";
+
+        setLiveStats([
+          ...liveStats,
+          {
+            game: GameType.dice,
+            amount: betAmt,
+            result: isWin ? "Won" : "Lost",
+            pnl: isWin ? (betAmt * winningPays) - betAmt : -betAmt,
+            totalPNL: liveStats.length > 0 ? liveStats[liveStats.length - 1].totalPNL + (isWin ? (betAmt * winningPays) - betAmt : -betAmt) : (isWin ? (betAmt * winningPays) - betAmt : -betAmt)
+          }
+        ])
+
         if (isWin) soundAlert("/sounds/win.wav");
         const newBetResults = [
           ...(betResults.length <= 4 ? betResults : betResults.slice(-4)),
@@ -208,7 +225,7 @@ export default function Dice() {
           // update profit / loss
           setAutoBetProfit(
             autoBetProfit +
-              (isWin ? winningPays * (1 - houseEdge) - 1 : -1) * betAmt,
+            (isWin ? winningPays * (1 - houseEdge) - 1 : -1) * betAmt,
           );
           // update count
           if (typeof autoBetCount === "number") {
@@ -277,8 +294,8 @@ export default function Dice() {
     );
     diceElements.forEach((element) => element?.classList.add("blink_dice"));
     setTimeout(() => {
-      diceElements.forEach(
-        (element) => element?.classList.remove("blink_dice"),
+      diceElements.forEach((element) =>
+        element?.classList.remove("blink_dice"),
       );
     }, 2000);
   };
@@ -315,9 +332,9 @@ export default function Dice() {
             (autoWinChangeReset || autoLossChangeReset
               ? betAmt
               : autoBetCount === "inf"
-              ? Math.max(0, betAmt)
-              : betAmt *
-                (autoLossChange !== null ? autoLossChange / 100.0 : 0));
+                ? Math.max(0, betAmt)
+                : betAmt *
+                  (autoLossChange !== null ? autoLossChange / 100.0 : 0));
 
         // console.log("Current bet amount:", betAmt);
         // console.log("Auto loss change:", autoLossChange);
@@ -412,8 +429,6 @@ export default function Dice() {
                 !session?.user ||
                 selectedFace.length === 0 ||
                 isRolling ||
-                !coinData ||
-                (coinData && coinData[0].amount < minGameAmount) ||
                 (betAmt !== undefined &&
                   maxBetAmt !== undefined &&
                   betAmt > maxBetAmt)
@@ -489,8 +504,6 @@ export default function Dice() {
                       !session?.user ||
                       selectedFace.length === 0 ||
                       isRolling ||
-                      !coinData ||
-                      (coinData && coinData[0].amount < minGameAmount) ||
                       (betAmt !== undefined &&
                         maxBetAmt !== undefined &&
                         betAmt > maxBetAmt)
@@ -523,8 +536,8 @@ export default function Dice() {
                   {selectedFace.length === 0
                     ? translator("Choose Upto 5 Faces", language)
                     : `${selectedFace.length
-                        .toString()
-                        .padStart(2, "0")}/0${translator("5 Faces", language)}`}
+                      .toString()
+                      .padStart(2, "0")}/0${translator("5 Faces", language)}`}
                 </div>
               )}
             </div>
@@ -532,9 +545,8 @@ export default function Dice() {
               {betResults.map((result, index) => (
                 <div
                   key={index}
-                  className={`${
-                    result.win ? "text-fomo-green" : "text-fomo-red"
-                  }`}
+                  className={`${result.win ? "text-fomo-green" : "text-fomo-red"
+                    }`}
                 >
                   {result.face === 1 && <Dice1 className="w-7 h-7" />}
                   {result.face === 2 && <Dice2 className="w-7 h-7" />}
@@ -550,20 +562,18 @@ export default function Dice() {
           <div className="relative w-full my-16 md:my-20">
             {/* win pointer  */}
             <div
-              className={`${
-                showPointer ? "opacity-100" : "opacity-0"
-              } transition-all duration-300 h-4 bg-transparent flex w-full`}
+              className={`${showPointer ? "opacity-100" : "opacity-0"
+                } transition-all duration-300 h-4 bg-transparent flex w-full`}
             >
               <div
                 ref={topWinPointerRef}
                 className="absolute -top-[1rem] z-[10] transition-all ease-in-out duration-300"
               >
                 <WinPointer
-                  className={`relative ${
-                    selectedFace.includes(strikeFace)
+                  className={`relative ${selectedFace.includes(strikeFace)
                       ? "text-fomo-green"
                       : "text-fomo-red"
-                  }`}
+                    }`}
                 />
               </div>
             </div>
@@ -683,16 +693,15 @@ function DiceFace({
       }}
     >
       <Icon
-        className={`${
-          selectedFaces[diceNumber]
+        className={`${selectedFaces[diceNumber]
             ? selectedFace.includes(diceNumber)
               ? strikeFace === diceNumber
                 ? "text-fomo-green" // Use winning dice face image if strikeFace is 1
                 : "text-[#94A3B8]" // Use selected dice face image if face 1 is selected but not strikeFace
               : "text-[#202329] hover:text-[#47484A] hover:duration-75" // Use regular dice face image if face 1 is not selected
             : strikeFace === diceNumber
-            ? "text-fomo-red" // Use losing dice face image if strikeFace is 1 and face 1 is not selected
-            : "text-[#202329] hover:text-[#47484A] hover:duration-75" // Use regular dice face image if face 1 is not selected and strikeFace is not 1
+              ? "text-fomo-red" // Use losing dice face image if strikeFace is 1 and face 1 is not selected
+              : "text-[#202329] hover:text-[#47484A] hover:duration-75" // Use regular dice face image if face 1 is not selected and strikeFace is not 1
         } cursor-pointer w-10 h-10 md:w-12 md:h-12 transition-all duration-300 ease-in-out dice-face-icon-${diceNumber}`}
       />
     </div>

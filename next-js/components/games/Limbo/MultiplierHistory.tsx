@@ -1,5 +1,5 @@
 import { truncateNumber } from "@/context/gameTransactions";
-import { formatNumber } from "@/context/transactions";
+
 interface MultiplierHistoryProps {
   multiplierHistory: number[];
   inputMultiplier: number;

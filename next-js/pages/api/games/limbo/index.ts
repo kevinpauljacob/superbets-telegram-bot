@@ -7,6 +7,7 @@ import {
   GameType,
   seedStatus,
   decryptServerSeed,
+  GameTokens,
 } from "@/utils/provably-fair";
 import StakingUser from "@/models/staking/user";
 import {
@@ -17,6 +18,7 @@ import {
 } from "@/context/transactions";
 import { minGameAmount, wsEndpoint } from "@/context/gameTransactions";
 import { Decimal } from "decimal.js";
+import { SPL_TOKENS } from "@/context/config";
 Decimal.set({ precision: 9 });
 
 const secret = process.env.NEXTAUTH_SECRET;
@@ -51,21 +53,27 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           .status(400)
           .json({ success: false, message: "Missing parameters" });
 
+      const splToken = SPL_TOKENS.find((t) => t.tokenMint === tokenMint);
+      if (
+        typeof amount !== "number" ||
+        !isFinite(amount) ||
+        !splToken ||
+        !(1.02 <= multiplier && multiplier <= 50)
+      )
+        return res
+          .status(400)
+          .json({ success: false, message: "Invalid parameters" });
+
       if (amount < minGameAmount)
         return res.status(400).json({
           success: false,
           message: "Invalid bet amount",
         });
 
-      if (tokenMint !== "SOL" || !(1.02 <= multiplier && multiplier <= 50))
-        return res
-          .status(400)
-          .json({ success: false, message: "Invalid parameters" });
-
       const strikeMultiplier = multiplier;
       const maxPayout = Decimal.mul(amount, strikeMultiplier);
 
-      if (!(maxPayout.toNumber() <= maxPayouts.limbo))
+      if (!(maxPayout.toNumber() <= maxPayouts[tokenMint as GameTokens].limbo))
         return res
           .status(400)
           .json({ success: false, message: "Max payout exceeded" });
@@ -93,7 +101,12 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         { upsert: true, new: true },
       );
       const userTier = userData?.tier ?? 0;
-      const houseEdge = launchPromoEdge ? 0 : houseEdgeTiers[userTier];
+      const isFomoToken =
+        tokenMint === SPL_TOKENS.find((t) => t.tokenName === "FOMO")?.tokenMint
+          ? true
+          : false;
+      const houseEdge =
+        launchPromoEdge || isFomoToken ? 0 : houseEdgeTiers[userTier];
 
       const activeGameSeed = await GameSeed.findOneAndUpdate(
         {

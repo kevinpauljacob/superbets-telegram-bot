@@ -113,7 +113,7 @@ export default function Bets({ refresh }: { refresh: boolean }) {
   }, [all]);
 
   return (
-    <div className={`relative w-full ${home ? "mt-[4rem] mb-5:" : ""}`}>
+    <div className={`relative w-full ${home ? "mt-[2rem] md:mt-[4rem] mb-5:" : ""}`}>
       <Table
         all={all}
         setAll={setAll}
