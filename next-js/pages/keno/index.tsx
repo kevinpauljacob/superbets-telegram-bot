@@ -23,13 +23,16 @@ import {
   successCustom,
   warningCustom,
 } from "@/components/toasts/ToastGroup";
-import { translator } from "@/context/transactions";
-import { minGameAmount, truncateNumber } from "@/context/gameTransactions";
+import { translator, truncateNumber } from "@/context/transactions";
+import { minGameAmount } from "@/context/config";
 import { useSession } from "next-auth/react";
 import { GameType } from "@/utils/provably-fair";
+import { handleSignIn } from "@/components/ConnectWallet";
+import { useWalletModal } from "@solana/wallet-adapter-react-ui";
 
 export default function Keno() {
   const wallet = useWallet();
+  const walletModal = useWalletModal();
   const methods = useForm();
   const { data: session, status } = useSession();
   const {
@@ -57,6 +60,8 @@ export default function Keno() {
     language,
     liveStats,
     setLiveStats,
+    enableSounds,
+    setShowWalletModal,
   } = useGlobalContext();
   const [betAmt, setBetAmt] = useState<number | undefined>();
   const [userInput, setUserInput] = useState<number | undefined>();
@@ -133,7 +138,7 @@ export default function Keno() {
       await new Promise((resolve) => setTimeout(resolve, 100));
 
       setChosenNumbers((prevNumbers) => [...prevNumbers, randomNumber]);
-      soundAlert("/sounds/betbutton.wav");
+      soundAlert("/sounds/betbutton.wav", !enableSounds);
       randomNumbers.push(randomNumber);
       ++randomCount;
     }
@@ -182,13 +187,13 @@ export default function Keno() {
   const handleBet = async () => {
     try {
       if (!wallet.connected || !wallet.publicKey) {
-        throw new Error("Wallet not connected");
+        throw new Error(translator("Wallet not connected", language));
       }
       if (!betAmt || betAmt === 0) {
-        throw new Error("Set Amount.");
+        throw new Error(translator("Set Amount.", language));
       }
       if (selectedCoin && selectedCoin.amount < betAmt) {
-        throw new Error("Insufficient balance for bet !");
+        throw new Error(translator("Insufficient balance for bet !", language));
       }
 
       setIsRolling(true);
@@ -222,9 +227,9 @@ export default function Keno() {
           await new Promise((resolve) => setTimeout(resolve, 200));
 
           if (chosenNumbers.includes(number)) {
-            soundAlert("/sounds/win3.wav");
+            soundAlert("/sounds/win3.wav", !enableSounds);
           } else {
-            soundAlert("/sounds/betbutton.wav");
+            soundAlert("/sounds/betbutton.wav", !enableSounds);
           }
           setStrikeNumbers((prevNumbers) => [...prevNumbers, number]);
         }
@@ -233,7 +238,7 @@ export default function Keno() {
       else errorCustom(message);
 
       const win = result === "Won";
-      if (win) soundAlert("/sounds/win.wav");
+      if (win) soundAlert("/sounds/win.wav", !enableSounds);
 
       setLiveStats([
         ...liveStats,
@@ -241,10 +246,16 @@ export default function Keno() {
           game: GameType.keno,
           amount: betAmt,
           result: win ? "Won" : "Lost",
-          pnl: win ? (betAmt * strikeMultiplier) - betAmt : -betAmt,
-          totalPNL: liveStats.length > 0 ? liveStats[liveStats.length - 1].totalPNL + (win ? (betAmt * strikeMultiplier) - betAmt : -betAmt) : win ? (betAmt * strikeMultiplier) - betAmt : -betAmt
-        }
-      ])
+          pnl: win ? betAmt * strikeMultiplier - betAmt : -betAmt,
+          totalPNL:
+            liveStats.length > 0
+              ? liveStats[liveStats.length - 1].totalPNL +
+                (win ? betAmt * strikeMultiplier - betAmt : -betAmt)
+              : win
+                ? betAmt * strikeMultiplier - betAmt
+                : -betAmt,
+        },
+      ]);
 
       // auto options
       if (betType === "auto") {
@@ -268,7 +279,8 @@ export default function Keno() {
         );
         // update count
         if (typeof autoBetCount === "number") {
-          autoBetCount === 1 && warningCustom("Auto bet stopped", "top-left");
+          autoBetCount === 1 &&
+            warningCustom(translator("Auto bet stopped", language), "top-left");
         } else
           setAutoBetCount(
             autoBetCount.length > 12
@@ -277,7 +289,9 @@ export default function Keno() {
           );
       }
     } catch (error: any) {
-      errorCustom(error?.message ?? "Could not make the Bet.");
+      errorCustom(
+        translator(error?.message ?? "Could not make the Bet.", language),
+      );
       setIsRolling(false);
       setAutoBetCount(0);
       setStartAuto(false);
@@ -335,7 +349,10 @@ export default function Keno() {
         autoBetProfit >= autoStopProfit
       ) {
         setTimeout(() => {
-          warningCustom("Profit limit reached.", "top-left");
+          warningCustom(
+            translator("Profit limit reached.", language),
+            "top-left",
+          );
         }, 500);
         setAutoBetCount(0);
         setStartAuto(false);
@@ -348,7 +365,10 @@ export default function Keno() {
         potentialLoss < -autoStopLoss
       ) {
         setTimeout(() => {
-          warningCustom("Loss limit reached.", "top-left");
+          warningCustom(
+            translator("Loss limit reached.", language),
+            "top-left",
+          );
         }, 500);
         setAutoBetCount(0);
         setStartAuto(false);
@@ -367,7 +387,7 @@ export default function Keno() {
   const onSubmit = async (data: any) => {
     if (betType === "auto") {
       if (betAmt === 0) {
-        errorCustom("Set Amount.");
+        errorCustom(translator("Set Amount.", language));
         return;
       }
       if (typeof autoBetCount === "number" && autoBetCount <= 0) {
@@ -427,8 +447,11 @@ export default function Keno() {
             {startAuto && (
               <div
                 onClick={() => {
-                  soundAlert("/sounds/betbutton.wav");
-                  warningCustom("Auto bet stopped", "top-left");
+                  soundAlert("/sounds/betbutton.wav", !enableSounds);
+                  warningCustom(
+                    translator("Auto bet stopped", language),
+                    "top-left",
+                  );
                   setAutoBetCount(0);
                   setStartAuto(false);
                 }}
@@ -562,8 +585,11 @@ export default function Keno() {
                   {startAuto && (
                     <div
                       onClick={() => {
-                        soundAlert("/sounds/betbutton.wav");
-                        warningCustom("Auto bet stopped", "top-left");
+                        soundAlert("/sounds/betbutton.wav", !enableSounds);
+                        warningCustom(
+                          translator("Auto bet stopped", language),
+                          "top-left",
+                        );
                         setAutoBetCount(0);
                         setStartAuto(false);
                       }}
@@ -614,7 +640,7 @@ export default function Keno() {
                   key={number}
                   onClick={() => {
                     handleChosenNumber(number);
-                    soundAlert("/sounds/betbutton.wav");
+                    soundAlert("/sounds/betbutton.wav", !enableSounds);
                   }}
                   className={`flex items-center justify-center cursor-pointer ${
                     !isRolling &&
@@ -734,9 +760,16 @@ export default function Keno() {
                   "Please deposit funds to start playing. View",
                   language,
                 )}{" "}
-                <Link href="/balance">
-                  <u>{translator("WALLET", language)}</u>
-                </Link>
+                <u
+                  onClick={() => {
+                    wallet.connected && status === "authenticated"
+                      ? setShowWalletModal(true)
+                      : handleSignIn(wallet, walletModal);
+                  }}
+                  className="cursor-pointer"
+                >
+                  {translator("WALLET", language)}
+                </u>
               </div>
             </div>
           ) : selectedCoin && chosenNumbers.length === 0 ? (

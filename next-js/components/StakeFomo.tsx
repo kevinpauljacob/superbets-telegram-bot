@@ -5,14 +5,12 @@ import {
   fomoToken,
   stakeFOMO,
   translator,
+  truncateNumber,
   unstakeFOMO,
 } from "@/context/transactions";
-import { truncateNumber } from "@/context/gameTransactions";
 import { useWallet } from "@solana/wallet-adapter-react";
 //import toast from "react-hot-toast";
 import Spinner from "./Spinner";
-import { PublicKey } from "@solana/web3.js";
-import { getAssociatedTokenAddressSync } from "@solana/spl-token";
 import { useSession } from "next-auth/react";
 import { errorCustom } from "./toasts/ToastGroup";
 import { getFOMOBalance } from "@/pages/stake";
@@ -59,7 +57,8 @@ export default function StakeFomo() {
         response = await unstakeFOMO(wallet, stakeAmount, fomoToken);
       }
       // console.log(response);
-      if (response && response.success) await getFOMOBalance(wallet, setFomoBalance);
+      if (response && response.success)
+        await getFOMOBalance(wallet, setFomoBalance);
 
       getUserDetails();
       getGlobalInfo();
@@ -67,7 +66,9 @@ export default function StakeFomo() {
     } catch (e) {
       setLoading(false);
       console.error(e);
-      errorCustom("Something went wrong, please try again");
+      errorCustom(
+        translator("Something went wrong, please try again", language),
+      );
     }
   };
 
@@ -222,7 +223,7 @@ export default function StakeFomo() {
             handleSetMaxStake();
           }}
         >
-          Max
+          {translator("Max", language)}
         </button>
       </div>
 

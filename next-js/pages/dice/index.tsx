@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo } from "react";
 import { useWallet } from "@solana/wallet-adapter-react";
-import { rollDice } from "@/context/gameTransactions";
 import BetSetting from "@/components/BetSetting";
 import { useGlobalContext } from "@/components/GlobalContext";
 import {
@@ -27,8 +26,8 @@ import Bets from "../../components/games/Bets";
 import AutoCount from "@/components/AutoCount";
 import ConfigureAutoButton from "@/components/ConfigureAutoButton";
 import { errorCustom, warningCustom } from "@/components/toasts/ToastGroup";
-import { translator } from "@/context/transactions";
-import { minGameAmount } from "@/context/gameTransactions";
+import { rollDice, translator } from "@/context/transactions";
+import { minGameAmount } from "@/context/config";
 import { useSession } from "next-auth/react";
 import { GameType } from "@/utils/provably-fair";
 
@@ -61,7 +60,8 @@ export default function Dice() {
     maxBetAmt,
     language,
     liveStats,
-    setLiveStats
+    setLiveStats,
+    enableSounds,
   } = useGlobalContext();
 
   const [userInput, setUserInput] = useState<number | undefined>();
@@ -97,7 +97,7 @@ export default function Dice() {
       setStrikeFace(0);
       setShowPointer(false);
       if (selectedFace.length >= 5 && !selectedFace.includes(newFace)) {
-        errorCustom("You can only select up to 5 faces");
+        errorCustom(translator("You can only select up to 5 faces", language));
         return;
       }
 
@@ -163,16 +163,16 @@ export default function Dice() {
     // );
     try {
       if (!wallet.connected || !wallet.publicKey) {
-        throw new Error("Wallet not connected");
+        throw new Error(translator("Wallet not connected", language));
       }
       if (!betAmt || betAmt === 0) {
-        throw new Error("Set Amount.");
+        throw new Error(translator("Set Amount.", language));
       }
       if (selectedCoin && selectedCoin.amount < betAmt) {
-        throw new Error("Insufficient balance for bet !");
+        throw new Error(translator("Insufficient balance for bet !", language));
       }
       if (selectedFace.length === 0) {
-        throw new Error("Choose at least 1 face.");
+        throw new Error(translator("Choose at least 1 face.", language));
       }
       setIsRolling(true);
       const res = await rollDice(
@@ -191,12 +191,18 @@ export default function Dice() {
             game: GameType.dice,
             amount: betAmt,
             result: isWin ? "Won" : "Lost",
-            pnl: isWin ? (betAmt * winningPays) - betAmt : -betAmt,
-            totalPNL: liveStats.length > 0 ? liveStats[liveStats.length - 1].totalPNL + (isWin ? (betAmt * winningPays) - betAmt : -betAmt) : (isWin ? (betAmt * winningPays) - betAmt : -betAmt)
-          }
-        ])
+            pnl: isWin ? betAmt * winningPays - betAmt : -betAmt,
+            totalPNL:
+              liveStats.length > 0
+                ? liveStats[liveStats.length - 1].totalPNL +
+                  (isWin ? betAmt * winningPays - betAmt : -betAmt)
+                : isWin
+                  ? betAmt * winningPays - betAmt
+                  : -betAmt,
+          },
+        ]);
 
-        if (isWin) soundAlert("/sounds/win.wav");
+        if (isWin) soundAlert("/sounds/win.wav", !enableSounds);
         const newBetResults = [
           ...(betResults.length <= 4 ? betResults : betResults.slice(-4)),
           { face: strikeNumber, win: isWin },
@@ -205,7 +211,7 @@ export default function Dice() {
         setShowPointer(true);
         setStrikeFace(strikeNumber);
         setRefresh(true);
-        loopSound("/sounds/diceshake.wav", 0.3);
+        loopSound("/sounds/diceshake.wav", 0.3, !enableSounds);
 
         // auto options
         if (betType === "auto") {
@@ -225,12 +231,16 @@ export default function Dice() {
           // update profit / loss
           setAutoBetProfit(
             autoBetProfit +
-            (isWin ? winningPays * (1 - houseEdge) - 1 : -1) * betAmt,
+              (isWin ? winningPays * (1 - houseEdge) - 1 : -1) * betAmt,
           );
           // update count
           if (typeof autoBetCount === "number") {
             setAutoBetCount(autoBetCount > 0 ? autoBetCount - 1 : 0);
-            autoBetCount === 1 && warningCustom("Auto bet stopped", "top-left");
+            autoBetCount === 1 &&
+              warningCustom(
+                translator("Auto bet stopped", language),
+                "top-left",
+              );
           } else
             setAutoBetCount(
               autoBetCount.length > 12
@@ -239,10 +249,14 @@ export default function Dice() {
             );
         }
       } else {
-        throw new Error(res?.message ?? "Could not make the Bet.");
+        throw new Error(
+          translator(res?.message ?? "Could not make the Bet.", language),
+        );
       }
     } catch (e: any) {
-      errorCustom(e?.message ?? "Could not make the Bet.");
+      errorCustom(
+        translator(e?.message ?? "Could not make the Bet.", language),
+      );
       setIsRolling(false);
       setAutoBetCount(0);
       setStartAuto(false);
@@ -348,7 +362,10 @@ export default function Dice() {
         autoBetProfit >= autoStopProfit
       ) {
         setTimeout(() => {
-          warningCustom("Profit limit reached.", "top-left");
+          warningCustom(
+            translator("Profit limit reached.", language),
+            "top-left",
+          );
         }, 500);
         setAutoBetCount(0);
         setStartAuto(false);
@@ -361,7 +378,10 @@ export default function Dice() {
         potentialLoss < -autoStopLoss
       ) {
         setTimeout(() => {
-          warningCustom("Loss limit reached.", "top-left");
+          warningCustom(
+            translator("Loss limit reached.", language),
+            "top-left",
+          );
         }, 500);
         setAutoBetCount(0);
         setStartAuto(false);
@@ -378,7 +398,7 @@ export default function Dice() {
   const onSubmit = async (data: any) => {
     if (betType === "auto") {
       if (betAmt === 0) {
-        errorCustom("Set Amount.");
+        errorCustom(translator("Set Amount.", language));
         return;
       }
       if (typeof autoBetCount === "number" && autoBetCount <= 0) {
@@ -413,8 +433,11 @@ export default function Dice() {
             {startAuto && (
               <div
                 onClick={() => {
-                  soundAlert("/sounds/betbutton.wav");
-                  warningCustom("Auto bet stopped", "top-left");
+                  soundAlert("/sounds/betbutton.wav", !enableSounds);
+                  warningCustom(
+                    translator("Auto bet stopped", language),
+                    "top-left",
+                  );
                   setAutoBetCount(0);
                   setStartAuto(false);
                 }}
@@ -488,8 +511,11 @@ export default function Dice() {
                   {startAuto && (
                     <div
                       onClick={() => {
-                        soundAlert("/sounds/betbutton.wav");
-                        warningCustom("Auto bet stopped", "top-left");
+                        soundAlert("/sounds/betbutton.wav", !enableSounds);
+                        warningCustom(
+                          translator("Auto bet stopped", language),
+                          "top-left",
+                        );
                         setAutoBetCount(0);
                         setStartAuto(false);
                       }}
@@ -536,8 +562,8 @@ export default function Dice() {
                   {selectedFace.length === 0
                     ? translator("Choose Upto 5 Faces", language)
                     : `${selectedFace.length
-                      .toString()
-                      .padStart(2, "0")}/0${translator("5 Faces", language)}`}
+                        .toString()
+                        .padStart(2, "0")}/0${translator("5 Faces", language)}`}
                 </div>
               )}
             </div>
@@ -545,8 +571,9 @@ export default function Dice() {
               {betResults.map((result, index) => (
                 <div
                   key={index}
-                  className={`${result.win ? "text-fomo-green" : "text-fomo-red"
-                    }`}
+                  className={`${
+                    result.win ? "text-fomo-green" : "text-fomo-red"
+                  }`}
                 >
                   {result.face === 1 && <Dice1 className="w-7 h-7" />}
                   {result.face === 2 && <Dice2 className="w-7 h-7" />}
@@ -562,18 +589,20 @@ export default function Dice() {
           <div className="relative w-full my-16 md:my-20">
             {/* win pointer  */}
             <div
-              className={`${showPointer ? "opacity-100" : "opacity-0"
-                } transition-all duration-300 h-4 bg-transparent flex w-full`}
+              className={`${
+                showPointer ? "opacity-100" : "opacity-0"
+              } transition-all duration-300 h-4 bg-transparent flex w-full`}
             >
               <div
                 ref={topWinPointerRef}
                 className="absolute -top-[1rem] z-[10] transition-all ease-in-out duration-300"
               >
                 <WinPointer
-                  className={`relative ${selectedFace.includes(strikeFace)
+                  className={`relative ${
+                    selectedFace.includes(strikeFace)
                       ? "text-fomo-green"
                       : "text-fomo-red"
-                    }`}
+                  }`}
                 />
               </div>
             </div>
@@ -685,15 +714,17 @@ function DiceFace({
   handleClick: (number: number) => void;
   Icon: any;
 }) {
+  const { enableSounds } = useGlobalContext();
   return (
     <div
       onClick={() => {
         handleClick(diceNumber);
-        soundAlert("/sounds/betbutton.wav");
+        soundAlert("/sounds/betbutton.wav", !enableSounds);
       }}
     >
       <Icon
-        className={`${selectedFaces[diceNumber]
+        className={`${
+          selectedFaces[diceNumber]
             ? selectedFace.includes(diceNumber)
               ? strikeFace === diceNumber
                 ? "text-fomo-green" // Use winning dice face image if strikeFace is 1

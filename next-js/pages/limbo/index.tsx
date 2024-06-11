@@ -10,7 +10,6 @@ import {
   GameOptions,
   GameTable,
 } from "@/components/GameLayout";
-import { limboBet, truncateNumber } from "@/context/gameTransactions";
 import BetAmount from "@/components/games/BetAmountInput";
 import BetButton from "@/components/games/BetButton";
 import Loader from "../../components/games/Loader";
@@ -25,10 +24,12 @@ import {
   successCustom,
   warningCustom,
 } from "@/components/toasts/ToastGroup";
-import { translator } from "@/context/transactions";
-import { minGameAmount } from "@/context/gameTransactions";
+import { limboBet, translator, truncateNumber } from "@/context/transactions";
+import { minGameAmount } from "@/context/config";
 import { useSession } from "next-auth/react";
 import { GameType } from "@/utils/provably-fair";
+import { handleSignIn } from "@/components/ConnectWallet";
+import { useWalletModal } from "@solana/wallet-adapter-react-ui";
 
 function useInterval(callback: Function, delay: number | null) {
   const savedCallback = useRef<Function | null>(null);
@@ -53,6 +54,7 @@ function useInterval(callback: Function, delay: number | null) {
 
 export default function Limbo() {
   const wallet = useWallet();
+  const walletModal = useWalletModal();
   const methods = useForm();
   const { data: session, status } = useSession();
 
@@ -79,7 +81,8 @@ export default function Limbo() {
     maxBetAmt,
     language,
     setLiveStats,
-    liveStats
+    liveStats,
+    enableSounds,
   } = useGlobalContext();
 
   const multiplierLimits = [1.02, 50];
@@ -124,7 +127,7 @@ export default function Limbo() {
 
           const win = result === "Won";
           if (win) {
-            soundAlert("/sounds/win.wav");
+            soundAlert("/sounds/win.wav", !enableSounds);
             successCustom(
               `Won ${resultAmount.toFixed(4)} ${selectedCoin.tokenName}!`,
             );
@@ -144,10 +147,18 @@ export default function Limbo() {
               game: GameType.limbo,
               amount: betAmt!,
               result: newBetResult.win ? "Won" : "Lost",
-              pnl: newBetResult.win ? (betAmt! * targetMultiplier) - betAmt! : -betAmt!,
-              totalPNL: liveStats.length > 0 ? liveStats[liveStats.length - 1].totalPNL + (win ? (betAmt! * targetMultiplier) - betAmt! : -betAmt!) : win ? (betAmt! * targetMultiplier) - betAmt! : -betAmt!
-            }
-          ])
+              pnl: newBetResult.win
+                ? betAmt! * targetMultiplier - betAmt!
+                : -betAmt!,
+              totalPNL:
+                liveStats.length > 0
+                  ? liveStats[liveStats.length - 1].totalPNL +
+                    (win ? betAmt! * targetMultiplier - betAmt! : -betAmt!)
+                  : win
+                    ? betAmt! * targetMultiplier - betAmt!
+                    : -betAmt!,
+            },
+          ]);
 
           // auto options
           if (betSetting === "auto" && betAmt !== undefined) {
@@ -173,7 +184,10 @@ export default function Limbo() {
             if (typeof autoBetCount === "number") {
               setAutoBetCount(autoBetCount > 0 ? autoBetCount - 1 : 0);
               autoBetCount === 1 &&
-                warningCustom("Auto bet stopped", "top-left");
+                warningCustom(
+                  translator("Auto bet stopped", language),
+                  "top-left",
+                );
             } else
               setAutoBetCount(
                 autoBetCount.length > 12
@@ -194,13 +208,13 @@ export default function Limbo() {
   const bet = async () => {
     try {
       if (!wallet.publicKey) {
-        throw new Error("Wallet not connected");
+        throw new Error(translator("Wallet not connected", language));
       }
       if (!betAmt || betAmt === 0) {
-        throw new Error("Set Amount.");
+        throw new Error(translator("Set Amount.", language));
       }
       if (selectedCoin && selectedCoin.amount < betAmt) {
-        throw new Error("Insufficient balance for bet !");
+        throw new Error(translator("Insufficient balance for bet !", language));
       }
       if (inputMultiplier < multiplierLimits[0]) {
         throw new Error("Multiplier should be at least 1.02");
@@ -290,7 +304,10 @@ export default function Limbo() {
         autoBetProfit >= autoStopProfit
       ) {
         setTimeout(() => {
-          warningCustom("Profit limit reached.", "top-left");
+          warningCustom(
+            translator("Profit limit reached.", language),
+            "top-left",
+          );
         }, 500);
         setAutoBetCount(0);
         setStartAuto(false);
@@ -303,7 +320,10 @@ export default function Limbo() {
         potentialLoss < -autoStopLoss
       ) {
         setTimeout(() => {
-          warningCustom("Loss limit reached.", "top-left");
+          warningCustom(
+            translator("Loss limit reached.", language),
+            "top-left",
+          );
         }, 500);
         setAutoBetCount(0);
         setStartAuto(false);
@@ -324,7 +344,7 @@ export default function Limbo() {
     setMultiplier(inputMultiplier);
     if (betSetting === "auto") {
       if (betAmt === 0) {
-        errorCustom("Set Amount.");
+        errorCustom(translator("Set Amount.", language));
         return;
       }
       if (typeof autoBetCount === "number" && autoBetCount <= 0) {
@@ -356,8 +376,11 @@ export default function Limbo() {
             {startAuto && (
               <div
                 onClick={() => {
-                  soundAlert("/sounds/betbutton.wav");
-                  warningCustom("Auto bet stopped", "top-left");
+                  soundAlert("/sounds/betbutton.wav", !enableSounds);
+                  warningCustom(
+                    translator("Auto bet stopped", language),
+                    "top-left",
+                  );
                   setAutoBetCount(0);
                   setStartAuto(false);
                 }}
@@ -437,8 +460,11 @@ export default function Limbo() {
                   {startAuto && (
                     <div
                       onClick={() => {
-                        soundAlert("/sounds/betbutton.wav");
-                        warningCustom("Auto bet stopped", "top-left");
+                        soundAlert("/sounds/betbutton.wav", !enableSounds);
+                        warningCustom(
+                          translator("Auto bet stopped", language),
+                          "top-left",
+                        );
                         setAutoBetCount(0);
                         setStartAuto(false);
                       }}
@@ -557,9 +583,16 @@ export default function Limbo() {
                   "Please deposit funds to start playing. View",
                   language,
                 )}{" "}
-                <Link href="/balance">
-                  <u>{translator("WALLET", language)}</u>
-                </Link>
+                <u
+                  onClick={() => {
+                    wallet.connected && status === "authenticated"
+                      ? setShowWalletModal(true)
+                      : handleSignIn(wallet, walletModal);
+                  }}
+                  className="cursor-pointer"
+                >
+                  {translator("WALLET", language)}
+                </u>
               </div>
             </div>
           )}

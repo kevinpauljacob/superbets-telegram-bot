@@ -24,8 +24,8 @@ import {
   successCustom,
   warningCustom,
 } from "@/components/toasts/ToastGroup";
-import { translator, formatNumber } from "@/context/transactions";
-import { minGameAmount, truncateNumber } from "@/context/gameTransactions";
+import { translator, truncateNumber } from "@/context/transactions";
+import { minGameAmount } from "@/context/config";
 import { useSession } from "next-auth/react";
 import user from "@/models/staking/user";
 import Decimal from "decimal.js";
@@ -64,6 +64,7 @@ export default function Mines() {
     selectedCoin,
     setLiveStats,
     liveStats,
+    enableSounds,
   } = useGlobalContext();
   const [betAmt, setBetAmt] = useState<number | undefined>();
   const [userInput, setUserInput] = useState<number | undefined>();
@@ -174,7 +175,7 @@ export default function Mines() {
       const win = result === "Won";
       if (win) {
         successCustom(message);
-        soundAlert("/sounds/win.wav");
+        soundAlert("/sounds/win.wav", !enableSounds);
       } else errorCustom(message);
 
       if (success) {
@@ -235,7 +236,7 @@ export default function Mines() {
   };
 
   const handlePick = async (number: number) => {
-    soundAlert("/sounds/betButton.wav");
+    soundAlert("/sounds/betbutton.wav", !enableSounds);
     setIsRolling(true);
     // setSelectTile(false);
     setNumBets(numBets + 1);
@@ -322,10 +323,10 @@ export default function Mines() {
       const win: boolean = result === "Pending";
       const lose: boolean = result === "Lost";
       if (win) {
-        soundAlert("/sounds/win.wav");
+        soundAlert("/sounds/win.wav", !enableSounds);
         // setSelectTile(true);
       }
-      if (lose) soundAlert("/sounds/bomb.wav");
+      if (lose) soundAlert("/sounds/bomb.wav", !enableSounds);
 
       if (result !== "Pending") {
         setLiveStats([
@@ -372,10 +373,8 @@ export default function Mines() {
 
     setProcessing(true);
 
-    const localPendingRequests = [...pendingRequests];
-
-    for (let i = 0; i < localPendingRequests.length; i++) {
-      const currentRequest = localPendingRequests[i];
+    for (let i = 0; i < pendingRequests.length; i++) {
+      const currentRequest = pendingRequests[i];
 
       // console.log(`Processing request: ${currentRequest}`);
       const alreadyPicked = userBets[currentRequest - 1]?.pick;
@@ -401,18 +400,18 @@ export default function Mines() {
       processPendingRequests();
     }
     // console.log(`Updated pending requests: ${pendingRequests}`);
-  }, [pendingRequests]);
+  }, [pendingRequests, processing]);
 
   const handleAutoBet = async () => {
     try {
       if (!wallet.connected || !wallet.publicKey) {
-        throw new Error("Wallet not connected");
+        throw new Error(translator("Wallet not connected", language));
       }
       if (!betAmt || betAmt === 0) {
-        throw new Error("Set Amount.");
+        throw new Error(translator("Set Amount.", language));
       }
       if (selectedCoin && selectedCoin.amount < betAmt) {
-        throw new Error("Insufficient balance for bet !");
+        throw new Error(translator("Insufficient balance for bet !", language));
       }
       if (userBetsForAuto.length === 0) {
         throw new Error("Select at least one tile to bet on.");
@@ -469,7 +468,7 @@ export default function Mines() {
 
       const win = result === "Won";
       if (win) {
-        soundAlert("/sounds/win.wav");
+        soundAlert("/sounds/win.wav", !enableSounds);
         successCustom(message);
         setCashoutModal({
           show: true,
@@ -481,7 +480,7 @@ export default function Mines() {
 
       const lose = result === "Lost";
       if (lose) {
-        soundAlert("/sounds/bomb.wav");
+        soundAlert("/sounds/bomb.wav", !enableSounds);
         errorCustom(message);
       }
 
@@ -508,7 +507,8 @@ export default function Mines() {
         // update count
         if (typeof autoBetCount === "number") {
           setAutoBetCount(autoBetCount > 0 ? autoBetCount - 1 : 0);
-          autoBetCount === 1 && warningCustom("Auto bet stopped", "top-left");
+          autoBetCount === 1 &&
+            warningCustom(translator("Auto bet stopped", language), "top-left");
         } else
           setAutoBetCount(
             autoBetCount.length > 12
@@ -517,7 +517,9 @@ export default function Mines() {
           );
       }
     } catch (error: any) {
-      errorCustom(error?.message ?? "Could not make the Bet.");
+      errorCustom(
+        translator(error?.message ?? "Could not make the Bet.", language),
+      );
       setIsRolling(false);
       setAutoBetCount(0);
       setStartAuto(false);
@@ -533,13 +535,13 @@ export default function Mines() {
     // setSelectTile(true);
     try {
       if (!wallet.connected || !wallet.publicKey) {
-        throw new Error("Wallet not connected");
+        throw new Error(translator("Wallet not connected", language));
       }
       if (!betAmt || betAmt === 0) {
-        throw new Error("Set Amount.");
+        throw new Error(translator("Set Amount.", language));
       }
       if (selectedCoin && selectedCoin.amount < betAmt) {
-        throw new Error("Insufficient balance for bet !");
+        throw new Error(translator("Insufficient balance for bet !", language));
       }
 
       setIsRolling(true);
@@ -581,7 +583,9 @@ export default function Mines() {
         successCustom(message);
       }
     } catch (error: any) {
-      errorCustom(error?.message ?? "Could not make the Bet.");
+      errorCustom(
+        translator(error?.message ?? "Could not make the Bet.", language),
+      );
       setIsRolling(false);
       setAutoBetCount(0);
       setStartAuto(false);
@@ -595,7 +599,7 @@ export default function Mines() {
     const updatedUserBets = userBets;
     try {
       if (!wallet.connected || !wallet.publicKey) {
-        throw new Error("Wallet not connected");
+        throw new Error(translator("Wallet not connected", language));
       }
       setUserBets(defaultUserBets);
       const response = await fetch(`/api/games/mines/pendingGame`, {
@@ -667,13 +671,15 @@ export default function Mines() {
           setBetAmt(amount);
           setGameId(gameId);
           setBetActive(true);
-          successCustom(message ?? "Pending game found!");
+          successCustom(translator(message ?? "Pending game found!", language));
         }
 
         setRefresh(true);
       }
     } catch (error: any) {
-      errorCustom(error?.message ?? "Could not fetch pending game.");
+      errorCustom(
+        translator(error?.message ?? "Could not fetch pending game.", language),
+      );
       setAutoBetCount(0);
       setStartAuto(false);
       console.error("Error occurred while fetching pending game:", error);
@@ -681,8 +687,9 @@ export default function Mines() {
   };
 
   useEffect(() => {
-    if (wallet.connected && wallet?.publicKey) handlePendingGame();
-  }, [wallet.connected, wallet.publicKey]);
+    if (wallet.connected && wallet?.publicKey && status === "authenticated")
+      handlePendingGame();
+  }, [wallet.connected, wallet.publicKey, status]);
 
   const disableInput = useMemo(() => {
     return betType === "auto" && startAuto
@@ -732,7 +739,10 @@ export default function Mines() {
         autoBetProfit > 0 &&
         autoBetProfit >= autoStopProfit
       ) {
-        warningCustom("Profit limit reached.", "top-left");
+        warningCustom(
+          translator("Profit limit reached.", language),
+          "top-left",
+        );
         setAutoBetCount(0);
         setStartAuto(false);
         setTimeout(() => {
@@ -753,7 +763,7 @@ export default function Mines() {
         autoBetProfit < 0 &&
         potentialLoss <= -autoStopLoss
       ) {
-        warningCustom("Loss limit reached.", "top-left");
+        warningCustom(translator("Loss limit reached.", language), "top-left");
         setAutoBetCount(0);
         setStartAuto(false);
         setTimeout(() => {
@@ -791,7 +801,7 @@ export default function Mines() {
   const onSubmit = async (data: any) => {
     if (betType === "auto") {
       if (betAmt === 0) {
-        errorCustom("Set Amount.");
+        errorCustom(translator("Set Amount.", language));
         return;
       }
       if (typeof autoBetCount === "number" && autoBetCount <= 0) {
@@ -817,8 +827,11 @@ export default function Mines() {
                 onClick={() => {
                   setUserBets(defaultUserBets);
                   setUserBetsForAuto([]);
-                  soundAlert("/sounds/betbutton.wav");
-                  warningCustom("Auto bet stopped", "top-left");
+                  soundAlert("/sounds/betbutton.wav", !enableSounds);
+                  warningCustom(
+                    translator("Auto bet stopped", language),
+                    "top-left",
+                  );
                   setAutoBetCount(0);
                   setStartAuto(false);
                   setCashoutModal({
@@ -911,7 +924,7 @@ export default function Mines() {
                         />
                       </div>
                       {dropDown && (
-                        <div className="absolute -top-[200px] lg:top-14 z-[150] max-h-[195px] lg:max-h-[335px] xl:max-h-[380px] overflow-y-scroll modalscrollbar left-0 bg-[#202329] border border-[#2A2E38] rounded-[8px] w-full">
+                        <div className="absolute -top-[200px] lg:top-14 z-[150] max-h-[195px] lg:max-h-[335px] xl:max-h-[380px] overflow-y-scroll modalscrollbar left-0 bg-[#202329] border-2 border-[#2A2E38] rounded-[8px] w-full">
                           {options.map((option) => (
                             <div
                               key={option.key}
@@ -1019,7 +1032,7 @@ export default function Mines() {
                             />
                           </div>
                           {!startAuto && dropDown && (
-                            <div className="absolute -top-[200px] lg:top-14 z-[150] max-h-[195px] lg:max-h-[335px] xl:max-h-[380px] overflow-y-scroll modalscrollbar left-0 bg-[#202329] border border-[#2A2E38] rounded-[8px] w-full">
+                            <div className="absolute -top-[200px] lg:top-14 z-[150] max-h-[195px] lg:max-h-[335px] xl:max-h-[380px] overflow-y-scroll modalscrollbar left-0 bg-[#202329] border-2 border-[#2A2E38] rounded-[8px] w-full">
                               {options.map((option) => (
                                 <div
                                   key={option.key}
@@ -1067,8 +1080,11 @@ export default function Mines() {
                       onClick={() => {
                         setUserBets(defaultUserBets);
                         setUserBetsForAuto([]);
-                        soundAlert("/sounds/betbutton.wav");
-                        warningCustom("Auto bet stopped", "top-left");
+                        soundAlert("/sounds/betbutton.wav", !enableSounds);
+                        warningCustom(
+                          translator("Auto bet stopped", language),
+                          "top-left",
+                        );
                         setAutoBetCount(0);
                         setStartAuto(false);
                         setCashoutModal({

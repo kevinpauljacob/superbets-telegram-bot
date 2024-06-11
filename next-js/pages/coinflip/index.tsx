@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import dynamic from "next/dynamic";
 import { useWallet } from "@solana/wallet-adapter-react";
-import { placeFlip } from "../../context/gameTransactions";
 import Image from "next/image";
 import { FormProvider, useForm } from "react-hook-form";
 import { useGlobalContext } from "@/components/GlobalContext";
@@ -25,8 +24,8 @@ import {
   successCustom,
   warningCustom,
 } from "@/components/toasts/ToastGroup";
-import { translator } from "@/context/transactions";
-import { minGameAmount } from "@/context/gameTransactions";
+import { placeFlip, translator } from "@/context/transactions";
+import { minGameAmount } from "@/context/config";
 import { useSession } from "next-auth/react";
 import { GameType } from "@/utils/provably-fair";
 
@@ -65,6 +64,7 @@ export default function Flip() {
     language,
     liveStats,
     setLiveStats,
+    enableSounds,
   } = useGlobalContext();
 
   const [betAmt, setBetAmt] = useState<number | undefined>();
@@ -84,13 +84,13 @@ export default function Flip() {
   const bet = async () => {
     try {
       if (!wallet.connected || !wallet.publicKey) {
-        throw new Error("Wallet not connected");
+        throw new Error(translator("Wallet not connected", language));
       }
       if (!betAmt || betAmt === 0) {
-        throw new Error("Set Amount.");
+        throw new Error(translator("Set Amount.", language));
       }
       if (selectedCoin && selectedCoin.amount < betAmt) {
-        throw new Error("Insufficient balance for bet !");
+        throw new Error(translator("Insufficient balance for bet !", language));
       }
 
       // console.log("Placing Flip");
@@ -102,18 +102,20 @@ export default function Flip() {
       );
       if (response.success !== true) {
         throw new Error(
-          response?.message ? response?.message : "Could not make Flip.",
+          response?.message
+            ? response?.message
+            : translator("Could not make Flip.", language),
         );
       }
       setTimeout(
         () => {
           if (response.success) {
             response?.data?.result == "Won"
-              ? successCustom(response?.message)
-              : errorCustom(response?.message);
+              ? successCustom(translator(response?.message, language))
+              : errorCustom(translator(response?.message, language));
 
             const win = response?.data?.result === "Won";
-            if (win) soundAlert("/sounds/win.wav");
+            if (win) soundAlert("/sounds/win.wav", !enableSounds);
             const newBetResult = { result: response?.data?.strikeNumber, win };
 
             setBetResults((prevResults) => {
@@ -135,10 +137,16 @@ export default function Flip() {
                 game: GameType.coin,
                 amount: betAmt,
                 result: win ? "Won" : "Lost",
-                pnl: win ? (betAmt * newBetResult.result) - betAmt : -betAmt,
-                totalPNL: liveStats.length > 0 ? liveStats[liveStats.length - 1].totalPNL + (win ? (betAmt * newBetResult.result) - betAmt : -betAmt) : win ? (betAmt * newBetResult.result) - betAmt : -betAmt,
-              }
-            ])
+                pnl: win ? betAmt * newBetResult.result - betAmt : -betAmt,
+                totalPNL:
+                  liveStats.length > 0
+                    ? liveStats[liveStats.length - 1].totalPNL +
+                      (win ? betAmt * newBetResult.result - betAmt : -betAmt)
+                    : win
+                      ? betAmt * newBetResult.result - betAmt
+                      : -betAmt,
+              },
+            ]);
 
             // auto options
             if (betSetting === "auto") {
@@ -163,7 +171,10 @@ export default function Flip() {
               if (typeof autoBetCount === "number") {
                 setAutoBetCount(autoBetCount > 0 ? autoBetCount - 1 : 0);
                 autoBetCount === 1 &&
-                  warningCustom("Auto bet stopped", "top-left");
+                  warningCustom(
+                    translator("Auto bet stopped", language),
+                    "top-left",
+                  );
               } else
                 setAutoBetCount(
                   autoBetCount.length > 12
@@ -173,14 +184,16 @@ export default function Flip() {
             }
           } else {
             throw new Error(
-              response?.message ? response?.message : "Could not make Flip.",
+              response?.message
+                ? response?.message
+                : translator("Could not make Flip.", language),
             );
           }
         },
         betSetting === "auto" ? 500 : 3000,
       );
     } catch (e: any) {
-      errorCustom(e?.message ?? "Could not make Flip.");
+      errorCustom(e?.message ?? translator("Could not make Flip.", language));
       setBetType(null);
       setFlipping(false);
       setLoading(false);
@@ -242,7 +255,10 @@ export default function Flip() {
         autoBetProfit >= autoStopProfit
       ) {
         setTimeout(() => {
-          warningCustom("Profit limit reached.", "top-left");
+          warningCustom(
+            translator("Profit limit reached.", language),
+            "top-left",
+          );
         }, 500);
         setAutoBetCount(0);
         setStartAuto(false);
@@ -255,7 +271,10 @@ export default function Flip() {
         potentialLoss < -autoStopLoss
       ) {
         setTimeout(() => {
-          warningCustom("Loss limit reached.", "top-left");
+          warningCustom(
+            translator("Loss limit reached.", language),
+            "top-left",
+          );
         }, 500);
         setAutoBetCount(0);
         setStartAuto(false);
@@ -275,17 +294,17 @@ export default function Flip() {
 
   const onSubmit = async (data: any) => {
     if (!wallet.publicKey) {
-      errorCustom("Wallet not connected");
+      errorCustom(translator("Wallet not connected", language));
       return;
     }
-    if (betAmt === 0) {
-      errorCustom("Set Amount.");
+    if (!betAmt || betAmt === 0) {
+      errorCustom(translator("Set Amount.", language));
       return;
     }
     if (betType) {
       if (betSetting === "auto") {
         if (betAmt === 0) {
-          errorCustom("Set Amount.");
+          errorCustom(translator("Set Amount.", language));
           return;
         }
         if (typeof autoBetCount === "number" && autoBetCount <= 0) {
@@ -319,8 +338,11 @@ export default function Flip() {
             {startAuto && (
               <div
                 onClick={() => {
-                  soundAlert("/sounds/betbutton.wav");
-                  warningCustom("Auto bet stopped", "top-left");
+                  soundAlert("/sounds/betbutton.wav", !enableSounds);
+                  warningCustom(
+                    translator("Auto bet stopped", language),
+                    "top-left",
+                  );
                   setAutoBetCount(0);
                   setStartAuto(false);
                 }}
@@ -440,8 +462,11 @@ export default function Flip() {
                   {startAuto && (
                     <div
                       onClick={() => {
-                        soundAlert("/sounds/betbutton.wav");
-                        warningCustom("Auto bet stopped", "top-left");
+                        soundAlert("/sounds/betbutton.wav", !enableSounds);
+                        warningCustom(
+                          translator("Auto bet stopped", language),
+                          "top-left",
+                        );
                         setAutoBetCount(0);
                         setStartAuto(false);
                       }}

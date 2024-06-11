@@ -1,12 +1,11 @@
-import connectDatabase from "../../../../../../utils/database";
-import { NextApiRequest, NextApiResponse } from "next";
-import { Referral } from "@/models/games";
-import { getToken } from "next-auth/jwt";
 import {
   createClaimEarningsTxn,
   retryTxn,
   verifyFrontendTransaction,
-} from "@/context/gameTransactions";
+} from "@/context/transactions";
+import { Referral } from "@/models/games";
+import TxnSignature from "@/models/txnSignature";
+import { bs58 } from "@project-serum/anchor/dist/cjs/utils/bytes";
 import {
   BlockhashWithExpiryBlockHeight,
   Connection,
@@ -14,15 +13,16 @@ import {
   PublicKey,
   Transaction,
 } from "@solana/web3.js";
-import { bs58 } from "@project-serum/anchor/dist/cjs/utils/bytes";
-import TxnSignature from "@/models/txnSignature";
+import { NextApiRequest, NextApiResponse } from "next";
+import { getToken } from "next-auth/jwt";
+import connectDatabase from "../../../../../../utils/database";
 
 const secret = process.env.NEXTAUTH_SECRET;
 
 const connection = new Connection(process.env.BACKEND_RPC!, "confirmed");
 
 const devWalletKey = Keypair.fromSecretKey(
-  bs58.decode(process.env.DEV_KEYPAIR!),
+  bs58.decode(process.env.CASINO_KEYPAIR!),
 );
 
 export const config = {
@@ -82,6 +82,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     const { transaction: vTxn } = await createClaimEarningsTxn(
       new PublicKey(wallet),
       earnings,
+      devWalletKey.publicKey,
     );
 
     const txn = Transaction.from(

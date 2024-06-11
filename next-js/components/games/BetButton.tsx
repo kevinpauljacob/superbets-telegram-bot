@@ -2,7 +2,7 @@ import { soundAlert } from "@/utils/soundUtils";
 import { ReactNode, useEffect, useRef } from "react";
 import { useGlobalContext } from "@/components/GlobalContext";
 import { translator } from "@/context/transactions";
-import { minGameAmount } from "@/context/gameTransactions";
+import { minGameAmount } from "@/context/config";
 
 export default function BetButton({
   disabled,
@@ -14,11 +14,11 @@ export default function BetButton({
   onClickFunction?: (data: any) => void;
 }) {
   const betButtonRef = useRef<HTMLButtonElement>(null);
-  const { language, coinData, selectedCoin } = useGlobalContext();
+  const { language, coinData, selectedCoin, enableSounds } = useGlobalContext();
 
   useEffect(() => {
     const handleClick = () => {
-      soundAlert("/sounds/betbutton.wav");
+      soundAlert("/sounds/betbutton.wav", !enableSounds);
     };
 
     const buttonElement = betButtonRef.current;

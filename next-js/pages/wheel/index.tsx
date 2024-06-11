@@ -26,13 +26,16 @@ import {
   successCustom,
   warningCustom,
 } from "@/components/toasts/ToastGroup";
-import { translator } from "@/context/transactions";
-import { minGameAmount, truncateNumber } from "@/context/gameTransactions";
+import { translator, truncateNumber } from "@/context/transactions";
+import { minGameAmount } from "@/context/config";
 import { useSession } from "next-auth/react";
 import { GameType } from "@/utils/provably-fair";
+import { handleSignIn } from "@/components/ConnectWallet";
+import { useWalletModal } from "@solana/wallet-adapter-react-ui";
 
 export default function Wheel() {
   const wallet = useWallet();
+  const walletModal = useWalletModal();
   const methods = useForm();
   const { data: session, status } = useSession();
   const wheelRef = useRef<HTMLDivElement>(null);
@@ -58,7 +61,9 @@ export default function Wheel() {
     maxBetAmt,
     language,
     setLiveStats,
-    liveStats
+    liveStats,
+    enableSounds,
+    setShowWalletModal,
   } = useGlobalContext();
   const [betAmt, setBetAmt] = useState<number | undefined>();
   const [userInput, setUserInput] = useState<number | undefined>();
@@ -137,21 +142,22 @@ export default function Wheel() {
     if (wheelRef.current) {
       wheelRef.current.style.transition =
         "transform 3s cubic-bezier(0.4, 0, 0.2, 1)";
-      wheelRef.current.style.transform = `rotate(${delta + 360 + 360 - resultAngle
-        }deg)`;
+      wheelRef.current.style.transform = `rotate(${
+        delta + 360 + 360 - resultAngle
+      }deg)`;
     }
   };
 
   const handleBet = async () => {
     try {
       if (!wallet.connected || !wallet.publicKey) {
-        throw new Error("Wallet not connected");
+        throw new Error(translator("Wallet not connected", language));
       }
       if (!betAmt || betAmt === 0) {
-        throw new Error("Set Amount.");
+        throw new Error(translator("Set Amount.", language));
       }
       if (selectedCoin && selectedCoin.amount < betAmt) {
-        throw new Error("Insufficient balance for bet !");
+        throw new Error(translator("Insufficient balance for bet !", language));
       }
 
       setIsRolling(true);
@@ -187,7 +193,7 @@ export default function Wheel() {
       setStrikeMultiplierColor(riskObject ? riskObject.color : "#ffffff");
       if (result == "Won") {
         successCustom(message);
-        soundAlert("/sounds/win.wav");
+        soundAlert("/sounds/win.wav", !enableSounds);
       } else errorCustom(message);
 
       const win = result === "Won";
@@ -199,10 +205,16 @@ export default function Wheel() {
           game: GameType.wheel,
           amount: betAmt!,
           result: win ? "Won" : "Lost",
-          pnl: win ? (betAmt! * strikeMultiplier) - betAmt! : -betAmt!,
-          totalPNL: liveStats.length > 0 ? liveStats[liveStats.length - 1].totalPNL + (win ? (betAmt * strikeMultiplier) - betAmt : -betAmt) : win ? (betAmt * strikeMultiplier) - betAmt : -betAmt
-        }
-      ])
+          pnl: win ? betAmt! * strikeMultiplier - betAmt! : -betAmt!,
+          totalPNL:
+            liveStats.length > 0
+              ? liveStats[liveStats.length - 1].totalPNL +
+                (win ? betAmt * strikeMultiplier - betAmt : -betAmt)
+              : win
+                ? betAmt * strikeMultiplier - betAmt
+                : -betAmt,
+        },
+      ]);
 
       setBetResults((prevResults) => {
         const newResults = [...prevResults, newBetResult];
@@ -237,12 +249,13 @@ export default function Wheel() {
         // update profit / loss
         setAutoBetProfit(
           autoBetProfit +
-          (win ? strikeMultiplier * (1 - houseEdge) - 1 : -1) * betAmt,
+            (win ? strikeMultiplier * (1 - houseEdge) - 1 : -1) * betAmt,
         );
         // update count
         if (typeof autoBetCount === "number") {
           setAutoBetCount(autoBetCount > 0 ? autoBetCount - 1 : 0);
-          autoBetCount === 1 && warningCustom("Auto bet stopped", "top-left");
+          autoBetCount === 1 &&
+            warningCustom(translator("Auto bet stopped", language), "top-left");
         } else
           setAutoBetCount(
             autoBetCount.length > 12
@@ -251,7 +264,9 @@ export default function Wheel() {
           );
       }
     } catch (error: any) {
-      errorCustom(error?.message ?? "Could not make the Bet.");
+      errorCustom(
+        translator(error?.message ?? "Could not make the Bet.", language),
+      );
       setIsRolling(false);
       setAutoBetCount(0);
       setStartAuto(false);
@@ -303,7 +318,10 @@ export default function Wheel() {
         autoBetProfit >= autoStopProfit
       ) {
         setTimeout(() => {
-          warningCustom("Profit limit reached.", "top-left");
+          warningCustom(
+            translator("Profit limit reached.", language),
+            "top-left",
+          );
         }, 500);
         setAutoBetCount(0);
         setStartAuto(false);
@@ -316,7 +334,10 @@ export default function Wheel() {
         potentialLoss < -autoStopLoss
       ) {
         setTimeout(() => {
-          warningCustom("Loss limit reached.", "top-left");
+          warningCustom(
+            translator("Loss limit reached.", language),
+            "top-left",
+          );
         }, 500);
         setAutoBetCount(0);
         setStartAuto(false);
@@ -335,7 +356,7 @@ export default function Wheel() {
   const onSubmit = async (data: any) => {
     if (betType === "auto") {
       if (betAmt === 0) {
-        errorCustom("Set Amount.");
+        errorCustom(translator("Set Amount.", language));
         return;
       }
       if (typeof autoBetCount === "number" && autoBetCount <= 0) {
@@ -364,8 +385,11 @@ export default function Wheel() {
             {startAuto && (
               <div
                 onClick={() => {
-                  soundAlert("/sounds/betbutton.wav");
-                  warningCustom("Auto bet stopped", "top-left");
+                  soundAlert("/sounds/betbutton.wav", !enableSounds);
+                  warningCustom(
+                    translator("Auto bet stopped", language),
+                    "top-left",
+                  );
                   setAutoBetCount(0);
                   setStartAuto(false);
                 }}
@@ -431,10 +455,11 @@ export default function Wheel() {
                       <button
                         onClick={() => setRisk("low")}
                         type="button"
-                        className={`text-center w-full rounded-[5px] border-[2px] disabled:cursor-not-allowed disabled:opacity-50 bg-[#202329] py-2 text-xs font-chakra text-white text-opacity-90 transition duration-200 ${risk === "low"
+                        className={`text-center w-full rounded-[5px] border-[2px] disabled:cursor-not-allowed disabled:opacity-50 bg-[#202329] py-2 text-xs font-chakra text-white text-opacity-90 transition duration-200 ${
+                          risk === "low"
                             ? "border-[#7839C5]"
                             : "border-transparent hover:border-[#7839C580]"
-                          }`}
+                        }`}
                         disabled={disableInput}
                       >
                         {translator("Low", language)}
@@ -442,10 +467,11 @@ export default function Wheel() {
                       <button
                         onClick={() => setRisk("medium")}
                         type="button"
-                        className={`text-center w-full rounded-[5px] border-[2px] disabled:cursor-not-allowed disabled:opacity-50 bg-[#202329] py-2 text-xs font-chakra text-white text-opacity-90 transition duration-200 ${risk === "medium"
+                        className={`text-center w-full rounded-[5px] border-[2px] disabled:cursor-not-allowed disabled:opacity-50 bg-[#202329] py-2 text-xs font-chakra text-white text-opacity-90 transition duration-200 ${
+                          risk === "medium"
                             ? "border-[#7839C5]"
                             : "border-transparent hover:border-[#7839C580]"
-                          }`}
+                        }`}
                         disabled={disableInput}
                       >
                         {translator("Medium", language)}
@@ -454,10 +480,11 @@ export default function Wheel() {
                     <button
                       onClick={() => setRisk("high")}
                       type="button"
-                      className={`text-center lg:w-[33.33%] w-full rounded-[5px] border-[2px] disabled:cursor-not-allowed disabled:opacity-50 bg-[#202329] py-2 text-xs font-chakra text-white text-opacity-90 transition duration-200 ${risk === "high"
+                      className={`text-center lg:w-[33.33%] w-full rounded-[5px] border-[2px] disabled:cursor-not-allowed disabled:opacity-50 bg-[#202329] py-2 text-xs font-chakra text-white text-opacity-90 transition duration-200 ${
+                        risk === "high"
                           ? "border-[#7839C5]"
                           : "border-transparent hover:border-[#7839C580]"
-                        }`}
+                      }`}
                       disabled={disableInput}
                     >
                       {translator("High", language)}
@@ -503,8 +530,11 @@ export default function Wheel() {
                   {startAuto && (
                     <div
                       onClick={() => {
-                        soundAlert("/sounds/betbutton.wav");
-                        warningCustom("Auto bet stopped", "top-left");
+                        soundAlert("/sounds/betbutton.wav", !enableSounds);
+                        warningCustom(
+                          translator("Auto bet stopped", language),
+                          "top-left",
+                        );
                         setAutoBetCount(0);
                         setStartAuto(false);
                       }}
@@ -555,15 +585,17 @@ export default function Wheel() {
               width={35}
               height={35}
               id="pointer"
-              className={`${isRolling
+              className={`${
+                isRolling
                   ? "-rotate-[20deg] delay-[500ms] duration-500"
                   : "rotate-0 duration-200"
-                } absolute z-50 -top-3 transition-all ease-[cubic-bezier(0.4,0,0.2,1)]`}
+              } absolute z-50 -top-3 transition-all ease-[cubic-bezier(0.4,0,0.2,1)]`}
             />
             <div
               ref={wheelRef}
-              className={`${isRolling ? "" : ""
-                } relative w-[20rem] h-[20rem] md:w-[25rem] md:h-[25rem] rounded-full overflow-hidden`}
+              className={`${
+                isRolling ? "" : ""
+              } relative w-[20rem] h-[20rem] md:w-[25rem] md:h-[25rem] rounded-full overflow-hidden`}
             >
               {typeof window !== "undefined" && (
                 <svg viewBox="0 0 300 300">
@@ -624,21 +656,19 @@ export default function Wheel() {
                             <span className="">
                               {translator("Profit", language)}
                             </span>
-                            <span>
-                              {selectedCoin.tokenName}
-                            </span>
+                            <span>{selectedCoin.tokenName}</span>
                           </div>
                           <div className="border border-white/10 rounded-lg p-3 mt-2">
                             {selectedCoin
                               ? truncateNumber(
-                                Math.max(
-                                  0,
-                                  (betAmt ?? 0) *
-                                  (segment.multiplier * (1 - houseEdge) -
-                                    1),
-                                ),
-                                4,
-                              )
+                                  Math.max(
+                                    0,
+                                    (betAmt ?? 0) *
+                                      (segment.multiplier * (1 - houseEdge) -
+                                        1),
+                                  ),
+                                  4,
+                                )
                               : 0}
                           </div>
                         </div>
@@ -664,9 +694,16 @@ export default function Wheel() {
                   "Please deposit funds to start playing. View",
                   language,
                 )}{" "}
-                <Link href="/balance">
-                  <u>{translator("WALLET", language)}</u>
-                </Link>
+                <u
+                  onClick={() => {
+                    wallet.connected && status === "authenticated"
+                      ? setShowWalletModal(true)
+                      : handleSignIn(wallet, walletModal);
+                  }}
+                  className="cursor-pointer"
+                >
+                  {translator("WALLET", language)}
+                </u>
               </div>
             </div>
           )}
