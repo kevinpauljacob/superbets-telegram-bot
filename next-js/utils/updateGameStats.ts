@@ -60,7 +60,6 @@ async function updateGameStats(
     },
     { upsert: true, new: true },
   );
-  if (!referralInfo?.referredByChain) return;
 
   for (let i = 0; i < referralInfo.referredByChain.length; i++) {
     const _id = referralInfo.referredByChain[i];

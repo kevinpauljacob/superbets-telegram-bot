@@ -1,19 +1,5 @@
 import mongoose, { Schema } from "mongoose";
 
-const AmountSchema = new Schema({
-  amount: {
-    type: Number,
-    required: true,
-    default: 0,
-    min: 0,
-  },
-  tokenMint: {
-    type: String,
-    required: true,
-    default: "SOL",
-  },
-});
-
 const ReferralSchema = new Schema(
   {
     wallet: {
@@ -25,16 +11,35 @@ const ReferralSchema = new Schema(
       type: String,
       unique: true,
     },
-    referredByChain: [
-      {
-        type: Schema.Types.ObjectId,
-        ref: "Referral",
-      },
-    ],
-    volume: [AmountSchema],
-    feeGenerated: [AmountSchema],
-    totalEarnings: [AmountSchema],
-    unclaimedEarnings: [AmountSchema],
+    referredByChain: {
+      type: [
+        {
+          type: Schema.Types.ObjectId,
+          ref: "Referral",
+        },
+      ],
+      default: [],
+    },
+    volume: {
+      type: Map,
+      of: Number,
+      default: {},
+    },
+    feeGenerated: {
+      type: Map,
+      of: Number,
+      default: {},
+    },
+    totalEarnings: {
+      type: Map,
+      of: Number,
+      default: {},
+    },
+    unclaimedEarnings: {
+      type: Map,
+      of: Number,
+      default: {},
+    },
   },
   { timestamps: true },
 );
