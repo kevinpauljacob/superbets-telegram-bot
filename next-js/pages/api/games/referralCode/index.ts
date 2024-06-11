@@ -16,10 +16,10 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
     const token = await getToken({ req, secret });
 
-      if (!token || !token.sub || token.sub != wallet)
-        return res.send({
-          error: "User wallet not authenticated",
-        });
+    if (!token || !token.sub || token.sub != wallet)
+      return res.send({
+        error: "User wallet not authenticated",
+      });
 
     if (!wallet || !referralCode)
       return res
@@ -34,27 +34,13 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
     await connectDatabase();
 
-    const referrer = await Referral.findOne({ referralCode });
-
-    if (!referrer)
-      return res
-        .status(400)
-        .json({ success: false, message: "Referrer not found!" });
-
-    const referredByChain = [referrer._id, ...referrer.referredByChain].slice(
-      0,
-      5,
-    );
-    console.log('referredByChain', referredByChain);
-
-    const referral = await Referral.findOneAndUpdate(
+    await Referral.findOneAndUpdate(
       {
         wallet,
-        referredByChain: [],
       },
       {
         $set: {
-          referredByChain,
+          referralCode,
         },
       },
       { upsert: true },
@@ -62,8 +48,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
     return res.json({
       success: true,
-      data: referral,
-      message: `Referral code applied successfully!`,
+      message: `Referral code set successfully!`,
     });
   } catch (e: any) {
     console.log(e);
