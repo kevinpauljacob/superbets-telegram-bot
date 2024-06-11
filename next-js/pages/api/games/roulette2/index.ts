@@ -13,8 +13,9 @@ import {
   launchPromoEdge,
   pointTiers,
 } from "@/context/transactions";
-import { wsEndpoint } from "@/context/gameTransactions";
+import { wsEndpoint } from "@/context/config";
 import { Decimal } from "decimal.js";
+import updateGameStats from "../../../../utils/updateGameStats";
 Decimal.set({ precision: 9 });
 
 const secret = process.env.NEXTAUTH_SECRET;
@@ -287,6 +288,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       //   gameSeed: activeGameSeed._id,
       // });
       // await roulette2.save();
+
+      // await updateGameStats(GameType.roulette2, wallet, amount, tokenMint);
 
       // const pointsGained =
       //   0 * user.numOfGamesPlayed + 1.4 * amount * userData.multiplier;

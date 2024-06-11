@@ -7,8 +7,7 @@ import { useGlobalContext } from "@/components/GlobalContext";
 import { FaRegCopy } from "react-icons/fa6";
 import Arc from "@/components/games/Wheel/Arc";
 import { MdClose } from "react-icons/md";
-import { translator } from "@/context/transactions";
-import { truncateNumber } from "@/context/gameTransactions";
+import { translator, truncateNumber } from "@/context/transactions";
 import Loader from "../Loader";
 import { SPL_TOKENS } from "@/context/config";
 
@@ -324,7 +323,7 @@ export default function VerifyWheelModal({
                       <label className="text-xs font-changa text-opacity-90 text-[#F0F0F0]">
                         {translator("Server Seed", language)}{" "}
                         {bet.gameSeed?.status !== seedStatus.EXPIRED
-                          ? "(Hashed)"
+                          ?  translator("(Hashed)", language)
                           : ""}
                       </label>
                       <div className="bg-[#202329] mt-1 rounded-md px-4 py-3 w-full relative flex items-center justify-between">

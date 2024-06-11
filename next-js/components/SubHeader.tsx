@@ -1,16 +1,12 @@
 import Image from "next/image";
 import { useGlobalContext } from "./GlobalContext";
 import Link from "next/link";
-import {
-  wsEndpoint,
-  trimStringToLength,
-  truncateNumber,
-} from "@/context/gameTransactions";
+import { wsEndpoint } from "@/context/config";
 import { useEffect, useRef, useState } from "react";
 import { GameType } from "@/utils/provably-fair";
 import { useRouter } from "next/router";
 import useWebSocket from "react-use-websocket";
-import { translator } from "@/context/transactions";
+import { trimStringToLength, truncateNumber } from "@/context/transactions";
 import { SPL_TOKENS } from "@/context/config";
 import CoinSelector from "./CoinSelector";
 
@@ -27,7 +23,7 @@ export default function SubHeader() {
     showFullScreen,
     setShowFullScreen,
     enableSounds,
-    setEnableSounds
+    setEnableSounds,
   } = useGlobalContext();
 
   type Card = {
@@ -126,14 +122,21 @@ export default function SubHeader() {
                   </span>
                 </div>
                 <p className="text-[#72F238] font-changa text-sm mt-1">
-                  +{truncateNumber(card.amountWon ?? 0, 2)} {SPL_TOKENS.find(token => token.tokenMint === card.tokenMint)?.tokenName ?? ""}
+                  +{truncateNumber(card.amountWon ?? 0, 2)}{" "}
+                  {SPL_TOKENS.find(
+                    (token) => token.tokenMint === card.tokenMint,
+                  )?.tokenName ?? ""}
                 </p>
               </div>
             </Link>
           ))}
         </div>
 
-        <div className="h-10 border border-white border-opacity-5 rounded-[5px] mx-4" />
+        <div
+          className={`${
+            router.pathname === "/" ? "hidden md:flex" : "hidden md:flex"
+          } h-10 border border-white border-opacity-5 rounded-[5px] mx-4`}
+        />
 
         {/* <div className={`border-2 border-white border-opacity-5 rounded-[5px] p-3 cursor-pointer ${showFullScreen ? "bg-[#d9d9d9] bg-opacity-10" : ""}`} onClick={() => setShowFullScreen(!showFullScreen)}>
           <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 16 16" fill="none">
@@ -148,10 +151,24 @@ export default function SubHeader() {
           </svg>
         </div> */}
 
-        <div className={`border-2 border-white border-opacity-5 rounded-[5px] p-3 cursor-pointer ${showLiveStats ? "bg-[#d9d9d9] bg-opacity-10" : ""}`} onClick={() => setShowLiveStats(!showLiveStats)}>
-          <svg width="18" height="18" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+        <div
+          className={`${
+            router.pathname === "/" ? "hidden md:flex" : "hidden md:flex"
+          } border-2 border-[#26282C] rounded-[5px] p-[0.563rem] cursor-pointer transition-all hover:bg-[#26282C]/50 hover:transition-all ${showLiveStats ? "bg-[#26282C] border-[#26282C] hover:bg-[#26282C]" : ""}`}
+          onClick={() => setShowLiveStats(!showLiveStats)}
+        >
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 16 16"
+            fill="currentColor"
+            xmlns="http://www.w3.org/2000/svg"
+          >
             <g opacity="0.75" clip-path="url(#clip0_3181_1728)">
-              <path d="M15 5H11V15H10V0H6V15H5V8H1V15H0V16H1H5H6H10H11H15H16V15H15V5Z" fill={showLiveStats ? "white" : "#94A3B8"} />
+              <path
+                d="M15 5H11V15H10V0H6V15H5V8H1V15H0V16H1H5H6H10H11H15H16V15H15V5Z"
+                fill={showLiveStats ? "white" : "#94A3B8"}
+              />
             </g>
             <defs>
               <clipPath id="clip0_3181_1728">
@@ -161,25 +178,149 @@ export default function SubHeader() {
           </svg>
         </div>
 
-        <div className={`border-2 border-white border-opacity-5 rounded-[5px] p-3 cursor-pointer ml-3 ${enableSounds ? "bg-[#d9d9d9] bg-opacity-10" : ""}`} onClick={() => setEnableSounds(!enableSounds)}>
-          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 16 16" fill="none">
-            <path d="M10.2 1.45002C10.05 1.35002 9.85 1.40002 9.7 1.50002L4.85 5.00002H1.5C1.2 5.00002 1 5.20002 1 5.50002V10.5C1 10.8 1.2 11 1.5 11H4.85L9.7 14.55C9.8 14.6 9.9 14.65 10 14.65C10.1 14.65 10.15 14.65 10.25 14.6C10.4 14.5 10.5 14.35 10.5 14.15V1.90002C10.5 1.70002 10.4 1.50002 10.2 1.45002Z" fill={enableSounds ? "white" : "#94A3B8"} />
-            <path d="M13.5492 4.65C13.3492 4.45 13.0492 4.45 12.8492 4.65C12.6492 4.85 12.6492 5.15 12.8492 5.35C13.5992 6.05 13.9992 7 13.9992 8C13.9992 9 13.5992 9.95 12.8492 10.65C12.6492 10.85 12.6492 11.15 12.8492 11.35C12.9492 11.45 13.0992 11.5 13.1992 11.5C13.2992 11.5 13.4492 11.45 13.5492 11.35C14.4992 10.45 14.9992 9.3 14.9992 8C14.9992 6.7 14.4992 5.55 13.5492 4.65Z" fill={enableSounds ? "white" : "#94A3B8"} />
-            <path d="M12.3508 6.35008C12.1508 6.15008 11.8508 6.15008 11.6508 6.40008C11.4508 6.60008 11.5008 6.90008 11.7008 7.10008C11.9508 7.35008 12.1008 7.70008 12.1008 8.05008C12.1008 8.40008 11.9508 8.75008 11.7008 9.00008C11.5008 9.20008 11.5008 9.50008 11.6508 9.70008C11.7508 9.80008 11.9008 9.85008 12.0008 9.85008C12.1008 9.85008 12.2508 9.80008 12.3508 9.70008C12.8508 9.25008 13.1008 8.65008 13.1008 8.05008C13.1008 7.45008 12.8008 6.75008 12.3508 6.35008Z" fill={enableSounds ? "white" : "#94A3B8"} />
-          </svg>
+        <div
+          className={`${
+            router.pathname === "/" ? "hidden md:flex" : "hidden md:flex"
+          } border-2 border-[#26282C] rounded-[5px] p-[0.563rem] cursor-pointer ml-3 transition-all hover:bg-[#26282C]/50 hover:transition-all ${enableSounds ? "bg-[#26282C] border-[#26282C] hover:bg-[#26282C]" : ""}`}
+          onClick={() => setEnableSounds(!enableSounds)}
+        >
+          {!enableSounds && (
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 500 500"
+              version="1.1"
+              xmlns="http://www.w3.org/2000/svg"
+              xmlnsXlink="http://www.w3.org/1999/xlink"
+              xmlSpace="preserve"
+              fill={enableSounds ? "white" : "#94A3B8"}
+              style={{
+                fillRule: "evenodd",
+                clipRule: "evenodd",
+                strokeLinejoin: "round",
+                strokeMiterlimit: 2,
+              }}
+            >
+              <g id="Mute" transform="matrix(1,0,0,1,0.169573,-0.924101)">
+                <path d="M320.661,49.169C320.661,46.504 319.247,44.04 316.947,42.695C314.647,41.35 311.806,41.326 309.484,42.632C273.448,62.902 161.379,125.941 139.236,138.397C136.874,139.725 135.413,142.224 135.413,144.933C135.413,173.139 135.413,328.709 135.413,356.915C135.413,359.624 136.874,362.123 139.236,363.452C161.379,375.907 273.448,438.946 309.484,459.216C311.806,460.523 314.647,460.499 316.947,459.153C319.247,457.808 320.661,455.344 320.661,452.679C320.661,389.55 320.661,112.298 320.661,49.169ZM113.8,148.047C113.8,146.058 113.01,144.15 111.604,142.744C110.197,141.337 108.289,140.547 106.3,140.547L50.288,140.547C48.299,140.547 46.392,141.337 44.985,142.744C43.579,144.15 42.788,146.058 42.788,148.047L42.788,353.801C42.788,355.79 43.579,357.698 44.985,359.104C46.392,360.511 48.299,361.301 50.288,361.301C63.931,361.301 92.657,361.301 106.3,361.301C108.289,361.301 110.197,360.511 111.604,359.104C113.01,357.698 113.8,355.79 113.8,353.801L113.8,148.047ZM408,231.88L380.997,204.878C375.997,199.878 367.878,199.878 362.878,204.878C357.878,209.878 357.878,217.997 362.878,222.997L389.88,250L362.878,277.003C357.878,282.003 357.878,290.122 362.878,295.122C367.878,300.122 375.997,300.122 380.997,295.122L408,268.12L435.003,295.122C440.003,300.122 448.122,300.122 453.122,295.122C458.122,290.122 458.122,282.003 453.122,277.003L426.12,250L453.122,222.997C458.122,217.997 458.122,209.878 453.122,204.878C448.122,199.878 440.003,199.878 435.003,204.878L408,231.88Z" />
+              </g>
+            </svg>
+          )}
+          {enableSounds && (
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 500 500"
+              version="1.1"
+              fill="white"
+              xmlns="http://www.w3.org/2000/svg"
+              xmlnsXlink="http://www.w3.org/1999/xlink"
+              xmlSpace="preserve"
+              style={{
+                fillRule: "evenodd",
+                clipRule: "evenodd",
+                strokeLinejoin: "round",
+                strokeMiterlimit: 2,
+              }}
+            >
+              <g id="Audio-on" transform="matrix(1,0,0,1,-3.80678,-0.924101)">
+                <path d="M320.661,49.169C320.661,46.504 319.247,44.04 316.947,42.695C314.647,41.35 311.806,41.326 309.484,42.632C273.448,62.902 161.379,125.941 139.236,138.397C136.874,139.725 135.413,142.224 135.413,144.933C135.413,173.139 135.413,328.709 135.413,356.915C135.413,359.624 136.874,362.123 139.236,363.452C161.379,375.907 273.448,438.946 309.484,459.216C311.806,460.523 314.647,460.499 316.947,459.153C319.247,457.808 320.661,455.344 320.661,452.679C320.661,389.55 320.661,112.298 320.661,49.169ZM395.861,142.758C424.207,179.443 439.037,215.803 439.199,251.982C439.36,287.983 424.936,323.546 396.083,358.811C391.606,364.284 392.414,372.363 397.887,376.841C403.36,381.318 411.439,380.51 415.917,375.037C449.107,334.469 465.009,293.282 464.824,251.867C464.639,210.629 448.448,168.905 416.139,127.09C411.815,121.495 403.762,120.462 398.166,124.785C392.571,129.109 391.538,137.162 395.861,142.758ZM113.8,148.047C113.8,146.058 113.01,144.15 111.604,142.744C110.197,141.337 108.289,140.547 106.3,140.547L50.288,140.547C48.299,140.547 46.392,141.337 44.985,142.744C43.579,144.15 42.788,146.058 42.788,148.047L42.788,353.801C42.788,355.79 43.579,357.698 44.985,359.104C46.392,360.511 48.299,361.301 50.288,361.301C63.931,361.301 92.657,361.301 106.3,361.301C108.289,361.301 110.197,360.511 111.604,359.104C113.01,357.698 113.8,355.79 113.8,353.801L113.8,148.047ZM348.057,192.589C375.819,238.172 375.755,276.239 349.213,307.656C344.649,313.057 345.33,321.148 350.731,325.711C356.133,330.275 364.224,329.594 368.787,324.193C402.218,284.622 404.91,236.673 369.943,179.259C366.264,173.22 358.375,171.303 352.335,174.981C346.296,178.66 344.379,186.549 348.057,192.589Z" />
+              </g>
+            </svg>
+          )}
         </div>
 
-        <div className="h-10 border border-white border-opacity-5 rounded-[5px] mx-4" />
+        <div
+          className={`${
+            router.pathname === "/" ? "hidden md:flex" : "hidden md:flex"
+          } h-10 border border-white border-opacity-5 rounded-[5px] mx-4`}
+        />
 
         <div className="hidden md:flex items-center md:min-w-fit">
-         <CoinSelector />
+          <CoinSelector />
         </div>
       </div>
       <div
-        className={`${router.pathname === "/" ? "hidden" : "flex"
-          } md:hidden items-center justify-between my-4 mx-2 rounded-[5px] bg-[#121418] py-3 px-4 md:min-w-fit`}
+        className={`${
+          router.pathname === "/" ? "hidden" : "flex"
+        } md:hidden items-center justify-between my-4 mx-2 rounded-[5px] bg-[#121418] py-3 px-4 md:min-w-fit`}
       >
-        <Image src={"/assets/wallet2.png"} alt="" width={30} height={30} />
+        <div className="flex items-center ">
+          <div
+            className={`border-2 border-white/5 rounded-[5px] p-[0.563rem] cursor-pointer transition-all hover:bg-[#26282C]/50 hover:transition-all ${showLiveStats ? "bg-[#26282C] border-[#26282C] hover:bg-[#26282C]" : ""}`}
+            onClick={() => setShowLiveStats(!showLiveStats)}
+          >
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 16 16"
+              fill="currentColor"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <g opacity="0.75" clip-path="url(#clip0_3181_1728)">
+                <path
+                  d="M15 5H11V15H10V0H6V15H5V8H1V15H0V16H1H5H6H10H11H15H16V15H15V5Z"
+                  fill={showLiveStats ? "white" : "#94A3B8"}
+                />
+              </g>
+              <defs>
+                <clipPath id="clip0_3181_1728">
+                  <rect width="16" height="16" fill="white" />
+                </clipPath>
+              </defs>
+            </svg>
+          </div>
+
+          <div
+            className={`border-2 border-white/5 rounded-[5px] p-[0.563rem] cursor-pointer ml-2 transition-all hover:bg-[#26282C]/50 hover:transition-all ${enableSounds ? "bg-[#26282C] border-[#26282C] hover:bg-[#26282C]" : ""}`}
+            onClick={() => setEnableSounds(!enableSounds)}
+          >
+            {!enableSounds && (
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 500 500"
+                version="1.1"
+                xmlns="http://www.w3.org/2000/svg"
+                xmlnsXlink="http://www.w3.org/1999/xlink"
+                xmlSpace="preserve"
+                fill={enableSounds ? "white" : "#94A3B8"}
+                style={{
+                  fillRule: "evenodd",
+                  clipRule: "evenodd",
+                  strokeLinejoin: "round",
+                  strokeMiterlimit: 2,
+                }}
+              >
+                <g id="Mute" transform="matrix(1,0,0,1,0.169573,-0.924101)">
+                  <path d="M320.661,49.169C320.661,46.504 319.247,44.04 316.947,42.695C314.647,41.35 311.806,41.326 309.484,42.632C273.448,62.902 161.379,125.941 139.236,138.397C136.874,139.725 135.413,142.224 135.413,144.933C135.413,173.139 135.413,328.709 135.413,356.915C135.413,359.624 136.874,362.123 139.236,363.452C161.379,375.907 273.448,438.946 309.484,459.216C311.806,460.523 314.647,460.499 316.947,459.153C319.247,457.808 320.661,455.344 320.661,452.679C320.661,389.55 320.661,112.298 320.661,49.169ZM113.8,148.047C113.8,146.058 113.01,144.15 111.604,142.744C110.197,141.337 108.289,140.547 106.3,140.547L50.288,140.547C48.299,140.547 46.392,141.337 44.985,142.744C43.579,144.15 42.788,146.058 42.788,148.047L42.788,353.801C42.788,355.79 43.579,357.698 44.985,359.104C46.392,360.511 48.299,361.301 50.288,361.301C63.931,361.301 92.657,361.301 106.3,361.301C108.289,361.301 110.197,360.511 111.604,359.104C113.01,357.698 113.8,355.79 113.8,353.801L113.8,148.047ZM408,231.88L380.997,204.878C375.997,199.878 367.878,199.878 362.878,204.878C357.878,209.878 357.878,217.997 362.878,222.997L389.88,250L362.878,277.003C357.878,282.003 357.878,290.122 362.878,295.122C367.878,300.122 375.997,300.122 380.997,295.122L408,268.12L435.003,295.122C440.003,300.122 448.122,300.122 453.122,295.122C458.122,290.122 458.122,282.003 453.122,277.003L426.12,250L453.122,222.997C458.122,217.997 458.122,209.878 453.122,204.878C448.122,199.878 440.003,199.878 435.003,204.878L408,231.88Z" />
+                </g>
+              </svg>
+            )}
+            {enableSounds && (
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 500 500"
+                version="1.1"
+                fill="white"
+                xmlns="http://www.w3.org/2000/svg"
+                xmlnsXlink="http://www.w3.org/1999/xlink"
+                xmlSpace="preserve"
+                style={{
+                  fillRule: "evenodd",
+                  clipRule: "evenodd",
+                  strokeLinejoin: "round",
+                  strokeMiterlimit: 2,
+                }}
+              >
+                <g id="Audio-on" transform="matrix(1,0,0,1,-3.80678,-0.924101)">
+                  <path d="M320.661,49.169C320.661,46.504 319.247,44.04 316.947,42.695C314.647,41.35 311.806,41.326 309.484,42.632C273.448,62.902 161.379,125.941 139.236,138.397C136.874,139.725 135.413,142.224 135.413,144.933C135.413,173.139 135.413,328.709 135.413,356.915C135.413,359.624 136.874,362.123 139.236,363.452C161.379,375.907 273.448,438.946 309.484,459.216C311.806,460.523 314.647,460.499 316.947,459.153C319.247,457.808 320.661,455.344 320.661,452.679C320.661,389.55 320.661,112.298 320.661,49.169ZM395.861,142.758C424.207,179.443 439.037,215.803 439.199,251.982C439.36,287.983 424.936,323.546 396.083,358.811C391.606,364.284 392.414,372.363 397.887,376.841C403.36,381.318 411.439,380.51 415.917,375.037C449.107,334.469 465.009,293.282 464.824,251.867C464.639,210.629 448.448,168.905 416.139,127.09C411.815,121.495 403.762,120.462 398.166,124.785C392.571,129.109 391.538,137.162 395.861,142.758ZM113.8,148.047C113.8,146.058 113.01,144.15 111.604,142.744C110.197,141.337 108.289,140.547 106.3,140.547L50.288,140.547C48.299,140.547 46.392,141.337 44.985,142.744C43.579,144.15 42.788,146.058 42.788,148.047L42.788,353.801C42.788,355.79 43.579,357.698 44.985,359.104C46.392,360.511 48.299,361.301 50.288,361.301C63.931,361.301 92.657,361.301 106.3,361.301C108.289,361.301 110.197,360.511 111.604,359.104C113.01,357.698 113.8,355.79 113.8,353.801L113.8,148.047ZM348.057,192.589C375.819,238.172 375.755,276.239 349.213,307.656C344.649,313.057 345.33,321.148 350.731,325.711C356.133,330.275 364.224,329.594 368.787,324.193C402.218,284.622 404.91,236.673 369.943,179.259C366.264,173.22 358.375,171.303 352.335,174.981C346.296,178.66 344.379,186.549 348.057,192.589Z" />
+                </g>
+              </svg>
+            )}
+          </div>
+        </div>
         <CoinSelector />
       </div>
     </div>

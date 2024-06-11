@@ -275,7 +275,7 @@ export default function VerifyLimboModal({
                       <label className="text-xs font-changa text-opacity-90 text-[#F0F0F0]">
                         {translator("Server Seed", language)}{" "}
                         {flip.gameSeed?.status !== seedStatus.EXPIRED
-                          ? "(Hashed)"
+                          ?  translator("(Hashed)", language)
                           : ""}
                       </label>
                       <div className="bg-[#202329] mt-1 rounded-md px-4 py-3 w-full relative flex items-center justify-between">

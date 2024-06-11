@@ -188,13 +188,13 @@ text-shadow-gold {
 
 @keyframes blink_tile {
   0% {
-    border-color: #FCB10F;
+    border-color: #fcb10f;
   }
   50% {
-    border-color: #FCB10F80;
+    border-color: #fcb10f80;
   }
   100% {
-    border-color: #FCB10F;
+    border-color: #fcb10f;
   }
 }
 
@@ -582,4 +582,36 @@ input[type="range"] {
   height: 21px; /* Set thumb height as desired */
   cursor: pointer;
   border-radius: 100%;
+}
+
+/* animation for Infobar */
+/* globals.css */
+@keyframes slideInFromLeft {
+  from {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideOutToRight {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
+
+.slide-in {
+  animation: slideInFromLeft 1.5s ease-in-out forwards;
+}
+
+.slide-out {
+  animation: slideOutToRight 1.5s ease-in-out forwards;
 }

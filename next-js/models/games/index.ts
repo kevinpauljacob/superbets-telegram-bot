@@ -10,6 +10,7 @@ export { default as Plinko } from "./plinko";
 export { default as Roulette1 } from "./roulette1";
 export { default as Roulette2 } from "./roulette2";
 export { default as Wheel } from "./wheel";
+export { default as GameStats } from "./gameStats";
 
 export { default as GameSeed } from "./gameSeed";
 export { default as User } from "./gameUser";

@@ -1,12 +1,19 @@
 import { useState } from "react";
 import { useGlobalContext } from "./GlobalContext";
 import Image from "next/image";
-import { truncateNumber } from "@/context/gameTransactions";
 import { SPL_TOKENS } from "@/context/config";
 import { translator } from "@/context/transactions";
 import SOL from "@/public/assets/coins/SOL";
+import { useSession } from "next-auth/react";
+import { useWallet } from "@solana/wallet-adapter-react";
+import { useWalletModal } from "@solana/wallet-adapter-react-ui";
+import { handleSignIn } from "./ConnectWallet";
 
 export default function CoinSelector() {
+  const { data: session, status } = useSession();
+  const wallet = useWallet();
+  const walletModal = useWalletModal();
+
   const {
     setShowWalletModal,
     setLiveBets,
@@ -18,13 +25,30 @@ export default function CoinSelector() {
   } = useGlobalContext();
   const [showSelectCoinModal, setShowSelectCoinModal] = useState(false);
   const [fiat, setFiat] = useState(false);
+
+  function formatAmount(amount: number) {
+    const integerPartLength = Math.floor(amount).toString().length;
+    let minimumFractionDigits = 0;
+    let maximumFractionDigits = 0;
+
+    if (integerPartLength < 5) {
+      minimumFractionDigits = 5 - integerPartLength;
+      maximumFractionDigits = 5 - integerPartLength;
+    }
+
+    return amount.toLocaleString("en-US", {
+      minimumFractionDigits: minimumFractionDigits,
+      maximumFractionDigits: maximumFractionDigits,
+    });
+  }
+
   return (
     <div className="relative flex items-center gap-2">
       <div
-        className={`flex flex-col min-w-[8rem] ${startAuto ? "opacity-50" : ""}`}
+        className={`flex flex-col min-w-[8rem] h-10 ${startAuto ? "opacity-50" : ""}`}
       >
         <div
-          className="flex flex-row justify-left items-center px-4 py-1 gap-2 border-2 border-white border-opacity-5 rounded-[5px] cursor-pointer"
+          className="flex flex-row justify-left items-center px-4 py-[2px] h-10 gap-2 border-2 border-white border-opacity-5 transition-all hover:bg-[#26282C]/50 hover:transition-all rounded-[5px] cursor-pointer"
           onClick={() => {
             !startAuto && setShowSelectCoinModal(!showSelectCoinModal);
           }}
@@ -32,11 +56,8 @@ export default function CoinSelector() {
           {selectedCoin.icon && (
             <selectedCoin.icon className="w-6 h-6 -mt-[1px]" />
           )}
-          <span className="font-chakra text-base md:text-2xl text-[#94A3B8]">
-            {(selectedCoin?.amount ?? 0).toLocaleString("en-US", {
-              minimumFractionDigits: 3,
-              maximumFractionDigits: 3,
-            })}
+          <span className="font-chakra font-medium text-base text-[#94A3B8]">
+            {formatAmount(selectedCoin.amount ?? 0)}
           </span>
           <div className="grow" />
           <Image
@@ -113,7 +134,9 @@ export default function CoinSelector() {
 
       <div
         onClick={() => {
-          setShowWalletModal(true);
+          wallet.connected && status === "authenticated"
+            ? setShowWalletModal(true)
+            : handleSignIn(wallet, walletModal);
         }}
         className="flex items-center h-[2.3rem] md:h-10 px-5 md:px-4 py-0 md:py-2 gap-1 md:gap-1.5 bg-[#7839C5] hover:bg-[#9361d1] focus:bg-[#602E9E] transition-all cursor-pointer rounded-[5px]"
       >

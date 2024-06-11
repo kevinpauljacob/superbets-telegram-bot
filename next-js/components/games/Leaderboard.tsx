@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { useWallet } from "@solana/wallet-adapter-react";
-import { obfuscatePubKey } from "@/context/transactions";
+import { obfuscatePubKey, translator } from "@/context/transactions";
 import { errorCustom } from "../toasts/ToastGroup";
 import FOMOHead from "../HeadElement";
+import { useGlobalContext } from "../GlobalContext";
 
 function Leaderboard() {
   const wallet = useWallet();
+
+  const { language } = useGlobalContext();
 
   const [isWeekly, setIsWeekly] = useState<boolean>(false);
   const [maxPages, setMaxPages] = useState<number>(0);
@@ -44,7 +47,7 @@ function Leaderboard() {
             // console.log("sss");
           } else {
             setData([]);
-            errorCustom("Could not fetch history.");
+            errorCustom(translator("Could not fetch history.", language));
           }
         });
     else
@@ -72,7 +75,7 @@ function Leaderboard() {
             setData(users);
           } else {
             setData([]);
-            errorCustom("Could not fetch history.");
+            errorCustom(translator("Could not fetch history.", language));
           }
         });
   }, [isWeekly]);
