@@ -12,11 +12,12 @@ import {
   houseEdgeTiers,
   launchPromoEdge,
   pointTiers,
+  stakingTiers,
 } from "@/context/transactions";
-import { wsEndpoint } from "@/context/gameTransactions";
+import { wsEndpoint } from "@/context/config";
 import { Decimal } from "decimal.js";
 import { SPL_TOKENS } from "@/context/config";
-import updateGameStats from "../global/updateGameStats";
+import updateGameStats from "../../../../utils/updateGameStats";
 Decimal.set({ precision: 9 });
 
 const secret = process.env.NEXTAUTH_SECRET;
@@ -71,6 +72,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         userBets,
         strikeMultiplier,
         tokenMint,
+        houseEdge,
       } = gameInfo;
 
       if (userBets.length === 0)
@@ -83,15 +85,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         {},
         { upsert: true, new: true },
       );
-      const userTier = userData?.tier ?? 0;
-      const isFomoToken =
-        tokenMint === SPL_TOKENS.find((t) => t.tokenName === "FOMO")?.tokenMint
-          ? true
-          : false;
-      const houseEdge =
-        launchPromoEdge || isFomoToken ? 0 : houseEdgeTiers[userTier];
-
-      amountWon = Decimal.mul(amountWon, Decimal.sub(1, houseEdge)).toNumber();
 
       const { serverSeed: encryptedServerSeed, clientSeed, iv } = gameSeed;
 
@@ -118,8 +111,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         },
         {
           result,
-          houseEdge,
-          amountWon,
           $set: { strikeNumbers },
         },
         { new: true },
@@ -130,7 +121,11 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           .status(400)
           .json({ success: false, message: "Game already concluded!" });
 
-      await updateGameStats(GameType.mines, wallet, amount, tokenMint);
+      const feeGenerated = Decimal.mul(amount, strikeMultiplier)
+        .mul(houseEdge)
+        .toNumber();
+
+      await updateGameStats(GameType.mines, tokenMint, 0, false, feeGenerated);
 
       const user = await User.findOneAndUpdate(
         {
@@ -164,9 +159,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         {
           $inc: {
             points: pointsGained,
-          },
-          $set: {
-            tier: newTier,
           },
         },
       );

@@ -24,8 +24,8 @@ import {
   successCustom,
   warningCustom,
 } from "@/components/toasts/ToastGroup";
-import { translator, formatNumber } from "@/context/transactions";
-import { minGameAmount, truncateNumber } from "@/context/gameTransactions";
+import { translator, truncateNumber } from "@/context/transactions";
+import { minGameAmount } from "@/context/config";
 import { useSession } from "next-auth/react";
 import user from "@/models/staking/user";
 import Decimal from "decimal.js";
@@ -236,7 +236,7 @@ export default function Mines() {
   };
 
   const handlePick = async (number: number) => {
-    soundAlert("/sounds/betButton.wav", !enableSounds);
+    soundAlert("/sounds/betbutton.wav", !enableSounds);
     setIsRolling(true);
     // setSelectTile(false);
     setNumBets(numBets + 1);

@@ -3,14 +3,12 @@ import React, { useEffect, useRef, useState } from "react";
 import { useForm, FormProvider } from "react-hook-form";
 import {
   connection,
+  deposit,
   obfuscatePubKey,
   translator,
-} from "@/context/transactions";
-import {
-  deposit,
   truncateNumber,
   withdraw,
-} from "../../context/gameTransactions";
+} from "@/context/transactions";
 import Loader from "./Loader";
 import { useGlobalContext } from "../GlobalContext";
 import { IoCloseOutline } from "react-icons/io5";

@@ -3,7 +3,7 @@ import { getToken } from "next-auth/jwt";
 import { NextApiRequest, NextApiResponse } from "next";
 import { GameSeed, Hilo, User } from "@/models/games";
 import { seedStatus } from "@/utils/provably-fair";
-import { minGameAmount } from "@/context/gameTransactions";
+import { minGameAmount } from "@/context/config";
 
 const secret = process.env.NEXTAUTH_SECRET;
 

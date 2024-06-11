@@ -69,10 +69,6 @@ const handleFomoBuyEvent = async (
     const pointsGained =
       1.2 * numOfGamesPlayed +
       1.4 * (totalAmount as number) * userData.multiplier;
-    const points = userData.points + pointsGained;
-    const newTier = Object.entries(pointTiers).reduce((prev, next) => {
-      return points >= next[1]?.limit ? next : prev;
-    })[0];
 
     await user.findOneAndUpdate(
       {
@@ -81,9 +77,6 @@ const handleFomoBuyEvent = async (
       {
         $inc: {
           points: pointsGained,
-        },
-        $set: {
-          tier: newTier,
         },
       }
     );

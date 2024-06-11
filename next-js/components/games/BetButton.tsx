@@ -2,7 +2,7 @@ import { soundAlert } from "@/utils/soundUtils";
 import { ReactNode, useEffect, useRef } from "react";
 import { useGlobalContext } from "@/components/GlobalContext";
 import { translator } from "@/context/transactions";
-import { minGameAmount } from "@/context/gameTransactions";
+import { minGameAmount } from "@/context/config";
 
 export default function BetButton({
   disabled,
