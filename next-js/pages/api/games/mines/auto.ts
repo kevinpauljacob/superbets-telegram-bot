@@ -10,14 +10,11 @@ import {
   seedStatus,
 } from "@/utils/provably-fair";
 import StakingUser from "@/models/staking/user";
-import {
-  isArrayUnique,
-  minGameAmount,
-  wsEndpoint,
-} from "@/context/gameTransactions";
+import { minGameAmount, wsEndpoint } from "@/context/config";
 import Decimal from "decimal.js";
 import {
   houseEdgeTiers,
+  isArrayUnique,
   launchPromoEdge,
   maxPayouts,
   pointTiers,
@@ -92,7 +89,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       if (
         !(
           maxPayout.toNumber() <=
-          maxPayouts[splToken.tokenName as GameTokens].mines
+          maxPayouts[splToken.tokenMint as GameTokens].mines
         )
       )
         return res

@@ -2,7 +2,7 @@ import connectDatabase from "../../../../utils/database";
 import { User, Option } from "../../../../models/games";
 import { getToken } from "next-auth/jwt";
 import { NextApiRequest, NextApiResponse } from "next";
-import { minGameAmount, wsEndpoint } from "@/context/gameTransactions";
+import { minGameAmount, wsEndpoint } from "@/context/config";
 import { Decimal } from "decimal.js";
 import { maintainance, maxPayouts } from "@/context/transactions";
 import StakingUser from "@/models/staking/user";

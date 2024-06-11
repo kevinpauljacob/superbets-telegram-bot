@@ -3,8 +3,7 @@ import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import { useWallet } from "@solana/wallet-adapter-react";
 import Loader from "../../components/games/Loader";
-import { placeBet, truncateNumber } from "../../context/gameTransactions";
-import { checkResult as checkResultAPI } from "../../context/gameTransactions";
+import { checkResult as checkResultAPI, placeBet, translator, truncateNumber } from "../../context/transactions";
 import { useGlobalContext } from "@/components/GlobalContext";
 import { FormProvider, useForm } from "react-hook-form";
 import {
@@ -18,8 +17,6 @@ import BetAmount from "@/components/games/BetAmountInput";
 import BetButton from "@/components/games/BetButton";
 import { soundAlert } from "@/utils/soundUtils";
 import { errorCustom, successCustom } from "@/components/toasts/ToastGroup";
-import { translator } from "@/context/transactions";
-import { minGameAmount } from "@/context/gameTransactions";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import { GameType } from "@/utils/provably-fair";

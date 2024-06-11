@@ -5,14 +5,12 @@ import {
   fomoToken,
   stakeFOMO,
   translator,
+  truncateNumber,
   unstakeFOMO,
 } from "@/context/transactions";
-import { truncateNumber } from "@/context/gameTransactions";
 import { useWallet } from "@solana/wallet-adapter-react";
 //import toast from "react-hot-toast";
 import Spinner from "./Spinner";
-import { PublicKey } from "@solana/web3.js";
-import { getAssociatedTokenAddressSync } from "@solana/spl-token";
 import { useSession } from "next-auth/react";
 import { errorCustom } from "./toasts/ToastGroup";
 import { getFOMOBalance } from "@/pages/stake";

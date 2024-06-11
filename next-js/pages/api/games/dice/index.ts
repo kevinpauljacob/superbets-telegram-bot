@@ -1,11 +1,7 @@
 import connectDatabase from "../../../../utils/database";
 import { getToken } from "next-auth/jwt";
 import { NextApiRequest, NextApiResponse } from "next";
-import {
-  wsEndpoint,
-  minGameAmount,
-  isArrayUnique,
-} from "@/context/gameTransactions";
+import { wsEndpoint, minGameAmount } from "@/context/config";
 import { GameSeed, User, Dice } from "@/models/games";
 import {
   GameTokens,
@@ -17,6 +13,7 @@ import {
 import StakingUser from "@/models/staking/user";
 import {
   houseEdgeTiers,
+  isArrayUnique,
   launchPromoEdge,
   maintainance,
   maxPayouts,
