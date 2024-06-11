@@ -89,7 +89,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       if (
         !(
           maxPayout.toNumber() <=
-          maxPayouts[splToken.tokenName as GameTokens].mines
+          maxPayouts[splToken.tokenMint as GameTokens].mines
         )
       )
         return res
