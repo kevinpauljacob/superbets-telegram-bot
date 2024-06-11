@@ -45,6 +45,190 @@ import ConfigureAutoButton from "@/components/ConfigureAutoButton";
 import BetAmount from "@/components/games/BetAmountInput";
 import AutoCount from "@/components/AutoCount";
 
+type RiskToChance = Record<string, Record<number, Array<number>>>;
+
+export type LinesType = 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15 | 16;
+
+export type RisksType = "Low" | "Medium" | "High";
+
+const riskToChance: RiskToChance = {
+  low: {
+    8: [6.9, 2.1, 1.1, 1, 0.5, 1, 1.1, 2.1, 6.9],
+    9: [5.6, 2, 1.6, 1, 0.7, 0.7, 1, 1.6, 2, 5.6],
+    10: [8.9, 3, 1.4, 1.1, 1, 0.5, 1, 1.1, 1.4, 3, 8.9],
+    11: [8.4, 3, 1.9, 1.3, 1, 0.7, 0.7, 1, 1.3, 1.9, 3, 8.4],
+    12: [10, 3, 1.6, 1.4, 1.1, 1, 0.5, 1, 1.1, 1.4, 1.6, 3, 10],
+    13: [8.1, 4, 3, 1.9, 1.2, 0.9, 0.7, 0.7, 0.9, 1.2, 1.9, 3, 4, 8.1],
+    14: [7.1, 4, 1.9, 1.4, 1.3, 1.1, 1, 0.5, 1, 1.1, 1.3, 1.4, 1.9, 4, 7.1],
+    15: [15, 8, 3, 2, 1.5, 1.1, 1, 0.7, 0.7, 1, 1.1, 1.5, 2, 3, 8, 15],
+    16: [16, 9, 2, 1.4, 1.4, 1.2, 1.1, 1, 0.5, 1, 1.1, 1.2, 1.4, 1.4, 2, 9, 16],
+  },
+  medium: {
+    8: [13, 3, 1.3, 0.7, 0.4, 0.7, 1.3, 3, 13],
+    9: [18, 4, 1.7, 0.9, 0.5, 0.5, 0.9, 1.7, 4, 18],
+    10: [22, 5, 2, 1.4, 0.6, 0.4, 0.6, 1.4, 2, 5, 22],
+    11: [24, 6, 3, 1.8, 0.7, 0.5, 0.5, 0.7, 1.8, 3, 6, 24],
+    12: [33, 11, 4, 2, 1.1, 0.6, 0.3, 0.6, 1.1, 2, 4, 11, 33],
+    13: [43, 13, 6, 3, 1.3, 0.7, 0.4, 0.4, 0.7, 1.3, 3, 6, 13, 43],
+    14: [58, 15, 7, 4, 1.9, 1, 0.5, 0.2, 0.5, 1, 1.9, 4, 7, 15, 58],
+    15: [88, 18, 11, 5, 3, 1.3, 0.5, 0.3, 0.3, 0.5, 1.3, 3, 5, 11, 18, 88],
+    16: [110, 41, 10, 5, 3, 1.5, 1, 0.5, 0.3, 0.5, 1, 1.5, 3, 5, 10, 41, 110],
+  },
+  high: {
+    8: [29, 4, 1.5, 0.3, 0.2, 0.3, 1.5, 4, 29],
+    9: [43, 7, 2, 0.6, 0.2, 0.2, 0.6, 2, 7, 43],
+    10: [76, 10, 3, 0.9, 0.3, 0.2, 0.3, 0.9, 3, 10, 76],
+    11: [120, 14, 5.2, 1.4, 0.4, 0.2, 0.2, 0.4, 1.4, 5.2, 14, 120],
+    12: [170, 24, 8.1, 2, 0.7, 0.2, 0.2, 0.2, 0.7, 2, 8.1, 24, 170],
+    13: [260, 37, 11, 4, 1, 0.2, 0.2, 0.2, 0.2, 1, 4, 11, 37, 260],
+    14: [420, 56, 18, 5, 1.9, 0.3, 0.2, 0.2, 0.2, 0.3, 1.9, 5, 18, 56, 420],
+    15: [620, 83, 27, 8, 3, 0.5, 0.2, 0.2, 0.2, 0.2, 0.5, 3, 8, 27, 83, 620],
+    16: [
+      1000, 130, 26, 9, 4, 2, 0.2, 0.2, 0.2, 0.2, 0.2, 2, 4, 9, 26, 130, 1000,
+    ],
+  },
+};
+
+export const multiplierColorMap: {
+  [key: number]: string[];
+} = {
+  8: [
+    "#FF003F",
+    "#FF302F",
+    "#FF6020",
+    "#FF9010",
+    "#FFC000",
+    "#FF9010",
+    "#FF6020",
+    "#FF302F",
+    "#FF003F",
+  ],
+  9: [
+    "#FF003F",
+    "#FF2B31",
+    "#FF5523",
+    "#FF8015",
+    "#FFAB07",
+    "#FFAB07",
+    "#FF8015",
+    "#FF5523",
+    "#FF2B31",
+    "#FF003F",
+  ],
+  10: [
+    "#FF003F",
+    "#FF2632",
+    "#FF4D26",
+    "#FF7319",
+    "#FF9A0D",
+    "#FFC000",
+    "#FF9A0D",
+    "#FF7319",
+    "#FF4D26",
+    "#FF2632",
+    "#FF2632",
+  ],
+  11: [
+    "#FF003F",
+    "#FF2334",
+    "#FF4628",
+    "#FF691D",
+    "#FF8C11",
+    "#FFAF06",
+    "#FFAF06",
+    "#FF8C11",
+    "#FF691D",
+    "#FF4628",
+    "#FF2334",
+    "#FF003F",
+  ],
+  12: [
+    "#FF003F",
+    "#FF2034",
+    "#FF6020",
+    "#FF6020",
+    "#FF8015",
+    "#FFA00B",
+    "#FFC000",
+    "#FFA00B",
+    "#FF8015",
+    "#FF6020",
+    "#FF6020",
+    "#FF2034",
+    "#FF003F",
+  ],
+  13: [
+    "#FF003F",
+    "#FF1E35",
+    "#FF3B2C",
+    "#FF5922",
+    "#FF7618",
+    "#FF940F",
+    "#FFB105",
+    "#FFB105",
+    "#FF940F",
+    "#FF7618",
+    "#FF5922",
+    "#FF3B2C",
+    "#FF1E35",
+    "#FF003F",
+  ],
+  14: [
+    "#FF003F",
+    "#FF1B36",
+    "#FF372D",
+    "#FF5224",
+    "#FF6E1B",
+    "#FF8912",
+    "#FFA509",
+    "#FFC000",
+    "#FFA509",
+    "#FF8912",
+    "#FF6E1B",
+    "#FF5224",
+    "#FF372D",
+    "#FF1B36",
+    "#FF003F",
+  ],
+  15: [
+    "#FF003F",
+    "#FF1A37",
+    "#FF332E",
+    "#FF4D26",
+    "#FF661D",
+    "#FF8015",
+    "#FF9A0D",
+    "#FFB304",
+    "#FFB304",
+    "#FF9A0D",
+    "#FF8015",
+    "#FF661D",
+    "#FF4D26",
+    "#FF332E",
+    "#FF1A37",
+    "#FF003F",
+  ],
+  16: [
+    "#FF003F",
+    "#FF1837",
+    "#FF302F",
+    "#FF4827",
+    "#FF6020",
+    "#FF7818",
+    "#FF9010",
+    "#FFA808",
+    "#FFC000",
+    "#FFA808",
+    "#FF9010",
+    "#FF7818",
+    "#FF6020",
+    "#FF4827",
+    "#FF302F",
+    "#FF1837",
+    "#FF003F",
+  ],
+};
+
 function getRandomFromFallMap(input: number): number {
   type FallMapType = {
     [key: number]: number[][];
@@ -82,115 +266,75 @@ function getRandomFromFallMap(input: number): number {
   return randomNumber;
 }
 
-export type LinesType = 8;
-
-export type RisksType = "Low" | "Medium" | "High";
-
-type MultiplierValues = 5.6 | 2.1 | 1.1 | 1 | 0.5;
-
-const multiplierSounds = {
-  5.6: "/sounds/multiplier-good.wav",
-  2.1: "/sounds/multiplier-regular.wav",
-  1.1: "/sounds/multiplier-regular.wav",
-  1: "/sounds/multiplier-regular.wav",
-  0.5: "/sounds/multiplier-low.wav",
-} as const;
-
-const multipliers = {
-  5.6: {
-    label: "block-5.6",
-    sound: "/sounds/multiplier-good.wav",
-    img: "/assets/multipliers/multiplier5_6.png",
-  },
-  2.1: {
-    label: "block-2.1",
-    sound: "/sounds/multiplier-regular.wav",
-    img: "/assets/multipliers/multiplier2_1.png",
-  },
-  1.1: {
-    label: "block-1.1",
-    sound: "/sounds/multiplier-good.wav",
-    img: "/assets/multipliers/multiplier1_1.png",
-  },
-  1: {
-    label: "block-1",
-    sound: "/sounds/multiplier-regular.wav",
-    img: "/assets/multipliers/multiplier1.png",
-  },
-  0.5: {
-    label: "block-0.5",
-    sound: "/sounds/multiplier-low.wav",
-    img: "/assets/multipliers/multiplier0_5.png",
-  },
-} as const;
-
-type MultipliersType = keyof typeof multipliers;
-
-function getMultiplier(value: MultipliersType) {
-  return multipliers[value];
+function getMultiplier(value: number, line: number, index: number) {
+  //todo: dynamic img and sound generation
+  const color = multiplierColorMap[`${line}`][index];
+  const sound = "regular";
+  return {
+    value: value,
+    label: `block-${value}-${color.slice(1)}-${sound}-${index}`,
+    sound: "/sounds/multiplier_regular.wav",
+    img: `/assets/multipliers/multiplier1.png`,
+  };
 }
 
-const multiplyBlocks8Lines = [
-  getMultiplier(5.6),
-  getMultiplier(2.1),
-  getMultiplier(1.1),
-  getMultiplier(1),
-  getMultiplier(0.5),
-  getMultiplier(1),
-  getMultiplier(1.1),
-  getMultiplier(2.1),
-  getMultiplier(5.6),
-];
-
-const multiplyBlocksByLinesQnt = {
-  8: multiplyBlocks8Lines,
-};
-
-function getMultiplierByLinesQnt(value: LinesType) {
-  return multiplyBlocksByLinesQnt[value];
+function getMultiplierByLinesQnt(value: LinesType, risk: RisksType) {
+  return riskToChance[risk.toLowerCase()][value].map((multiplier, index) =>
+    getMultiplier(multiplier, value, index),
+  );
 }
-
-function getMultiplierSound(value: MultiplierValues): string {
-  return multiplierSounds[value];
-}
-
-const pins = {
-  startPins: 3,
-  pinSize: 8,
-  pinGap: 51,
-};
-
-const ball = {
-  ballSize: 10,
-};
-
-const engine = {
-  engineGravity: 1.4,
-};
-
-const colors = {
-  background: "#0C0F16",
-  purple: "#C52BFF",
-} as const;
-
-const configPlinko = {
-  pins,
-  ball,
-  engine,
-  colors,
-};
 
 export default function Plinko() {
   const { data: session, status } = useSession();
   const { width, height } = useWindowSize();
+  const [lines, setLines] = useState<LinesType>(8);
+
   const world = {
-    width: 600,
-    height: 600,
+    width:
+      width! >= 1440
+        ? 750
+        : width! >= 1024
+        ? 500
+        : width! >= 700
+        ? 620
+        : width! >= 600
+        ? 500
+        : 340,
+    height:
+      width! >= 1440
+        ? 640
+        : width! >= 1024
+        ? 450
+        : width! >= 700
+        ? 570
+        : width! >= 600
+        ? 450
+        : 330,
   };
 
-  const worldMobile = {
-    width: 300,
-    height: 300,
+  const ball = {
+    ballSize:
+      (width! >= 1440
+        ? 15
+        : width! >= 1024
+        ? 11
+        : width! >= 700
+        ? 13
+        : width! >= 600
+        ? 11
+        : 6) /
+      (lines / 8),
+  };
+
+  const configPlinko = {
+    ball,
+    engine: {
+      engineGravity: 1.4,
+    },
+    colors: {
+      background: "#0C0F16",
+      purple: "#C52BFF",
+    },
   };
 
   const wallet = useWallet();
@@ -219,13 +363,12 @@ export default function Plinko() {
     houseEdge,
     maxBetAmt,
     language,
+    selectedCoin,
   } = useGlobalContext();
 
-  const [user, setUser] = useState<any>(null);
   const [betAmt, setBetAmt] = useState<number | undefined>();
   const [userInput, setUserInput] = useState<number | undefined>();
-  const [risk, setRisk] = useState<"low" | "medium" | "high">("low");
-  const [segments, setSegments] = useState<number>(10);
+  const [risk, setRisk] = useState<RisksType>("Low");
   const [result, setResult] = useState<{
     success: boolean;
     message: string;
@@ -233,33 +376,48 @@ export default function Plinko() {
     strikeMultiplier: number;
     strikeNumber: number;
   } | null>(null);
-
   const [loading, setLoading] = useState(false);
   const [refresh, setRefresh] = useState(true);
-
   const [betSetting, setBetSetting] = useState<"manual" | "auto">("manual");
   const [betResults, setBetResults] = useState<
     { result: number; win: boolean }[]
   >([]);
-
-  const engine = Engine.create();
-  const [lines, setLines] = useState<LinesType>(8);
-  const [risks, setRisks] = useState<RisksType>("Low");
-  const [lastMultipliers, setLastMultipliers] = useState<number[]>([]);
-  const [gamesRunning, setGamesRunning] = useState(0);
-  const [inGameBallsCount, setInGameBallsCount] = useState(gamesRunning);
+  const [lastMultipliers, setLastMultipliers] = useState<MultiplierHistory[]>(
+    [],
+  );
+  const [inGameBallsCount, setInGameBallsCount] = useState<number>(0);
   const incrementInGameBallsCount = () => {
     setInGameBallsCount(inGameBallsCount + 1);
   };
   const decrementInGameBallsCount = () => {
     setInGameBallsCount(inGameBallsCount - 1);
   };
+  const engine = Engine.create();
   const { colors, ball: ballConfig, engine: engineConfig } = configPlinko;
-
   const pinsConfig = {
     startPins: 3,
-    pinSize: width! < 400 ? 2 : 8,
-    pinGap: width! < 400 ? 20 : 51,
+    pinSize:
+      (width! >= 1440
+        ? 9
+        : width! >= 1024
+        ? 6
+        : width! >= 700
+        ? 8
+        : width! >= 600
+        ? 6
+        : 6) /
+      (lines / 8),
+    pinGap:
+      (width! >= 1440
+        ? 75
+        : width! >= 1024
+        ? 50
+        : width! >= 700
+        ? 65
+        : width! >= 600
+        ? 50
+        : 35) /
+      (lines / 8),
   };
 
   const worldWidth: number = world.width;
@@ -299,7 +457,7 @@ export default function Plinko() {
       render.canvas.remove();
       render.textures = {};
     };
-  }, [lines]);
+  }, [lines, width]);
 
   const pins: Body[] = [];
 
@@ -313,8 +471,7 @@ export default function Plinko() {
         i * pinsConfig.pinGap +
         pinsConfig.pinGap / 2;
 
-      const pinY =
-        worldWidth / lines + l * pinsConfig.pinGap + pinsConfig.pinGap - 60;
+      const pinY = l * pinsConfig.pinGap + 20;
 
       const pin = Bodies.circle(pinX, pinY, pinsConfig.pinSize, {
         label: `pin-${i}`,
@@ -372,38 +529,67 @@ export default function Plinko() {
       });
       Composite.add(engine.world, ball);
     },
-    [lines],
+    [lines, width],
   );
 
-  const floor = Bodies.rectangle(0, worldWidth + 10, worldWidth * 10, 350, {
-    label: "block-1",
-    render: {
-      visible: false,
+  const floor = Bodies.rectangle(
+    0,
+    lines * pinsConfig.pinGap + 150,
+    worldWidth * 10,
+    60 / (lines / 8),
+    {
+      label: "block-1",
+      render: {
+        visible: false,
+      },
+      isStatic: true,
     },
-    isStatic: true,
-  });
+  );
 
-  const multipliers = getMultiplierByLinesQnt(lines);
+  const multipliers = getMultiplierByLinesQnt(lines, risk);
 
   const multipliersBodies: Body[] = [];
 
   let lastMultiplierX: number =
     worldWidth / 2 - (pinsConfig.pinGap / 2) * lines - pinsConfig.pinGap;
 
+  let scaleX =
+    width! >= 1440
+      ? 1.25
+      : width! >= 1024
+      ? 0.8
+      : width! >= 700
+      ? 1.1
+      : width! >= 600
+      ? 0.8
+      : 0.6;
+
   multipliers.forEach((multiplier) => {
-    const blockSize = 60; // height and width
+    const blockSize = 60 / (lines / 8); // height and width
     const multiplierBody = Bodies.rectangle(
-      lastMultiplierX + 51,
-      worldWidth / lines + lines * pinsConfig.pinGap + pinsConfig.pinGap - 68,
+      lastMultiplierX +
+        (width! >= 1440
+          ? 75
+          : width! >= 1024
+          ? 50
+          : width! >= 700
+          ? 65
+          : width! >= 600
+          ? 50
+          : 35) /
+          (lines / 8),
+      lines * pinsConfig.pinGap + 15,
       blockSize,
       blockSize,
       {
         label: multiplier.label,
         isStatic: true,
+        restitution: 0,
         render: {
+          visible: false,
           sprite: {
-            xScale: 0.8,
-            yScale: 0.8,
+            xScale: scaleX / (lines / 8),
+            yScale: scaleX / (lines / 8),
             texture: multiplier.img,
           },
         },
@@ -419,20 +605,58 @@ export default function Plinko() {
     ball.collisionFilter.group = 2;
     World.remove(engine.world, ball);
     removeInGameBall();
-    const ballValue = ball.label.split("-")[1];
-    const multiplierValue = +multiplier.label.split("-")[1] as MultiplierValues;
 
-    const multiplierSong = new Audio(getMultiplierSound(multiplierValue));
+    const multiplierElement = document.getElementById(multiplier.label);
+
+    if (multiplierElement) {
+      const originalTop = multiplierElement.offsetTop;
+      const dropDistance = 20;
+
+      const animationKeyframes = [
+        { transform: "translateY(0)" },
+        { transform: `translateY(${dropDistance}px)` },
+        { transform: "translateY(0)" },
+      ];
+
+      const animationTiming = {
+        duration: 500,
+        easing: "ease-in-out",
+      };
+
+      const animationPromise = multiplierElement.animate(
+        animationKeyframes,
+        animationTiming,
+      ).finished;
+
+      await animationPromise;
+    }
+
+    const ballValue = ball.label.split("-")[1];
+
+    const multiplierValues = multiplier.label.split("-");
+    const multiplierValue = +multiplierValues[1];
+    const multiplierColor = multiplierValues[2] ?? "#ffffff";
+    const multiplierSound = multiplierValues[3] ?? "regular";
+
+    const multiplierSong = new Audio(
+      `/sounds/multiplier_${multiplierSound}.wav`,
+    );
     multiplierSong.currentTime = 0;
     multiplierSong.volume = 0.2;
     multiplierSong.play();
-    setLastMultipliers((prev) => [multiplierValue, prev[0], prev[1], prev[2]]);
+    setLastMultipliers((prev) => [
+      { color: `#${multiplierColor}`, value: multiplierValue },
+      prev[0],
+      prev[1],
+      prev[2],
+    ]);
 
     if (+ballValue <= 0) return;
   }
   async function onBodyCollision(event: IEventCollision<Engine>) {
     const pairs = event.pairs;
     for (const pair of pairs) {
+      console.log("colliding", pair);
       const { bodyA, bodyB } = pair;
       if (bodyB.label.includes("ball") && bodyA.label.includes("block"))
         await onCollideWithMultiplier(bodyB, bodyA);
@@ -478,7 +702,7 @@ export default function Plinko() {
       if (!betAmt || betAmt === 0) {
         throw new Error("Set Amount.");
       }
-      if (coinData && coinData[0].amount < betAmt) {
+      if (selectedCoin && selectedCoin.amount < betAmt) {
         throw new Error("Insufficient balance for bet !");
       }
       setLoading(true);
@@ -491,13 +715,15 @@ export default function Plinko() {
           wallet: wallet.publicKey,
           amount: betAmt,
           tokenMint: "SOL",
-          rows: segments,
-          risk: risk,
+          rows: lines,
+          risk: risk.toLowerCase(),
         }),
       });
 
       const { success, message, result, strikeMultiplier, strikeNumber } =
         await response.json();
+
+      if (!success) throw new Error(message);
       // console.log(success, message, result, strikeMultiplier, strikeNumber);
       setResult({ success, message, result, strikeMultiplier, strikeNumber });
       addBall(1, getRandomFromFallMap(strikeMultiplier));
@@ -588,10 +814,14 @@ export default function Plinko() {
         autoBetProfit > 0 &&
         autoBetProfit >= autoStopProfit
       ) {
-        warningCustom("Profit limit reached.", "top-right");
+        setTimeout(() => {
+          warningCustom(
+            translator("Profit limit reached.", language),
+            "top-left",
+          );
+        }, 500);
         setAutoBetCount(0);
         setStartAuto(false);
-        setUserInput(betAmt);
         return;
       }
       if (
@@ -600,7 +830,12 @@ export default function Plinko() {
         autoBetProfit < 0 &&
         potentialLoss <= -autoStopLoss
       ) {
-        warningCustom("Loss limit reached.", "top-right");
+        setTimeout(() => {
+          warningCustom(
+            translator("Loss limit reached.", language),
+            "top-left",
+          );
+        }, 500);
         setAutoBetCount(0);
         setStartAuto(false);
         return;
@@ -614,29 +849,31 @@ export default function Plinko() {
   }, [startAuto, autoBetCount]);
 
   const onSubmit = async (data: any) => {
-    // if (betSetting === "auto") {
-    //   if (betAmt === 0) {
-    //     errorCustom("Set Amount.");
-    //     return;
-    //   }
-    //   if (typeof autoBetCount === "number" && autoBetCount <= 0) {
-    //     errorCustom("Set Bet Count.");
-    //     return;
-    //   }
-    //   if (
-    //     (typeof autoBetCount === "string" && autoBetCount.includes("inf")) ||
-    //     (typeof autoBetCount === "number" && autoBetCount > 0)
-    //   ) {
-    //     // console.log("Auto betting. config: ", useAutoConfig);
-    //     setStartAuto(true);
-    //   }
-    // } else if (wallet.connected) handleBet();
-    addBall(1, 0);
+    if (betSetting === "auto") {
+      if (betAmt === 0) {
+        errorCustom(translator("Set Amount.", language));
+        return;
+      }
+      if (typeof autoBetCount === "number" && autoBetCount <= 0) {
+        errorCustom(translator("Set Bet Count.", language));
+        return;
+      }
+      if (
+        (typeof autoBetCount === "string" && autoBetCount.includes("inf")) ||
+        (typeof autoBetCount === "number" && autoBetCount > 0)
+      ) {
+        // console.log("Auto betting. config: ", useAutoConfig);
+        setStartAuto(true);
+      }
+    } else if (wallet.connected) handleBet();
+    // addBall(1, 0.5);
   };
 
   const disableInput = useMemo(() => {
-    return betSetting === "auto" && startAuto ? true : false || loading;
-  }, [betSetting, startAuto, loading]);
+    return (
+      (betSetting === "auto" && startAuto) || loading || inGameBallsCount > 0
+    );
+  }, [betSetting, startAuto, loading, inGameBallsCount]);
 
   return (
     <GameLayout title="FOMO - Plinko">
@@ -661,7 +898,7 @@ export default function Plinko() {
                 !wallet ||
                 !session?.user ||
                 loading ||
-                (coinData && coinData[0].amount < minGameAmount) ||
+                disableInput ||
                 (betAmt !== undefined &&
                   maxBetAmt !== undefined &&
                   betAmt > maxBetAmt)
@@ -713,10 +950,10 @@ export default function Plinko() {
                   <div className="flex lg:flex-row flex-col gap-2.5 w-full items-center justify-evenly rounded-[8px] text-white font-chakra text-sm font-semibold bg-[#0C0F16] p-4">
                     <div className="flex lg:w-[66.66%] w-full gap-2.5">
                       <button
-                        onClick={() => setRisk("low")}
+                        onClick={() => setRisk("Low")}
                         type="button"
                         className={`text-center w-full rounded-[5px] border-[2px] disabled:cursor-not-allowed disabled:opacity-50 bg-[#202329] py-2 text-xs font-chakra text-white text-opacity-90 transition duration-200 ${
-                          risk === "low"
+                          risk === "Low"
                             ? "border-[#7839C5]"
                             : "border-transparent hover:border-[#7839C580]"
                         }`}
@@ -725,10 +962,10 @@ export default function Plinko() {
                         {translator("Low", language)}
                       </button>
                       <button
-                        onClick={() => setRisk("medium")}
+                        onClick={() => setRisk("Medium")}
                         type="button"
                         className={`text-center w-full rounded-[5px] border-[2px] disabled:cursor-not-allowed disabled:opacity-50 bg-[#202329] py-2 text-xs font-chakra text-white text-opacity-90 transition duration-200 ${
-                          risk === "medium"
+                          risk === "Medium"
                             ? "border-[#7839C5]"
                             : "border-transparent hover:border-[#7839C580]"
                         }`}
@@ -738,10 +975,10 @@ export default function Plinko() {
                       </button>
                     </div>
                     <button
-                      onClick={() => setRisk("high")}
+                      onClick={() => setRisk("High")}
                       type="button"
                       className={`text-center lg:w-[33.33%] w-full rounded-[5px] border-[2px] disabled:cursor-not-allowed disabled:opacity-50 bg-[#202329] py-2 text-xs font-chakra text-white text-opacity-90 transition duration-200 ${
-                        risk === "high"
+                        risk === "High"
                           ? "border-[#7839C5]"
                           : "border-transparent hover:border-[#7839C580]"
                       }`}
@@ -755,8 +992,8 @@ export default function Plinko() {
                 {/* rows  */}
                 <div className="mb-6 w-full">
                   <div className="flex justify-between text-xs mb-2 font-medium font-changa text-[#F0F0F0] text-opacity-90">
-                    <p className="">{translator("Segments", language)}</p>
-                    <p className="text-[#94A3B8] text-sm">{segments}</p>
+                    <p className="">{translator("Rows", language)}</p>
+                    <p className="text-[#94A3B8] text-sm">{lines}</p>
                   </div>
                   <div className="relative h-[5px] rounded-full bg-[#2A2E38] w-full mt-5">
                     <input
@@ -765,13 +1002,15 @@ export default function Plinko() {
                       max={16}
                       step={1}
                       disabled={loading || startAuto || disableInput}
-                      value={segments}
-                      onChange={(e) => setSegments(parseInt(e.target.value))}
+                      value={lines}
+                      onChange={(e) =>
+                        setLines(parseInt(e.target.value) as LinesType)
+                      }
                       className="defaultSlider absolute top-[-8px] w-full bg-transparent appearance-none z-20 disabled:cursor-not-allowed disabled:opacity-50"
                     />
                     <div
                       className="absolute rounded-l-full h-[5px] bg-[#9945ff] z-10"
-                      style={{ width: `${((segments - 8) * 100) / 8}%` }}
+                      style={{ width: `${((lines - 8) * 100) / 8}%` }}
                     ></div>
                   </div>
                 </div>
@@ -806,7 +1045,7 @@ export default function Plinko() {
                       !wallet ||
                       !session?.user ||
                       loading ||
-                      (coinData && coinData[0].amount < minGameAmount) ||
+                      disableInput ||
                       (betAmt !== undefined &&
                         maxBetAmt !== undefined &&
                         betAmt > maxBetAmt)
@@ -838,8 +1077,54 @@ export default function Plinko() {
             ) : null}
           </div>
           <MultiplierHistory multiplierHistory={lastMultipliers} />
-          <div id="plinko" />
-          <div id="plinko-base" />
+          <div className="relative">
+            <div id="plinko" className="border border-red-700" />
+            <div
+              style={{
+                position: "absolute",
+                width: world.width,
+                height: world.height,
+                top: 0,
+                left: 0,
+                zIndex: 100,
+              }}
+            >
+              {multipliersBodies.map((multiplierBody, index) => (
+                <div
+                  key={multiplierBody.label}
+                  id={multiplierBody.label}
+                  style={{
+                    position: "absolute",
+                    left: `${
+                      multiplierBody.position.x -
+                      (multiplierBody?.render?.sprite?.xScale ?? 1) * 27
+                    }px`,
+                    top: `${
+                      multiplierBody.position.y -
+                      (multiplierBody?.render?.sprite?.yScale ?? 1) * 27
+                    }px`,
+                    width: `${
+                      (multiplierBody?.render?.sprite?.xScale ?? 1) * 55
+                    }px`,
+                    height: `${
+                      (multiplierBody?.render?.sprite?.yScale ?? 1) *
+                      55 *
+                      (lines / 16)
+                    }px`,
+                    background: "#202329",
+                    borderTop: "0.2rem solid",
+                    borderColor: multiplierColorMap[`${lines}`][index],
+                    color: multiplierColorMap[`${lines}`][index],
+                    borderRadius: "0.32rem",
+                  }}
+                  className="flex items-center justify-center font-semibold text-xs"
+                >
+                  {multipliers[index].value}
+                </div>
+              ))}
+            </div>
+          </div>
+          <div id="plinko-base" className="bg-red-200" />
         </>
       </GameDisplay>
       <GameTable>

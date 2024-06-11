@@ -95,12 +95,18 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           success: false,
           message: "Invalid bet amount",
         });
-
       if (
         tokenMint !== "SOL" ||
         //TODO: change rows depending on ui
-        !(Number.isInteger(rows) && rows === 8) ||
-        !(risk === "low" || risk === "medium" || risk === "high")
+        !(
+          Number.isInteger(rows) &&
+          [8, 9, 10, 11, 12, 13, 14, 15, 16].includes(rows)
+        ) ||
+        !(
+          risk.toLowerCase() === "low" ||
+          risk.toLowerCase() === "medium" ||
+          risk.toLowerCase() === "high"
+        )
       )
         return res
           .status(400)

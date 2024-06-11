@@ -28,7 +28,6 @@ export default function FomoPlay() {
       href: "/limbo",
       src: "/assets/game-cards/limbo.png",
     },
-
     {
       href: "/keno",
       src: "/assets/game-cards/keno.png",
@@ -40,6 +39,10 @@ export default function FomoPlay() {
     {
       href: "/mines",
       src: "/assets/game-cards/mines.png",
+    },
+    {
+      href: "/plinko",
+      src: "/assets/game-cards/plinko.png",
     },
   ];
 
