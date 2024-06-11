@@ -22,13 +22,16 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
     await connectDatabase();
 
-    const referral = await Referral.findOne({ wallet });
-    const referred = await Referral.find({
-      referredByChain: { $in: [referral._id] },
-    });
+    const user = await Referral.findOne({ wallet });
+    const referred = !user
+      ? null
+      : await Referral.find({
+          referredByChain: { $in: [user._id] },
+        }).lean();
 
     return res.json({
       success: true,
+      user,
       data: referred,
       message: `Data fetch successful!`,
     });
