@@ -264,7 +264,7 @@ export const maxPayouts: {
   },
 };
 
-export const commissionLevels = {
+export const commissionLevels: Record<number, number> = {
   0: 25,
   1: 3.5,
   2: 2.5,

@@ -32,6 +32,7 @@ const ReferralSchema = new Schema(
       },
     ],
     volume: [AmountSchema],
+    feeGenerated: [AmountSchema],
     totalEarnings: [AmountSchema],
     unclaimedEarnings: [AmountSchema],
   },

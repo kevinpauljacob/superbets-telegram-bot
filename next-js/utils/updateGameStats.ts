@@ -1,7 +1,9 @@
-import GameStats from "@/models/games/gameStats";
+import { commissionLevels } from "@/context/transactions";
+import { GameStats, Referral } from "@/models/games";
 import { GameType } from "@/utils/provably-fair";
 
 async function updateGameStats(
+  wallet: string,
   game: GameType,
   tokenMint: string,
   amount: number,
@@ -46,6 +48,33 @@ async function updateGameStats(
           },
         },
       );
+  }
+
+  const referralInfo = await Referral.findOneAndUpdate(
+    { wallet },
+    {
+      $inc: {
+        [`volume.${tokenMint}`]: amount,
+        [`feeGenerated.${tokenMint}`]: feeGenerated,
+      },
+    },
+    { upsert: true, new: true },
+  );
+  if (!referralInfo?.referredByChain) return;
+
+  for (let i = 0; i < referralInfo.referredByChain.length; i++) {
+    const _id = referralInfo.referredByChain[i];
+
+    const earnings = commissionLevels[i] * feeGenerated;
+    await Referral.findOneAndUpdate(
+      { _id },
+      {
+        $inc: {
+          [`totalEarnings.${tokenMint}`]: earnings,
+          [`unclaimedEarnings.${tokenMint}`]: earnings,
+        },
+      },
+    );
   }
 }
 

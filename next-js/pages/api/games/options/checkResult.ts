@@ -145,6 +145,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           .json({ success: false, message: "Game already concluded!" });
 
       await updateGameStats(
+        wallet,
         GameType.options,
         tokenMint,
         0,

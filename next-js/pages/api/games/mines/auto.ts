@@ -259,6 +259,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           .json({ success: false, message: "Pending game found!" });
 
       await updateGameStats(
+        wallet,
         GameType.mines,
         tokenMint,
         amount,

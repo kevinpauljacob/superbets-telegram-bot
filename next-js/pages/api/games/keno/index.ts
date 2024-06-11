@@ -244,6 +244,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       await keno.save();
 
       await updateGameStats(
+        wallet,
         GameType.keno,
         tokenMint,
         amount,
