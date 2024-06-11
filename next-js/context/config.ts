@@ -284,7 +284,6 @@ if (environment === "development") {
   launchPromoEdge = false;
   maintainance = false;
 } else if (environment === "production") {
-  //TODO: Add production config
   maxPayouts = {
     [GameTokens.SOL]: {
       [GameType.dice]: 1,
@@ -301,44 +300,44 @@ if (environment === "development") {
       [GameType.hilo]: 1,
     },
     [GameTokens.FOMO]: {
-      [GameType.dice]: 1,
-      [GameType.coin]: 1,
-      [GameType.options]: 1,
-      [GameType.dice2]: 1,
-      [GameType.wheel]: 1,
-      [GameType.plinko]: 1,
-      [GameType.limbo]: 1,
-      [GameType.roulette1]: 1,
-      [GameType.roulette2]: 1,
-      [GameType.keno]: 1,
-      [GameType.mines]: 1,
-      [GameType.hilo]: 1,
+      [GameType.dice]: 7500,
+      [GameType.coin]: 7500,
+      [GameType.options]: 7500,
+      [GameType.dice2]: 7500,
+      [GameType.wheel]: 7500,
+      [GameType.plinko]: 7500,
+      [GameType.limbo]: 7500,
+      [GameType.roulette1]: 7500,
+      [GameType.roulette2]: 7500,
+      [GameType.keno]: 7500,
+      [GameType.mines]: 7500,
+      [GameType.hilo]: 7500,
     },
     [GameTokens.USDC]: {
-      [GameType.dice]: 1,
-      [GameType.coin]: 1,
-      [GameType.options]: 1,
-      [GameType.dice2]: 1,
-      [GameType.wheel]: 1,
-      [GameType.plinko]: 1,
-      [GameType.limbo]: 1,
-      [GameType.roulette1]: 1,
-      [GameType.roulette2]: 1,
-      [GameType.keno]: 1,
-      [GameType.mines]: 1,
-      [GameType.hilo]: 1,
+      [GameType.dice]: 125,
+      [GameType.coin]: 125,
+      [GameType.options]: 125,
+      [GameType.dice2]: 125,
+      [GameType.wheel]: 125,
+      [GameType.plinko]: 125,
+      [GameType.limbo]: 125,
+      [GameType.roulette1]: 125,
+      [GameType.roulette2]: 125,
+      [GameType.keno]: 125,
+      [GameType.mines]: 125,
+      [GameType.hilo]: 125,
     },
   };
 
-  wsEndpoint = "";
+  wsEndpoint = "wss://ws.fomowtf.com";
 
-  minGameAmount = 0.000001;
+  minGameAmount = 0.001;
 
   timeWeightedAvgInterval = 24 * 60 * 60 * 1000;
   timeWeightedAvgLimit = {
     SOL: 50,
-    USDC: 100,
-    FOMO: 10000,
+    USDC: 500,
+    FOMO: 30000,
   };
   userLimitMultiplier = 5;
 
