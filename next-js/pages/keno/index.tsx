@@ -24,7 +24,6 @@ import {
   warningCustom,
 } from "@/components/toasts/ToastGroup";
 import { translator, truncateNumber } from "@/context/transactions";
-import { minGameAmount } from "@/context/config";
 import { useSession } from "next-auth/react";
 import { GameType } from "@/utils/provably-fair";
 import { handleSignIn } from "@/components/ConnectWallet";
@@ -62,6 +61,7 @@ export default function Keno() {
     setLiveStats,
     enableSounds,
     setShowWalletModal,
+    minGameAmount
   } = useGlobalContext();
   const [betAmt, setBetAmt] = useState<number | undefined>();
   const [userInput, setUserInput] = useState<number | undefined>();

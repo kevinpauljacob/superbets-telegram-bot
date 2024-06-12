@@ -10,15 +10,15 @@ import {
   GameTokens,
 } from "@/utils/provably-fair";
 import StakingUser from "@/models/staking/user";
+import { isArrayUnique } from "@/context/transactions";
 import {
   houseEdgeTiers,
-  isArrayUnique,
-  launchPromoEdge,
-  maintainance,
   maxPayouts,
+  minAmtFactor,
   pointTiers,
   stakingTiers,
-} from "@/context/transactions";
+} from "@/context/config";
+import { launchPromoEdge, maintainance } from "@/context/config";
 import { minGameAmount, wsEndpoint } from "@/context/config";
 import { riskToChance } from "@/components/games/Keno/RiskToChance";
 import { Decimal } from "decimal.js";
@@ -46,6 +46,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     try {
       let { wallet, amount, tokenMint, chosenNumbers, risk }: InputType =
         req.body;
+
+      const minGameAmount =
+        maxPayouts[tokenMint as GameTokens]["keno" as GameType] * minAmtFactor;
 
       if (maintainance)
         return res.status(400).json({

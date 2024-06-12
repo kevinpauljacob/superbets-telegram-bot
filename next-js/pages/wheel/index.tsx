@@ -27,7 +27,6 @@ import {
   warningCustom,
 } from "@/components/toasts/ToastGroup";
 import { translator, truncateNumber } from "@/context/transactions";
-import { minGameAmount } from "@/context/config";
 import { useSession } from "next-auth/react";
 import { GameType } from "@/utils/provably-fair";
 import { handleSignIn } from "@/components/ConnectWallet";
@@ -64,6 +63,7 @@ export default function Wheel() {
     liveStats,
     enableSounds,
     setShowWalletModal,
+    minGameAmount,
   } = useGlobalContext();
   const [betAmt, setBetAmt] = useState<number | undefined>();
   const [userInput, setUserInput] = useState<number | undefined>();
@@ -104,14 +104,14 @@ export default function Wheel() {
     segments === 10
       ? 0
       : segments === 20
-        ? 25
-        : segments === 30
-          ? 50
-          : segments === 40
-            ? 75
-            : segments === 50
-              ? 100
-              : null;
+      ? 25
+      : segments === 30
+      ? 50
+      : segments === 40
+      ? 75
+      : segments === 50
+      ? 100
+      : null;
 
   useEffect(() => {
     if (!wheelRef.current) return;
@@ -211,8 +211,8 @@ export default function Wheel() {
               ? liveStats[liveStats.length - 1].totalPNL +
                 (win ? betAmt * strikeMultiplier - betAmt : -betAmt)
               : win
-                ? betAmt * strikeMultiplier - betAmt
-                : -betAmt,
+              ? betAmt * strikeMultiplier - betAmt
+              : -betAmt,
         },
       ]);
 
@@ -302,9 +302,9 @@ export default function Wheel() {
             (autoWinChangeReset || autoLossChangeReset
               ? betAmt
               : autoBetCount === "inf"
-                ? Math.max(0, betAmt)
-                : betAmt *
-                  (autoLossChange !== null ? autoLossChange / 100.0 : 0));
+              ? Math.max(0, betAmt)
+              : betAmt *
+                (autoLossChange !== null ? autoLossChange / 100.0 : 0));
 
         // console.log("Current bet amount:", betAmt);
         // console.log("Auto loss change:", autoLossChange);

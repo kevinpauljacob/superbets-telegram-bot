@@ -3,12 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useWallet } from "@solana/wallet-adapter-react";
-import {
-  connection,
-  fomoToken,
-  translator,
-  truncateNumber,
-} from "@/context/transactions";
+import { translator, truncateNumber } from "@/context/transactions";
 import { useGlobalContext } from "./GlobalContext";
 import Home from "@/public/assets/sidebar-icons/Home";
 import FomoExitIcon from "@/public/assets/sidebar-icons/FomoExitIcon";
@@ -21,6 +16,7 @@ import Twitter from "@/public/assets/Twitter";
 import Birdeye from "@/public/assets/Birdeye";
 import Telegram from "@/public/assets/Telegram";
 import FomoExitSidebar from "./FomoExitSidebar";
+import { SPL_TOKENS } from "@/context/config";
 
 export type Game = {
   src: string;
@@ -316,6 +312,9 @@ export const OpenSidebar = ({
   const [priceChange24h, setPriceChange24h] = useState(0);
   const { language, setFomoPrice } = useGlobalContext();
 
+  const fomoToken = SPL_TOKENS.find(
+    (token) => token.tokenName === "FOMO",
+  )?.tokenMint!;
   const url = `https://api.dexscreener.com/latest/dex/tokens/${fomoToken}`;
   useEffect(() => {
     /// code added to fetch fomo price

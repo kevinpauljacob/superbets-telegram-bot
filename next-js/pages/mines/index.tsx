@@ -25,7 +25,6 @@ import {
   warningCustom,
 } from "@/components/toasts/ToastGroup";
 import { translator, truncateNumber } from "@/context/transactions";
-import { minGameAmount } from "@/context/config";
 import { useSession } from "next-auth/react";
 import user from "@/models/staking/user";
 import Decimal from "decimal.js";
@@ -65,6 +64,7 @@ export default function Mines() {
     setLiveStats,
     liveStats,
     enableSounds,
+    minGameAmount,
   } = useGlobalContext();
   const [betAmt, setBetAmt] = useState<number | undefined>();
   const [userInput, setUserInput] = useState<number | undefined>();
@@ -352,18 +352,25 @@ export default function Mines() {
         setIsRolling(false);
       }
     } catch (error: any) {
+      if (
+        error.message != "Max payout of 25 exceeded! Cashout to continue..."
+      ) {
+        setNumBets(0);
+        setCurrentMultiplier(0);
+        setNextMultiplier(0);
+        setStrikeMultiplier(1);
+        setCurrentProfit(0);
+        setNextProfit(0);
+        setAmountWon(0);
+        setBetActive(false);
+        setIsRolling(false);
+        setProcessing(false);
+        setPendingRequests([]);
+      } else {
+        setRefresh(true);
+        setIsRolling(false);
+      }
       errorCustom(error.message);
-      setNumBets(0);
-      setCurrentMultiplier(0);
-      setNextMultiplier(0);
-      setStrikeMultiplier(1);
-      setCurrentProfit(0);
-      setNextProfit(0);
-      setAmountWon(0);
-      setBetActive(false);
-      setIsRolling(false);
-      setProcessing(false);
-      setPendingRequests([]);
       console.error("Error occurred while betting:", error);
     }
   };
@@ -930,7 +937,11 @@ export default function Mines() {
                           alt="arrowDown"
                           width={14}
                           height={14}
-                          className={`${dropDown ? "transform transition-all rotate-180" : "transition-all"}`}
+                          className={`${
+                            dropDown
+                              ? "transform transition-all rotate-180"
+                              : "transition-all"
+                          }`}
                         />
                       </div>
                       {dropDown && (
@@ -1038,7 +1049,11 @@ export default function Mines() {
                               alt="arrowDown"
                               width={14}
                               height={14}
-                              className={`${dropDown ? "transform transition-all rotate-180" : "transition-all"}`}
+                              className={`${
+                                dropDown
+                                  ? "transform transition-all rotate-180"
+                                  : "transition-all"
+                              }`}
                             />
                           </div>
                           {!startAuto && dropDown && (
