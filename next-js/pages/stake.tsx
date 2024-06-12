@@ -109,7 +109,7 @@ export default function Stake() {
                   {translator("Total FOMO Staked", language)}
                 </span>
                 <div className="flex w-full mt-3 sm:mt-0 justify-end sm:justify-start items-end gap-2 font-chakra">
-                  <span className="text-white text-opacity-80 text-2xl sm:text-2xl font-semibold">
+                  <span className="flex items-center gap-1 text-white text-opacity-80 text-2xl sm:text-2xl font-semibold">
                     {truncateNumber(globalInfo?.stakedTotal)}{" "}
                     <span className="hidden sm:block">$FOMO</span>
                   </span>

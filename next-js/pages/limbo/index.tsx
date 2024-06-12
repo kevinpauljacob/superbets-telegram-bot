@@ -79,9 +79,8 @@ export default function Limbo() {
     houseEdge,
     maxBetAmt,
     language,
-    setLiveStats,
-    liveStats,
     enableSounds,
+    updatePNL,
     minGameAmount,
   } = useGlobalContext();
 
@@ -141,24 +140,14 @@ export default function Limbo() {
             return newResults;
           });
 
-          setLiveStats([
-            ...liveStats,
-            {
-              game: GameType.limbo,
-              amount: betAmt!,
-              result: newBetResult.win ? "Won" : "Lost",
-              pnl: newBetResult.win
-                ? betAmt! * targetMultiplier - betAmt!
-                : -betAmt!,
-              totalPNL:
-                liveStats.length > 0
-                  ? liveStats[liveStats.length - 1].totalPNL +
-                    (win ? betAmt! * targetMultiplier - betAmt! : -betAmt!)
-                  : win
-                    ? betAmt! * targetMultiplier - betAmt!
-                    : -betAmt!,
-            },
-          ]);
+          if (betAmt) {
+            updatePNL(
+              GameType.limbo,
+              newBetResult.win,
+              betAmt,
+              inputMultiplier,
+            );
+          }
 
           // auto options
           if (betSetting === "auto" && betAmt !== undefined) {
@@ -228,7 +217,7 @@ export default function Limbo() {
 
       const response = await limboBet(
         wallet,
-        betAmt!,
+        betAmt,
         inputMultiplier,
         selectedCoin.tokenMint,
       );

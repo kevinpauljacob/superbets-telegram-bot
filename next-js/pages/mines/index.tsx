@@ -61,9 +61,8 @@ export default function Mines() {
     maxBetAmt,
     language,
     selectedCoin,
-    setLiveStats,
-    liveStats,
     enableSounds,
+    updatePNL,
     minGameAmount,
   } = useGlobalContext();
   const [betAmt, setBetAmt] = useState<number | undefined>();
@@ -189,6 +188,7 @@ export default function Mines() {
           strikeMultiplier: strikeMultiplier,
           pointsGained: pointsGained,
         });
+        updatePNL(GameType.mines, win, betAmt!, strikeMultiplier);
         setGameStatus("Completed");
         setUserBets(updatedUserBetsWithResult);
         setRefresh(true);
@@ -326,25 +326,9 @@ export default function Mines() {
         soundAlert("/sounds/win.wav", !enableSounds);
         // setSelectTile(true);
       }
-      if (lose) soundAlert("/sounds/bomb.wav", !enableSounds);
-
-      if (result !== "Pending") {
-        setLiveStats([
-          ...liveStats,
-          {
-            game: GameType.mines,
-            amount: betAmt!,
-            result: win ? "Won" : "Lost",
-            pnl: win ? betAmt! * strikeMultiplier - betAmt! : -betAmt!,
-            totalPNL:
-              liveStats.length > 0
-                ? liveStats[liveStats.length - 1].totalPNL +
-                  (win ? betAmt! * strikeMultiplier - betAmt! : -betAmt!)
-                : win
-                  ? betAmt! * strikeMultiplier - betAmt!
-                  : -betAmt!,
-          },
-        ]);
+      if (lose) {
+        soundAlert("/sounds/bomb.wav", !enableSounds);
+        updatePNL(GameType.mines, false, betAmt!, 1);
       }
 
       if (success) {
@@ -1233,10 +1217,13 @@ export default function Mines() {
                         ? "border-[#FCB10F] bg-[#FCB10F33]"
                         : userBets[index - 1].result === "Lost" &&
                             userBets[index - 1].pick === true
-                          ? "border-[#F1323E] bg-[#F1323E33]"
-                          : gameStatus === "Completed"
-                            ? "bg-transparent border-white/10"
-                            : "bg-[#202329] border-[#202329] hover:border-white/30"
+                          ? "border-[#FCB10F] bg-[#FCB10F33]"
+                          : userBets[index - 1].result === "Lost" &&
+                              userBets[index - 1].pick === true
+                            ? "border-[#F1323E] bg-[#F1323E33]"
+                            : gameStatus === "Completed"
+                              ? "bg-transparent border-white/10"
+                              : "bg-[#202329] border-[#202329] hover:border-white/30"
                       : betType === "auto"
                         ? userBets[index - 1].result === "" &&
                           userBets[index - 1].pick === true

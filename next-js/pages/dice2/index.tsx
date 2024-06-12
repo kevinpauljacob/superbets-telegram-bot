@@ -57,10 +57,9 @@ export default function Dice2() {
     maxBetAmt,
     language,
     selectedCoin,
-    liveStats,
-    setLiveStats,
     enableSounds,
     setShowWalletModal,
+    updatePNL,
     minGameAmount,
   } = useGlobalContext();
   const [betAmt, setBetAmt] = useState<number | undefined>();
@@ -191,22 +190,7 @@ export default function Dice2() {
       } else errorCustom(message);
       const newBetResult = { result: strikeNumber, win };
 
-      setLiveStats([
-        ...liveStats,
-        {
-          game: GameType.dice2,
-          amount: betAmt,
-          result: win ? "Won" : "Lost",
-          pnl: win ? betAmt * multiplier - betAmt : -betAmt,
-          totalPNL:
-            liveStats.length > 0
-              ? liveStats[liveStats.length - 1].totalPNL +
-                (win ? betAmt * multiplier - betAmt : -betAmt)
-              : win
-                ? betAmt * multiplier - betAmt
-                : -betAmt,
-        },
-      ]);
+      updatePNL(GameType.dice2, win, betAmt, multiplier);
 
       setBetResults((prevResults) => {
         const newResults = [...prevResults, newBetResult];
