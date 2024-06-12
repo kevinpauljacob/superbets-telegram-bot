@@ -5,11 +5,14 @@ import { useSession } from "next-auth/react";
 import Image from "next/image";
 import BetSetting from "@/components/BetSetting";
 import { GameDisplay, GameLayout, GameOptions } from "@/components/GameLayout";
+import { GameDisplay, GameLayout, GameOptions, GameTable } from "@/components/GameLayout";
 import { useGlobalContext } from "@/components/GlobalContext";
 import BetAmount from "@/components/games/BetAmountInput";
 import BetButton from "@/components/games/BetButton";
 import Loader from "@/components/games/Loader";
 import { errorCustom } from "@/components/toasts/ToastGroup";
+import Bets from "@/components/games/Bets";
+import { Refresh } from "iconsax-react";
 
 interface Token {
   id: number;
@@ -111,7 +114,7 @@ export default function Roulette() {
   const [hoveredSplit, setHoveredSplit] = useState<number[] | null>(null);
   const [hoveredCorner, setHoveredCorner] = useState<number[] | null>(null);
   const [hoveredColumn, setHoveredColumn] = useState<number[] | null>(null);
-
+  const [refresh, setRefresh] = useState(true);
   console.log(betss);
 
   const onSubmit = async (data: any) => {
@@ -384,7 +387,7 @@ export default function Roulette() {
               <p className="font-sans text-[16px]">Clear</p>
             </div>
         </div>
-          <div className="flex sm:flex-col flex-row-reverse w-[211px]  sm:w-full  sm:text-[16px] text-[12px] itmes-start gap-2 sm:gap-0 ">
+          <div className="flex sm:flex-col flex-row-reverse w-[211px]  sm:w-full  sm:text-[16px] text-[12px] itmes-start gap-2 sm:gap-0 rotate-90 sm:rotate-0">
             {/* table ui */}
           <div className="w-full flex items-start sm:gap-1 flex-col sm:flex-row ">
             <div
@@ -609,6 +612,9 @@ export default function Roulette() {
           
         </div>
       </GameDisplay>
+      <GameTable>
+        <Bets refresh={refresh}/>
+      </GameTable>
     </GameLayout>
   );
 }
