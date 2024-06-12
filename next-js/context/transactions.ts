@@ -737,3 +737,72 @@ export const truncateNumber = (num: number, numOfDecimals: number = 4) => {
 export const isArrayUnique = (arr: number[]) => {
   return new Set(arr).size === arr.length;
 };
+
+export const createClaimEarningsTxn = async (
+  wallet: PublicKey,
+  earnings: Array<{
+    tokenMint: string;
+    amount: number;
+  }>,
+  devPublicKey: PublicKey,
+) => {
+  const transaction = new Transaction();
+
+  transaction.feePayer = wallet;
+  const blockhashWithExpiryBlockHeight = await connection.getLatestBlockhash();
+  transaction.recentBlockhash = blockhashWithExpiryBlockHeight.blockhash;
+
+  transaction.add(
+    ComputeBudgetProgram.setComputeUnitLimit({ units: 100000 }),
+    ComputeBudgetProgram.setComputeUnitPrice({ microLamports: 150000 }),
+  );
+
+  for (let earning of earnings) {
+    let splToken = SPL_TOKENS.find(
+      (data) => data.tokenMint === earning.tokenMint,
+    );
+    if (!splToken) throw new Error("Invalid tokenMint provided!");
+
+    const { tokenName, decimal } = splToken;
+
+    if (tokenName === "SOL") {
+      transaction.add(
+        SystemProgram.transfer({
+          fromPubkey: devPublicKey,
+          toPubkey: wallet,
+          lamports: Math.floor(earning.amount * Math.pow(10, 9)),
+        }),
+      );
+    } else {
+      const tokenId = new PublicKey(earning.tokenMint);
+      const userAta = await getAssociatedTokenAddress(tokenId, wallet);
+      const devAta = await getAssociatedTokenAddress(tokenId, devPublicKey);
+
+      transaction.add(
+        createAssociatedTokenAccountIdempotentInstruction(
+          wallet,
+          userAta,
+          wallet,
+          tokenId,
+        ),
+        createTransferInstruction(
+          devAta,
+          userAta,
+          devPublicKey,
+          Math.floor(earning.amount * Math.pow(10, decimal)),
+        ),
+      );
+    }
+  }
+
+  transaction.instructions.slice(2).forEach((i) => {
+    i.keys.forEach((k) => {
+      if (k.pubkey.equals(wallet)) {
+        k.isSigner = true;
+        k.isWritable = true;
+      }
+    });
+  });
+
+  return { transaction, blockhashWithExpiryBlockHeight };
+};

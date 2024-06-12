@@ -1,15 +1,11 @@
-import { useWallet } from "@solana/wallet-adapter-react";
-import { obfuscatePubKey } from "@/context/transactions";
-import { ReactNode, useEffect, useState } from "react";
-import BetRow from "@/components/games/BetRow";
 import { useGlobalContext } from "@/components/GlobalContext";
-import Loader from "@/components/games/Loader";
+import { TButton } from "@/components/table/Table";
 import { errorCustom } from "@/components/toasts/ToastGroup";
 import { translator } from "@/context/transactions";
-import { useRouter } from "next/router";
+import { useWallet } from "@solana/wallet-adapter-react";
 import Image from "next/image";
-import { TButton, TablePagination } from "@/components/table/Table";
-import { truncateNumber } from "@/context/gameTransactions";
+import { useRouter } from "next/router";
+import { useState } from "react";
 
 interface PaginationProps {
   page: number;

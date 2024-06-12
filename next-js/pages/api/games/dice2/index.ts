@@ -231,6 +231,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       await dice2.save();
 
       await updateGameStats(
+        wallet,
         GameType.dice2,
         tokenMint,
         amount,

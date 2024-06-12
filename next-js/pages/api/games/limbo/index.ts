@@ -222,6 +222,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       await limbo.save();
 
       await updateGameStats(
+        wallet,
         GameType.limbo,
         tokenMint,
         amount,
