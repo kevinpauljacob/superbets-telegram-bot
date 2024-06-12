@@ -72,6 +72,13 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
       await connectDatabase();
 
+      const pendingGame = await Mines.findOne({ wallet, result: "Pending" });
+      if (pendingGame)
+        return res.status(400).json({
+          success: false,
+          message: "You already have a pending game!",
+        });
+
       const user = await User.findOne({ wallet });
       const addGame = !user.gamesPlayed.includes(GameType.mines);
 
