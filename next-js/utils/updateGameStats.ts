@@ -1,4 +1,4 @@
-import { commissionLevels } from "@/context/transactions";
+import { commissionLevels } from "@/context/config";
 import { GameStats, Referral } from "@/models/games";
 import { GameType } from "@/utils/provably-fair";
 

@@ -209,6 +209,14 @@ let maxPayouts: {
   };
 };
 
+const commissionLevels: Record<number, number> = {
+  0: 25,
+  1: 3.5,
+  2: 2.5,
+  3: 2,
+  4: 1,
+};
+
 let wsEndpoint: string;
 
 let minGameAmount: number;
@@ -362,4 +370,5 @@ export {
   launchPromoEdge,
   maintainance,
   maxPayouts,
+  commissionLevels,
 };
