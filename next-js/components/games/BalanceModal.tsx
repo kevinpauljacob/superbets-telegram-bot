@@ -455,11 +455,8 @@ export default function BalanceModal() {
                   <span
                     className="text-xs font-medium text-white text-opacity-50 bg-[#292C32] hover:bg-[#47484A] focus:bg-[#47484A] transition-all rounded-[5px] py-1.5 px-4"
                     onClick={() => {
-                      setAmount(
-                        userTokens.find(
-                          (t) => t.mintAddress === selectedToken.tokenMint,
-                        )!.balance,
-                      );
+                      let token = userTokens.find(t => t.mintAddress === selectedToken.tokenMint)
+                      setAmount(token?token.balance:0);
                     }}
                   >
                     {translator("Max", language)}
