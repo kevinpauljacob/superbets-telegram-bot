@@ -121,7 +121,14 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         .mul(houseEdge)
         .toNumber();
 
-      await updateGameStats(GameType.mines, tokenMint, 0, false, feeGenerated);
+      await updateGameStats(
+        wallet,
+        GameType.mines,
+        tokenMint,
+        0,
+        false,
+        feeGenerated,
+      );
 
       const user = await User.findOneAndUpdate(
         {
