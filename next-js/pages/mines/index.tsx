@@ -842,35 +842,44 @@ export default function Mines() {
                     pointsGained: 0,
                   });
                 }}
-                className="cursor-pointer rounded-lg absolute w-full h-full z-20 bg-[#442c62] hover:bg-[#7653A2] focus:bg-[#53307E] flex items-center justify-center font-chakra font-semibold text-2xl tracking-wider text-white"
+                className="hover:duration-75 hover:opacity-90 w-full h-[3.75rem] rounded-lg transition-all bg-[#442c62] hover:bg-[#7653A2] focus:bg-[#53307E] flex items-center justify-center font-chakra font-semibold text-2xl tracking-wider text-white"
               >
                 {translator("STOP", language)}
               </div>
             )}
-            <BetButton
-              disabled={
-                !wallet ||
+            {!betActive && !startAuto && (
+              <BetButton
+                disabled={
+                  !wallet ||
                   !session?.user ||
                   isRolling ||
-                  (betActive &&
-                    betType === "manual" &&
-                    !userBets.some((bet) => bet.pick)) ||
+                  (coinData && coinData[0].amount < minGameAmount) ||
                   (betAmt !== undefined &&
                     maxBetAmt !== undefined &&
                     betAmt > maxBetAmt)
-                  ? true
-                  : false
-              }
-              onClickFunction={
-                !betActive
-                  ? betType === "auto"
-                    ? onSubmit
-                    : handleBet
-                  : handleConclude
-              }
-            >
-              {isRolling ? <Loader /> : betActive ? "CASHOUT" : "BET"}
-            </BetButton>
+                    ? true
+                    : false
+                }
+                onClickFunction={betType === "auto" ? onSubmit : handleBet}
+              >
+                {isRolling ? <Loader /> : "BET"}
+              </BetButton>
+            )}
+            {betActive && betType === "manual" && (
+              <button
+                onClick={() => {
+                  handleConclude();
+                }}
+                disabled={
+                  betActive &&
+                  betType === "manual" &&
+                  !userBets.some((bet) => bet.pick)
+                }
+                className="disabled:cursor-default disabled:opacity-70 hover:duration-75 hover:opacity-90 w-full h-[3.75rem] rounded-lg transition-all bg-[#7839C5] disabled:bg-[#4b2876] hover:bg-[#9361d1] focus:bg-[#602E9E] flex items-center justify-center font-chakra font-semibold text-xl tracking-wider text-white"
+              >
+                {isRolling ? <Loader /> : translator("CASHOUT", language)}
+              </button>
+            )}
           </div>
           {betType === "auto" && (
             <div className="w-full flex lg:hidden">
@@ -1094,38 +1103,46 @@ export default function Mines() {
                           pointsGained: 0,
                         });
                       }}
-                      className="rounded-lg absolute w-full h-full z-20 bg-[#442c62] hover:bg-[#7653A2] focus:bg-[#53307E] flex items-center justify-center font-chakra font-semibold text-2xl tracking-wider text-white"
+                      className="hover:duration-75 hover:opacity-90 w-full h-[3.75rem] rounded-lg transition-all bg-[#442c62] hover:bg-[#7653A2] focus:bg-[#53307E] flex items-center justify-center font-chakra font-semibold text-2xl tracking-wider text-white"
                     >
                       {translator("STOP", language)}
                     </div>
                   )}
-                  <BetButton
-                    disabled={
-                      !wallet ||
+                  {!betActive && !startAuto && (
+                    <BetButton
+                      disabled={
+                        !wallet ||
                         !session?.user ||
                         isRolling ||
-                        (!betActive &&
-                          coinData &&
-                          coinData[0].amount < minGameAmount) ||
-                        (betActive &&
-                          betType === "manual" &&
-                          !userBets.some((bet) => bet.pick)) ||
+                        (coinData && coinData[0].amount < minGameAmount) ||
                         (betAmt !== undefined &&
                           maxBetAmt !== undefined &&
                           betAmt > maxBetAmt)
-                        ? true
-                        : false
-                    }
-                    onClickFunction={
-                      !betActive
-                        ? betType === "auto"
-                          ? onSubmit
-                          : handleBet
-                        : handleConclude
-                    }
-                  >
-                    {isRolling ? <Loader /> : betActive ? "CASHOUT" : "BET"}
-                  </BetButton>
+                          ? true
+                          : false
+                      }
+                      onClickFunction={
+                        betType === "auto" ? onSubmit : handleBet
+                      }
+                    >
+                      {isRolling ? <Loader /> : "BET"}
+                    </BetButton>
+                  )}
+                  {betActive && betType === "manual" && (
+                    <button
+                      onClick={() => {
+                        handleConclude();
+                      }}
+                      disabled={
+                        betActive &&
+                        betType === "manual" &&
+                        !userBets.some((bet) => bet.pick)
+                      }
+                      className="disabled:cursor-default disabled:opacity-70 hover:duration-75 hover:opacity-90 w-full h-[3.75rem] rounded-lg transition-all bg-[#7839C5] disabled:bg-[#4b2876] hover:bg-[#9361d1] focus:bg-[#602E9E] flex items-center justify-center font-chakra font-semibold text-xl tracking-wider text-white"
+                    >
+                      {isRolling ? <Loader /> : translator("CASHOUT", language)}
+                    </button>
+                  )}
                 </div>
               </form>
             </FormProvider>
