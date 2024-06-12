@@ -1,12 +1,6 @@
-import {
-  User,
-  connection,
-  houseEdgeTiers,
-  launchPromoEdge,
-  pointTiers,
-  stakingTiers,
-  translator,
-} from "@/context/transactions";
+import { User, connection, translator } from "@/context/transactions";
+import { houseEdgeTiers, pointTiers, stakingTiers } from "@/context/config";
+import { launchPromoEdge } from "@/context/config";
 import { useWallet } from "@solana/wallet-adapter-react";
 import React, {
   createContext,
@@ -200,6 +194,9 @@ interface GlobalContextProps {
   maxBetAmt: number | undefined;
   setMaxBetAmt: React.Dispatch<React.SetStateAction<number>>;
 
+  minGameAmount: number;
+  setMinGameAmount: React.Dispatch<React.SetStateAction<number>>;
+
   kenoRisk: "classic" | "low" | "medium" | "high";
   setKenoRisk: React.Dispatch<
     React.SetStateAction<"classic" | "low" | "medium" | "high">
@@ -296,6 +293,7 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
 
   const [houseEdge, setHouseEdge] = useState<number>(0);
   const [maxBetAmt, setMaxBetAmt] = useState<number>(0);
+  const [minGameAmount, setMinGameAmount] = useState<number>(0.0001);
   const [kenoRisk, setKenoRisk] = useState<
     "classic" | "low" | "medium" | "high"
   >("classic");
@@ -552,6 +550,8 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
         houseEdge,
         setHouseEdge,
         maxBetAmt,
+        minGameAmount,
+        setMinGameAmount,
         kenoRisk,
         setKenoRisk,
         setMaxBetAmt,

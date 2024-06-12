@@ -2,10 +2,10 @@ import { useGlobalContext } from "@/components/GlobalContext";
 import LeaderboardTable from "@/components/Leaderboard";
 import {
   obfuscatePubKey,
-  pointTiers,
   translator,
   truncateNumber,
 } from "@/context/transactions";
+import { pointTiers } from "@/context/config";
 import { useWallet } from "@solana/wallet-adapter-react";
 import Image from "next/legacy/image";
 import { useEffect } from "react";

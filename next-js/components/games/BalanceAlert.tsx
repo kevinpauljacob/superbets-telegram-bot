@@ -1,5 +1,4 @@
 import { translator } from "@/context/transactions";
-import { minGameAmount } from "@/context/config";
 import { useGlobalContext } from "../GlobalContext";
 import { useSession } from "next-auth/react";
 import { useWallet } from "@solana/wallet-adapter-react";
@@ -10,7 +9,7 @@ export default function BalanceAlert() {
   const { data: session, status } = useSession();
   const wallet = useWallet();
   const walletModal = useWalletModal();
-  const { setShowWalletModal, language, selectedCoin } = useGlobalContext();
+  const { setShowWalletModal, language, selectedCoin, minGameAmount } = useGlobalContext();
   return (
     (!selectedCoin ||
       (selectedCoin && selectedCoin.amount < minGameAmount)) && (
