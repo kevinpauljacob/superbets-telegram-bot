@@ -279,6 +279,7 @@ export default function Keno() {
         );
         // update count
         if (typeof autoBetCount === "number") {
+          setAutoBetCount(autoBetCount > 0 ? autoBetCount - 1 : 0);
           autoBetCount === 1 &&
             warningCustom(translator("Auto bet stopped", language), "top-left");
         } else
