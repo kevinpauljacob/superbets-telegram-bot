@@ -18,6 +18,7 @@ import { useRouter } from "next/router";
 import { SPL_TOKENS, spl_token } from "@/context/config";
 import { Connection, ParsedAccountData, PublicKey } from "@solana/web3.js";
 import { TOKEN_PROGRAM_ID } from "@solana/spl-token";
+import { errorCustom } from "../toasts/ToastGroup";
 
 export default function BalanceModal() {
   const methods = useForm();
@@ -57,14 +58,21 @@ export default function BalanceModal() {
       let response: { success: boolean; message: string };
 
       try {
-        if (actionType === "Deposit")
+        if (actionType === "Deposit") {
+          let balance = userTokens.find(x => x.mintAddress === selectedToken.tokenMint)?.balance;
+          if (!balance || balance < amount) {
+            setLoading(false)
+            errorCustom("Insufficient balance")
+            return;
+          }
+
           response = await deposit(
             wallet,
             amount,
             selectedToken.tokenMint,
             campaignId,
           );
-        else response = await withdraw(wallet, amount, selectedToken.tokenMint);
+        } else response = await withdraw(wallet, amount, selectedToken.tokenMint);
 
         if (response && response.success) {
           getBalance();
@@ -224,31 +232,28 @@ export default function BalanceModal() {
 
         <div className="w-full flex mb-8 mt-2 gap-2">
           <button
-            className={`w-full border-2 rounded-md py-2 text-white font-semibold text-xs sm:text-sm transition hover:duration-75 ease-in-out ${
-              actionType === "Deposit"
-                ? "bg-[#d9d9d90d] border-transparent text-opacity-90"
-                : "border-[#d9d9d90d] hover:bg-[#9361d1] focus:bg-[#602E9E] text-opacity-50 hover:text-opacity-90"
-            }`}
+            className={`w-full border-2 rounded-md py-2 text-white font-semibold text-xs sm:text-sm transition hover:duration-75 ease-in-out ${actionType === "Deposit"
+              ? "bg-[#d9d9d90d] border-transparent text-opacity-90"
+              : "border-[#d9d9d90d] hover:bg-[#9361d1] focus:bg-[#602E9E] text-opacity-50 hover:text-opacity-90"
+              }`}
             onClick={() => setActionType("Deposit")}
           >
             {translator("Deposit", language)}
           </button>
           <button
-            className={`w-full border-2 rounded-md py-2 text-white font-semibold text-xs sm:text-sm transition-all hover:duration-75 ease-in-out ${
-              actionType === "Withdraw"
-                ? "bg-[#d9d9d90d] border-transparent text-opacity-90"
-                : "border-[#d9d9d90d] hover:bg-[#9361d1] focus:bg-[#602E9E] text-opacity-50 hover:text-opacity-90"
-            }`}
+            className={`w-full border-2 rounded-md py-2 text-white font-semibold text-xs sm:text-sm transition-all hover:duration-75 ease-in-out ${actionType === "Withdraw"
+              ? "bg-[#d9d9d90d] border-transparent text-opacity-90"
+              : "border-[#d9d9d90d] hover:bg-[#9361d1] focus:bg-[#602E9E] text-opacity-50 hover:text-opacity-90"
+              }`}
             onClick={() => setActionType("Withdraw")}
           >
             {translator("Withdraw", language)}
           </button>
           <button
-            className={`w-full border-2 rounded-md py-2 text-white font-semibold text-xs sm:text-sm transition hover:duration-75 ease-in-out flex items-center justify-center gap-1 ${
-              actionType === "History"
-                ? "bg-[#d9d9d90d] border-transparent text-opacity-90"
-                : "border-[#d9d9d90d] hover:bg-[#9361d1] focus:bg-[#602E9E] text-opacity-50 hover:text-opacity-90"
-            }`}
+            className={`w-full border-2 rounded-md py-2 text-white font-semibold text-xs sm:text-sm transition hover:duration-75 ease-in-out flex items-center justify-center gap-1 ${actionType === "History"
+              ? "bg-[#d9d9d90d] border-transparent text-opacity-90"
+              : "border-[#d9d9d90d] hover:bg-[#9361d1] focus:bg-[#602E9E] text-opacity-50 hover:text-opacity-90"
+              }`}
             onClick={() => setActionType("History")}
           >
             {translator("History", language)}
@@ -289,9 +294,8 @@ export default function BalanceModal() {
                   <img
                     src="/assets/chevron.svg"
                     alt=""
-                    className={`w-4 h-4 transform ${
-                      isSelectModalOpen ? "rotate-180" : ""
-                    }`}
+                    className={`w-4 h-4 transform ${isSelectModalOpen ? "rotate-180" : ""
+                      }`}
                   />
                 </span>
 
@@ -404,11 +408,10 @@ export default function BalanceModal() {
                 </div>
 
                 <span
-                  className={`${
-                    methods.formState.errors["amount"]
-                      ? "opacity-100"
-                      : "opacity-0"
-                  } mt-1.5 flex items-center gap-1 text-xs text-[#D92828]`}
+                  className={`${methods.formState.errors["amount"]
+                    ? "opacity-100"
+                    : "opacity-0"
+                    } mt-1.5 flex items-center gap-1 text-xs text-[#D92828]`}
                 >
                   {methods.formState.errors["amount"]
                     ? methods.formState.errors["amount"]!.message!.toString()
@@ -463,11 +466,10 @@ export default function BalanceModal() {
                   </span>
                 </div>
                 <span
-                  className={`${
-                    methods.formState.errors["amount"]
-                      ? "opacity-100"
-                      : "opacity-0"
-                  } mt-1.5 flex items-center gap-1 text-xs text-[#D92828]`}
+                  className={`${methods.formState.errors["amount"]
+                    ? "opacity-100"
+                    : "opacity-0"
+                    } mt-1.5 flex items-center gap-1 text-xs text-[#D92828]`}
                 >
                   {methods.formState.errors["amount"]
                     ? methods.formState.errors["amount"]!.message!.toString()
@@ -495,11 +497,10 @@ export default function BalanceModal() {
                   ))}
                 </tr>
                 <div
-                  className={`${
-                    historyData.length <= 0
-                      ? "flex items-center justify-center"
-                      : ""
-                  } w-full h-[310px] overflow-y-scroll modalscrollbar`}
+                  className={`${historyData.length <= 0
+                    ? "flex items-center justify-center"
+                    : ""
+                    } w-full h-[310px] overflow-y-scroll modalscrollbar`}
                 >
                   {historyData.length > 0 ? (
                     historyData.map((data, index) => (
@@ -519,11 +520,10 @@ export default function BalanceModal() {
                             : translator("Withdraw", language)}
                         </td>
                         <td
-                          className={`w-full text-center font-changa text-xs font-light ${
-                            data.status === "completed"
-                              ? "text-green-500"
-                              : "text-red-500"
-                          }`}
+                          className={`w-full text-center font-changa text-xs font-light ${data.status === "completed"
+                            ? "text-green-500"
+                            : "text-red-500"
+                            }`}
                         >
                           {data.status === "completed"
                             ? translator("Completed", language)
