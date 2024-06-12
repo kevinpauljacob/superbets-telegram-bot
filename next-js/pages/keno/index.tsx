@@ -61,7 +61,7 @@ export default function Keno() {
     setLiveStats,
     enableSounds,
     setShowWalletModal,
-    minGameAmount
+    minGameAmount,
   } = useGlobalContext();
   const [betAmt, setBetAmt] = useState<number | undefined>();
   const [userInput, setUserInput] = useState<number | undefined>();
@@ -465,6 +465,8 @@ export default function Keno() {
                 !wallet ||
                 !session?.user ||
                 isRolling ||
+                autoBetCount === 0 ||
+                Number.isNaN(autoBetCount) ||
                 (betAmt !== undefined &&
                   maxBetAmt !== undefined &&
                   betAmt > maxBetAmt)
@@ -603,6 +605,8 @@ export default function Keno() {
                       !wallet ||
                       !session?.user ||
                       isRolling ||
+                      autoBetCount === 0 ||
+                      Number.isNaN(autoBetCount) ||
                       (betAmt !== undefined &&
                         maxBetAmt !== undefined &&
                         betAmt > maxBetAmt)

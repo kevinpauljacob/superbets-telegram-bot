@@ -203,8 +203,8 @@ export default function Dice2() {
               ? liveStats[liveStats.length - 1].totalPNL +
                 (win ? betAmt * multiplier - betAmt : -betAmt)
               : win
-              ? betAmt * multiplier - betAmt
-              : -betAmt,
+                ? betAmt * multiplier - betAmt
+                : -betAmt,
         },
       ]);
 
@@ -329,9 +329,9 @@ export default function Dice2() {
             (autoWinChangeReset || autoLossChangeReset
               ? betAmt
               : autoBetCount === "inf"
-              ? Math.max(0, betAmt)
-              : betAmt *
-                (autoLossChange !== null ? autoLossChange / 100.0 : 0));
+                ? Math.max(0, betAmt)
+                : betAmt *
+                  (autoLossChange !== null ? autoLossChange / 100.0 : 0));
 
         // console.log("Current bet amount:", betAmt);
         // console.log("Auto loss change:", autoLossChange);
@@ -424,6 +424,8 @@ export default function Dice2() {
                 !wallet ||
                 !session?.user ||
                 isRolling ||
+                autoBetCount === 0 ||
+                Number.isNaN(autoBetCount) ||
                 (betAmt !== undefined &&
                   maxBetAmt !== undefined &&
                   betAmt > maxBetAmt)
@@ -499,6 +501,8 @@ export default function Dice2() {
                       !wallet ||
                       !session?.user ||
                       isRolling ||
+                      autoBetCount === 0 ||
+                      Number.isNaN(autoBetCount) ||
                       (betAmt !== undefined &&
                         maxBetAmt !== undefined &&
                         betAmt > maxBetAmt)

@@ -155,8 +155,8 @@ export default function Limbo() {
                   ? liveStats[liveStats.length - 1].totalPNL +
                     (win ? betAmt! * targetMultiplier - betAmt! : -betAmt!)
                   : win
-                  ? betAmt! * targetMultiplier - betAmt!
-                  : -betAmt!,
+                    ? betAmt! * targetMultiplier - betAmt!
+                    : -betAmt!,
             },
           ]);
 
@@ -288,9 +288,9 @@ export default function Limbo() {
             (autoWinChangeReset || autoLossChangeReset
               ? betAmt
               : autoBetCount === "inf"
-              ? Math.max(0, betAmt)
-              : betAmt *
-                (autoLossChange !== null ? autoLossChange / 100.0 : 0));
+                ? Math.max(0, betAmt)
+                : betAmt *
+                  (autoLossChange !== null ? autoLossChange / 100.0 : 0));
 
         // console.log("Current bet amount:", betAmt);
         // console.log("Auto loss change:", autoLossChange);
@@ -393,6 +393,8 @@ export default function Limbo() {
               disabled={
                 loading ||
                 !session?.user ||
+                autoBetCount === 0 ||
+                Number.isNaN(autoBetCount) ||
                 (betAmt !== undefined &&
                   maxBetAmt !== undefined &&
                   betAmt > maxBetAmt)
@@ -477,6 +479,8 @@ export default function Limbo() {
                     disabled={
                       loading ||
                       !session?.user ||
+                      autoBetCount === 0 ||
+                      Number.isNaN(autoBetCount) ||
                       (betAmt !== undefined &&
                         maxBetAmt !== undefined &&
                         betAmt > maxBetAmt)

@@ -355,6 +355,8 @@ export default function Flip() {
                 !betType ||
                 loading ||
                 !session?.user ||
+                autoBetCount === 0 ||
+                Number.isNaN(autoBetCount) ||
                 (betAmt !== undefined &&
                   maxBetAmt !== undefined &&
                   betAmt > maxBetAmt)
@@ -479,6 +481,8 @@ export default function Flip() {
                       !betType ||
                       loading ||
                       !session?.user ||
+                      autoBetCount === 0 ||
+                      Number.isNaN(autoBetCount) ||
                       (betAmt !== undefined &&
                         maxBetAmt !== undefined &&
                         betAmt > maxBetAmt)
