@@ -59,10 +59,9 @@ export default function Wheel() {
     houseEdge,
     maxBetAmt,
     language,
-    setLiveStats,
-    liveStats,
     enableSounds,
     setShowWalletModal,
+    updatePNL,
     minGameAmount,
   } = useGlobalContext();
   const [betAmt, setBetAmt] = useState<number | undefined>();
@@ -199,22 +198,12 @@ export default function Wheel() {
       const win = result === "Won";
       const newBetResult = { result: strikeMultiplier, win };
 
-      setLiveStats([
-        ...liveStats,
-        {
-          game: GameType.wheel,
-          amount: betAmt!,
-          result: win ? "Won" : "Lost",
-          pnl: win ? betAmt! * strikeMultiplier - betAmt! : -betAmt!,
-          totalPNL:
-            liveStats.length > 0
-              ? liveStats[liveStats.length - 1].totalPNL +
-                (win ? betAmt * strikeMultiplier - betAmt : -betAmt)
-              : win
-              ? betAmt * strikeMultiplier - betAmt
-              : -betAmt,
-        },
-      ]);
+      updatePNL(
+        GameType.wheel,
+        win,
+        betAmt!,
+        strikeMultiplier,
+      );
 
       setBetResults((prevResults) => {
         const newResults = [...prevResults, newBetResult];

@@ -15,6 +15,7 @@ export default function LiveGraph({ setHoverValue }: { setHoverValue: (value: nu
     const { liveStats: data, liveCurrentStat } = useGlobalContext();
     const [positiveData, setPositiveData] = useState<GameStat[]>([]);
     const [negativeData, setNegativeData] = useState<GameStat[]>([]);
+    const [length, setLength] = useState<number>(0);
 
     const CustomTooltip = ({ active, payload, label, coordinate }: any) => {
         if (active && payload && payload.length) {
@@ -42,7 +43,7 @@ export default function LiveGraph({ setHoverValue }: { setHoverValue: (value: nu
 
         if (liveCurrentStat !== "All") {
             const filteredData = data.filter(item => item.game === liveCurrentStat);
-            fdata = filteredData;
+            fdata = filteredData.map((item, index) => ({ ...item, index }));
         }
 
         for (let i = 0; i < fdata.length - 1; i++) {
@@ -61,13 +62,14 @@ export default function LiveGraph({ setHoverValue }: { setHoverValue: (value: nu
 
         setPositiveData(positiveD);
         setNegativeData(negativeD);
+        setLength(fdata.length - 1);
     }, [data, liveCurrentStat])
 
     return (
         <ResponsiveContainer style={{
             borderRadius: "10px",
         }}>
-            <AreaChart data={negativeData}>
+            <AreaChart data={positiveData}>
                 <defs>
                     <linearGradient id="colorpnl" >
                         <stop offset="100%" stopColor={colors.greenFill} />
@@ -77,7 +79,7 @@ export default function LiveGraph({ setHoverValue }: { setHoverValue: (value: nu
                     </linearGradient>
                 </defs>
 
-                <XAxis dataKey="index" type="number" domain={[0, data.length - 1]} hide />
+                <XAxis dataKey="index" type="number" domain={[0, length]} hide />
 
                 <Area
                     type="monotone"

@@ -58,8 +58,7 @@ export default function Dice() {
     houseEdge,
     maxBetAmt,
     language,
-    liveStats,
-    setLiveStats,
+    updatePNL,
     enableSounds,
   } = useGlobalContext();
 
@@ -184,22 +183,12 @@ export default function Dice() {
         const { strikeNumber, result } = res.data;
         const isWin = result === "Won";
 
-        setLiveStats([
-          ...liveStats,
-          {
-            game: GameType.dice,
-            amount: betAmt,
-            result: isWin ? "Won" : "Lost",
-            pnl: isWin ? betAmt * winningPays - betAmt : -betAmt,
-            totalPNL:
-              liveStats.length > 0
-                ? liveStats[liveStats.length - 1].totalPNL +
-                  (isWin ? betAmt * winningPays - betAmt : -betAmt)
-                : isWin
-                  ? betAmt * winningPays - betAmt
-                  : -betAmt,
-          },
-        ]);
+        updatePNL(
+          GameType.dice,
+          isWin,
+          betAmt,
+          winningPays,
+        );
 
         if (isWin) soundAlert("/sounds/win.wav", !enableSounds);
         const newBetResults = [
