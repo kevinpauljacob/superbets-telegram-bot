@@ -27,7 +27,6 @@ import AutoCount from "@/components/AutoCount";
 import ConfigureAutoButton from "@/components/ConfigureAutoButton";
 import { errorCustom, warningCustom } from "@/components/toasts/ToastGroup";
 import { rollDice, translator } from "@/context/transactions";
-import { minGameAmount } from "@/context/config";
 import { useSession } from "next-auth/react";
 import { GameType } from "@/utils/provably-fair";
 

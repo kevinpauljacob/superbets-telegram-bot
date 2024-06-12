@@ -2,10 +2,10 @@ import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useGlobalContext } from "../GlobalContext";
 import { GameTokens, GameType } from "@/utils/provably-fair";
-import { maxPayouts, truncateNumber } from "@/context/transactions";
+import { truncateNumber } from "@/context/transactions";
+import { maxPayouts } from "@/context/config";
 import Image from "next/image";
 import { translator } from "@/context/transactions";
-import { minGameAmount } from "@/context/config";
 import { riskToChance } from "./Keno/RiskToChance";
 import { SPL_TOKENS } from "@/context/config";
 export default function BetAmount({
@@ -31,6 +31,7 @@ export default function BetAmount({
     language,
     kenoRisk,
     selectedCoin,
+    minGameAmount,
   } = useGlobalContext();
 
   //Temperory max bet
@@ -321,7 +322,7 @@ export default function BetAmount({
                 {" "}
                 {currentMaxBetAmt.toFixed(2)} {selectedCoin.tokenName}
               </span>
-               .
+              .
             </span>
           </div>
           <div className="flex flex-col items-center text-white font-chakra font-medium w-[20%] min-[1412px]:flex lg:hidden">

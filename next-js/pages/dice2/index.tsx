@@ -27,7 +27,6 @@ import {
   warningCustom,
 } from "@/components/toasts/ToastGroup";
 import { translator } from "@/context/transactions";
-import { minGameAmount } from "@/context/config";
 import { useSession } from "next-auth/react";
 import { GameType } from "@/utils/provably-fair";
 import { handleSignIn } from "@/components/ConnectWallet";
@@ -62,6 +61,7 @@ export default function Dice2() {
     setLiveStats,
     enableSounds,
     setShowWalletModal,
+    minGameAmount,
   } = useGlobalContext();
   const [betAmt, setBetAmt] = useState<number | undefined>();
   const [userInput, setUserInput] = useState<number | undefined>();
@@ -203,8 +203,8 @@ export default function Dice2() {
               ? liveStats[liveStats.length - 1].totalPNL +
                 (win ? betAmt * multiplier - betAmt : -betAmt)
               : win
-                ? betAmt * multiplier - betAmt
-                : -betAmt,
+              ? betAmt * multiplier - betAmt
+              : -betAmt,
         },
       ]);
 
@@ -329,9 +329,9 @@ export default function Dice2() {
             (autoWinChangeReset || autoLossChangeReset
               ? betAmt
               : autoBetCount === "inf"
-                ? Math.max(0, betAmt)
-                : betAmt *
-                  (autoLossChange !== null ? autoLossChange / 100.0 : 0));
+              ? Math.max(0, betAmt)
+              : betAmt *
+                (autoLossChange !== null ? autoLossChange / 100.0 : 0));
 
         // console.log("Current bet amount:", betAmt);
         // console.log("Auto loss change:", autoLossChange);

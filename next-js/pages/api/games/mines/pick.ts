@@ -8,12 +8,8 @@ import {
   decryptServerSeed,
 } from "@/utils/provably-fair";
 import StakingUser from "@/models/staking/user";
-import {
-  houseEdgeTiers,
-  launchPromoEdge,
-  pointTiers,
-  stakingTiers,
-} from "@/context/transactions";
+import { houseEdgeTiers, pointTiers, stakingTiers } from "@/context/config";
+import { launchPromoEdge } from "@/context/config";
 import { wsEndpoint } from "@/context/config";
 import Decimal from "decimal.js";
 import { SPL_TOKENS } from "@/context/config";
