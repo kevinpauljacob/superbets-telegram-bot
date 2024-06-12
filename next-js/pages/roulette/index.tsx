@@ -4,7 +4,6 @@ import { useWallet } from "@solana/wallet-adapter-react";
 import { useSession } from "next-auth/react";
 import Image from "next/image";
 import BetSetting from "@/components/BetSetting";
-import { GameDisplay, GameLayout, GameOptions } from "@/components/GameLayout";
 import { GameDisplay, GameLayout, GameOptions, GameTable } from "@/components/GameLayout";
 import { useGlobalContext } from "@/components/GlobalContext";
 import BetAmount from "@/components/games/BetAmountInput";
