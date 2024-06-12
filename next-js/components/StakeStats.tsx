@@ -1,8 +1,5 @@
-import {
-  stakingTiers,
-  translator,
-  truncateNumber,
-} from "@/context/transactions";
+import { translator, truncateNumber } from "@/context/transactions";
+import { stakingTiers } from "@/context/config";
 import { useGlobalContext } from "./GlobalContext";
 
 export default function StakeStats() {
