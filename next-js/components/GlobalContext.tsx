@@ -72,7 +72,7 @@ interface AutoConfigOptions {
 
 interface LiveTokenPrice {
   mintAddress: string;
-  price: number;// 1 Token Price in USD
+  price: number; // 1 Token Price in USD
 }
 
 interface GlobalContextProps {
@@ -203,7 +203,12 @@ interface GlobalContextProps {
   >;
   userTokens: TokenAccount[]; // Add this line
   setUserTokens: React.Dispatch<React.SetStateAction<TokenAccount[]>>;
-  updatePNL: (game: GameType, win: boolean, betAmount: number, multiplier: number) => void;
+  updatePNL: (
+    game: GameType,
+    win: boolean,
+    betAmount: number,
+    multiplier: number,
+  ) => void;
   liveTokenPrice: LiveTokenPrice[];
 }
 
@@ -280,7 +285,7 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
   const [liveCurrentStat, setLiveCurrentStat] = useState<GameType | "All">(
     "All",
   );
-  const [liveTokenPrice, setLiveTokenPrice] = useState<LiveTokenPrice[]>([])
+  const [liveTokenPrice, setLiveTokenPrice] = useState<LiveTokenPrice[]>([]);
   const [enableSounds, setEnableSounds] = useState<boolean>(true);
 
   const [autoConfigState, setAutoConfigState] = useState<
@@ -365,11 +370,21 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
     }
   };
 
-  const updatePNL = async (game: GameType, win: boolean, betAmount: number, multiplier: number) => {
-    let token = liveTokenPrice.find((token) => token.mintAddress === selectedCoin.tokenMint)
-    if (!token) token = (await updateLivePrices()).find((token) => token.mintAddress === selectedCoin.tokenMint)!
+  const updatePNL = async (
+    game: GameType,
+    win: boolean,
+    betAmount: number,
+    multiplier: number,
+  ) => {
+    let token = liveTokenPrice.find(
+      (token) => token.mintAddress === selectedCoin.tokenMint,
+    );
+    if (!token)
+      token = (await updateLivePrices()).find(
+        (token) => token.mintAddress === selectedCoin.tokenMint,
+      )!;
 
-    betAmount = token.price * betAmount
+    betAmount = token.price * betAmount;
 
     setLiveStats([
       ...liveStats,
@@ -377,42 +392,47 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
         game: game,
         amount: betAmount,
         result: win ? "Won" : "Lost",
-        pnl: win
-          ? (betAmount * multiplier) - betAmount
-          : -betAmount,
+        pnl: win ? betAmount * multiplier - betAmount : -betAmount,
         totalPNL:
           liveStats.length > 0
             ? liveStats[liveStats.length - 1].totalPNL +
-            (win ? (betAmount * multiplier) - betAmount : -betAmount)
+              (win ? betAmount * multiplier - betAmount : -betAmount)
             : win
-              ? (betAmount * multiplier) - betAmount
-              : -betAmount,
-        token: selectedCoin.tokenMint
+            ? betAmount * multiplier - betAmount
+            : -betAmount,
+        token: selectedCoin.tokenMint,
       },
     ]);
-  }
+  };
 
   const updateLivePrices = async () => {
-    let prices = []
+    let prices = [];
     let data = await (
-      await fetch(`https://price.jup.ag/v6/price?ids=${SPL_TOKENS.map(x => x.tokenMint).join(",")}&vsToken=USDC`)
-    ).json()
+      await fetch(
+        `https://price.jup.ag/v6/price?ids=${SPL_TOKENS.map(
+          (x) => x.tokenMint,
+        ).join(",")}&vsToken=USDC`,
+      )
+    ).json();
 
     for (let token of SPL_TOKENS) {
-      let price = data?.data[token.tokenMint]?.price ?? 0
-      prices.push({ mintAddress: token.tokenMint, price: price })
+      let price = data?.data[token.tokenMint]?.price ?? 0;
+      prices.push({ mintAddress: token.tokenMint, price: price });
     }
 
-    setLiveTokenPrice(prices)
-    return prices
-  }
+    setLiveTokenPrice(prices);
+    return prices;
+  };
 
   useEffect(() => {
-    updateLivePrices()
-    setInterval(() => {
-      updateLivePrices()
-    }, 5 * 60 * 1000)
-  }, [])
+    updateLivePrices();
+    setInterval(
+      () => {
+        updateLivePrices();
+      },
+      5 * 60 * 1000,
+    );
+  }, []);
 
   const getWalletBalance = async () => {
     if (wallet && wallet.publicKey)
@@ -577,7 +597,7 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
         liveCurrentStat,
         setLiveCurrentStat,
         updatePNL,
-        liveTokenPrice
+        liveTokenPrice,
       }}
     >
       {children}
@@ -1001,11 +1021,11 @@ export const translationsMap = {
     ch: "您可以在此游戏中下注的最高金额为",
   },
   "The more you stake, the less fees you pay and the bigger your points multiplier":
-  {
-    ru: "Чем больше вы ставите, тем меньше вы платите комиссий и тем выше ваш множитель очков",
-    ko: "더 많이 걸수록 수수료가 적게 들고 포인트 배수가 커집니다",
-    ch: "投注金额越大，您支付的费用越少，积分乘数越大",
-  },
+    {
+      ru: "Чем больше вы ставите, тем меньше вы платите комиссий и тем выше ваш множитель очков",
+      ko: "더 많이 걸수록 수수료가 적게 들고 포인트 배수가 커집니다",
+      ch: "投注金额越大，您支付的费用越少，积分乘数越大",
+    },
   WALLET: {
     ru: "КОШЕЛЕК",
     ko: "지갑",
@@ -1107,11 +1127,11 @@ export const translationsMap = {
     ch: "待定",
   },
   "FOMO wtf casino games are currently in beta and will be undergoing audit shortly. FOMO wtf EXIT games has gone through audit performed by OtterSec in December 2023.":
-  {
-    ru: "Игры казино FOMO wtf находятся в бета-тестировании и вскоре будут проходить аудит. Игры FOMO wtf EXIT прошли аудит, проведенный OtterSec в декабре 2023 года.",
-    ko: "FOMO wtf 카지노 게임은 현재 베타 버전이며 곧 감사를 받을 예정입니다. FOMO wtf EXIT 게임은 2023년 12월 OtterSec에 의해 감사를 받았습니다.",
-    ch: "FOMO wtf赌场游戏目前处于测试阶段，将很快进行审计。 FOMO wtf EXIT游戏已于2023年12月由OtterSec进行了审计。",
-  },
+    {
+      ru: "Игры казино FOMO wtf находятся в бета-тестировании и вскоре будут проходить аудит. Игры FOMO wtf EXIT прошли аудит, проведенный OtterSec в декабре 2023 года.",
+      ko: "FOMO wtf 카지노 게임은 현재 베타 버전이며 곧 감사를 받을 예정입니다. FOMO wtf EXIT 게임은 2023년 12월 OtterSec에 의해 감사를 받았습니다.",
+      ch: "FOMO wtf赌场游戏目前处于测试阶段，将很快进行审计。 FOMO wtf EXIT游戏已于2023年12月由OtterSec进行了审计。",
+    },
   Services: {
     ru: "Услуги",
     ko: "서비스",
@@ -1417,11 +1437,66 @@ export const translationsMap = {
     ko: "하우스 엣지",
     ch: "庄家优势",
   },
-  "I agree with Privacy Policy and with Terms of Use, Gambling isn't forbidden by my local authorities and I'm at least 18 years old.":
-  {
-    ru: "Я согласен с Политикой конфиденциальности и Условиями использования, азартные игры не запрещены моими местными властями, и мне исполнилось 18 лет.",
-    ko: "개인정보 보호정책 및 이용 약관에 동의하며, 도박은 현지 당국에 의해 금지되지 않으며 나는 18세 이상입니다.",
-    ch: "我同意隐私政策和使用条款，赌博未被当地政府禁止并且我已满18岁。",
+  "I agree with the Privacy Policy and with the Terms of Use, Gambling is not forbidden by my local authorities and I am at least 18 years old.":
+    {
+      ru: "Я согласен с Политикой конфиденциальности и Условиями использования, азартные игры не запрещены моими местными властями, и мне как минимум 18 лет.",
+      ko: "개인정보 처리방침 및 이용 약관에 동의합니다. 도박은 현지 당국에 의해 금지되지 않았으며, 저는 만 18세 이상입니다.",
+      ch: "我同意隐私政策和使用条款，我所在地区的法律不禁止赌博，并且我已满18岁。",
+    },
+  "LIVE STATS": {
+    ru: "Живые статистики",
+    ko: "실시간 통계",
+    ch: "实时统计",
+  },
+  Wins: {
+    ru: "Победы",
+    ko: "승리",
+    ch: "胜",
+  },
+  Losses: {
+    ru: "Поражения",
+    ko: "패배",
+    ch: "败",
+  },
+  Wagered: {
+    ru: "Сделанные ставки",
+    ko: "베팅",
+    ch: "投注",
+  },
+  Gems: {
+    ru: "Самоцветы",
+    ko: "보석",
+    ch: "宝石",
+  },
+  "Current Profit": {
+    ru: "Текущая прибыль",
+    ko: "현재 이익",
+    ch: "当前利润",
+  },
+  "Profit on next tile": {
+    ru: "Прибыль на следующем квадрате",
+    ko: "다음 타일에서의 이익",
+    ch: "下一个方块的利润",
+  },
+  CASHOUT: {
+    ru: "ВЫВОД",
+    ko: "출금",
+    ch: "提现",
+  },
+  "Pending game found!": {
+    ru: "Найдена ожидающая игра!",
+    ko: "보류 중인 게임 발견!",
+    ch: "找到待处理的游戏！",
+  },
+  "Could not fetch pending game.": {
+    ru: "Не удалось получить ожидающую игру.",
+    ko: "보류 중인 게임을 가져올 수 없습니다.",
+    ch: "无法获取待处理游戏。",
+  },
+  "Select at least one tile to bet on.": {
+    ru: "Выберите по крайней мере один квадрат для ставки.",
+    ko: "최소 1개의 타일을 선택하여 베팅하십시오.",
+    ch: "至少选择1个方块进行投注。",
   },
   "High Rollers": {
     ru: "Крупные игроки",
