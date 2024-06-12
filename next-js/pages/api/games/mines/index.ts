@@ -5,7 +5,7 @@ import { GameSeed, Mines, User } from "@/models/games";
 import { GameTokens, GameType, seedStatus } from "@/utils/provably-fair";
 import { wsEndpoint } from "@/context/config";
 import Decimal from "decimal.js";
-import { maxPayouts, minAmtFactor } from "@/context/config";
+import { maxPayouts, minAmtFactor, maintainance } from "@/context/config";
 import StakingUser from "@/models/staking/user";
 import { SPL_TOKENS } from "@/context/config";
 import updateGameStats from "../../../../utils/updateGameStats";
@@ -27,6 +27,12 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === "POST") {
     try {
       let { wallet, amount, tokenMint, minesCount }: InputType = req.body;
+
+      if (maintainance)
+        return res.status(400).json({
+          success: false,
+          message: "Under maintenance",
+        });
 
       const minGameAmount =
         maxPayouts[tokenMint as GameTokens]["mines" as GameType] * minAmtFactor;

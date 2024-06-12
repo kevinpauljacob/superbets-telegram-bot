@@ -10,7 +10,7 @@ import {
   seedStatus,
 } from "@/utils/provably-fair";
 import StakingUser from "@/models/staking/user";
-import { wsEndpoint } from "@/context/config";
+import { wsEndpoint, maintainance } from "@/context/config";
 import Decimal from "decimal.js";
 import { isArrayUnique } from "@/context/transactions";
 import {
@@ -44,6 +44,12 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     try {
       let { wallet, amount, tokenMint, minesCount, userBets }: InputType =
         req.body;
+
+      if (maintainance)
+        return res.status(400).json({
+          success: false,
+          message: "Under maintenance",
+        });
 
       const minGameAmount =
         maxPayouts[tokenMint as GameTokens]["mines" as GameType] * minAmtFactor;

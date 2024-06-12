@@ -2,6 +2,7 @@ import connectDatabase from "@/utils/database";
 import { getToken } from "next-auth/jwt";
 import { NextApiRequest, NextApiResponse } from "next";
 import { Mines } from "@/models/games";
+import { maintainance } from "@/context/config";
 
 const secret = process.env.NEXTAUTH_SECRET;
 
@@ -17,6 +18,12 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === "POST") {
     try {
       let { wallet }: InputType = req.body;
+
+      if (maintainance)
+        return res.status(400).json({
+          success: false,
+          message: "Under maintenance",
+        });
 
       const token = await getToken({ req, secret });
 
