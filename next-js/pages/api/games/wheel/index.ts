@@ -12,16 +12,17 @@ import {
 import StakingUser from "@/models/staking/user";
 import {
   houseEdgeTiers,
-  launchPromoEdge,
-  maintainance,
   maxPayouts,
+  minAmtFactor,
   pointTiers,
-} from "@/context/transactions";
-import { minGameAmount, wsEndpoint } from "@/context/gameTransactions";
+  stakingTiers,
+} from "@/context/config";
+import { launchPromoEdge, maintainance } from "@/context/config";
+import { minGameAmount, wsEndpoint } from "@/context/config";
 import { riskToChance } from "@/components/games/Wheel/Segments";
 import { Decimal } from "decimal.js";
 import { SPL_TOKENS } from "@/context/config";
-import updateGameStats from "../global/updateGameStats";
+import updateGameStats from "../../../../utils/updateGameStats";
 Decimal.set({ precision: 9 });
 
 const secret = process.env.NEXTAUTH_SECRET;
@@ -43,6 +44,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === "POST") {
     try {
       let { wallet, amount, tokenMint, segments, risk }: InputType = req.body;
+
+      const minGameAmount =
+        maxPayouts[tokenMint as GameTokens]["wheel" as GameType] * minAmtFactor;
 
       if (maintainance)
         return res.status(400).json({
@@ -115,13 +119,19 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         {},
         { upsert: true, new: true },
       );
-      const userTier = userData?.tier ?? 0;
+
+      const stakeAmount = userData?.stakedAmount ?? 0;
+      const stakingTier = Object.entries(stakingTiers).reduce((prev, next) => {
+        return stakeAmount >= next[1]?.limit ? next : prev;
+      })[0];
       const isFomoToken =
         tokenMint === SPL_TOKENS.find((t) => t.tokenName === "FOMO")?.tokenMint
           ? true
           : false;
       const houseEdge =
-        launchPromoEdge || isFomoToken ? 0 : houseEdgeTiers[userTier];
+        launchPromoEdge || isFomoToken
+          ? 0
+          : houseEdgeTiers[parseInt(stakingTier)];
 
       const activeGameSeed = await GameSeed.findOneAndUpdate(
         {
@@ -164,6 +174,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       let result = "Lost";
       let amountWon = new Decimal(0);
       let amountLost = amount;
+      let feeGenerated = 0;
 
       let strikeMultiplier = 0;
 
@@ -178,12 +189,18 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
                 Decimal.sub(1, houseEdge),
               );
               amountLost = 0;
+
+              feeGenerated = Decimal.mul(amount, strikeMultiplier)
+                .mul(houseEdge)
+                .toNumber();
             }
             isFound = true;
             break;
           }
         }
       }
+
+      const addGame = !user.gamesPlayed.includes(GameType.wheel);
 
       const userUpdate = await User.findOneAndUpdate(
         {
@@ -200,6 +217,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
             "deposit.$.amount": amountWon.sub(amount),
             numOfGamesPlayed: 1,
           },
+          ...(addGame ? { $addToSet: { gamesPlayed: GameType.wheel } } : {}),
         },
         {
           new: true,
@@ -227,7 +245,13 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       });
       await wheel.save();
 
-      await updateGameStats(GameType.wheel, wallet, amount, tokenMint);
+      await updateGameStats(
+        GameType.wheel,
+        tokenMint,
+        amount,
+        addGame,
+        feeGenerated,
+      );
 
       const pointsGained =
         0 * user.numOfGamesPlayed + 1.4 * amount * userData.multiplier;
@@ -244,9 +268,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         {
           $inc: {
             points: pointsGained,
-          },
-          $set: {
-            tier: newTier,
           },
         },
       );

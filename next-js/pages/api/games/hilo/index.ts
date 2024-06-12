@@ -3,7 +3,6 @@ import { getToken } from "next-auth/jwt";
 import { NextApiRequest, NextApiResponse } from "next";
 import { GameSeed, Hilo, User } from "@/models/games";
 import { seedStatus } from "@/utils/provably-fair";
-import { minGameAmount } from "@/context/gameTransactions";
 
 const secret = process.env.NEXTAUTH_SECRET;
 
@@ -26,6 +25,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         .json({ success: false, message: "GAME UNDER DEVELOPMENT !" });
 
       // let { wallet, amount, tokenMint, startNumber }: InputType = req.body;
+
+      // const minGameAmount =
+      // maxPayouts[tokenMint as GameTokens]["hilo" as GameType] * minAmtFactor;
 
       // const token = await getToken({ req, secret });
 

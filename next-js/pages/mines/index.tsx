@@ -24,8 +24,7 @@ import {
   successCustom,
   warningCustom,
 } from "@/components/toasts/ToastGroup";
-import { translator, formatNumber } from "@/context/transactions";
-import { minGameAmount, truncateNumber } from "@/context/gameTransactions";
+import { translator, truncateNumber } from "@/context/transactions";
 import { useSession } from "next-auth/react";
 import user from "@/models/staking/user";
 import Decimal from "decimal.js";
@@ -62,9 +61,9 @@ export default function Mines() {
     maxBetAmt,
     language,
     selectedCoin,
-    setLiveStats,
-    liveStats,
     enableSounds,
+    updatePNL,
+    minGameAmount,
   } = useGlobalContext();
   const [betAmt, setBetAmt] = useState<number | undefined>();
   const [userInput, setUserInput] = useState<number | undefined>();
@@ -189,6 +188,12 @@ export default function Mines() {
           strikeMultiplier: strikeMultiplier,
           pointsGained: pointsGained,
         });
+        updatePNL(
+          GameType.mines,
+          win,
+          betAmt!,
+          strikeMultiplier,
+        );
         setGameStatus("Completed");
         setUserBets(updatedUserBetsWithResult);
         setRefresh(true);
@@ -236,7 +241,7 @@ export default function Mines() {
   };
 
   const handlePick = async (number: number) => {
-    soundAlert("/sounds/betButton.wav", !enableSounds);
+    soundAlert("/sounds/betbutton.wav", !enableSounds);
     setIsRolling(true);
     // setSelectTile(false);
     setNumBets(numBets + 1);
@@ -326,25 +331,14 @@ export default function Mines() {
         soundAlert("/sounds/win.wav", !enableSounds);
         // setSelectTile(true);
       }
-      if (lose) soundAlert("/sounds/bomb.wav", !enableSounds);
-
-      if (result !== "Pending") {
-        setLiveStats([
-          ...liveStats,
-          {
-            game: GameType.mines,
-            amount: betAmt!,
-            result: win ? "Won" : "Lost",
-            pnl: win ? betAmt! * strikeMultiplier - betAmt! : -betAmt!,
-            totalPNL:
-              liveStats.length > 0
-                ? liveStats[liveStats.length - 1].totalPNL +
-                  (win ? betAmt! * strikeMultiplier - betAmt! : -betAmt!)
-                : win
-                  ? betAmt! * strikeMultiplier - betAmt!
-                  : -betAmt!,
-          },
-        ]);
+      if (lose) {
+        soundAlert("/sounds/bomb.wav", !enableSounds);
+        updatePNL(
+          GameType.mines,
+          false,
+          betAmt!,
+          1,
+        );
       }
 
       if (success) {
@@ -352,18 +346,25 @@ export default function Mines() {
         setIsRolling(false);
       }
     } catch (error: any) {
+      if (
+        error.message != "Max payout of 25 exceeded! Cashout to continue..."
+      ) {
+        setNumBets(0);
+        setCurrentMultiplier(0);
+        setNextMultiplier(0);
+        setStrikeMultiplier(1);
+        setCurrentProfit(0);
+        setNextProfit(0);
+        setAmountWon(0);
+        setBetActive(false);
+        setIsRolling(false);
+        setProcessing(false);
+        setPendingRequests([]);
+      } else {
+        setRefresh(true);
+        setIsRolling(false);
+      }
       errorCustom(error.message);
-      setNumBets(0);
-      setCurrentMultiplier(0);
-      setNextMultiplier(0);
-      setStrikeMultiplier(1);
-      setCurrentProfit(0);
-      setNextProfit(0);
-      setAmountWon(0);
-      setBetActive(false);
-      setIsRolling(false);
-      setProcessing(false);
-      setPendingRequests([]);
       console.error("Error occurred while betting:", error);
     }
   };
@@ -502,7 +503,7 @@ export default function Mines() {
         // update profit / loss
         setAutoBetProfit(
           autoBetProfit +
-            (win ? strikeMultiplier * (1 - houseEdge) - 1 : -1) * betAmt,
+          (win ? strikeMultiplier * (1 - houseEdge) - 1 : -1) * betAmt,
         );
         // update count
         if (typeof autoBetCount === "number") {
@@ -726,12 +727,12 @@ export default function Mines() {
         potentialLoss =
           autoBetProfit +
           -1 *
-            (autoWinChangeReset || autoLossChangeReset
-              ? betAmt
-              : autoBetCount === "inf"
-                ? Math.max(0, betAmt)
-                : betAmt *
-                  (autoLossChange !== null ? autoLossChange / 100.0 : 0));
+          (autoWinChangeReset || autoLossChangeReset
+            ? betAmt
+            : autoBetCount === "inf"
+              ? Math.max(0, betAmt)
+              : betAmt *
+              (autoLossChange !== null ? autoLossChange / 100.0 : 0));
       }
       if (
         useAutoConfig &&
@@ -914,9 +915,8 @@ export default function Mines() {
                       <label className="text-white/90">Mines</label>
                     </div>
                     <div
-                      className={`${
-                        dropDown ? "" : ""
-                      } relative flex h-11 w-full cursor-pointer items-center rounded-[8px] bg-[#202329] px-4`}
+                      className={`${dropDown ? "" : ""
+                        } relative flex h-11 w-full cursor-pointer items-center rounded-[8px] bg-[#202329] px-4`}
                       onClick={handleDropDown}
                     >
                       <div className="flex justify-between items-center bg-transparent text-base text-[#94A3B8] placeholder-[#94A3B8] font-chakra placeholder-opacity-40 outline-none w-full">
@@ -926,7 +926,10 @@ export default function Mines() {
                           alt="arrowDown"
                           width={14}
                           height={14}
-                          className={`${dropDown ? "transform transition-all rotate-180" : "transition-all"}`}
+                          className={`${dropDown
+                              ? "transform transition-all rotate-180"
+                              : "transition-all"
+                            }`}
                         />
                       </div>
                       {dropDown && (
@@ -934,11 +937,10 @@ export default function Mines() {
                           {options.map((option) => (
                             <div
                               key={option.key}
-                              className={`${
-                                minesCount === option.value
-                                  ? "text-white bg-white/20 hover:bg-white/20"
-                                  : "hover:bg-white/10"
-                              } border-b border-r text-[#94A3B8] font-chakra border-[#2A2E38] py-1.5 px-3`}
+                              className={`${minesCount === option.value
+                                ? "text-white bg-white/20 hover:bg-white/20"
+                                : "hover:bg-white/10"
+                                } border-b border-r text-[#94A3B8] font-chakra border-[#2A2E38] py-1.5 px-3`}
                               onClick={() =>
                                 handleMinesCountChange(option.value)
                               }
@@ -1022,9 +1024,8 @@ export default function Mines() {
                           Mines
                         </label>
                         <div
-                          className={`${
-                            dropDown ? "" : ""
-                          } relative flex h-11 w-full cursor-pointer items-center rounded-[8px] bg-[#202329] px-4`}
+                          className={`${dropDown ? "" : ""
+                            } relative flex h-11 w-full cursor-pointer items-center rounded-[8px] bg-[#202329] px-4`}
                           onClick={!startAuto ? handleDropDown : undefined}
                         >
                           <div className="flex justify-between items-center bg-transparent text-base text-[#94A3B8] placeholder-[#94A3B8] font-chakra placeholder-opacity-40 outline-none w-full">
@@ -1034,7 +1035,10 @@ export default function Mines() {
                               alt="arrowDown"
                               width={14}
                               height={14}
-                              className={`${dropDown ? "transform transition-all rotate-180" : "transition-all"}`}
+                              className={`${dropDown
+                                  ? "transform transition-all rotate-180"
+                                  : "transition-all"
+                                }`}
                             />
                           </div>
                           {!startAuto && dropDown && (
@@ -1042,11 +1046,10 @@ export default function Mines() {
                               {options.map((option) => (
                                 <div
                                   key={option.key}
-                                  className={`${
-                                    minesCount === option.value
-                                      ? "text-white bg-white/20 hover:bg-white/20"
-                                      : "hover:bg-white/10"
-                                  } border-b border-r text-[#94A3B8] font-chakra border-[#2A2E38] py-1.5 px-3`}
+                                  className={`${minesCount === option.value
+                                    ? "text-white bg-white/20 hover:bg-white/20"
+                                    : "hover:bg-white/10"
+                                    } border-b border-r text-[#94A3B8] font-chakra border-[#2A2E38] py-1.5 px-3`}
                                   onClick={() =>
                                     handleMinesCountChange(option.value)
                                   }
@@ -1203,13 +1206,22 @@ export default function Mines() {
               (index) => (
                 <button
                   key={index}
-                  className={`border-2 ${
-                    betType === "manual"
-                      ? userBets[index - 1].result === "Pending" &&
+                  className={`border-2 ${betType === "manual"
+                    ? userBets[index - 1].result === "Pending" &&
+                      userBets[index - 1].pick === true
+                      ? "border-[#FCB10F] bg-[#FCB10F33]"
+                      : userBets[index - 1].result === "Lost" &&
+                        userBets[index - 1].pick === true
+                        ? "border-[#F1323E] bg-[#F1323E33]"
+                        : gameStatus === "Completed"
+                          ? "bg-transparent border-white/10"
+                          : "bg-[#202329] border-[#202329] hover:border-white/30"
+                    : betType === "auto"
+                      ? userBets[index - 1].result === "" &&
                         userBets[index - 1].pick === true
                         ? "border-[#FCB10F] bg-[#FCB10F33]"
                         : userBets[index - 1].result === "Lost" &&
-                            userBets[index - 1].pick === true
+                          userBets[index - 1].pick === true
                           ? "border-[#F1323E] bg-[#F1323E33]"
                           : gameStatus === "Completed"
                             ? "bg-transparent border-white/10"
@@ -1219,25 +1231,24 @@ export default function Mines() {
                           userBets[index - 1].pick === true
                           ? "border-[#FCB10F] bg-[#FCB10F33]"
                           : userBets[index - 1].result === "Won" &&
-                              userBets[index - 1].pick === true
+                            userBets[index - 1].pick === true
                             ? "border-[#FCB10F] bg-[#FCB10F33]"
                             : userBets[index - 1].result === "Lost" &&
-                                userBets[index - 1].pick === true
+                              userBets[index - 1].pick === true
                               ? "border-[#F1323E] bg-[#F1323E33]"
                               : "bg-[#202329] border-[#202329] hover:border-white/30"
                         : null
-                  } ${
-                    pendingRequests.includes(index) ? "blink_tile" : ""
-                  } flex items-center active:scale-90 justify-center cursor-pointer rounded-md text-center transition duration-150 ease-in-out w-[50px] h-[50px] sm:w-[55px] sm:h-[55px] md:w-[80px] md:h-[80px] xl:w-[90px] xl:h-[90px]`}
+                    } ${pendingRequests.includes(index) ? "blink_tile" : ""
+                    } flex items-center active:scale-90 justify-center cursor-pointer rounded-md text-center transition duration-150 ease-in-out w-[50px] h-[50px] sm:w-[55px] sm:h-[55px] md:w-[80px] md:h-[80px] xl:w-[90px] xl:h-[90px]`}
                   disabled={betType === "manual" && userBets[index - 1].pick}
                   onClick={() =>
                     betType === "auto"
                       ? handleAutoPick(index)
                       : betActive && betType === "manual"
                         ? setPendingRequests((prevRequests) => [
-                            ...prevRequests,
-                            index,
-                          ])
+                          ...prevRequests,
+                          index,
+                        ])
                         : null
                   }
                 >

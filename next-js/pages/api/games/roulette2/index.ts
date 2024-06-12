@@ -8,14 +8,11 @@ import {
   seedStatus,
 } from "@/utils/provably-fair";
 import StakingUser from "@/models/staking/user";
-import {
-  houseEdgeTiers,
-  launchPromoEdge,
-  pointTiers,
-} from "@/context/transactions";
-import { wsEndpoint } from "@/context/gameTransactions";
+import { houseEdgeTiers, pointTiers } from "@/context/config";
+import { launchPromoEdge } from "@/context/config";
+import { wsEndpoint } from "@/context/config";
 import { Decimal } from "decimal.js";
-import updateGameStats from "../global/updateGameStats";
+import updateGameStats from "../../../../utils/updateGameStats";
 Decimal.set({ precision: 9 });
 
 const secret = process.env.NEXTAUTH_SECRET;

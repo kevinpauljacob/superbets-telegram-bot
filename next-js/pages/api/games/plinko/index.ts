@@ -8,13 +8,9 @@ import {
   seedStatus,
 } from "@/utils/provably-fair";
 import StakingUser from "@/models/staking/user";
-import {
-  houseEdgeTiers,
-  launchPromoEdge,
-  maxPayouts,
-  pointTiers,
-} from "@/context/transactions";
-import { minGameAmount, wsEndpoint } from "@/context/gameTransactions";
+import { houseEdgeTiers, maxPayouts, pointTiers } from "@/context/config";
+import { launchPromoEdge } from "@/context/config";
+import { minGameAmount, wsEndpoint } from "@/context/config";
 import { Decimal } from "decimal.js";
 Decimal.set({ precision: 9 });
 
@@ -80,6 +76,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         .json({ success: false, message: "GAME UNDER DEVELOPMENT !" });
 
       // let { wallet, amount, tokenMint, rows, risk }: InputType = req.body;
+
+      // const minGameAmount =
+      //   maxPayouts[tokenMint as GameTokens]["plinko" as GameType] * minAmtFactor;
 
       // const token = await getToken({ req, secret });
 

@@ -1,10 +1,6 @@
-import {
-  User,
-  houseEdgeTiers,
-  launchPromoEdge,
-  pointTiers,
-  translator,
-} from "@/context/transactions";
+import { User, connection, translator } from "@/context/transactions";
+import { houseEdgeTiers, pointTiers, stakingTiers } from "@/context/config";
+import { launchPromoEdge } from "@/context/config";
 import { useWallet } from "@solana/wallet-adapter-react";
 import React, {
   createContext,
@@ -13,18 +9,18 @@ import React, {
   ReactNode,
   useEffect,
 } from "react";
-import { connection } from "../context/gameTransactions";
 import { LAMPORTS_PER_SOL, PublicKey } from "@solana/web3.js";
 import { errorCustom } from "./toasts/ToastGroup";
-import { SPL_TOKENS } from "@/context/config";
 import SOL from "@/public/assets/coins/SOL";
 import { GameType } from "@/utils/provably-fair";
+import { SPL_TOKENS } from "@/context/config";
 
 export interface GameStat {
   game: GameType;
   amount: number;
   pnl: number;
   totalPNL: number;
+  token: string;
   result: "Won" | "Lost";
 }
 
@@ -72,6 +68,11 @@ interface AutoConfigOptions {
   autoStopProfit: number | null;
   autoStopLoss: number | null;
   useAutoConfig: boolean;
+}
+
+interface LiveTokenPrice {
+  mintAddress: string;
+  price: number;// 1 Token Price in USD
 }
 
 interface GlobalContextProps {
@@ -167,8 +168,6 @@ interface GlobalContextProps {
   setLiveCurrentStat: React.Dispatch<React.SetStateAction<GameType | "All">>;
   showLiveStats: boolean;
   setShowLiveStats: React.Dispatch<React.SetStateAction<boolean>>;
-  showFullScreen: boolean;
-  setShowFullScreen: React.Dispatch<React.SetStateAction<boolean>>;
   enableSounds: boolean;
   setEnableSounds: React.Dispatch<React.SetStateAction<boolean>>;
 
@@ -195,12 +194,17 @@ interface GlobalContextProps {
   maxBetAmt: number | undefined;
   setMaxBetAmt: React.Dispatch<React.SetStateAction<number>>;
 
+  minGameAmount: number;
+  setMinGameAmount: React.Dispatch<React.SetStateAction<number>>;
+
   kenoRisk: "classic" | "low" | "medium" | "high";
   setKenoRisk: React.Dispatch<
     React.SetStateAction<"classic" | "low" | "medium" | "high">
   >;
   userTokens: TokenAccount[]; // Add this line
   setUserTokens: React.Dispatch<React.SetStateAction<TokenAccount[]>>;
+  updatePNL: (game: GameType, win: boolean, betAmount: number, multiplier: number) => void;
+  liveTokenPrice: LiveTokenPrice[];
 }
 
 const GlobalContext = createContext<GlobalContextProps | undefined>(undefined);
@@ -276,7 +280,7 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
   const [liveCurrentStat, setLiveCurrentStat] = useState<GameType | "All">(
     "All",
   );
-  const [showFullScreen, setShowFullScreen] = useState<boolean>(false);
+  const [liveTokenPrice, setLiveTokenPrice] = useState<LiveTokenPrice[]>([])
   const [enableSounds, setEnableSounds] = useState<boolean>(true);
 
   const [autoConfigState, setAutoConfigState] = useState<
@@ -289,6 +293,7 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
 
   const [houseEdge, setHouseEdge] = useState<number>(0);
   const [maxBetAmt, setMaxBetAmt] = useState<number>(0);
+  const [minGameAmount, setMinGameAmount] = useState<number>(0.0001);
   const [kenoRisk, setKenoRisk] = useState<
     "classic" | "low" | "medium" | "high"
   >("classic");
@@ -320,14 +325,18 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
         if (success) {
           setUserData(user);
         } else console.error(message);
-        let points = user?.points ?? 0;
-        const userTier = Object.entries(pointTiers).reduce((prev, next) => {
-          return points >= next[1]?.limit ? next : prev;
-        })[0];
+
+        const stakeAmount = user?.stakedAmount ?? 0;
+        const stakingTier = Object.entries(stakingTiers).reduce(
+          (prev, next) => {
+            return stakeAmount >= next[1]?.limit ? next : prev;
+          },
+        )[0];
+
         setHouseEdge(
           launchPromoEdge || selectedCoin.tokenName === "FOMO"
             ? 0
-            : houseEdgeTiers[parseInt(userTier)],
+            : houseEdgeTiers[parseInt(stakingTier)],
         );
       } catch (e) {
         // errorCustom("Unable to fetch balance.");
@@ -355,6 +364,55 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
       console.error(e);
     }
   };
+
+  const updatePNL = async (game: GameType, win: boolean, betAmount: number, multiplier: number) => {
+    let token = liveTokenPrice.find((token) => token.mintAddress === selectedCoin.tokenMint)
+    if (!token) token = (await updateLivePrices()).find((token) => token.mintAddress === selectedCoin.tokenMint)!
+
+    betAmount = token.price * betAmount
+
+    setLiveStats([
+      ...liveStats,
+      {
+        game: game,
+        amount: betAmount,
+        result: win ? "Won" : "Lost",
+        pnl: win
+          ? (betAmount * multiplier) - betAmount
+          : -betAmount,
+        totalPNL:
+          liveStats.length > 0
+            ? liveStats[liveStats.length - 1].totalPNL +
+            (win ? (betAmount * multiplier) - betAmount : -betAmount)
+            : win
+              ? (betAmount * multiplier) - betAmount
+              : -betAmount,
+        token: selectedCoin.tokenMint
+      },
+    ]);
+  }
+
+  const updateLivePrices = async () => {
+    let prices = []
+    let data = await (
+      await fetch(`https://price.jup.ag/v6/price?ids=${SPL_TOKENS.map(x => x.tokenMint).join(",")}&vsToken=USDC`)
+    ).json()
+
+    for (let token of SPL_TOKENS) {
+      let price = data?.data[token.tokenMint]?.price ?? 0
+      prices.push({ mintAddress: token.tokenMint, price: price })
+    }
+
+    setLiveTokenPrice(prices)
+    return prices
+  }
+
+  useEffect(() => {
+    updateLivePrices()
+    setInterval(() => {
+      updateLivePrices()
+    }, 5 * 60 * 1000)
+  }, [])
 
   const getWalletBalance = async () => {
     if (wallet && wallet.publicKey)
@@ -492,6 +550,8 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
         houseEdge,
         setHouseEdge,
         maxBetAmt,
+        minGameAmount,
+        setMinGameAmount,
         kenoRisk,
         setKenoRisk,
         setMaxBetAmt,
@@ -512,12 +572,12 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
         setLiveStats,
         showLiveStats,
         setShowLiveStats,
-        showFullScreen,
-        setShowFullScreen,
         enableSounds,
         setEnableSounds,
         liveCurrentStat,
         setLiveCurrentStat,
+        updatePNL,
+        liveTokenPrice
       }}
     >
       {children}
@@ -941,11 +1001,11 @@ export const translationsMap = {
     ch: "您可以在此游戏中下注的最高金额为",
   },
   "The more you stake, the less fees you pay and the bigger your points multiplier":
-    {
-      ru: "Чем больше вы ставите, тем меньше вы платите комиссий и тем выше ваш множитель очков",
-      ko: "더 많이 걸수록 수수료가 적게 들고 포인트 배수가 커집니다",
-      ch: "投注金额越大，您支付的费用越少，积分乘数越大",
-    },
+  {
+    ru: "Чем больше вы ставите, тем меньше вы платите комиссий и тем выше ваш множитель очков",
+    ko: "더 많이 걸수록 수수료가 적게 들고 포인트 배수가 커집니다",
+    ch: "投注金额越大，您支付的费用越少，积分乘数越大",
+  },
   WALLET: {
     ru: "КОШЕЛЕК",
     ko: "지갑",
@@ -1047,11 +1107,11 @@ export const translationsMap = {
     ch: "待定",
   },
   "FOMO wtf casino games are currently in beta and will be undergoing audit shortly. FOMO wtf EXIT games has gone through audit performed by OtterSec in December 2023.":
-    {
-      ru: "Игры казино FOMO wtf находятся в бета-тестировании и вскоре будут проходить аудит. Игры FOMO wtf EXIT прошли аудит, проведенный OtterSec в декабре 2023 года.",
-      ko: "FOMO wtf 카지노 게임은 현재 베타 버전이며 곧 감사를 받을 예정입니다. FOMO wtf EXIT 게임은 2023년 12월 OtterSec에 의해 감사를 받았습니다.",
-      ch: "FOMO wtf赌场游戏目前处于测试阶段，将很快进行审计。 FOMO wtf EXIT游戏已于2023年12月由OtterSec进行了审计。",
-    },
+  {
+    ru: "Игры казино FOMO wtf находятся в бета-тестировании и вскоре будут проходить аудит. Игры FOMO wtf EXIT прошли аудит, проведенный OtterSec в декабре 2023 года.",
+    ko: "FOMO wtf 카지노 게임은 현재 베타 버전이며 곧 감사를 받을 예정입니다. FOMO wtf EXIT 게임은 2023년 12월 OtterSec에 의해 감사를 받았습니다.",
+    ch: "FOMO wtf赌场游戏目前处于测试阶段，将很快进行审计。 FOMO wtf EXIT游戏已于2023年12月由OtterSec进行了审计。",
+  },
   Services: {
     ru: "Услуги",
     ko: "서비스",
@@ -1358,11 +1418,11 @@ export const translationsMap = {
     ch: "庄家优势",
   },
   "I agree with Privacy Policy and with Terms of Use, Gambling isn't forbidden by my local authorities and I'm at least 18 years old.":
-    {
-      ru: "Я согласен с Политикой конфиденциальности и Условиями использования, азартные игры не запрещены моими местными властями, и мне исполнилось 18 лет.",
-      ko: "개인정보 보호정책 및 이용 약관에 동의하며, 도박은 현지 당국에 의해 금지되지 않으며 나는 18세 이상입니다.",
-      ch: "我同意隐私政策和使用条款，赌博未被当地政府禁止并且我已满18岁。",
-    },
+  {
+    ru: "Я согласен с Политикой конфиденциальности и Условиями использования, азартные игры не запрещены моими местными властями, и мне исполнилось 18 лет.",
+    ko: "개인정보 보호정책 및 이용 약관에 동의하며, 도박은 현지 당국에 의해 금지되지 않으며 나는 18세 이상입니다.",
+    ch: "我同意隐私政策和使用条款，赌博未被当地政府禁止并且我已满18岁。",
+  },
   "High Rollers": {
     ru: "Крупные игроки",
     ko: "하이 롤러",

@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import dynamic from "next/dynamic";
 import { useWallet } from "@solana/wallet-adapter-react";
-import { placeFlip } from "../../context/gameTransactions";
 import Image from "next/image";
 import { FormProvider, useForm } from "react-hook-form";
 import { useGlobalContext } from "@/components/GlobalContext";
@@ -25,8 +24,7 @@ import {
   successCustom,
   warningCustom,
 } from "@/components/toasts/ToastGroup";
-import { translator } from "@/context/transactions";
-import { minGameAmount } from "@/context/gameTransactions";
+import { placeFlip, translator } from "@/context/transactions";
 import { useSession } from "next-auth/react";
 import { GameType } from "@/utils/provably-fair";
 
@@ -63,8 +61,7 @@ export default function Flip() {
     houseEdge,
     maxBetAmt,
     language,
-    liveStats,
-    setLiveStats,
+    updatePNL,
     enableSounds,
   } = useGlobalContext();
 
@@ -85,17 +82,13 @@ export default function Flip() {
   const bet = async () => {
     try {
       if (!wallet.connected || !wallet.publicKey) {
-        throw new Error(
-          translator("Wallet not connected", language),
-        );
+        throw new Error(translator("Wallet not connected", language));
       }
       if (!betAmt || betAmt === 0) {
         throw new Error(translator("Set Amount.", language));
       }
       if (selectedCoin && selectedCoin.amount < betAmt) {
-        throw new Error(
-          translator("Insufficient balance for bet !", language)
-        );
+        throw new Error(translator("Insufficient balance for bet !", language));
       }
 
       // console.log("Placing Flip");
@@ -116,12 +109,8 @@ export default function Flip() {
         () => {
           if (response.success) {
             response?.data?.result == "Won"
-              ? successCustom(
-                  translator(response?.message, language),
-                )
-              : errorCustom(
-                  translator(response?.message, language),
-                );
+              ? successCustom(translator(response?.message, language))
+              : errorCustom(translator(response?.message, language));
 
             const win = response?.data?.result === "Won";
             if (win) soundAlert("/sounds/win.wav", !enableSounds);
@@ -140,22 +129,12 @@ export default function Flip() {
             setLoading(false);
             setFlipping(false);
 
-            setLiveStats([
-              ...liveStats,
-              {
-                game: GameType.coin,
-                amount: betAmt,
-                result: win ? "Won" : "Lost",
-                pnl: win ? betAmt * newBetResult.result - betAmt : -betAmt,
-                totalPNL:
-                  liveStats.length > 0
-                    ? liveStats[liveStats.length - 1].totalPNL +
-                      (win ? betAmt * newBetResult.result - betAmt : -betAmt)
-                    : win
-                      ? betAmt * newBetResult.result - betAmt
-                      : -betAmt,
-              },
-            ]);
+            updatePNL(
+              GameType.coin,
+              win,
+              betAmt,
+              newBetResult.result,
+            );
 
             // auto options
             if (betSetting === "auto") {
@@ -202,10 +181,7 @@ export default function Flip() {
         betSetting === "auto" ? 500 : 3000,
       );
     } catch (e: any) {
-      errorCustom(
-        e?.message ??
-          translator("Could not make Flip.", language),
-      );
+      errorCustom(e?.message ?? translator("Could not make Flip.", language));
       setBetType(null);
       setFlipping(false);
       setLoading(false);
@@ -351,7 +327,10 @@ export default function Flip() {
               <div
                 onClick={() => {
                   soundAlert("/sounds/betbutton.wav", !enableSounds);
-                  warningCustom(translator("Auto bet stopped", language), "top-left");
+                  warningCustom(
+                    translator("Auto bet stopped", language),
+                    "top-left",
+                  );
                   setAutoBetCount(0);
                   setStartAuto(false);
                 }}
@@ -472,7 +451,10 @@ export default function Flip() {
                     <div
                       onClick={() => {
                         soundAlert("/sounds/betbutton.wav", !enableSounds);
-                        warningCustom(translator("Auto bet stopped", language), "top-left");
+                        warningCustom(
+                          translator("Auto bet stopped", language),
+                          "top-left",
+                        );
                         setAutoBetCount(0);
                         setStartAuto(false);
                       }}

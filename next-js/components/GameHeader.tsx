@@ -3,8 +3,7 @@ import Image from "next/image";
 import { useEffect, useState } from "react";
 import { GameType } from "@/utils/provably-fair";
 import { useGlobalContext } from "./GlobalContext";
-import { translator } from "@/context/transactions";
-import { truncateNumber } from "@/context/gameTransactions";
+import { translator, truncateNumber } from "@/context/transactions";
 import { Coins } from "./Infobar";
 
 export default function GameHeader() {
@@ -41,7 +40,7 @@ export default function GameHeader() {
               ...prev[game],
               stats: {
                 volume: volume,
-                players: data?.stats?.wallets?.length ?? 0,
+                players: data?.stats?.numOfWallets ?? 0,
                 balance: 0,
               },
             },
@@ -130,7 +129,9 @@ export default function GameHeader() {
             <p className="font-light text-xs">
               {translator("House Edge", language)} :&nbsp;
             </p>
-            <p className="text-[#7839C5] font-semibold text-xs">{houseEdge}%</p>
+            <p className="text-[#7839C5] font-semibold text-xs">
+              {houseEdge * 100}%
+            </p>
           </div>
           <div className="hidden md:flex items-center justify-between bg-[#1E2220] rounded-md mx-1.5  my-1 px-4 py-1">
             <p className="font-thin text-xs">

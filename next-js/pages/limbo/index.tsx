@@ -10,7 +10,6 @@ import {
   GameOptions,
   GameTable,
 } from "@/components/GameLayout";
-import { limboBet, truncateNumber } from "@/context/gameTransactions";
 import BetAmount from "@/components/games/BetAmountInput";
 import BetButton from "@/components/games/BetButton";
 import Loader from "../../components/games/Loader";
@@ -25,8 +24,7 @@ import {
   successCustom,
   warningCustom,
 } from "@/components/toasts/ToastGroup";
-import { translator } from "@/context/transactions";
-import { minGameAmount } from "@/context/gameTransactions";
+import { limboBet, translator, truncateNumber } from "@/context/transactions";
 import { useSession } from "next-auth/react";
 import { GameType } from "@/utils/provably-fair";
 import { handleSignIn } from "@/components/ConnectWallet";
@@ -81,9 +79,9 @@ export default function Limbo() {
     houseEdge,
     maxBetAmt,
     language,
-    setLiveStats,
-    liveStats,
     enableSounds,
+    updatePNL,
+    minGameAmount,
   } = useGlobalContext();
 
   const multiplierLimits = [1.02, 50];
@@ -142,24 +140,14 @@ export default function Limbo() {
             return newResults;
           });
 
-          setLiveStats([
-            ...liveStats,
-            {
-              game: GameType.limbo,
-              amount: betAmt!,
-              result: newBetResult.win ? "Won" : "Lost",
-              pnl: newBetResult.win
-                ? betAmt! * targetMultiplier - betAmt!
-                : -betAmt!,
-              totalPNL:
-                liveStats.length > 0
-                  ? liveStats[liveStats.length - 1].totalPNL +
-                    (win ? betAmt! * targetMultiplier - betAmt! : -betAmt!)
-                  : win
-                    ? betAmt! * targetMultiplier - betAmt!
-                    : -betAmt!,
-            },
-          ]);
+          if (betAmt) {
+            updatePNL(
+              GameType.limbo,
+              newBetResult.win,
+              betAmt,
+              inputMultiplier,
+            );
+          }
 
           // auto options
           if (betSetting === "auto" && betAmt !== undefined) {
@@ -179,13 +167,16 @@ export default function Limbo() {
             // update profit / loss
             setAutoBetProfit(
               autoBetProfit +
-                (win ? multiplier * (1 - houseEdge) - 1 : -1) * betAmt,
+              (win ? multiplier * (1 - houseEdge) - 1 : -1) * betAmt,
             );
             // update count
             if (typeof autoBetCount === "number") {
               setAutoBetCount(autoBetCount > 0 ? autoBetCount - 1 : 0);
               autoBetCount === 1 &&
-                warningCustom(translator("Auto bet stopped", language), "top-left");
+                warningCustom(
+                  translator("Auto bet stopped", language),
+                  "top-left",
+                );
             } else
               setAutoBetCount(
                 autoBetCount.length > 12
@@ -206,9 +197,7 @@ export default function Limbo() {
   const bet = async () => {
     try {
       if (!wallet.publicKey) {
-        throw new Error(
-          translator("Wallet not connected", language),
-        );;
+        throw new Error(translator("Wallet not connected", language));
       }
       if (!betAmt || betAmt === 0) {
         throw new Error(translator("Set Amount.", language));
@@ -228,7 +217,7 @@ export default function Limbo() {
 
       const response = await limboBet(
         wallet,
-        betAmt!,
+        betAmt,
         inputMultiplier,
         selectedCoin.tokenMint,
       );
@@ -285,12 +274,12 @@ export default function Limbo() {
         potentialLoss =
           autoBetProfit +
           -1 *
-            (autoWinChangeReset || autoLossChangeReset
-              ? betAmt
-              : autoBetCount === "inf"
-                ? Math.max(0, betAmt)
-                : betAmt *
-                  (autoLossChange !== null ? autoLossChange / 100.0 : 0));
+          (autoWinChangeReset || autoLossChangeReset
+            ? betAmt
+            : autoBetCount === "inf"
+              ? Math.max(0, betAmt)
+              : betAmt *
+              (autoLossChange !== null ? autoLossChange / 100.0 : 0));
 
         // console.log("Current bet amount:", betAmt);
         // console.log("Auto loss change:", autoLossChange);
@@ -377,7 +366,10 @@ export default function Limbo() {
               <div
                 onClick={() => {
                   soundAlert("/sounds/betbutton.wav", !enableSounds);
-                  warningCustom(translator("Auto bet stopped", language), "top-left");
+                  warningCustom(
+                    translator("Auto bet stopped", language),
+                    "top-left",
+                  );
                   setAutoBetCount(0);
                   setStartAuto(false);
                 }}
@@ -389,10 +381,10 @@ export default function Limbo() {
             <BetButton
               disabled={
                 loading ||
-                !session?.user ||
-                (betAmt !== undefined &&
-                  maxBetAmt !== undefined &&
-                  betAmt > maxBetAmt)
+                  !session?.user ||
+                  (betAmt !== undefined &&
+                    maxBetAmt !== undefined &&
+                    betAmt > maxBetAmt)
                   ? true
                   : false
               }
@@ -458,7 +450,10 @@ export default function Limbo() {
                     <div
                       onClick={() => {
                         soundAlert("/sounds/betbutton.wav", !enableSounds);
-                        warningCustom(translator("Auto bet stopped", language), "top-left");
+                        warningCustom(
+                          translator("Auto bet stopped", language),
+                          "top-left",
+                        );
                         setAutoBetCount(0);
                         setStartAuto(false);
                       }}
@@ -470,10 +465,10 @@ export default function Limbo() {
                   <BetButton
                     disabled={
                       loading ||
-                      !session?.user ||
-                      (betAmt !== undefined &&
-                        maxBetAmt !== undefined &&
-                        betAmt > maxBetAmt)
+                        !session?.user ||
+                        (betAmt !== undefined &&
+                          maxBetAmt !== undefined &&
+                          betAmt > maxBetAmt)
                         ? true
                         : false
                     }
@@ -509,15 +504,14 @@ export default function Limbo() {
         <div className="grid place-items-center">
           <div className="bg-black border-2 border-white border-opacity-20 px-8 py-6 sm:px-10 lg:px-[4.5rem] lg:py-10 my-10 md:my-10 lg:my-0 place-content-center text-center rounded-[10px]">
             <span
-              className={`${
-                result
-                  ? displayMultiplier === targetMultiplier
-                    ? displayMultiplier >= multiplier
-                      ? "text-fomo-green"
-                      : "text-fomo-red"
-                    : "text-white"
+              className={`${result
+                ? displayMultiplier === targetMultiplier
+                  ? displayMultiplier >= multiplier
+                    ? "text-fomo-green"
+                    : "text-fomo-red"
                   : "text-white"
-              } font-chakra inline-block transition-transform duration-1000 ease-out text-[5rem] font-black`}
+                : "text-white"
+                } font-chakra inline-block transition-transform duration-1000 ease-out text-[5rem] font-black`}
             >
               {truncateNumber(displayMultiplier, 2)}x
             </span>
@@ -544,12 +538,12 @@ export default function Limbo() {
                 <span className="bg-[#202329] font-chakra text-xs text-white rounded-md px-2 md:px-5 py-3">
                   {betAmt && inputMultiplier
                     ? truncateNumber(
-                        Math.max(
-                          0,
-                          betAmt * (inputMultiplier * (1 - houseEdge) - 1),
-                        ),
-                        4,
-                      )
+                      Math.max(
+                        0,
+                        betAmt * (inputMultiplier * (1 - houseEdge) - 1),
+                      ),
+                      4,
+                    )
                     : 0.0}{" "}
                   ${selectedCoin.tokenName}
                 </span>

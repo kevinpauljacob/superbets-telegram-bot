@@ -2,11 +2,13 @@ import connectDatabase from "@/utils/database";
 import { getToken } from "next-auth/jwt";
 import { NextApiRequest, NextApiResponse } from "next";
 import { GameSeed, Mines, User } from "@/models/games";
-import { GameTokens, seedStatus } from "@/utils/provably-fair";
-import { minGameAmount } from "@/context/gameTransactions";
+import { GameTokens, GameType, seedStatus } from "@/utils/provably-fair";
+import { wsEndpoint } from "@/context/config";
 import Decimal from "decimal.js";
-import { maxPayouts } from "@/context/transactions";
+import { maxPayouts, minAmtFactor } from "@/context/config";
+import StakingUser from "@/models/staking/user";
 import { SPL_TOKENS } from "@/context/config";
+import updateGameStats from "../../../../utils/updateGameStats";
 
 const secret = process.env.NEXTAUTH_SECRET;
 
@@ -25,6 +27,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === "POST") {
     try {
       let { wallet, amount, tokenMint, minesCount }: InputType = req.body;
+
+      const minGameAmount =
+        maxPayouts[tokenMint as GameTokens]["mines" as GameType] * minAmtFactor;
 
       const token = await getToken({ req, secret });
 
@@ -67,6 +72,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
       await connectDatabase();
 
+      const user = await User.findOne({ wallet });
+      const addGame = !user.gamesPlayed.includes(GameType.mines);
+
       const userUpdate = await User.findOneAndUpdate(
         {
           wallet,
@@ -82,6 +90,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
             "deposit.$.amount": -amount,
             numOfGamesPlayed: 1,
           },
+          ...(addGame ? { $addToSet: { gamesPlayed: GameType.mines } } : {}),
         },
         {
           new: true,
@@ -131,6 +140,36 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         },
         { upsert: true, new: true, setDefaultsOnInsert: true },
       );
+
+      await updateGameStats(GameType.mines, tokenMint, amount, addGame, 0);
+
+      const userData = await StakingUser.findOneAndUpdate(
+        { wallet },
+        {},
+        { upsert: true, new: true },
+      );
+      const userTier = userData?.tier ?? 0;
+
+      const rest = minesGame.toObject();
+      rest.game = GameType.mines;
+      rest.userTier = userTier;
+
+      const payload = rest;
+
+      const socket = new WebSocket(wsEndpoint);
+
+      socket.onopen = () => {
+        socket.send(
+          JSON.stringify({
+            clientType: "api-client",
+            channel: "fomo-casino_games-channel",
+            authKey: process.env.FOMO_CHANNEL_AUTH_KEY!,
+            payload,
+          }),
+        );
+
+        socket.close();
+      };
 
       return res.status(201).json({
         success: true,

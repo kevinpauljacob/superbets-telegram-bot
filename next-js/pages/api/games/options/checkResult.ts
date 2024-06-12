@@ -3,16 +3,13 @@ import { Option, User } from "../../../../models/games";
 import { NextApiRequest, NextApiResponse } from "next";
 import { getToken } from "next-auth/jwt";
 import StakingUser from "@/models/staking/user";
-import {
-  houseEdgeTiers,
-  launchPromoEdge,
-  pointTiers,
-} from "@/context/transactions";
+import { houseEdgeTiers, pointTiers, stakingTiers } from "@/context/config";
+import { launchPromoEdge } from "@/context/config";
 import { GameType } from "@/utils/provably-fair";
-import { optionsEdge, wsEndpoint } from "@/context/gameTransactions";
+import { optionsEdge, wsEndpoint } from "@/context/config";
 import { Decimal } from "decimal.js";
 import { SPL_TOKENS } from "@/context/config";
-import updateGameStats from "../global/updateGameStats";
+import updateGameStats from "../../../../utils/updateGameStats";
 Decimal.set({ precision: 9 });
 
 const secret = process.env.NEXTAUTH_SECRET;
@@ -60,14 +57,20 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         {},
         { upsert: true, new: true },
       );
-      const userTier = userData?.tier ?? 0;
+
+      const stakeAmount = userData?.stakedAmount ?? 0;
+      const stakingTier = Object.entries(stakingTiers).reduce((prev, next) => {
+        return stakeAmount >= next[1]?.limit ? next : prev;
+      })[0];
       const isFomoToken =
         tokenMint === SPL_TOKENS.find((t) => t.tokenName === "FOMO")?.tokenMint
           ? true
           : false;
       const houseEdge =
         optionsEdge +
-        (launchPromoEdge || isFomoToken ? 0 : houseEdgeTiers[userTier]);
+        (launchPromoEdge || isFomoToken
+          ? 0
+          : houseEdgeTiers[parseInt(stakingTier)]);
 
       await new Promise((r) => setTimeout(r, 2000));
 
@@ -82,6 +85,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       let result = "Lost";
       let amountWon = new Decimal(0);
       let amountLost = amount;
+      let feeGenerated = 0;
 
       if (
         (betType === "betUp" && betEndPrice > strikePrice) ||
@@ -90,6 +94,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         result = "Won";
         amountWon = Decimal.mul(amount, 2).mul(Decimal.sub(1, houseEdge));
         amountLost = 0;
+
+        feeGenerated = Decimal.mul(amount, 2).mul(houseEdge).toNumber();
       }
 
       const status = await User.findOneAndUpdate(
@@ -105,7 +111,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         {
           $inc: {
             "deposit.$.amount": amountWon,
-            numOfGamesPlayed: 1,
           },
           isOptionOngoing: false,
         },
@@ -135,7 +140,13 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           .status(400)
           .json({ success: false, message: "Game already concluded!" });
 
-      await updateGameStats(GameType.options, wallet, amount, tokenMint);
+      await updateGameStats(
+        GameType.options,
+        tokenMint,
+        0,
+        false,
+        feeGenerated,
+      );
 
       const pointsGained =
         0 * user.numOfGamesPlayed + 1.4 * amount * userData.multiplier;
@@ -152,9 +163,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         {
           $inc: {
             points: pointsGained,
-          },
-          $set: {
-            tier: newTier,
           },
         },
       );
