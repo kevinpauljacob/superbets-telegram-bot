@@ -62,62 +62,6 @@ const DialogContent = React.forwardRef<
 ))
 DialogContent.displayName = DialogPrimitive.Content.displayName
 
-const DialogHeader = ({
-  className,
-  ...props
-}: React.HTMLAttributes<HTMLDivElement>) => (
-  <div
-    className={cn(
-      "flex flex-col space-y-1.5 text-center sm:text-left",
-      className
-    )}
-    {...props}
-  />
-)
-DialogHeader.displayName = "DialogHeader"
-
-const DialogFooter = ({
-  className,
-  ...props
-}: React.HTMLAttributes<HTMLDivElement>) => (
-  <div
-    className={cn(
-      "flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2",
-      className
-    )}
-    {...props}
-  />
-)
-DialogFooter.displayName = "DialogFooter"
-
-const DialogTitle = React.forwardRef<
-  React.ElementRef<typeof DialogPrimitive.Title>,
-  React.ComponentPropsWithoutRef<typeof DialogPrimitive.Title>
->(({ className, ...props }, ref) => (
-  <DialogPrimitive.Title
-    ref={ref}
-    className={cn(
-      "text-lg font-semibold leading-none tracking-tight",
-      className
-    )}
-    {...props}
-  />
-))
-DialogTitle.displayName = DialogPrimitive.Title.displayName
-
-const DialogDescription = React.forwardRef<
-  React.ElementRef<typeof DialogPrimitive.Description>,
-  React.ComponentPropsWithoutRef<typeof DialogPrimitive.Description>
->(({ className, ...props }, ref) => (
-  <DialogPrimitive.Description
-    ref={ref}
-    className={cn("text-sm text-muted-foreground", className)}
-    {...props}
-  />
-))
-DialogDescription.displayName = DialogPrimitive.Description.displayName
-
-
 const Drawer = ({
   shouldScaleBackground = true,
   ...props
@@ -167,55 +111,6 @@ const DrawerContent = React.forwardRef<
   </DrawerPortal>
 ))
 DrawerContent.displayName = "DrawerContent"
-
-const DrawerHeader = ({
-  className,
-  ...props
-}: React.HTMLAttributes<HTMLDivElement>) => (
-  <div
-    className={cn("grid gap-1.5 p-4 text-center sm:text-left", className)}
-    {...props}
-  />
-)
-DrawerHeader.displayName = "DrawerHeader"
-
-const DrawerFooter = ({
-  className,
-  ...props
-}: React.HTMLAttributes<HTMLDivElement>) => (
-  <div
-    className={cn("mt-auto flex flex-col gap-2 p-4", className)}
-    {...props}
-  />
-)
-DrawerFooter.displayName = "DrawerFooter"
-
-const DrawerTitle = React.forwardRef<
-  React.ElementRef<typeof DrawerPrimitive.Title>,
-  React.ComponentPropsWithoutRef<typeof DrawerPrimitive.Title>
->(({ className, ...props }, ref) => (
-  <DrawerPrimitive.Title
-    ref={ref}
-    className={cn(
-      "text-lg font-semibold leading-none tracking-tight",
-      className
-    )}
-    {...props}
-  />
-))
-DrawerTitle.displayName = DrawerPrimitive.Title.displayName
-
-const DrawerDescription = React.forwardRef<
-  React.ElementRef<typeof DrawerPrimitive.Description>,
-  React.ComponentPropsWithoutRef<typeof DrawerPrimitive.Description>
->(({ className, ...props }, ref) => (
-  <DrawerPrimitive.Description
-    ref={ref}
-    className={cn("text-sm text-muted-foreground", className)}
-    {...props}
-  />
-))
-DrawerDescription.displayName = DrawerPrimitive.Description.displayName
 
 
 interface BaseProps {
@@ -274,70 +169,9 @@ interface BaseProps {
     )
   }
   
-  const AdaptiveModalDescription = ({
-    className,
-    children,
-    ...props
-  }: AdaptiveModalProps) => {
-    const isDesktop = useMediaQuery(desktop)
-    const AdaptiveModalDescription = isDesktop ? DialogDescription : DrawerDescription
-  
-    return (
-      <AdaptiveModalDescription className={className} {...props}>
-        {children}
-      </AdaptiveModalDescription>
-    )
-  }
-  
-  const AdaptiveModalHeader = ({ className, children, ...props }: AdaptiveModalProps) => {
-    const isDesktop = useMediaQuery(desktop)
-    const AdaptiveModalHeader = isDesktop ? DialogHeader : DrawerHeader
-  
-    return (
-      <AdaptiveModalHeader className={className} {...props}>
-        {children}
-      </AdaptiveModalHeader>
-    )
-  }
-  
-  const AdaptiveModalTitle = ({ className, children, ...props }: AdaptiveModalProps) => {
-    const isDesktop = useMediaQuery(desktop)
-    const AdaptiveModalTitle = isDesktop ? DialogTitle : DrawerTitle
-  
-    return (
-      <AdaptiveModalTitle className={className} {...props}>
-        {children}
-      </AdaptiveModalTitle>
-    )
-  }
-  
-  const AdaptiveModalBody = ({ className, children, ...props }: AdaptiveModalProps) => {
-    return (
-      <div className={cn("px-4 md:px-0", className)} {...props}>
-        {children}
-      </div>
-    )
-  }
-  
-  const AdaptiveModalFooter = ({ className, children, ...props }: AdaptiveModalProps) => {
-    const isDesktop = useMediaQuery(desktop)
-    const AdaptiveModalFooter = isDesktop ? DialogFooter : DrawerFooter
-  
-    return (
-      <AdaptiveModalFooter className={className} {...props}>
-        {children}
-      </AdaptiveModalFooter>
-    )
-  }
-  
   export {
     AdaptiveModal,
     AdaptiveModalTrigger,
     AdaptiveModalClose,
-    AdaptiveModalContent,
-    AdaptiveModalDescription,
-    AdaptiveModalHeader,
-    AdaptiveModalTitle,
-    AdaptiveModalBody,
-    AdaptiveModalFooter,
+    AdaptiveModalContent
   }
