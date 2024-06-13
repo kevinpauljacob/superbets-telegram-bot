@@ -9,20 +9,27 @@ export function soundAlert(audioFilePath: string, muted?: boolean) {
     alertInstance.pause();
     alertInstance.currentTime = 0;
   }
-  if(muted) alertInstance.muted = muted
+  if (muted) alertInstance.muted = muted;
   alertInstance.play();
 }
 
 let loopInstance: HTMLAudioElement | null = null;
-export function loopSound(audioFilePath: string, duration: number) {
+export function loopSound(
+  audioFilePath: string,
+  duration: number,
+  muted?: boolean,
+) {
   loopInstance = new Audio(audioFilePath);
   if (loopInstance) {
+    if (muted) {
+      loopInstance.muted = muted;
+    }
     const interval = setInterval(() => {
       loopInstance && loopInstance.play();
     }, loopInstance.duration * 1000);
 
     setTimeout(() => {
-      loopInstance=null
+      loopInstance = null;
       clearInterval(interval);
     }, duration * 1000);
   }

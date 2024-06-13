@@ -7,16 +7,21 @@ import {
   GameType,
   seedStatus,
   decryptServerSeed,
+  GameTokens,
 } from "@/utils/provably-fair";
 import StakingUser from "@/models/staking/user";
 import {
   houseEdgeTiers,
-  launchPromoEdge,
   maxPayouts,
+  minAmtFactor,
   pointTiers,
-} from "@/context/transactions";
-import { minGameAmount, wsEndpoint } from "@/context/gameTransactions";
+  stakingTiers,
+} from "@/context/config";
+import { launchPromoEdge } from "@/context/config";
+import { minGameAmount, wsEndpoint, maintainance } from "@/context/config";
 import { Decimal } from "decimal.js";
+import { SPL_TOKENS } from "@/context/config";
+import updateGameStats from "../../../../utils/updateGameStats";
 Decimal.set({ precision: 9 });
 
 const secret = process.env.NEXTAUTH_SECRET;
@@ -38,6 +43,15 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     try {
       let { wallet, amount, tokenMint, multiplier }: InputType = req.body;
 
+      if (maintainance)
+        return res.status(400).json({
+          success: false,
+          message: "Under maintenance",
+        });
+
+      const minGameAmount =
+        maxPayouts[tokenMint as GameTokens]["limbo" as GameType] * minAmtFactor;
+
       const token = await getToken({ req, secret });
 
       if (!token || !token.sub || token.sub != wallet)
@@ -51,21 +65,27 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           .status(400)
           .json({ success: false, message: "Missing parameters" });
 
+      const splToken = SPL_TOKENS.find((t) => t.tokenMint === tokenMint);
+      if (
+        typeof amount !== "number" ||
+        !isFinite(amount) ||
+        !splToken ||
+        !(1.02 <= multiplier && multiplier <= 50)
+      )
+        return res
+          .status(400)
+          .json({ success: false, message: "Invalid parameters" });
+
       if (amount < minGameAmount)
         return res.status(400).json({
           success: false,
           message: "Invalid bet amount",
         });
 
-      if (tokenMint !== "SOL" || !(1.02 <= multiplier && multiplier <= 50))
-        return res
-          .status(400)
-          .json({ success: false, message: "Invalid parameters" });
-
       const strikeMultiplier = multiplier;
       const maxPayout = Decimal.mul(amount, strikeMultiplier);
 
-      if (!(maxPayout.toNumber() <= maxPayouts.limbo))
+      if (!(maxPayout.toNumber() <= maxPayouts[tokenMint as GameTokens].limbo))
         return res
           .status(400)
           .json({ success: false, message: "Max payout exceeded" });
@@ -92,8 +112,19 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         {},
         { upsert: true, new: true },
       );
-      const userTier = userData?.tier ?? 0;
-      const houseEdge = launchPromoEdge ? 0 : houseEdgeTiers[userTier];
+
+      const stakeAmount = userData?.stakedAmount ?? 0;
+      const stakingTier = Object.entries(stakingTiers).reduce((prev, next) => {
+        return stakeAmount >= next[1]?.limit ? next : prev;
+      })[0];
+      const isFomoToken =
+        tokenMint === SPL_TOKENS.find((t) => t.tokenName === "FOMO")?.tokenMint
+          ? true
+          : false;
+      const houseEdge =
+        launchPromoEdge || isFomoToken
+          ? 0
+          : houseEdgeTiers[parseInt(stakingTier)];
 
       const activeGameSeed = await GameSeed.findOneAndUpdate(
         {
@@ -136,6 +167,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       let result = "Lost";
       let amountWon = new Decimal(0);
       let amountLost = amount;
+      let feeGenerated = 0;
 
       const chance = new Decimal(100).div(strikeMultiplier).toNumber();
 
@@ -145,7 +177,13 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           Decimal.sub(1, houseEdge),
         );
         amountLost = Math.max(new Decimal(amount).sub(amountWon).toNumber(), 0);
+
+        feeGenerated = Decimal.mul(amount, strikeMultiplier)
+          .mul(houseEdge)
+          .toNumber();
       }
+
+      const addGame = !user.gamesPlayed.includes(GameType.limbo);
 
       const userUpdate = await User.findOneAndUpdate(
         {
@@ -162,6 +200,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
             "deposit.$.amount": amountWon.sub(amount),
             numOfGamesPlayed: 1,
           },
+          ...(addGame ? { $addToSet: { gamesPlayed: GameType.limbo } } : {}),
         },
         {
           new: true,
@@ -188,6 +227,14 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       });
       await limbo.save();
 
+      await updateGameStats(
+        GameType.limbo,
+        tokenMint,
+        amount,
+        addGame,
+        feeGenerated,
+      );
+
       const pointsGained =
         0 * user.numOfGamesPlayed + 1.4 * amount * userData.multiplier;
 
@@ -203,9 +250,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         {
           $inc: {
             points: pointsGained,
-          },
-          $set: {
-            tier: newTier,
           },
         },
       );

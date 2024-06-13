@@ -197,7 +197,7 @@ export const TButton: React.FC<ButtonProps> = ({ active, onClick, label }) => {
         active
           ? "bg-[#202329] text-opacity-90"
           : "bg-transparent hover:bg-[#9361d1] focus:bg-[#602E9E] text-opacity-50 hover:text-opacity-90"
-      } transform rounded-[5px] px-[1.2rem] py-2 font-medium tracking-wider font-sans text-sm text-white transition duration-200 flex items-center`}
+      } transform rounded-[5px] w-full md:w-auto px-[1.2rem] py-2 font-medium tracking-wider font-sans text-sm text-white transition duration-200 flex justify-center items-center`}
     >
       {label}
     </button>
@@ -218,7 +218,7 @@ export const TableButtons: React.FC<TableButtonProps> = ({ all, setAll }) => {
         home ? "" : "mt-20"
       }`}
     >
-      <div className="flex items-center">
+      <div className="hidden md:flex items-center ">
         <Image src={Dollar} alt="" width={26} height={26} />
         <span className="font-semibold font-changa text-xl text-white text-opacity-90 pl-3">
           {translator("Bets", language)}
@@ -237,7 +237,7 @@ export const TableButtons: React.FC<TableButtonProps> = ({ all, setAll }) => {
               setAll(false);
               setHighRollers(false);
             } else {
-              errorCustom("Wallet not connected");
+              errorCustom(translator("Wallet not connected", language));
             }
           }}
           label={translator("My Bets", language)}
@@ -350,6 +350,7 @@ export const Table: React.FC<TableProps> = ({
 
   useEffect(() => {
     if (router.query.table === "high-rollers") {
+      // to-do conversions
       // filter amount >= 2 SOL
       setDisplayBets(bets.filter((bet) => bet.amount >= 2));
     } else {
@@ -414,7 +415,7 @@ export const Table: React.FC<TableProps> = ({
               </div>
             </div>
           </div>
-          {!home && (
+          {!home && displayBets.length > 0 && (
             <TablePagination
               page={page}
               setPage={setPage}

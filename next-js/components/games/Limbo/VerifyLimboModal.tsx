@@ -1,6 +1,6 @@
 import { seedStatus } from "@/utils/provably-fair";
 import { useState } from "react";
-import { IoIosArrowDown, IoMdCopy } from "react-icons/io";
+import { IoIosArrowDown } from "react-icons/io";
 import LimboProvablyFairModal, { PFModalData } from "./LimboProvablyFairModal";
 import { useGlobalContext } from "@/components/GlobalContext";
 import { FaRegCopy } from "react-icons/fa6";
@@ -8,6 +8,7 @@ import { MdClose } from "react-icons/md";
 import { translator } from "@/context/transactions";
 import Loader from "../Loader";
 import { AdaptiveModal, AdaptiveModalContent } from "@/components/AdaptiveModal";
+import { SPL_TOKENS } from "@/context/config";
 
 export interface Limbo {
   chance: number;
@@ -20,6 +21,7 @@ export interface Limbo {
   risk?: string;
   segments?: number;
   nonce?: number;
+  tokenMint: string;
   gameSeed?: {
     status: seedStatus;
     clientSeed: string;
@@ -51,7 +53,7 @@ export default function VerifyLimboModal({
 
   //Provably Fair Modal handling
   const [isPFModalOpen, setIsPFModalOpen] = useState(false);
-  const [isLoading, setIsLoading]=useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const openPFModal = () => {
     setIsPFModalOpen(true);
   };
@@ -122,7 +124,6 @@ export default function VerifyLimboModal({
     }
   };
 
-
   return (
     <>
       {isOpen && (
@@ -144,7 +145,9 @@ export default function VerifyLimboModal({
                   {translator("Flip", language)}
                 </div>
                 <div className="text-white font-chakra text-xs font-medium">
-                  {flip.amount} $SOL
+                  {flip.amount} $
+                  {SPL_TOKENS.find((token) => token.tokenMint === flip.tokenMint)
+                    ?.tokenName ?? ""}
                 </div>
               </button>
               <button className="px-1 py-3 flex flex-col items-center justify-center w-full text-white rounded-md bg-[#202329]">
@@ -160,7 +163,9 @@ export default function VerifyLimboModal({
                   {translator("Payout", language)}
                 </div>
                 <div className="text-white font-chakra text-xs font-medium">
-                  {(flip.amountWon - flip.amount).toFixed(5)} $SOL
+                  {(flip.amountWon - flip.amount).toFixed(5)} $
+                  {SPL_TOKENS.find((token) => token.tokenMint === flip.tokenMint)
+                    ?.tokenName ?? ""}
                 </div>
               </button>
             </div>
@@ -258,7 +263,7 @@ export default function VerifyLimboModal({
                       <label className="text-xs font-changa text-opacity-90 text-[#F0F0F0]">
                         {translator("Server Seed", language)}{" "}
                         {flip.gameSeed?.status !== seedStatus.EXPIRED
-                          ? "(Hashed)"
+                          ?  translator("(Hashed)", language)
                           : ""}
                       </label>
                       <div className="bg-[#202329] mt-1 rounded-md px-4 py-3 w-full relative flex items-center justify-between">
@@ -297,13 +302,20 @@ export default function VerifyLimboModal({
                     ) : flip.gameSeed?.status !== seedStatus.EXPIRED ? (
                       <>
                         <div className="text-xs text-[#94A3B8] font-changa text-opacity-75 text-center">
-                          {translator("To verify this bet, you first need to rotate your seed pair.", language)}
+                          {translator(
+                            "To verify this bet, you first need to rotate your seed pair.",
+                            language,
+                          )}
                         </div>
                         <button
                           className="bg-[#7839C5] rounded-md w-full text-sm text-white text-opacity-90 text-semibold py-3"
                           onClick={handleSeedClick}
                         >
-                          {isLoading ? <Loader/> : translator("Rotate", language)}
+                          {isLoading ? (
+                            <Loader />
+                          ) : (
+                            translator("Rotate", language)
+                          )}
                         </button>
                       </>
                     ) : (
@@ -311,7 +323,11 @@ export default function VerifyLimboModal({
                         className="bg-[#7839C5] rounded-md w-full text-sm text-white text-opacity-90 text-semibold py-3"
                         onClick={handleVerifyClick}
                       >
-                       {isLoading ? <Loader/> : translator("Verify", language)}
+                        {isLoading ? (
+                          <Loader />
+                        ) : (
+                          translator("Verify", language)
+                        )}
                       </button>
                     )}
                   </div>

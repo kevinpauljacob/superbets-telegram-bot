@@ -2,11 +2,13 @@ import connectDatabase from "../../../../utils/database";
 import { User, Option } from "../../../../models/games";
 import { getToken } from "next-auth/jwt";
 import { NextApiRequest, NextApiResponse } from "next";
-import { minGameAmount, wsEndpoint } from "@/context/gameTransactions";
+import { wsEndpoint } from "@/context/config";
 import { Decimal } from "decimal.js";
-import { maintainance, maxPayouts } from "@/context/transactions";
+import { maxPayouts, minAmtFactor, maintainance } from "@/context/config";
 import StakingUser from "@/models/staking/user";
-import { GameType } from "@/utils/provably-fair";
+import { GameTokens, GameType } from "@/utils/provably-fair";
+import { SPL_TOKENS } from "@/context/config";
+import updateGameStats from "../../../../utils/updateGameStats";
 Decimal.set({ precision: 9 });
 
 const secret = process.env.NEXTAUTH_SECRET;
@@ -29,6 +31,10 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       let { wallet, amount, tokenMint, betType, timeFrame }: InputType =
         req.body;
 
+      const minGameAmount =
+        maxPayouts[tokenMint as GameTokens]["options" as GameType] *
+        minAmtFactor;
+
       if (maintainance)
         return res.status(400).json({
           success: false,
@@ -42,6 +48,22 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           success: false,
           message: "User wallet not authenticated",
         });
+
+      if (!wallet || !amount || !tokenMint || !betType)
+        return res
+          .status(400)
+          .json({ success: false, message: "Missing parameters" });
+
+      const splToken = SPL_TOKENS.find((t) => t.tokenMint === tokenMint);
+      if (
+        typeof amount !== "number" ||
+        !isFinite(amount) ||
+        !splToken ||
+        !(betType === "betUp" || betType === "betDown")
+      )
+        return res
+          .status(400)
+          .json({ success: false, message: "Invalid parameters" });
 
       if (amount < minGameAmount)
         return res.status(400).json({
@@ -58,24 +80,14 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       const strikeMultiplier = new Decimal(2);
       const maxPayout = Decimal.mul(amount, strikeMultiplier);
 
-      if (!(maxPayout.toNumber() <= maxPayouts.options))
+      if (
+        !(maxPayout.toNumber() <= maxPayouts[tokenMint as GameTokens].options)
+      )
         return res
           .status(400)
           .json({ success: false, message: "Max payout exceeded" });
 
       await connectDatabase();
-
-      if (
-        !wallet ||
-        !amount ||
-        !tokenMint ||
-        betType == null ||
-        tokenMint != "SOL" ||
-        !(betType === "betUp" || betType === "betDown")
-      )
-        return res
-          .status(400)
-          .json({ success: false, message: "Missing parameters" });
 
       let betTime = new Date();
       let betEndTime = new Date(betTime.getTime() + timeFrame * 60 * 1000);
@@ -112,6 +124,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           .status(400)
           .json({ success: false, message: "Insufficient balance !" });
 
+      const addGame = !user.gamesPlayed.includes(GameType.options);
+
       const result = await User.findOneAndUpdate(
         {
           wallet,
@@ -124,8 +138,12 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           isOptionOngoing: false,
         },
         {
-          $inc: { "deposit.$.amount": -amount },
+          $inc: {
+            "deposit.$.amount": -amount,
+            numOfGamesPlayed: 1,
+          },
           isOptionOngoing: true,
+          ...(addGame ? { $addToSet: { gamesPlayed: GameType.options } } : {}),
         },
         {
           new: true,
@@ -151,6 +169,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         amountLost: 0,
       });
       await record.save();
+
+      await updateGameStats(GameType.options, tokenMint, amount, addGame, 0);
 
       const userData = await StakingUser.findOneAndUpdate(
         { wallet },
@@ -183,7 +203,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       return res.json({
         success: true,
         data: { betTime, strikePrice },
-        message: `${amount} SOL successfully deposited!`,
+        message: `${amount} ${splToken.tokenName} successfully deposited!`,
       });
     } catch (e: any) {
       console.log(e);

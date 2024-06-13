@@ -1,9 +1,6 @@
-import {
-  User,
-  houseEdgeTiers,
-  launchPromoEdge,
-  pointTiers,
-} from "@/context/transactions";
+import { User, connection, translator } from "@/context/transactions";
+import { houseEdgeTiers, pointTiers, stakingTiers } from "@/context/config";
+import { launchPromoEdge } from "@/context/config";
 import { useWallet } from "@solana/wallet-adapter-react";
 import React, {
   createContext,
@@ -12,11 +9,20 @@ import React, {
   ReactNode,
   useEffect,
 } from "react";
-import toast from "react-hot-toast";
-import { connection } from "../context/gameTransactions";
 import { LAMPORTS_PER_SOL, PublicKey } from "@solana/web3.js";
-import { TOKEN_PROGRAM_ID } from "@solana/spl-token";
 import { errorCustom } from "./toasts/ToastGroup";
+import SOL from "@/public/assets/coins/SOL";
+import { GameType } from "@/utils/provably-fair";
+import { SPL_TOKENS } from "@/context/config";
+
+export interface GameStat {
+  game: GameType;
+  amount: number;
+  pnl: number;
+  totalPNL: number;
+  token: string;
+  result: "Won" | "Lost";
+}
 
 interface PointTier {
   index: number;
@@ -24,12 +30,15 @@ interface PointTier {
   image: string;
   label: string;
 }
-
+interface TokenAccount {
+  mintAddress: string;
+  balance: number;
+}
 interface CoinBalance {
-  wallet: string;
-  type: boolean;
   amount: number;
   tokenMint: string;
+  tokenName: string;
+  icon: any;
 }
 
 interface ProvablyFairData {
@@ -59,6 +68,11 @@ interface AutoConfigOptions {
   autoStopProfit: number | null;
   autoStopLoss: number | null;
   useAutoConfig: boolean;
+}
+
+interface LiveTokenPrice {
+  mintAddress: string;
+  price: number; // 1 Token Price in USD
 }
 
 interface GlobalContextProps {
@@ -101,6 +115,9 @@ interface GlobalContextProps {
 
   coinData: CoinBalance[] | null;
   setCoinData: (coinData: CoinBalance[] | null) => void;
+
+  selectedCoin: CoinBalance;
+  setSelectedCoin: (selectedCoin: CoinBalance) => void;
 
   showWalletModal: boolean;
   setShowWalletModal: React.Dispatch<React.SetStateAction<boolean>>;
@@ -145,6 +162,14 @@ interface GlobalContextProps {
   setAutoBetProfit: React.Dispatch<React.SetStateAction<number>>;
   liveBets: any[];
   setLiveBets: React.Dispatch<React.SetStateAction<any[]>>;
+  liveStats: GameStat[];
+  setLiveStats: React.Dispatch<React.SetStateAction<GameStat[]>>;
+  liveCurrentStat: GameType | "All";
+  setLiveCurrentStat: React.Dispatch<React.SetStateAction<GameType | "All">>;
+  showLiveStats: boolean;
+  setShowLiveStats: React.Dispatch<React.SetStateAction<boolean>>;
+  enableSounds: boolean;
+  setEnableSounds: React.Dispatch<React.SetStateAction<boolean>>;
 
   autoConfigState: Map<string, AutoConfigOptions>;
   setAutoConfigState: React.Dispatch<
@@ -169,10 +194,22 @@ interface GlobalContextProps {
   maxBetAmt: number | undefined;
   setMaxBetAmt: React.Dispatch<React.SetStateAction<number>>;
 
+  minGameAmount: number;
+  setMinGameAmount: React.Dispatch<React.SetStateAction<number>>;
+
   kenoRisk: "classic" | "low" | "medium" | "high";
   setKenoRisk: React.Dispatch<
     React.SetStateAction<"classic" | "low" | "medium" | "high">
   >;
+  userTokens: TokenAccount[]; // Add this line
+  setUserTokens: React.Dispatch<React.SetStateAction<TokenAccount[]>>;
+  updatePNL: (
+    game: GameType,
+    win: boolean,
+    betAmount: number,
+    multiplier: number,
+  ) => void;
+  liveTokenPrice: LiveTokenPrice[];
 }
 
 const GlobalContext = createContext<GlobalContextProps | undefined>(undefined);
@@ -183,9 +220,10 @@ interface GlobalProviderProps {
 
 export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
   const wallet = useWallet();
+
   const [loading, setLoading] = useState(false);
   const [language, setLanguage] = useState<"en" | "ru" | "ko" | "ch">("en");
-
+  const [userTokens, setUserTokens] = useState<TokenAccount[]>([]);
   const [userData, setUserData] = useState<User | null>(null);
   const [stake, setStake] = useState(true);
   const [stakeAmount, setStakeAmount] = useState<number>(0);
@@ -206,12 +244,19 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
   const [walletBalance, setWalletBalance] = useState(0);
   const [coinData, setCoinData] = useState<CoinBalance[] | null>([
     {
-      wallet: "",
-      type: true,
       amount: 0,
       tokenMint: "SOL",
+      tokenName: "SOL",
+      icon: SOL,
     },
   ]);
+  const [selectedCoin, setSelectedCoin] = useState<CoinBalance>({
+    amount: 0,
+    tokenMint: "SOL",
+    tokenName: "SOL",
+    icon: SOL,
+  });
+
   const [showWalletModal, setShowWalletModal] = useState<boolean>(false);
   const [isVerifyModalOpen, setIsVerifyModalOpen] = useState<boolean>(false);
   const [verifyModalData, setVerifyModalData] = useState({});
@@ -235,6 +280,13 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
   const [autoBetProfit, setAutoBetProfit] = useState<number>(0);
 
   const [liveBets, setLiveBets] = useState<any[]>([]);
+  const [liveStats, setLiveStats] = useState<GameStat[]>([]);
+  const [showLiveStats, setShowLiveStats] = useState<boolean>(false);
+  const [liveCurrentStat, setLiveCurrentStat] = useState<GameType | "All">(
+    "All",
+  );
+  const [liveTokenPrice, setLiveTokenPrice] = useState<LiveTokenPrice[]>([]);
+  const [enableSounds, setEnableSounds] = useState<boolean>(true);
 
   const [autoConfigState, setAutoConfigState] = useState<
     Map<string, AutoConfigOptions>
@@ -246,33 +298,10 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
 
   const [houseEdge, setHouseEdge] = useState<number>(0);
   const [maxBetAmt, setMaxBetAmt] = useState<number>(0);
+  const [minGameAmount, setMinGameAmount] = useState<number>(0.0001);
   const [kenoRisk, setKenoRisk] = useState<
     "classic" | "low" | "medium" | "high"
   >("classic");
-
-  useEffect(() => {
-    const fetchFomoPrice = async () => {
-      try {
-        let data = await fetch(
-          "https://price.jup.ag/v4/price?ids=FOMO&vsToken=USDC",
-        ).then((res) => res.json());
-        // console.log(data);
-        setFomoPrice(data?.data?.FOMO?.price ?? 0);
-      } catch (e) {
-        console.log(e);
-        setFomoPrice(0);
-        // errorCustom("Could not fetch fomo live price.");
-      }
-    };
-
-    fetchFomoPrice();
-
-    let intervalId = setInterval(async () => {
-      fetchFomoPrice();
-    }, 10000);
-
-    return () => clearInterval(intervalId);
-  }, []);
 
   const openVerifyModal = () => {
     setIsVerifyModalOpen(true);
@@ -301,11 +330,19 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
         if (success) {
           setUserData(user);
         } else console.error(message);
-        let points = user?.points ?? 0;
-        const userTier = Object.entries(pointTiers).reduce((prev, next) => {
-          return points >= next[1]?.limit ? next : prev;
-        })[0];
-        setHouseEdge(launchPromoEdge ? 0 : houseEdgeTiers[parseInt(userTier)]);
+
+        const stakeAmount = user?.stakedAmount ?? 0;
+        const stakingTier = Object.entries(stakingTiers).reduce(
+          (prev, next) => {
+            return stakeAmount >= next[1]?.limit ? next : prev;
+          },
+        )[0];
+
+        setHouseEdge(
+          launchPromoEdge || selectedCoin.tokenName === "FOMO"
+            ? 0
+            : houseEdgeTiers[parseInt(stakingTier)],
+        );
       } catch (e) {
         // errorCustom("Unable to fetch balance.");
         console.error(e);
@@ -333,6 +370,70 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
     }
   };
 
+  const updatePNL = async (
+    game: GameType,
+    win: boolean,
+    betAmount: number,
+    multiplier: number,
+  ) => {
+    let token = liveTokenPrice.find(
+      (token) => token.mintAddress === selectedCoin.tokenMint,
+    );
+    if (!token)
+      token = (await updateLivePrices()).find(
+        (token) => token.mintAddress === selectedCoin.tokenMint,
+      )!;
+
+    betAmount = token.price * betAmount;
+
+    setLiveStats([
+      ...liveStats,
+      {
+        game: game,
+        amount: betAmount,
+        result: win ? "Won" : "Lost",
+        pnl: win ? betAmount * multiplier - betAmount : -betAmount,
+        totalPNL:
+          liveStats.length > 0
+            ? liveStats[liveStats.length - 1].totalPNL +
+              (win ? betAmount * multiplier - betAmount : -betAmount)
+            : win
+            ? betAmount * multiplier - betAmount
+            : -betAmount,
+        token: selectedCoin.tokenMint,
+      },
+    ]);
+  };
+
+  const updateLivePrices = async () => {
+    let prices = [];
+    let data = await (
+      await fetch(
+        `https://price.jup.ag/v6/price?ids=${SPL_TOKENS.map(
+          (x) => x.tokenMint,
+        ).join(",")}&vsToken=USDC`,
+      )
+    ).json();
+
+    for (let token of SPL_TOKENS) {
+      let price = data?.data[token.tokenMint]?.price ?? 0;
+      prices.push({ mintAddress: token.tokenMint, price: price });
+    }
+
+    setLiveTokenPrice(prices);
+    return prices;
+  };
+
+  useEffect(() => {
+    updateLivePrices();
+    setInterval(
+      () => {
+        updateLivePrices();
+      },
+      5 * 60 * 1000,
+    );
+  }, []);
+
   const getWalletBalance = async () => {
     if (wallet && wallet.publicKey)
       try {
@@ -358,6 +459,11 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
               balance?.data.deposit.length > 0
             ) {
               setCoinData(balance.data.deposit);
+              let prevCoin = selectedCoin;
+              let coin = balance.data.deposit.find(
+                (token: CoinBalance) => token.tokenName === prevCoin.tokenName,
+              );
+              if (coin) setSelectedCoin({ ...coin, icon: prevCoin.icon });
             } else {
               // console.log("Could not fetch balance.");
               setCoinData(null);
@@ -389,7 +495,9 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
         if (data.success) return data;
         else return null;
       } catch (e) {
-        errorCustom("Unable to fetch provably fair data.");
+        errorCustom(
+          translator("Unable to fetch provably fair data.", language),
+        );
         return null;
       }
   };
@@ -462,6 +570,8 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
         houseEdge,
         setHouseEdge,
         maxBetAmt,
+        minGameAmount,
+        setMinGameAmount,
         kenoRisk,
         setKenoRisk,
         setMaxBetAmt,
@@ -474,6 +584,20 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
         getWalletBalance,
         getBalance,
         getProvablyFairData,
+        selectedCoin,
+        setSelectedCoin,
+        userTokens,
+        setUserTokens,
+        liveStats,
+        setLiveStats,
+        showLiveStats,
+        setShowLiveStats,
+        enableSounds,
+        setEnableSounds,
+        liveCurrentStat,
+        setLiveCurrentStat,
+        updatePNL,
+        liveTokenPrice,
       }}
     >
       {children}
@@ -1308,10 +1432,285 @@ export const translationsMap = {
     ko: "베팅자는 먼저 시드 페어를 회전해야 합니다.",
     ch: "投注者首先需要旋转种子对。",
   },
-  "I agree with Privacy Policy and with Terms of Use, Gambling isn't forbidden by my local authorities and I'm at least 18 years old.":
+  "House Edge": {
+    ru: "Край дома",
+    ko: "하우스 엣지",
+    ch: "庄家优势",
+  },
+  "I agree with the Privacy Policy and with the Terms of Use, Gambling is not forbidden by my local authorities and I am at least 18 years old.":
     {
-      ru: "Я согласен с Политикой конфиденциальности и Условиями использования, азартные игры не запрещены моими местными властями, и мне исполнилось 18 лет.",
-      ko: "개인정보 보호정책 및 이용 약관에 동의하며, 도박은 현지 당국에 의해 금지되지 않으며 나는 18세 이상입니다.",
-      ch: "我同意隐私政策和使用条款，赌博未被当地政府禁止并且我已满18岁。",
+      ru: "Я согласен с Политикой конфиденциальности и Условиями использования, азартные игры не запрещены моими местными властями, и мне как минимум 18 лет.",
+      ko: "개인정보 처리방침 및 이용 약관에 동의합니다. 도박은 현지 당국에 의해 금지되지 않았으며, 저는 만 18세 이상입니다.",
+      ch: "我同意隐私政策和使用条款，我所在地区的法律不禁止赌博，并且我已满18岁。",
     },
+  "LIVE STATS": {
+    ru: "Живые статистики",
+    ko: "실시간 통계",
+    ch: "实时统计",
+  },
+  Wins: {
+    ru: "Победы",
+    ko: "승리",
+    ch: "胜",
+  },
+  Losses: {
+    ru: "Поражения",
+    ko: "패배",
+    ch: "败",
+  },
+  Wagered: {
+    ru: "Сделанные ставки",
+    ko: "베팅",
+    ch: "投注",
+  },
+  Gems: {
+    ru: "Самоцветы",
+    ko: "보석",
+    ch: "宝石",
+  },
+  "Current Profit": {
+    ru: "Текущая прибыль",
+    ko: "현재 이익",
+    ch: "当前利润",
+  },
+  "Profit on next tile": {
+    ru: "Прибыль на следующем квадрате",
+    ko: "다음 타일에서의 이익",
+    ch: "下一个方块的利润",
+  },
+  CASHOUT: {
+    ru: "ВЫВОД",
+    ko: "출금",
+    ch: "提现",
+  },
+  "Pending game found!": {
+    ru: "Найдена ожидающая игра!",
+    ko: "보류 중인 게임 발견!",
+    ch: "找到待处理的游戏！",
+  },
+  "Could not fetch pending game.": {
+    ru: "Не удалось получить ожидающую игру.",
+    ko: "보류 중인 게임을 가져올 수 없습니다.",
+    ch: "无法获取待处理游戏。",
+  },
+  "Select at least one tile to bet on.": {
+    ru: "Выберите по крайней мере один квадрат для ставки.",
+    ko: "최소 1개의 타일을 선택하여 베팅하십시오.",
+    ch: "至少选择1个方块进行投注。",
+  },
+  "High Rollers": {
+    ru: "Крупные игроки",
+    ko: "하이 롤러",
+    ch: "大赌客",
+  },
+  "No Bets Made.": {
+    ru: "Ставок не сделано.",
+    ko: "베팅 없음.",
+    ch: "没有下注。",
+  },
+  "Set Bet Count.": {
+    ru: "Установить количество ставок.",
+    ko: "베팅 횟수 설정.",
+    ch: "设置投注次数。",
+  },
+  "Set Amount.": {
+    ru: "Установить сумму.",
+    ko: "금액 설정.",
+    ch: "设置金额。",
+  },
+  "Choose amount, interval and type.": {
+    ru: "Выберите сумму, интервал и тип.",
+    ko: "금액, 간격 및 유형 선택.",
+    ch: "选择金额，间隔和类型。",
+  },
+  "Wallet not connected": {
+    ru: "Кошелек не подключен",
+    ko: "지갑이 연결되지 않았습니다",
+    ch: "钱包未连接",
+  },
+  "Insufficient balance for bet !": {
+    ru: "Недостаточно баланса для ставки!",
+    ko: "베��에 필요한 잔액이 부족합니다!",
+    ch: "投注所需的余额不足！",
+  },
+  "Profit Limit reached.": {
+    ru: "Достигнут предел прибыли.",
+    ko: "이익 한도 도달.",
+    ch: "达到盈利限制。",
+  },
+  "Loss Limit reached.": {
+    ru: "Достигнут предел убытков.",
+    ko: "손실 한도 도달.",
+    ch: "达到损失限制。",
+  },
+  "Auto bet stopped": {
+    ru: "Автоставка остановлена",
+    ko: "자동 베팅 중지됨",
+    ch: "自动投注停止",
+  },
+  "Could not make the Bet.": {
+    ru: "Не удалось сделать ставку.",
+    ko: "베팅을 할 수 없습니다.",
+    ch: "无法下注。",
+  },
+  "Could not fetch result!": {
+    ru: "Не удалось получить результат!",
+    ko: "결과를 가져올 수 없습니다!",
+    ch: "无法获取结果！",
+  },
+  "Invalid amount": {
+    ru: "Неверная сумма",
+    ko: "잘못된 금액",
+    ch: "无效金额",
+  },
+  "Could not place bet.": {
+    ru: "Не удалось разместить ставку.",
+    ko: "베팅을 할 수 없습니다.",
+    ch: "无法下注。",
+  },
+  "Better luck next time!": {
+    ru: "Следующая попытка!",
+    ko: "다음 시도!",
+    ch: "下次试试吧！",
+  },
+  "10 numbers can be selected at max": {
+    ru: "Максимум 10 чисел можно выбрать",
+    ko: "최대 10개의 숫자를 선택할 수 있습니다",
+    ch: "最多选择10个数字",
+  },
+  "You can only select up to 5 faces": {
+    ru: "Вы можете выбрать только до 5 лиц",
+    ko: "최대 5개의 얼굴만 선택할 수 있습니다",
+    ch: "您最多只能选择5张脸",
+  },
+  "Choose at least 1 face": {
+    ru: "Выберите по крайней мере 1 лицо",
+    ko: "최소 1개의 얼굴을 선택하십시오",
+    ch: "至少选择1张脸",
+  },
+  Rank: {
+    ru: "Ранг",
+    ko: "랭크",
+    ch: "等级",
+  },
+  Points: {
+    ru: "Баллы",
+    ko: "포인트",
+    ch: "积分",
+  },
+  "Your level progress": {
+    ru: "Ваш прогресс уровня",
+    ko: "당신의 레벨 진행 상황",
+    ch: "您的等级进度",
+  },
+  BRONZE: {
+    ru: "Бронза",
+    ko: "브론즈",
+    ch: "青铜",
+  },
+  "Boost Your Tier by Staking!": {
+    ru: "Ставьте, чтобы увеличить свой уровень!",
+    ko: "스테이킹하여 당신의 등급을 증가시키십시오!",
+    ch: "通过质押来提高您的等级！",
+  },
+  "You can stake your $FOMO to obtain higher multiplier for your points!": {
+    ru: "Вы можете заложить свой $FOMO, чтобы получить более высокий множитель для ваших очков!",
+    ko: "당신의 포인트에 더 높은 배수를 얻기 위해 $FOMO를 스테이크 할 수 있습니다!",
+    ch: "您可以抵押您的$FOMO以获得更高的积分倍数！",
+  },
+  "Current Multiplier": {
+    ru: "Текущий множитель",
+    ko: "현재 배수",
+    ch: "当前倍数",
+  },
+  "Congratulations! You won!": {
+    ru: "Поздравляем! Ты выиграл!",
+    ko: "축하해요! 당신이 이겼어요!",
+    ch: "恭喜！你赢了！",
+  },
+  "Invalid strike number!": {
+    ru: "Неверный номер удара!",
+    ko: "잘못된 스트라이크 번호!",
+    ch: "无效的罢工号！",
+  },
+  "To verify this bet, you first need to rotate your seed pair.": {
+    ru: "Чтобы проверить эту ставку, сначала нужно повернуть пару семян.",
+    ko: "이 베팅을 확인하려면 먼저 시드 페어를 회전해야 합니다.",
+    ch: "要验证此投注，您首先需要旋转种子对。",
+  },
+  Flip: {
+    ru: "Флип",
+    ko: "플립",
+    ch: "翻转",
+  },
+  "(Hashed)": {
+    ru: "(Хешировано)",
+    ko: "(해시 처리됨)",
+    ch: "(已散列)",
+  },
+  "No data.": {
+    ru: "Нет данных.",
+    ko: "데이터 없음.",
+    ch: "没有数据。",
+  },
+  Completed: {
+    ru: "Завершено",
+    ko: "완료",
+    ch: "已完成",
+  },
+  Time: {
+    ru: "Время",
+    ko: "시간",
+    ch: "时间",
+  },
+  Status: {
+    ru: "Статус",
+    ko: "상태",
+    ch: "状态",
+  },
+  Type: {
+    ru: "Тип",
+    ko: "유형",
+    ch: "类型",
+  },
+  PLATINUM: {
+    ru: "Платина",
+    ko: "백금",
+    ch: "铂金",
+  },
+  ELITE: {
+    ru: "Элита",
+    ko: "엘리트",
+    ch: "精英",
+  },
+  SUPREME: {
+    ru: "Суприм",
+    ko: "최고",
+    ch: "至尊",
+  },
+  LEGENDARY: {
+    ru: "Легендарный",
+    ko: "전설",
+    ch: "传奇",
+  },
+  MYTHICAL: {
+    ru: "Мифический",
+    ko: "신화",
+    ch: "神话",
+  },
+  SILVER: {
+    ru: "Серебро",
+    ko: "은",
+    ch: "银",
+  },
+  GOLD: {
+    ru: "Золото",
+    ko: "금",
+    ch: "金",
+  },
+  "Could not fetch leaderboard.": {
+    ru: "Не удалось получить доску лидеров.",
+    ko: "리더 보드를 가져올 수 없습니다.",
+    ch: "无法获取排行榜。",
+  },
 };

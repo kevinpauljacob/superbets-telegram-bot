@@ -2,10 +2,13 @@ import connectDatabase from "@/utils/database";
 import { getToken } from "next-auth/jwt";
 import { NextApiRequest, NextApiResponse } from "next";
 import { GameSeed, Mines, User } from "@/models/games";
-import { seedStatus } from "@/utils/provably-fair";
-import { minGameAmount } from "@/context/gameTransactions";
+import { GameTokens, GameType, seedStatus } from "@/utils/provably-fair";
+import { wsEndpoint } from "@/context/config";
 import Decimal from "decimal.js";
-import { maxPayouts } from "@/context/transactions";
+import { maxPayouts, minAmtFactor, maintainance } from "@/context/config";
+import StakingUser from "@/models/staking/user";
+import { SPL_TOKENS } from "@/context/config";
+import updateGameStats from "../../../../utils/updateGameStats";
 
 const secret = process.env.NEXTAUTH_SECRET;
 
@@ -25,6 +28,15 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     try {
       let { wallet, amount, tokenMint, minesCount }: InputType = req.body;
 
+      if (maintainance)
+        return res.status(400).json({
+          success: false,
+          message: "Under maintenance",
+        });
+
+      const minGameAmount =
+        maxPayouts[tokenMint as GameTokens]["mines" as GameType] * minAmtFactor;
+
       const token = await getToken({ req, secret });
 
       if (!token || !token.sub || token.sub != wallet)
@@ -38,10 +50,11 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           .status(400)
           .json({ success: false, message: "Missing parameters" });
 
+      const splToken = SPL_TOKENS.find((t) => t.tokenMint === tokenMint);
       if (
         typeof amount !== "number" ||
         !isFinite(amount) ||
-        tokenMint !== "SOL" ||
+        !splToken ||
         !(Number.isInteger(minesCount) && 1 <= minesCount && minesCount <= 24)
       )
         return res
@@ -58,12 +71,22 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
       const maxPayout = Decimal.mul(amount, maxStrikeMultiplier);
 
-      if (!(maxPayout.toNumber() <= maxPayouts.mines))
+      if (!(maxPayout.toNumber() <= maxPayouts[tokenMint as GameTokens].mines))
         return res
           .status(400)
           .json({ success: false, message: "Max payout exceeded" });
 
       await connectDatabase();
+
+      const pendingGame = await Mines.findOne({ wallet, result: "Pending" });
+      if (pendingGame)
+        return res.status(400).json({
+          success: false,
+          message: "You already have a pending game!",
+        });
+
+      const user = await User.findOne({ wallet });
+      const addGame = !user.gamesPlayed.includes(GameType.mines);
 
       const userUpdate = await User.findOneAndUpdate(
         {
@@ -80,6 +103,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
             "deposit.$.amount": -amount,
             numOfGamesPlayed: 1,
           },
+          ...(addGame ? { $addToSet: { gamesPlayed: GameType.mines } } : {}),
         },
         {
           new: true,
@@ -129,6 +153,36 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         },
         { upsert: true, new: true, setDefaultsOnInsert: true },
       );
+
+      await updateGameStats(GameType.mines, tokenMint, amount, addGame, 0);
+
+      const userData = await StakingUser.findOneAndUpdate(
+        { wallet },
+        {},
+        { upsert: true, new: true },
+      );
+      const userTier = userData?.tier ?? 0;
+
+      const rest = minesGame.toObject();
+      rest.game = GameType.mines;
+      rest.userTier = userTier;
+
+      const payload = rest;
+
+      const socket = new WebSocket(wsEndpoint);
+
+      socket.onopen = () => {
+        socket.send(
+          JSON.stringify({
+            clientType: "api-client",
+            channel: "fomo-casino_games-channel",
+            authKey: process.env.FOMO_CHANNEL_AUTH_KEY!,
+            payload,
+          }),
+        );
+
+        socket.close();
+      };
 
       return res.status(201).json({
         success: true,

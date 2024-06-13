@@ -8,13 +8,12 @@ import {
   decryptServerSeed,
 } from "@/utils/provably-fair";
 import StakingUser from "@/models/staking/user";
-import {
-  houseEdgeTiers,
-  launchPromoEdge,
-  pointTiers,
-} from "@/context/transactions";
-import { wsEndpoint } from "@/context/gameTransactions";
+import { houseEdgeTiers, pointTiers, stakingTiers } from "@/context/config";
+import { launchPromoEdge } from "@/context/config";
+import { wsEndpoint } from "@/context/config";
 import Decimal from "decimal.js";
+import { SPL_TOKENS, maintainance } from "@/context/config";
+import updateGameStats from "../../../../utils/updateGameStats";
 Decimal.set({ precision: 9 });
 
 const secret = process.env.NEXTAUTH_SECRET;
@@ -34,6 +33,12 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === "POST") {
     try {
       let { wallet, gameId, userBet }: InputType = req.body;
+
+      if (maintainance)
+        return res.status(400).json({
+          success: false,
+          message: "Under maintenance",
+        });
 
       const token = await getToken({ req, secret });
 
@@ -115,8 +120,21 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         {},
         { upsert: true, new: true },
       );
-      const userTier = userData?.tier ?? 0;
-      const houseEdge = launchPromoEdge ? 0 : houseEdgeTiers[userTier];
+
+      let user = await User.findOne({ wallet });
+
+      const stakeAmount = userData?.stakedAmount ?? 0;
+      const stakingTier = Object.entries(stakingTiers).reduce((prev, next) => {
+        return stakeAmount >= next[1]?.limit ? next : prev;
+      })[0];
+      const isFomoToken =
+        tokenMint === SPL_TOKENS.find((t) => t.tokenName === "FOMO")?.tokenMint
+          ? true
+          : false;
+      const houseEdge =
+        launchPromoEdge || isFomoToken
+          ? 0
+          : houseEdgeTiers[parseInt(stakingTier)];
 
       let record;
       if (strikeNumbers[userBet] === 1) {
@@ -148,6 +166,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
         if (numBets + 1 === 25 - minesCount) {
           result = "Won";
+          const feeGenerated = Decimal.mul(amount, strikeMultiplier)
+            .mul(houseEdge)
+            .toNumber();
 
           await User.findOneAndUpdate(
             {
@@ -184,6 +205,14 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
               new: true,
             },
           ).populate("gameSeed");
+
+          await updateGameStats(
+            GameType.mines,
+            tokenMint,
+            0,
+            false,
+            feeGenerated,
+          );
         } else {
           await Mines.findOneAndUpdate(
             {
@@ -193,6 +222,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
             },
             {
               $push: { userBets: userBet },
+              houseEdge,
               amountWon,
               strikeMultiplier,
             },
@@ -201,8 +231,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       }
 
       if (result !== "Pending") {
-        let user = await User.findOne({ wallet });
-
         const pointsGained =
           0 * user.numOfGamesPlayed + 1.4 * amount * userData.multiplier;
 
@@ -254,8 +282,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           result === "Won"
             ? "Congratulations! You won!"
             : result === "Lost"
-            ? "Better luck next time!"
-            : "Game in progress",
+              ? "Better luck next time!"
+              : "Game in progress",
         result,
         ...(result === "Pending" ? {} : { strikeNumbers }),
         strikeMultiplier,

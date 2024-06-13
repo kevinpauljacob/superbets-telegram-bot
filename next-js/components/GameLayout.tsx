@@ -1,17 +1,14 @@
-import Head from "next/head";
 import React, { ReactNode } from "react";
 import GameHeader from "./GameHeader";
-import { Table } from "./table/Table";
 import { useGlobalContext } from "./GlobalContext";
-import { formatNumber, translator } from "@/context/transactions";
-import {
-  minGameAmount,
-  optionsEdge,
-  truncateNumber,
-} from "@/context/gameTransactions";
-import Link from "next/link";
+import { translator, truncateNumber } from "@/context/transactions";
+import { optionsEdge } from "@/context/config";
 import FomoPlay from "./FomoPlay";
 import FOMOHead from "./HeadElement";
+import { useSession } from "next-auth/react";
+import { useWallet } from "@solana/wallet-adapter-react";
+import { useWalletModal } from "@solana/wallet-adapter-react-ui";
+import { handleSignIn } from "./ConnectWallet";
 
 interface LayoutProps {
   children: ReactNode;
@@ -41,12 +38,22 @@ export const GameFooterInfo: React.FC<GameFooterProps> = ({
   amount,
   chance,
 }) => {
-  const { coinData, setShowWalletModal, currentGame, houseEdge, language } =
-    useGlobalContext();
+  const { data: session, status } = useSession();
+  const wallet = useWallet();
+  const walletModal = useWalletModal();
+  const {
+    coinData,
+    setShowWalletModal,
+    currentGame,
+    houseEdge,
+    language,
+    selectedCoin,
+    minGameAmount,
+  } = useGlobalContext();
 
   return (
     <div className="flex px-0 xl:px-4 mb-0 md:mb-[1.4rem] gap-4 flex-row w-full justify-between">
-      {coinData && coinData[0].amount > minGameAmount && (
+      {selectedCoin && selectedCoin.amount > minGameAmount && (
         <>
           {multiplier !== undefined ? (
             <div className="flex flex-col w-full">
@@ -75,7 +82,7 @@ export const GameFooterInfo: React.FC<GameFooterProps> = ({
                     1),
                 4,
               )}{" "}
-              $SOL
+              ${selectedCoin.tokenName}
             </span>
           </div>
 
@@ -92,23 +99,27 @@ export const GameFooterInfo: React.FC<GameFooterProps> = ({
         </>
       )}
 
-      {(!coinData || (coinData && coinData[0].amount < minGameAmount)) && (
-        <div className="w-full rounded-lg bg-[#d9d9d90d] bg-opacity-10 flex items-center px-3 py-3 text-white md:px-6">
-          <div className="w-full text-center font-changa font-medium text-sm md:text-base text-[#F0F0F0] text-opacity-75">
-            {translator(
-              "Please deposit funds to start playing. View",
-              language,
-            )}{" "}
-            <u
-              onClick={() => {
-                setShowWalletModal(true);
-              }}
-            >
-              {translator("WALLET", language)}
-            </u>
+      {!selectedCoin ||
+        (selectedCoin.amount < minGameAmount && (
+          <div className="w-full rounded-lg bg-[#d9d9d90d] bg-opacity-10 flex items-center px-3 py-3 text-white md:px-6">
+            <div className="w-full text-center font-changa font-medium text-sm md:text-base text-[#F0F0F0] text-opacity-75">
+              {translator(
+                "Please deposit funds to start playing. View",
+                language,
+              )}{" "}
+              <u
+                onClick={() => {
+                  wallet.connected && status === "authenticated"
+                    ? setShowWalletModal(true)
+                    : handleSignIn(wallet, walletModal);
+                }}
+                className="cursor-pointer"
+              >
+                {translator("WALLET", language)}
+              </u>
+            </div>
           </div>
-        </div>
-      )}
+        ))}
     </div>
   );
 };
