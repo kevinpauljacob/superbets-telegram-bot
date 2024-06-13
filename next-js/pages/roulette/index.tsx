@@ -200,7 +200,7 @@ export default function Roulette() {
                 height={40}
                 src={bet.token.image}
                 alt={`token-${index}`}
-                className="absolute"
+                className="absolute drop-shadow-3xl"
                 style={{ left: '-16px', bottom: `${index * 3}px` }}
               />
             ))}
@@ -219,7 +219,7 @@ export default function Roulette() {
       const betsForArea = betss.filter((bet) => bet.areaId === areaId);
       if (betsForArea.length > 0) {
         return (
-          <div className="absolute inset-0 flex flex-col items-center justify-center space-y-1 z-10 top-6">
+          <div className="absolute inset-0 flex flex-col items-center justify-center space-y-1 z-10 top-6 ">
             {betsForArea.slice(0, 3).map((bet, index) => (
               <Image
                 key={index}
@@ -227,7 +227,7 @@ export default function Roulette() {
                 height={40}
                 src={bet.token.image}
                 alt={`token-${index}`}
-                className="absolute"
+                className="absolute sm:drop-shadow-3xl"
                 style={{ bottom: `${index * 3}px` }}
               />
             ))}
@@ -256,7 +256,7 @@ export default function Roulette() {
                 height={40}
                 src={bet.token.image}
                 alt={`token-${index}`}
-                className="absolute"
+                className="absolute drop-shadow-3xl"
                 style={{ left: '20%', transform: 'translateX(-50%)', bottom: `${index * 3}px` }}
               />
             ))}
@@ -273,7 +273,7 @@ export default function Roulette() {
     const betsForArea = betss.filter((bet) => bet.areaId === areaId);
     if (betsForArea.length > 0) {
       return (
-        <div className="absolute inset-0 flex flex-col items-center justify-center space-y-1 z-10">
+        <div className="absolute inset-0 flex flex-col items-center justify-center space-y-1 z-10 ">
           {betsForArea.slice(0, 3).map((bet, index) => (
             <Image
               key={index}
@@ -281,8 +281,8 @@ export default function Roulette() {
               height={40}
               src={bet.token.image}
               alt={`token-${index}`}
-              className="absolute"
-              style={{ bottom: `${index * 3}px` }}
+              className="absolute drop-shadow-3xl"
+              style={{ bottom: `${index * 3}px`,  }}
             />
           ))}
         </div>
@@ -363,7 +363,7 @@ export default function Roulette() {
         </>
       </GameOptions>
       <GameDisplay>
-      <div className="p-4 rounded-lg flex flex-col items-center font-chakra font-semibold text-base">
+      <div className="sm:p-4 rounded-lg flex flex-col items-center font-chakra font-semibold text-base">
         <div className="flex justify-between w-full  text-white mb-1">
           <div className="hidden sm:flex items-center cursor-pointer hover:opacity-90"
             onClick={undoLastBet}>
@@ -386,18 +386,21 @@ export default function Roulette() {
               <p className="font-sans text-[16px]">Clear</p>
             </div>
         </div>
-          <div className="flex sm:flex-col flex-row-reverse w-[211px]  sm:w-full  sm:text-[16px] text-[12px] itmes-start gap-2 sm:gap-0 rotate-90 sm:rotate-0">
-            {/* table ui */}
-          <div className="w-full flex items-start sm:gap-1 flex-col sm:flex-row ">
+          <div className="flex flex-col    h-[415px] w-full  text-[12px] sm:text-[16px]  itmes-start  gap-1 sm:gap-0 rotate-90 sm:rotate-0">
+            {/* table ui flex-row-reverse w-[211px]  text-[12px] rotate-90 gap-2*/} 
+          <div className="w-full flex items-start gap-1   ">
+            {/* flex-col */}
             <div
-              className="sm:h-[153px] sm:w-12  h-[27.3px] w-[125px] flex flex-col justify-center text-center cursor-pointer bg-[#149200] rounded-[5px]
+              className="  h-[125px] w-[27.3px]  sm:h-[153px] sm:w-12    flex flex-col justify-center text-center cursor-pointer bg-[#149200] rounded-[5px]
                text-white relative border-4 border-transparent  hover:bg-[#55BA78] hover:border-[2px] hover:border-slate-300 mb-1"
               onClick={() => handlePlaceBet('num-0', selectedToken)}
             >
-              0
+              {/* h-[27.3px] w-[125px] */}
+              <p className="-rotate-90 sm:rotate-0">0</p>
               {renderRegularToken('num-0')}
             </div>
-            <div className="grid sm:grid-cols-12 sm:grid-rows-3 grid-cols-3 grid-rows-12 gap-1 w-full  sm:mb-[7px] ">
+            <div className="grid grid-cols-12 grid-rows-3 gap-[4px] sm:gap-1 sm:w-full sm:mb-[7px] ">
+            {/* grid-cols-3 grid-rows-12 */}
             {rows.map((row, rowIndex) => (
                     <>
                       {row.map((number, colIndex) => {
@@ -405,8 +408,8 @@ export default function Roulette() {
                           <div key={colIndex} className="relative flex justify-center items-center">
                             <button
                               data-testid={`roulette-tile-${number}`}
-                              className={`h-[27px] w-[40px] sm:w-[48px] sm:h-[48px] flex items-center justify-center relative  ${
-                                predefinedBets.red.includes(number)
+                              className={` h-[40px] w-[27px] sm:w-[48px] sm:h-[48px] flex items-center justify-center relative  ${
+                                predefinedBets.red.includes(number)  /* h-[27px] w-[40px] */
                                   ? 'bg-[#F1323E] hover:border hover:border-slate-200 hover:bg-[#FF5C67]'
                                   : 'bg-[#2A2E38] hover:border hover:border-slate-200 hover:bg-[#4D5361]'
                               } text-white rounded-[5px] border-4 border-transparent ${
@@ -432,7 +435,8 @@ export default function Roulette() {
                               }`}
                               onClick={() => selectedToken && handlePlaceBet(`num-${number}`, selectedToken)}
                             >
-                              {number}
+                              <p className="-rotate-90 sm:rotate-0">{number}</p>
+                              
                               {renderRegularToken(`num-${number}`)}
                             </button>
 
@@ -461,7 +465,7 @@ export default function Roulette() {
                             {colIndex > 0 && (
                               <button
                                 data-testid={`roulette-tile-${number}-left`}
-                                className="absolute w-3 h-full bg-transparent -left-2 px-2 top-0"
+                                className="absolute w-1 sm:w-3 h-full bg-transparent -left-2 px-2 top-0"
                                 onClick={() => handlePlaceSplitBet(number, rows[rowIndex][colIndex - 1], selectedToken)}
                                 onMouseEnter={() => setHoveredSplit([number, rows[rowIndex][colIndex - 1]])}
                                 onMouseLeave={() => setHoveredSplit(null)}
@@ -496,52 +500,63 @@ export default function Roulette() {
                    </>
                   ))}
             </div>
-            <div className="flex flex-row sm:flex-col justify-between gap-[3px] items-center sm:gap-1 mt-1 sm:mt-0">
+            <div className="flex flex-col justify-between  items-center gap-[5px] sm:gap-1  mt-0 ">
+              {/* flex-row  gap-[3px] mt-1*/}
               {rows.map((_, rowIndex) => (
                 <div
                   key={`row-${rowIndex}`}
-                  className="h-[27px] w-[40px] sm:w-[48px] sm:h-[48px]  flex items-center justify-center text-center bg-transparent border-2 border-[#26272B] text-white cursor-pointer relative rounded-[5px] hover:border hover:border-slate-200 hover:bg-[#4D5361]"
+                  className="h-[40px] w-[27px] sm:w-[48px] sm:h-[48px]  flex items-center justify-center text-center bg-transparent border-2
+                   border-[#26272B] text-white cursor-pointer relative rounded-[5px] hover:border hover:border-slate-200 hover:bg-[#4D5361]"
                   onMouseEnter={() => setHoveredRow(rowIndex)}
                   onMouseLeave={() => setHoveredRow(null)}
                   onClick={() => handlePlaceBet(`row-${rowIndex}`, selectedToken)}
                 >
-                  2:1
+                  {/* h-[27px] w-[40px] */}
+                  <p className="-rotate-90 sm:rotate-0">2:1</p>
                   {renderRegularToken(`row-${rowIndex}`)}
                 </div>
               ))}
             </div>
             </div>
             {/* options */}
-          <div className="flex w-[430px] sm:w-full justify-between rotate-90 sm:rotate-0">
-            <div className="sm:h-[153px] sm:w-12  h-[27.3px] w-[123px] bg-transparent"/>
+          <div className="flex  w-[430px] sm:w-full justify-between">
+            {/* w-[430px] rotate-90*/}
+            <div className="h-[27px] w-[27.3px] sm:h-[153px] sm:w-12   bg-transparent"/>
+            {/*h-[27.3px] w-[123px]  */}
             <div className="flex flex-col w-full gap-1">
               <div className="flex w-full justify-center gap-1">
               <button
                   className="relative  flex items-center justify-center bg-[#0E0F14] border border-[#26272B]
-                    text-white cursor-pointer rounded-[5px] w-[117px] h-[40px] sm:w-[213.19px] sm:h-12 hover:border hover:border-slate-200 hover:bg-[#4D5361]"
+                    text-white cursor-pointer rounded-[5px] w-[120px] h-[40px] sm:w-[213.19px] sm:h-12 hover:border
+                     hover:border-slate-200 hover:bg-[#4D5361]"
                   onMouseEnter={() => setHoveredButton('1-12')}
                   onMouseLeave={() => setHoveredButton(null)}
                   onClick={() => handlePlaceBet('1-12', selectedToken)}
                 >
+                  {/* w-[117px] h-[40px] */}
                  1 to 12
                   {renderRegularToken('1-12')}
                 </button>
                 <button
                   className="relative col-span-1 flex items-center justify-center bg-[#0E0F14] border border-[#26272B]
-                   text-white cursor-pointer rounded-[5px] w-[117px] h-[40px] sm:w-[213.19px] sm:h-12 hover:border hover:border-slate-200 hover:bg-[#4D5361]"
+                   text-white cursor-pointer rounded-[5px]  w-[120px] h-[40px] sm:w-[213.19px] sm:h-12 hover:border hover:border-slate-200 hover:bg-[#4D5361]"
                   onMouseEnter={() => setHoveredButton('13-24')}
                   onMouseLeave={() => setHoveredButton(null)}
                   onClick={() => handlePlaceBet('13-24', selectedToken)}
                 >
+                  {/* w-[117px] h-[40px] */}
                   13 to 24
                   {renderRegularToken('13-24')}
                 </button>
                 <button
-                  className="relative col-span-1 flex items-center justify-center bg-[#0E0F14] border border-[#26272B] text-white cursor-pointer rounded-[5px]  w-[117px] h-[40px] sm:w-[213.19px] sm:h-12 hover:border hover:border-slate-200 hover:bg-[#4D5361]"
+                  className="relative col-span-1 flex items-center justify-center bg-[#0E0F14] border border-[#26272B]
+                   text-white cursor-pointer rounded-[5px]   w-[120px] h-[40px] sm:w-[213.19px] sm:h-12 hover:border hover:border-slate-200
+                    hover:bg-[#4D5361]"
                   onMouseEnter={() => setHoveredButton('25-36')}
                   onMouseLeave={() => setHoveredButton(null)}
                   onClick={() => handlePlaceBet('25-36', selectedToken)}
                 >
+                  {/*  w-[117px] h-[40px]*/}
               25 to 36
                   {renderRegularToken('25-36')}
                 </button>
@@ -550,61 +565,72 @@ export default function Roulette() {
             </div>
               <div className="flex w-full justify-center gap-1">
                 <button
-                  className="relative  flex items-center justify-center bg-[#0E0F14] border border-[#26272B] text-white cursor-pointer rounded-md sm:h-[49.5px] w-[57px] h-[40px] sm:w-[104px] hover:border hover:border-slate-200 hover:bg-[#4D5361]"
+                  className="relative  flex items-center justify-center bg-[#0E0F14] border border-[#26272B] text-white cursor-pointer rounded-md
+                   sm:h-[49.5px]  sm:w-[104px] w-[57px] h-[40px] hover:border hover:border-slate-200 hover:bg-[#4D5361]"
                   onMouseEnter={() => setHoveredButton('1-18')}
                   onMouseLeave={() => setHoveredButton(null)}
                   onClick={() => handlePlaceBet('1-18', selectedToken)}
                 >
+                  {/* w-[57px] h-[40px] */}
                   1 to 18
                   {renderRegularToken('1-18')}
                 </button>
                 <button
-                  className="relative  flex items-center justify-center bg-[#0E0F14] border border-[#26272B] text-white cursor-pointer rounded-md sm:h-[49.5px] w-[57px] h-[40px] sm:w-[104px] hover:border hover:border-slate-200 hover:bg-[#4D5361]"
+                  className="relative  flex items-center justify-center bg-[#0E0F14] border border-[#26272B] text-white cursor-pointer rounded-md 
+                  sm:h-[49.5px]  sm:w-[104px] w-[57px] h-[40px] hover:border hover:border-slate-200 hover:bg-[#4D5361]"
                   onMouseEnter={() => setHoveredButton('even')}
                   onMouseLeave={() => setHoveredButton(null)}
                   onClick={() => handlePlaceBet('even', selectedToken)}
                 >
+                  {/*  w-[57px] h-[40px]*/}
                   Even
                   {renderRegularToken('even')}
                 </button>
                 <button
-                  className="relative  flex items-center justify-center bg-[#F1323E] cursor-pointer rounded-md sm:h-[49.5px] w-[57px] h-[40px] sm:w-[104px] hover:border hover:border-slate-200 hover:bg-[#FF5C67]"
+                  className="relative  flex items-center justify-center bg-[#F1323E] cursor-pointer rounded-md  sm:h-[49.5px]  sm:w-[104px] w-[57px] h-[40px] hover:border
+                   hover:border-slate-200 hover:bg-[#FF5C67]"
                   onMouseEnter={() => setHoveredButton('red')}
                   onMouseLeave={() => setHoveredButton(null)}
                   onClick={() => handlePlaceBet('red', selectedToken)}
                 >
+                  {/*w-[57px] h-[40px]  */}
                   {renderRegularToken('red')}
                 </button>
                 <button
-                  className="relative  flex items-center justify-center bg-[#2A2E38] cursor-pointer rounded-md sm:h-[49.5px] w-[57px] h-[40px] sm:w-[104px] hover:border hover:border-slate-200 hover:bg-[#4D5361]"
+                  className="relative  flex items-center justify-center bg-[#2A2E38] cursor-pointer rounded-md  sm:h-[49.5px]  sm:w-[104px] w-[57px] h-[40px] hover:border hover:border-slate-200 hover:bg-[#4D5361]"
                   onMouseEnter={() => setHoveredButton('black')}
                   onMouseLeave={() => setHoveredButton(null)}
                   onClick={() => handlePlaceBet('black', selectedToken)}
                 >
+                   {/* w-[57px] h-[40px] */}
                   {renderRegularToken('black')}
                 </button>
                 <button
-                  className="relative  flex items-center justify-center bg-[#0E0F14] border border-[#26272B] text-white cursor-pointer rounded-md sm:h-[49.5px] w-[57px] h-[40px] sm:w-[104px] hover:border hover:border-slate-200 hover:bg-[#4D5361]"
+                  className="relative  flex items-center justify-center bg-[#0E0F14] border border-[#26272B] text-white cursor-pointer
+                   rounded-md  sm:h-[49.5px]  sm:w-[104px] w-[57px] h-[40px] hover:border hover:border-slate-200 hover:bg-[#4D5361]"
                   onMouseEnter={() => setHoveredButton('odd')}
                   onMouseLeave={() => setHoveredButton(null)}
                   onClick={() => handlePlaceBet('odd', selectedToken)}
-                >
+                > 
+                  {/*  w-[57px] h-[40px]*/}
                   Odd
                   {renderRegularToken('odd')}
                 </button>
                 <button
-                  className="relative  flex items-center justify-center bg-[#0E0F14] border border-[#26272B] text-white cursor-pointer rounded-md sm:h-[49.5px] w-[57px] h-[40px] sm:w-[104px] hover:border hover:border-slate-200 hover:bg-[#4D5361]"
+                  className="relative  flex items-center justify-center bg-[#0E0F14] border border-[#26272B] text-white cursor-pointer rounded-md 
+                  sm:h-[49.5px]  sm:w-[104px] w-[57px] h-[40px] hover:border hover:border-slate-200 hover:bg-[#4D5361]"
                   onMouseEnter={() => setHoveredButton('19-36')}
                   onMouseLeave={() => setHoveredButton(null)}
                   onClick={() => handlePlaceBet('19-36', selectedToken)}
                 >
+                  {/* w-[57px] h-[40px] */}
                   19 to 36
                   {renderRegularToken('19-36')}
                 </button>
               </div>
 
             </div>
-              <div className="sm:h-[153px] sm:w-12  h-[27.3px] w-[123px] bg-transparent"/>
+              <div className="sm:h-[153px] sm:w-12  w-[27.3px] h-[123px] bg-transparent"/>
           </div>
             
           </div>
