@@ -61,7 +61,7 @@ export default function BalanceModal() {
         if (actionType === "Deposit") {
           let token = userTokens.find(x => x.mintAddress && x.mintAddress === selectedToken.tokenMint)
           let balance = null
-          if (token) balance = token.balance;
+          if (token) balance = token?.balance;
 
           if (!balance || balance < amount) {
             setLoading(false)
@@ -292,7 +292,7 @@ export default function BalanceModal() {
                   onClick={() => setIsSelectModalOpen(!isSelectModalOpen)}
                 >
                   <selectedToken.icon className="w-6 h-6" />
-                  <span>{selectedToken.tokenName}</span>
+                  <span>{selectedToken?.tokenName}</span>
                   <div className="grow" />
                   <img
                     src="/assets/chevron.svg"
@@ -320,13 +320,13 @@ export default function BalanceModal() {
                           {actionType === "Deposit" &&
                             truncateNumber(
                               userTokens.find(
-                                (t) => t.mintAddress && t.mintAddress === token.tokenMint,
+                                (t) => t?.mintAddress && t?.mintAddress === token?.tokenMint,
                               )?.balance ?? 0,
                             )}
                           {actionType === "Withdraw" &&
                             truncateNumber(
                               coinData ? coinData.find(
-                                (coin) => coin.tokenMint && coin.tokenMint === token.tokenMint,
+                                (coin) => coin?.tokenMint && coin?.tokenMint === token?.tokenMint,
                               )?.amount ?? 0 : 0,
                             )}
                         </span>
@@ -359,10 +359,10 @@ export default function BalanceModal() {
                   <span className="font-changa font-medium text-sm text-[#94A3B8] text-opacity-90">
                     {truncateNumber(
                       coinData ? coinData.find(
-                        (coin) => coin.tokenMint && coin.tokenMint === selectedToken.tokenMint,
+                        (coin) => coin?.tokenMint && coin?.tokenMint === selectedToken?.tokenMint,
                       )?.amount ?? 0 : 0,
                     )}{" "}
-                    ${selectedToken.tokenName}
+                    ${selectedToken?.tokenName}
                   </span>
                 </div>
 
@@ -389,9 +389,9 @@ export default function BalanceModal() {
                       let bal = 0
                       if (coinData) {
                         let token = coinData.find(
-                          (coin) => coin.tokenMint && coin.tokenMint === selectedToken.tokenMint,
+                          (coin) => coin?.tokenMint && coin?.tokenMint === selectedToken?.tokenMint,
                         )
-                        if (token) bal = token.amount
+                        if (token) bal = token?.amount
                       }
 
                       if (!amount || amount === 0) setAmount(bal / 2);
@@ -406,9 +406,9 @@ export default function BalanceModal() {
                       let bal = 0
                       if (coinData) {
                         let token = coinData.find(
-                          (coin) => coin.tokenMint && coin.tokenMint === selectedToken.tokenMint,
+                          (coin) => coin?.tokenMint && coin?.tokenMint === selectedToken?.tokenMint,
                         )
-                        if (token) bal = token.amount
+                        if (token) bal = token?.amount
                       }
 
                       setAmount(bal);
@@ -440,11 +440,11 @@ export default function BalanceModal() {
                     {truncateNumber(
                       userTokens.find(
                         (token) =>
-                          token.mintAddress && token.mintAddress === selectedToken.tokenMint,
+                          token?.mintAddress && token?.mintAddress === selectedToken?.tokenMint,
                       )?.balance ?? 0,
                       3,
                     )}{" "}
-                    ${selectedToken.tokenName}
+                    ${selectedToken?.tokenName}
                   </span>
                 </div>
                 <div
@@ -466,8 +466,8 @@ export default function BalanceModal() {
                   <span
                     className="text-xs font-medium text-white text-opacity-50 bg-[#292C32] hover:bg-[#47484A] focus:bg-[#47484A] transition-all rounded-[5px] py-1.5 px-4"
                     onClick={() => {
-                      let token = userTokens.find(t => t.mintAddress === selectedToken.tokenMint)
-                      setAmount(token ? token.balance : 0);
+                      let token = userTokens.find(t => t?.mintAddress === selectedToken?.tokenMint)
+                      setAmount(token?.balance ?? 0);
                     }}
                   >
                     {translator("Max", language)}
