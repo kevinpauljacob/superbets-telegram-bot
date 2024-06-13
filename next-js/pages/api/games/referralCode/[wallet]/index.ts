@@ -1,6 +1,6 @@
 import connectDatabase from "../../../../../utils/database";
 import { NextApiRequest, NextApiResponse } from "next";
-import { Referral } from "@/models/games";
+import { User } from "@/models/referral";
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
@@ -18,11 +18,17 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
     await connectDatabase();
 
-    const referral = await Referral.findOne({ wallet }).lean();
+    const user = await User.findOne({ wallet }).populate("campaigns");
+    const campaignIds = user?.campaigns.map((c: any) => c._id) || [];
+
+    const referredUsers = await User.find({
+      referredByChain: { $in: campaignIds },
+    }).lean();
 
     return res.json({
       success: true,
-      data: referral,
+      user,
+      referredUsers,
       message: `Data fetch successful!`,
     });
   } catch (e: any) {

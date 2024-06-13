@@ -3,7 +3,7 @@ import {
   retryTxn,
   verifyFrontendTransaction,
 } from "@/context/transactions";
-import { Referral } from "@/models/games";
+import { User } from "@/models/referral";
 import TxnSignature from "@/models/txnSignature";
 import { bs58 } from "@project-serum/anchor/dist/cjs/utils/bytes";
 import {
@@ -63,21 +63,29 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
     await connectDatabase();
 
-    const referral = await Referral.findOne({ wallet });
+    const user = await User.findOne({ wallet }).populate("campaigns");
 
-    if (!referral)
+    if (!user)
       return res
         .status(400)
         .json({ success: false, message: "Wallet info not found!" });
 
-    const earnings = referral.unclaimedEarnings.map((e: any) => {
-      return { tokenMint: e.tokenMint, amount: e.amount };
-    });
+    const earnings: Record<string, number> = {};
 
-    referral.unclaimedEarnings.forEach((e: any) => {
-      e.amount = 0;
-    });
-    referral.save();
+    user.campaigns.forEach(
+      (c: { unclaimedEarnings: Record<string, number> }) => {
+        Object.entries(c.unclaimedEarnings).forEach(
+          ([key, value]: [string, number]) => {
+            if (earnings.hasOwnProperty(key)) earnings[key] += value;
+            else earnings[key] = value;
+
+            c.unclaimedEarnings[key] = 0;
+          },
+        );
+      },
+    );
+
+    user.save();
 
     const { transaction: vTxn } = await createClaimEarningsTxn(
       new PublicKey(wallet),
