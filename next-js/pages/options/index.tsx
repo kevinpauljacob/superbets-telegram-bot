@@ -45,10 +45,9 @@ export default function Options() {
     setShowWalletModal,
     maxBetAmt,
     language,
-    setLiveStats,
-    liveStats,
     selectedCoin,
     enableSounds,
+    updatePNL
   } = useGlobalContext();
 
   const [livePrice, setLivePrice] = useState(0);
@@ -113,22 +112,12 @@ export default function Options() {
 
         let win = res?.data?.result == "Won";
 
-        setLiveStats([
-          ...liveStats,
-          {
-            game: GameType.options,
-            amount: betAmt!,
-            result: win ? "Won" : "Lost",
-            pnl: win ? betAmt! * 2 - betAmt! : -betAmt!,
-            totalPNL:
-              liveStats.length > 0
-                ? liveStats[liveStats.length - 1].totalPNL +
-                  (win ? betAmt! * 2 - betAmt! : -betAmt!)
-                : win
-                  ? betAmt! * 2 - betAmt!
-                  : -betAmt!,
-          },
-        ]);
+        updatePNL(
+          GameType.options,
+          win,
+          betAmt!,
+          2,
+        );
 
         setRefresh(true);
         setLoading(false);
