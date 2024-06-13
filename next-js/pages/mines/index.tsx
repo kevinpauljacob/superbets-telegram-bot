@@ -188,12 +188,7 @@ export default function Mines() {
           strikeMultiplier: strikeMultiplier,
           pointsGained: pointsGained,
         });
-        updatePNL(
-          GameType.mines,
-          win,
-          betAmt!,
-          strikeMultiplier,
-        );
+        updatePNL(GameType.mines, win, betAmt!, strikeMultiplier);
         setGameStatus("Completed");
         setUserBets(updatedUserBetsWithResult);
         setRefresh(true);
@@ -333,12 +328,7 @@ export default function Mines() {
       }
       if (lose) {
         soundAlert("/sounds/bomb.wav", !enableSounds);
-        updatePNL(
-          GameType.mines,
-          false,
-          betAmt!,
-          1,
-        );
+        updatePNL(GameType.mines, false, betAmt!, 1);
       }
 
       if (success) {
@@ -503,7 +493,7 @@ export default function Mines() {
         // update profit / loss
         setAutoBetProfit(
           autoBetProfit +
-          (win ? strikeMultiplier * (1 - houseEdge) - 1 : -1) * betAmt,
+            (win ? strikeMultiplier * (1 - houseEdge) - 1 : -1) * betAmt,
         );
         // update count
         if (typeof autoBetCount === "number") {
@@ -522,7 +512,6 @@ export default function Mines() {
         translator(error?.message ?? "Could not make the Bet.", language),
       );
       setIsRolling(false);
-      setAutoBetCount(0);
       setStartAuto(false);
       console.error("Error occurred while betting:", error);
     } finally {
@@ -727,12 +716,12 @@ export default function Mines() {
         potentialLoss =
           autoBetProfit +
           -1 *
-          (autoWinChangeReset || autoLossChangeReset
-            ? betAmt
-            : autoBetCount === "inf"
-              ? Math.max(0, betAmt)
-              : betAmt *
-              (autoLossChange !== null ? autoLossChange / 100.0 : 0));
+            (autoWinChangeReset || autoLossChangeReset
+              ? betAmt
+              : autoBetCount === "inf"
+                ? Math.max(0, betAmt)
+                : betAmt *
+                  (autoLossChange !== null ? autoLossChange / 100.0 : 0));
       }
       if (
         useAutoConfig &&
@@ -784,16 +773,18 @@ export default function Mines() {
       }, 1000);
     } else {
       setStartAuto(false);
-      setTimeout(() => {
-        setUserBets(defaultUserBets);
-        setUserBetsForAuto([]);
-        setCashoutModal({
-          show: false,
-          amountWon: 0,
-          strikeMultiplier: 0,
-          pointsGained: 0,
-        });
-      }, 2000);
+      if (startAuto === false && userBets.some((bet) => bet.result !== "")) {
+        setTimeout(() => {
+          setUserBets(defaultUserBets);
+          setUserBetsForAuto([]);
+          setCashoutModal({
+            show: false,
+            amountWon: 0,
+            strikeMultiplier: 0,
+            pointsGained: 0,
+          });
+        }, 2000);
+      }
       setAutoBetProfit(0);
       setUserInput(betAmt);
     }
@@ -801,10 +792,10 @@ export default function Mines() {
 
   const onSubmit = async (data: any) => {
     if (betType === "auto") {
-      if (betAmt === 0) {
-        errorCustom(translator("Set Amount.", language));
-        return;
-      }
+      // if (betAmt === 0) {
+      //   errorCustom(translator("Set Amount.", language));
+      //   return;
+      // }
       if (typeof autoBetCount === "number" && autoBetCount <= 0) {
         errorCustom("Set Bet Count.");
         return;
@@ -842,35 +833,47 @@ export default function Mines() {
                     pointsGained: 0,
                   });
                 }}
-                className="cursor-pointer rounded-lg absolute w-full h-full z-20 bg-[#442c62] hover:bg-[#7653A2] focus:bg-[#53307E] flex items-center justify-center font-chakra font-semibold text-2xl tracking-wider text-white"
+                className="hover:duration-75 hover:opacity-90 w-full h-[3.75rem] rounded-lg transition-all bg-[#442c62] hover:bg-[#7653A2] focus:bg-[#53307E] flex items-center justify-center font-chakra font-semibold text-2xl tracking-wider text-white"
               >
                 {translator("STOP", language)}
               </div>
             )}
-            <BetButton
-              disabled={
-                !wallet ||
+            {!betActive && !startAuto && (
+              <BetButton
+                disabled={
+                  !wallet ||
                   !session?.user ||
                   isRolling ||
-                  (betActive &&
-                    betType === "manual" &&
-                    !userBets.some((bet) => bet.pick)) ||
+                  (coinData && coinData[0].amount < minGameAmount) ||
+                  (betType === "auto" && !userBets.some((bet) => bet.pick)) ||
+                  autoBetCount === 0 ||
+                  Number.isNaN(autoBetCount) ||
                   (betAmt !== undefined &&
                     maxBetAmt !== undefined &&
                     betAmt > maxBetAmt)
-                  ? true
-                  : false
-              }
-              onClickFunction={
-                !betActive
-                  ? betType === "auto"
-                    ? onSubmit
-                    : handleBet
-                  : handleConclude
-              }
-            >
-              {isRolling ? <Loader /> : betActive ? "CASHOUT" : "BET"}
-            </BetButton>
+                    ? true
+                    : false
+                }
+                onClickFunction={betType === "auto" ? onSubmit : handleBet}
+              >
+                {isRolling ? <Loader /> : "BET"}
+              </BetButton>
+            )}
+            {betActive && betType === "manual" && (
+              <button
+                onClick={() => {
+                  handleConclude();
+                }}
+                disabled={
+                  betActive &&
+                  betType === "manual" &&
+                  !userBets.some((bet) => bet.pick)
+                }
+                className="disabled:cursor-default disabled:opacity-70 hover:duration-75 hover:opacity-90 w-full h-[3.75rem] rounded-lg transition-all bg-[#7839C5] disabled:bg-[#4b2876] hover:bg-[#9361d1] focus:bg-[#602E9E] flex items-center justify-center font-chakra font-semibold text-xl tracking-wider text-white"
+              >
+                {isRolling ? <Loader /> : translator("CASHOUT", language)}
+              </button>
+            )}
           </div>
           {betType === "auto" && (
             <div className="w-full flex lg:hidden">
@@ -906,8 +909,9 @@ export default function Mines() {
                       <label className="text-white/90">Mines</label>
                     </div>
                     <div
-                      className={`${dropDown ? "" : ""
-                        } relative flex h-11 w-full cursor-pointer items-center rounded-[8px] bg-[#202329] px-4`}
+                      className={`${
+                        dropDown ? "" : ""
+                      } relative flex h-11 w-full cursor-pointer items-center rounded-[8px] bg-[#202329] px-4`}
                       onClick={handleDropDown}
                     >
                       <div className="flex justify-between items-center bg-transparent text-base text-[#94A3B8] placeholder-[#94A3B8] font-chakra placeholder-opacity-40 outline-none w-full">
@@ -917,10 +921,11 @@ export default function Mines() {
                           alt="arrowDown"
                           width={14}
                           height={14}
-                          className={`${dropDown
+                          className={`${
+                            dropDown
                               ? "transform transition-all rotate-180"
                               : "transition-all"
-                            }`}
+                          }`}
                         />
                       </div>
                       {dropDown && (
@@ -928,10 +933,11 @@ export default function Mines() {
                           {options.map((option) => (
                             <div
                               key={option.key}
-                              className={`${minesCount === option.value
-                                ? "text-white bg-white/20 hover:bg-white/20"
-                                : "hover:bg-white/10"
-                                } border-b border-r text-[#94A3B8] font-chakra border-[#2A2E38] py-1.5 px-3`}
+                              className={`${
+                                minesCount === option.value
+                                  ? "text-white bg-white/20 hover:bg-white/20"
+                                  : "hover:bg-white/10"
+                              } border-b border-r text-[#94A3B8] font-chakra border-[#2A2E38] py-1.5 px-3`}
                               onClick={() =>
                                 handleMinesCountChange(option.value)
                               }
@@ -1015,8 +1021,9 @@ export default function Mines() {
                           Mines
                         </label>
                         <div
-                          className={`${dropDown ? "" : ""
-                            } relative flex h-11 w-full cursor-pointer items-center rounded-[8px] bg-[#202329] px-4`}
+                          className={`${
+                            dropDown ? "" : ""
+                          } relative flex h-11 w-full cursor-pointer items-center rounded-[8px] bg-[#202329] px-4`}
                           onClick={!startAuto ? handleDropDown : undefined}
                         >
                           <div className="flex justify-between items-center bg-transparent text-base text-[#94A3B8] placeholder-[#94A3B8] font-chakra placeholder-opacity-40 outline-none w-full">
@@ -1026,10 +1033,11 @@ export default function Mines() {
                               alt="arrowDown"
                               width={14}
                               height={14}
-                              className={`${dropDown
+                              className={`${
+                                dropDown
                                   ? "transform transition-all rotate-180"
                                   : "transition-all"
-                                }`}
+                              }`}
                             />
                           </div>
                           {!startAuto && dropDown && (
@@ -1037,10 +1045,11 @@ export default function Mines() {
                               {options.map((option) => (
                                 <div
                                   key={option.key}
-                                  className={`${minesCount === option.value
-                                    ? "text-white bg-white/20 hover:bg-white/20"
-                                    : "hover:bg-white/10"
-                                    } border-b border-r text-[#94A3B8] font-chakra border-[#2A2E38] py-1.5 px-3`}
+                                  className={`${
+                                    minesCount === option.value
+                                      ? "text-white bg-white/20 hover:bg-white/20"
+                                      : "hover:bg-white/10"
+                                  } border-b border-r text-[#94A3B8] font-chakra border-[#2A2E38] py-1.5 px-3`}
                                   onClick={() =>
                                     handleMinesCountChange(option.value)
                                   }
@@ -1094,38 +1103,50 @@ export default function Mines() {
                           pointsGained: 0,
                         });
                       }}
-                      className="rounded-lg absolute w-full h-full z-20 bg-[#442c62] hover:bg-[#7653A2] focus:bg-[#53307E] flex items-center justify-center font-chakra font-semibold text-2xl tracking-wider text-white"
+                      className="hover:duration-75 hover:opacity-90 w-full h-[3.75rem] rounded-lg transition-all bg-[#442c62] hover:bg-[#7653A2] focus:bg-[#53307E] flex items-center justify-center font-chakra font-semibold text-2xl tracking-wider text-white"
                     >
                       {translator("STOP", language)}
                     </div>
                   )}
-                  <BetButton
-                    disabled={
-                      !wallet ||
+                  {!betActive && !startAuto && (
+                    <BetButton
+                      disabled={
+                        !wallet ||
                         !session?.user ||
                         isRolling ||
-                        (!betActive &&
-                          coinData &&
-                          coinData[0].amount < minGameAmount) ||
-                        (betActive &&
-                          betType === "manual" &&
+                        (coinData && coinData[0].amount < minGameAmount) ||
+                        (betType === "auto" &&
                           !userBets.some((bet) => bet.pick)) ||
+                        autoBetCount === 0 ||
+                        Number.isNaN(autoBetCount) ||
                         (betAmt !== undefined &&
                           maxBetAmt !== undefined &&
                           betAmt > maxBetAmt)
-                        ? true
-                        : false
-                    }
-                    onClickFunction={
-                      !betActive
-                        ? betType === "auto"
-                          ? onSubmit
-                          : handleBet
-                        : handleConclude
-                    }
-                  >
-                    {isRolling ? <Loader /> : betActive ? "CASHOUT" : "BET"}
-                  </BetButton>
+                          ? true
+                          : false
+                      }
+                      onClickFunction={
+                        betType === "auto" ? onSubmit : handleBet
+                      }
+                    >
+                      {isRolling ? <Loader /> : "BET"}
+                    </BetButton>
+                  )}
+                  {betActive && betType === "manual" && (
+                    <button
+                      onClick={() => {
+                        handleConclude();
+                      }}
+                      disabled={
+                        betActive &&
+                        betType === "manual" &&
+                        !userBets.some((bet) => bet.pick)
+                      }
+                      className="disabled:cursor-default disabled:opacity-70 hover:duration-75 hover:opacity-90 w-full h-[3.75rem] rounded-lg transition-all bg-[#7839C5] disabled:bg-[#4b2876] hover:bg-[#9361d1] focus:bg-[#602E9E] flex items-center justify-center font-chakra font-semibold text-xl tracking-wider text-white"
+                    >
+                      {isRolling ? <Loader /> : translator("CASHOUT", language)}
+                    </button>
+                  )}
                 </div>
               </form>
             </FormProvider>
@@ -1189,49 +1210,44 @@ export default function Mines() {
               (index) => (
                 <button
                   key={index}
-                  className={`border-2 ${betType === "manual"
-                    ? userBets[index - 1].result === "Pending" &&
-                      userBets[index - 1].pick === true
-                      ? "border-[#FCB10F] bg-[#FCB10F33]"
-                      : userBets[index - 1].result === "Lost" &&
-                        userBets[index - 1].pick === true
-                        ? "border-[#F1323E] bg-[#F1323E33]"
-                        : gameStatus === "Completed"
-                          ? "bg-transparent border-white/10"
-                          : "bg-[#202329] border-[#202329] hover:border-white/30"
-                    : betType === "auto"
-                      ? userBets[index - 1].result === "" &&
+                  className={`border-2 ${
+                    betType === "manual"
+                      ? userBets[index - 1].result === "Pending" &&
                         userBets[index - 1].pick === true
                         ? "border-[#FCB10F] bg-[#FCB10F33]"
                         : userBets[index - 1].result === "Lost" &&
-                          userBets[index - 1].pick === true
-                          ? "border-[#F1323E] bg-[#F1323E33]"
-                          : gameStatus === "Completed"
-                            ? "bg-transparent border-white/10"
-                            : "bg-[#202329] border-[#202329] hover:border-white/30"
+                            userBets[index - 1].pick === true
+                          ? "border-[#FCB10F] bg-[#FCB10F33]"
+                          : userBets[index - 1].result === "Lost" &&
+                              userBets[index - 1].pick === true
+                            ? "border-[#F1323E] bg-[#F1323E33]"
+                            : gameStatus === "Completed"
+                              ? "bg-transparent border-white/10"
+                              : "bg-[#202329] border-[#202329] hover:border-white/30"
                       : betType === "auto"
                         ? userBets[index - 1].result === "" &&
                           userBets[index - 1].pick === true
                           ? "border-[#FCB10F] bg-[#FCB10F33]"
                           : userBets[index - 1].result === "Won" &&
-                            userBets[index - 1].pick === true
+                              userBets[index - 1].pick === true
                             ? "border-[#FCB10F] bg-[#FCB10F33]"
                             : userBets[index - 1].result === "Lost" &&
-                              userBets[index - 1].pick === true
+                                userBets[index - 1].pick === true
                               ? "border-[#F1323E] bg-[#F1323E33]"
                               : "bg-[#202329] border-[#202329] hover:border-white/30"
                         : null
-                    } ${pendingRequests.includes(index) ? "blink_tile" : ""
-                    } flex items-center active:scale-90 justify-center cursor-pointer rounded-md text-center transition duration-150 ease-in-out w-[50px] h-[50px] sm:w-[55px] sm:h-[55px] md:w-[80px] md:h-[80px] xl:w-[90px] xl:h-[90px]`}
+                  } ${
+                    pendingRequests.includes(index) ? "blink_tile" : ""
+                  } flex items-center active:scale-90 justify-center cursor-pointer rounded-md text-center transition duration-150 ease-in-out w-[50px] h-[50px] sm:w-[55px] sm:h-[55px] md:w-[80px] md:h-[80px] xl:w-[90px] xl:h-[90px]`}
                   disabled={betType === "manual" && userBets[index - 1].pick}
                   onClick={() =>
                     betType === "auto"
                       ? handleAutoPick(index)
                       : betActive && betType === "manual"
                         ? setPendingRequests((prevRequests) => [
-                          ...prevRequests,
-                          index,
-                        ])
+                            ...prevRequests,
+                            index,
+                          ])
                         : null
                   }
                 >
