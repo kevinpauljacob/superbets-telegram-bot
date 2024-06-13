@@ -59,7 +59,10 @@ export default function BalanceModal() {
 
       try {
         if (actionType === "Deposit") {
-          let balance = userTokens.find(x => x.mintAddress === selectedToken.tokenMint)?.balance;
+          let token = userTokens.find(x => x.mintAddress && x.mintAddress === selectedToken.tokenMint)
+          let balance = null
+          if (token) balance = token.balance;
+
           if (!balance || balance < amount) {
             setLoading(false)
             errorCustom("Insufficient balance")
@@ -317,14 +320,14 @@ export default function BalanceModal() {
                           {actionType === "Deposit" &&
                             truncateNumber(
                               userTokens.find(
-                                (t) => t.mintAddress === token.tokenMint,
+                                (t) => t.mintAddress && t.mintAddress === token.tokenMint,
                               )?.balance ?? 0,
                             )}
                           {actionType === "Withdraw" &&
                             truncateNumber(
-                              coinData?.find(
-                                (coin) => coin.tokenMint === token.tokenMint,
-                              )?.amount ?? 0,
+                              coinData ? coinData.find(
+                                (coin) => coin.tokenMint && coin.tokenMint === token.tokenMint,
+                              )?.amount ?? 0 : 0,
                             )}
                         </span>
                       </div>
@@ -355,9 +358,9 @@ export default function BalanceModal() {
                   </label>
                   <span className="font-changa font-medium text-sm text-[#94A3B8] text-opacity-90">
                     {truncateNumber(
-                      coinData?.find(
-                        (coin) => coin.tokenMint === selectedToken.tokenMint,
-                      )?.amount ?? 0,
+                      coinData ? coinData.find(
+                        (coin) => coin.tokenMint && coin.tokenMint === selectedToken.tokenMint,
+                      )?.amount ?? 0 : 0,
                     )}{" "}
                     ${selectedToken.tokenName}
                   </span>
@@ -383,10 +386,14 @@ export default function BalanceModal() {
                   <span
                     className="text-xs font-medium text-white text-opacity-50 bg-[#292C32] hover:bg-[#47484A] focus:bg-[#47484A] transition-all rounded-[5px] mr-2 py-1.5 px-4"
                     onClick={() => {
-                      let bal =
-                        coinData?.find(
-                          (coin) => coin.tokenMint === selectedToken.tokenMint,
-                        )?.amount ?? 0;
+                      let bal = 0
+                      if (coinData) {
+                        let token = coinData.find(
+                          (coin) => coin.tokenMint && coin.tokenMint === selectedToken.tokenMint,
+                        )
+                        if (token) bal = token.amount
+                      }
+
                       if (!amount || amount === 0) setAmount(bal / 2);
                       else setAmount(amount / 2);
                     }}
@@ -396,10 +403,14 @@ export default function BalanceModal() {
                   <span
                     className="text-xs font-medium text-white text-opacity-50 bg-[#292C32] hover:bg-[#47484A] focus:bg-[#47484A] transition-all rounded-[5px] py-1.5 px-4"
                     onClick={() => {
-                      let bal =
-                        coinData?.find(
-                          (coin) => coin.tokenMint === selectedToken.tokenMint,
-                        )?.amount ?? 0;
+                      let bal = 0
+                      if (coinData) {
+                        let token = coinData.find(
+                          (coin) => coin.tokenMint && coin.tokenMint === selectedToken.tokenMint,
+                        )
+                        if (token) bal = token.amount
+                      }
+
                       setAmount(bal);
                     }}
                   >
@@ -429,7 +440,7 @@ export default function BalanceModal() {
                     {truncateNumber(
                       userTokens.find(
                         (token) =>
-                          token.mintAddress === selectedToken.tokenMint,
+                          token.mintAddress && token.mintAddress === selectedToken.tokenMint,
                       )?.balance ?? 0,
                       3,
                     )}{" "}
@@ -456,7 +467,7 @@ export default function BalanceModal() {
                     className="text-xs font-medium text-white text-opacity-50 bg-[#292C32] hover:bg-[#47484A] focus:bg-[#47484A] transition-all rounded-[5px] py-1.5 px-4"
                     onClick={() => {
                       let token = userTokens.find(t => t.mintAddress === selectedToken.tokenMint)
-                      setAmount(token?token.balance:0);
+                      setAmount(token ? token.balance : 0);
                     }}
                   >
                     {translator("Max", language)}
