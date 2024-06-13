@@ -86,15 +86,6 @@ export default function VerifyFlipModal({
   //to handle dropodown
   const [openDropDown, setOpenDropDown] = useState<boolean>(false);
 
-  const handleClose = () => {
-    //@ts-ignore
-    document.addEventListener("click", function (event) {
-      //@ts-ignore
-      var targetId = event.target.id;
-      if (targetId && targetId === "modal-bg") onClose();
-    });
-  };
-
   const copyToClipboard = (text?: string) => {
     if (text) navigator.clipboard.writeText(text);
   };
@@ -137,11 +128,10 @@ export default function VerifyFlipModal({
   return (
     <>
       {isOpen && (
-        <AdaptiveModal
-          open={isOpen} onOpenChange={()=>onClose()}
-        >
+        <AdaptiveModal open={isOpen} onOpenChange={()=>onClose()}>
           <AdaptiveModalContent className="w-full">
           <div className="bg-[#121418] max-h-[80dvh] p-8 pb-20 rounded-lg w-full sm:w-[34rem] -mt-[4.7rem] md:mt-0 overflow-y-scroll nobar sm:-translate-x-16">
+            <div className="mx-auto h-1 w-10 rounded-full -translate-y-3 bg-gray-400 sm:hidden" />
             <div className="flex flex-wrap justify-center sm:justify-between items-center mb-4 sm:mb-[1.4rem]">
               <div className="font-changa text-2xl font-semibold text-white mr-4 text-opacity-90">
                 {translator("Coin Flip", language)}
