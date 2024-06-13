@@ -8,13 +8,9 @@ import {
   seedStatus,
 } from "@/utils/provably-fair";
 import StakingUser from "@/models/staking/user";
-import {
-  houseEdgeTiers,
-  launchPromoEdge,
-  maxPayouts,
-  pointTiers,
-} from "@/context/transactions";
-import { minGameAmount, wsEndpoint } from "@/context/gameTransactions";
+import { houseEdgeTiers, maxPayouts, pointTiers } from "@/context/config";
+import { launchPromoEdge } from "@/context/config";
+import { minGameAmount, wsEndpoint } from "@/context/config";
 import { Decimal } from "decimal.js";
 Decimal.set({ precision: 9 });
 
@@ -81,6 +77,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
       // let { wallet, amount, tokenMint, rows, risk }: InputType = req.body;
 
+      // const minGameAmount =
+      //   maxPayouts[tokenMint as GameTokens]["plinko" as GameType] * minAmtFactor;
+
       // const token = await getToken({ req, secret });
 
       // if (!token || !token.sub || token.sub != wallet)
@@ -113,7 +112,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       // const maxStrikeMultiplier = multiplier.at(-1)!;
       // const maxPayout = Decimal.mul(amount, maxStrikeMultiplier);
 
-      // if (!(maxPayout.toNumber() <= maxPayouts.plinko))
+      // if (!(maxPayout.toNumber() <= maxPayouts[tokenMint as GameTokens].plinko))
       //   return res
       //     .status(400)
       //     .json({ success: false, message: "Max payout exceeded" });

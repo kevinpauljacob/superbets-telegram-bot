@@ -1,21 +1,25 @@
 import { useWallet } from "@solana/wallet-adapter-react";
 import React, { useEffect, useRef, useState } from "react";
-import { useForm, FormProvider, set } from "react-hook-form";
-import { obfuscatePubKey, translator } from "@/context/transactions";
+import { useForm, FormProvider } from "react-hook-form";
 import {
+  connection,
   deposit,
+  obfuscatePubKey,
+  translator,
   truncateNumber,
   withdraw,
-} from "../../context/gameTransactions";
+} from "@/context/transactions";
 import Loader from "./Loader";
 import { useGlobalContext } from "../GlobalContext";
-import { IoClose, IoCloseOutline } from "react-icons/io5";
+import { IoCloseOutline } from "react-icons/io5";
 import Image from "next/image";
 import { timestampParser } from "@/utils/timestampParser";
-import { formatNumber } from "@/context/transactions";
 import { useRouter } from "next/router";
-import Link from "next/link";
 import { AdaptiveModal,AdaptiveModalContent} from "../AdaptiveModal";
+import { SPL_TOKENS, spl_token } from "@/context/config";
+import { Connection, ParsedAccountData, PublicKey } from "@solana/web3.js";
+import { TOKEN_PROGRAM_ID } from "@solana/spl-token";
+import { errorCustom } from "../toasts/ToastGroup";
 
 export default function BalanceModal() {
   const methods = useForm();
@@ -25,18 +29,20 @@ export default function BalanceModal() {
 
   const { c: campaignId } = router.query;
 
-  const token = "SOL";
-
   const {
     showWalletModal,
     setShowWalletModal,
     walletBalance,
-    coinData,
     language,
-    getBalance
+    userTokens,
+    setUserTokens,
+    getBalance,
+    coinData,
   } = useGlobalContext();
 
   const [loading, setLoading] = useState<boolean>(false);
+  const [selectedToken, setSelectedToken] = useState<spl_token>(SPL_TOKENS[0]);
+  const [isSelectModalOpen, setIsSelectModalOpen] = useState<boolean>(false);
   const [amount, setAmount] = useState<number>(0);
   const [historyData, setHistoryData] = useState<any[]>([]);
   const [actionType, setActionType] = useState<
@@ -53,16 +59,32 @@ export default function BalanceModal() {
       let response: { success: boolean; message: string };
 
       try {
-        if (actionType === "Deposit")
-          response = await deposit(wallet, amount, token, campaignId);
-        else response = await withdraw(wallet, amount, token);
+        if (actionType === "Deposit") {
+          let token = userTokens.find(x => x.mintAddress && x.mintAddress === selectedToken.tokenMint)
+          let balance = null
+          if (token) balance = token?.balance;
+
+          if (!balance || balance < amount) {
+            setLoading(false)
+            errorCustom("Insufficient balance")
+            return;
+          }
+
+          response = await deposit(
+            wallet,
+            amount,
+            selectedToken.tokenMint,
+            campaignId,
+          );
+        } else response = await withdraw(wallet, amount, selectedToken.tokenMint);
 
         if (response && response.success) {
-          getBalance()
+          getBalance();
           setShowWalletModal(false);
         } else {
           //   errorCustom(response.message);
         }
+        handleGetHistory();
         setLoading(false);
       } catch (e) {
         setLoading(false);
@@ -74,8 +96,7 @@ export default function BalanceModal() {
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
-    const amount = parseFloat(e.target.value)
-    setAmount(parseFloat(e.target.value));
+    setAmount(Math.abs(parseFloat(e.target.value)));
   };
 
   const handleGetHistory = async () => {
@@ -91,7 +112,7 @@ export default function BalanceModal() {
         },
       );
       let { success, data, message } = await res.json();
-      setHistoryData(data.reverse());
+      setHistoryData(data);
       // console.log(data);
     } catch (error) {
       console.error(error);
@@ -99,8 +120,75 @@ export default function BalanceModal() {
   };
 
   useEffect(() => {
-    if (actionType === "History") handleGetHistory();
-  }, [actionType]);
+    handleGetHistory();
+  }, []);
+
+  interface TokenAccount {
+    mintAddress: string;
+    balance: number;
+  }
+
+  async function getTokenAccounts(
+    walletPublicKey: PublicKey,
+    connection: Connection,
+  ) {
+    const filters = [
+      {
+        dataSize: 165, // size of SPL Token account
+      },
+      {
+        memcmp: {
+          offset: 32, // offset of the owner in the Token account layout
+          bytes: walletPublicKey.toBase58(), // wallet public key as a base58 encoded string
+        },
+      },
+    ];
+
+    const accounts = await connection.getParsedProgramAccounts(
+      TOKEN_PROGRAM_ID, // Token program ID
+      { filters: filters },
+    );
+
+    const results: TokenAccount[] = accounts.map((account) => {
+      const info = account.account.data as ParsedAccountData; // Assume proper typing
+      const mintAddress = info.parsed.info.mint;
+      const balance = info.parsed.info.tokenAmount.uiAmount || 0;
+
+      console.log(`Token Mint: ${mintAddress}, Balance: ${balance}`);
+      return { mintAddress, balance };
+    });
+
+    return results;
+  }
+
+  useEffect(() => {
+    let intervalId: NodeJS.Timeout | null = null;
+
+    if (wallet && wallet.publicKey && showWalletModal) {
+      const fetchAndUpddateToken = () => {
+        getTokenAccounts(wallet.publicKey!, connection)
+          .then((tokens) => {
+            console.log("gill", tokens);
+            setUserTokens([
+              {
+                mintAddress: "SOL",
+                balance: walletBalance,
+              },
+              ...tokens,
+            ]);
+          })
+          .catch(console.error);
+      };
+      fetchAndUpddateToken();
+      intervalId = setInterval(fetchAndUpddateToken, 5000);
+
+      return () => {
+        if (intervalId) {
+          clearInterval(intervalId);
+        }
+      };
+    }
+  }, [wallet, showWalletModal]);
 
   return (
     <AdaptiveModal open={showWalletModal} onOpenChange={()=>setShowWalletModal(false)} >
@@ -119,34 +207,43 @@ export default function BalanceModal() {
 
         <div className="w-full flex mb-8 mt-2 gap-2">
           <button
-            className={`w-full border-2 rounded-md py-2 text-white font-semibold text-xs sm:text-sm transition hover:duration-75 ease-in-out ${
-              actionType === "Deposit"
-                ? "bg-[#d9d9d90d] border-transparent text-opacity-90"
-                : "border-[#d9d9d90d] hover:bg-[#9361d1] focus:bg-[#602E9E] text-opacity-50 hover:text-opacity-90"
-            }`}
+            className={`w-full border-2 rounded-md py-2 text-white font-semibold text-xs sm:text-sm transition hover:duration-75 ease-in-out ${actionType === "Deposit"
+              ? "bg-[#d9d9d90d] border-transparent text-opacity-90"
+              : "border-[#d9d9d90d] hover:bg-[#9361d1] focus:bg-[#602E9E] text-opacity-50 hover:text-opacity-90"
+              }`}
             onClick={() => setActionType("Deposit")}
           >
             {translator("Deposit", language)}
           </button>
           <button
-            className={`w-full border-2 rounded-md py-2 text-white font-semibold text-xs sm:text-sm transition-all hover:duration-75 ease-in-out ${
-              actionType === "Withdraw"
-                ? "bg-[#d9d9d90d] border-transparent text-opacity-90"
-                : "border-[#d9d9d90d] hover:bg-[#9361d1] focus:bg-[#602E9E] text-opacity-50 hover:text-opacity-90"
-            }`}
+            className={`w-full border-2 rounded-md py-2 text-white font-semibold text-xs sm:text-sm transition-all hover:duration-75 ease-in-out ${actionType === "Withdraw"
+              ? "bg-[#d9d9d90d] border-transparent text-opacity-90"
+              : "border-[#d9d9d90d] hover:bg-[#9361d1] focus:bg-[#602E9E] text-opacity-50 hover:text-opacity-90"
+              }`}
             onClick={() => setActionType("Withdraw")}
           >
             {translator("Withdraw", language)}
           </button>
           <button
-            className={`w-full border-2 rounded-md py-2 text-white font-semibold text-xs sm:text-sm transition hover:duration-75 ease-in-out ${
-              actionType === "History"
-                ? "bg-[#d9d9d90d] border-transparent text-opacity-90"
-                : "border-[#d9d9d90d] hover:bg-[#9361d1] focus:bg-[#602E9E] text-opacity-50 hover:text-opacity-90"
-            }`}
+            className={`w-full border-2 rounded-md py-2 text-white font-semibold text-xs sm:text-sm transition hover:duration-75 ease-in-out flex items-center justify-center gap-1 ${actionType === "History"
+              ? "bg-[#d9d9d90d] border-transparent text-opacity-90"
+              : "border-[#d9d9d90d] hover:bg-[#9361d1] focus:bg-[#602E9E] text-opacity-50 hover:text-opacity-90"
+              }`}
             onClick={() => setActionType("History")}
           >
             {translator("History", language)}
+            {historyData.length > 0 && (
+              <div className="flex items-center justify-center bg-[#EFA411] bg-opacity-10 text-[#EFA411] text-[0.625rem] font-sans font-semibold w-5 min-h-5 rounded-full">
+                {
+                  historyData.filter(
+                    (history) =>
+                      !history?.type &&
+                      history?.status &&
+                      history?.status == "review",
+                  ).length
+                }
+              </div>
+            )}
           </button>
         </div>
 
@@ -157,14 +254,58 @@ export default function BalanceModal() {
             onSubmit={methods.handleSubmit(onSubmit)}
           >
             {actionType !== "History" && (
-              <div className="mb-0 flex w-full flex-col">
-                <label className="mb-1 font-changa font-medium text-xs text-white text-opacity-90">
+              <div className="relative mb-0 flex w-full flex-col rounded-md">
+                <label className="mb-1 font-changa font-medium text-xs text-white text-opacity-90 ">
                   {translator("Coin", language)}
                 </label>
 
-                <span className="w-full rounded-md h-11 flex items-center bg-[#202329] px-4 py-2 text-[#94A3B8] text-base font-chakra">
-                  {token}
+                <span
+                  className="w-full rounded-md h-11 flex items-center bg-[#202329] px-4 py-2 text-[#94A3B8] text-base font-chakra gap-2 cursor-pointer"
+                  onClick={() => setIsSelectModalOpen(!isSelectModalOpen)}
+                >
+                  <selectedToken.icon className="w-6 h-6" />
+                  <span>{selectedToken?.tokenName}</span>
+                  <div className="grow" />
+                  <img
+                    src="/assets/chevron.svg"
+                    alt=""
+                    className={`w-4 h-4 transform ${isSelectModalOpen ? "rotate-180" : ""
+                      }`}
+                  />
                 </span>
+
+                {isSelectModalOpen && (
+                  <div className="absolute z-[100] top-[calc(100%+10px)] left-0 w-full bg-[#202329] rounded-[5px] border-2 border-white border-opacity-10">
+                    {SPL_TOKENS.map((token, index) => (
+                      <div
+                        key={index}
+                        className="w-full h-11 flex flex-row items-center border-y  border-white border-opacity-10  bg-[#202329] px-4 py-2 text-[#94A3B8] text-base font-chakra gap-2 cursor-pointer hover:bg-[#292C32]"
+                        onClick={() => {
+                          setSelectedToken(token);
+                          setIsSelectModalOpen(false);
+                        }}
+                      >
+                        <token.icon className="" />
+                        <span>{token.tokenName}</span>
+                        <div className="grow" />
+                        <span className="text-gray-400">
+                          {actionType === "Deposit" &&
+                            truncateNumber(
+                              userTokens.find(
+                                (t) => t?.mintAddress && t?.mintAddress === token?.tokenMint,
+                              )?.balance ?? 0,
+                            )}
+                          {actionType === "Withdraw" &&
+                            truncateNumber(
+                              coinData ? coinData.find(
+                                (coin) => coin?.tokenMint && coin?.tokenMint === token?.tokenMint,
+                              )?.amount ?? 0 : 0,
+                            )}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
 
@@ -188,7 +329,12 @@ export default function BalanceModal() {
                     {translator("Amount", language)}
                   </label>
                   <span className="font-changa font-medium text-sm text-[#94A3B8] text-opacity-90">
-                    {truncateNumber(coinData ? coinData[0]?.amount : 0, 3)} $SOL
+                    {truncateNumber(
+                      coinData ? coinData.find(
+                        (coin) => coin?.tokenMint && coin?.tokenMint === selectedToken?.tokenMint,
+                      )?.amount ?? 0 : 0,
+                    )}{" "}
+                    ${selectedToken?.tokenName}
                   </span>
                 </div>
 
@@ -205,34 +351,50 @@ export default function BalanceModal() {
                     step={"any"}
                     autoComplete="off"
                     onChange={handleChange}
-                    placeholder={"Amount"}
+                    placeholder={"00.00"}
                     value={amount}
                     className={`flex w-full min-w-0 bg-transparent text-sm text-[#94A3B8] placeholder-[#94A3B8]  placeholder-opacity-40 outline-none`}
                   />
                   <span
                     className="text-xs font-medium text-white text-opacity-50 bg-[#292C32] hover:bg-[#47484A] focus:bg-[#47484A] transition-all rounded-[5px] mr-2 py-1.5 px-4"
-                    onClick={() =>
-                      setAmount(coinData ? coinData[0]?.amount / 2 : 0)
-                    }
+                    onClick={() => {
+                      let bal = 0
+                      if (coinData) {
+                        let token = coinData.find(
+                          (coin) => coin?.tokenMint && coin?.tokenMint === selectedToken?.tokenMint,
+                        )
+                        if (token) bal = token?.amount
+                      }
+
+                      if (!amount || amount === 0) setAmount(bal / 2);
+                      else setAmount(amount / 2);
+                    }}
                   >
                     {translator("Half", language)}
                   </span>
                   <span
                     className="text-xs font-medium text-white text-opacity-50 bg-[#292C32] hover:bg-[#47484A] focus:bg-[#47484A] transition-all rounded-[5px] py-1.5 px-4"
-                    onClick={() =>
-                      setAmount(coinData ? coinData[0]?.amount : 0)
-                    }
+                    onClick={() => {
+                      let bal = 0
+                      if (coinData) {
+                        let token = coinData.find(
+                          (coin) => coin?.tokenMint && coin?.tokenMint === selectedToken?.tokenMint,
+                        )
+                        if (token) bal = token?.amount
+                      }
+
+                      setAmount(bal);
+                    }}
                   >
                     {translator("Max", language)}
                   </span>
                 </div>
 
                 <span
-                  className={`${
-                    methods.formState.errors["amount"]
-                      ? "opacity-100"
-                      : "opacity-0"
-                  } mt-1.5 flex items-center gap-1 text-xs text-[#D92828]`}
+                  className={`${methods.formState.errors["amount"]
+                    ? "opacity-100"
+                    : "opacity-0"
+                    } mt-1.5 flex items-center gap-1 text-xs text-[#D92828]`}
                 >
                   {methods.formState.errors["amount"]
                     ? methods.formState.errors["amount"]!.message!.toString()
@@ -247,7 +409,14 @@ export default function BalanceModal() {
                     {translator("Amount", language)}
                   </label>
                   <span className="font-changa font-medium text-sm text-[#94A3B8] text-opacity-90">
-                    {truncateNumber(walletBalance ?? 0, 3)} $SOL
+                    {truncateNumber(
+                      userTokens.find(
+                        (token) =>
+                          token?.mintAddress && token?.mintAddress === selectedToken?.tokenMint,
+                      )?.balance ?? 0,
+                      3,
+                    )}{" "}
+                    ${selectedToken?.tokenName}
                   </span>
                 </div>
                 <div
@@ -268,17 +437,19 @@ export default function BalanceModal() {
                   />
                   <span
                     className="text-xs font-medium text-white text-opacity-50 bg-[#292C32] hover:bg-[#47484A] focus:bg-[#47484A] transition-all rounded-[5px] py-1.5 px-4"
-                    onClick={() => setAmount((walletBalance ?? 0) - 0.01)}
+                    onClick={() => {
+                      let token = userTokens.find(t => t?.mintAddress === selectedToken?.tokenMint)
+                      setAmount(token?.balance ?? 0);
+                    }}
                   >
                     {translator("Max", language)}
                   </span>
                 </div>
                 <span
-                  className={`${
-                    methods.formState.errors["amount"]
-                      ? "opacity-100"
-                      : "opacity-0"
-                  } mt-1.5 flex items-center gap-1 text-xs text-[#D92828]`}
+                  className={`${methods.formState.errors["amount"]
+                    ? "opacity-100"
+                    : "opacity-0"
+                    } mt-1.5 flex items-center gap-1 text-xs text-[#D92828]`}
                 >
                   {methods.formState.errors["amount"]
                     ? methods.formState.errors["amount"]!.message!.toString()
@@ -293,7 +464,7 @@ export default function BalanceModal() {
                       key={index}
                       className={`hidden sm:block w-full text-center font-changa text-[10px] font-light text-[#F0F0F0] text-opacity-75`}
                     >
-                      {header}
+                      {translator(header, language)}
                     </th>
                   ))}
                   {mobileHistoryHeaders.map((header, index) => (
@@ -301,16 +472,15 @@ export default function BalanceModal() {
                       key={index}
                       className={`sm:hidden w-full text-center font-changa text-[10px] font-light text-[#F0F0F0] text-opacity-75`}
                     >
-                      {header}
+                      {translator(header, language)}
                     </th>
                   ))}
                 </tr>
                 <div
-                  className={`${
-                    historyData.length <= 0
-                      ? "flex items-center justify-center"
-                      : ""
-                  } w-full h-[310px] overflow-y-scroll modalscrollbar`}
+                  className={`${historyData.length <= 0
+                    ? "flex items-center justify-center"
+                    : ""
+                    } w-full h-[310px] overflow-y-scroll modalscrollbar`}
                 >
                   {historyData.length > 0 ? (
                     historyData.map((data, index) => (
@@ -322,27 +492,28 @@ export default function BalanceModal() {
                           {timestampParser(data.createdAt)}
                         </td>
                         <td className="w-full text-center font-changa text-xs font-light text-[#F0F0F0] text-opacity-75">
-                          {truncateNumber(data.amount, 4)} SOL
+                          {truncateNumber(data.amount, 4)} {data.tokenName}
                         </td>
                         <td className="hidden sm:block w-full text-center font-changa text-xs font-light text-[#F0F0F0] text-opacity-75">
-                          {data.type ? "Deposit" : "Withdraw"}
+                          {data.type
+                            ? translator("Deposit", language)
+                            : translator("Withdraw", language)}
                         </td>
                         <td
-                          className={`w-full text-center font-changa text-xs font-light ${
-                            data.status === "completed"
-                              ? "text-green-500"
-                              : "text-red-500"
-                          }`}
+                          className={`w-full text-center font-changa text-xs font-light ${data.status === "completed"
+                            ? "text-green-500"
+                            : "text-red-500"
+                            }`}
                         >
                           {data.status === "completed"
-                            ? "Completed"
-                            : "Pending"}
+                            ? translator("Completed", language)
+                            : translator("Pending", language)}
                         </td>
                       </tr>
                     ))
                   ) : (
                     <span className="flex items-center justify-center w-full text-center font-changa text-[#F0F0F080]">
-                      No data.
+                      {translator("No Data.", language)}
                     </span>
                   )}
                 </div>
@@ -390,12 +561,13 @@ export default function BalanceModal() {
                 </div>
                 <label
                   htmlFor="termsCheckbox"
-                  className="text-[12px] text-[#94A3B8] font-chakra font-bold w-[397px] h-[47px]   text-justify"
+                  className="text-[10px] xs:text-[11px] sm2:text-[12px] text-[#94A3B8] font-chakra font-bold w-[397px] h-[47px]   text-justify"
                   onClick={() => setChecked(!checked)}
                 >
-                  I agree with the Privacy Policy and with the Terms of Use, Gambling
-                  is not forbidden by my local authorities and I am at least 18
-                  years old.
+                  {translator(
+                    "I agree with the Privacy Policy and with the Terms of Use, Gambling is not forbidden by my local authorities and I am at least 18 years old.",
+                    language,
+                  )}
                 </label>
               </div>
             )}

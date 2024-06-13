@@ -2,25 +2,26 @@ import { useContext, useEffect, useState } from "react";
 import { useGlobalContext } from "./GlobalContext";
 import {
   connection,
-  fomoToken,
   stakeFOMO,
   translator,
+  truncateNumber,
   unstakeFOMO,
 } from "@/context/transactions";
-import { truncateNumber } from "@/context/gameTransactions";
 import { useWallet } from "@solana/wallet-adapter-react";
 //import toast from "react-hot-toast";
 import Spinner from "./Spinner";
-import { PublicKey } from "@solana/web3.js";
-import { getAssociatedTokenAddressSync } from "@solana/spl-token";
 import { useSession } from "next-auth/react";
 import { errorCustom } from "./toasts/ToastGroup";
 import { getFOMOBalance } from "@/pages/stake";
+import { useForm } from "react-hook-form";
+import { SPL_TOKENS } from "@/context/config";
 
 const MinAmount = 0.01;
 
 export default function StakeFomo() {
   const { data: session, status } = useSession();
+  const [inputString, setInputString] = useState("");
+  const methods = useForm()
   const wallet = useWallet();
   const {
     stake,
@@ -38,6 +39,10 @@ export default function StakeFomo() {
     getUserDetails,
     getGlobalInfo,
   } = useGlobalContext();
+
+  const fomoToken = SPL_TOKENS.find(
+    (token) => token.tokenName === "FOMO",
+  )?.tokenMint!;
 
   const handleRequest = async () => {
     setLoading(true);
@@ -59,7 +64,8 @@ export default function StakeFomo() {
         response = await unstakeFOMO(wallet, stakeAmount, fomoToken);
       }
       // console.log(response);
-      if (response && response.success) await getFOMOBalance(wallet, setFomoBalance);
+      if (response && response.success)
+        await getFOMOBalance(wallet, setFomoBalance);
 
       getUserDetails();
       getGlobalInfo();
@@ -67,7 +73,9 @@ export default function StakeFomo() {
     } catch (e) {
       setLoading(false);
       console.error(e);
-      errorCustom("Something went wrong, please try again");
+      errorCustom(
+        translator("Something went wrong, please try again", language),
+      );
     }
   };
 
@@ -81,6 +89,7 @@ export default function StakeFomo() {
         if (amt < MinAmount) amt = MinAmount;
         if (amt > fomoBalance) amt = fomoBalance;
         setStakeAmount(amt);
+        setInputString(amt.toString());
       }
     } else {
       // Withdraw
@@ -92,6 +101,7 @@ export default function StakeFomo() {
         if (userData && amt > userData?.stakedAmount)
           amt = userData?.stakedAmount;
         setStakeAmount(amt);
+        setInputString(amt.toString());
       }
     }
   };
@@ -106,6 +116,7 @@ export default function StakeFomo() {
         if (amt < MinAmount) amt = MinAmount;
         if (amt > fomoBalance) amt = fomoBalance;
         setStakeAmount(amt);
+        setInputString(amt.toString());
       }
     } else {
       // Withdraw
@@ -117,18 +128,24 @@ export default function StakeFomo() {
         if (userData && amt > userData?.stakedAmount)
           amt = userData?.stakedAmount;
         setStakeAmount(amt);
+        setInputString(amt.toString());
       }
     }
   };
 
   const handleSetMaxStake = () => {
-    stake
-      ? setStakeAmount(fomoBalance)
-      : setStakeAmount(userData?.stakedAmount ?? 0);
+    if (stake) {
+      setStakeAmount(fomoBalance);
+      setInputString(fomoBalance.toString());
+    } else {
+      setStakeAmount(userData?.stakedAmount ?? 0);
+      setInputString(userData?.stakedAmount.toString() ?? "");
+    }
   };
 
   useEffect(() => {
     setStakeAmount(0);
+    setInputString("");
   }, [stake]);
 
   return (
@@ -168,11 +185,7 @@ export default function StakeFomo() {
           ? translator("Deposit", language)
           : translator("Withdraw", language)}
         <span
-          onClick={() => {
-            stake
-              ? setStakeAmount(fomoBalance)
-              : setStakeAmount(userData?.stakedAmount ?? 0);
-          }}
+          onClick={handleSetMaxStake}
           className="text-sm cursor-pointer font-medium font-changa text-[#94A3B8] text-opacity-90 transition-all"
         >
           {truncateNumber(stake ? fomoBalance : userData?.stakedAmount ?? 0, 4)}{" "}
@@ -189,11 +202,20 @@ export default function StakeFomo() {
           step={"any"}
           autoComplete="off"
           onChange={(e) => {
-            parseFloat(e.target.value) >= 0 &&
-              setStakeAmount(parseFloat(e.target.value));
+            let enteredAmount = parseFloat(e.target.value);
+            if(enteredAmount > fomoBalance){
+              methods.setError("stakeAmount", {
+                type: "manual",
+                message: "Stake amount cannot exceed the balance !"
+              })
+            }else{
+              methods.clearErrors("stakeAmount")
+            }
+            setStakeAmount(enteredAmount);
+            setInputString(e.target.value);
           }}
           placeholder={"0.0"}
-          value={stakeAmount}
+          value={inputString}
           lang="en"
           className={`flex w-full min-w-0 bg-transparent text-base text-[#94A3B8] placeholder-[#94A3B8] font-chakra placeholder-opacity-40 outline-none disabled:cursor-default disabled:opacity-50`}
         />
@@ -222,9 +244,21 @@ export default function StakeFomo() {
             handleSetMaxStake();
           }}
         >
-          Max
+          {translator("Max", language)}
         </button>
       </div>
+      
+      <span
+        className={`${
+          methods.formState.errors["amount"]
+            ? "opacity-100 mt-1.5"
+            : "opacity-0 h-0"
+        } flex items-center gap-1 text-xs text-[#D92828]`}
+      >
+        {methods.formState.errors["amount"]
+          ? methods.formState.errors["amount"]!.message!.toString()
+          : "NONE"}
+      </span>
 
       <button
         onClick={() => {

@@ -1,8 +1,5 @@
-import { useForm } from "react-hook-form";
 import { useGlobalContext } from "./GlobalContext";
-import { BsInfinity } from "react-icons/bs";
-import { formatNumber, translator } from "@/context/transactions";
-import { truncateNumber } from "@/context/gameTransactions";
+import { translator, truncateNumber } from "@/context/transactions";
 
 export default function ProfitBox({
   multiplier,
@@ -11,8 +8,7 @@ export default function ProfitBox({
   multiplier: number;
   amount: number;
 }) {
-  const methods = useForm();
-  const { houseEdge, language } = useGlobalContext();
+  const { houseEdge, language, selectedCoin } = useGlobalContext();
 
   return (
     <div className="mb-0 flex w-full flex-col">
@@ -32,7 +28,7 @@ export default function ProfitBox({
             Math.max(0, amount * (multiplier * (1 - houseEdge) - 1)),
             4,
           )}{" "}
-          $SOL
+          ${selectedCoin.tokenName}
         </span>
       </div>
     </div>

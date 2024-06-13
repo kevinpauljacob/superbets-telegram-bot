@@ -1,11 +1,7 @@
-import { useWallet } from "@solana/wallet-adapter-react";
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { useForm, FormProvider } from "react-hook-form";
-import { obfuscatePubKey } from "@/context/transactions";
-import { deposit, withdraw } from "../../context/gameTransactions";
-import Loader from "./Loader";
 import { useGlobalContext } from "../GlobalContext";
-import { IoClose, IoCloseOutline } from "react-icons/io5";
+import { IoCloseOutline } from "react-icons/io5";
 import { translator } from "@/context/transactions";
 import Image from "next/image";
 import { warningCustom } from "../toasts/ToastGroup";
@@ -14,7 +10,6 @@ import { AdaptiveModal, AdaptiveModalContent } from "../AdaptiveModal";
 
 export default function ConfigureAutoModal() {
   const methods = useForm();
-  const wallet = useWallet();
   const router = useRouter();
   const game = router.pathname.split("/")[1];
 
@@ -38,10 +33,10 @@ export default function ConfigureAutoModal() {
     startAuto,
     setStartAuto,
     walletBalance,
-    coinData,
     language,
     autoConfigState,
     setAutoConfigState,
+    selectedCoin,
   } = useGlobalContext();
 
   const updateAutoConfigState = () => {
@@ -272,20 +267,14 @@ export default function ConfigureAutoModal() {
                   {translator("Stop On Profit", language)}
                 </label>
                 {/* <span className="text-[#94A3B8] text-opacity-90 font-changa font-medium text-sm">
-                  {coinData ? coinData[0]?.amount.toFixed(4) : 0} $SOL
+                  {coinData ? coinData[0]?.amount.toFixed(4) : 0} ${selectedCoin.tokenName}
                 </span> */}
               </div>
 
               <div
                 className={`group flex h-11 w-full cursor-pointer items-center rounded-[8px] bg-[#202329] px-2`}
               >
-                <Image
-                  src={"/assets/sol.png"}
-                  width={16}
-                  height={14}
-                  alt=""
-                  className={``}
-                />
+                <selectedCoin.icon className="w-6 h-6 text-[#94A3B8]" />
                 <input
                   id={"autoStopProfit"}
                   {...methods.register("autoStopProfit", {
@@ -333,20 +322,14 @@ export default function ConfigureAutoModal() {
                   {translator("Stop On Loss", language)}
                 </label>
                 {/* <span className="text-[#94A3B8] text-opacity-90 font-changa font-medium text-sm">
-                  {coinData ? coinData[0]?.amount.toFixed(4) : 0} $SOL
+                  {coinData ? coinData[0]?.amount.toFixed(4) : 0} ${selectedCoin.tokenName}
                 </span> */}
               </div>
 
               <div
                 className={`group flex h-11 w-full cursor-pointer items-center rounded-[8px] bg-[#202329] px-2`}
               >
-                <Image
-                  src={"/assets/sol.png"}
-                  width={16}
-                  height={14}
-                  alt=""
-                  className={``}
-                />
+                <selectedCoin.icon className="w-6 h-6 text-[#94A3B8]" />
                 <input
                   id={"autoStopLoss"}
                   {...methods.register("autoStopLoss", {

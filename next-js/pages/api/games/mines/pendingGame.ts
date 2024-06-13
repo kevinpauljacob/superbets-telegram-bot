@@ -2,6 +2,7 @@ import connectDatabase from "@/utils/database";
 import { getToken } from "next-auth/jwt";
 import { NextApiRequest, NextApiResponse } from "next";
 import { Mines } from "@/models/games";
+import { maintainance } from "@/context/config";
 
 const secret = process.env.NEXTAUTH_SECRET;
 
@@ -17,6 +18,12 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === "POST") {
     try {
       let { wallet }: InputType = req.body;
+
+      if (maintainance)
+        return res.status(400).json({
+          success: false,
+          message: "Under maintenance",
+        });
 
       const token = await getToken({ req, secret });
 
@@ -35,15 +42,11 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
       const pendingGame = await Mines.findOne({ wallet, result: "Pending" });
       const result = pendingGame !== null ? true : false;
+
       return res.status(201).json({
         success: true,
-        userBets: pendingGame ? pendingGame.userBets : [],
-        amount: pendingGame ? pendingGame.amount : 0,
-        amountWon: pendingGame ? pendingGame.amountWon : 0,
-        gameId: pendingGame ? pendingGame._id : null,
-        minesCount: pendingGame ? pendingGame.minesCount : 0,
-        strikeMultiplier: pendingGame ? pendingGame.strikeMultiplier : 0,
-        result: result,
+        pendingGame,
+        result,
       });
     } catch (e: any) {
       console.log(e);

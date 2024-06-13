@@ -2,24 +2,20 @@ import React, { useState, useEffect, useMemo } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useWallet } from "@solana/wallet-adapter-react";
-import { toast } from "react-hot-toast";
 import BetSetting from "@/components/BetSetting";
 import DraggableBar from "@/components/games/Dice2/DraggableBar";
 import { useGlobalContext } from "@/components/GlobalContext";
 import {
   GameDisplay,
-  GameFooterInfo,
   GameLayout,
   GameOptions,
   GameTable,
 } from "@/components/GameLayout";
 import { FormProvider, useForm } from "react-hook-form";
-import { BsInfinity } from "react-icons/bs";
 import Loader from "@/components/games/Loader";
 import BetAmount from "@/components/games/BetAmountInput";
 import BetButton from "@/components/games/BetButton";
 import ResultsSlider from "@/components/ResultsSlider";
-import showInfoToast from "@/components/games/toasts/toasts";
 import { loopSound, soundAlert } from "@/utils/soundUtils";
 import Bets from "../../components/games/Bets";
 import ConfigureAutoButton from "@/components/ConfigureAutoButton";
@@ -31,18 +27,19 @@ import {
   warningCustom,
 } from "@/components/toasts/ToastGroup";
 import { translator } from "@/context/transactions";
-import { minGameAmount } from "@/context/gameTransactions";
 import { useSession } from "next-auth/react";
+import { GameType } from "@/utils/provably-fair";
+import { handleSignIn } from "@/components/ConnectWallet";
+import { useWalletModal } from "@solana/wallet-adapter-react-ui";
 
 export default function Dice2() {
   const wallet = useWallet();
+  const walletModal = useWalletModal();
   const methods = useForm();
   const { data: session, status } = useSession();
   const {
-    coinData,
     getBalance,
     getWalletBalance,
-    setShowAutoModal,
     autoWinChange,
     autoLossChange,
     autoWinChangeReset,
@@ -56,10 +53,14 @@ export default function Dice2() {
     autoBetProfit,
     setAutoBetProfit,
     useAutoConfig,
-    setUseAutoConfig,
     houseEdge,
     maxBetAmt,
     language,
+    selectedCoin,
+    enableSounds,
+    setShowWalletModal,
+    updatePNL,
+    minGameAmount,
   } = useGlobalContext();
   const [betAmt, setBetAmt] = useState<number | undefined>();
   const [userInput, setUserInput] = useState<number | undefined>();
@@ -153,13 +154,13 @@ export default function Dice2() {
     // );
     try {
       if (!wallet.connected || !wallet.publicKey) {
-        throw new Error("Wallet not connected");
+        throw new Error(translator("Wallet not connected", language));
       }
       if (!betAmt || betAmt === 0) {
-        throw new Error("Set Amount.");
+        throw new Error(translator("Set Amount.", language));
       }
-      if (coinData && coinData[0].amount < betAmt) {
-        throw new Error("Insufficient balance for bet !");
+      if (selectedCoin && selectedCoin.amount < betAmt) {
+        throw new Error(translator("Insufficient balance for bet !", language));
       }
       setIsRolling(true);
       const response = await fetch(`/api/games/dice2`, {
@@ -170,7 +171,7 @@ export default function Dice2() {
         body: JSON.stringify({
           wallet: wallet.publicKey,
           amount: betAmt,
-          tokenMint: "SOL",
+          tokenMint: selectedCoin?.tokenMint,
           chance: chance,
           direction: rollType === "over" ? "over" : "under",
         }),
@@ -185,9 +186,11 @@ export default function Dice2() {
       const win = result === "Won";
       if (win) {
         successCustom(message);
-        soundAlert("/sounds/win.wav");
+        soundAlert("/sounds/win.wav", !enableSounds);
       } else errorCustom(message);
       const newBetResult = { result: strikeNumber, win };
+
+      updatePNL(GameType.dice2, win, betAmt, multiplier);
 
       setBetResults((prevResults) => {
         const newResults = [...prevResults, newBetResult];
@@ -200,7 +203,7 @@ export default function Dice2() {
       setStrikeNumber(strikeNumber);
       setResult(win);
       setRefresh(true);
-      loopSound("/sounds/diceshake.wav", 0.3);
+      loopSound("/sounds/diceshake.wav", 0.3, !enableSounds);
 
       // auto options
       if (betType === "auto") {
@@ -231,7 +234,8 @@ export default function Dice2() {
         // update count
         if (typeof autoBetCount === "number") {
           setAutoBetCount(autoBetCount > 0 ? autoBetCount - 1 : 0);
-          autoBetCount === 1 && warningCustom("Auto bet stopped", "top-left");
+          autoBetCount === 1 &&
+            warningCustom(translator("Auto bet stopped", language), "top-left");
         } else
           setAutoBetCount(
             autoBetCount.length > 12
@@ -240,7 +244,9 @@ export default function Dice2() {
           );
       }
     } catch (error: any) {
-      errorCustom(error?.message ?? "Could not make the bet.");
+      errorCustom(
+        translator(error?.message ?? "Could not make the Bet.", language),
+      );
       console.error("Error occurred while betting:", error);
       setAutoBetCount(0);
       setStartAuto(false);
@@ -307,9 +313,9 @@ export default function Dice2() {
             (autoWinChangeReset || autoLossChangeReset
               ? betAmt
               : autoBetCount === "inf"
-              ? Math.max(0, betAmt)
-              : betAmt *
-                (autoLossChange !== null ? autoLossChange / 100.0 : 0));
+                ? Math.max(0, betAmt)
+                : betAmt *
+                  (autoLossChange !== null ? autoLossChange / 100.0 : 0));
 
         // console.log("Current bet amount:", betAmt);
         // console.log("Auto loss change:", autoLossChange);
@@ -323,7 +329,10 @@ export default function Dice2() {
         autoBetProfit >= autoStopProfit
       ) {
         setTimeout(() => {
-          warningCustom("Profit limit reached.", "top-left");
+          warningCustom(
+            translator("Profit limit reached.", language),
+            "top-left",
+          );
         }, 500);
         setAutoBetCount(0);
         setStartAuto(false);
@@ -336,7 +345,10 @@ export default function Dice2() {
         potentialLoss < -autoStopLoss
       ) {
         setTimeout(() => {
-          warningCustom("Loss limit reached.", "top-left");
+          warningCustom(
+            translator("Loss limit reached.", language),
+            "top-left",
+          );
         }, 500);
         setAutoBetCount(0);
         setStartAuto(false);
@@ -353,7 +365,7 @@ export default function Dice2() {
   const onSubmit = async (data: any) => {
     if (betType === "auto") {
       if (betAmt === 0) {
-        errorCustom("Set Amount.");
+        errorCustom(translator("Set Amount.", language));
         return;
       }
       if (typeof autoBetCount === "number" && autoBetCount <= 0) {
@@ -370,10 +382,6 @@ export default function Dice2() {
     } else if (wallet.connected) handleBet();
   };
 
-  useEffect(() => {
-    console.log("jil", coinData, minGameAmount);
-  }, []);
-
   return (
     <GameLayout title="Dice 2">
       <GameOptions>
@@ -382,8 +390,11 @@ export default function Dice2() {
             {startAuto && (
               <div
                 onClick={() => {
-                  soundAlert("/sounds/betbutton.wav");
-                  warningCustom("Auto bet stopped", "top-left");
+                  soundAlert("/sounds/betbutton.wav", !enableSounds);
+                  warningCustom(
+                    translator("Auto bet stopped", language),
+                    "top-left",
+                  );
                   setAutoBetCount(0);
                   setStartAuto(false);
                 }}
@@ -397,8 +408,8 @@ export default function Dice2() {
                 !wallet ||
                 !session?.user ||
                 isRolling ||
-                coinData === null ||
-                (coinData && coinData[0].amount < minGameAmount) ||
+                autoBetCount === 0 ||
+                Number.isNaN(autoBetCount) ||
                 (betAmt !== undefined &&
                   maxBetAmt !== undefined &&
                   betAmt > maxBetAmt)
@@ -456,8 +467,11 @@ export default function Dice2() {
                   {startAuto && (
                     <div
                       onClick={() => {
-                        soundAlert("/sounds/betbutton.wav");
-                        warningCustom("Auto bet stopped", "top-left");
+                        soundAlert("/sounds/betbutton.wav", !enableSounds);
+                        warningCustom(
+                          translator("Auto bet stopped", language),
+                          "top-left",
+                        );
                         setAutoBetCount(0);
                         setStartAuto(false);
                       }}
@@ -471,15 +485,15 @@ export default function Dice2() {
                       !wallet ||
                       !session?.user ||
                       isRolling ||
-                      coinData === null ||
-                      (coinData && coinData[0].amount < minGameAmount) ||
+                      autoBetCount === 0 ||
+                      Number.isNaN(autoBetCount) ||
                       (betAmt !== undefined &&
                         maxBetAmt !== undefined &&
                         betAmt > maxBetAmt)
                         ? true
                         : false
                     }
-                    onClickFunction={onSubmit}
+                    // onClickFunction={onSubmit}
                   >
                     {isRolling ? <Loader /> : "BET"}
                   </BetButton>
@@ -514,7 +528,7 @@ export default function Dice2() {
           />
         </div>
         <div className="flex px-0 xl:px-4 mb-0 md:mb-[1.4rem] gap-4 flex-row w-full justify-between">
-          {coinData && coinData[0].amount > minGameAmount && (
+          {selectedCoin && selectedCoin.amount > minGameAmount && (
             <>
               <div className="flex flex-col w-full">
                 <span className="text-[#F0F0F0] font-changa font-semibold text-xs mb-1">
@@ -581,16 +595,23 @@ export default function Dice2() {
               )}
             </>
           )}
-          {(!coinData || (coinData && coinData[0].amount < minGameAmount)) && (
+          {(!selectedCoin || selectedCoin.amount < minGameAmount) && (
             <div className="w-full rounded-lg bg-[#d9d9d90d] bg-opacity-10 flex items-center px-3 py-3 text-white md:px-6">
               <div className="w-full text-center font-changa font-medium text-sm md:text-base text-[#F0F0F0] text-opacity-75">
                 {translator(
                   "Please deposit funds to start playing. View",
                   language,
                 )}{" "}
-                <Link href="/balance">
-                  <u>{translator("WALLET", language)}</u>
-                </Link>
+                <u
+                  onClick={() => {
+                    wallet.connected && status === "authenticated"
+                      ? setShowWalletModal(true)
+                      : handleSignIn(wallet, walletModal);
+                  }}
+                  className="cursor-pointer"
+                >
+                  {translator("WALLET", language)}
+                </u>
               </div>
             </div>
           )}
