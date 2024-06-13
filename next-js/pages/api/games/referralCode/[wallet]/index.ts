@@ -18,11 +18,17 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
     await connectDatabase();
 
-    const referral = await User.findOne({ wallet }).populate("campaigns");
+    const user = await User.findOne({ wallet }).populate("campaigns");
+    const campaignIds = user?.campaigns.map((c: any) => c._id) || [];
+
+    const referredUsers = await User.find({
+      referredByChain: { $in: campaignIds },
+    });
 
     return res.json({
       success: true,
-      data: referral,
+      user,
+      referredUsers,
       message: `Data fetch successful!`,
     });
   } catch (e: any) {
