@@ -1,6 +1,6 @@
 import connectDatabase from "../../../../../utils/database";
 import { NextApiRequest, NextApiResponse } from "next";
-import { ReferralUser } from "@/models/referral";
+import { User } from "@/models/referral";
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
@@ -18,9 +18,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
     await connectDatabase();
 
-    const referral = await ReferralUser.findOne({ wallet }).populate(
-      "campaigns",
-    );
+    const referral = await User.findOne({ wallet }).populate("campaigns");
 
     return res.json({
       success: true,

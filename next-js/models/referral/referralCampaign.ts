@@ -1,6 +1,6 @@
 import mongoose, { Schema } from "mongoose";
 
-const CampaignSchema = new Schema(
+const ReferralCampaignSchema = new Schema(
   {
     wallet: {
       type: String,
@@ -29,9 +29,10 @@ const CampaignSchema = new Schema(
   { timestamps: true },
 );
 
-CampaignSchema.index({ wallet: 1, campaignName: 1 }, { unique: true });
+ReferralCampaignSchema.index({ wallet: 1, campaignName: 1 }, { unique: true });
 
-const Campaign =
-  mongoose.models.Campaign || mongoose.model("Campaign", CampaignSchema);
+const ReferralCampaign =
+  mongoose.models.ReferralCampaign ||
+  mongoose.model("ReferralCampaign", ReferralCampaignSchema);
 
-export default Campaign;
+export default ReferralCampaign;

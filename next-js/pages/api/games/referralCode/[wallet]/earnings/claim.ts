@@ -3,7 +3,7 @@ import {
   retryTxn,
   verifyFrontendTransaction,
 } from "@/context/transactions";
-import { ReferralUser } from "@/models/referral";
+import { User } from "@/models/referral";
 import TxnSignature from "@/models/txnSignature";
 import { bs58 } from "@project-serum/anchor/dist/cjs/utils/bytes";
 import {
@@ -63,7 +63,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
     await connectDatabase();
 
-    const user = await ReferralUser.findOne({ wallet }).populate("campaigns");
+    const user = await User.findOne({ wallet }).populate("campaigns");
 
     if (!user)
       return res
@@ -72,14 +72,18 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
     const earnings: Record<string, number> = {};
 
-    user.campaigns.forEach((c: {unclaimedEarnings:Record<string,number>}) => {
-      Object.entries(c.unclaimedEarnings).forEach(([key, value]: [string, number]) => {
-        if (earnings.hasOwnProperty(key)) earnings[key] += value;
-        else earnings[key] = value;
+    user.campaigns.forEach(
+      (c: { unclaimedEarnings: Record<string, number> }) => {
+        Object.entries(c.unclaimedEarnings).forEach(
+          ([key, value]: [string, number]) => {
+            if (earnings.hasOwnProperty(key)) earnings[key] += value;
+            else earnings[key] = value;
 
-        c.unclaimedEarnings[key] = 0;
-      })
-    });
+            c.unclaimedEarnings[key] = 0;
+          },
+        );
+      },
+    );
 
     user.save();
 

@@ -1,2 +1,2 @@
-export {default as ReferralUser} from "./referralUser";
-export {default as Campaign} from "./campaign";
+export { default as User } from "./referralUser";
+export { default as Campaign } from "./referralCampaign";

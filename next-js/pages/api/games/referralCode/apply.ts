@@ -1,6 +1,6 @@
 import connectDatabase from "../../../../utils/database";
 import { NextApiRequest, NextApiResponse } from "next";
-import { ReferralUser, Campaign } from "@/models/referral";
+import { User, Campaign } from "@/models/referral";
 import { getToken } from "next-auth/jwt";
 
 const secret = process.env.NEXTAUTH_SECRET;
@@ -51,7 +51,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       5,
     );
 
-    await ReferralUser.findOneAndUpdate(
+    await User.findOneAndUpdate(
       {
         wallet,
         referredByChain: [],

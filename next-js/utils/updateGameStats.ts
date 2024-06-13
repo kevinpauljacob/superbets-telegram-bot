@@ -1,6 +1,6 @@
 import { commissionLevels } from "@/context/config";
 import { GameStats } from "@/models/games";
-import { Campaign, ReferralUser } from "@/models/referral";
+import { Campaign, User } from "@/models/referral";
 import { GameType } from "@/utils/provably-fair";
 import Decimal from "decimal.js";
 
@@ -52,7 +52,7 @@ async function updateGameStats(
       );
   }
 
-  const referralInfo = await ReferralUser.findOneAndUpdate(
+  const referralInfo = await User.findOneAndUpdate(
     { wallet },
     {
       $inc: {
