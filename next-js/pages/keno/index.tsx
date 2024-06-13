@@ -60,7 +60,7 @@ export default function Keno() {
     enableSounds,
     setShowWalletModal,
     updatePNL,
-    minGameAmount
+    minGameAmount,
   } = useGlobalContext();
   const [betAmt, setBetAmt] = useState<number | undefined>();
   const [userInput, setUserInput] = useState<number | undefined>();
@@ -239,12 +239,7 @@ export default function Keno() {
       const win = result === "Won";
       if (win) soundAlert("/sounds/win.wav", !enableSounds);
 
-      updatePNL(
-        GameType.keno,
-        win,
-        betAmt,
-        strikeMultiplier,
-      );
+      updatePNL(GameType.keno, win, betAmt, strikeMultiplier);
 
       // auto options
       if (betType === "auto") {
@@ -268,6 +263,7 @@ export default function Keno() {
         );
         // update count
         if (typeof autoBetCount === "number") {
+          setAutoBetCount(autoBetCount > 0 ? autoBetCount - 1 : 0);
           autoBetCount === 1 &&
             warningCustom(translator("Auto bet stopped", language), "top-left");
         } else
@@ -454,6 +450,8 @@ export default function Keno() {
                 !wallet ||
                 !session?.user ||
                 isRolling ||
+                autoBetCount === 0 ||
+                Number.isNaN(autoBetCount) ||
                 (betAmt !== undefined &&
                   maxBetAmt !== undefined &&
                   betAmt > maxBetAmt)
@@ -592,13 +590,15 @@ export default function Keno() {
                       !wallet ||
                       !session?.user ||
                       isRolling ||
+                      autoBetCount === 0 ||
+                      Number.isNaN(autoBetCount) ||
                       (betAmt !== undefined &&
                         maxBetAmt !== undefined &&
                         betAmt > maxBetAmt)
                         ? true
                         : false
                     }
-                    onClickFunction={onSubmit}
+                    // onClickFunction={onSubmit}
                   >
                     {isRolling ? <Loader /> : "BET"}
                   </BetButton>
