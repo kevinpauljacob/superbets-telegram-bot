@@ -1,7 +1,7 @@
 import React, { ReactNode } from "react";
 import GameHeader from "./GameHeader";
 import { useGlobalContext } from "./GlobalContext";
-import { maxPayouts, translator, truncateNumber } from "@/context/transactions";
+import { translator, truncateNumber } from "@/context/transactions";
 import { optionsEdge } from "@/context/config";
 import Link from "next/link";
 import FomoPlay from "./FomoPlay";
