@@ -18,7 +18,7 @@ import {
   stakingTiers,
 } from "@/context/config";
 import { launchPromoEdge } from "@/context/config";
-import { minGameAmount, wsEndpoint } from "@/context/config";
+import { minGameAmount, wsEndpoint, maintainance } from "@/context/config";
 import { Decimal } from "decimal.js";
 import { SPL_TOKENS } from "@/context/config";
 import updateGameStats from "../../../../utils/updateGameStats";
@@ -42,6 +42,12 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === "POST") {
     try {
       let { wallet, amount, tokenMint, multiplier }: InputType = req.body;
+
+      if (maintainance)
+        return res.status(400).json({
+          success: false,
+          message: "Under maintenance",
+        });
 
       const minGameAmount =
         maxPayouts[tokenMint as GameTokens]["limbo" as GameType] * minAmtFactor;
