@@ -740,10 +740,7 @@ export const isArrayUnique = (arr: number[]) => {
 
 export const createClaimEarningsTxn = async (
   wallet: PublicKey,
-  earnings: Array<{
-    tokenMint: string;
-    amount: number;
-  }>,
+  earnings: Record<string, number>,
   devPublicKey: PublicKey,
 ) => {
   const transaction = new Transaction();
@@ -757,10 +754,8 @@ export const createClaimEarningsTxn = async (
     ComputeBudgetProgram.setComputeUnitPrice({ microLamports: 150000 }),
   );
 
-  for (let earning of earnings) {
-    let splToken = SPL_TOKENS.find(
-      (data) => data.tokenMint === earning.tokenMint,
-    );
+  for (let tokenMint in earnings) {
+    let splToken = SPL_TOKENS.find((data) => data.tokenMint === tokenMint);
     if (!splToken) throw new Error("Invalid tokenMint provided!");
 
     const { tokenName, decimal } = splToken;
@@ -770,11 +765,11 @@ export const createClaimEarningsTxn = async (
         SystemProgram.transfer({
           fromPubkey: devPublicKey,
           toPubkey: wallet,
-          lamports: Math.floor(earning.amount * Math.pow(10, 9)),
+          lamports: Math.floor(earnings[tokenMint] * Math.pow(10, 9)),
         }),
       );
     } else {
-      const tokenId = new PublicKey(earning.tokenMint);
+      const tokenId = new PublicKey(tokenMint);
       const userAta = await getAssociatedTokenAddress(tokenId, wallet);
       const devAta = await getAssociatedTokenAddress(tokenId, devPublicKey);
 
@@ -789,7 +784,7 @@ export const createClaimEarningsTxn = async (
           devAta,
           userAta,
           devPublicKey,
-          Math.floor(earning.amount * Math.pow(10, decimal)),
+          Math.floor(earnings[tokenMint] * Math.pow(10, decimal)),
         ),
       );
     }

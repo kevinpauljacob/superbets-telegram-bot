@@ -1,6 +1,6 @@
 import connectDatabase from "../../../../utils/database";
 import { NextApiRequest, NextApiResponse } from "next";
-import { Referral } from "@/models/games";
+import { ReferralUser, Campaign } from "@/models/referral";
 import { getToken } from "next-auth/jwt";
 
 const secret = process.env.NEXTAUTH_SECRET;
@@ -12,7 +12,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         .status(405)
         .json({ success: false, message: "Method not allowed!" });
 
-    const { wallet, referralCode } = req.body;
+    const { wallet, referralCode, campaignName } = req.body;
 
     const token = await getToken({ req, secret });
 
@@ -21,7 +21,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         error: "User wallet not authenticated",
       });
 
-    if (!wallet || !referralCode)
+    if (!wallet || !referralCode || !campaignName)
       return res
         .status(400)
         .json({ success: false, message: "Missing parameters!" });
@@ -34,26 +34,26 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
     await connectDatabase();
 
-    await Referral.findOneAndUpdate(
+    const campaign = new Campaign({
+      wallet,
+      campaignName,
+      referralCode,
+    });
+    await campaign.save();
+
+    await ReferralUser.findOneAndUpdate(
       {
         wallet,
       },
       {
-        $set: {
-          referralCode,
-        },
+        campaigns: { $addToSet: campaign._id },
       },
       { upsert: true },
-    ).catch((e) => {
-      return res.status(400).json({
-        success: false,
-        message: "This referral code is already in use!",
-      });
-    });
+    );
 
     return res.json({
       success: true,
-      message: `Referral code set successfully!`,
+      message: `Campaign created successfully!`,
     });
   } catch (e: any) {
     console.log(e);

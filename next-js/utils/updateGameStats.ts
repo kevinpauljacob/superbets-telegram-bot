@@ -1,6 +1,8 @@
 import { commissionLevels } from "@/context/config";
-import { GameStats, Referral } from "@/models/games";
+import { GameStats } from "@/models/games";
+import { Campaign, ReferralUser } from "@/models/referral";
 import { GameType } from "@/utils/provably-fair";
+import Decimal from "decimal.js";
 
 async function updateGameStats(
   wallet: string,
@@ -50,7 +52,7 @@ async function updateGameStats(
       );
   }
 
-  const referralInfo = await Referral.findOneAndUpdate(
+  const referralInfo = await ReferralUser.findOneAndUpdate(
     { wallet },
     {
       $inc: {
@@ -64,8 +66,9 @@ async function updateGameStats(
   for (let i = 0; i < referralInfo.referredByChain.length; i++) {
     const _id = referralInfo.referredByChain[i];
 
-    const earnings = commissionLevels[i] * feeGenerated;
-    await Referral.findOneAndUpdate(
+    const earnings = Decimal.mul(commissionLevels[i], feeGenerated).toNumber();
+
+    await Campaign.findOneAndUpdate(
       { _id },
       {
         $inc: {

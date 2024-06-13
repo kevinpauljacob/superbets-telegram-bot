@@ -1,21 +1,26 @@
 import mongoose, { Schema } from "mongoose";
 
-const ReferralSchema = new Schema(
+const ReferralUserSchema = new Schema(
   {
     wallet: {
       type: String,
       required: true,
       unique: true,
     },
-    referralCode: {
-      type: String,
-      unique: true,
+    campaigns: {
+      type: [
+        {
+          type: Schema.Types.ObjectId,
+          ref: "Campaign",
+        },
+      ],
+      default: [],
     },
     referredByChain: {
       type: [
         {
           type: Schema.Types.ObjectId,
-          ref: "Referral",
+          ref: "Campaign",
         },
       ],
       default: [],
@@ -30,21 +35,12 @@ const ReferralSchema = new Schema(
       of: Number,
       default: {},
     },
-    totalEarnings: {
-      type: Map,
-      of: Number,
-      default: {},
-    },
-    unclaimedEarnings: {
-      type: Map,
-      of: Number,
-      default: {},
-    },
   },
   { timestamps: true },
 );
 
-const Referral =
-  mongoose.models.Referral || mongoose.model("Referral", ReferralSchema);
+const ReferralUser =
+  mongoose.models.ReferralUser ||
+  mongoose.model("ReferralUser", ReferralUserSchema);
 
-export default Referral;
+export default ReferralUser;

@@ -1,6 +1,6 @@
 import connectDatabase from "../../../../utils/database";
 import { NextApiRequest, NextApiResponse } from "next";
-import { Referral } from "@/models/games";
+import { ReferralUser, Campaign } from "@/models/referral";
 import { getToken } from "next-auth/jwt";
 
 const secret = process.env.NEXTAUTH_SECRET;
@@ -34,24 +34,24 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
     await connectDatabase();
 
-    const referrer = await Referral.findOne({ referralCode });
+    const campaign = await Campaign.findOne({ referralCode });
 
-    if (!referrer)
+    if (!campaign)
       return res
         .status(400)
-        .json({ success: false, message: "Referrer not found!" });
+        .json({ success: false, message: "Referral code not found!" });
 
-    if (referrer.wallet === wallet)
+    if (campaign.wallet === wallet)
       return res
         .status(400)
         .json({ success: false, message: "You can't refer yourself!" });
 
-    const referredByChain = [referrer._id, ...referrer.referredByChain].slice(
+    const referredByChain = [campaign._id, ...campaign.referredByChain].slice(
       0,
       5,
     );
 
-    const referral = await Referral.findOneAndUpdate(
+    await ReferralUser.findOneAndUpdate(
       {
         wallet,
         referredByChain: [],
@@ -61,12 +61,11 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           referredByChain,
         },
       },
-      { upsert: true, new: true },
+      { upsert: true },
     );
 
     return res.json({
       success: true,
-      data: referral,
       message: `Referral code applied successfully!`,
     });
   } catch (e: any) {
