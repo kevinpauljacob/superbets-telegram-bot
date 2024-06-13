@@ -11,7 +11,7 @@ const ReferralUserSchema = new Schema(
       type: [
         {
           type: Schema.Types.ObjectId,
-          ref: "Campaign",
+          ref: "ReferralCampaign",
         },
       ],
       default: [],
@@ -20,7 +20,7 @@ const ReferralUserSchema = new Schema(
       type: [
         {
           type: Schema.Types.ObjectId,
-          ref: "Campaign",
+          ref: "ReferralCampaign",
         },
       ],
       default: [],

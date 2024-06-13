@@ -46,7 +46,14 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         .status(400)
         .json({ success: false, message: "You can't refer yourself!" });
 
-    const referredByChain = [campaign._id, ...campaign.referredByChain].slice(
+    const referrer = await User.findOne({ wallet: campaign.wallet });
+
+    if (!referrer)
+      return res
+        .status(400)
+        .json({ success: false, message: "Referrer not found!" });
+
+    const referredByChain = [campaign._id, ...referrer.referredByChain].slice(
       0,
       5,
     );

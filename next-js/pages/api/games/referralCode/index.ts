@@ -46,7 +46,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         wallet,
       },
       {
-        campaigns: { $addToSet: campaign._id },
+        $addToSet: { campaigns: campaign._id },
       },
       { upsert: true },
     );

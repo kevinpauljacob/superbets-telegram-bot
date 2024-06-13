@@ -23,7 +23,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
     const referredUsers = await User.find({
       referredByChain: { $in: campaignIds },
-    });
+    }).lean();
 
     return res.json({
       success: true,
