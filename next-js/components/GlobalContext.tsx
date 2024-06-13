@@ -386,20 +386,21 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
 
     betAmount = token.price * betAmount;
 
+    let profit = win ? (multiplier * (1 - houseEdge) - 1) * betAmount : -betAmount;
+    let totalPNL = 0;
+    
+    if (liveStats.length > 0) totalPNL = liveStats[liveStats.length - 1].totalPNL;
+
+    totalPNL += profit;
+
     setLiveStats([
       ...liveStats,
       {
         game: game,
         amount: betAmount,
         result: win ? "Won" : "Lost",
-        pnl: win ? betAmount * multiplier - betAmount : -betAmount,
-        totalPNL:
-          liveStats.length > 0
-            ? liveStats[liveStats.length - 1].totalPNL +
-              (win ? betAmount * multiplier - betAmount : -betAmount)
-            : win
-            ? betAmount * multiplier - betAmount
-            : -betAmount,
+        pnl: profit,
+        totalPNL,
         token: selectedCoin.tokenMint,
       },
     ]);
@@ -1021,11 +1022,11 @@ export const translationsMap = {
     ch: "您可以在此游戏中下注的最高金额为",
   },
   "The more you stake, the less fees you pay and the bigger your points multiplier":
-    {
-      ru: "Чем больше вы ставите, тем меньше вы платите комиссий и тем выше ваш множитель очков",
-      ko: "더 많이 걸수록 수수료가 적게 들고 포인트 배수가 커집니다",
-      ch: "投注金额越大，您支付的费用越少，积分乘数越大",
-    },
+  {
+    ru: "Чем больше вы ставите, тем меньше вы платите комиссий и тем выше ваш множитель очков",
+    ko: "더 많이 걸수록 수수료가 적게 들고 포인트 배수가 커집니다",
+    ch: "投注金额越大，您支付的费用越少，积分乘数越大",
+  },
   WALLET: {
     ru: "КОШЕЛЕК",
     ko: "지갑",
@@ -1127,11 +1128,11 @@ export const translationsMap = {
     ch: "待定",
   },
   "FOMO wtf casino games are currently in beta and will be undergoing audit shortly. FOMO wtf EXIT games has gone through audit performed by OtterSec in December 2023.":
-    {
-      ru: "Игры казино FOMO wtf находятся в бета-тестировании и вскоре будут проходить аудит. Игры FOMO wtf EXIT прошли аудит, проведенный OtterSec в декабре 2023 года.",
-      ko: "FOMO wtf 카지노 게임은 현재 베타 버전이며 곧 감사를 받을 예정입니다. FOMO wtf EXIT 게임은 2023년 12월 OtterSec에 의해 감사를 받았습니다.",
-      ch: "FOMO wtf赌场游戏目前处于测试阶段，将很快进行审计。 FOMO wtf EXIT游戏已于2023年12月由OtterSec进行了审计。",
-    },
+  {
+    ru: "Игры казино FOMO wtf находятся в бета-тестировании и вскоре будут проходить аудит. Игры FOMO wtf EXIT прошли аудит, проведенный OtterSec в декабре 2023 года.",
+    ko: "FOMO wtf 카지노 게임은 현재 베타 버전이며 곧 감사를 받을 예정입니다. FOMO wtf EXIT 게임은 2023년 12월 OtterSec에 의해 감사를 받았습니다.",
+    ch: "FOMO wtf赌场游戏目前处于测试阶段，将很快进行审计。 FOMO wtf EXIT游戏已于2023年12月由OtterSec进行了审计。",
+  },
   Services: {
     ru: "Услуги",
     ko: "서비스",
@@ -1438,11 +1439,11 @@ export const translationsMap = {
     ch: "庄家优势",
   },
   "I agree with the Privacy Policy and with the Terms of Use, Gambling is not forbidden by my local authorities and I am at least 18 years old.":
-    {
-      ru: "Я согласен с Политикой конфиденциальности и Условиями использования, азартные игры не запрещены моими местными властями, и мне как минимум 18 лет.",
-      ko: "개인정보 처리방침 및 이용 약관에 동의합니다. 도박은 현지 당국에 의해 금지되지 않았으며, 저는 만 18세 이상입니다.",
-      ch: "我同意隐私政策和使用条款，我所在地区的法律不禁止赌博，并且我已满18岁。",
-    },
+  {
+    ru: "Я согласен с Политикой конфиденциальности и Условиями использования, азартные игры не запрещены моими местными властями, и мне как минимум 18 лет.",
+    ko: "개인정보 처리방침 및 이용 약관에 동의합니다. 도박은 현지 당국에 의해 금지되지 않았으며, 저는 만 18세 이상입니다.",
+    ch: "我同意隐私政策和使用条款，我所在地区的法律不禁止赌博，并且我已满18岁。",
+  },
   "LIVE STATS": {
     ru: "Живые статистики",
     ko: "실시간 통계",
