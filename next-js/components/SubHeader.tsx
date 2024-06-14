@@ -90,7 +90,7 @@ export default function SubHeader() {
         })
         setCards(data.data);
       });
-  }, []);
+  }, [liveTokenPrice]);
 
   return (
     <div className="flex flex-col w-full z-[80] absolute top-0 right-0">
