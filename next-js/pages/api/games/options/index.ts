@@ -2,13 +2,13 @@ import connectDatabase from "../../../../utils/database";
 import { User, Option } from "../../../../models/games";
 import { getToken } from "next-auth/jwt";
 import { NextApiRequest, NextApiResponse } from "next";
-import { minGameAmount, wsEndpoint } from "@/context/gameTransactions";
+import { wsEndpoint } from "@/context/config";
 import { Decimal } from "decimal.js";
-import { maintainance, maxPayouts } from "@/context/transactions";
+import { maxPayouts, minAmtFactor, maintainance } from "@/context/config";
 import StakingUser from "@/models/staking/user";
 import { GameTokens, GameType } from "@/utils/provably-fair";
 import { SPL_TOKENS } from "@/context/config";
-import updateGameStats from "../global/updateGameStats";
+import updateGameStats from "../../../../utils/updateGameStats";
 Decimal.set({ precision: 9 });
 
 const secret = process.env.NEXTAUTH_SECRET;
@@ -30,6 +30,10 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     try {
       let { wallet, amount, tokenMint, betType, timeFrame }: InputType =
         req.body;
+
+      const minGameAmount =
+        maxPayouts[tokenMint as GameTokens]["options" as GameType] *
+        minAmtFactor;
 
       if (maintainance)
         return res.status(400).json({

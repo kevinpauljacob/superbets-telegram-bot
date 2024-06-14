@@ -11,19 +11,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
       // Calculate the total volume and total unique players
       const totalVolumes: Record<string, number> = {};
-      const totalPlayers = await User.aggregate([
-        {
-          $group: {
-            _id: null,
-            wallets: { $addToSet: "$wallet" },
-          },
-        },
-        {
-          $addFields: {
-            totalPlayers: { $size: "$wallets" },
-          },
-        },
-      ]).then((res) => res[0].totalPlayers);
+      const totalPlayers = await User.countDocuments();
 
       gameStats.forEach((stat) => {
         Object.keys(stat.volume).forEach((key) => {

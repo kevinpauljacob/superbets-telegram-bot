@@ -1,39 +1,40 @@
-import { Connection, PublicKey, Transaction } from "@solana/web3.js";
+import { Connection, Keypair, PublicKey, Transaction } from "@solana/web3.js";
 import {
   createDepositTxn,
-  fomoToken,
-  stakingTiers,
   verifyTransaction,
 } from "../../../../context/transactions";
+import { stakingTiers } from "@/context/config";
 import connectDatabase from "../../../../utils/database";
 import User from "../../../../models/staking/user";
 import TxnSignature from "../../../../models/txnSignature";
 
 import { getToken } from "next-auth/jwt";
+import { NextApiRequest, NextApiResponse } from "next";
+import { bs58 } from "@project-serum/anchor/dist/cjs/utils/bytes";
+import { SPL_TOKENS } from "@/context/config";
 
 const secret = process.env.NEXTAUTH_SECRET;
 
 const connection = new Connection(process.env.BACKEND_RPC!);
 
+const devWalletKey = Keypair.fromSecretKey(
+  bs58.decode(process.env.STAKING_KEYPAIR!),
+);
+
 export const config = {
   maxDuration: 60,
 };
 
-async function handler(req: any, res: any) {
-  if (req.method === "OPTIONS") {
-    res.setHeader("Access-Control-Allow-Methods", "POST,GET,OPTIONS");
-    res.setHeader("Access-Control-Allow-Origin", "*");
-    res.setHeader(
-      "Access-Control-Allow-Headers",
-      "Content-Type, Authorization",
-    );
-    return res.status(200).end();
-  }
-
+async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === "POST") {
     try {
-      let { transactionBase64, wallet, amount, tokenMint, blockhash } =
-        req.body;
+      let {
+        transactionBase64,
+        wallet,
+        amount,
+        tokenMint,
+        blockhashWithExpiryBlockHeight,
+      } = req.body;
 
       const token = await getToken({ req, secret });
 
@@ -45,11 +46,15 @@ async function handler(req: any, res: any) {
 
       await connectDatabase();
 
+      const fomoToken = SPL_TOKENS.find(
+        (token) => token.tokenName === "FOMO",
+      )?.tokenMint!;
+
       if (
         !wallet ||
         !transactionBase64 ||
         !amount ||
-        !blockhash ||
+        !blockhashWithExpiryBlockHeight ||
         !tokenMint ||
         tokenMint != fomoToken
       )
@@ -66,6 +71,7 @@ async function handler(req: any, res: any) {
         new PublicKey(wallet),
         amount,
         tokenMint,
+        devWalletKey.publicKey,
       );
 
       const txn = Transaction.from(
@@ -78,12 +84,15 @@ async function handler(req: any, res: any) {
           .json({ success: false, message: "Transaction verification failed" });
       console.log("Transaction verified");
 
-      const txnSignature = await connection.sendRawTransaction(txn.serialize());
+      const txnSignature = await connection.sendRawTransaction(
+        txn.serialize(),
+        { skipPreflight: true },
+      );
 
       const confirmationRes = await connection.confirmTransaction(
         {
           signature: txnSignature,
-          ...blockhash,
+          ...blockhashWithExpiryBlockHeight,
         },
         "confirmed",
       );

@@ -7,8 +7,7 @@ import { useGlobalContext } from "@/components/GlobalContext";
 import { FaRegCopy } from "react-icons/fa6";
 import Arc from "@/components/games/Wheel/Arc";
 import { MdClose } from "react-icons/md";
-import { translator } from "@/context/transactions";
-import { truncateNumber } from "@/context/gameTransactions";
+import { translator, truncateNumber } from "@/context/transactions";
 import Loader from "../Loader";
 import { SPL_TOKENS } from "@/context/config";
 

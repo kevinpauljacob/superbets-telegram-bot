@@ -3,14 +3,12 @@ import React, { useEffect, useRef, useState } from "react";
 import { useForm, FormProvider } from "react-hook-form";
 import {
   connection,
+  deposit,
   obfuscatePubKey,
   translator,
-} from "@/context/transactions";
-import {
-  deposit,
   truncateNumber,
   withdraw,
-} from "../../context/gameTransactions";
+} from "@/context/transactions";
 import Loader from "./Loader";
 import { useGlobalContext } from "../GlobalContext";
 import { IoCloseOutline } from "react-icons/io5";
@@ -20,6 +18,7 @@ import { useRouter } from "next/router";
 import { SPL_TOKENS, spl_token } from "@/context/config";
 import { Connection, ParsedAccountData, PublicKey } from "@solana/web3.js";
 import { TOKEN_PROGRAM_ID } from "@solana/spl-token";
+import { errorCustom } from "../toasts/ToastGroup";
 
 export default function BalanceModal() {
   const methods = useForm();
@@ -59,14 +58,24 @@ export default function BalanceModal() {
       let response: { success: boolean; message: string };
 
       try {
-        if (actionType === "Deposit")
+        if (actionType === "Deposit") {
+          let token = userTokens.find(x => x.mintAddress && x.mintAddress === selectedToken.tokenMint)
+          let balance = null
+          if (token) balance = token?.balance;
+
+          if (!balance || balance < amount) {
+            setLoading(false)
+            errorCustom("Insufficient balance")
+            return;
+          }
+
           response = await deposit(
             wallet,
             amount,
             selectedToken.tokenMint,
             campaignId,
           );
-        else response = await withdraw(wallet, amount, selectedToken.tokenMint);
+        } else response = await withdraw(wallet, amount, selectedToken.tokenMint);
 
         if (response && response.success) {
           getBalance();
@@ -226,31 +235,28 @@ export default function BalanceModal() {
 
         <div className="w-full flex mb-8 mt-2 gap-2">
           <button
-            className={`w-full border-2 rounded-md py-2 text-white font-semibold text-xs sm:text-sm transition hover:duration-75 ease-in-out ${
-              actionType === "Deposit"
-                ? "bg-[#d9d9d90d] border-transparent text-opacity-90"
-                : "border-[#d9d9d90d] hover:bg-[#9361d1] focus:bg-[#602E9E] text-opacity-50 hover:text-opacity-90"
-            }`}
+            className={`w-full border-2 rounded-md py-2 text-white font-semibold text-xs sm:text-sm transition hover:duration-75 ease-in-out ${actionType === "Deposit"
+              ? "bg-[#d9d9d90d] border-transparent text-opacity-90"
+              : "border-[#d9d9d90d] hover:bg-[#9361d1] focus:bg-[#602E9E] text-opacity-50 hover:text-opacity-90"
+              }`}
             onClick={() => setActionType("Deposit")}
           >
             {translator("Deposit", language)}
           </button>
           <button
-            className={`w-full border-2 rounded-md py-2 text-white font-semibold text-xs sm:text-sm transition-all hover:duration-75 ease-in-out ${
-              actionType === "Withdraw"
-                ? "bg-[#d9d9d90d] border-transparent text-opacity-90"
-                : "border-[#d9d9d90d] hover:bg-[#9361d1] focus:bg-[#602E9E] text-opacity-50 hover:text-opacity-90"
-            }`}
+            className={`w-full border-2 rounded-md py-2 text-white font-semibold text-xs sm:text-sm transition-all hover:duration-75 ease-in-out ${actionType === "Withdraw"
+              ? "bg-[#d9d9d90d] border-transparent text-opacity-90"
+              : "border-[#d9d9d90d] hover:bg-[#9361d1] focus:bg-[#602E9E] text-opacity-50 hover:text-opacity-90"
+              }`}
             onClick={() => setActionType("Withdraw")}
           >
             {translator("Withdraw", language)}
           </button>
           <button
-            className={`w-full border-2 rounded-md py-2 text-white font-semibold text-xs sm:text-sm transition hover:duration-75 ease-in-out flex items-center justify-center gap-1 ${
-              actionType === "History"
-                ? "bg-[#d9d9d90d] border-transparent text-opacity-90"
-                : "border-[#d9d9d90d] hover:bg-[#9361d1] focus:bg-[#602E9E] text-opacity-50 hover:text-opacity-90"
-            }`}
+            className={`w-full border-2 rounded-md py-2 text-white font-semibold text-xs sm:text-sm transition hover:duration-75 ease-in-out flex items-center justify-center gap-1 ${actionType === "History"
+              ? "bg-[#d9d9d90d] border-transparent text-opacity-90"
+              : "border-[#d9d9d90d] hover:bg-[#9361d1] focus:bg-[#602E9E] text-opacity-50 hover:text-opacity-90"
+              }`}
             onClick={() => setActionType("History")}
           >
             {translator("History", language)}
@@ -286,14 +292,13 @@ export default function BalanceModal() {
                   onClick={() => setIsSelectModalOpen(!isSelectModalOpen)}
                 >
                   <selectedToken.icon className="w-6 h-6" />
-                  <span>{selectedToken.tokenName}</span>
+                  <span>{selectedToken?.tokenName}</span>
                   <div className="grow" />
                   <img
                     src="/assets/chevron.svg"
                     alt=""
-                    className={`w-4 h-4 transform ${
-                      isSelectModalOpen ? "rotate-180" : ""
-                    }`}
+                    className={`w-4 h-4 transform ${isSelectModalOpen ? "rotate-180" : ""
+                      }`}
                   />
                 </span>
 
@@ -315,14 +320,14 @@ export default function BalanceModal() {
                           {actionType === "Deposit" &&
                             truncateNumber(
                               userTokens.find(
-                                (t) => t.mintAddress === token.tokenMint,
+                                (t) => t?.mintAddress && t?.mintAddress === token?.tokenMint,
                               )?.balance ?? 0,
                             )}
                           {actionType === "Withdraw" &&
                             truncateNumber(
-                              coinData?.find(
-                                (coin) => coin.tokenMint === token.tokenMint,
-                              )?.amount ?? 0,
+                              coinData ? coinData.find(
+                                (coin) => coin?.tokenMint && coin?.tokenMint === token?.tokenMint,
+                              )?.amount ?? 0 : 0,
                             )}
                         </span>
                       </div>
@@ -353,11 +358,11 @@ export default function BalanceModal() {
                   </label>
                   <span className="font-changa font-medium text-sm text-[#94A3B8] text-opacity-90">
                     {truncateNumber(
-                      coinData?.find(
-                        (coin) => coin.tokenMint === selectedToken.tokenMint,
-                      )?.amount ?? 0,
+                      coinData ? coinData.find(
+                        (coin) => coin?.tokenMint && coin?.tokenMint === selectedToken?.tokenMint,
+                      )?.amount ?? 0 : 0,
                     )}{" "}
-                    ${selectedToken.tokenName}
+                    ${selectedToken?.tokenName}
                   </span>
                 </div>
 
@@ -381,10 +386,14 @@ export default function BalanceModal() {
                   <span
                     className="text-xs font-medium text-white text-opacity-50 bg-[#292C32] hover:bg-[#47484A] focus:bg-[#47484A] transition-all rounded-[5px] mr-2 py-1.5 px-4"
                     onClick={() => {
-                      let bal =
-                        coinData?.find(
-                          (coin) => coin.tokenMint === selectedToken.tokenMint,
-                        )?.amount ?? 0;
+                      let bal = 0
+                      if (coinData) {
+                        let token = coinData.find(
+                          (coin) => coin?.tokenMint && coin?.tokenMint === selectedToken?.tokenMint,
+                        )
+                        if (token) bal = token?.amount
+                      }
+
                       if (!amount || amount === 0) setAmount(bal / 2);
                       else setAmount(amount / 2);
                     }}
@@ -394,10 +403,14 @@ export default function BalanceModal() {
                   <span
                     className="text-xs font-medium text-white text-opacity-50 bg-[#292C32] hover:bg-[#47484A] focus:bg-[#47484A] transition-all rounded-[5px] py-1.5 px-4"
                     onClick={() => {
-                      let bal =
-                        coinData?.find(
-                          (coin) => coin.tokenMint === selectedToken.tokenMint,
-                        )?.amount ?? 0;
+                      let bal = 0
+                      if (coinData) {
+                        let token = coinData.find(
+                          (coin) => coin?.tokenMint && coin?.tokenMint === selectedToken?.tokenMint,
+                        )
+                        if (token) bal = token?.amount
+                      }
+
                       setAmount(bal);
                     }}
                   >
@@ -406,11 +419,10 @@ export default function BalanceModal() {
                 </div>
 
                 <span
-                  className={`${
-                    methods.formState.errors["amount"]
-                      ? "opacity-100"
-                      : "opacity-0"
-                  } mt-1.5 flex items-center gap-1 text-xs text-[#D92828]`}
+                  className={`${methods.formState.errors["amount"]
+                    ? "opacity-100"
+                    : "opacity-0"
+                    } mt-1.5 flex items-center gap-1 text-xs text-[#D92828]`}
                 >
                   {methods.formState.errors["amount"]
                     ? methods.formState.errors["amount"]!.message!.toString()
@@ -428,11 +440,11 @@ export default function BalanceModal() {
                     {truncateNumber(
                       userTokens.find(
                         (token) =>
-                          token.mintAddress === selectedToken.tokenMint,
+                          token?.mintAddress && token?.mintAddress === selectedToken?.tokenMint,
                       )?.balance ?? 0,
                       3,
                     )}{" "}
-                    ${selectedToken.tokenName}
+                    ${selectedToken?.tokenName}
                   </span>
                 </div>
                 <div
@@ -454,22 +466,18 @@ export default function BalanceModal() {
                   <span
                     className="text-xs font-medium text-white text-opacity-50 bg-[#292C32] hover:bg-[#47484A] focus:bg-[#47484A] transition-all rounded-[5px] py-1.5 px-4"
                     onClick={() => {
-                      setAmount(
-                        userTokens.find(
-                          (t) => t.mintAddress === selectedToken.tokenMint,
-                        )!.balance,
-                      );
+                      let token = userTokens.find(t => t?.mintAddress === selectedToken?.tokenMint)
+                      setAmount(token?.balance ?? 0);
                     }}
                   >
                     {translator("Max", language)}
                   </span>
                 </div>
                 <span
-                  className={`${
-                    methods.formState.errors["amount"]
-                      ? "opacity-100"
-                      : "opacity-0"
-                  } mt-1.5 flex items-center gap-1 text-xs text-[#D92828]`}
+                  className={`${methods.formState.errors["amount"]
+                    ? "opacity-100"
+                    : "opacity-0"
+                    } mt-1.5 flex items-center gap-1 text-xs text-[#D92828]`}
                 >
                   {methods.formState.errors["amount"]
                     ? methods.formState.errors["amount"]!.message!.toString()
@@ -497,11 +505,10 @@ export default function BalanceModal() {
                   ))}
                 </tr>
                 <div
-                  className={`${
-                    historyData.length <= 0
-                      ? "flex items-center justify-center"
-                      : ""
-                  } w-full h-[310px] overflow-y-scroll modalscrollbar`}
+                  className={`${historyData.length <= 0
+                    ? "flex items-center justify-center"
+                    : ""
+                    } w-full h-[310px] overflow-y-scroll modalscrollbar`}
                 >
                   {historyData.length > 0 ? (
                     historyData.map((data, index) => (
@@ -521,11 +528,10 @@ export default function BalanceModal() {
                             : translator("Withdraw", language)}
                         </td>
                         <td
-                          className={`w-full text-center font-changa text-xs font-light ${
-                            data.status === "completed"
-                              ? "text-green-500"
-                              : "text-red-500"
-                          }`}
+                          className={`w-full text-center font-changa text-xs font-light ${data.status === "completed"
+                            ? "text-green-500"
+                            : "text-red-500"
+                            }`}
                         >
                           {data.status === "completed"
                             ? translator("Completed", language)
@@ -586,9 +592,10 @@ export default function BalanceModal() {
                   className="text-[10px] xs:text-[11px] sm2:text-[12px] text-[#94A3B8] font-chakra font-bold w-[397px] h-[47px]   text-justify"
                   onClick={() => setChecked(!checked)}
                 >
-                  I agree with the Privacy Policy and with the Terms of Use,
-                  Gambling is not forbidden by my local authorities and I am at
-                  least 18 years old.
+                  {translator(
+                    "I agree with the Privacy Policy and with the Terms of Use, Gambling is not forbidden by my local authorities and I am at least 18 years old.",
+                    language,
+                  )}
                 </label>
               </div>
             )}

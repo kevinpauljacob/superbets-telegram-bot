@@ -82,6 +82,17 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         await GameStats.create(gameStats);
       }
 
+      await User.updateMany(
+        {
+          gamesPlayed: { $exists: false },
+        },
+        {
+          $set: {
+            gamesPlayed: [],
+          },
+        },
+      );
+
       return res.json({
         success: true,
       });

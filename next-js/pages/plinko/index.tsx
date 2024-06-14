@@ -10,10 +10,8 @@ import {
   World,
 } from "matter-js";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import dynamic from "next/dynamic";
 import { useWallet } from "@solana/wallet-adapter-react";
 import toast from "react-hot-toast";
-import { minGameAmount, placeFlip } from "../../context/gameTransactions";
 import Image from "next/image";
 import Link from "next/link";
 import Head from "next/head";

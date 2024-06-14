@@ -24,8 +24,7 @@ import {
   successCustom,
   warningCustom,
 } from "@/components/toasts/ToastGroup";
-import { translator, formatNumber } from "@/context/transactions";
-import { minGameAmount, truncateNumber } from "@/context/gameTransactions";
+import { translator, truncateNumber } from "@/context/transactions";
 import { useSession } from "next-auth/react";
 import user from "@/models/staking/user";
 import Decimal from "decimal.js";
@@ -62,9 +61,9 @@ export default function Mines() {
     maxBetAmt,
     language,
     selectedCoin,
-    setLiveStats,
-    liveStats,
     enableSounds,
+    updatePNL,
+    minGameAmount,
   } = useGlobalContext();
   const [betAmt, setBetAmt] = useState<number | undefined>();
   const [userInput, setUserInput] = useState<number | undefined>();
@@ -189,6 +188,7 @@ export default function Mines() {
           strikeMultiplier: strikeMultiplier,
           pointsGained: pointsGained,
         });
+        updatePNL(GameType.mines, win, betAmt!, strikeMultiplier);
         setGameStatus("Completed");
         setUserBets(updatedUserBetsWithResult);
         setRefresh(true);
@@ -236,7 +236,7 @@ export default function Mines() {
   };
 
   const handlePick = async (number: number) => {
-    soundAlert("/sounds/betButton.wav", !enableSounds);
+    soundAlert("/sounds/betbutton.wav", !enableSounds);
     setIsRolling(true);
     // setSelectTile(false);
     setNumBets(numBets + 1);
@@ -326,25 +326,9 @@ export default function Mines() {
         soundAlert("/sounds/win.wav", !enableSounds);
         // setSelectTile(true);
       }
-      if (lose) soundAlert("/sounds/bomb.wav", !enableSounds);
-
-      if (result !== "Pending") {
-        setLiveStats([
-          ...liveStats,
-          {
-            game: GameType.mines,
-            amount: betAmt!,
-            result: win ? "Won" : "Lost",
-            pnl: win ? betAmt! * strikeMultiplier - betAmt! : -betAmt!,
-            totalPNL:
-              liveStats.length > 0
-                ? liveStats[liveStats.length - 1].totalPNL +
-                  (win ? betAmt! * strikeMultiplier - betAmt! : -betAmt!)
-                : win
-                  ? betAmt! * strikeMultiplier - betAmt!
-                  : -betAmt!,
-          },
-        ]);
+      if (lose) {
+        soundAlert("/sounds/bomb.wav", !enableSounds);
+        updatePNL(GameType.mines, false, betAmt!, 1);
       }
 
       if (success) {
@@ -352,18 +336,25 @@ export default function Mines() {
         setIsRolling(false);
       }
     } catch (error: any) {
+      if (
+        error.message != "Max payout of 25 exceeded! Cashout to continue..."
+      ) {
+        setNumBets(0);
+        setCurrentMultiplier(0);
+        setNextMultiplier(0);
+        setStrikeMultiplier(1);
+        setCurrentProfit(0);
+        setNextProfit(0);
+        setAmountWon(0);
+        setBetActive(false);
+        setIsRolling(false);
+        setProcessing(false);
+        setPendingRequests([]);
+      } else {
+        setRefresh(true);
+        setIsRolling(false);
+      }
       errorCustom(error.message);
-      setNumBets(0);
-      setCurrentMultiplier(0);
-      setNextMultiplier(0);
-      setStrikeMultiplier(1);
-      setCurrentProfit(0);
-      setNextProfit(0);
-      setAmountWon(0);
-      setBetActive(false);
-      setIsRolling(false);
-      setProcessing(false);
-      setPendingRequests([]);
       console.error("Error occurred while betting:", error);
     }
   };
@@ -405,9 +396,7 @@ export default function Mines() {
   const handleAutoBet = async () => {
     try {
       if (!wallet.connected || !wallet.publicKey) {
-        throw new Error(
-          translator("Wallet not connected", language),
-        );;
+        throw new Error(translator("Wallet not connected", language));
       }
       if (!betAmt || betAmt === 0) {
         throw new Error(translator("Set Amount.", language));
@@ -509,7 +498,8 @@ export default function Mines() {
         // update count
         if (typeof autoBetCount === "number") {
           setAutoBetCount(autoBetCount > 0 ? autoBetCount - 1 : 0);
-          autoBetCount === 1 && warningCustom(translator("Auto bet stopped", language), "top-left");
+          autoBetCount === 1 &&
+            warningCustom(translator("Auto bet stopped", language), "top-left");
         } else
           setAutoBetCount(
             autoBetCount.length > 12
@@ -518,9 +508,10 @@ export default function Mines() {
           );
       }
     } catch (error: any) {
-      errorCustom(translator(error?.message ?? "Could not make the Bet.", language));
+      errorCustom(
+        translator(error?.message ?? "Could not make the Bet.", language),
+      );
       setIsRolling(false);
-      setAutoBetCount(0);
       setStartAuto(false);
       console.error("Error occurred while betting:", error);
     } finally {
@@ -534,9 +525,7 @@ export default function Mines() {
     // setSelectTile(true);
     try {
       if (!wallet.connected || !wallet.publicKey) {
-        throw new Error(
-          translator("Wallet not connected", language),
-        );;
+        throw new Error(translator("Wallet not connected", language));
       }
       if (!betAmt || betAmt === 0) {
         throw new Error(translator("Set Amount.", language));
@@ -584,7 +573,9 @@ export default function Mines() {
         successCustom(message);
       }
     } catch (error: any) {
-      errorCustom(translator(error?.message ?? "Could not make the Bet.", language));
+      errorCustom(
+        translator(error?.message ?? "Could not make the Bet.", language),
+      );
       setIsRolling(false);
       setAutoBetCount(0);
       setStartAuto(false);
@@ -598,9 +589,7 @@ export default function Mines() {
     const updatedUserBets = userBets;
     try {
       if (!wallet.connected || !wallet.publicKey) {
-        throw new Error(
-          translator("Wallet not connected", language),
-        );;
+        throw new Error(translator("Wallet not connected", language));
       }
       setUserBets(defaultUserBets);
       const response = await fetch(`/api/games/mines/pendingGame`, {
@@ -678,7 +667,9 @@ export default function Mines() {
         setRefresh(true);
       }
     } catch (error: any) {
-      errorCustom(translator(error?.message ?? "Could not fetch pending game.", language));
+      errorCustom(
+        translator(error?.message ?? "Could not fetch pending game.", language),
+      );
       setAutoBetCount(0);
       setStartAuto(false);
       console.error("Error occurred while fetching pending game:", error);
@@ -739,9 +730,9 @@ export default function Mines() {
         autoBetProfit >= autoStopProfit
       ) {
         warningCustom(
-            translator("Profit limit reached.", language),
-            "top-left",
-          );
+          translator("Profit limit reached.", language),
+          "top-left",
+        );
         setAutoBetCount(0);
         setStartAuto(false);
         setTimeout(() => {
@@ -762,10 +753,7 @@ export default function Mines() {
         autoBetProfit < 0 &&
         potentialLoss <= -autoStopLoss
       ) {
-        warningCustom(
-            translator("Loss limit reached.", language),
-            "top-left",
-          );
+        warningCustom(translator("Loss limit reached.", language), "top-left");
         setAutoBetCount(0);
         setStartAuto(false);
         setTimeout(() => {
@@ -785,16 +773,18 @@ export default function Mines() {
       }, 1000);
     } else {
       setStartAuto(false);
-      setTimeout(() => {
-        setUserBets(defaultUserBets);
-        setUserBetsForAuto([]);
-        setCashoutModal({
-          show: false,
-          amountWon: 0,
-          strikeMultiplier: 0,
-          pointsGained: 0,
-        });
-      }, 2000);
+      if (startAuto === false && userBets.some((bet) => bet.result !== "")) {
+        setTimeout(() => {
+          setUserBets(defaultUserBets);
+          setUserBetsForAuto([]);
+          setCashoutModal({
+            show: false,
+            amountWon: 0,
+            strikeMultiplier: 0,
+            pointsGained: 0,
+          });
+        }, 2000);
+      }
       setAutoBetProfit(0);
       setUserInput(betAmt);
     }
@@ -802,10 +792,10 @@ export default function Mines() {
 
   const onSubmit = async (data: any) => {
     if (betType === "auto") {
-      if (betAmt === 0) {
-        errorCustom(translator("Set Amount.", language));
-        return;
-      }
+      // if (betAmt === 0) {
+      //   errorCustom(translator("Set Amount.", language));
+      //   return;
+      // }
       if (typeof autoBetCount === "number" && autoBetCount <= 0) {
         errorCustom("Set Bet Count.");
         return;
@@ -830,7 +820,10 @@ export default function Mines() {
                   setUserBets(defaultUserBets);
                   setUserBetsForAuto([]);
                   soundAlert("/sounds/betbutton.wav", !enableSounds);
-                  warningCustom(translator("Auto bet stopped", language), "top-left");
+                  warningCustom(
+                    translator("Auto bet stopped", language),
+                    "top-left",
+                  );
                   setAutoBetCount(0);
                   setStartAuto(false);
                   setCashoutModal({
@@ -840,38 +833,47 @@ export default function Mines() {
                     pointsGained: 0,
                   });
                 }}
-                className="cursor-pointer rounded-lg absolute w-full h-full z-20 bg-[#442c62] hover:bg-[#7653A2] focus:bg-[#53307E] flex items-center justify-center font-chakra font-semibold text-2xl tracking-wider text-white"
+                className="hover:duration-75 hover:opacity-90 w-full h-[3.75rem] rounded-lg transition-all bg-[#442c62] hover:bg-[#7653A2] focus:bg-[#53307E] flex items-center justify-center font-chakra font-semibold text-2xl tracking-wider text-white"
               >
                 {translator("STOP", language)}
               </div>
             )}
-            <BetButton
-              disabled={
-                !wallet ||
-                !session?.user ||
-                isRolling ||
-                (!betActive &&
-                  coinData &&
-                  coinData[0].amount < minGameAmount) ||
-                (betActive &&
+            {!betActive && !startAuto && (
+              <BetButton
+                disabled={
+                  !wallet ||
+                  !session?.user ||
+                  isRolling ||
+                  (coinData && coinData[0].amount < minGameAmount) ||
+                  (betType === "auto" && !userBets.some((bet) => bet.pick)) ||
+                  autoBetCount === 0 ||
+                  Number.isNaN(autoBetCount) ||
+                  (betAmt !== undefined &&
+                    maxBetAmt !== undefined &&
+                    betAmt > maxBetAmt)
+                    ? true
+                    : false
+                }
+                onClickFunction={betType === "auto" ? onSubmit : handleBet}
+              >
+                {isRolling ? <Loader /> : "BET"}
+              </BetButton>
+            )}
+            {betActive && betType === "manual" && (
+              <button
+                onClick={() => {
+                  handleConclude();
+                }}
+                disabled={
+                  betActive &&
                   betType === "manual" &&
-                  !userBets.some((bet) => bet.pick)) ||
-                (betAmt !== undefined &&
-                  maxBetAmt !== undefined &&
-                  betAmt > maxBetAmt)
-                  ? true
-                  : false
-              }
-              onClickFunction={
-                !betActive
-                  ? betType === "auto"
-                    ? onSubmit
-                    : handleBet
-                  : handleConclude
-              }
-            >
-              {isRolling ? <Loader /> : betActive ? "CASHOUT" : "BET"}
-            </BetButton>
+                  !userBets.some((bet) => bet.pick)
+                }
+                className="disabled:cursor-default disabled:opacity-70 hover:duration-75 hover:opacity-90 w-full h-[3.75rem] rounded-lg transition-all bg-[#7839C5] disabled:bg-[#4b2876] hover:bg-[#9361d1] focus:bg-[#602E9E] flex items-center justify-center font-chakra font-semibold text-xl tracking-wider text-white"
+              >
+                {isRolling ? <Loader /> : translator("CASHOUT", language)}
+              </button>
+            )}
           </div>
           {betType === "auto" && (
             <div className="w-full flex lg:hidden">
@@ -919,7 +921,11 @@ export default function Mines() {
                           alt="arrowDown"
                           width={14}
                           height={14}
-                          className={`${dropDown ? "transform transition-all rotate-180" : "transition-all"}`}
+                          className={`${
+                            dropDown
+                              ? "transform transition-all rotate-180"
+                              : "transition-all"
+                          }`}
                         />
                       </div>
                       {dropDown && (
@@ -1027,7 +1033,11 @@ export default function Mines() {
                               alt="arrowDown"
                               width={14}
                               height={14}
-                              className={`${dropDown ? "transform transition-all rotate-180" : "transition-all"}`}
+                              className={`${
+                                dropDown
+                                  ? "transform transition-all rotate-180"
+                                  : "transition-all"
+                              }`}
                             />
                           </div>
                           {!startAuto && dropDown && (
@@ -1080,7 +1090,10 @@ export default function Mines() {
                         setUserBets(defaultUserBets);
                         setUserBetsForAuto([]);
                         soundAlert("/sounds/betbutton.wav", !enableSounds);
-                        warningCustom(translator("Auto bet stopped", language), "top-left");
+                        warningCustom(
+                          translator("Auto bet stopped", language),
+                          "top-left",
+                        );
                         setAutoBetCount(0);
                         setStartAuto(false);
                         setCashoutModal({
@@ -1090,38 +1103,50 @@ export default function Mines() {
                           pointsGained: 0,
                         });
                       }}
-                      className="rounded-lg absolute w-full h-full z-20 bg-[#442c62] hover:bg-[#7653A2] focus:bg-[#53307E] flex items-center justify-center font-chakra font-semibold text-2xl tracking-wider text-white"
+                      className="hover:duration-75 hover:opacity-90 w-full h-[3.75rem] rounded-lg transition-all bg-[#442c62] hover:bg-[#7653A2] focus:bg-[#53307E] flex items-center justify-center font-chakra font-semibold text-2xl tracking-wider text-white"
                     >
                       {translator("STOP", language)}
                     </div>
                   )}
-                  <BetButton
-                    disabled={
-                      !wallet ||
-                      !session?.user ||
-                      isRolling ||
-                      (!betActive &&
-                        coinData &&
-                        coinData[0].amount < minGameAmount) ||
-                      (betActive &&
+                  {!betActive && !startAuto && (
+                    <BetButton
+                      disabled={
+                        !wallet ||
+                        !session?.user ||
+                        isRolling ||
+                        (coinData && coinData[0].amount < minGameAmount) ||
+                        (betType === "auto" &&
+                          !userBets.some((bet) => bet.pick)) ||
+                        autoBetCount === 0 ||
+                        Number.isNaN(autoBetCount) ||
+                        (betAmt !== undefined &&
+                          maxBetAmt !== undefined &&
+                          betAmt > maxBetAmt)
+                          ? true
+                          : false
+                      }
+                      onClickFunction={
+                        betType === "auto" ? onSubmit : handleBet
+                      }
+                    >
+                      {isRolling ? <Loader /> : "BET"}
+                    </BetButton>
+                  )}
+                  {betActive && betType === "manual" && (
+                    <button
+                      onClick={() => {
+                        handleConclude();
+                      }}
+                      disabled={
+                        betActive &&
                         betType === "manual" &&
-                        !userBets.some((bet) => bet.pick)) ||
-                      (betAmt !== undefined &&
-                        maxBetAmt !== undefined &&
-                        betAmt > maxBetAmt)
-                        ? true
-                        : false
-                    }
-                    onClickFunction={
-                      !betActive
-                        ? betType === "auto"
-                          ? onSubmit
-                          : handleBet
-                        : handleConclude
-                    }
-                  >
-                    {isRolling ? <Loader /> : betActive ? "CASHOUT" : "BET"}
-                  </BetButton>
+                        !userBets.some((bet) => bet.pick)
+                      }
+                      className="disabled:cursor-default disabled:opacity-70 hover:duration-75 hover:opacity-90 w-full h-[3.75rem] rounded-lg transition-all bg-[#7839C5] disabled:bg-[#4b2876] hover:bg-[#9361d1] focus:bg-[#602E9E] flex items-center justify-center font-chakra font-semibold text-xl tracking-wider text-white"
+                    >
+                      {isRolling ? <Loader /> : translator("CASHOUT", language)}
+                    </button>
+                  )}
                 </div>
               </form>
             </FormProvider>
@@ -1192,10 +1217,13 @@ export default function Mines() {
                         ? "border-[#FCB10F] bg-[#FCB10F33]"
                         : userBets[index - 1].result === "Lost" &&
                             userBets[index - 1].pick === true
-                          ? "border-[#F1323E] bg-[#F1323E33]"
-                          : gameStatus === "Completed"
-                            ? "bg-transparent border-white/10"
-                            : "bg-[#202329] border-[#202329] hover:border-white/30"
+                          ? "border-[#FCB10F] bg-[#FCB10F33]"
+                          : userBets[index - 1].result === "Lost" &&
+                              userBets[index - 1].pick === true
+                            ? "border-[#F1323E] bg-[#F1323E33]"
+                            : gameStatus === "Completed"
+                              ? "bg-transparent border-white/10"
+                              : "bg-[#202329] border-[#202329] hover:border-white/30"
                       : betType === "auto"
                         ? userBets[index - 1].result === "" &&
                           userBets[index - 1].pick === true

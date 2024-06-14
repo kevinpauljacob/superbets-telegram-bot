@@ -3,12 +3,12 @@ import { getToken } from "next-auth/jwt";
 import { NextApiRequest, NextApiResponse } from "next";
 import { GameSeed, Mines, User } from "@/models/games";
 import { GameTokens, GameType, seedStatus } from "@/utils/provably-fair";
-import { minGameAmount, wsEndpoint } from "@/context/gameTransactions";
+import { wsEndpoint } from "@/context/config";
 import Decimal from "decimal.js";
-import { maxPayouts } from "@/context/transactions";
+import { maxPayouts, minAmtFactor, maintainance } from "@/context/config";
 import StakingUser from "@/models/staking/user";
 import { SPL_TOKENS } from "@/context/config";
-import updateGameStats from "../global/updateGameStats";
+import updateGameStats from "../../../../utils/updateGameStats";
 
 const secret = process.env.NEXTAUTH_SECRET;
 
@@ -27,6 +27,15 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === "POST") {
     try {
       let { wallet, amount, tokenMint, minesCount }: InputType = req.body;
+
+      if (maintainance)
+        return res.status(400).json({
+          success: false,
+          message: "Under maintenance",
+        });
+
+      const minGameAmount =
+        maxPayouts[tokenMint as GameTokens]["mines" as GameType] * minAmtFactor;
 
       const token = await getToken({ req, secret });
 
@@ -68,6 +77,13 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           .json({ success: false, message: "Max payout exceeded" });
 
       await connectDatabase();
+
+      const pendingGame = await Mines.findOne({ wallet, result: "Pending" });
+      if (pendingGame)
+        return res.status(400).json({
+          success: false,
+          message: "You already have a pending game!",
+        });
 
       const user = await User.findOne({ wallet });
       const addGame = !user.gamesPlayed.includes(GameType.mines);

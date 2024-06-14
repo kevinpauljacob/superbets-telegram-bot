@@ -12,16 +12,16 @@ import {
 import StakingUser from "@/models/staking/user";
 import {
   houseEdgeTiers,
-  launchPromoEdge,
-  maintainance,
   maxPayouts,
+  minAmtFactor,
   pointTiers,
   stakingTiers,
-} from "@/context/transactions";
-import { minGameAmount, wsEndpoint } from "@/context/gameTransactions";
+} from "@/context/config";
+import { launchPromoEdge, maintainance } from "@/context/config";
+import { minGameAmount, wsEndpoint } from "@/context/config";
 import { Decimal } from "decimal.js";
 import { SPL_TOKENS } from "@/context/config";
-import updateGameStats from "../global/updateGameStats";
+import updateGameStats from "../../../../utils/updateGameStats";
 Decimal.set({ precision: 9 });
 
 const secret = process.env.NEXTAUTH_SECRET;
@@ -44,6 +44,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     try {
       let { wallet, amount, tokenMint, chance, direction }: InputType =
         req.body;
+
+      const minGameAmount =
+        maxPayouts[tokenMint as GameTokens]["dice2" as GameType] * minAmtFactor;
 
       if (maintainance)
         return res.status(400).json({

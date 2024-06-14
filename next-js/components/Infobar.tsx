@@ -109,8 +109,8 @@ export default function InfoBar() {
         </div>
       </div>
       {/* medium screen */}
-      {slides.map(({ label, value }) => (
-        <div className="hidden md:flex items-center gap-1">
+      {slides.map(({ label, value }, index) => (
+        <div key={index} className="hidden md:flex items-center gap-1">
           <span className="text-[#e7e7e7] text-opacity-70 text-xs font-normal">
             {label} :
           </span>

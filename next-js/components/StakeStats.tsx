@@ -1,6 +1,6 @@
-import { stakingTiers, translator } from "@/context/transactions";
+import { translator, truncateNumber } from "@/context/transactions";
+import { stakingTiers } from "@/context/config";
 import { useGlobalContext } from "./GlobalContext";
-import { truncateNumber } from "@/context/gameTransactions";
 
 export default function StakeStats() {
   const { userData, fomoBalance, language } = useGlobalContext();

@@ -6,15 +6,12 @@ import {
   generateGameResult,
   GameType,
   seedStatus,
+  GameTokens,
 } from "@/utils/provably-fair";
 import StakingUser from "@/models/staking/user";
-import {
-  houseEdgeTiers,
-  launchPromoEdge,
-  maxPayouts,
-  pointTiers,
-} from "@/context/transactions";
-import { minGameAmount, wsEndpoint } from "@/context/gameTransactions";
+import { houseEdgeTiers, maintainance, maxPayouts, minAmtFactor, pointTiers } from "@/context/config";
+import { launchPromoEdge } from "@/context/config";
+import { minGameAmount, wsEndpoint } from "@/context/config";
 import { Decimal } from "decimal.js";
 Decimal.set({ precision: 9 });
 
@@ -84,6 +81,16 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           success: false,
           message: "User wallet not authenticated",
         });
+
+      if (maintainance)
+        return res.status(400).json({
+          success: false,
+          message: "Under maintenance",
+        });
+
+      const minGameAmount =
+        maxPayouts[tokenMint as GameTokens]["plinko" as GameType] *
+        minAmtFactor;
 
       if (!wallet || !amount || tokenMint !== "SOL" || !rows || !risk)
         return res

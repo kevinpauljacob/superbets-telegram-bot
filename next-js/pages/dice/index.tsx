@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo } from "react";
 import { useWallet } from "@solana/wallet-adapter-react";
-import { rollDice } from "@/context/gameTransactions";
 import BetSetting from "@/components/BetSetting";
 import { useGlobalContext } from "@/components/GlobalContext";
 import {
@@ -27,8 +26,7 @@ import Bets from "../../components/games/Bets";
 import AutoCount from "@/components/AutoCount";
 import ConfigureAutoButton from "@/components/ConfigureAutoButton";
 import { errorCustom, warningCustom } from "@/components/toasts/ToastGroup";
-import { translator } from "@/context/transactions";
-import { minGameAmount } from "@/context/gameTransactions";
+import { rollDice, translator } from "@/context/transactions";
 import { useSession } from "next-auth/react";
 import { GameType } from "@/utils/provably-fair";
 
@@ -60,8 +58,7 @@ export default function Dice() {
     houseEdge,
     maxBetAmt,
     language,
-    liveStats,
-    setLiveStats,
+    updatePNL,
     enableSounds,
   } = useGlobalContext();
 
@@ -186,22 +183,12 @@ export default function Dice() {
         const { strikeNumber, result } = res.data;
         const isWin = result === "Won";
 
-        setLiveStats([
-          ...liveStats,
-          {
-            game: GameType.dice,
-            amount: betAmt,
-            result: isWin ? "Won" : "Lost",
-            pnl: isWin ? betAmt * winningPays - betAmt : -betAmt,
-            totalPNL:
-              liveStats.length > 0
-                ? liveStats[liveStats.length - 1].totalPNL +
-                  (isWin ? betAmt * winningPays - betAmt : -betAmt)
-                : isWin
-                  ? betAmt * winningPays - betAmt
-                  : -betAmt,
-          },
-        ]);
+        updatePNL(
+          GameType.dice,
+          isWin,
+          betAmt,
+          winningPays,
+        );
 
         if (isWin) soundAlert("/sounds/win.wav", !enableSounds);
         const newBetResults = [
@@ -237,7 +224,11 @@ export default function Dice() {
           // update count
           if (typeof autoBetCount === "number") {
             setAutoBetCount(autoBetCount > 0 ? autoBetCount - 1 : 0);
-            autoBetCount === 1 && warningCustom(translator("Auto bet stopped", language), "top-left");
+            autoBetCount === 1 &&
+              warningCustom(
+                translator("Auto bet stopped", language),
+                "top-left",
+              );
           } else
             setAutoBetCount(
               autoBetCount.length > 12
@@ -246,10 +237,14 @@ export default function Dice() {
             );
         }
       } else {
-        throw new Error(translator(res?.message ?? "Could not make the Bet.", language));
+        throw new Error(
+          translator(res?.message ?? "Could not make the Bet.", language),
+        );
       }
     } catch (e: any) {
-      errorCustom(translator(e?.message ?? "Could not make the Bet.", language));
+      errorCustom(
+        translator(e?.message ?? "Could not make the Bet.", language),
+      );
       setIsRolling(false);
       setAutoBetCount(0);
       setStartAuto(false);
@@ -427,7 +422,10 @@ export default function Dice() {
               <div
                 onClick={() => {
                   soundAlert("/sounds/betbutton.wav", !enableSounds);
-                  warningCustom(translator("Auto bet stopped", language), "top-left");
+                  warningCustom(
+                    translator("Auto bet stopped", language),
+                    "top-left",
+                  );
                   setAutoBetCount(0);
                   setStartAuto(false);
                 }}
@@ -442,6 +440,8 @@ export default function Dice() {
                 !session?.user ||
                 selectedFace.length === 0 ||
                 isRolling ||
+                autoBetCount === 0 ||
+                Number.isNaN(autoBetCount) ||
                 (betAmt !== undefined &&
                   maxBetAmt !== undefined &&
                   betAmt > maxBetAmt)
@@ -502,7 +502,10 @@ export default function Dice() {
                     <div
                       onClick={() => {
                         soundAlert("/sounds/betbutton.wav", !enableSounds);
-                        warningCustom(translator("Auto bet stopped", language), "top-left");
+                        warningCustom(
+                          translator("Auto bet stopped", language),
+                          "top-left",
+                        );
                         setAutoBetCount(0);
                         setStartAuto(false);
                       }}
@@ -517,13 +520,15 @@ export default function Dice() {
                       !session?.user ||
                       selectedFace.length === 0 ||
                       isRolling ||
+                      autoBetCount === 0 ||
+                      Number.isNaN(autoBetCount) ||
                       (betAmt !== undefined &&
                         maxBetAmt !== undefined &&
                         betAmt > maxBetAmt)
                         ? true
                         : false
                     }
-                    onClickFunction={onSubmit}
+                    // onClickFunction={onSubmit}
                   >
                     {isRolling ? <Loader /> : "BET"}
                   </BetButton>

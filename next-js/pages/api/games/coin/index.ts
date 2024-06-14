@@ -1,7 +1,7 @@
 import connectDatabase from "../../../../utils/database";
 import { getToken } from "next-auth/jwt";
 import { NextApiRequest, NextApiResponse } from "next";
-import { wsEndpoint, minGameAmount } from "@/context/gameTransactions";
+import { wsEndpoint } from "@/context/config";
 import { Coin, GameSeed, User } from "@/models/games";
 import {
   GameTokens,
@@ -13,15 +13,15 @@ import {
 import StakingUser from "@/models/staking/user";
 import {
   houseEdgeTiers,
-  launchPromoEdge,
-  maintainance,
   maxPayouts,
+  minAmtFactor,
   pointTiers,
   stakingTiers,
-} from "@/context/transactions";
+} from "@/context/config";
+import { launchPromoEdge, maintainance } from "@/context/config";
 import { Decimal } from "decimal.js";
 import { SPL_TOKENS } from "@/context/config";
-import updateGameStats from "../global/updateGameStats";
+import updateGameStats from "../../../../utils/updateGameStats";
 Decimal.set({ precision: 9 });
 
 const secret = process.env.NEXTAUTH_SECRET;
@@ -42,6 +42,10 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === "POST") {
     try {
       let { wallet, amount, tokenMint, flipType }: InputType = req.body;
+
+      const minGameAmount =
+        maxPayouts[tokenMint as GameTokens]["coinflip" as GameType] *
+        minAmtFactor;
 
       if (maintainance)
         return res.status(400).json({

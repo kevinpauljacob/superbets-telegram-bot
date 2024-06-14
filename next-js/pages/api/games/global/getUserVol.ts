@@ -24,7 +24,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
       const user = await User.findOne({ wallet });
       if (!user)
-        return res.json({ success: true, data: [], message: "No data found" });
+        return res.json({ success: true, data: 0, message: "No data found" });
 
       let totalVolume = 0;
 
