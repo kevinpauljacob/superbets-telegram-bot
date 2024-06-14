@@ -1,6 +1,14 @@
 import React from "react";
 
-export default function ReferralLink() {
+export default function ReferralLink({
+  signUps,
+  totalEarnings,
+  referralCode,
+}: {
+  signUps: Record<string, any> | string;
+  totalEarnings: Record<string, any> | string;
+  referralCode: string;
+}) {
   return (
     <div className="flex items-center justify-between bg-staking-bg rounded-[10px] py-4 px-5 mb-4">
       <div className="flex items-center gap-[14px]">
@@ -9,7 +17,7 @@ export default function ReferralLink() {
         </p>
         <div className="flex gap-[12px]">
           <span className="bg-white/5 rounded-[5px] text-sm font-chakra text-[#94A3B8] font-normal px-4 py-2">
-            www.figma.com/La9ivJdfAk1cEkALohDSdx
+            {`www.figma.com/${referralCode}`}
           </span>
           <button className="bg-[#7839C5] rounded-[5px] text-white/75 text-[13px] font-chakra font-medium px-5">
             Copy
