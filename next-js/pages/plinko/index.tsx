@@ -9,7 +9,7 @@ import {
   Runner,
   World,
 } from "matter-js";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import { useWallet } from "@solana/wallet-adapter-react";
 import toast from "react-hot-toast";
@@ -50,6 +50,56 @@ type RiskToChance = Record<string, Record<number, Array<number>>>;
 export type LinesType = 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15 | 16;
 
 export type RisksType = "Low" | "Medium" | "High";
+
+const adjustedRisks = {
+  low: {
+    "8": [6.9, 2.1, 1.1, 1, 0.5, 1, 1.1, 2.1, 6.9],
+    "9": [8.2, 2, 1.6, 1, 0.7, 0.7, 1, 1.6, 2, 8.2],
+    "10": [14, 3, 1.4, 1.1, 1, 0.5, 1, 1.1, 1.4, 3, 14],
+    "11": [18.6, 3, 1.9, 1.3, 1, 0.7, 0.7, 1, 1.3, 1.9, 3, 18.6],
+    "12": [30.9, 3, 1.6, 1.4, 1.1, 1, 0.5, 1, 1.1, 1.4, 1.6, 3, 30.9],
+    "13": [49.1, 4, 3, 1.9, 1.2, 0.9, 0.7, 0.7, 0.9, 1.2, 1.9, 3, 4, 49.1],
+    "14": [89, 4, 1.9, 1.4, 1.3, 1.1, 1, 0.5, 1, 1.1, 1.3, 1.4, 1.9, 4, 89],
+    "15": [178.7, 8, 3, 2, 1.5, 1.1, 1, 0.7, 0.7, 1, 1.1, 1.5, 2, 3, 8, 178.7],
+    "16": [
+      344.1, 9, 2, 1.4, 1.4, 1.2, 1.1, 1, 0.5, 1, 1.1, 1.2, 1.4, 1.4, 2, 9,
+      344.1,
+    ],
+  },
+  medium: {
+    "8": [14.4, 3, 1.3, 0.7, 0.4, 0.7, 1.3, 3, 14.4],
+    "9": [20.2, 4, 1.7, 0.9, 0.5, 0.5, 0.9, 1.7, 4, 20.2],
+    "10": [27.6, 5, 2, 1.4, 0.6, 0.4, 0.6, 1.4, 2, 5, 27.6],
+    "11": [34, 6, 3, 1.8, 0.7, 0.5, 0.5, 0.7, 1.8, 3, 6, 34],
+    "12": [53.7, 11, 4, 2, 1.1, 0.6, 0.3, 0.6, 1.1, 2, 4, 11, 53.7],
+    "13": [84.2, 13, 6, 3, 1.3, 0.7, 0.4, 0.4, 0.7, 1.3, 3, 6, 13, 84.2],
+    "14": [140.4, 15, 7, 4, 1.9, 1, 0.5, 0.2, 0.5, 1, 1.9, 4, 7, 15, 140.4],
+    "15": [
+      252.1, 18, 11, 5, 3, 1.3, 0.5, 0.3, 0.3, 0.5, 1.3, 3, 5, 11, 18, 252.1,
+    ],
+    "16": [
+      441.5, 41, 10, 5, 3, 1.5, 1, 0.5, 0.3, 0.5, 1, 1.5, 3, 5, 10, 41, 441.5,
+    ],
+  },
+  high: {
+    "8": [30.2, 4, 1.5, 0.3, 0.2, 0.3, 1.5, 4, 30.2],
+    "9": [45.4, 7, 2, 0.6, 0.2, 0.2, 0.6, 2, 7, 45.4],
+    "10": [80.8, 10, 3, 0.9, 0.3, 0.2, 0.3, 0.9, 3, 10, 80.8],
+    "11": [128.6, 14, 5.2, 1.4, 0.4, 0.2, 0.2, 0.4, 1.4, 5.2, 14, 128.6],
+    "12": [188.1, 24, 8.1, 2, 0.7, 0.2, 0.2, 0.2, 0.7, 2, 8.1, 24, 188.1],
+    "13": [297.4, 37, 11, 4, 1, 0.2, 0.2, 0.2, 0.2, 1, 4, 11, 37, 297.4],
+    "14": [
+      503.7, 56, 18, 5, 1.9, 0.3, 0.2, 0.2, 0.2, 0.3, 1.9, 5, 18, 56, 503.7,
+    ],
+    "15": [
+      779.5, 83, 27, 8, 3, 0.5, 0.2, 0.2, 0.2, 0.2, 0.5, 3, 8, 27, 83, 779.5,
+    ],
+    "16": [
+      1335.4, 130, 26, 9, 4, 2, 0.2, 0.2, 0.2, 0.2, 0.2, 2, 4, 9, 26, 130,
+      1335.4,
+    ],
+  },
+};
 
 const riskToChance: RiskToChance = {
   low: {
@@ -269,7 +319,7 @@ function getRandomFromFallMap(input: number): number {
 function getMultiplier(value: number, line: number, index: number) {
   //todo: dynamic img and sound generation
   const color = multiplierColorMap[`${line}`][index];
-  const sound = "regular";
+  const sound = value <= 1 ? "loss" : "win";
   return {
     value: value,
     label: `block-${value}-${color.slice(1)}-${sound}-${index}`,
@@ -288,6 +338,26 @@ export default function Plinko() {
   const { data: session, status } = useSession();
   const { width, height } = useWindowSize();
   const [lines, setLines] = useState<LinesType>(8);
+
+  type FallMapType2 = {
+    [key: number]: {
+      [key: number]: {
+        [key: number]: number[];
+      };
+    };
+  };
+
+  const [fallMap, setFallMap] = useState<FallMapType2>({
+    750: {
+      8: {},
+    },
+  });
+  const referenceMap = useRef<FallMapType2>();
+  referenceMap.current = fallMap;
+
+  const [currX, setCurrX] = useState<number>(0);
+  const reference = useRef<number>();
+  reference.current = currX;
 
   const world = {
     width:
@@ -325,6 +395,125 @@ export default function Plinko() {
         : 6) /
       (lines / 8),
   };
+
+  // useEffect(() => {
+  //   function binomialCoefficient(n: number, k: number): number {
+  //     function factorial(x: number): number {
+  //       if (x === 0 || x === 1) return 1;
+  //       return x * factorial(x - 1);
+  //     }
+  //     return factorial(n) / (factorial(k) * factorial(n - k));
+  //   }
+
+  //   function binomialProbability(n: number, k: number, p: number): number {
+  //     return (
+  //       binomialCoefficient(n, k) * Math.pow(p, k) * Math.pow(1 - p, n - k)
+  //     );
+  //   }
+
+  //   function getMultipliers(
+  //     n: number,
+  //     level: string,
+  //     multipliersDisk: RiskToChance,
+  //   ): number[] | string {
+  //     if (!(level in multipliersDisk)) {
+  //       return `Invalid risk level: ${level}. Valid levels are 'low', 'medium', 'high'.`;
+  //     }
+  //     const multipliers = multipliersDisk[level][n];
+  //     if (!multipliers) {
+  //       return `No multipliers found for n = ${n} under level '${level}'.`;
+  //     }
+  //     return multipliers;
+  //   }
+
+  //   function calculateEv(
+  //     n: number,
+  //     p: number,
+  //     level: string,
+  //     multipliersDisk: RiskToChance,
+  //   ): void {
+  //     const multipliers = getMultipliers(n, level, multipliersDisk);
+  //     console.log("multipliers", multipliers);
+  //     if (typeof multipliers === "string") {
+  //       console.log(multipliers);
+  //       return;
+  //     }
+
+  //     const probabilities = Array.from({ length: n + 1 }, (_, k) =>
+  //       binomialProbability(n, k, p),
+  //     );
+
+  //     let ev = 0;
+  //     for (let k = 0; k <= n; k++) {
+  //       const probabilityPercent = probabilities[k] * 100;
+  //       const contribution = multipliers[k] * probabilityPercent;
+  //       console.log(
+  //         `level ${level} Probability % of landing in slot ${
+  //           multipliers[k]
+  //         }: ${probabilityPercent.toFixed(4)}%`,
+  //       );
+  //       ev += contribution;
+  //     }
+
+  //     console.log(getMultipliers(n, level, multipliersDisk));
+  //     console.log(`level ${level} Expected value (EV): ${ev.toFixed(4)}`);
+  //   }
+
+  //   function adjustFirstLast(lst: number[], value: number): number[] | string {
+  //     if (lst.length < 2) {
+  //       return "List must have at least two elements.";
+  //     }
+  //     lst[0] = value;
+  //     lst[lst.length - 1] = value;
+  //     return lst;
+  //   }
+
+  //   function adjustRiskToChance(
+  //     originalRiskToChance: RiskToChance,
+  //     level: string,
+  //     evInput: number = 100,
+  //   ): Record<number, number[]> {
+  //     //deep copy to prevent mutation of original risktochance object
+  //     const clonedRiskToChance: RiskToChance = JSON.parse(
+  //       JSON.stringify(originalRiskToChance),
+  //     );
+  //     const adjustedDict: Record<number, number[]> = {};
+  //     for (const [nStr, multipliers] of Object.entries(
+  //       clonedRiskToChance[level],
+  //     )) {
+  //       const n = parseInt(nStr);
+  //       const probabilities = Array.from({ length: n + 1 }, (_, k) =>
+  //         binomialProbability(n, k, 0.5),
+  //       );
+  //       let ev = 0;
+  //       for (let k = 1; k < n; k++) {
+  //         const probabilityPercent = probabilities[k] * 100;
+  //         const contribution = multipliers[k] * probabilityPercent;
+  //         ev += contribution;
+  //       }
+  //       const adjustedMultiplier =
+  //         (evInput - ev) / (2 * probabilities[0] * 100);
+  //       const adjustedList = adjustFirstLast(
+  //         multipliers,
+  //         Math.round(adjustedMultiplier * 100) / 100,
+  //       ) as number[];
+  //       adjustedDict[n] = adjustedList;
+  //     }
+  //     return adjustedDict;
+  //   }
+
+  //   const adjustedRiskToChance: RiskToChance = {
+  //     low: {},
+  //     medium: {},
+  //     high: {},
+  //   };
+
+  //   for (const level of ["low", "medium", "high"]) {
+  //     adjustedRiskToChance[level] = adjustRiskToChance(riskToChance, level);
+  //   }
+
+  //   console.log("adjustedRiskToChance =", adjustedRiskToChance);
+  // }, []);
 
   const configPlinko = {
     ball,
@@ -424,6 +613,9 @@ export default function Plinko() {
 
   const worldHeight: number = world.height;
 
+  const pinCategory = 0b001;
+  const ballCategory = 0b010;
+
   useEffect(() => {
     engine.gravity.y = engineConfig.engineGravity;
     const element = document.getElementById("plinko");
@@ -475,6 +667,10 @@ export default function Plinko() {
 
       const pin = Bodies.circle(pinX, pinY, pinsConfig.pinSize, {
         label: `pin-${i}`,
+        collisionFilter: {
+          category: pinCategory,
+          mask: ballCategory,
+        },
         render: {
           fillStyle: "#D9D9D9",
         },
@@ -508,22 +704,23 @@ export default function Plinko() {
         pinsConfig.pinGap +
         pinsConfig.pinGap / 2;
 
-      // const pos = parseFloat(Math.random().toFixed(9));
-      // const pos = mapResult[8][8];
       const ballX = pos! * (maxBallX - minBallX) + minBallX;
       console.log(">>>>>>", pos);
       const ballColor = colors.purple;
       const ball = Bodies.circle(ballX, 20, ballConfig.ballSize, {
         restitution: 1.25,
         friction: 0.6,
-        label: `ball-${ballValue}`,
+        label: `ball-${ballValue}-${pos}`,
         id: new Date().getTime(),
         frictionAir: 0.05,
         collisionFilter: {
-          group: -1,
+          // group: -1,
+          category: ballCategory,
+          mask: pinCategory,
         },
         render: {
           fillStyle: ballColor,
+          // visible: false
         },
         isStatic: false,
       });
@@ -583,6 +780,10 @@ export default function Plinko() {
       blockSize,
       {
         label: multiplier.label,
+        isSensor: true,
+        // collisionFilter: {
+        //   mask: 0,
+        // },
         isStatic: true,
         restitution: 0,
         render: {
@@ -651,6 +852,16 @@ export default function Plinko() {
       prev[2],
     ]);
 
+    let prevMap = { ...referenceMap.current! };
+    let posX = parseFloat(ball.label.split("-")[2]);
+    let posArray = (prevMap["750"]["8"][multiplierValue] ?? []).concat([posX!]);
+    console.log("fall array", posArray, multiplierValue, posX);
+    prevMap = {
+      750: { 8: { ...prevMap["750"]["8"], [multiplierValue]: posArray } },
+    };
+    setFallMap(prevMap);
+    // reference.current! <=1 && setCurrX(prev => prev + 0.1);
+
     if (+ballValue <= 0) return;
   }
   async function onBodyCollision(event: IEventCollision<Engine>) {
@@ -658,10 +869,15 @@ export default function Plinko() {
     for (const pair of pairs) {
       console.log("colliding", pair);
       const { bodyA, bodyB } = pair;
-      if (bodyB.label.includes("ball") && bodyA.label.includes("block"))
+      if (bodyB.label.includes("ball") && bodyA.label.includes("ball"))
+        console.log("fall oommbi");
+      if (bodyB.label.includes("ball") && bodyA.label.includes("block")) {
+        console.log("fall yay");
         await onCollideWithMultiplier(bodyB, bodyA);
+      }
     }
   }
+
   Events.on(engine, "collisionActive", onBodyCollision);
 
   useEffect(() => {
@@ -849,24 +1065,29 @@ export default function Plinko() {
   }, [startAuto, autoBetCount]);
 
   const onSubmit = async (data: any) => {
-    if (betSetting === "auto") {
-      if (betAmt === 0) {
-        errorCustom(translator("Set Amount.", language));
-        return;
-      }
-      if (typeof autoBetCount === "number" && autoBetCount <= 0) {
-        errorCustom(translator("Set Bet Count.", language));
-        return;
-      }
-      if (
-        (typeof autoBetCount === "string" && autoBetCount.includes("inf")) ||
-        (typeof autoBetCount === "number" && autoBetCount > 0)
-      ) {
-        // console.log("Auto betting. config: ", useAutoConfig);
-        setStartAuto(true);
-      }
-    } else if (wallet.connected) handleBet();
-    // addBall(1, 0.5);
+    // if (betSetting === "auto") {
+    //   if (betAmt === 0) {
+    //     errorCustom(translator("Set Amount.", language));
+    //     return;
+    //   }
+    //   if (typeof autoBetCount === "number" && autoBetCount <= 0) {
+    //     errorCustom(translator("Set Bet Count.", language));
+    //     return;
+    //   }
+    //   if (
+    //     (typeof autoBetCount === "string" && autoBetCount.includes("inf")) ||
+    //     (typeof autoBetCount === "number" && autoBetCount > 0)
+    //   ) {
+    //     // console.log("Auto betting. config: ", useAutoConfig);
+    //     setStartAuto(true);
+    //   }
+    // } else if (wallet.connected) handleBet();
+    addBall(1, 0.7);
+    // for (let i = 0; i <= 1; i += 0.1) {
+    //   setCurrX(i);
+    //   console.log("fall", i);
+    //   addBall(1, parseFloat(i.toFixed(5)));
+    // }
   };
 
   const disableInput = useMemo(() => {
@@ -874,6 +1095,18 @@ export default function Plinko() {
       (betSetting === "auto" && startAuto) || loading || inGameBallsCount > 0
     );
   }, [betSetting, startAuto, loading, inGameBallsCount]);
+
+  useEffect(() => {
+    console.log("fallmap", fallMap);
+  }, [fallMap]);
+
+  // useEffect(() => {
+  //   console.log("fall", inGameBallsCount, currX);
+  //   if (inGameBallsCount === -1) {
+  //     // setCurrX(currX + 0.1);
+  //     addBall(1, currX + 0.1);
+  //   }
+  // }, [inGameBallsCount]);
 
   return (
     <GameLayout title="FOMO - Plinko">
@@ -898,7 +1131,7 @@ export default function Plinko() {
                 !wallet ||
                 !session?.user ||
                 loading ||
-                disableInput ||
+                (betSetting === "auto" && startAuto) ||
                 (betAmt !== undefined &&
                   maxBetAmt !== undefined &&
                   betAmt > maxBetAmt)
@@ -1035,7 +1268,7 @@ export default function Plinko() {
                         setAutoBetCount(0);
                         setStartAuto(false);
                       }}
-                      className="rounded-lg absolute w-full h-full z-20 bg-[#442c62] hover:bg-[#7653A2] focus:bg-[#53307E] flex items-center justify-center font-chakra font-semibold text-2xl tracking-wider text-white"
+                      className="cursor-pointer rounded-lg absolute w-full h-full z-20 bg-[#442c62] hover:bg-[#7653A2] focus:bg-[#53307E] flex items-center justify-center font-chakra font-semibold text-2xl tracking-wider text-white"
                     >
                       {translator("STOP", language)}
                     </div>
@@ -1045,7 +1278,7 @@ export default function Plinko() {
                       !wallet ||
                       !session?.user ||
                       loading ||
-                      disableInput ||
+                      (betSetting === "auto" && startAuto) ||
                       (betAmt !== undefined &&
                         maxBetAmt !== undefined &&
                         betAmt > maxBetAmt)
