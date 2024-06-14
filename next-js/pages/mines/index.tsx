@@ -1242,7 +1242,7 @@ export default function Mines() {
                   disabled={betType === "manual" && userBets[index - 1].pick}
                   onClick={() =>
                     betType === "auto"
-                      ? handleAutoPick(index)
+                      ? !startAuto && handleAutoPick(index)
                       : betActive && betType === "manual"
                         ? setPendingRequests((prevRequests) => [
                             ...prevRequests,
