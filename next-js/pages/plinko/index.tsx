@@ -8,7 +8,9 @@ import {
   Render,
   Runner,
   World,
+  Common,
 } from "matter-js";
+import MatterJS from "@/components/games/Plinko/matterjs";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useWallet } from "@solana/wallet-adapter-react";
 import toast from "react-hot-toast";
@@ -580,6 +582,7 @@ export default function Plinko() {
     setInGameBallsCount(inGameBallsCount - 1);
   };
   const engine = Engine.create();
+  Engine.update(engine, 100);
   const { colors, ball: ballConfig, engine: engineConfig } = configPlinko;
   const pinsConfig = {
     startPins: 3,
@@ -638,7 +641,9 @@ export default function Plinko() {
       },
       engine,
     });
-    const runner = Runner.create();
+    const runner = Runner.create({
+      isFixed: true,
+    });
     Runner.run(runner, engine);
     Render.run(render);
     return () => {
@@ -1080,13 +1085,75 @@ export default function Plinko() {
     //     setStartAuto(true);
     //   }
     // } else if (wallet.connected) handleBet();
-    addBall(1, 0.7);
-    // for (let i = 0; i <= 1; i += 0.1) {
-    //   setCurrX(i);
-    //   console.log("fall", i);
-    //   addBall(1, parseFloat(i.toFixed(5)));
+    addBall(1, betAmt!);
+    // for (let i = 0; i <= 1; i += 0.0015) {
+    //   setTimeout(() => {
+    //     setCurrX(i);
+    //     console.log("fall", i);
+    //     addBall(1, parseFloat(i.toFixed(5)));
+    //   }, 1000);
     // }
+
+    //   let start: number | null = null;
+    // const duration = 1000; // Animation duration in milliseconds
+
+    // const step = (timestamp: number) => {
+    //   if (!start) start = timestamp;
+    //   const progress = Math.min((timestamp - start) / duration, 1);
+    //   const currX = progress * 1.0015; // Adjust the final value as needed
+
+    //   setCurrX(currX);
+    //   console.log("fall", currX);
+    //   addBall(1, parseFloat(currX.toFixed(5)));
+
+    //   if (progress < 1) {
+    //     requestAnimationFrame(step);
+    //   }
+    // };
+
+    // requestAnimationFrame(step);
   };
+
+  // useEffect(() => {
+  //   const canvas = canvasRef.current;
+  //   const ctx = canvas ? canvas.getContext("2d") : null;
+  //   let lastTime = Date.now();
+  //   let elapsedTime = 0;
+  //   let deltaTime = 0;
+
+  //   if (ctx && canvas) {
+  //     canvas.width = window.innerWidth; // Adjust these values as necessary
+  //     canvas.height = window.innerHeight;
+
+  //     const frameRate = 60; // Target frame rate
+  //     const frameInterval = 1000 / frameRate;
+
+  //     const animate = () => {
+  //       animationFrameId.current = requestAnimationFrame(animate);
+
+  //       const now = Date.now();
+  //       deltaTime = now - lastTime;
+  //       elapsedTime = deltaTime / frameInterval;
+
+  //       if (deltaTime > frameInterval) {
+  //         if (elapsedTime > 1 && elapsedTime < 300) {
+  //           // Update and render multiple times for high elapsedTime values
+  //           for (let i = 0; i < elapsedTime; i++) {
+  //             updateAndRender({ plinkoObjects, canvas, ctx, engine });
+  //           }
+  //         } else {
+  //           // Normal update and render
+  //           updateAndRender({ plinkoObjects, canvas, ctx, engine });
+  //         }
+  //         lastTime = now - (deltaTime % frameInterval);
+  //       }
+  //     };
+
+  //     animate();
+
+  //     return () => cancelAnimationFrame(animationFrameId.current);
+  //   }
+  // }, [plinkoObjects, engine]);
 
   const disableInput = useMemo(() => {
     return (
@@ -1168,7 +1235,7 @@ export default function Plinko() {
                   currentMultiplier={5.6}
                   leastMultiplier={0}
                   game="wheel"
-                  disabled={disableInput}
+                  disabled={false}
                 />
 
                 {/* risk  */}
@@ -1272,17 +1339,18 @@ export default function Plinko() {
                     </div>
                   )}
                   <BetButton
-                    disabled={
-                      !wallet ||
-                      !session?.user ||
-                      loading ||
-                      (betSetting === "auto" && startAuto) ||
-                      (betAmt !== undefined &&
-                        maxBetAmt !== undefined &&
-                        betAmt > maxBetAmt)
-                        ? true
-                        : false
-                    }
+                    // disabled={
+                    //   !wallet ||
+                    //   !session?.user ||
+                    //   loading ||
+                    //   (betSetting === "auto" && startAuto) ||
+                    //   (betAmt !== undefined &&
+                    //     maxBetAmt !== undefined &&
+                    //     betAmt > maxBetAmt)
+                    //     ? true
+                    //     : false
+                    // }
+                    disabled={false}
                   >
                     {loading ? <Loader /> : "BET"}
                   </BetButton>
