@@ -131,7 +131,7 @@ export default function VerifyLimboModal({
          <AdaptiveModalContent className="w-full">
           <div className="bg-[#121418] max-h-[80dvh] p-8 pb-20 rounded-lg w-full sm:w-[34rem] -mt-[4.7rem] md:mt-0 overflow-y-scroll nobar sm:-translate-x-16">
             <div className="mx-auto h-1 w-10 rounded-full -translate-y-3 bg-gray-400 sm:hidden" />
-            <div className="flex flex-wrap justify-center sm:justify-between items-center mb-4 sm:mb-[1.4rem]">
+            <div className="flex flex-wrap justify-between items-center mb-4 sm:mb-[1.4rem]">
               <div className="font-changa text-2xl font-semibold text-white mr-4 text-opacity-90">
                 {translator("Limbo", language)}
               </div>

@@ -1,7 +1,4 @@
-import {
-  GameType,
-  generateClientSeed,
-} from "@/utils/provably-fair";
+import { GameType, generateClientSeed } from "@/utils/provably-fair";
 import { useEffect, useState } from "react";
 import { Flip } from "./VerifyFlipModal";
 import { FaRegCopy } from "react-icons/fa6";
@@ -18,7 +15,10 @@ import { translator } from "@/context/transactions";
 import { useGlobalContext } from "@/components/GlobalContext";
 import ProvablyFairModal from "../ProvablyFairModal";
 import GameSelect from "../GameSelect";
-import { AdaptiveModal, AdaptiveModalContent } from "@/components/AdaptiveModal";
+import {
+  AdaptiveModal,
+  AdaptiveModalContent,
+} from "@/components/AdaptiveModal";
 
 export interface PFModalData {
   activeGameSeed: {
@@ -144,9 +144,9 @@ export default function CoinFlipProvablyFairModal({
   return (
     <>
       {isOpen && (
-        <AdaptiveModal open={isOpen} onOpenChange={()=>onClose()}>
-          <AdaptiveModalContent className="bg-[#121418] overflow-y-scroll p-7 rounded-lg sm:max-h-[80dvh] sm:h-auto sm:w-[95%] sm:max-w-[36rem]  md:mt-0 nobar">
-            <div className="flex font-chakra tracking-wider text-2xl font-semibold text-[#F0F0F0] items-center justify-center sm:justify-between">
+        <AdaptiveModal open={isOpen} onOpenChange={() => onClose()}>
+          <AdaptiveModalContent className="bg-[#121418] h-[85%] overflow-y-scroll p-7 rounded-lg sm:max-h-[80dvh] sm:h-auto sm:w-[90%] sm:max-w-[36rem] md:mt-0 nobar">
+            <div className="flex font-chakra tracking-wider text-2xl font-semibold text-[#F0F0F0] items-center justify-center sm:justify-between mb-0">
               <div className="flex items-center gap-2">
                 <Image src={CheckPF} alt="" />
                 {translator("PROVABLY FAIR", language)}
@@ -198,7 +198,7 @@ export default function CoinFlipProvablyFairModal({
                       {translator("Active Server Seed (Hashed)", language)}
                     </label>
                     <div className="bg-[#202329] mt-1 rounded-md px-5 py-4 w-full relative flex items-center justify-between">
-                      <span className="truncate text-[#B9B9BA] text-xs font-semibold">
+                      <span className="truncate max-w-[26rem] text-[#B9B9BA] text-xs font-semibold">
                         {modalData.activeGameSeed.serverSeedHash}
                       </span>
                       <FaRegCopy

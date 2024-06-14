@@ -187,7 +187,7 @@ export default function RollDiceProvablyFairModal({
                       {translator("Active Server Seed (Hashed)", language)}
                     </label>
                     <div className="bg-[#202329] mt-1 rounded-md px-4 py-3 w-full relative flex items-center justify-between">
-                      <span className="truncate text-[#B9B9BA] text-xs font-semibold">
+                      <span className="truncate max-w-[26rem] text-[#B9B9BA] text-xs font-semibold">
                         {modalData.activeGameSeed.serverSeedHash}
                       </span>
                       <FaRegCopy
@@ -242,7 +242,7 @@ export default function RollDiceProvablyFairModal({
                         {translator("Next Server Seed", language)}
                       </label>
                       <div className="bg-[#202329] mt-1 rounded-md px-4 py-3 w-full relative flex items-center justify-between">
-                        <span className="truncate text-[#B9B9BA] text-xs font-semibold">
+                        <span className="truncate max-w-[26rem] text-[#B9B9BA] text-xs font-semibold">
                           {modalData.nextGameSeed.serverSeedHash}
                         </span>
                         <FaRegCopy

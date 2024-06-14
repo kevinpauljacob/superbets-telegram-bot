@@ -192,7 +192,7 @@ export default function BalanceModal() {
 
   return (
     <AdaptiveModal open={showWalletModal} onOpenChange={()=>setShowWalletModal(false)} >
-      <AdaptiveModalContent className="bg-[#121418] h-[80%] sm:h-auto flex sm:w-[95%] sm:max-w-[30rem] flex-col rounded-md p-7 overflow-y-scroll nobar">
+      <AdaptiveModalContent className="bg-[#121418] h-fit sm:h-auto flex w-full sm:max-w-[30rem] flex-col rounded-md p-7 overflow-y-scroll nobar">
         <div className="flex justify-center sm:justify-start items-center w-full mb-7 gap-2 mt-2">
           <Image
             src={"/assets/wallet_color.png"}

@@ -226,7 +226,7 @@ export default function WheelProvablyFairModal({
                       {translator("Active Server Seed (Hashed)", language)}
                     </label>
                     <div className="bg-[#202329] mt-1 rounded-md px-5 py-4 w-full relative flex items-center justify-between">
-                      <span className="truncate text-[#B9B9BA] text-xs font-semibold">
+                      <span className="truncate max-w-[26rem] text-[#B9B9BA] text-xs font-semibold">
                         {modalData.activeGameSeed.serverSeedHash}
                       </span>
                       <FaRegCopy
@@ -281,7 +281,7 @@ export default function WheelProvablyFairModal({
                         {translator("Next Server Seed", language)}
                       </label>
                       <div className="bg-[#202329] mt-1 rounded-md px-5 py-4 w-full relative flex items-center justify-between">
-                        <span className="truncate text-[#B9B9BA] text-xs font-semibold">
+                        <span className="truncate max-w-[26rem] text-[#B9B9BA] text-xs font-semibold">
                           {modalData.nextGameSeed.serverSeedHash}
                         </span>
                         <FaRegCopy
