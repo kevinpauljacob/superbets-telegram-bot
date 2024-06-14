@@ -1,14 +1,16 @@
-import { optionsEdge } from "@/context/config";
+import React, { ReactNode } from "react";
+import GameHeader from "./GameHeader";
+import { useGlobalContext } from "./GlobalContext";
 import { translator, truncateNumber } from "@/context/transactions";
+import { optionsEdge } from "@/context/config";
+import FomoPlay from "./FomoPlay";
+import FOMOHead from "./HeadElement";
+import { useSession } from "next-auth/react";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { useWalletModal } from "@solana/wallet-adapter-react-ui";
 import { useSession } from "next-auth/react";
 import React, { ReactNode } from "react";
 import { handleSignIn } from "./ConnectWallet";
-import FomoPlay from "./FomoPlay";
-import GameHeader from "./GameHeader";
-import { useGlobalContext } from "./GlobalContext";
-import FOMOHead from "./HeadElement";
 
 interface LayoutProps {
   children: ReactNode;
