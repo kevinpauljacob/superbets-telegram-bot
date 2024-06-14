@@ -142,7 +142,7 @@ export default function VerifyDice2Modal({
             <div className="flex flex-1 px-8 sm:p-0 justify-center overflow-y-auto">
               <div className="flex flex-col w-full">
                 <div className="mx-auto h-1 w-10 rounded-full -translate-y-3 bg-gray-400 sm:hidden" />
-                <div className="flex flex-wrap justify-between items-center mb-4 sm:mb-[1.4rem]">
+                <div className="flex flex-wrap sm:flex-col justify-between items-center sm:items-start mb-4 sm:mb-[1.4rem]">
                   <div className="font-changa text-2xl font-semibold text-white mr-4 text-opacity-90">
                     {translator("Keno", language)}
                   </div>

@@ -136,7 +136,7 @@ export default function VerifyFlipModal({
           <AdaptiveModalContent className="bg-[#121418] sm:overflow-y-auto min-h-[50dvh] max-h-[80dvh] w-full pb-6">
             <div className="flex flex-1 px-6 sm:p-0 justify-center overflow-y-auto">
               <div className="flex flex-col w-full">
-                <div className="flex flex-wrap justify-between items-center mb-4 sm:mb-[1.4rem]">
+                <div className="flex flex-wrap sm:flex-col justify-between items-center sm:items-start mb-4 sm:mb-[1.4rem]">
                   <div className="font-changa text-2xl font-semibold text-white mr-4 text-opacity-90">
                     {translator("Coin Flip", language)}
                   </div>
