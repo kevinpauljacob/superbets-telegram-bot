@@ -118,7 +118,7 @@ export default function GameHeader() {
       <div className="flex flex-row w-full items-center justify-between">
         <div className="flex items-center">
           <Image
-            src={selectedGame.icon}
+            src={"/assets/gameIcon.svg"}
             alt={selectedGame.name}
             width={30}
             height={30}
