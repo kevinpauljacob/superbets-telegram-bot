@@ -19,10 +19,16 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
       await connectDatabase();
 
-      const result = await User.aggregate([
+      const result = await GameSeed.aggregate([
+        {
+          $group: {
+            _id: "$wallet", // Group by the wallet field
+          },
+        },
         {
           $project: {
-            wallet: 1,
+            _id: 0,
+            wallet: "$_id", // Project wallet field as the output
           },
         },
       ]);
