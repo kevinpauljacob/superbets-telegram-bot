@@ -561,7 +561,11 @@ export default function Plinko() {
     maxBetAmt,
     language,
     selectedCoin,
+    enableSounds,
   } = useGlobalContext();
+
+  const muteRef = useRef<boolean>(false);
+  muteRef.current = !enableSounds;
 
   const [betAmt, setBetAmt] = useState<number | undefined>();
   const [userInput, setUserInput] = useState<number | undefined>();
@@ -717,10 +721,7 @@ export default function Plinko() {
   const addBall = useCallback(
     (ballValue: number, pos: number) => {
       addInGameBall();
-      const ballSound = new Audio("/sounds/ball.wav");
-      ballSound.volume = 0.2;
-      ballSound.currentTime = 0;
-      ballSound.play();
+      soundAlert('/sounds/ball.wav', muteRef.current)
 
       const minBallX =
         worldWidth / 2 - pinsConfig.pinSize * 3 + pinsConfig.pinGap;
@@ -872,12 +873,7 @@ export default function Plinko() {
     const multiplierColor = multiplierValues[2] ?? "#ffffff";
     const multiplierSound = multiplierValues[3] ?? "regular";
 
-    const multiplierSong = new Audio(
-      `/sounds/multiplier_${multiplierSound}.wav`,
-    );
-    multiplierSong.currentTime = 0;
-    multiplierSong.volume = 0.2;
-    multiplierSong.play();
+    soundAlert(`/sounds/multiplier_${multiplierSound}.wav`, muteRef.current)
     setLastMultipliers((prev) => [
       { color: `#${multiplierColor}`, value: multiplierValue },
       prev[0],
@@ -893,7 +889,7 @@ export default function Plinko() {
         ? prevMap["750"]["9"][multiplierValue]
         : []
     ).concat([posX!]);
-    console.log("fall array", posArray, multiplierValue, posX);
+    // console.log("fall array", posArray, multiplierValue, posX);
     prevMap = {
       750: { 9: { ...prevMap["750"]["9"], [multiplierValue]: posArray } },
     };
@@ -904,12 +900,8 @@ export default function Plinko() {
   async function onBodyCollision(event: IEventCollision<Engine>) {
     const pairs = event.pairs;
     for (const pair of pairs) {
-      console.log("colliding", pair);
       const { bodyA, bodyB } = pair;
-      if (bodyB.label.includes("ball") && bodyA.label.includes("ball"))
-        console.log("fall oommbi");
       if (bodyB.label.includes("ball") && bodyA.label.includes("block")) {
-        console.log("fall yay");
         await onCollideWithMultiplier(bodyB, bodyA);
       }
     }
@@ -927,7 +919,7 @@ export default function Plinko() {
       const win = result?.result === "Won";
       if (win) {
         successCustom(result?.message);
-        soundAlert("/sounds/win.wav");
+        soundAlert("/sounds/win.wav", muteRef.current);
       } else errorCustom(result?.message);
       const newBetResult = { result: result?.strikeMultiplier, win };
 
@@ -1148,23 +1140,23 @@ export default function Plinko() {
 
     const k = 0.000001; // Adjust this value to change the difference between values
     let start: number | null = null;
-    const duration = 30000; // Animation duration in milliseconds
-    // const duration = 10000; // Animation duration in milliseconds
+    // const duration = 30000; // Animation duration in milliseconds use for right and left 
+    const duration = 10000; // Animation duration in milliseconds use for 0 to 1 range
 
     const step = (timestamp: number) => {
-      if (!start) start = 0.3 * timestamp;
-      // if (!start) start = 1 * timestamp;
-      // if (!start) start = 1.5 * timestamp;
-      const progress = Math.min((timestamp - start) / duration, 1.5);
+      // if (!start) start = 0.3 * timestamp; // left setting: middle value to 1.5
+      if (!start) start = 1 * timestamp; //0 to 1 setting
+      // if (!start) start = 1.5 * timestamp; // right setting: -1.smth to middle
+      const progress = Math.min((timestamp - start) / duration, 1); // set 1 for 0 to 1 range, for oleft and right 1.5 is fine
       const currX = Math.floor(progress / k) * k; // Round down to the nearest multiple of k
 
       setCurrX(currX);
-      console.log("fall", currX);
+      // console.log("fall", currX);
       addBall(1, parseFloat(currX.toFixed(7)));
 
-      // if (progress < 0.4) {
-      // if (progress < 1) {
-      if (progress < 1.5) {
+      // if (progress < 0.4) { //right setting
+      if (progress < 1) { // 0 to 1 setting
+      // if (progress < 1.5) { // left setting
         requestAnimationFrame(step);
       }
     };
@@ -1263,7 +1255,7 @@ export default function Plinko() {
             {startAuto && (
               <div
                 onClick={() => {
-                  soundAlert("/sounds/betbutton.wav");
+                  soundAlert("/sounds/betbutton.wav", !enableSounds);
                   warningCustom("Auto bet stopped", "top-right");
                   setAutoBetCount(0);
                   setStartAuto(false);
@@ -1411,7 +1403,7 @@ export default function Plinko() {
                   {startAuto && (
                     <div
                       onClick={() => {
-                        soundAlert("/sounds/betbutton.wav");
+                        soundAlert("/sounds/betbutton.wav", !enableSounds);
                         warningCustom("Auto bet stopped", "top-right");
                         setAutoBetCount(0);
                         setStartAuto(false);
