@@ -350,6 +350,14 @@ export default function Plinko() {
   const [fallMap, setFallMap] = useState<FallMapType2>({
     750: {
       8: {},
+      9: {},
+      10: {},
+      11: {},
+      12: {},
+      13: {},
+      14: {},
+      15: {},
+      16: {},
     },
   });
   const referenceMap = useRef<FallMapType2>();
@@ -392,7 +400,7 @@ export default function Plinko() {
         ? 13
         : width! >= 600
         ? 11
-        : 6) /
+        : 8) /
       (lines / 8),
   };
 
@@ -641,12 +649,27 @@ export default function Plinko() {
       },
       engine,
     });
-    const runner = Runner.create({
-      isFixed: true,
-    });
-    Runner.run(runner, engine);
+
+    let isRunning = true;
+    let lastUpdate = performance.now();
+    const fixedDelta = 1000 / 60;
+
+    const runnerFunc = () => {
+      const now = performance.now();
+      while (lastUpdate < now) {
+        Engine.update(engine, fixedDelta);
+        lastUpdate += fixedDelta;
+      }
+      if (isRunning) {
+        requestAnimationFrame(runnerFunc);
+      }
+    };
+
+    requestAnimationFrame(runnerFunc);
     Render.run(render);
+
     return () => {
+      isRunning = false;
       World.clear(engine.world, true);
       Engine.clear(engine);
       render.canvas.remove();
@@ -709,11 +732,16 @@ export default function Plinko() {
 
       const ballX = pos! * (maxBallX - minBallX) + minBallX;
       console.log(">>>>>>", pos);
+      let isNeg = "";
+      if (pos < 0) {
+        pos = pos * -1;
+        isNeg = "-yes";
+      }
       const ballColor = colors.purple;
-      const ball = Bodies.circle(ballX, 20, ballConfig.ballSize, {
+      const ball = Bodies.circle(ballX, 0, ballConfig.ballSize, {
         restitution: 1.25,
         friction: 0.6,
-        label: `ball-${ballValue}-${pos}`,
+        label: `ball-${ballValue}-${pos}${isNeg}`,
         id: new Date().getTime(),
         frictionAir: 0.05,
         collisionFilter: {
@@ -738,7 +766,7 @@ export default function Plinko() {
     worldWidth * 10,
     60 / (lines / 8),
     {
-      label: "block-1",
+      label: "block-floor-plinko",
       render: {
         visible: false,
       },
@@ -810,6 +838,8 @@ export default function Plinko() {
     World.remove(engine.world, ball);
     removeInGameBall();
 
+    if (multiplier.label.includes("floor")) return;
+
     const multiplierElement = document.getElementById(multiplier.label);
 
     if (multiplierElement) {
@@ -857,13 +887,17 @@ export default function Plinko() {
 
     let prevMap = { ...referenceMap.current! };
     let posX = parseFloat(ball.label.split("-")[2]);
-    let posArray = (prevMap["750"]["8"][multiplierValue] ?? []).concat([posX!]);
+    if (ball.label.split("-").length === 4) posX = posX * -1;
+    let posArray = (
+      multiplierValue in prevMap["750"]["9"]
+        ? prevMap["750"]["9"][multiplierValue]
+        : []
+    ).concat([posX!]);
     console.log("fall array", posArray, multiplierValue, posX);
     prevMap = {
-      750: { 8: { ...prevMap["750"]["8"], [multiplierValue]: posArray } },
+      750: { 9: { ...prevMap["750"]["9"], [multiplierValue]: posArray } },
     };
     setFallMap(prevMap);
-    // reference.current! <=1 && setCurrX(prev => prev + 0.1);
 
     if (+ballValue <= 0) return;
   }
@@ -1085,13 +1119,13 @@ export default function Plinko() {
     //     setStartAuto(true);
     //   }
     // } else if (wallet.connected) handleBet();
-    addBall(1, betAmt!);
+    // addBall(1, betAmt!);
     // for (let i = 0; i <= 1; i += 0.0015) {
-    //   setTimeout(() => {
+    //   // setTimeout(() => {
     //     setCurrX(i);
     //     console.log("fall", i);
     //     addBall(1, parseFloat(i.toFixed(5)));
-    //   }, 1000);
+    //   // }, 1000);
     // }
 
     //   let start: number | null = null;
@@ -1100,11 +1134,10 @@ export default function Plinko() {
     // const step = (timestamp: number) => {
     //   if (!start) start = timestamp;
     //   const progress = Math.min((timestamp - start) / duration, 1);
-    //   const currX = progress * 1.0015; // Adjust the final value as needed
+    //   const currX = progress * 1.000105; // Adjust the final value as needed
 
-    //   setCurrX(currX);
     //   console.log("fall", currX);
-    //   addBall(1, parseFloat(currX.toFixed(5)));
+    //   addBall(1, parseFloat(currX.toFixed(6)));
 
     //   if (progress < 1) {
     //     requestAnimationFrame(step);
@@ -1112,8 +1145,57 @@ export default function Plinko() {
     // };
 
     // requestAnimationFrame(step);
-  };
 
+    const k = 0.000001; // Adjust this value to change the difference between values
+    let start: number | null = null;
+    const duration = 30000; // Animation duration in milliseconds
+    // const duration = 10000; // Animation duration in milliseconds
+
+    const step = (timestamp: number) => {
+      if (!start) start = 0.3 * timestamp;
+      // if (!start) start = 1 * timestamp;
+      // if (!start) start = 1.5 * timestamp;
+      const progress = Math.min((timestamp - start) / duration, 1.5);
+      const currX = Math.floor(progress / k) * k; // Round down to the nearest multiple of k
+
+      setCurrX(currX);
+      console.log("fall", currX);
+      addBall(1, parseFloat(currX.toFixed(7)));
+
+      // if (progress < 0.4) {
+      // if (progress < 1) {
+      if (progress < 1.5) {
+        requestAnimationFrame(step);
+      }
+    };
+
+    requestAnimationFrame(step);
+
+    //   const k = 0.000015; // Adjust this value to change the difference between values
+    // let start: number | null = null;
+    // const duration = 3000; // Animation duration in milliseconds
+    // let currentIndex = 0; // Track the current index
+    // const delayBetweenBalls = 10; // Delay in milliseconds between each ball creation
+
+    // const step = () => {
+    //   if (!start) start = performance.now();
+    //   const progress = Math.min((performance.now() - start) / duration, 1);
+    //   const currX = Math.floor(progress / k) * k; // Round down to the nearest multiple of k
+
+    //   if (currentIndex * k <= currX) {
+    //     setCurrX(currX);
+    //     console.log("fall", currX);
+    //     addBall(1, parseFloat(currX.toFixed(6)));
+    //     currentIndex++;
+    //   }
+
+    //   if (progress < 1) {
+    //     setTimeout(step, delayBetweenBalls);
+    //   }
+    // };
+
+    // step();
+  };
   // useEffect(() => {
   //   const canvas = canvasRef.current;
   //   const ctx = canvas ? canvas.getContext("2d") : null;
@@ -1192,17 +1274,18 @@ export default function Plinko() {
               </div>
             )}
             <BetButton
-              disabled={
-                !wallet ||
-                !session?.user ||
-                loading ||
-                (betSetting === "auto" && startAuto) ||
-                (betAmt !== undefined &&
-                  maxBetAmt !== undefined &&
-                  betAmt > maxBetAmt)
-                  ? true
-                  : false
-              }
+              // disabled={
+              //   !wallet ||
+              //   !session?.user ||
+              //   loading ||
+              //   (betSetting === "auto" && startAuto) ||
+              //   (betAmt !== undefined &&
+              //     maxBetAmt !== undefined &&
+              //     betAmt > maxBetAmt)
+              //     ? true
+              //     : false
+              // }
+              disabled={false}
               onClickFunction={onSubmit}
             >
               {loading ? <Loader /> : "BET"}
