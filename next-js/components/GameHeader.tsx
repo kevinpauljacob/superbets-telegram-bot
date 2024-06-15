@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { GameType } from "@/utils/provably-fair";
 import { useGlobalContext } from "./GlobalContext";
 import { translator, truncateNumber } from "@/context/transactions";
-import { Coins } from "./Infobar";
+import { TokenVolumes } from "./Infobar";
 
 export default function GameHeader() {
   const router = useRouter();
@@ -12,7 +12,7 @@ export default function GameHeader() {
 
   const { coinData, houseEdge, setOpenPFModal, language } = useGlobalContext();
 
-  const getVolume = async (totalVolume: Coins): Promise<number> => {
+  const getVolume = async (totalVolume: TokenVolumes): Promise<number> => {
     const mintIds = Object.keys(totalVolume).join(",");
     const data = await (
       await fetch(`https://price.jup.ag/v6/price?ids=${mintIds}&vsToken=SOL`)
