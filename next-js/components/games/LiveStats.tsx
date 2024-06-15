@@ -24,7 +24,10 @@ export default function LiveStats() {
   });
   const [hoverValue, setHoverValue] = useState<number | null>(null);
 
-  const games = ["All", ...Object.values(GameType)];
+  const games = ["All", ...Object.values(GameType)].filter(x => {
+    let g = ["hilo", "roulette1", "roulette2", "plinko"];
+    return !g.includes(x);
+  })
 
   useEffect(() => {
     if (liveCurrentStat === "All") {
@@ -197,7 +200,7 @@ export default function LiveStats() {
                   height="14"
                   viewBox="0 0 14 14"
                   fill="none"
-                  className="ml-1"
+                  className="ml-1 -mt-0.5"
                 >
                   <g opacity="0.5">
                     <path
@@ -272,7 +275,7 @@ export default function LiveStats() {
                   height="14"
                   viewBox="0 0 14 14"
                   fill="none"
-                  className="ml-1"
+                  className="ml-1 -mt-0.5"
                 >
                   <g opacity="0.5">
                     <path
