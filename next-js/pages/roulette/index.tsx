@@ -166,7 +166,7 @@ export default function Roulette() {
     const betsForArea = betss.filter((bet) => bet.areaId === areaId);
     if (betsForArea.length > 0) {
       return (
-        <div className="absolute inset-0 flex flex-col items-center justify-center space-y-1 z-10">
+        <div className="absolute inset-0 flex flex-col items-center justify-center space-y-1 z-10 w-7 sm:w-12 -rotate-90 sm:rotate-0 -left-1">
           {betsForArea.slice(0, 3).map((bet, index) => (
             <Image
               key={index}
@@ -174,7 +174,7 @@ export default function Roulette() {
               height={40}
               src={bet.token.image}
               alt={`token-${index}`}
-              className="absolute"
+              className="absolute drop-shadow-3xl"
               style={{ bottom: `${index * 3}px` }}
             />
           ))}
@@ -185,14 +185,35 @@ export default function Roulette() {
   };
 
   const renderLeftSplitToken = (number: number, rowIndex: number, colIndex: number) => {
-    if (colIndex > 0) {
-      const leftNumber = rows[rowIndex][colIndex - 1];
-      const areaId = `split-${number}-${leftNumber}`;
-
+    if (number === 1 || number === 2 || number === 3) {
+      const areaId = `split-${number}-0`;
       const betsForArea = betss.filter((bet) => bet.areaId === areaId);
+  
       if (betsForArea.length > 0) {
         return (
-          <div className="absolute inset-0 flex flex-col items-center justify-center space-y-1 z-10 w-12 ">
+          <div className="absolute inset-0 flex flex-col items-center justify-center space-y-1 z-10 w-7 sm:w-12 -rotate-90 sm:rotate-0 bottom-8 sm:bottom-0">
+            {betsForArea.slice(0, 3).map((bet, index) => (
+              <Image
+                key={index}
+                width={40}
+                height={40}
+                src={bet.token.image}
+                alt={`token-${index}`}
+                className="absolute drop-shadow-3xl"
+                style={{ left: '-16px', bottom: `${index * 3}px` }}
+              />
+            ))}
+          </div>
+        );
+      }
+    } else if (colIndex > 0) {
+      const leftNumber = rows[rowIndex][colIndex - 1];
+      const areaId = `split-${number}-${leftNumber}`;
+      const betsForArea = betss.filter((bet) => bet.areaId === areaId);
+  
+      if (betsForArea.length > 0) {
+        return (
+          <div className="absolute inset-0 flex flex-col items-center justify-center space-y-1 z-10 w-7 sm:w-12 -rotate-90 sm:rotate-0 bottom-8 sm:bottom-0">
             {betsForArea.slice(0, 3).map((bet, index) => (
               <Image
                 key={index}
@@ -210,7 +231,8 @@ export default function Roulette() {
     }
     return null;
   };
-
+  
+  
   const renderTopSplitToken = (number: number, rowIndex: number, colIndex: number) => {
     if (rowIndex > 0) {
       const topNumber = rows[rowIndex - 1][colIndex];
@@ -219,7 +241,7 @@ export default function Roulette() {
       const betsForArea = betss.filter((bet) => bet.areaId === areaId);
       if (betsForArea.length > 0) {
         return (
-          <div className="absolute inset-0 flex flex-col items-center justify-center space-y-1 z-10 top-6 ">
+          <div className="absolute inset-0 flex flex-col items-center justify-center space-y-1 z-10 w-7 sm:w-12 sm:top-6 sm:rotate-0 -rotate-90 left-2 top-2   sm:left-0">
             {betsForArea.slice(0, 3).map((bet, index) => (
               <Image
                 key={index}
@@ -227,7 +249,7 @@ export default function Roulette() {
                 height={40}
                 src={bet.token.image}
                 alt={`token-${index}`}
-                className="absolute sm:drop-shadow-3xl"
+                className="absolute drop-shadow-3xl"
                 style={{ bottom: `${index * 3}px` }}
               />
             ))}
@@ -239,16 +261,17 @@ export default function Roulette() {
   };
 
   const renderCornerToken = (number: number, rowIndex: number, colIndex: number) => {
-    if (colIndex < rows[rowIndex].length - 1 && rowIndex > 0) {
+    if (rowIndex > 0 && rows[rowIndex] && rows[rowIndex - 1] && colIndex < rows[rowIndex].length - 1) {
       const rightNumber = rows[rowIndex][colIndex - 1];
       const topNumber = rows[rowIndex - 1][colIndex];
       const topRightNumber = rows[rowIndex - 1][colIndex - 1];
       const areaId = `corner-${number}-${rightNumber}-${topNumber}-${topRightNumber}`;
-
+  
       const betsForArea = betss.filter((bet) => bet.areaId === areaId);
+  
       if (betsForArea.length > 0) {
         return (
-          <div className="absolute inset-0 flex flex-col items-center justify-center space-y-1 z-10 w-12 h-full ">
+          <div className="absolute inset-0 flex flex-col items-center justify-center space-y-1 z-10 sm:w-12 w-7 h-full sm:rotate-0 -rotate-90 -left-2 -top-3 sm:top-0 sm:left-0">
             {betsForArea.slice(0, 3).map((bet, index) => (
               <Image
                 key={index}
@@ -266,14 +289,53 @@ export default function Roulette() {
     }
     return null;
   };
-
+  
+  const handlePlaceCornerBetWithThreeNumbers = (
+    number: number,
+    adjacentNumbers: number[],
+    token: Token | null
+  ) => {
+    if (token) {
+      const areaId = `corner-${number}-${adjacentNumbers.join('-')}`;
+      handlePlaceBet(areaId, token);
+    }
+  };
+  
+ 
+  const renderCornerTokenWithThreeNumbers = (number: number, rowIndex: number, colIndex: number) => {
+    if (rowIndex > 0) {
+      const topNumber = rows[rowIndex - 1][colIndex];
+      const areaId = `corner-${number}-0-${topNumber}`;
+      const betsForArea = betss.filter((bet) => bet.areaId === areaId);
+  
+      if (betsForArea.length > 0) {
+        return (
+          <div className="absolute inset-0 flex flex-col items-center justify-center space-y-1 z-10 sm:w-12 w-7 h-full sm:rotate-0 -rotate-90 -left-2 -top-3 sm:top-0 sm:left-0">
+            {betsForArea.slice(0, 3).map((bet, index) => (
+              <Image
+                key={index}
+                width={40}
+                height={40}
+                src={bet.token.image}
+                alt={`token-${index}`}
+                className="absolute drop-shadow-3xl"
+                style={{ left: '20%', transform: 'translateX(-50%)', bottom: `${index * 3}px` }}
+              />
+            ))}
+          </div>
+        );
+      }
+    }
+    return null;
+  };
+  
   const renderTopColumnToken = (colIndex: number) => {
     const columnNumbers = rows.map(row => row[colIndex]);
     const areaId = `column-${columnNumbers.join('-')}`;
     const betsForArea = betss.filter((bet) => bet.areaId === areaId);
     if (betsForArea.length > 0) {
       return (
-        <div className="absolute inset-0 flex flex-col items-center justify-center space-y-1 z-10 ">
+        <div className="absolute inset-0 flex flex-col items-center justify-center space-y-1 w-7 sm:w-12 z-10 sm:-bottom-2 -bottom-1 -rotate-90 sm:rotate-0 left-1 sm:left-0">
           {betsForArea.slice(0, 3).map((bet, index) => (
             <Image
               key={index}
@@ -291,6 +353,7 @@ export default function Roulette() {
     return null;
   };
 
+  
   const disableInput = useMemo(() => {
     return betType === "auto" && startAuto
       ? true
@@ -335,7 +398,7 @@ export default function Roulette() {
                     {tokens.map((chip) => (
                       <div
                         key={chip.id}
-                        className={`border rounded cursor-pointer bg-[#1e2024] flex justify-center items-center py-1 px-[-2px] ${selectedChip === chip.value ? 'border-white' : 'border-gray-600'}`
+                        className={`border rounded cursor-pointer bg-[#1e2024] flex justify-center items-center py-1 px-[-2px] ${selectedToken === chip ? 'border-white' : 'border-gray-600'}`
                         }
                         onClick={() => setSelectedToken(chip)}
                       >
@@ -391,8 +454,12 @@ export default function Roulette() {
           <div className="w-full flex items-start gap-1   ">
             {/* flex-col */}
             <div
-              className="  h-[125px] w-[27.3px]  sm:h-[153px] sm:w-12    flex flex-col justify-center text-center cursor-pointer bg-[#149200] rounded-[5px]
-               text-white relative border-4 border-transparent  hover:bg-[#55BA78] hover:border-[2px] hover:border-slate-300 mb-1"
+              className={` h-[125px] w-[27.3px]  sm:h-[153px] sm:w-12    flex flex-col justify-center text-center cursor-pointer bg-[#149200] rounded-[5px]
+               text-white relative border-4 border-transparent  hover:bg-[#55BA78]
+                hover:border-[2px] hover:border-slate-300 mb-1 ${hoveredCorner && hoveredCorner.includes(0) ? 'overlay border-[2px] border-white'
+                : ''}
+                ${hoveredSplit && hoveredSplit.includes(0) ? 'overlay border-[2px] border-white'
+                : ''}`}
               onClick={() => handlePlaceBet('num-0', selectedToken)}
             >
               {/* h-[27.3px] w-[125px] */}
@@ -408,7 +475,7 @@ export default function Roulette() {
                           <div key={colIndex} className="relative flex justify-center items-center">
                             <button
                               data-testid={`roulette-tile-${number}`}
-                              className={` h-[40px] w-[27px] sm:w-[48px] sm:h-[48px] flex items-center justify-center relative  ${
+                              className={` h-[40px] w-[27px] sm:w-[48px] sm:h-[48px] flex items-center justify-center  relative text-center  ${
                                 predefinedBets.red.includes(number)  /* h-[27px] w-[40px] */
                                   ? 'bg-[#F1323E] hover:border hover:border-slate-200 hover:bg-[#FF5C67]'
                                   : 'bg-[#2A2E38] hover:border hover:border-slate-200 hover:bg-[#4D5361]'
@@ -435,7 +502,7 @@ export default function Roulette() {
                               }`}
                               onClick={() => selectedToken && handlePlaceBet(`num-${number}`, selectedToken)}
                             >
-                              <p className="-rotate-90 sm:rotate-0">{number}</p>
+                              <p className="-rotate-90 sm:rotate-0 ">{number}</p>
                               
                               {renderRegularToken(`num-${number}`)}
                             </button>
@@ -459,41 +526,68 @@ export default function Roulette() {
                                 onMouseLeave={() => setHoveredSplit(null)}
                               >
                                 {rowIndex > 0 && renderTopSplitToken(number, rowIndex, colIndex)}
+                                
                               </button>
                             )}
 
-                            {colIndex > 0 && (
-                              <button
-                                data-testid={`roulette-tile-${number}-left`}
-                                className="absolute w-1 sm:w-3 h-full bg-transparent -left-2 px-2 top-0"
-                                onClick={() => handlePlaceSplitBet(number, rows[rowIndex][colIndex - 1], selectedToken)}
-                                onMouseEnter={() => setHoveredSplit([number, rows[rowIndex][colIndex - 1]])}
-                                onMouseLeave={() => setHoveredSplit(null)}
-                              >
-                                {renderLeftSplitToken(number, rowIndex, colIndex)}
-                              </button>
+                            { (
+                             <button
+                             data-testid={`roulette-tile-${number}-left`}
+                             className="absolute w-[12px] px-[6px] py-[1px] h-[42px] sm:w-3 sm:h-full bg-transparent -left-[7px] sm:-left-2 sm:px-2 top-0"
+                             onClick={() => {
+                               if (number === 1 || number === 2 || number === 3) {
+                                 handlePlaceSplitBet(number, 0, selectedToken);
+                               } else {
+                                 handlePlaceSplitBet(number, rows[rowIndex][colIndex - 1], selectedToken);
+                               }
+                             }}
+                             onMouseEnter={() => {
+                               if (number === 1 || number === 2 || number === 3) {
+                                 setHoveredSplit([number, 0]);
+                               } else {
+                                 setHoveredSplit([number, rows[rowIndex][colIndex - 1]]);
+                               }
+                             }}
+                             onMouseLeave={() => setHoveredSplit(null)}
+                           >
+                             {renderLeftSplitToken(number, rowIndex, colIndex)}
+                           </button>
+                           
                             )}
-                            <button
-                              data-testid={`roulette-tile-${number}-corner`}
-                              className="absolute w-6 h-6 bg-transparent -left-2 -top-2"
-                              onClick={() => 
-                                rowIndex > 0 && 
-                                handlePlaceCornerBet(
-                                  number, 
-                                  rows[rowIndex][colIndex - 1], 
-                                  rows[rowIndex - 1][colIndex], 
-                                  rows[rowIndex - 1][colIndex - 1], 
-                                  selectedToken
-                                )
-                              }
-                              onMouseEnter={() => 
-                                rowIndex > 0 && 
-                                setHoveredCorner([number, rows[rowIndex][colIndex - 1], rows[rowIndex - 1][colIndex], rows[rowIndex - 1][colIndex -1]])
-                              }
-                              onMouseLeave={() => setHoveredCorner(null)}
-                            >
-                              {rowIndex > 0 && renderCornerToken(number, rowIndex, colIndex)}
-                            </button>
+<button
+  data-testid={`roulette-tile-${number}-corner`}
+  className="absolute w-[15px] h-[24px] sm:w-6 sm:h-6 bg-transparent -left-2 -top-2"
+  onClick={() => {
+    if (rowIndex > 0) {
+      if (number === 2) {
+        handlePlaceCornerBetWithThreeNumbers(number, [0, rows[rowIndex - 1][colIndex]], selectedToken);
+      } else if (number === 1) {
+        handlePlaceCornerBetWithThreeNumbers(number, [0, rows[rowIndex - 1][colIndex]], selectedToken);
+      } else {
+        handlePlaceCornerBet(number, rows[rowIndex][colIndex - 1], rows[rowIndex - 1][colIndex], rows[rowIndex - 1][colIndex - 1], selectedToken);
+      }
+    }
+  }}
+  onMouseEnter={() => {
+    if (rowIndex > 0) {
+      if (number === 2) {
+        setHoveredCorner([number, 0, rows[rowIndex - 1][colIndex]]);
+      } else if (number === 1) {
+        setHoveredCorner([number,0, rows[rowIndex - 1][colIndex]]);
+      } else {
+        setHoveredCorner([number, rows[rowIndex][colIndex - 1], rows[rowIndex - 1][colIndex], rows[rowIndex - 1][colIndex - 1]]);
+      }
+    }
+  }}
+  onMouseLeave={() => setHoveredCorner(null)}
+>
+  {rowIndex > 0 && renderCornerToken(number, rowIndex, colIndex)}
+  {renderCornerTokenWithThreeNumbers(number,rowIndex,colIndex)}
+</button>
+
+
+
+
                           </div>
                         );
                       })}
@@ -630,7 +724,30 @@ export default function Roulette() {
               </div>
 
             </div>
-              <div className="sm:h-[153px] sm:w-12  w-[27.3px] h-[123px] bg-transparent"/>
+              <div className="sm:h-[153px] sm:w-12  bg-transparent hidden sm:block"/>
+              <div className="flex flex-col   w-[27.3px] h-[123px] text-white  sm:hidden gap-1">
+          <div className="flex items-center justify-center cursor-pointer hover:opacity-90  w-[27px] h-[40px] rounded-md bg-[#2A2E38]"
+            onClick={undoLastBet}>
+              <Image
+                src="/assets/Undo.png"
+                width={20}
+                height={20}
+                alt="undo"
+              />
+              
+            </div>
+            <div className="flex items-center justify-center cursor-pointer hover:opacity-90 w-[27px] h-[40px]  rounded-md bg-[#2A2E38]"
+            onClick={clearBets}>
+              <Image
+                src="/assets/clear.png"
+                width={18}
+                height={18}
+                alt="clear"
+                
+              />
+             
+            </div>
+        </div>
           </div>
             
           </div>
