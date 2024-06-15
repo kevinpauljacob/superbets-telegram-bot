@@ -14,6 +14,7 @@ import { useGlobalContext } from "@/components/GlobalContext";
 import { translator } from "@/context/transactions";
 import ProvablyFairModal from "../ProvablyFairModal";
 import GameSelect from "../GameSelect";
+import { AdaptiveModal, AdaptiveModalContent } from "@/components/AdaptiveModal";
 
 export interface PFModalData {
   activeGameSeed: {
@@ -116,15 +117,6 @@ export default function WheelProvablyFairModal({
     setState(newState);
   };
 
-  const handleClose = () => {
-    //@ts-ignore
-    document.addEventListener("click", function (event) {
-      //@ts-ignore
-      var targetId = event.target.id;
-      if (targetId && targetId === "pf-modal-bg") onClose();
-    });
-  };
-
   useEffect(() => {
     if (modalData.tab) handleToggleState(modalData.tab);
   }, [modalData]);
@@ -180,27 +172,12 @@ export default function WheelProvablyFairModal({
   return (
     <>
       {isOpen && (
-        <div
-          onClick={() => {
-            handleClose();
-          }}
-          id="pf-modal-bg"
-          className="absolute z-[150] left-0 top-0 flex h-full w-full items-center justify-center bg-[#33314680] backdrop-blur-[0px] transition-all"
-        >
-          <div className="bg-[#121418] max-h-[80dvh]  overflow-y-scroll p-8 rounded-lg z-10 w-11/12 sm:w-[32rem] -mt-[4.7rem] md:mt-0 nobar">
-            <div className="flex font-chakra tracking-wider text-2xl font-semibold text-[#F0F0F0] items-center justify-between">
+       <AdaptiveModal open={isOpen} onOpenChange={()=>onClose()}>
+        <AdaptiveModalContent className="bg-[#121418] h-[85%] overflow-y-scroll p-7 rounded-lg sm:max-h-[80dvh] sm:h-auto sm:w-[90%] sm:max-w-[36rem]  md:mt-0 nobar">
+            <div className="flex font-chakra tracking-wider text-2xl font-semibold text-[#F0F0F0] items-center justify-center sm:justify-between">
               <div className="flex items-center gap-2">
                 <Image src={CheckPF} alt="" />
                 {translator("PROVABLY FAIR", language)}
-              </div>
-              <div className="hover:cursor-pointer hover:bg-[#26282c] transition-all rounded-full p-[2px]">
-                <MdClose
-                  size={25}
-                  color="#F0F0F0"
-                  onClick={() => {
-                    onClose();
-                  }}
-                />
               </div>
             </div>
             <div className="my-4 flex w-full items-center justify-center">
@@ -249,7 +226,7 @@ export default function WheelProvablyFairModal({
                       {translator("Active Server Seed (Hashed)", language)}
                     </label>
                     <div className="bg-[#202329] mt-1 rounded-md px-5 py-4 w-full relative flex items-center justify-between">
-                      <span className="truncate text-[#B9B9BA] text-xs font-semibold">
+                      <span className="truncate max-w-[26rem] text-[#B9B9BA] text-xs font-semibold">
                         {modalData.activeGameSeed.serverSeedHash}
                       </span>
                       <FaRegCopy
@@ -304,7 +281,7 @@ export default function WheelProvablyFairModal({
                         {translator("Next Server Seed", language)}
                       </label>
                       <div className="bg-[#202329] mt-1 rounded-md px-5 py-4 w-full relative flex items-center justify-between">
-                        <span className="truncate text-[#B9B9BA] text-xs font-semibold">
+                        <span className="truncate max-w-[26rem] text-[#B9B9BA] text-xs font-semibold">
                           {modalData.nextGameSeed.serverSeedHash}
                         </span>
                         <FaRegCopy
@@ -381,8 +358,8 @@ export default function WheelProvablyFairModal({
                 </div>
               </div>
             )}
-          </div>
-        </div>
+          </AdaptiveModalContent>
+        </AdaptiveModal>
       )}
     </>
   );

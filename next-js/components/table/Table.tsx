@@ -197,7 +197,7 @@ export const TButton: React.FC<ButtonProps> = ({ active, onClick, label }) => {
         active
           ? "bg-[#202329] text-opacity-90"
           : "bg-transparent hover:bg-[#9361d1] focus:bg-[#602E9E] text-opacity-50 hover:text-opacity-90"
-      } transform rounded-[5px] px-[1.2rem] py-2 font-medium tracking-wider font-sans text-sm text-white transition duration-200 flex items-center`}
+      } transform rounded-[5px] w-full md:w-auto px-[1.2rem] py-2 font-medium tracking-wider font-sans text-sm text-white transition duration-200 flex justify-center items-center`}
     >
       {label}
     </button>
