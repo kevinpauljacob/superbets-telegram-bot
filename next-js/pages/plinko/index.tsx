@@ -10,7 +10,6 @@ import {
   World,
   Common,
 } from "matter-js";
-import MatterJS from "@/components/games/Plinko/matterjs";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useWallet } from "@solana/wallet-adapter-react";
 import toast from "react-hot-toast";
@@ -44,6 +43,11 @@ import Loader from "@/components/games/Loader";
 import ConfigureAutoButton from "@/components/ConfigureAutoButton";
 import BetAmount from "@/components/games/BetAmountInput";
 import AutoCount from "@/components/AutoCount";
+import {
+  getRandomFromFallMap,
+  multiplierColorMap,
+} from "@/components/games/Plinko/constants";
+import { GameType } from "@/utils/provably-fair";
 
 type RiskToChance = Record<string, Record<number, Array<number>>>;
 
@@ -51,270 +55,53 @@ export type LinesType = 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15 | 16;
 
 export type RisksType = "Low" | "Medium" | "High";
 
-const adjustedRisks = {
+const riskToChance: RiskToChance = {
   low: {
-    "8": [6.9, 2.1, 1.1, 1, 0.5, 1, 1.1, 2.1, 6.9],
-    "9": [8.2, 2, 1.6, 1, 0.7, 0.7, 1, 1.6, 2, 8.2],
-    "10": [14, 3, 1.4, 1.1, 1, 0.5, 1, 1.1, 1.4, 3, 14],
-    "11": [18.6, 3, 1.9, 1.3, 1, 0.7, 0.7, 1, 1.3, 1.9, 3, 18.6],
-    "12": [30.9, 3, 1.6, 1.4, 1.1, 1, 0.5, 1, 1.1, 1.4, 1.6, 3, 30.9],
-    "13": [49.1, 4, 3, 1.9, 1.2, 0.9, 0.7, 0.7, 0.9, 1.2, 1.9, 3, 4, 49.1],
-    "14": [89, 4, 1.9, 1.4, 1.3, 1.1, 1, 0.5, 1, 1.1, 1.3, 1.4, 1.9, 4, 89],
-    "15": [178.7, 8, 3, 2, 1.5, 1.1, 1, 0.7, 0.7, 1, 1.1, 1.5, 2, 3, 8, 178.7],
-    "16": [
+    8: [6.9, 2.1, 1.1, 1, 0.5, 1, 1.1, 2.1, 6.9],
+    9: [8.2, 2, 1.6, 1, 0.7, 0.7, 1, 1.6, 2, 8.2],
+    10: [14, 3, 1.4, 1.1, 1, 0.5, 1, 1.1, 1.4, 3, 14],
+    11: [18.6, 3, 1.9, 1.3, 1, 0.7, 0.7, 1, 1.3, 1.9, 3, 18.6],
+    12: [30.9, 3, 1.6, 1.4, 1.1, 1, 0.5, 1, 1.1, 1.4, 1.6, 3, 30.9],
+    13: [49.1, 4, 3, 1.9, 1.2, 0.9, 0.7, 0.7, 0.9, 1.2, 1.9, 3, 4, 49.1],
+    14: [89, 4, 1.9, 1.4, 1.3, 1.1, 1, 0.5, 1, 1.1, 1.3, 1.4, 1.9, 4, 89],
+    15: [178.7, 8, 3, 2, 1.5, 1.1, 1, 0.7, 0.7, 1, 1.1, 1.5, 2, 3, 8, 178.7],
+    16: [
       344.1, 9, 2, 1.4, 1.4, 1.2, 1.1, 1, 0.5, 1, 1.1, 1.2, 1.4, 1.4, 2, 9,
       344.1,
     ],
   },
   medium: {
-    "8": [14.4, 3, 1.3, 0.7, 0.4, 0.7, 1.3, 3, 14.4],
-    "9": [20.2, 4, 1.7, 0.9, 0.5, 0.5, 0.9, 1.7, 4, 20.2],
-    "10": [27.6, 5, 2, 1.4, 0.6, 0.4, 0.6, 1.4, 2, 5, 27.6],
-    "11": [34, 6, 3, 1.8, 0.7, 0.5, 0.5, 0.7, 1.8, 3, 6, 34],
-    "12": [53.7, 11, 4, 2, 1.1, 0.6, 0.3, 0.6, 1.1, 2, 4, 11, 53.7],
-    "13": [84.2, 13, 6, 3, 1.3, 0.7, 0.4, 0.4, 0.7, 1.3, 3, 6, 13, 84.2],
-    "14": [140.4, 15, 7, 4, 1.9, 1, 0.5, 0.2, 0.5, 1, 1.9, 4, 7, 15, 140.4],
-    "15": [
+    8: [14.4, 3, 1.3, 0.7, 0.4, 0.7, 1.3, 3, 14.4],
+    9: [20.2, 4, 1.7, 0.9, 0.5, 0.5, 0.9, 1.7, 4, 20.2],
+    10: [27.6, 5, 2, 1.4, 0.6, 0.4, 0.6, 1.4, 2, 5, 27.6],
+    11: [34, 6, 3, 1.8, 0.7, 0.5, 0.5, 0.7, 1.8, 3, 6, 34],
+    12: [53.7, 11, 4, 2, 1.1, 0.6, 0.3, 0.6, 1.1, 2, 4, 11, 53.7],
+    13: [84.2, 13, 6, 3, 1.3, 0.7, 0.4, 0.4, 0.7, 1.3, 3, 6, 13, 84.2],
+    14: [140.4, 15, 7, 4, 1.9, 1, 0.5, 0.2, 0.5, 1, 1.9, 4, 7, 15, 140.4],
+    15: [
       252.1, 18, 11, 5, 3, 1.3, 0.5, 0.3, 0.3, 0.5, 1.3, 3, 5, 11, 18, 252.1,
     ],
-    "16": [
+    16: [
       441.5, 41, 10, 5, 3, 1.5, 1, 0.5, 0.3, 0.5, 1, 1.5, 3, 5, 10, 41, 441.5,
     ],
   },
   high: {
-    "8": [30.2, 4, 1.5, 0.3, 0.2, 0.3, 1.5, 4, 30.2],
-    "9": [45.4, 7, 2, 0.6, 0.2, 0.2, 0.6, 2, 7, 45.4],
-    "10": [80.8, 10, 3, 0.9, 0.3, 0.2, 0.3, 0.9, 3, 10, 80.8],
-    "11": [128.6, 14, 5.2, 1.4, 0.4, 0.2, 0.2, 0.4, 1.4, 5.2, 14, 128.6],
-    "12": [188.1, 24, 8.1, 2, 0.7, 0.2, 0.2, 0.2, 0.7, 2, 8.1, 24, 188.1],
-    "13": [297.4, 37, 11, 4, 1, 0.2, 0.2, 0.2, 0.2, 1, 4, 11, 37, 297.4],
-    "14": [
-      503.7, 56, 18, 5, 1.9, 0.3, 0.2, 0.2, 0.2, 0.3, 1.9, 5, 18, 56, 503.7,
-    ],
-    "15": [
+    8: [30.2, 4, 1.5, 0.3, 0.2, 0.3, 1.5, 4, 30.2],
+    9: [45.4, 7, 2, 0.6, 0.2, 0.2, 0.6, 2, 7, 45.4],
+    10: [80.8, 10, 3, 0.9, 0.3, 0.2, 0.3, 0.9, 3, 10, 80.8],
+    11: [128.6, 14, 5.2, 1.4, 0.4, 0.2, 0.2, 0.4, 1.4, 5.2, 14, 128.6],
+    12: [188.1, 24, 8.1, 2, 0.7, 0.2, 0.2, 0.2, 0.7, 2, 8.1, 24, 188.1],
+    13: [297.4, 37, 11, 4, 1, 0.2, 0.2, 0.2, 0.2, 1, 4, 11, 37, 297.4],
+    14: [503.7, 56, 18, 5, 1.9, 0.3, 0.2, 0.2, 0.2, 0.3, 1.9, 5, 18, 56, 503.7],
+    15: [
       779.5, 83, 27, 8, 3, 0.5, 0.2, 0.2, 0.2, 0.2, 0.5, 3, 8, 27, 83, 779.5,
     ],
-    "16": [
+    16: [
       1335.4, 130, 26, 9, 4, 2, 0.2, 0.2, 0.2, 0.2, 0.2, 2, 4, 9, 26, 130,
       1335.4,
     ],
   },
 };
-
-const riskToChance: RiskToChance = {
-  low: {
-    8: [6.9, 2.1, 1.1, 1, 0.5, 1, 1.1, 2.1, 6.9],
-    9: [5.6, 2, 1.6, 1, 0.7, 0.7, 1, 1.6, 2, 5.6],
-    10: [8.9, 3, 1.4, 1.1, 1, 0.5, 1, 1.1, 1.4, 3, 8.9],
-    11: [8.4, 3, 1.9, 1.3, 1, 0.7, 0.7, 1, 1.3, 1.9, 3, 8.4],
-    12: [10, 3, 1.6, 1.4, 1.1, 1, 0.5, 1, 1.1, 1.4, 1.6, 3, 10],
-    13: [8.1, 4, 3, 1.9, 1.2, 0.9, 0.7, 0.7, 0.9, 1.2, 1.9, 3, 4, 8.1],
-    14: [7.1, 4, 1.9, 1.4, 1.3, 1.1, 1, 0.5, 1, 1.1, 1.3, 1.4, 1.9, 4, 7.1],
-    15: [15, 8, 3, 2, 1.5, 1.1, 1, 0.7, 0.7, 1, 1.1, 1.5, 2, 3, 8, 15],
-    16: [16, 9, 2, 1.4, 1.4, 1.2, 1.1, 1, 0.5, 1, 1.1, 1.2, 1.4, 1.4, 2, 9, 16],
-  },
-  medium: {
-    8: [13, 3, 1.3, 0.7, 0.4, 0.7, 1.3, 3, 13],
-    9: [18, 4, 1.7, 0.9, 0.5, 0.5, 0.9, 1.7, 4, 18],
-    10: [22, 5, 2, 1.4, 0.6, 0.4, 0.6, 1.4, 2, 5, 22],
-    11: [24, 6, 3, 1.8, 0.7, 0.5, 0.5, 0.7, 1.8, 3, 6, 24],
-    12: [33, 11, 4, 2, 1.1, 0.6, 0.3, 0.6, 1.1, 2, 4, 11, 33],
-    13: [43, 13, 6, 3, 1.3, 0.7, 0.4, 0.4, 0.7, 1.3, 3, 6, 13, 43],
-    14: [58, 15, 7, 4, 1.9, 1, 0.5, 0.2, 0.5, 1, 1.9, 4, 7, 15, 58],
-    15: [88, 18, 11, 5, 3, 1.3, 0.5, 0.3, 0.3, 0.5, 1.3, 3, 5, 11, 18, 88],
-    16: [110, 41, 10, 5, 3, 1.5, 1, 0.5, 0.3, 0.5, 1, 1.5, 3, 5, 10, 41, 110],
-  },
-  high: {
-    8: [29, 4, 1.5, 0.3, 0.2, 0.3, 1.5, 4, 29],
-    9: [43, 7, 2, 0.6, 0.2, 0.2, 0.6, 2, 7, 43],
-    10: [76, 10, 3, 0.9, 0.3, 0.2, 0.3, 0.9, 3, 10, 76],
-    11: [120, 14, 5.2, 1.4, 0.4, 0.2, 0.2, 0.4, 1.4, 5.2, 14, 120],
-    12: [170, 24, 8.1, 2, 0.7, 0.2, 0.2, 0.2, 0.7, 2, 8.1, 24, 170],
-    13: [260, 37, 11, 4, 1, 0.2, 0.2, 0.2, 0.2, 1, 4, 11, 37, 260],
-    14: [420, 56, 18, 5, 1.9, 0.3, 0.2, 0.2, 0.2, 0.3, 1.9, 5, 18, 56, 420],
-    15: [620, 83, 27, 8, 3, 0.5, 0.2, 0.2, 0.2, 0.2, 0.5, 3, 8, 27, 83, 620],
-    16: [
-      1000, 130, 26, 9, 4, 2, 0.2, 0.2, 0.2, 0.2, 0.2, 2, 4, 9, 26, 130, 1000,
-    ],
-  },
-};
-
-export const multiplierColorMap: {
-  [key: number]: string[];
-} = {
-  8: [
-    "#FF003F",
-    "#FF302F",
-    "#FF6020",
-    "#FF9010",
-    "#FFC000",
-    "#FF9010",
-    "#FF6020",
-    "#FF302F",
-    "#FF003F",
-  ],
-  9: [
-    "#FF003F",
-    "#FF2B31",
-    "#FF5523",
-    "#FF8015",
-    "#FFAB07",
-    "#FFAB07",
-    "#FF8015",
-    "#FF5523",
-    "#FF2B31",
-    "#FF003F",
-  ],
-  10: [
-    "#FF003F",
-    "#FF2632",
-    "#FF4D26",
-    "#FF7319",
-    "#FF9A0D",
-    "#FFC000",
-    "#FF9A0D",
-    "#FF7319",
-    "#FF4D26",
-    "#FF2632",
-    "#FF2632",
-  ],
-  11: [
-    "#FF003F",
-    "#FF2334",
-    "#FF4628",
-    "#FF691D",
-    "#FF8C11",
-    "#FFAF06",
-    "#FFAF06",
-    "#FF8C11",
-    "#FF691D",
-    "#FF4628",
-    "#FF2334",
-    "#FF003F",
-  ],
-  12: [
-    "#FF003F",
-    "#FF2034",
-    "#FF6020",
-    "#FF6020",
-    "#FF8015",
-    "#FFA00B",
-    "#FFC000",
-    "#FFA00B",
-    "#FF8015",
-    "#FF6020",
-    "#FF6020",
-    "#FF2034",
-    "#FF003F",
-  ],
-  13: [
-    "#FF003F",
-    "#FF1E35",
-    "#FF3B2C",
-    "#FF5922",
-    "#FF7618",
-    "#FF940F",
-    "#FFB105",
-    "#FFB105",
-    "#FF940F",
-    "#FF7618",
-    "#FF5922",
-    "#FF3B2C",
-    "#FF1E35",
-    "#FF003F",
-  ],
-  14: [
-    "#FF003F",
-    "#FF1B36",
-    "#FF372D",
-    "#FF5224",
-    "#FF6E1B",
-    "#FF8912",
-    "#FFA509",
-    "#FFC000",
-    "#FFA509",
-    "#FF8912",
-    "#FF6E1B",
-    "#FF5224",
-    "#FF372D",
-    "#FF1B36",
-    "#FF003F",
-  ],
-  15: [
-    "#FF003F",
-    "#FF1A37",
-    "#FF332E",
-    "#FF4D26",
-    "#FF661D",
-    "#FF8015",
-    "#FF9A0D",
-    "#FFB304",
-    "#FFB304",
-    "#FF9A0D",
-    "#FF8015",
-    "#FF661D",
-    "#FF4D26",
-    "#FF332E",
-    "#FF1A37",
-    "#FF003F",
-  ],
-  16: [
-    "#FF003F",
-    "#FF1837",
-    "#FF302F",
-    "#FF4827",
-    "#FF6020",
-    "#FF7818",
-    "#FF9010",
-    "#FFA808",
-    "#FFC000",
-    "#FFA808",
-    "#FF9010",
-    "#FF7818",
-    "#FF6020",
-    "#FF4827",
-    "#FF302F",
-    "#FF1837",
-    "#FF003F",
-  ],
-};
-
-function getRandomFromFallMap(input: number): number {
-  type FallMapType = {
-    [key: number]: number[][];
-  };
-  const fallMap: FallMapType = {
-    0.5: [
-      [0.15, 0.135, 0.167, 0.184],
-      [0.25, 0.585],
-    ],
-    1: [
-      [0.1, 0.115, 0.12, 0.173],
-      [0.24, 0.512, 0.58],
-    ],
-    1.1: [
-      [0.17, 0.125, 0.14, 0.155],
-      [0.154, 0.185],
-    ],
-    2.1: [
-      [0.16, 0.128, 0.177, 0.18],
-      [0.515, 0.612],
-    ],
-    5.6: [[0.126], [0.126]],
-  };
-
-  if (!fallMap.hasOwnProperty(input)) {
-    return 0;
-  }
-
-  const valueArray = fallMap[input];
-  const randomChildArray =
-    valueArray[Math.floor(Math.random() * valueArray.length)];
-  const randomNumber =
-    randomChildArray[Math.floor(Math.random() * randomChildArray.length)];
-
-  return randomNumber;
-}
 
 function getMultiplier(value: number, line: number, index: number) {
   //todo: dynamic img and sound generation
@@ -338,34 +125,6 @@ export default function Plinko() {
   const { data: session, status } = useSession();
   const { width, height } = useWindowSize();
   const [lines, setLines] = useState<LinesType>(8);
-
-  type FallMapType2 = {
-    [key: number]: {
-      [key: number]: {
-        [key: number]: number[];
-      };
-    };
-  };
-
-  const [fallMap, setFallMap] = useState<FallMapType2>({
-    750: {
-      8: {},
-      9: {},
-      10: {},
-      11: {},
-      12: {},
-      13: {},
-      14: {},
-      15: {},
-      16: {},
-    },
-  });
-  const referenceMap = useRef<FallMapType2>();
-  referenceMap.current = fallMap;
-
-  const [currX, setCurrX] = useState<number>(0);
-  const reference = useRef<number>();
-  reference.current = currX;
 
   const world = {
     width:
@@ -403,125 +162,6 @@ export default function Plinko() {
         : 8) /
       (lines / 8),
   };
-
-  // useEffect(() => {
-  //   function binomialCoefficient(n: number, k: number): number {
-  //     function factorial(x: number): number {
-  //       if (x === 0 || x === 1) return 1;
-  //       return x * factorial(x - 1);
-  //     }
-  //     return factorial(n) / (factorial(k) * factorial(n - k));
-  //   }
-
-  //   function binomialProbability(n: number, k: number, p: number): number {
-  //     return (
-  //       binomialCoefficient(n, k) * Math.pow(p, k) * Math.pow(1 - p, n - k)
-  //     );
-  //   }
-
-  //   function getMultipliers(
-  //     n: number,
-  //     level: string,
-  //     multipliersDisk: RiskToChance,
-  //   ): number[] | string {
-  //     if (!(level in multipliersDisk)) {
-  //       return `Invalid risk level: ${level}. Valid levels are 'low', 'medium', 'high'.`;
-  //     }
-  //     const multipliers = multipliersDisk[level][n];
-  //     if (!multipliers) {
-  //       return `No multipliers found for n = ${n} under level '${level}'.`;
-  //     }
-  //     return multipliers;
-  //   }
-
-  //   function calculateEv(
-  //     n: number,
-  //     p: number,
-  //     level: string,
-  //     multipliersDisk: RiskToChance,
-  //   ): void {
-  //     const multipliers = getMultipliers(n, level, multipliersDisk);
-  //     console.log("multipliers", multipliers);
-  //     if (typeof multipliers === "string") {
-  //       console.log(multipliers);
-  //       return;
-  //     }
-
-  //     const probabilities = Array.from({ length: n + 1 }, (_, k) =>
-  //       binomialProbability(n, k, p),
-  //     );
-
-  //     let ev = 0;
-  //     for (let k = 0; k <= n; k++) {
-  //       const probabilityPercent = probabilities[k] * 100;
-  //       const contribution = multipliers[k] * probabilityPercent;
-  //       console.log(
-  //         `level ${level} Probability % of landing in slot ${
-  //           multipliers[k]
-  //         }: ${probabilityPercent.toFixed(4)}%`,
-  //       );
-  //       ev += contribution;
-  //     }
-
-  //     console.log(getMultipliers(n, level, multipliersDisk));
-  //     console.log(`level ${level} Expected value (EV): ${ev.toFixed(4)}`);
-  //   }
-
-  //   function adjustFirstLast(lst: number[], value: number): number[] | string {
-  //     if (lst.length < 2) {
-  //       return "List must have at least two elements.";
-  //     }
-  //     lst[0] = value;
-  //     lst[lst.length - 1] = value;
-  //     return lst;
-  //   }
-
-  //   function adjustRiskToChance(
-  //     originalRiskToChance: RiskToChance,
-  //     level: string,
-  //     evInput: number = 100,
-  //   ): Record<number, number[]> {
-  //     //deep copy to prevent mutation of original risktochance object
-  //     const clonedRiskToChance: RiskToChance = JSON.parse(
-  //       JSON.stringify(originalRiskToChance),
-  //     );
-  //     const adjustedDict: Record<number, number[]> = {};
-  //     for (const [nStr, multipliers] of Object.entries(
-  //       clonedRiskToChance[level],
-  //     )) {
-  //       const n = parseInt(nStr);
-  //       const probabilities = Array.from({ length: n + 1 }, (_, k) =>
-  //         binomialProbability(n, k, 0.5),
-  //       );
-  //       let ev = 0;
-  //       for (let k = 1; k < n; k++) {
-  //         const probabilityPercent = probabilities[k] * 100;
-  //         const contribution = multipliers[k] * probabilityPercent;
-  //         ev += contribution;
-  //       }
-  //       const adjustedMultiplier =
-  //         (evInput - ev) / (2 * probabilities[0] * 100);
-  //       const adjustedList = adjustFirstLast(
-  //         multipliers,
-  //         Math.round(adjustedMultiplier * 100) / 100,
-  //       ) as number[];
-  //       adjustedDict[n] = adjustedList;
-  //     }
-  //     return adjustedDict;
-  //   }
-
-  //   const adjustedRiskToChance: RiskToChance = {
-  //     low: {},
-  //     medium: {},
-  //     high: {},
-  //   };
-
-  //   for (const level of ["low", "medium", "high"]) {
-  //     adjustedRiskToChance[level] = adjustRiskToChance(riskToChance, level);
-  //   }
-
-  //   console.log("adjustedRiskToChance =", adjustedRiskToChance);
-  // }, []);
 
   const configPlinko = {
     ball,
@@ -562,6 +202,7 @@ export default function Plinko() {
     language,
     selectedCoin,
     enableSounds,
+    updatePNL,
   } = useGlobalContext();
 
   const muteRef = useRef<boolean>(false);
@@ -721,7 +362,7 @@ export default function Plinko() {
   const addBall = useCallback(
     (ballValue: number, pos: number) => {
       addInGameBall();
-      soundAlert('/sounds/ball.wav', muteRef.current)
+      soundAlert("/sounds/ball.wav", muteRef.current);
 
       const minBallX =
         worldWidth / 2 - pinsConfig.pinSize * 3 + pinsConfig.pinGap;
@@ -843,8 +484,9 @@ export default function Plinko() {
 
     const multiplierElement = document.getElementById(multiplier.label);
 
+    console.log(multiplier.label, multiplierElement);
+
     if (multiplierElement) {
-      const originalTop = multiplierElement.offsetTop;
       const dropDistance = 20;
 
       const animationKeyframes = [
@@ -873,27 +515,13 @@ export default function Plinko() {
     const multiplierColor = multiplierValues[2] ?? "#ffffff";
     const multiplierSound = multiplierValues[3] ?? "regular";
 
-    soundAlert(`/sounds/multiplier_${multiplierSound}.wav`, muteRef.current)
+    soundAlert(`/sounds/multiplier_${multiplierSound}.wav`, muteRef.current);
     setLastMultipliers((prev) => [
       { color: `#${multiplierColor}`, value: multiplierValue },
       prev[0],
       prev[1],
       prev[2],
     ]);
-
-    let prevMap = { ...referenceMap.current! };
-    let posX = parseFloat(ball.label.split("-")[2]);
-    if (ball.label.split("-").length === 4) posX = posX * -1;
-    let posArray = (
-      multiplierValue in prevMap["750"]["9"]
-        ? prevMap["750"]["9"][multiplierValue]
-        : []
-    ).concat([posX!]);
-    // console.log("fall array", posArray, multiplierValue, posX);
-    prevMap = {
-      750: { 9: { ...prevMap["750"]["9"], [multiplierValue]: posArray } },
-    };
-    setFallMap(prevMap);
 
     if (+ballValue <= 0) return;
   }
@@ -910,13 +538,16 @@ export default function Plinko() {
   Events.on(engine, "collisionActive", onBodyCollision);
 
   useEffect(() => {
-    console.log(result);
+    // console.log(result);
     if (result && result?.result && betAmt) {
       if (result?.success !== true) {
         throw new Error(result?.message);
       }
 
       const win = result?.result === "Won";
+
+      updatePNL(GameType.plinko, win, betAmt, result?.strikeMultiplier ?? 0);
+
       if (win) {
         successCustom(result?.message);
         soundAlert("/sounds/win.wav", muteRef.current);
@@ -931,11 +562,7 @@ export default function Plinko() {
         return newResults;
       });
 
-      // setStrikeNumber(strikeNumber);
-      // setResult(win);
       setRefresh(true);
-
-      // auto options
     }
   }, [lastMultipliers]);
 
@@ -969,9 +596,15 @@ export default function Plinko() {
         await response.json();
 
       if (!success) throw new Error(message);
-      // console.log(success, message, result, strikeMultiplier, strikeNumber);
       setResult({ success, message, result, strikeMultiplier, strikeNumber });
-      addBall(1, getRandomFromFallMap(strikeMultiplier));
+
+      // we only have mapping for low risk multipliers. Since the positions wld be sa,e we need to find the mapped multiplier for other risks
+      let multiplierRiskIndex = riskToChance[risk.toLowerCase()][
+        lines
+      ].findIndex((multiplier) => multiplier === strikeMultiplier);
+      let mappedMultiplier = riskToChance["low"][lines][multiplierRiskIndex];
+      addBall(1, getRandomFromFallMap(lines, mappedMultiplier));
+
       const win = result === "Won";
       if (betSetting === "auto") {
         if (useAutoConfig && win) {
@@ -1094,158 +727,31 @@ export default function Plinko() {
   }, [startAuto, autoBetCount]);
 
   const onSubmit = async (data: any) => {
-    // if (betSetting === "auto") {
-    //   if (betAmt === 0) {
-    //     errorCustom(translator("Set Amount.", language));
-    //     return;
-    //   }
-    //   if (typeof autoBetCount === "number" && autoBetCount <= 0) {
-    //     errorCustom(translator("Set Bet Count.", language));
-    //     return;
-    //   }
-    //   if (
-    //     (typeof autoBetCount === "string" && autoBetCount.includes("inf")) ||
-    //     (typeof autoBetCount === "number" && autoBetCount > 0)
-    //   ) {
-    //     // console.log("Auto betting. config: ", useAutoConfig);
-    //     setStartAuto(true);
-    //   }
-    // } else if (wallet.connected) handleBet();
-    // addBall(1, betAmt!);
-    // for (let i = 0; i <= 1; i += 0.0015) {
-    //   // setTimeout(() => {
-    //     setCurrX(i);
-    //     console.log("fall", i);
-    //     addBall(1, parseFloat(i.toFixed(5)));
-    //   // }, 1000);
-    // }
-
-    //   let start: number | null = null;
-    // const duration = 1000; // Animation duration in milliseconds
-
-    // const step = (timestamp: number) => {
-    //   if (!start) start = timestamp;
-    //   const progress = Math.min((timestamp - start) / duration, 1);
-    //   const currX = progress * 1.000105; // Adjust the final value as needed
-
-    //   console.log("fall", currX);
-    //   addBall(1, parseFloat(currX.toFixed(6)));
-
-    //   if (progress < 1) {
-    //     requestAnimationFrame(step);
-    //   }
-    // };
-
-    // requestAnimationFrame(step);
-
-    const k = 0.000001; // Adjust this value to change the difference between values
-    let start: number | null = null;
-    // const duration = 30000; // Animation duration in milliseconds use for right and left 
-    const duration = 10000; // Animation duration in milliseconds use for 0 to 1 range
-
-    const step = (timestamp: number) => {
-      // if (!start) start = 0.3 * timestamp; // left setting: middle value to 1.5
-      if (!start) start = 1 * timestamp; //0 to 1 setting
-      // if (!start) start = 1.5 * timestamp; // right setting: -1.smth to middle
-      const progress = Math.min((timestamp - start) / duration, 1); // set 1 for 0 to 1 range, for oleft and right 1.5 is fine
-      const currX = Math.floor(progress / k) * k; // Round down to the nearest multiple of k
-
-      setCurrX(currX);
-      // console.log("fall", currX);
-      addBall(1, parseFloat(currX.toFixed(7)));
-
-      // if (progress < 0.4) { //right setting
-      if (progress < 1) { // 0 to 1 setting
-      // if (progress < 1.5) { // left setting
-        requestAnimationFrame(step);
+    if (betSetting === "auto") {
+      if (betAmt === 0) {
+        errorCustom(translator("Set Amount.", language));
+        return;
       }
-    };
-
-    requestAnimationFrame(step);
-
-    //   const k = 0.000015; // Adjust this value to change the difference between values
-    // let start: number | null = null;
-    // const duration = 3000; // Animation duration in milliseconds
-    // let currentIndex = 0; // Track the current index
-    // const delayBetweenBalls = 10; // Delay in milliseconds between each ball creation
-
-    // const step = () => {
-    //   if (!start) start = performance.now();
-    //   const progress = Math.min((performance.now() - start) / duration, 1);
-    //   const currX = Math.floor(progress / k) * k; // Round down to the nearest multiple of k
-
-    //   if (currentIndex * k <= currX) {
-    //     setCurrX(currX);
-    //     console.log("fall", currX);
-    //     addBall(1, parseFloat(currX.toFixed(6)));
-    //     currentIndex++;
-    //   }
-
-    //   if (progress < 1) {
-    //     setTimeout(step, delayBetweenBalls);
-    //   }
-    // };
-
-    // step();
+      if (typeof autoBetCount === "number" && autoBetCount <= 0) {
+        errorCustom(translator("Set Bet Count.", language));
+        return;
+      }
+      if (
+        (typeof autoBetCount === "string" && autoBetCount.includes("inf")) ||
+        (typeof autoBetCount === "number" && autoBetCount > 0)
+      ) {
+        // console.log("Auto betting. config: ", useAutoConfig);
+        setStartAuto(true);
+      }
+    } else if (wallet.connected) handleBet();
+    // addBall(1, betAmt!);
   };
-  // useEffect(() => {
-  //   const canvas = canvasRef.current;
-  //   const ctx = canvas ? canvas.getContext("2d") : null;
-  //   let lastTime = Date.now();
-  //   let elapsedTime = 0;
-  //   let deltaTime = 0;
-
-  //   if (ctx && canvas) {
-  //     canvas.width = window.innerWidth; // Adjust these values as necessary
-  //     canvas.height = window.innerHeight;
-
-  //     const frameRate = 60; // Target frame rate
-  //     const frameInterval = 1000 / frameRate;
-
-  //     const animate = () => {
-  //       animationFrameId.current = requestAnimationFrame(animate);
-
-  //       const now = Date.now();
-  //       deltaTime = now - lastTime;
-  //       elapsedTime = deltaTime / frameInterval;
-
-  //       if (deltaTime > frameInterval) {
-  //         if (elapsedTime > 1 && elapsedTime < 300) {
-  //           // Update and render multiple times for high elapsedTime values
-  //           for (let i = 0; i < elapsedTime; i++) {
-  //             updateAndRender({ plinkoObjects, canvas, ctx, engine });
-  //           }
-  //         } else {
-  //           // Normal update and render
-  //           updateAndRender({ plinkoObjects, canvas, ctx, engine });
-  //         }
-  //         lastTime = now - (deltaTime % frameInterval);
-  //       }
-  //     };
-
-  //     animate();
-
-  //     return () => cancelAnimationFrame(animationFrameId.current);
-  //   }
-  // }, [plinkoObjects, engine]);
 
   const disableInput = useMemo(() => {
     return (
       (betSetting === "auto" && startAuto) || loading || inGameBallsCount > 0
     );
   }, [betSetting, startAuto, loading, inGameBallsCount]);
-
-  useEffect(() => {
-    console.log("fallmap", fallMap);
-  }, [fallMap]);
-
-  // useEffect(() => {
-  //   console.log("fall", inGameBallsCount, currX);
-  //   if (inGameBallsCount === -1) {
-  //     // setCurrX(currX + 0.1);
-  //     addBall(1, currX + 0.1);
-  //   }
-  // }, [inGameBallsCount]);
 
   return (
     <GameLayout title="FOMO - Plinko">
@@ -1256,7 +762,10 @@ export default function Plinko() {
               <div
                 onClick={() => {
                   soundAlert("/sounds/betbutton.wav", !enableSounds);
-                  warningCustom("Auto bet stopped", "top-right");
+                  warningCustom(
+                    translator("Auto bet stopped", language),
+                    "top-left",
+                  );
                   setAutoBetCount(0);
                   setStartAuto(false);
                 }}
@@ -1266,18 +775,17 @@ export default function Plinko() {
               </div>
             )}
             <BetButton
-              // disabled={
-              //   !wallet ||
-              //   !session?.user ||
-              //   loading ||
-              //   (betSetting === "auto" && startAuto) ||
-              //   (betAmt !== undefined &&
-              //     maxBetAmt !== undefined &&
-              //     betAmt > maxBetAmt)
-              //     ? true
-              //     : false
-              // }
-              disabled={false}
+              disabled={
+                !wallet ||
+                !session?.user ||
+                loading ||
+                (betSetting === "auto" && startAuto) ||
+                (betAmt !== undefined &&
+                  maxBetAmt !== undefined &&
+                  betAmt > maxBetAmt)
+                  ? true
+                  : false
+              }
               onClickFunction={onSubmit}
             >
               {loading ? <Loader /> : "BET"}
@@ -1310,7 +818,7 @@ export default function Plinko() {
                   currentMultiplier={5.6}
                   leastMultiplier={0}
                   game="wheel"
-                  disabled={false}
+                  disabled={disableInput}
                 />
 
                 {/* risk  */}
@@ -1404,7 +912,10 @@ export default function Plinko() {
                     <div
                       onClick={() => {
                         soundAlert("/sounds/betbutton.wav", !enableSounds);
-                        warningCustom("Auto bet stopped", "top-right");
+                        warningCustom(
+                          translator("Auto bet stopped", language),
+                          "top-left",
+                        );
                         setAutoBetCount(0);
                         setStartAuto(false);
                       }}
@@ -1414,18 +925,17 @@ export default function Plinko() {
                     </div>
                   )}
                   <BetButton
-                    // disabled={
-                    //   !wallet ||
-                    //   !session?.user ||
-                    //   loading ||
-                    //   (betSetting === "auto" && startAuto) ||
-                    //   (betAmt !== undefined &&
-                    //     maxBetAmt !== undefined &&
-                    //     betAmt > maxBetAmt)
-                    //     ? true
-                    //     : false
-                    // }
-                    disabled={false}
+                    disabled={
+                      !wallet ||
+                      !session?.user ||
+                      loading ||
+                      (betSetting === "auto" && startAuto) ||
+                      (betAmt !== undefined &&
+                        maxBetAmt !== undefined &&
+                        betAmt > maxBetAmt)
+                        ? true
+                        : false
+                    }
                   >
                     {loading ? <Loader /> : "BET"}
                   </BetButton>
@@ -1452,7 +962,7 @@ export default function Plinko() {
           </div>
           <MultiplierHistory multiplierHistory={lastMultipliers} />
           <div className="relative">
-            <div id="plinko" className="border border-red-700" />
+            <div id="plinko" className="" />
             <div
               style={{
                 position: "absolute",
@@ -1490,15 +1000,19 @@ export default function Plinko() {
                     borderColor: multiplierColorMap[`${lines}`][index],
                     color: multiplierColorMap[`${lines}`][index],
                     borderRadius: "0.32rem",
+                    fontSize: `${
+                      (width! > 640 ? (width! > 1440 ? 1 : 0.75) : 0.5) /
+                      (lines / 8)
+                    }rem`,
                   }}
-                  className="flex items-center justify-center font-semibold text-xs"
+                  className="flex items-center justify-center font-semibold"
                 >
                   {multipliers[index].value}
                 </div>
               ))}
             </div>
           </div>
-          <div id="plinko-base" className="bg-red-200" />
+          <div id="plinko-base" className="" />
         </>
       </GameDisplay>
       <GameTable>

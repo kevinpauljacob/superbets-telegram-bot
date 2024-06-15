@@ -103,6 +103,10 @@ export default function GameHeader() {
       icon: "/assets/dice.png",
       name: "Mines",
     },
+    plinko: {
+      icon: "/assets/plinko.png",
+      name: "Plinko",
+    },
   });
 
   // Get the game details based on the extracted game name
