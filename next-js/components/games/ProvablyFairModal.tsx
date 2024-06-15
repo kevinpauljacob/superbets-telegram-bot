@@ -13,6 +13,7 @@ interface VerificationState {
   risk?: string;
   segments?: number;
   parameter?: number;
+  rows?:number;
 }
 
 interface Props {
@@ -128,6 +129,21 @@ export default function ProvablyFairModal({
           }
         }
       }
+    }
+  }, [verificationState, selectedGameType, strikeNumber]);
+  useEffect(() => {
+    if (selectedGameType === GameType.plinko) {
+     console.log(verificationState)
+     
+     console.log( generateGameResult(
+        verificationState.serverSeed,
+        verificationState.clientSeed,
+        parseInt(verificationState.nonce),
+        GameType.plinko,
+        verificationState.parameter,
+      ))
+        
+        
     }
   }, [verificationState, selectedGameType, strikeNumber]);
 
@@ -340,6 +356,7 @@ export default function ProvablyFairModal({
       </div>
     </>
   );
+  
   const renderMinesCount = () => {
     return (
       <div className="my-4">
@@ -456,6 +473,62 @@ export default function ProvablyFairModal({
       </div>
     );
   };
+  const renderPlinko = ()=>{
+
+    return (
+      <div className="mt-6 pt-7  rounded-md flex flex-col items-center ">
+                  <div className="relative w-1/4 h-10 flex items-center justify-center font-semibold"
+                  style={{
+                    background:"#202329",
+                    borderTop:"0.2rem solid",
+                    borderColor:"#FF9010",
+                    color:"#FF9010",
+                    fontSize:"18px",
+                    borderRadius:"0.32rem"
+                  }}>
+                    {strikeMultiplier}
+                  </div>
+                  <div className="flex gap-4 pt-2 mb-8">
+                    <div className="w-full">
+                      <label className="text-xs text-opacity-75 font-changa text-[#F0F0F0]">
+                        {translator("Risk", language)}
+                      </label>
+                      <select
+            name="risk"
+            value={verificationState.risk}
+            onChange={handleChange}
+            className="bg-[#202329] text-white capitalize font-chakra text-xs font-medium mt-1 rounded-md p-3 w-full relative"
+          >
+            <option value={"low"}>{translator("Low", language)}</option>
+            <option value={"medium"}>{translator("Medium", language)}</option>
+            <option value={"high"}>{translator("High", language)}</option>
+          </select>
+                    </div>
+                    <div className="w-full">
+                      <label className="text-xs text-opacity-75 font-changa text-[#F0F0F0]">
+                        {translator("Rows", language)}
+                      </label>
+                      <select
+            name="segments"
+            value={verificationState.parameter}
+            onChange={handleChange}
+            
+                        className="bg-[#202329] text-white font-chakra text-xs font-medium mt-1 rounded-md p-3 w-full relative"
+          >
+            <option value={8}>8</option>
+            <option value={10}>10</option>
+            <option value={11}>11</option>
+            <option value={12}>12</option>
+            <option value={14}>14</option>
+            <option value={15}>15</option>
+            <option value={15}>15</option>
+            <option value={16}>16</option>
+          </select>
+                    </div>
+                  </div>
+                </div>
+    )
+  }
 
   const renderGameVisuals = () => {
     switch (selectedGameType) {
@@ -483,7 +556,13 @@ export default function ProvablyFairModal({
             {renderMinesCount()}
           </>
         );
-
+      case GameType.plinko:
+        return(
+          <>
+          {renderPlinko()}
+          
+          </>
+        )
       default:
         return <div>Unsupported game type</div>;
     }

@@ -241,8 +241,8 @@ export const generateGameResult = <T extends GameType>(
         serverSeed,
         clientSeed,
         nonce,
-        cursor: 0,
-        count: 1,
+        cursor: 0, 
+        count: parameter ? parameter : 0,
       }).map((e) => Math.floor(Math.pow(2, parameter ?? 8) * e) + 1);
 
       return n[0] as GameResult<T>;

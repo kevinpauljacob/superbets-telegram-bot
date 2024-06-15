@@ -21,6 +21,8 @@ const GameSelect: React.FC<GameSelectProps> = ({ selectedGameType, setSelectedGa
       <option value={GameType.dice2}>Dice2</option>
       <option value={GameType.limbo}>Limbo</option>
       <option value={GameType.wheel}>Wheel</option>
+      <option value={GameType.plinko}>Plinko</option>
+
     </select>
   );
 };

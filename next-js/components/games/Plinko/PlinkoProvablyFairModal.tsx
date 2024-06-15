@@ -68,25 +68,25 @@ export default function PlinkoProvablyFairModal({
   const [selectedGameType, setSelectedGameType] = useState<GameType>(
     GameType.plinko,
   );
-
+ 
   const [verificationState, setVerificationState] = useState<{
     clientSeed: string;
     serverSeed: string;
     nonce: string;
     risk?: string;
-    segments?: number;
+    rows?: number;
     parameter?: number;
   }>(
     bet?.gameSeed
       ? {
           clientSeed: bet.gameSeed.clientSeed,
-          serverSeed: bet.gameSeed.serverSeed ?? "",
+          serverSeed: bet.gameSeed.serverSeedHash ?? "",
           nonce: bet.nonce?.toString() ?? "",
           risk:
             bet.risk ||
             (selectedGameType === GameType.wheel ? "low" : undefined),
-          segments:
-            bet.segments ||
+          rows:
+            bet.rows ||
             (selectedGameType === GameType.wheel ? 10 : undefined),
           parameter:
             bet.minesCount ||
@@ -97,11 +97,11 @@ export default function PlinkoProvablyFairModal({
           serverSeed: "",
           nonce: "",
           risk: selectedGameType === GameType.wheel ? "low" : undefined,
-          segments: selectedGameType === GameType.wheel ? 10 : undefined,
+          rows: selectedGameType === GameType.plinko ? 8 : undefined,
           parameter: selectedGameType === GameType.mines ? 1 : undefined,
         },
   );
-
+  console.log(bet)
   useEffect(() => {
     setStrikeNumber(
       generateGameResult(

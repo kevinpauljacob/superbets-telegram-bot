@@ -55,7 +55,7 @@ export type LinesType = 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15 | 16;
 
 export type RisksType = "Low" | "Medium" | "High";
 
-const riskToChance: RiskToChance = {
+export const riskToChance: RiskToChance = {
   low: {
     8: [6.9, 2.1, 1.1, 1, 0.5, 1, 1.1, 2.1, 6.9],
     9: [8.2, 2, 1.6, 1, 0.7, 0.7, 1, 1.6, 2, 8.2],
@@ -125,7 +125,7 @@ export default function Plinko() {
   const { data: session, status } = useSession();
   const { width, height } = useWindowSize();
   const [lines, setLines] = useState<LinesType>(8);
-
+  
   const world = {
     width:
       width! >= 1440

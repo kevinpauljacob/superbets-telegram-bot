@@ -15,6 +15,9 @@ import {
 } from "@/components/AdaptiveModal";
 import { SPL_TOKENS } from "@/context/config";
 import PlinkoProvablyFairModal from "./PlinkoProvablyFairModal";
+import { multiplierColorMap } from "./constants";
+import { riskToChance } from "@/pages/plinko";
+
 
 export interface Plinko {
   createdAt: string;
@@ -29,6 +32,7 @@ export interface Plinko {
   amountWon: number;
   nonce?: number;
   tokenMint: string;
+  rows?:number;
   gameSeed?: {
     status: seedStatus;
     clientSeed: string;
@@ -60,7 +64,7 @@ export default function VerifyPlinkoModal({
   const { getProvablyFairData, language } = useGlobalContext();
   const wheelRef = useRef<HTMLDivElement>(null);
   const [rotationAngle, setRotationAngle] = useState(0);
-
+  console.log(modalData)
   //Provably Fair Modal handling
   const [isPFModalOpen, setIsPFModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -91,10 +95,11 @@ export default function VerifyPlinkoModal({
     },
     tab: "seeds",
   });
-
+  type RiskToChance = Record<string, Record<number, Array<number>>>;
   //to handle dropodown
   const [openDropDown, setOpenDropDown] = useState<boolean>(false);
-
+  const [color, setColor] = useState('#ffffff');
+  console.log(color)
   const copyToClipboard = (text?: string) => {
     if (text) navigator.clipboard.writeText(text);
   };
@@ -115,8 +120,13 @@ export default function VerifyPlinkoModal({
   }
 
   useEffect(() => {
-    console.log("open")
-  }, [isOpen]);
+  
+    const currentRisk = bet?.risk;  
+    const currentLine = bet?.rows;    
+    const currentMultiplier = bet?.strikeMultiplier; 
+    const color = getColorForMultiplier(riskToChance, multiplierColorMap, currentRisk, currentLine||0, currentMultiplier);
+    setColor(color|| '#ffffff');
+}, [isOpen]);
 
   const handleSeedClick = async () => {
     setIsLoading(true);
@@ -143,6 +153,18 @@ export default function VerifyPlinkoModal({
     }
   };
 
+  
+  function getColorForMultiplier(riskToChance: RiskToChance, multiplierColorMap: {[key: number]: string[]}, risk: keyof RiskToChance, line: number , multiplier: number): string | undefined {
+    const multipliers = riskToChance[risk][line];
+    const multiplierIndex = multipliers.indexOf(multiplier);
+  
+    if (multiplierIndex === -1) {
+        console.error("Multiplier not found in the array");
+        return undefined;
+    } else {
+        return multiplierColorMap[line][multiplierIndex];
+    }
+  }
   return (
     <>
       {isOpen && (
@@ -189,9 +211,17 @@ export default function VerifyPlinkoModal({
                     </div>
                   </button>
                 </div>
-                <div className="mt-6 px-4 md:px-12 pt-7 border-2 border-white border-opacity-5 rounded-md">
-                  <div className="relative w-full h-10 bg-red-500">
-                    hvghvhgvhg
+                <div className="mt-6 px-4 md:px-12 pt-7 border-2 border-white border-opacity-5 rounded-md flex flex-col items-center ">
+                  <div className="relative w-1/4 h-10 flex items-center justify-center font-semibold"
+                  style={{
+                    background:"#202329",
+                    borderTop:"0.2rem solid",
+                    borderColor:color,
+                    color:color,
+                    fontSize:"18px",
+                    borderRadius:"0.32rem"
+                  }}>
+                    {bet?.strikeMultiplier}
                   </div>
                   <div className="flex gap-4 pt-2 mb-8">
                     <div className="w-full">
@@ -208,12 +238,12 @@ export default function VerifyPlinkoModal({
                     </div>
                     <div className="w-full">
                       <label className="text-xs text-opacity-75 font-changa text-[#F0F0F0]">
-                        {translator("Segments", language)}
+                        {translator("Rows", language)}
                       </label>
                       <input
                         type="text"
                         name="chance"
-                        value={bet.segments}
+                        value={bet?.rows}
                         className="bg-[#202329] text-white font-chakra text-xs font-medium mt-1 rounded-md p-3 w-full relative"
                         readOnly
                       />
