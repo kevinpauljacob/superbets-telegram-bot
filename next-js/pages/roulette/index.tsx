@@ -105,7 +105,7 @@ export default function Roulette() {
   const [selectedToken, setSelectedToken] = useState<Token | null>(tokens[0]);
   const [bets, setBets] = useState<{ areaId: string; token: Token }[]>([]);
   const [betActive, setBetActive] = useState(false);
-  const [betType, setBetType] = useState<"manual" | "auto">("manual");
+  const [betSetting, setBetSetting] = useState<"manual" | "auto">("manual");
   const [isRolling, setIsRolling] = useState(false);
   const [betss, setBetss] = useState<{ areaId: string, token: { image: string } }[]>([]);
   const [hoveredButton, setHoveredButton] = useState<string | null>(null);
@@ -117,7 +117,7 @@ export default function Roulette() {
   console.log(betss);
 
   const onSubmit = async (data: any) => {
-    if (betType === "auto") {
+    if (betSetting === "auto") {
       // Auto bet logic
     }
   };
@@ -191,7 +191,8 @@ export default function Roulette() {
   
       if (betsForArea.length > 0) {
         return (
-          <div className="absolute inset-0 flex flex-col items-center justify-center space-y-1 z-10 w-7 sm:w-12 -rotate-90 sm:rotate-0 bottom-8 sm:bottom-0">
+          <div className="absolute inset-0 flex flex-col items-center justify-center space-y-1 z-10
+           w-7 sm:w-12 -rotate-90 sm:rotate-0 bottom-8 sm:bottom-0">
             {betsForArea.slice(0, 3).map((bet, index) => (
               <Image
                 key={index}
@@ -213,7 +214,8 @@ export default function Roulette() {
   
       if (betsForArea.length > 0) {
         return (
-          <div className="absolute inset-0 flex flex-col items-center justify-center space-y-1 z-10 w-7 sm:w-12 -rotate-90 sm:rotate-0 bottom-8 sm:bottom-0">
+          <div className="absolute inset-0 flex flex-col items-center justify-center space-y-1 z-10 
+          w-7 sm:w-12 -rotate-90 sm:rotate-0 bottom-8 sm:bottom-1">
             {betsForArea.slice(0, 3).map((bet, index) => (
               <Image
                 key={index}
@@ -271,7 +273,8 @@ export default function Roulette() {
   
       if (betsForArea.length > 0) {
         return (
-          <div className="absolute inset-0 flex flex-col items-center justify-center space-y-1 z-10 sm:w-12 w-7 h-full sm:rotate-0 -rotate-90 -left-2 -top-3 sm:top-0 sm:left-0">
+          <div className="absolute inset-0 flex flex-col items-center justify-center space-y-1 z-10 
+          sm:w-12 w-7 h-full sm:rotate-0 -rotate-90 -left-2 -top-3 sm:-top-1 sm:-left-1">
             {betsForArea.slice(0, 3).map((bet, index) => (
               <Image
                 key={index}
@@ -310,7 +313,8 @@ export default function Roulette() {
   
       if (betsForArea.length > 0) {
         return (
-          <div className="absolute inset-0 flex flex-col items-center justify-center space-y-1 z-10 sm:w-12 w-7 h-full sm:rotate-0 -rotate-90 -left-2 -top-3 sm:top-0 sm:left-0">
+          <div className="absolute inset-0 flex flex-col items-center justify-center space-y-1 z-10 
+          sm:w-12 w-7 h-full sm:rotate-0 -rotate-90 -left-2 -top-3 sm:top-0 sm:left-0">
             {betsForArea.slice(0, 3).map((bet, index) => (
               <Image
                 key={index}
@@ -335,7 +339,8 @@ export default function Roulette() {
     const betsForArea = betss.filter((bet) => bet.areaId === areaId);
     if (betsForArea.length > 0) {
       return (
-        <div className="absolute inset-0 flex flex-col items-center justify-center space-y-1 w-7 sm:w-12 z-10 sm:-bottom-2 -bottom-1 -rotate-90 sm:rotate-0 left-1 sm:left-0">
+        <div className="absolute inset-0 flex flex-col items-center justify-center space-y-1 w-7 
+        sm:w-12 z-10 sm:-bottom-2 -bottom-1 -rotate-90 sm:rotate-0 left-1 sm:left-0">
           {betsForArea.slice(0, 3).map((bet, index) => (
             <Image
               key={index}
@@ -355,10 +360,10 @@ export default function Roulette() {
 
   
   const disableInput = useMemo(() => {
-    return betType === "auto" && startAuto
+    return betSetting === "auto" && startAuto
       ? true
       : false || isRolling || betActive;
-  }, [betType, startAuto, isRolling, betActive]);
+  }, [betSetting, startAuto, isRolling, betActive]);
   const clearBets = () => {
     setBetss([]);
   };
@@ -380,8 +385,8 @@ export default function Roulette() {
           </div>
           <div className="w-full hidden lg:flex">
             <BetSetting
-              betSetting={betType}
-              setBetSetting={setBetType}
+              betSetting={betSetting}
+              setBetSetting={setBetSetting}
               disabled={disableInput}
             />
           </div>

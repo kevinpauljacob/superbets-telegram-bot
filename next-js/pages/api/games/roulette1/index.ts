@@ -128,7 +128,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         .status(400)
         .json({ success: false, message: "GAME UNDER DEVELOPMENT !" });
 
-      // let { wallet, tokenMint, wager }: InputType = req.body;
+      let { wallet, tokenMint, wager }: InputType = req.body;
 
       // const token = await getToken({ req, secret });
 
