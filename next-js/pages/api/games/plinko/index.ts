@@ -324,6 +324,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         strikeNumber,
         amountWon: amountWon.toNumber(),
         amountLost,
+        rows,
       });
     } catch (e: any) {
       console.log(e);
