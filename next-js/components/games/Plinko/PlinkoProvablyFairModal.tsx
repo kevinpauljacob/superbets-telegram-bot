@@ -85,11 +85,9 @@ export default function PlinkoProvablyFairModal({
           risk:
             bet.risk ||
             (selectedGameType === GameType.wheel ? "low" : undefined),
-          rows:
-            bet.rows ||
-            (selectedGameType === GameType.wheel ? 10 : undefined),
+          
           parameter:
-            bet.minesCount ||
+            bet.rows ||
             (selectedGameType === GameType.mines ? 1 : undefined),
         }
       : {
@@ -97,8 +95,8 @@ export default function PlinkoProvablyFairModal({
           serverSeed: "",
           nonce: "",
           risk: selectedGameType === GameType.wheel ? "low" : undefined,
-          rows: selectedGameType === GameType.plinko ? 8 : undefined,
-          parameter: selectedGameType === GameType.mines ? 1 : undefined,
+          
+          parameter: selectedGameType === GameType.plinko ? 8 : undefined,
         },
   );
   console.log(bet)

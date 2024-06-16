@@ -6,6 +6,7 @@ import { riskToChance } from "./Wheel/Segments";
 import Arc from "./Wheel/Arc";
 import { useGlobalContext } from "../GlobalContext";
 import { translator } from "@/context/transactions";
+import { multiplierColorMap } from "./Plinko/constants";
 interface VerificationState {
   clientSeed: string;
   serverSeed: string;
@@ -21,6 +22,55 @@ interface Props {
   setVerificationState: React.Dispatch<React.SetStateAction<VerificationState>>;
   selectedGameType: GameType;
 }
+type RiskToChance = Record<string, Record<number, Array<number>>>;
+
+const riskToChancePlinko: RiskToChance = {
+  low: {
+    8: [6.9, 2.1, 1.1, 1, 0.5, 1, 1.1, 2.1, 6.9],
+    9: [8.2, 2, 1.6, 1, 0.7, 0.7, 1, 1.6, 2, 8.2],
+    10: [14, 3, 1.4, 1.1, 1, 0.5, 1, 1.1, 1.4, 3, 14],
+    11: [18.6, 3, 1.9, 1.3, 1, 0.7, 0.7, 1, 1.3, 1.9, 3, 18.6],
+    12: [30.9, 3, 1.6, 1.4, 1.1, 1, 0.5, 1, 1.1, 1.4, 1.6, 3, 30.9],
+    13: [49.1, 4, 3, 1.9, 1.2, 0.9, 0.7, 0.7, 0.9, 1.2, 1.9, 3, 4, 49.1],
+    14: [89, 4, 1.9, 1.4, 1.3, 1.1, 1, 0.5, 1, 1.1, 1.3, 1.4, 1.9, 4, 89],
+    15: [178.7, 8, 3, 2, 1.5, 1.1, 1, 0.7, 0.7, 1, 1.1, 1.5, 2, 3, 8, 178.7],
+    16: [
+      344.1, 9, 2, 1.4, 1.4, 1.2, 1.1, 1, 0.5, 1, 1.1, 1.2, 1.4, 1.4, 2, 9,
+      344.1,
+    ],
+  },
+  medium: {
+    8: [14.4, 3, 1.3, 0.7, 0.4, 0.7, 1.3, 3, 14.4],
+    9: [20.2, 4, 1.7, 0.9, 0.5, 0.5, 0.9, 1.7, 4, 20.2],
+    10: [27.6, 5, 2, 1.4, 0.6, 0.4, 0.6, 1.4, 2, 5, 27.6],
+    11: [34, 6, 3, 1.8, 0.7, 0.5, 0.5, 0.7, 1.8, 3, 6, 34],
+    12: [53.7, 11, 4, 2, 1.1, 0.6, 0.3, 0.6, 1.1, 2, 4, 11, 53.7],
+    13: [84.2, 13, 6, 3, 1.3, 0.7, 0.4, 0.4, 0.7, 1.3, 3, 6, 13, 84.2],
+    14: [140.4, 15, 7, 4, 1.9, 1, 0.5, 0.2, 0.5, 1, 1.9, 4, 7, 15, 140.4],
+    15: [
+      252.1, 18, 11, 5, 3, 1.3, 0.5, 0.3, 0.3, 0.5, 1.3, 3, 5, 11, 18, 252.1,
+    ],
+    16: [
+      441.5, 41, 10, 5, 3, 1.5, 1, 0.5, 0.3, 0.5, 1, 1.5, 3, 5, 10, 41, 441.5,
+    ],
+  },
+  high: {
+    8: [30.2, 4, 1.5, 0.3, 0.2, 0.3, 1.5, 4, 30.2],
+    9: [45.4, 7, 2, 0.6, 0.2, 0.2, 0.6, 2, 7, 45.4],
+    10: [80.8, 10, 3, 0.9, 0.3, 0.2, 0.3, 0.9, 3, 10, 80.8],
+    11: [128.6, 14, 5.2, 1.4, 0.4, 0.2, 0.2, 0.4, 1.4, 5.2, 14, 128.6],
+    12: [188.1, 24, 8.1, 2, 0.7, 0.2, 0.2, 0.2, 0.7, 2, 8.1, 24, 188.1],
+    13: [297.4, 37, 11, 4, 1, 0.2, 0.2, 0.2, 0.2, 1, 4, 11, 37, 297.4],
+    14: [503.7, 56, 18, 5, 1.9, 0.3, 0.2, 0.2, 0.2, 0.3, 1.9, 5, 18, 56, 503.7],
+    15: [
+      779.5, 83, 27, 8, 3, 0.5, 0.2, 0.2, 0.2, 0.2, 0.5, 3, 8, 27, 83, 779.5,
+    ],
+    16: [
+      1335.4, 130, 26, 9, 4, 2, 0.2, 0.2, 0.2, 0.2, 0.2, 2, 4, 9, 26, 130,
+      1335.4,
+    ],
+  },
+};
 
 export default function ProvablyFairModal({
   verificationState,
@@ -38,8 +88,12 @@ export default function ProvablyFairModal({
   const [hoveredMultiplier, setHoveredMultiplier] = useState<number | null>(
     null,
   );
-  const { language } = useGlobalContext();
+  const [color, setColor] = useState('#ffffff');
 
+  const { language } = useGlobalContext();
+  console.log("StrikeMultiplier",strikeMultiplier)
+  console.log("StrikeNumber",strikeNumber)
+  console.log(verificationState)
   useEffect(() => {
     const result = generateGameResult(
       verificationState.serverSeed,
@@ -133,20 +187,46 @@ export default function ProvablyFairModal({
   }, [verificationState, selectedGameType, strikeNumber]);
   useEffect(() => {
     if (selectedGameType === GameType.plinko) {
-     console.log(verificationState)
-     
-     console.log( generateGameResult(
+      const strikeNumber = generateGameResult(
         verificationState.serverSeed,
         verificationState.clientSeed,
         parseInt(verificationState.nonce),
         GameType.plinko,
         verificationState.parameter,
-      ))
-        
-        
+      );
+  
+      const rows = verificationState.parameter || 8; 
+      const risk = verificationState.risk || "low"; 
+      const multipliers = riskToChancePlinko[risk]?.[rows];
+      let finalMultiplier = 1;
+      
+      if (multipliers) {
+        let totalChance = 0;
+        for (let i = 1, chance = 1; i <= rows; i++) {
+          chance = (chance * (rows - i + 1)) / i;
+          totalChance += chance;
+          if (strikeNumber <= totalChance) {
+            finalMultiplier = multipliers[i - 1];
+            break;
+          }
+        }
+      }
+  
+      setStrikeMultiplier(finalMultiplier);
+  
+      const color = getColorForMultiplier(riskToChancePlinko, multiplierColorMap, risk, rows, finalMultiplier);
+      setColor(color || '#ffffff');
     }
-  }, [verificationState, selectedGameType, strikeNumber]);
-
+  }, [verificationState, selectedGameType]);
+  
+  function getColorForMultiplier(riskToChancePlinko: RiskToChance, multiplierColorMap: {[key: number]: string[]}, risk: keyof RiskToChance, line: number , multiplier: number): string | undefined {
+    const multipliers = riskToChancePlinko[risk]?.[line];
+    if (!multipliers) return undefined;
+  
+    const multiplierIndex = multipliers.indexOf(multiplier);
+    return multiplierIndex !== -1 ? multiplierColorMap[line]?.[multiplierIndex] : undefined;
+  }
+  
   const renderKeno = () => (
     <div className="p-4">
       <div className="grid grid-cols-8 gap-2 text-white lg2:text-xl md:text-lg sm:text-base text-sm font-chakra w-full">
@@ -481,8 +561,8 @@ export default function ProvablyFairModal({
                   style={{
                     background:"#202329",
                     borderTop:"0.2rem solid",
-                    borderColor:"#FF9010",
-                    color:"#FF9010",
+                    borderColor:color,
+                    color:color,
                     fontSize:"18px",
                     borderRadius:"0.32rem"
                   }}>
@@ -509,7 +589,7 @@ export default function ProvablyFairModal({
                         {translator("Rows", language)}
                       </label>
                       <select
-            name="segments"
+            name="parameter"
             value={verificationState.parameter}
             onChange={handleChange}
             
