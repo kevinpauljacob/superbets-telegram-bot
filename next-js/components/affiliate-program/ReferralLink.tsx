@@ -25,20 +25,20 @@ export default function ReferralLink({
 
   return (
     <div className="flex items-center justify-between bg-staking-bg rounded-[10px] py-4 px-5 mb-4">
-      <div className="flex items-center gap-[14px]">
-        <p className="text-white font-chakra font-semibold text-lg">
+      <div className="flex flex-col sm:flex-row sm:items-center gap-[14px]">
+        <p className="text-white font-chakra font-semibold sm:text-lg">
           {campaignName}
         </p>
         <div className="flex gap-[12px]">
           <span className="bg-white/5 rounded-[5px] text-sm font-chakra text-[#94A3B8] font-normal px-4 py-2">
-            {`http://localhost:3000?referralCode=${referralCode}`}
+            {`referralCode=${referralCode}`}
           </span>
           <button className="bg-[#7839C5] rounded-[5px] text-white/75 text-[13px] font-chakra font-medium px-5">
             Copy
           </button>
         </div>
       </div>
-      <div className="flex gap-[14px]">
+      <div className="hidden sm:flex gap-[14px]">
         <p className="bg-white/5 rounded-[5px] text-sm font-chakra text-[#94A3B8] font-normal px-4 py-2">
           Signups :{" "}
           <span className="font-chakra text-[13px] font-semibold text-[#94A3B8]">

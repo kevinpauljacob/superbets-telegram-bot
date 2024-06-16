@@ -53,6 +53,11 @@ interface ReferralLevel {
   level: number;
 }
 
+interface ReferralLevelData {
+  signUps: number;
+  totalEarnings: number;
+}
+
 export default function AffiliateProgram() {
   const wallet = useWallet();
   const router = useRouter();
@@ -72,6 +77,9 @@ export default function AffiliateProgram() {
   const [earningsData, setEarningsData] = useState<EarningsData>([]);
   const [totalClaimed, setTotalClaimed] = useState(0);
   const [totalClaimable, setTotalClaimable] = useState(0);
+  const [referralLevelData, setReferralLevelData] = useState<
+    ReferralLevelData[]
+  >([]);
 
   console.log("SPL_TOKENS", SPL_TOKENS);
   const referredTabHeaders = [
@@ -133,7 +141,7 @@ export default function AffiliateProgram() {
 
   const calculateFeeGenerated = (
     feeGenerated: Record<string, number>,
-    commissionLevel: number,
+    referralLevel: number,
   ): number => {
     let totalAmountInDollars = 0;
 
@@ -146,8 +154,43 @@ export default function AffiliateProgram() {
       }
     }
 
-    return totalAmountInDollars * commissionLevel;
+    return totalAmountInDollars * commissionLevels[referralLevel];
   };
+
+  const referralData = () => {
+    const updatedReferralLevelData: ReferralLevelData[] = Array.from(
+      { length: 5 },
+      () => ({ signUps: 0, totalEarnings: 0 }),
+    );
+    referredUsers.forEach((user) => {
+      const referralLevel = getReferralLevel(user._id) ?? -1;
+      const { feeGenerated } = user;
+      let totalEarnings = 0;
+
+      for (const [token, amount] of Object.entries(feeGenerated)) {
+        // Assuming liveTokenPrice is available
+        const tokenPriceObj = liveTokenPrice.find(
+          (priceObj) => priceObj.mintAddress === token,
+        );
+        if (tokenPriceObj) {
+          totalEarnings += amount * tokenPriceObj.price;
+        }
+      }
+
+      console.log("referral level", referralLevel);
+      if (referralLevel !== -1) {
+        updatedReferralLevelData[referralLevel].signUps += 1;
+        updatedReferralLevelData[referralLevel].totalEarnings += totalEarnings;
+      }
+    });
+
+    console.log("updatedReferralLevelData", updatedReferralLevelData);
+    setReferralLevelData(updatedReferralLevelData);
+  };
+
+  useEffect(() => {
+    if (referredUsers.length > 0) referralData();
+  }, [referredUsers]);
 
   const calculateEarnings = () => {
     // Temporary object to accumulate earnings
@@ -273,6 +316,11 @@ export default function AffiliateProgram() {
     console.log("totalClaimable", totalClaimable);
   }, [totalClaimed, totalClaimable]);
 
+  function getColor(level: number): string {
+    const colors = ["4594FF", "E17AFF", "00C278", "4594FF", "00C278"];
+    return colors[level % colors.length];
+  }
+
   return (
     <div className="px-5 lg2:px-[4rem] md:px-[3rem] pt-5">
       <h1 className="font-chakra font-bold text-[1.75rem] text-white mb-3.5">
@@ -297,7 +345,7 @@ export default function AffiliateProgram() {
                 </p>
                 <div className="flex gap-3 mb-4">
                   <span className="text-ellipsis overflow-hidden bg-white/5 rounded-[5px] text-sm font-chakra text-[#94A3B8] font-normal px-4 py-1">
-                    {`http://localhost:3000?referralCode=${userCampaigns[userCampaigns.length - 1]?.referralCode}`}
+                    {`referralCode=${userCampaigns[userCampaigns.length - 1]?.referralCode}`}
                   </span>
                   <button className="bg-[#7839C5] rounded-[5px] text-white/75 text-[13px] font-chakra font-medium px-5">
                     Copy
@@ -316,9 +364,11 @@ export default function AffiliateProgram() {
             />
           </div>
         </div>
+        <Levels referralLevelData={referralLevelData} />
       </div>
-      <Levels />
-      <div className="flex justify-between mb-8">
+
+      {/* tabs */}
+      <div className="flex flex-col sm:flex-row gap-4 justify-between mb-6">
         <div className="flex w-full md:w-max items-center gap-2 justify-center md:justify-end border-2 p-1.5 rounded-lg border-white border-opacity-[5%]">
           <TButton
             active={referred}
@@ -354,33 +404,17 @@ export default function AffiliateProgram() {
         </div>
         {campaigns && (
           <button
-            className="bg-[#7839C5] text-white font-chakra font-semibold text-sm rounded-[5px] px-8"
+            className="bg-[#7839C5] text-white font-chakra font-semibold text-sm rounded-[5px] px-8 py-4"
             onClick={() => toggleModal()}
           >
             CREATE CAMPAIGN
           </button>
         )}
       </div>
-      // campaigns tab
-      {campaigns && (
-        <div>
-          {userCampaigns.length > 0 ? (
-            userCampaigns.map((campaign, index) => (
-              <ReferralLink
-                campaignName={campaign?.campaignName}
-                referralCode={campaign?.referralCode}
-                totalEarnings={campaign?.totalEarnings}
-                key={index}
-              />
-            ))
-          ) : (
-            <p className="text-center font-changa text-[#F0F0F080]">No data</p>
-          )}
-        </div>
-      )}
+
       {/* earnings tab */}
       {earnings && (
-        <div className="flex gap-[1.85rem] w-full mb-[3.25rem]">
+        <div className="flex flex-col sm:flex-row gap-[14px] sm:gap-[1.85rem] w-full mb-[2.63rem]">
           <div className="flex items-start gap-[12px] bg-staking-bg rounded-[5px] p-4 h-[50%] w-full">
             <div className="flex justify-center items-center bg-[#202329] rounded-lg w-[73px] h-[68px]">
               <Image
@@ -391,10 +425,10 @@ export default function AffiliateProgram() {
               />
             </div>
             <div>
-              <p className="text-white font-medium text-base text-opacity-50">
+              <p className="text-white font-medium text-xs lg:text-base text-opacity-50">
                 Total Claimed
               </p>
-              <p className="text-[#94A3B8] font-semibold text-2xl">
+              <p className="text-[#94A3B8] font-semibold text-lg lg:text-2xl">
                 ${formatNumber(totalClaimed, 2) ?? 0}
               </p>
             </div>
@@ -410,22 +444,23 @@ export default function AffiliateProgram() {
                 />
               </div>
               <div>
-                <p className="text-white font-medium text-base text-opacity-50">
+                <p className="text-white font-medium text-xs lg:text-base text-opacity-50">
                   Total Claimable
                 </p>
-                <p className="text-[#94A3B8] font-semibold text-2xl">
+                <p className="text-[#94A3B8] font-semibold text-lg lg:text-2xl">
                   ${formatNumber(totalClaimable, 2) ?? 0}
                 </p>
               </div>
             </div>
-            <div className="mr-4">
-              <button className="text-white font-semibold font-chakra bg-[#7839C5] rounded-[5px] py-2 px-11">
+            <div className="sm:mr-4">
+              <button className="text-white text-xs lg:text-base font-semibold font-chakra bg-[#7839C5] rounded-[5px] py-2 px-7 lg:px-11">
                 CLAIM
               </button>
             </div>
           </div>
         </div>
       )}
+
       {/* table headers */}
       {!campaigns && (
         <>
@@ -462,6 +497,8 @@ export default function AffiliateProgram() {
           </div>
         </>
       )}
+
+      {/* referred table */}
       {referred && (
         <div className={`flex w-full flex-col ${loading ? "h-[50rem]" : ""}`}>
           {loading ? (
@@ -470,8 +507,8 @@ export default function AffiliateProgram() {
             </div>
           ) : (
             <>
-              <div className="scrollbar w-full mt-[1.125rem] pb-8">
-                <div className="flex w-full md:min-w-[50rem] flex-col items-center">
+              <div className="scrollbar w-full pb-8">
+                <div className="flex w-full flex-col items-center">
                   <div className="relative flex flex-col items-center w-full max-h-[36rem] overflow-hidden">
                     {referredUsers?.length ? (
                       <>
@@ -486,29 +523,40 @@ export default function AffiliateProgram() {
                               className="mb-2.5 flex w-full flex-row items-center gap-2 rounded-[5px] bg-[#121418] hover:bg-[#1f2024] py-3"
                             >
                               <div className="w-full flex items-center justify-between cursor-pointer">
-                                <span className="w-full hidden md:block text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
+                                <span className="w-full text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
                                   {obfuscatePubKey(user.wallet)}
                                 </span>
-                                <span className="w-full hidden md:block text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
-                                  {getReferralLevel(user._id)}
-                                </span>
-                                <span className="w-full hidden md:block text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
-                                  ${calculateWagerAmount(user.volume)}
-                                </span>
-                                <span className="w-full hidden md:block text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
-                                  {user._id &&
-                                    commissionLevels[
-                                      getReferralLevel(user._id)
-                                    ] * 100}
-                                  %
+                                <span className="w-full text-center font-changa text-sm text-opacity-75">
+                                  <span
+                                    className={`text-[#${getColor(getReferralLevel(user._id))}]  bg-[#${getColor(getReferralLevel(user._id))}]/10 rounded-[5px] px-2.5`}
+                                  >
+                                    Level {getReferralLevel(user._id)}
+                                  </span>
                                 </span>
                                 <span className="w-full hidden md:block text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
                                   $
-                                  {calculateFeeGenerated(
-                                    user.feeGenerated,
-                                    commissionLevels[
-                                      getReferralLevel(user._id)
-                                    ],
+                                  {formatNumber(
+                                    calculateWagerAmount(user.volume),
+                                    2,
+                                  )}
+                                </span>
+                                <span className="w-full hidden md:block text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
+                                  {user._id &&
+                                    truncateNumber(
+                                      commissionLevels[
+                                        getReferralLevel(user._id)
+                                      ] * 100,
+                                    )}
+                                  %
+                                </span>
+                                <span className="w-full text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
+                                  $
+                                  {formatNumber(
+                                    calculateFeeGenerated(
+                                      user.feeGenerated,
+                                      getReferralLevel(user._id),
+                                    ),
+                                    2,
                                   )}
                                 </span>
                               </div>
@@ -534,6 +582,26 @@ export default function AffiliateProgram() {
           )}
         </div>
       )}
+
+      {/* campaigns tab */}
+      {campaigns && (
+        <div>
+          {userCampaigns.length > 0 ? (
+            userCampaigns.map((campaign, index) => (
+              <ReferralLink
+                campaignName={campaign?.campaignName}
+                referralCode={campaign?.referralCode}
+                totalEarnings={campaign?.totalEarnings}
+                key={index}
+              />
+            ))
+          ) : (
+            <p className="text-center font-changa text-[#F0F0F080]">No data</p>
+          )}
+        </div>
+      )}
+
+      {/* earnings table */}
       {earnings && (
         <div className={`flex w-full flex-col ${loading ? "h-[50rem]" : ""}`}>
           {loading ? (
@@ -542,8 +610,8 @@ export default function AffiliateProgram() {
             </div>
           ) : (
             <>
-              <div className="scrollbar w-full mt-[1.125rem] pb-8">
-                <div className="flex w-full md:min-w-[50rem] flex-col items-center">
+              <div className="scrollbar w-full pb-8">
+                <div className="flex w-full flex-col items-center">
                   <div className="relative flex flex-col items-center w-full max-h-[36rem] overflow-hidden">
                     {earningsData?.length ? (
                       <>
@@ -558,15 +626,21 @@ export default function AffiliateProgram() {
                               className="mb-2.5 flex w-full flex-row items-center gap-2 rounded-[5px] bg-[#121418] hover:bg-[#1f2024] py-3"
                             >
                               <div className="w-full flex items-center justify-between cursor-pointer">
-                                <span className="w-full hidden md:block text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
+                                <span className="w-full text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
                                   ${token.tokenName}
                                 </span>
-                                <span className="w-full hidden md:block text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
-                                  {token.totalEarnings -
-                                    token.unclaimedEarnings ?? 0}
+                                <span className="w-full text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
+                                  {formatNumber(
+                                    token.totalEarnings -
+                                      token.unclaimedEarnings ?? 0,
+                                    2,
+                                  )}
                                 </span>
-                                <span className="w-full hidden md:block text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
-                                  {token.unclaimedEarnings ?? 0}
+                                <span className="w-full text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
+                                  {formatNumber(
+                                    token.unclaimedEarnings ?? 0,
+                                    2,
+                                  )}
                                 </span>
                               </div>
                             </div>
