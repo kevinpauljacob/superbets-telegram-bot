@@ -9,7 +9,7 @@ const CountdownTimer = dynamic(() => import("./CountdownTimer"), {
   ssr: false,
 });
 
-type TokenVolumes = {
+export type TokenVolumes = {
   [token: string]: number;
 };
 
