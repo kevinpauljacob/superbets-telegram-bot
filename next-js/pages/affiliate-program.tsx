@@ -1,72 +1,238 @@
 import { useGlobalContext } from "@/components/GlobalContext";
-import { TButton } from "@/components/table/Table";
+import { TButton, TablePagination } from "@/components/table/Table";
 import { errorCustom } from "@/components/toasts/ToastGroup";
-import { translator } from "@/context/transactions";
+import { formatNumber, translator } from "@/context/transactions";
 import { useWallet } from "@solana/wallet-adapter-react";
 import Image from "next/image";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
-import User from "@/public/assets/User";
 import ReferralLink from "@/components/affiliate-program/ReferralLink";
 import CreateCampaignModal from "@/components/affiliate-program/CreateCampaignModal";
-
-interface PaginationProps {
-  page: number;
-  setPage: React.Dispatch<React.SetStateAction<number>>;
-  bets: any[];
-  maxPages: number;
-}
-
-interface TableButtonProps {
-  all: boolean;
-  setAll: React.Dispatch<React.SetStateAction<boolean>>;
-}
-
+import Levels from "@/components/affiliate-program/Levels";
+import Loader from "@/components/games/Loader";
+import { obfuscatePubKey, truncateNumber } from "@/context/transactions";
+import { SPL_TOKENS, commissionLevels } from "@/context/config";
 interface Referral {
   _id: string;
   wallet: string;
   __v: number;
+  campaigns: Campaign[];
   createdAt: string;
   feeGenerated: Record<string, any>;
-  referralCode: string;
-  referredByChain: string[];
-  totalEarnings: Record<string, any>;
-  unclaimedEarnings: Record<string, any>;
+  referredByChain: any[];
   updatedAt: string;
   volume: Record<string, any>;
 }
 
 type ReferralData = Referral[];
 
+interface Campaign {
+  _id: string;
+  wallet: string;
+  campaignName: string;
+  referralCode: string;
+  totalEarnings: Record<string, any>;
+  unclaimedEarnings: Record<string, any>;
+  createdAt: string;
+  updatedAt: string;
+  __v: number;
+}
+
+type CampaignData = Campaign[];
+
+interface Earnings {
+  tokenName: string;
+  totalEarnings: number;
+  unclaimedEarnings: number;
+}
+
+type EarningsData = Earnings[];
+
+interface ReferralLevel {
+  userId: string;
+  level: number;
+}
+
 export default function AffiliateProgram() {
   const wallet = useWallet();
   const router = useRouter();
-  const { language } = useGlobalContext();
+  const { language, liveTokenPrice } = useGlobalContext();
   const transactionsPerPage = 10;
+  const [page, setPage] = useState(1);
   const [referred, setReferred] = useState(true);
   const [campaigns, setCampaigns] = useState(false);
   const [earnings, setEarnings] = useState(false);
   const [loading, setLoading] = useState(false);
   const [modal, setModal] = useState(false);
-  const [referredData, setReferredData] = useState<ReferralData>([]);
-  const [earningsData, setEarningsData] = useState([]);
+  const [userId, setUserId] = useState("");
+  const [userCampaigns, setUserCampaigns] = useState<CampaignData>([]);
+  const [referredUsers, setReferredUsers] = useState<ReferralData>([]);
+  const [user, setUser] = useState([]);
+  const [referralLevels, setReferralLevels] = useState<ReferralLevel[]>([]);
+  const [earningsData, setEarningsData] = useState<EarningsData>([]);
+  const [totalClaimed, setTotalClaimed] = useState(0);
+  const [totalClaimable, setTotalClaimable] = useState(0);
 
-  const referredHeaders = [
+  console.log("SPL_TOKENS", SPL_TOKENS);
+  const referredTabHeaders = [
     "Wallet",
     "Level",
     "Wagered",
     "Commission %",
     "Earned",
   ];
-  const earningsHeaders = ["Cryptocurreny", "Previously Claimed", "Claimable"];
-  const smallScreenHeaders = ["Game", "Payout"];
+  const earningsTabHeaders = [
+    "Cryptocurreny",
+    "Previously Claimed",
+    "Claimable",
+  ];
+  const smallScreenReferredTabHeaders = ["Wallet", "Level", "Earned"];
 
   const toggleModal = () => {
     setModal(true);
   };
 
   useEffect(() => {
-    const fetchReferredData = async () => {
+    const calculateReferralLevels = () => {
+      const levels: ReferralLevel[] = referredUsers.map((referredUser) => {
+        let level = -1;
+        userCampaigns.forEach((campaign, index) => {
+          const pos = referredUser.referredByChain.indexOf(campaign._id);
+          if (pos !== -1 && (level === -1 || pos < level)) {
+            level = pos;
+          }
+        });
+        return { userId: referredUser._id, level };
+      });
+      setReferralLevels(levels);
+      console.log("referralLevels", levels);
+    };
+
+    calculateReferralLevels();
+  }, [referredUsers]);
+
+  const getReferralLevel = (userId: string): number => {
+    const referral = referralLevels.find((r) => r.userId === userId);
+    return referral ? referral.level : -1;
+  };
+
+  const calculateWagerAmount = (volume: Record<string, number>): number => {
+    let totalAmountInDollars = 0;
+
+    for (const [token, amount] of Object.entries(volume)) {
+      const tokenPriceObj = liveTokenPrice.find(
+        (priceObj) => priceObj.mintAddress === token,
+      );
+      if (tokenPriceObj) {
+        totalAmountInDollars += amount * tokenPriceObj.price;
+      }
+    }
+
+    return totalAmountInDollars;
+  };
+
+  const calculateFeeGenerated = (
+    feeGenerated: Record<string, number>,
+    commissionLevel: number,
+  ): number => {
+    let totalAmountInDollars = 0;
+
+    for (const [token, amount] of Object.entries(feeGenerated)) {
+      const tokenPriceObj = liveTokenPrice.find(
+        (priceObj) => priceObj.mintAddress === token,
+      );
+      if (tokenPriceObj) {
+        totalAmountInDollars += amount * tokenPriceObj.price;
+      }
+    }
+
+    return totalAmountInDollars * commissionLevel;
+  };
+
+  const calculateEarnings = () => {
+    // Temporary object to accumulate earnings
+    const tempEarningsData: Record<
+      string,
+      { totalEarnings: number; unclaimedEarnings: number }
+    > = {};
+
+    // Iterate over each campaign to accumulate earnings
+    userCampaigns.forEach((campaign) => {
+      const { totalEarnings, unclaimedEarnings } = campaign;
+
+      // Helper function to process earnings
+      const processEarnings = (
+        earnings: Record<string, number>,
+        key: "totalEarnings" | "unclaimedEarnings",
+      ) => {
+        Object.entries(earnings).forEach(([tokenMint, amount]) => {
+          const tokenPriceObj = liveTokenPrice.find(
+            (priceObj) => priceObj.mintAddress === tokenMint,
+          );
+
+          if (tokenPriceObj) {
+            const { price } = tokenPriceObj;
+            const dollars = amount * price;
+            const tokenName = SPL_TOKENS.find(
+              (token) => token.tokenMint === tokenMint,
+            )?.tokenName;
+
+            if (tokenName) {
+              tempEarningsData[tokenName] = tempEarningsData[tokenName] || {
+                totalEarnings: 0,
+                unclaimedEarnings: 0,
+              };
+              tempEarningsData[tokenName][key] =
+                (tempEarningsData[tokenName][key] || 0) + dollars;
+            }
+          }
+        });
+      };
+
+      // Process totalEarnings and unclaimedEarnings
+      processEarnings(totalEarnings, "totalEarnings");
+      processEarnings(unclaimedEarnings, "unclaimedEarnings");
+    });
+
+    // Convert tempEarningsData object to an array
+    const earningsDataArray: {
+      tokenName: string;
+      totalEarnings: number;
+      unclaimedEarnings: number;
+    }[] = Object.entries(tempEarningsData).map(
+      ([tokenName, { totalEarnings, unclaimedEarnings }]) => ({
+        tokenName,
+        totalEarnings,
+        unclaimedEarnings,
+      }),
+    );
+
+    // Set the earningsData state once
+    setEarningsData(earningsDataArray);
+
+    // Calculate total claimed and total claimable earnings
+    const totalClaimed = earningsDataArray.reduce(
+      (acc, { totalEarnings, unclaimedEarnings }) =>
+        acc + totalEarnings - unclaimedEarnings,
+      0,
+    );
+    const totalClaimable = earningsDataArray.reduce(
+      (acc, { unclaimedEarnings }) => acc + unclaimedEarnings,
+      0,
+    );
+
+    // Set the state for total claimed and total claimable earnings
+    setTotalClaimed(totalClaimed);
+    setTotalClaimable(totalClaimable);
+  };
+
+  useEffect(() => {
+    if (userCampaigns.length > 0) calculateEarnings();
+  }, [userCampaigns]);
+
+  // fetch user data
+  useEffect(() => {
+    const fetchData = async () => {
       try {
         const response = await fetch(
           `/api/games/referralCode/${wallet.publicKey}`,
@@ -78,54 +244,34 @@ export default function AffiliateProgram() {
           },
         );
 
-        const { success, data } = await response.json();
+        const { success, user, referredUsers, message } = await response.json();
 
         if (success) {
-          data !== null && setReferredData(data);
-          console.log("data", data);
+          setUser(user);
+          setUserId(user._id);
+          setUserCampaigns(user.campaigns);
+          setReferredUsers(referredUsers);
+          console.log("user", user);
+          console.log("referredUsers", referredUsers);
         }
       } catch (error: any) {
         throw new Error(error.message);
       }
     };
 
-    if (wallet) {
-      fetchReferredData();
+    if (wallet && wallet.connected) {
+      fetchData();
     }
   }, [wallet]);
 
   useEffect(() => {
-    console.log("referredData", referredData);
-  }, [referredData]);
+    console.log("userData", user);
+  }, [user]);
 
   useEffect(() => {
-    const fetchEarnings = async () => {
-      try {
-        const response = await fetch(
-          `/api/games/referralCode/${wallet.publicKey}/earnings`,
-          {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-            },
-          },
-        );
-
-        const { success, user, data, message } = await response.json();
-
-        if (success) {
-          setEarningsData(data);
-          console.log("data", data);
-        }
-      } catch (error: any) {
-        throw new Error(error.message);
-      }
-    };
-
-    if (wallet) {
-      fetchEarnings();
-    }
-  }, [earnings, wallet]);
+    console.log("totalClaimed", totalClaimed);
+    console.log("totalClaimable", totalClaimable);
+  }, [totalClaimed, totalClaimable]);
 
   return (
     <div className="px-5 lg2:px-[4rem] md:px-[3rem] pt-5">
@@ -144,19 +290,21 @@ export default function AffiliateProgram() {
                 that keeps referred customers engaged and invested.
               </p>
             </div>
-            <div className="mt-3.5">
-              <p className="text-white/50 font-chakra font-semibold text-xs mb-2">
-                Referral Link
-              </p>
-              <div className="flex gap-3 mb-4">
-                <span className="text-ellipsis overflow-hidden bg-white/5 rounded-[5px] text-sm font-chakra text-[#94A3B8] font-normal px-4 py-1">
-                  www.figma.com/La9ivJdfAk1cEkALohDSdx
-                </span>
-                <button className="bg-[#7839C5] rounded-[5px] text-white/75 text-[13px] font-chakra font-medium px-5">
-                  Copy
-                </button>
+            {userCampaigns.length > 0 && (
+              <div className="mt-3.5">
+                <p className="text-white/50 font-chakra font-semibold text-xs mb-2">
+                  Referral Link
+                </p>
+                <div className="flex gap-3 mb-4">
+                  <span className="text-ellipsis overflow-hidden bg-white/5 rounded-[5px] text-sm font-chakra text-[#94A3B8] font-normal px-4 py-1">
+                    {`http://localhost:3000?referralCode=${userCampaigns[userCampaigns.length - 1]?.referralCode}`}
+                  </span>
+                  <button className="bg-[#7839C5] rounded-[5px] text-white/75 text-[13px] font-chakra font-medium px-5">
+                    Copy
+                  </button>
+                </div>
               </div>
-            </div>
+            )}
           </div>
           <div className="hidden lg:flex flex-col justify-between bg-staking-bg rounded-[5px] px-4 pt-4 pb-8">
             <p className="text-white/75 font-semibold">How it Works?</p>
@@ -168,197 +316,8 @@ export default function AffiliateProgram() {
             />
           </div>
         </div>
-        <div className="flex gap-[14px] overflow-x-auto overflow-y-hidden w-full">
-          <div className="flex flex-col gap-[30px] bg-staking-bg rounded-[5px] p-4 w-full min-w-[330px] xl:min-w-0">
-            <div className="w-full">
-              <div className="flex gap-[6px]">
-                <User fill="#4594FF" />
-                <p className="text-[#4594FF] text-[13px] font-semibold bg-[#4594FF]/10 rounded-[5px] px-1">
-                  Level 1
-                </p>
-                <p className="text-[#94A3B8]/75 text-[13px] font-semibold bg-[#94A3B8]/5 rounded-[5px] px-1">
-                  3% Commission
-                </p>
-              </div>
-              <div className="flex items-center gap-[7px] font-chakra text-white/50 font-medium text-xs mt-2">
-                <p>Signups</p>
-                <svg
-                  width="4"
-                  height="4"
-                  viewBox="0 0 4 4"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    opacity="0.5"
-                    d="M0.556524 2L1.9999 3.44338L3.44328 2L1.9999 0.556624L0.556524 2ZM2 1.75H1.99998V2.25H2V1.75ZM1.99993 1.75H1.9999V2.25H1.99993V1.75ZM0.556524 2L1.9999 3.44338L3.44328 2L1.9999 0.556624L0.556524 2ZM2 1.75H1.99998V2.25H2V1.75ZM1.99993 1.75H1.9999V2.25H1.99993V1.75Z"
-                    fill="#94A3B8"
-                  />
-                </svg>
-                <p>Earnings</p>
-              </div>
-            </div>
-            <div className="flex items-center justify-end gap-[10px] font-chakra font-semibold text-[20px]">
-              <p className="text-[#94A3B8]/90">23</p>
-              <svg
-                width="35"
-                height="6"
-                viewBox="0 0 35 6"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  opacity="0.5"
-                  d="M34.8868 3L32 0.113249L29.1132 3L32 5.88675L34.8868 3ZM0.113249 3L3 5.88675L5.88675 3L3 0.113249L0.113249 3ZM32 2.5H30.9643V3.5H32V2.5ZM28.8929 2.5H26.8214V3.5L28.8929 3.5V2.5ZM24.75 2.5L22.6786 2.5V3.5H24.75V2.5ZM20.6071 2.5L18.5357 2.5V3.5L20.6071 3.5V2.5ZM16.4643 2.5L14.3929 2.5V3.5L16.4643 3.5V2.5ZM12.3214 2.5L10.25 2.5V3.5H12.3214V2.5ZM8.17857 2.5H6.10715V3.5L8.17857 3.5V2.5ZM4.03572 2.5H3V3.5H4.03572V2.5ZM34.8868 3L32 0.113249L29.1132 3L32 5.88675L34.8868 3ZM0.113249 3L3 5.88675L5.88675 3L3 0.113249L0.113249 3ZM32 2.5H30.9643V3.5H32V2.5ZM28.8929 2.5H26.8214V3.5L28.8929 3.5V2.5ZM24.75 2.5L22.6786 2.5V3.5H24.75V2.5ZM20.6071 2.5L18.5357 2.5V3.5L20.6071 3.5V2.5ZM16.4643 2.5L14.3929 2.5V3.5L16.4643 3.5V2.5ZM12.3214 2.5L10.25 2.5V3.5H12.3214V2.5ZM8.17857 2.5H6.10715V3.5L8.17857 3.5V2.5ZM4.03572 2.5H3V3.5H4.03572V2.5Z"
-                  fill="#94A3B8"
-                />
-              </svg>
-              <p className="text-[#00C278]">$10.6</p>
-            </div>
-          </div>
-          <div className="flex flex-col gap-[30px] bg-staking-bg rounded-[5px] p-4 w-full min-w-[330px] xl:min-w-0">
-            <div>
-              <div className="flex gap-[6px]">
-                <User fill="#E17AFF" />
-                <p className="text-[#E17AFF] text-[13px] font-semibold bg-[#E17AFF]/10 rounded-[5px] px-1">
-                  Level 2
-                </p>
-                <p className="text-[#94A3B8]/75 text-[13px] font-semibold bg-[#94A3B8]/5 rounded-[5px] px-1">
-                  2.5% Commission
-                </p>
-              </div>
-              <div className="flex items-center gap-[7px] font-chakra text-white/50 font-medium text-xs mt-2">
-                <p>Signups</p>
-                <svg
-                  width="4"
-                  height="4"
-                  viewBox="0 0 4 4"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    opacity="0.5"
-                    d="M0.556524 2L1.9999 3.44338L3.44328 2L1.9999 0.556624L0.556524 2ZM2 1.75H1.99998V2.25H2V1.75ZM1.99993 1.75H1.9999V2.25H1.99993V1.75ZM0.556524 2L1.9999 3.44338L3.44328 2L1.9999 0.556624L0.556524 2ZM2 1.75H1.99998V2.25H2V1.75ZM1.99993 1.75H1.9999V2.25H1.99993V1.75Z"
-                    fill="#94A3B8"
-                  />
-                </svg>
-                <p>Earnings</p>
-              </div>
-            </div>
-            <div className="flex items-center justify-end gap-[10px] font-chakra font-semibold text-[20px]">
-              <p className="text-[#94A3B8]/90">23</p>
-              <svg
-                width="35"
-                height="6"
-                viewBox="0 0 35 6"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  opacity="0.5"
-                  d="M34.8868 3L32 0.113249L29.1132 3L32 5.88675L34.8868 3ZM0.113249 3L3 5.88675L5.88675 3L3 0.113249L0.113249 3ZM32 2.5H30.9643V3.5H32V2.5ZM28.8929 2.5H26.8214V3.5L28.8929 3.5V2.5ZM24.75 2.5L22.6786 2.5V3.5H24.75V2.5ZM20.6071 2.5L18.5357 2.5V3.5L20.6071 3.5V2.5ZM16.4643 2.5L14.3929 2.5V3.5L16.4643 3.5V2.5ZM12.3214 2.5L10.25 2.5V3.5H12.3214V2.5ZM8.17857 2.5H6.10715V3.5L8.17857 3.5V2.5ZM4.03572 2.5H3V3.5H4.03572V2.5ZM34.8868 3L32 0.113249L29.1132 3L32 5.88675L34.8868 3ZM0.113249 3L3 5.88675L5.88675 3L3 0.113249L0.113249 3ZM32 2.5H30.9643V3.5H32V2.5ZM28.8929 2.5H26.8214V3.5L28.8929 3.5V2.5ZM24.75 2.5L22.6786 2.5V3.5H24.75V2.5ZM20.6071 2.5L18.5357 2.5V3.5L20.6071 3.5V2.5ZM16.4643 2.5L14.3929 2.5V3.5L16.4643 3.5V2.5ZM12.3214 2.5L10.25 2.5V3.5H12.3214V2.5ZM8.17857 2.5H6.10715V3.5L8.17857 3.5V2.5ZM4.03572 2.5H3V3.5H4.03572V2.5Z"
-                  fill="#94A3B8"
-                />
-              </svg>
-              <p className="text-[#00C278]">$10.6</p>
-            </div>
-          </div>
-          <div className="flex flex-col gap-[30px] bg-staking-bg rounded-[5px] p-4 w-full min-w-[330px] xl:min-w-0">
-            <div>
-              <div className="flex gap-[6px]">
-                <User fill="#00C278" />
-                <p className="text-[#00C278] text-[13px] font-semibold bg-[#00C278]/10 rounded-[5px] px-1">
-                  Level 3
-                </p>
-                <p className="text-[#94A3B8]/75 text-[13px] font-semibold bg-[#94A3B8]/5 rounded-[5px] px-1">
-                  2% Commission
-                </p>
-              </div>
-              <div className="flex items-center gap-[7px] font-chakra text-white/50 font-medium text-xs mt-2">
-                <p>Signups</p>
-                <svg
-                  width="4"
-                  height="4"
-                  viewBox="0 0 4 4"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    opacity="0.5"
-                    d="M0.556524 2L1.9999 3.44338L3.44328 2L1.9999 0.556624L0.556524 2ZM2 1.75H1.99998V2.25H2V1.75ZM1.99993 1.75H1.9999V2.25H1.99993V1.75ZM0.556524 2L1.9999 3.44338L3.44328 2L1.9999 0.556624L0.556524 2ZM2 1.75H1.99998V2.25H2V1.75ZM1.99993 1.75H1.9999V2.25H1.99993V1.75Z"
-                    fill="#94A3B8"
-                  />
-                </svg>
-                <p>Earnings</p>
-              </div>
-            </div>
-            <div className="flex items-center justify-end gap-[10px] font-chakra font-semibold text-[20px]">
-              <p className="text-[#94A3B8]/90">23</p>
-              <svg
-                width="35"
-                height="6"
-                viewBox="0 0 35 6"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  opacity="0.5"
-                  d="M34.8868 3L32 0.113249L29.1132 3L32 5.88675L34.8868 3ZM0.113249 3L3 5.88675L5.88675 3L3 0.113249L0.113249 3ZM32 2.5H30.9643V3.5H32V2.5ZM28.8929 2.5H26.8214V3.5L28.8929 3.5V2.5ZM24.75 2.5L22.6786 2.5V3.5H24.75V2.5ZM20.6071 2.5L18.5357 2.5V3.5L20.6071 3.5V2.5ZM16.4643 2.5L14.3929 2.5V3.5L16.4643 3.5V2.5ZM12.3214 2.5L10.25 2.5V3.5H12.3214V2.5ZM8.17857 2.5H6.10715V3.5L8.17857 3.5V2.5ZM4.03572 2.5H3V3.5H4.03572V2.5ZM34.8868 3L32 0.113249L29.1132 3L32 5.88675L34.8868 3ZM0.113249 3L3 5.88675L5.88675 3L3 0.113249L0.113249 3ZM32 2.5H30.9643V3.5H32V2.5ZM28.8929 2.5H26.8214V3.5L28.8929 3.5V2.5ZM24.75 2.5L22.6786 2.5V3.5H24.75V2.5ZM20.6071 2.5L18.5357 2.5V3.5L20.6071 3.5V2.5ZM16.4643 2.5L14.3929 2.5V3.5L16.4643 3.5V2.5ZM12.3214 2.5L10.25 2.5V3.5H12.3214V2.5ZM8.17857 2.5H6.10715V3.5L8.17857 3.5V2.5ZM4.03572 2.5H3V3.5H4.03572V2.5Z"
-                  fill="#94A3B8"
-                />
-              </svg>
-              <p className="text-[#00C278]">$10.6</p>
-            </div>
-          </div>
-          <div className="flex flex-col gap-[30px] bg-staking-bg rounded-[5px] p-4 w-full min-w-[330px] xl:min-w-0">
-            <div>
-              <div className="flex gap-[6px]">
-                <User fill="#4594FF" />
-                <p className="text-[#4594FF] text-[13px] font-semibold bg-[#4594FF]/10 rounded-[5px] px-1">
-                  Level 4
-                </p>
-                <p className="text-[#94A3B8]/75 text-[13px] font-semibold bg-[#94A3B8]/5 rounded-[5px] px-1">
-                  &lt;2% Commission
-                </p>
-              </div>
-              <div className="flex items-center gap-[7px] font-chakra text-white/50 font-medium text-xs mt-2">
-                <p>Signups</p>
-                <svg
-                  width="4"
-                  height="4"
-                  viewBox="0 0 4 4"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    opacity="0.5"
-                    d="M0.556524 2L1.9999 3.44338L3.44328 2L1.9999 0.556624L0.556524 2ZM2 1.75H1.99998V2.25H2V1.75ZM1.99993 1.75H1.9999V2.25H1.99993V1.75ZM0.556524 2L1.9999 3.44338L3.44328 2L1.9999 0.556624L0.556524 2ZM2 1.75H1.99998V2.25H2V1.75ZM1.99993 1.75H1.9999V2.25H1.99993V1.75Z"
-                    fill="#94A3B8"
-                  />
-                </svg>
-                <p>Earnings</p>
-              </div>
-            </div>
-            <div className="flex items-center justify-end gap-[10px] font-chakra font-semibold text-[20px]">
-              <p className="text-[#94A3B8]/90">23</p>
-              <svg
-                width="35"
-                height="6"
-                viewBox="0 0 35 6"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  opacity="0.5"
-                  d="M34.8868 3L32 0.113249L29.1132 3L32 5.88675L34.8868 3ZM0.113249 3L3 5.88675L5.88675 3L3 0.113249L0.113249 3ZM32 2.5H30.9643V3.5H32V2.5ZM28.8929 2.5H26.8214V3.5L28.8929 3.5V2.5ZM24.75 2.5L22.6786 2.5V3.5H24.75V2.5ZM20.6071 2.5L18.5357 2.5V3.5L20.6071 3.5V2.5ZM16.4643 2.5L14.3929 2.5V3.5L16.4643 3.5V2.5ZM12.3214 2.5L10.25 2.5V3.5H12.3214V2.5ZM8.17857 2.5H6.10715V3.5L8.17857 3.5V2.5ZM4.03572 2.5H3V3.5H4.03572V2.5ZM34.8868 3L32 0.113249L29.1132 3L32 5.88675L34.8868 3ZM0.113249 3L3 5.88675L5.88675 3L3 0.113249L0.113249 3ZM32 2.5H30.9643V3.5H32V2.5ZM28.8929 2.5H26.8214V3.5L28.8929 3.5V2.5ZM24.75 2.5L22.6786 2.5V3.5H24.75V2.5ZM20.6071 2.5L18.5357 2.5V3.5L20.6071 3.5V2.5ZM16.4643 2.5L14.3929 2.5V3.5L16.4643 3.5V2.5ZM12.3214 2.5L10.25 2.5V3.5H12.3214V2.5ZM8.17857 2.5H6.10715V3.5L8.17857 3.5V2.5ZM4.03572 2.5H3V3.5H4.03572V2.5Z"
-                  fill="#94A3B8"
-                />
-              </svg>
-              <p className="text-[#00C278]">$10.6</p>
-            </div>
-          </div>
-        </div>
       </div>
+      <Levels />
       <div className="flex justify-between mb-8">
         <div className="flex w-full md:w-max items-center gap-2 justify-center md:justify-end border-2 p-1.5 rounded-lg border-white border-opacity-[5%]">
           <TButton
@@ -402,15 +361,15 @@ export default function AffiliateProgram() {
           </button>
         )}
       </div>
-
+      // campaigns tab
       {campaigns && (
         <div>
-          {referredData.length > 0 ? (
-            referredData.map((data, index) => (
+          {userCampaigns.length > 0 ? (
+            userCampaigns.map((campaign, index) => (
               <ReferralLink
-                signUps={data?.volume || "0"}
-                totalEarnings={data?.totalEarnings || "0"}
-                referralCode={data?.referralCode}
+                campaignName={campaign?.campaignName}
+                referralCode={campaign?.referralCode}
+                totalEarnings={campaign?.totalEarnings}
                 key={index}
               />
             ))
@@ -419,7 +378,7 @@ export default function AffiliateProgram() {
           )}
         </div>
       )}
-
+      {/* earnings tab */}
       {earnings && (
         <div className="flex gap-[1.85rem] w-full mb-[3.25rem]">
           <div className="flex items-start gap-[12px] bg-staking-bg rounded-[5px] p-4 h-[50%] w-full">
@@ -435,7 +394,9 @@ export default function AffiliateProgram() {
               <p className="text-white font-medium text-base text-opacity-50">
                 Total Claimed
               </p>
-              <p className="text-[#94A3B8] font-semibold text-2xl">$0.00</p>
+              <p className="text-[#94A3B8] font-semibold text-2xl">
+                ${formatNumber(totalClaimed, 2) ?? 0}
+              </p>
             </div>
           </div>
           <div className="flex items-center justify-between bg-staking-bg rounded-[5px] p-4 h-[50%] w-full">
@@ -452,7 +413,9 @@ export default function AffiliateProgram() {
                 <p className="text-white font-medium text-base text-opacity-50">
                   Total Claimable
                 </p>
-                <p className="text-[#94A3B8] font-semibold text-2xl">$0.00</p>
+                <p className="text-[#94A3B8] font-semibold text-2xl">
+                  ${formatNumber(totalClaimable, 2) ?? 0}
+                </p>
               </div>
             </div>
             <div className="mr-4">
@@ -463,11 +426,12 @@ export default function AffiliateProgram() {
           </div>
         </div>
       )}
+      {/* table headers */}
       {!campaigns && (
         <>
           <div className="mb-[1.125rem] hidden md:flex w-full flex-row items-center gap-2 bg-[#121418] py-1 rounded-[5px]">
             {referred
-              ? referredHeaders.map((header, index) => (
+              ? referredTabHeaders.map((header, index) => (
                   <span
                     key={index}
                     className="w-full text-center font-changa text-[#F0F0F080]"
@@ -476,7 +440,7 @@ export default function AffiliateProgram() {
                   </span>
                 ))
               : earnings
-                ? earningsHeaders.map((header, index) => (
+                ? earningsTabHeaders.map((header, index) => (
                     <span
                       key={index}
                       className="w-full text-center font-changa text-[#F0F0F080]"
@@ -487,7 +451,7 @@ export default function AffiliateProgram() {
                 : null}
           </div>
           <div className="mb-[1.4rem] flex md:hidden w-full flex-row items-center bg-[#121418] rounded-md py-1 gap-2">
-            {smallScreenHeaders.map((header, index) => (
+            {smallScreenReferredTabHeaders.map((header, index) => (
               <span
                 key={index}
                 className="w-full text-center font-changa text-[#F0F0F080]"
@@ -498,82 +462,135 @@ export default function AffiliateProgram() {
           </div>
         </>
       )}
-
-      {/* <div
-        className={`flex w-full flex-col
-        ${loading ? " h-[50rem]" : ""}`}
-      >
-        {loading ? (
-          <div className="h-20">
-            <Loader />
-          </div>
-        ) : (
-          <>
-            <div className="scrollbar w-full mt-[1.125rem] pb-8">
-              <div className="flex w-full md:min-w-[50rem] flex-col items-center">
-                <div className="relative flex flex-col items-center w-full max-h-[36rem] overflow-hidden">
-                  {tableData?.length ? (
-                    <>
-                      {tableData
-                        .slice(
-                          page * transactionsPerPage - transactionsPerPage,
-                          page * transactionsPerPage,
-                        )
-                        .map((data, index) => (
-                          <div
-                            key={index}
-                            className="mb-2.5 flex w-full flex-row items-center gap-2 rounded-[5px] bg-[#121418] hover:bg-[#1f2024] py-3"
-                          >
-                            {referred && (
+      {referred && (
+        <div className={`flex w-full flex-col ${loading ? "h-[50rem]" : ""}`}>
+          {loading ? (
+            <div className="h-20">
+              <Loader />
+            </div>
+          ) : (
+            <>
+              <div className="scrollbar w-full mt-[1.125rem] pb-8">
+                <div className="flex w-full md:min-w-[50rem] flex-col items-center">
+                  <div className="relative flex flex-col items-center w-full max-h-[36rem] overflow-hidden">
+                    {referredUsers?.length ? (
+                      <>
+                        {referredUsers
+                          .slice(
+                            page * transactionsPerPage - transactionsPerPage,
+                            page * transactionsPerPage,
+                          )
+                          .map((user, index) => (
+                            <div
+                              key={index}
+                              className="mb-2.5 flex w-full flex-row items-center gap-2 rounded-[5px] bg-[#121418] hover:bg-[#1f2024] py-3"
+                            >
                               <div className="w-full flex items-center justify-between cursor-pointer">
                                 <span className="w-full hidden md:block text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
-                                  {obfuscatePubKey(data.wallet)}
+                                  {obfuscatePubKey(user.wallet)}
                                 </span>
                                 <span className="w-full hidden md:block text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
-                                  ${truncateNumber(data.wagered ?? 0)}
+                                  {getReferralLevel(user._id)}
                                 </span>
                                 <span className="w-full hidden md:block text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
-                                  {data.commission ?? 0}%
+                                  ${calculateWagerAmount(user.volume)}
                                 </span>
                                 <span className="w-full hidden md:block text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
-                                  ${truncateNumber(data.earned ?? 0)}
+                                  {user._id &&
+                                    commissionLevels[
+                                      getReferralLevel(user._id)
+                                    ] * 100}
+                                  %
+                                </span>
+                                <span className="w-full hidden md:block text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
+                                  $
+                                  {calculateFeeGenerated(
+                                    user.feeGenerated,
+                                    commissionLevels[
+                                      getReferralLevel(user._id)
+                                    ],
+                                  )}
                                 </span>
                               </div>
-                            )}
-                            {earnings && (
-                              <div className="w-full flex items-center justify-between cursor-pointer">
-                                <span className="w-full hidden md:block text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
-                                  ${data.cryptocurreny)}
-                                </span>
-                                <span className="w-full hidden md:block text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
-                                  ${truncateNumber(data.claimed ?? 0)}
-                                </span>
-                                <span className="w-full hidden md:block text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
-                                  ${truncateNumber(data.claimable ?? 0)}
-                                </span>
-                              </div>
-                            )}
-                          </div>
-                        ))}
-                    </>
-                  ) : (
-                    <span className="font-changa text-[#F0F0F080]">
-                      {translator("No have not referred anyone.", language)}
-                    </span>
-                  )}
+                            </div>
+                          ))}
+                      </>
+                    ) : (
+                      <span className="font-changa text-[#F0F0F080]">
+                        {translator("No have not referred anyone.", language)}
+                      </span>
+                    )}
+                  </div>
                 </div>
               </div>
-            </div>
 
-            <TablePagination
+              {/* <TablePagination
               page={page}
               setPage={setPage}
               maxPages={maxPages}
               bets={bets}
-            />
-          </>
-        )}
-      </div> */}
+            /> */}
+            </>
+          )}
+        </div>
+      )}
+      {earnings && (
+        <div className={`flex w-full flex-col ${loading ? "h-[50rem]" : ""}`}>
+          {loading ? (
+            <div className="h-20">
+              <Loader />
+            </div>
+          ) : (
+            <>
+              <div className="scrollbar w-full mt-[1.125rem] pb-8">
+                <div className="flex w-full md:min-w-[50rem] flex-col items-center">
+                  <div className="relative flex flex-col items-center w-full max-h-[36rem] overflow-hidden">
+                    {earningsData?.length ? (
+                      <>
+                        {earningsData
+                          .slice(
+                            page * transactionsPerPage - transactionsPerPage,
+                            page * transactionsPerPage,
+                          )
+                          .map((token, index) => (
+                            <div
+                              key={index}
+                              className="mb-2.5 flex w-full flex-row items-center gap-2 rounded-[5px] bg-[#121418] hover:bg-[#1f2024] py-3"
+                            >
+                              <div className="w-full flex items-center justify-between cursor-pointer">
+                                <span className="w-full hidden md:block text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
+                                  ${token.tokenName}
+                                </span>
+                                <span className="w-full hidden md:block text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
+                                  {token.totalEarnings -
+                                    token.unclaimedEarnings ?? 0}
+                                </span>
+                                <span className="w-full hidden md:block text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
+                                  {token.unclaimedEarnings ?? 0}
+                                </span>
+                              </div>
+                            </div>
+                          ))}
+                      </>
+                    ) : (
+                      <span className="font-changa text-[#F0F0F080]">
+                        {translator("No have not referred anyone.", language)}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* <TablePagination
+              page={page}
+              setPage={setPage}
+              maxPages={maxPages}
+              bets={bets}
+            /> */}
+            </>
+          )}
+        </div>
+      )}
       {modal && <CreateCampaignModal modal={modal} setModal={setModal} />}
     </div>
   );

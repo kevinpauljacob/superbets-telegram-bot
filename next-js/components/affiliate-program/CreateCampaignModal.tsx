@@ -36,6 +36,7 @@ export default function CoinFlipProvablyFairModal({ modal, setModal }: Props) {
         body: JSON.stringify({
           wallet: wallet.publicKey,
           referralCode: campaignCode,
+          campaignName: campaignName,
         }),
       });
 
@@ -43,8 +44,9 @@ export default function CoinFlipProvablyFairModal({ modal, setModal }: Props) {
 
       if (success) {
         successCustom(message);
+        setModal(false);
       } else {
-        errorCustom(message);
+        errorCustom("Failed to create campaign!");
       }
     } catch (error: any) {
       throw new Error(error.message);
