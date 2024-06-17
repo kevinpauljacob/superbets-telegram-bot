@@ -100,7 +100,7 @@ export default function BetAmount({
           : truncateNumber(currentMaxBetAmt, 4),
       ),
     );
-    console.log(selectedCoin);
+    // console.log(selectedCoin);
   }, [currentMaxBetAmt, coinData, selectedCoin]);
 
   const handleSetMaxBet = () => {
@@ -185,7 +185,8 @@ export default function BetAmount({
       game !== "keno" &&
       game !== "wheel" &&
       game !== "coinflip" &&
-      game !== "options" ? (
+      game !== "options" &&
+      game !== "plinko" ? (
         <div className="fadeInDown_04 relative flex flex-col items-center gap-3 bg-[#0C0F16] rounded-[5px] px-6 pt-7 pb-4 mt-2 mb-1.5">
           <div className="flex items-center border-b border-white/10 h-full w-full px-3 pb-8 pt-3">
             <div className="relative h-[4px] rounded-full bg-[#2A2E38] w-full mx-3">
@@ -297,7 +298,8 @@ export default function BetAmount({
         game === "keno" ||
         game === "wheel" ||
         game === "coinflip" ||
-        game === "options") ? (
+        game === "options" ||
+        game === "plinko") ? (
         <div
           className={`absolute z-[1000] ${
             game === "options" ? "top-[1rem]" : "-top-[5.2rem]"
