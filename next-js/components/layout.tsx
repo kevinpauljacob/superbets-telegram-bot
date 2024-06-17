@@ -245,12 +245,7 @@ export default function Layout({ children }: LayoutProps) {
         <MobileNavbar sidebar={mobileSidebar} toggleSidebar={toggleSidebar} />
       </div>
       {showWalletModal && <BalanceModal />}
-      {showCreateCampaignModal && (
-        <CreateCampaignModal
-          modal={showCreateCampaignModal}
-          setModal={setShowCreateCampaignModal}
-        />
-      )}
+      {showCreateCampaignModal && <CreateCampaignModal />}
       {/* verify modals  */}
       {verifyModalData.game === GameType.coin ? (
         <VerifyFlipModal
