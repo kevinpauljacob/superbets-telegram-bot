@@ -525,7 +525,10 @@ export default function AffiliateProgram() {
               </div>
             </div>
             <div className="sm:mr-4">
-              <button className="text-white text-xs lg:text-base font-semibold font-chakra bg-[#7839C5] rounded-[5px] py-2 px-7 lg:px-11">
+              <button
+                disabled
+                className="disabled:cursor-default disabled:opacity-70 disabled:bg-[#4b2876] text-white text-xs lg:text-base font-semibold font-chakra bg-[#7839C5] hover:bg-[#9361d1] focus:bg-[#602E9E] transition-all cursor-pointer rounded-[5px] py-2 px-7 lg:px-11"
+              >
                 CLAIM
               </button>
             </div>
@@ -668,7 +671,9 @@ export default function AffiliateProgram() {
               />
             ))
           ) : (
-            <p className="text-center font-changa text-[#F0F0F080]">No data</p>
+            <p className="text-center font-changa text-[#F0F0F080]">
+              No campaigns created
+            </p>
           )}
         </div>
       )}
