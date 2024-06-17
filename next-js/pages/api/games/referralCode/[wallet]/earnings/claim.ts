@@ -90,7 +90,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     const { transaction: vTxn } = await createClaimEarningsTxn(
       new PublicKey(wallet),
       earnings,
-      devWalletKey.publicKey,
     );
 
     const txn = Transaction.from(
