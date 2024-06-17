@@ -10,7 +10,11 @@ import ReferralLink from "@/components/affiliate-program/ReferralLink";
 import CreateCampaignModal from "@/components/affiliate-program/CreateCampaignModal";
 import Levels from "@/components/affiliate-program/Levels";
 import Loader from "@/components/games/Loader";
-import { obfuscatePubKey, truncateNumber } from "@/context/transactions";
+import {
+  obfuscatePubKey,
+  truncateNumber,
+  claimEarnings,
+} from "@/context/transactions";
 import { SPL_TOKENS, commissionLevels } from "@/context/config";
 interface Referral {
   _id: string;
@@ -524,8 +528,9 @@ export default function AffiliateProgram() {
             </div>
             <div className="sm:mr-4">
               <button
-                disabled
+                disabled={totalClaimable === 0}
                 className="disabled:cursor-default disabled:opacity-70 disabled:bg-[#4b2876] text-white text-xs lg:text-base font-semibold font-chakra bg-[#7839C5] hover:bg-[#9361d1] focus:bg-[#602E9E] transition-all cursor-pointer rounded-[5px] py-2 px-7 lg:px-11"
+                onClick={() => claimEarnings(wallet, userCampaigns)}
               >
                 CLAIM
               </button>
