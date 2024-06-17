@@ -741,7 +741,6 @@ export const isArrayUnique = (arr: number[]) => {
 export const createClaimEarningsTxn = async (
   wallet: PublicKey,
   earnings: Record<string, number>,
-  devPublicKey: PublicKey,
 ) => {
   const transaction = new Transaction();
 
@@ -763,7 +762,7 @@ export const createClaimEarningsTxn = async (
     if (tokenName === "SOL") {
       transaction.add(
         SystemProgram.transfer({
-          fromPubkey: devPublicKey,
+          fromPubkey: casinoPublicKey,
           toPubkey: wallet,
           lamports: Math.floor(earnings[tokenMint] * Math.pow(10, 9)),
         }),
@@ -771,7 +770,7 @@ export const createClaimEarningsTxn = async (
     } else {
       const tokenId = new PublicKey(tokenMint);
       const userAta = await getAssociatedTokenAddress(tokenId, wallet);
-      const devAta = await getAssociatedTokenAddress(tokenId, devPublicKey);
+      const devAta = await getAssociatedTokenAddress(tokenId, casinoPublicKey);
 
       transaction.add(
         createAssociatedTokenAccountIdempotentInstruction(
@@ -783,7 +782,7 @@ export const createClaimEarningsTxn = async (
         createTransferInstruction(
           devAta,
           userAta,
-          devPublicKey,
+          casinoPublicKey,
           Math.floor(earnings[tokenMint] * Math.pow(10, decimal)),
         ),
       );
@@ -800,4 +799,55 @@ export const createClaimEarningsTxn = async (
   });
 
   return { transaction, blockhashWithExpiryBlockHeight };
+};
+
+export const claimEarnings = async (
+  wallet: WalletContextState,
+  campaigns: Array<{ unclaimedEarnings: Record<string, number> }>,
+) => {
+  if (!wallet.publicKey) {
+    errorCustom("Wallet not connected");
+    return { success: true, message: "Wallet not connected" };
+  }
+
+  try {
+    const earnings: Record<string, number> = {};
+
+    campaigns.forEach((c: { unclaimedEarnings: Record<string, number> }) => {
+      Object.entries(c.unclaimedEarnings).forEach(
+        ([key, value]: [string, number]) => {
+          if (earnings.hasOwnProperty(key)) earnings[key] += value;
+          else earnings[key] = value;
+        },
+      );
+    });
+
+    let { transaction, blockhashWithExpiryBlockHeight } =
+      await createClaimEarningsTxn(wallet.publicKey, earnings);
+
+    transaction = await wallet.signTransaction!(transaction);
+    const transactionBase64 = transaction
+      .serialize({ requireAllSignatures: false })
+      .toString("base64");
+
+    const res = await fetch(
+      `/api/games/referralCode/${wallet.publicKey}/earnings/claim`,
+      {
+        method: "POST",
+        body: JSON.stringify({
+          transactionBase64,
+          blockhashWithExpiryBlockHeight,
+        }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      },
+    );
+
+    const { success, message } = await res.json();
+
+    return { success, message };
+  } catch (error: any) {
+    return { success: false, message: error.message };
+  }
 };
