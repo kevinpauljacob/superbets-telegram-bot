@@ -17,6 +17,7 @@ import { NextApiRequest, NextApiResponse } from "next";
 import { getToken } from "next-auth/jwt";
 import connectDatabase from "../../../../utils/database";
 import Deposit from "@/models/games/deposit";
+import mongoose from "mongoose";
 
 const secret = process.env.NEXTAUTH_SECRET;
 
