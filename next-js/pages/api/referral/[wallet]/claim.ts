@@ -15,7 +15,7 @@ import {
 } from "@solana/web3.js";
 import { NextApiRequest, NextApiResponse } from "next";
 import { getToken } from "next-auth/jwt";
-import connectDatabase from "../../../../../../utils/database";
+import connectDatabase from "../../../../utils/database";
 
 const secret = process.env.NEXTAUTH_SECRET;
 

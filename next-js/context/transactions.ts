@@ -830,19 +830,16 @@ export const claimEarnings = async (
       .serialize({ requireAllSignatures: false })
       .toString("base64");
 
-    const res = await fetch(
-      `/api/games/referralCode/${wallet.publicKey}/earnings/claim`,
-      {
-        method: "POST",
-        body: JSON.stringify({
-          transactionBase64,
-          blockhashWithExpiryBlockHeight,
-        }),
-        headers: {
-          "Content-Type": "application/json",
-        },
+    const res = await fetch(`/api/referral/${wallet.publicKey}/claim`, {
+      method: "POST",
+      body: JSON.stringify({
+        transactionBase64,
+        blockhashWithExpiryBlockHeight,
+      }),
+      headers: {
+        "Content-Type": "application/json",
       },
-    );
+    });
 
     const { success, message } = await res.json();
 

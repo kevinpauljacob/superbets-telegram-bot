@@ -32,7 +32,7 @@ export default function Home() {
   useEffect(() => {
     const applyReferralCode = async () => {
       try {
-        const response = await fetch(`/api/games/referralCode/apply`, {
+        const response = await fetch(`/api/referral/apply`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",

@@ -1,4 +1,4 @@
-import connectDatabase from "../../../../utils/database";
+import connectDatabase from "../../../utils/database";
 import { NextApiRequest, NextApiResponse } from "next";
 import { User, Campaign } from "@/models/referral";
 import { getToken } from "next-auth/jwt";
@@ -12,7 +12,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         .status(405)
         .json({ success: false, message: "Method not allowed!" });
 
-    const { wallet, referralCode, campaignName } = req.body;
+    const { wallet, referralCode } = req.body;
 
     const token = await getToken({ req, secret });
 
@@ -21,7 +21,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         error: "User wallet not authenticated",
       });
 
-    if (!wallet || !referralCode || !campaignName)
+    if (!wallet || !referralCode)
       return res
         .status(400)
         .json({ success: false, message: "Missing parameters!" });
@@ -34,26 +34,54 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
     await connectDatabase();
 
-    const campaign = new Campaign({
-      wallet,
-      campaignName,
-      referralCode,
-    });
-    await campaign.save();
+    const campaign = await Campaign.findOne({ referralCode });
+
+    if (!campaign)
+      return res
+        .status(400)
+        .json({ success: false, message: "Referral code not found!" });
+
+    if (campaign.wallet === wallet)
+      return res
+        .status(400)
+        .json({ success: false, message: "You can't refer yourself!" });
+
+    const referrer = await User.findOne({ wallet: campaign.wallet });
+
+    if (!referrer)
+      return res
+        .status(400)
+        .json({ success: false, message: "Referrer not found!" });
+
+    const referredByChain = [campaign._id, ...referrer.referredByChain].slice(
+      0,
+      5,
+    );
 
     await User.findOneAndUpdate(
       {
         wallet,
+        referredByChain: [],
       },
       {
-        $addToSet: { campaigns: campaign._id },
+        $set: {
+          referredByChain,
+        },
       },
       { upsert: true },
-    );
+    ).catch((e) => {
+      return res.status(400).json({
+        success: false,
+        message: "Applied referralCode cannot be changed!",
+      });
+    });
+
+    campaign.signupCount += 1;
+    await campaign.save();
 
     return res.json({
       success: true,
-      message: `Campaign created successfully!`,
+      message: `Referral code applied successfully!`,
     });
   } catch (e: any) {
     console.log(e);

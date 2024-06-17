@@ -1,4 +1,4 @@
-import connectDatabase from "../../../../../utils/database";
+import connectDatabase from "../../../../utils/database";
 import { NextApiRequest, NextApiResponse } from "next";
 import { User } from "@/models/referral";
 
