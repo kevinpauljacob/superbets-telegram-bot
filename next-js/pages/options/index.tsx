@@ -77,7 +77,7 @@ export default function Options() {
 
   const handleBeforeUnload = () => {
     if (checkBet) {
-      console.log("clearing");
+      // console.log("clearing");
       clearTimeout(checkBet);
     }
   };
@@ -101,7 +101,7 @@ export default function Options() {
           soundAlert("/sounds/win.wav", !enableSounds);
         } else errorCustom(res?.message);
         if (!result) {
-          console.log("updating");
+          // console.log("updating");
           setResult(res?.data?.result);
           setResultAmt(
             res?.data?.result == "Won"

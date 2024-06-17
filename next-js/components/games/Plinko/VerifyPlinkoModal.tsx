@@ -64,7 +64,7 @@ export default function VerifyPlinkoModal({
   const { getProvablyFairData, language } = useGlobalContext();
   const wheelRef = useRef<HTMLDivElement>(null);
   const [rotationAngle, setRotationAngle] = useState(0);
-  console.log(modalData)
+  // console.log(modalData)
   //Provably Fair Modal handling
   const [isPFModalOpen, setIsPFModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -99,7 +99,7 @@ export default function VerifyPlinkoModal({
   //to handle dropodown
   const [openDropDown, setOpenDropDown] = useState<boolean>(false);
   const [color, setColor] = useState('#ffffff');
-  console.log(color)
+  // console.log(color)
   const copyToClipboard = (text?: string) => {
     if (text) navigator.clipboard.writeText(text);
   };

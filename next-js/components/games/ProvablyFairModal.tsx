@@ -91,9 +91,9 @@ export default function ProvablyFairModal({
   const [color, setColor] = useState('#ffffff');
 
   const { language } = useGlobalContext();
-  console.log("StrikeMultiplier",strikeMultiplier)
-  console.log("StrikeNumber",strikeNumber)
-  console.log(verificationState)
+  // console.log("StrikeMultiplier",strikeMultiplier)
+  // console.log("StrikeNumber",strikeNumber)
+  // console.log(verificationState)
   useEffect(() => {
     const result = generateGameResult(
       verificationState.serverSeed,

@@ -373,7 +373,7 @@ export default function Plinko() {
         pinsConfig.pinGap / 2;
 
       const ballX = pos! * (maxBallX - minBallX) + minBallX;
-      console.log(">>>>>>", pos);
+      // console.log(">>>>>>", pos);
       let isNeg = "";
       if (pos < 0) {
         pos = pos * -1;
@@ -484,7 +484,7 @@ export default function Plinko() {
 
     const multiplierElement = document.getElementById(multiplier.label);
 
-    console.log(multiplier.label, multiplierElement);
+    // console.log(multiplier.label, multiplierElement);
 
     if (multiplierElement) {
       const dropDistance = 20;
@@ -512,7 +512,6 @@ export default function Plinko() {
 
     const multiplierValues = multiplier.label.split("-");
     const multiplierValue = +multiplierValues[1];
-    console.log(multiplierValue)
     const multiplierColor = multiplierValues[2] ?? "#ffffff";
     const multiplierSound = multiplierValues[3] ?? "regular";
 
