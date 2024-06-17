@@ -486,7 +486,8 @@ export const verifyFrontendTransaction = (
     ),
   );
 
-  console.log(transactionInstructions, verificationTransactionInstructions);
+  console.log(transactionInstructions);
+  console.log(verificationTransactionInstructions);
 
   return transactionInstructions === verificationTransactionInstructions;
 };
@@ -753,6 +754,11 @@ export const createClaimEarningsTxn = async (
     ComputeBudgetProgram.setComputeUnitPrice({ microLamports: 150000 }),
   );
 
+  //sort earnings by key alphabetically
+  earnings = Object.fromEntries(
+    Object.entries(earnings).sort((a, b) => a[0].localeCompare(b[0])),
+  );
+
   for (let tokenMint in earnings) {
     let splToken = SPL_TOKENS.find((data) => data.tokenMint === tokenMint);
     if (!splToken) throw new Error("Invalid tokenMint provided!");
@@ -791,7 +797,7 @@ export const createClaimEarningsTxn = async (
 
   transaction.instructions.slice(2).forEach((i) => {
     i.keys.forEach((k) => {
-      if (k.pubkey.equals(wallet)) {
+      if (k.pubkey.equals(wallet) || k.pubkey.equals(casinoPublicKey)) {
         k.isSigner = true;
         k.isWritable = true;
       }
@@ -830,19 +836,16 @@ export const claimEarnings = async (
       .serialize({ requireAllSignatures: false })
       .toString("base64");
 
-    const res = await fetch(
-      `/api/games/referralCode/${wallet.publicKey}/earnings/claim`,
-      {
-        method: "POST",
-        body: JSON.stringify({
-          transactionBase64,
-          blockhashWithExpiryBlockHeight,
-        }),
-        headers: {
-          "Content-Type": "application/json",
-        },
+    const res = await fetch(`/api/referral/${wallet.publicKey}/claim`, {
+      method: "POST",
+      body: JSON.stringify({
+        transactionBase64,
+        blockhashWithExpiryBlockHeight,
+      }),
+      headers: {
+        "Content-Type": "application/json",
       },
-    );
+    });
 
     const { success, message } = await res.json();
 

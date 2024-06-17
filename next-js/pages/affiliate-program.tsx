@@ -297,15 +297,12 @@ export default function AffiliateProgram() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch(
-          `/api/games/referralCode/${wallet.publicKey}`,
-          {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-            },
+        const response = await fetch(`/api/referral/${wallet.publicKey}`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
           },
-        );
+        });
 
         const { success, user, referredUsers, message } = await response.json();
 

@@ -15,7 +15,9 @@ import {
 } from "@solana/web3.js";
 import { NextApiRequest, NextApiResponse } from "next";
 import { getToken } from "next-auth/jwt";
-import connectDatabase from "../../../../../../utils/database";
+import connectDatabase from "../../../../utils/database";
+import Deposit from "@/models/games/deposit";
+import mongoose from "mongoose";
 
 const secret = process.env.NEXTAUTH_SECRET;
 
@@ -60,31 +62,51 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
     await connectDatabase();
 
-    //TODO: Avoid race conditions
-    const aggregateEarnings = await Campaign.aggregate([
-      { $match: { wallet } },
-      {
-        $project: {
-          unclaimedEarningsArr: {
-            $objectToArray: "$unclaimedEarnings",
+    const session = await mongoose.startSession();
+    session.startTransaction();
+
+    let earnings: Record<string, number> = {};
+
+    try {
+      const aggregateEarnings = await Campaign.aggregate(
+        [
+          { $match: { wallet } },
+          {
+            $project: {
+              unclaimedEarningsArr: {
+                $objectToArray: "$unclaimedEarnings",
+              },
+            },
           },
-        },
-      },
-      { $unwind: "$unclaimedEarningsArr" },
-      {
-        $group: {
-          _id: "$unclaimedEarningsArr.k",
-          totalUnclaimedEarnings: { $sum: "$unclaimedEarningsArr.v" },
-        },
-      },
-    ]);
+          { $unwind: "$unclaimedEarningsArr" },
+          {
+            $group: {
+              _id: "$unclaimedEarningsArr.k",
+              totalUnclaimedEarnings: { $sum: "$unclaimedEarningsArr.v" },
+            },
+          },
+        ],
+        { session },
+      );
 
-    const earnings = aggregateEarnings.reduce((acc, item) => {
-      acc[item._id] = item.totalUnclaimedEarnings;
-      return acc;
-    }, {});
+      earnings = aggregateEarnings.reduce((acc, item) => {
+        acc[item._id] = item.totalUnclaimedEarnings;
+        return acc;
+      }, {});
 
-    await Campaign.updateMany({ wallet }, { $set: { unclaimedEarnings: {} } });
+      await Campaign.updateMany(
+        { wallet },
+        { $set: { unclaimedEarnings: {} } },
+        { session },
+      );
+
+      await session.commitTransaction();
+      session.endSession();
+    } catch (error: any) {
+      await session.abortTransaction();
+      session.endSession();
+      return res.status(500).json({ success: false, message: error.message });
+    }
 
     const { transaction: vTxn } = await createClaimEarningsTxn(
       new PublicKey(wallet),
@@ -109,6 +131,17 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     );
 
     await TxnSignature.create({ txnSignature });
+
+    await Deposit.create(
+      Object.entries(earnings).map(([tokenMint, amount], index) => ({
+        wallet,
+        type: false,
+        amount,
+        tokenMint,
+        comments: "Earnings claimed",
+        txnSignature: txnSignature + `-${index}`,
+      })),
+    );
 
     return res.json({
       success: true,
