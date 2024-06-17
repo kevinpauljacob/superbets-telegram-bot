@@ -37,6 +37,8 @@ import Footer from "./Footer";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { soundAlert } from "@/utils/soundUtils";
 import { maxPayouts, minAmtFactor } from "@/context/config";
+import VerifyPlinkoModal, { Plinko } from "./games/Plinko/VerifyPlinkoModal";
+import PlinkoProvablyFairModal from "./games/Plinko/PlinkoProvablyFairModal";
 
 interface LayoutProps {
   children: ReactNode;
@@ -299,6 +301,13 @@ export default function Layout({ children }: LayoutProps) {
           modalData={{ bet: (verifyModalData as Mines)! }}
           wallet={wallet.publicKey?.toBase58()}
         />
+      ) : verifyModalData.game === GameType.plinko ? (
+        <VerifyPlinkoModal
+          isOpen={isVerifyModalOpen}
+          onClose={closeVerifyModal}
+          modalData={{ bet: (verifyModalData as Plinko)! }}
+          wallet={wallet.publicKey?.toBase58()}
+        />
       ) : null}
 
       {/* pf modals  */}
@@ -346,6 +355,13 @@ export default function Layout({ children }: LayoutProps) {
         />
       ) : game === GameType.mines ? (
         <MinesProvablyFairModal
+          isOpen={openPFModal}
+          onClose={closePfModal}
+          modalData={modalData}
+          setModalData={setModalData}
+        />
+      ) : game === GameType.plinko ? (
+        <PlinkoProvablyFairModal
           isOpen={openPFModal}
           onClose={closePfModal}
           modalData={modalData}

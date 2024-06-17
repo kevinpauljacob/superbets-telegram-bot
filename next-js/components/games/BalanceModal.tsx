@@ -171,7 +171,7 @@ export default function BalanceModal() {
       const fetchAndUpddateToken = () => {
         getTokenAccounts(wallet.publicKey!, connection)
           .then((tokens) => {
-            console.log("gill", tokens);
+            // console.log("gill", tokens);
             setUserTokens([
               {
                 mintAddress: "SOL",

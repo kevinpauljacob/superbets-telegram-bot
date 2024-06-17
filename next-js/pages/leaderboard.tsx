@@ -20,8 +20,8 @@ export default function Leaderboard() {
     const tier = Object.entries(pointTiers).reduce((prev, next) => {
       return points >= next[1]?.limit ? next : prev;
     });
-    console.log(tier, pointTiers["2"]);
-    console.log("pointTiers", pointTiers);
+    // console.log(tier, pointTiers["2"]);
+    // console.log("pointTiers", pointTiers);
     setPointTier({
       index: parseInt(tier[0]),
       limit: tier[1]?.limit,

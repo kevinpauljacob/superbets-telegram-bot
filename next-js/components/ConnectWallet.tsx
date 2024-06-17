@@ -67,12 +67,12 @@ export default function ConnectWallet() {
 
   return (
     <>
-      {!session && (
+      {(!session || !wallet.publicKey) && (
         <button
           onClick={() => {
             handleSignIn(wallet, walletModal);
           }}
-          className="bg-[#192634] hover:bg-[#121D28] transition-all w-full sm:w-fit flex items-center rounded-md min-w-32 min-h-9 px-5"
+          className="bg-[#192634] hover:bg-[#121D28] transition-all w-full sm:w-fit flex items-center rounded-md min-w-[8rem] h-10 px-5"
         >
           {wallet.connected && status === "unauthenticated" ? (
             <Loader className="scale-75" />
@@ -84,7 +84,7 @@ export default function ConnectWallet() {
         </button>
       )}
 
-      {session?.user && (
+      {session?.user && wallet.publicKey && (
         <>
           <button
             className="w-full sm:w-fit flex text-white bg-[#192634] hover:bg-[#121D28] transition-all font-medium rounded-md text-sm px-5 py-2.5"
