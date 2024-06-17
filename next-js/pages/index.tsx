@@ -4,6 +4,7 @@ import { useRouter } from "next/router";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { useGlobalContext } from "@/components/GlobalContext";
 import { successCustom, errorCustom } from "@/components/toasts/ToastGroup";
+import { useSession } from "next-auth/react";
 import StoreBanner from "@/components/Banner";
 import FomoPlay from "@/components/FomoPlay";
 import FOMOHead from "@/components/HeadElement";
@@ -13,6 +14,7 @@ const inter = Inter({ subsets: ["latin"] });
 
 export default function Home() {
   const wallet = useWallet();
+  const { status } = useSession();
   const router = useRouter();
   const { referralCode } = router.query;
 
@@ -56,12 +58,13 @@ export default function Home() {
     if (
       wallet &&
       wallet.connected &&
+      status === "authenticated" &&
       referralCode !== undefined &&
       referralCode !== null &&
       referralCode !== ""
     )
       applyReferralCode();
-  }, [wallet.connected, referralCode]);
+  }, [status, referralCode]);
 
   return (
     <>
