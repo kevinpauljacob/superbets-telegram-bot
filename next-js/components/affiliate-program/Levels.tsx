@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { commissionLevels } from "@/context/config";
 import { truncateNumber } from "@/context/transactions";
-import { getColor } from "@/pages/affiliate-program";
 import User from "@/public/assets/User";
 import Image from "next/image";
 interface ReferralLevelData {
@@ -76,18 +75,22 @@ function LevelsCard({
   level: number;
   data: ReferralLevelData;
 }) {
+  const colors = ["4594FF", "E17AFF", "00C278", "4594FF", "00C278"];
   const commission = commissionLevels[level] || 0;
   const commissionText = commission
     ? `${truncateNumber(commission * 100)}% Commission`
     : "<2% Commission";
-
   return (
     <div className="flex flex-col gap-[30px] bg-staking-bg rounded-[5px] p-4 w-full min-w-[330px]">
       <div className="w-full">
         <div className="flex gap-[6px]">
-          <User fill={`#${getColor(level)}`} />
+          <User fill={`#${colors[level]}`} />
           <p
-            className={`text-[#${getColor(level)}] text-[13px] font-semibold bg-[#${getColor(level)}]/10 rounded-[5px] px-1`}
+            className="text-[13px] font-semibold rounded-[5px] px-1"
+            style={{
+              backgroundColor: `rgba(${parseInt(colors[level].slice(0, 2), 16)}, ${parseInt(colors[level].slice(2, 4), 16)}, ${parseInt(colors[level].slice(4, 6), 16)}, 0.1)`,
+              color: `#${colors[level]}`,
+            }}
           >
             Level {level}
           </p>

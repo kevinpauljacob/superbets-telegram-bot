@@ -58,11 +58,6 @@ interface ReferralLevelData {
   totalEarnings: number;
 }
 
-export const getColor = (level: number): string => {
-  const colors = ["4594FF", "E17AFF", "00C278", "4594FF", "00C278"];
-  return colors[level % colors.length];
-};
-
 export const copyToClipboard = (text?: string) => {
   if (text) {
     navigator.clipboard
@@ -100,6 +95,8 @@ export default function AffiliateProgram() {
     ReferralLevelData[]
   >([]);
   const [buttonText, setButtonText] = useState("Copy");
+
+  const colors = ["4594FF", "E17AFF", "00C278", "4594FF", "00C278"];
 
   const referredTabHeaders = [
     "Wallet",
@@ -592,51 +589,58 @@ export default function AffiliateProgram() {
                             page * transactionsPerPage - transactionsPerPage,
                             page * transactionsPerPage,
                           )
-                          .map((user, index) => (
-                            <div
-                              key={index}
-                              className="mb-2.5 flex w-full flex-row items-center gap-2 rounded-[5px] bg-[#121418] hover:bg-[#1f2024] py-3"
-                            >
-                              <div className="w-full flex items-center justify-between cursor-pointer">
-                                <span className="w-full text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
-                                  {obfuscatePubKey(user.wallet)}
-                                </span>
-                                <span className="w-full text-center font-changa text-sm text-opacity-75">
-                                  <span
-                                    className={`text-[#${getColor(getReferralLevel(user._id))}]  bg-[#${getColor(getReferralLevel(user._id))}]/10 rounded-[5px] px-2.5`}
-                                  >
-                                    Level {getReferralLevel(user._id)}
+                          .map((user, index) => {
+                            const level = getReferralLevel(user._id);
+                            return (
+                              <div
+                                key={index}
+                                className="mb-2.5 flex w-full flex-row items-center gap-2 rounded-[5px] bg-[#121418] hover:bg-[#1f2024] py-3"
+                              >
+                                <div className="w-full flex items-center justify-between cursor-pointer">
+                                  <span className="w-full text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
+                                    {obfuscatePubKey(user.wallet)}
                                   </span>
-                                </span>
-                                <span className="w-full hidden md:block text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
-                                  $
-                                  {formatNumber(
-                                    calculateWagerAmount(user.volume),
-                                    2,
-                                  )}
-                                </span>
-                                <span className="w-full hidden md:block text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
-                                  {user._id &&
-                                    truncateNumber(
-                                      commissionLevels[
-                                        getReferralLevel(user._id)
-                                      ] * 100,
+                                  <span className="w-full text-center font-changa text-sm text-opacity-75">
+                                    <span
+                                      className="rounded-[5px] px-2.5"
+                                      style={{
+                                        backgroundColor: `rgba(${parseInt(colors[level]?.slice(0, 2), 16)}, ${parseInt(colors[level]?.slice(2, 4), 16)}, ${parseInt(colors[level]?.slice(4, 6), 16)}, 0.1)`,
+                                        color: `#${colors[level]}`,
+                                      }}
+                                    >
+                                      Level {getReferralLevel(user._id)}
+                                    </span>
+                                  </span>
+                                  <span className="w-full hidden md:block text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
+                                    $
+                                    {formatNumber(
+                                      calculateWagerAmount(user.volume),
+                                      2,
                                     )}
-                                  %
-                                </span>
-                                <span className="w-full text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
-                                  $
-                                  {formatNumber(
-                                    calculateFeeGenerated(
-                                      user.feeGenerated,
-                                      getReferralLevel(user._id),
-                                    ),
-                                    2,
-                                  )}
-                                </span>
+                                  </span>
+                                  <span className="w-full hidden md:block text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
+                                    {user._id &&
+                                      truncateNumber(
+                                        commissionLevels[
+                                          getReferralLevel(user._id)
+                                        ] * 100,
+                                      )}
+                                    %
+                                  </span>
+                                  <span className="w-full text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
+                                    $
+                                    {formatNumber(
+                                      calculateFeeGenerated(
+                                        user.feeGenerated,
+                                        getReferralLevel(user._id),
+                                      ),
+                                      2,
+                                    )}
+                                  </span>
+                                </div>
                               </div>
-                            </div>
-                          ))}
+                            );
+                          })}
                       </>
                     ) : (
                       <span className="font-changa text-[#F0F0F080]">
