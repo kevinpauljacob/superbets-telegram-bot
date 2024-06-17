@@ -16,6 +16,7 @@ import {
 import { NextApiRequest, NextApiResponse } from "next";
 import { getToken } from "next-auth/jwt";
 import connectDatabase from "../../../../utils/database";
+import Deposit from "@/models/games/deposit";
 
 const secret = process.env.NEXTAUTH_SECRET;
 
@@ -129,6 +130,17 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     );
 
     await TxnSignature.create({ txnSignature });
+
+    await Deposit.create(
+      Object.entries(earnings).map(([tokenMint, amount], index) => ({
+        wallet,
+        type: false,
+        amount,
+        tokenMint,
+        comments: "Earnings claimed",
+        txnSignature: txnSignature + `-${index}`,
+      })),
+    );
 
     return res.json({
       success: true,
