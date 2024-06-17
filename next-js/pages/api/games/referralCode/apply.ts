@@ -69,7 +69,15 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         },
       },
       { upsert: true },
-    );
+    ).catch((e) => {
+      return res.status(400).json({
+        success: false,
+        message: "Applied referralCode cannot be changed!",
+      });
+    });
+
+    campaign.signupCount += 1;
+    await campaign.save();
 
     return res.json({
       success: true,

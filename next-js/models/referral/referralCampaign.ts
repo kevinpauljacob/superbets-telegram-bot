@@ -25,6 +25,11 @@ const ReferralCampaignSchema = new Schema(
       of: Number,
       default: {},
     },
+    signupCount: {
+      type: Number,
+      required: true,
+      default: 0,
+    },
   },
   { timestamps: true },
 );
