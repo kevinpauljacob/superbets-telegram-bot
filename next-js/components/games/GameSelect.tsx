@@ -12,7 +12,7 @@ const GameSelect: React.FC<GameSelectProps> = ({ selectedGameType, setSelectedGa
       name="game"
       value={selectedGameType}
       onChange={(e) => setSelectedGameType(e.target.value as GameType)}
-      className="bg-[#202329] text-white font-chakra text-xs font-medium mt-1 rounded-md px-5 py-4 w-full relative appearance-none"
+      className="bg-[#202329] text-white font-chakra text-xs font-medium mt-1 rounded-md px-5 py-4 w-full relative appearance-none focus:ring-0 focus:outline-none"
     >
       <option value={GameType.keno}>Keno</option>
       <option value={GameType.dice}>Dice</option>

@@ -18,6 +18,7 @@ import {
   AdaptiveModal,
   AdaptiveModalContent,
 } from "@/components/AdaptiveModal";
+import { successAlert } from "@/components/toasts/ToastGroup";
 
 export interface PFModalData {
   activeGameSeed: {
@@ -126,6 +127,8 @@ export default function Dice2ProvablyFairModal({
 
   const copyToClipboard = (text?: string) => {
     if (text) navigator.clipboard.writeText(text);
+        successAlert("Successfully copied to clipboard");
+
   };
 
   return (
@@ -210,7 +213,7 @@ export default function Dice2ProvablyFairModal({
                           type="text"
                           name="totalBets"
                           placeholder={modalData.activeGameSeed.nonce.toString()}
-                          className="bg-[#202329] text-[#B9B9BA] text-xs font-semibold mt-1 rounded-md px-5 py-4 w-full relative flex items-center justify-between"
+                          className="bg-[#202329] text-[#B9B9BA] text-xs font-semibold mt-1 rounded-md px-5 py-4 w-full relative flex items-center justify-between focus:ring-0 focus:outline-none"
                           readOnly
                         />
                       </div>
@@ -229,7 +232,7 @@ export default function Dice2ProvablyFairModal({
                               value={newClientSeed}
                               type="text"
                               onChange={(e) => setNewClientSeed(e.target.value)}
-                              className="bg-[#202329] text-[#B9B9BA] text-xs font-semibold rounded-md px-5 py-4 w-full relative flex items-center justify-between"
+                              className="bg-[#202329] text-[#B9B9BA] text-xs font-semibold rounded-md px-5 py-4 w-full relative flex items-center justify-between focus:ring-0 focus:outline-none"
                             />
                             <button
                               className="flex items-center justify-center h-full mx-2 px-5 py-1 my-auto bg-[#7839C5] text-white rounded-md font-bold text-sm"
@@ -291,7 +294,7 @@ export default function Dice2ProvablyFairModal({
                           name="clientSeed"
                           value={verificationState.clientSeed}
                           onChange={handleChange}
-                          className="bg-[#202329] text-white font-chakra text-xs font-medium mt-1 rounded-md px-5 py-4 w-full relative"
+                          className="bg-[#202329] text-white font-chakra text-xs font-medium mt-1 rounded-md px-5 py-4 w-full relative focus:ring-0 focus:outline-none"
                         />
                       </div>
                       <div>
@@ -303,7 +306,7 @@ export default function Dice2ProvablyFairModal({
                           name="serverSeed"
                           value={verificationState.serverSeed}
                           onChange={handleChange}
-                          className="bg-[#202329] text-white font-chakra text-xs font-medium mt-1 rounded-md px-5 py-4 w-full relative"
+                          className="bg-[#202329] text-white font-chakra text-xs font-medium mt-1 rounded-md px-5 py-4 w-full relative focus:ring-0 focus:outline-none"
                         />
                       </div>
                       <div>
@@ -315,7 +318,7 @@ export default function Dice2ProvablyFairModal({
                           name="nonce"
                           value={verificationState.nonce}
                           onChange={handleChange}
-                          className="bg-[#202329] text-white font-chakra text-xs font-medium mt-1 rounded-md px-5 py-4 w-full relative"
+                          className="bg-[#202329] text-white font-chakra text-xs font-medium mt-1 rounded-md px-5 py-4 w-full relative focus:ring-0 focus:outline-none"
                         />
                       </div>
                     </div>
