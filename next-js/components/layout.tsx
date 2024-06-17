@@ -32,6 +32,7 @@ import LimboProvablyFairModal from "./games/Limbo/LimboProvablyFairModal";
 import WheelProvablyFairModal from "./games/Wheel/WheelProvablyFairModal";
 import KenoProvablyFairModal from "./games/Keno/KenoProvablyFairModal";
 import MinesProvablyFairModal from "./games/Mines/MinesProvablyFairModal";
+import CreateCampaignModal from "@/components/affiliate-program/CreateCampaignModal";
 import Footer from "./Footer";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { soundAlert } from "@/utils/soundUtils";
@@ -51,6 +52,8 @@ export default function Layout({ children }: LayoutProps) {
 
   const {
     showWalletModal,
+    showCreateCampaignModal,
+    setShowCreateCampaignModal,
     getBalance,
     getWalletBalance,
     isVerifyModalOpen,
@@ -242,7 +245,7 @@ export default function Layout({ children }: LayoutProps) {
         <MobileNavbar sidebar={mobileSidebar} toggleSidebar={toggleSidebar} />
       </div>
       {showWalletModal && <BalanceModal />}
-
+      {showCreateCampaignModal && <CreateCampaignModal />}
       {/* verify modals  */}
       {verifyModalData.game === GameType.coin ? (
         <VerifyFlipModal

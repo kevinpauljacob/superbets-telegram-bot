@@ -1,26 +1,12 @@
 import { Inter } from "next/font/google";
-import { Header } from "@/components/Header";
-import { Solana } from "iconsax-react";
 import { useEffect, useState } from "react";
-import Image from "next/legacy/image";
-
-import {
-  obfuscatePubKey,
-  connection,
-  translator,
-  User,
-} from "@/context/transactions";
-import {
-  getAllDomains,
-  getFavoriteDomain,
-  reverseLookup,
-} from "@bonfida/spl-name-service";
+import { useRouter } from "next/router";
 import { useWallet } from "@solana/wallet-adapter-react";
-import { translationsMap, useGlobalContext } from "@/components/GlobalContext";
+import { useGlobalContext } from "@/components/GlobalContext";
+import { successCustom, errorCustom } from "@/components/toasts/ToastGroup";
+import { useSession } from "next-auth/react";
 import StoreBanner from "@/components/Banner";
-import FomoExit from "@/components/FomoExit";
 import FomoPlay from "@/components/FomoPlay";
-import FomoSupply from "@/components/FomoSupply";
 import FOMOHead from "@/components/HeadElement";
 import Bets from "@/components/games/Bets";
 
@@ -28,16 +14,11 @@ const inter = Inter({ subsets: ["latin"] });
 
 export default function Home() {
   const wallet = useWallet();
-  const { getBalance } = useGlobalContext();
+  const { status } = useSession();
+  const router = useRouter();
+  const { referralCode } = router.query;
 
-  const maintenance = false;
-
-  const { language, setLanguage, userData, setUserData, showWalletModal } =
-    useGlobalContext();
-
-  const [refetch, setRefetch] = useState(true);
-  const [sidebarOpen, setSidebarOpen] = useState(true);
-
+  const { setLanguage } = useGlobalContext();
   useEffect(() => {
     //@ts-ignore
     setLanguage(localStorage.getItem("language") ?? "en");
@@ -47,6 +28,44 @@ export default function Home() {
     localStorage.setItem("language", language);
   }, [language]); 
  */
+
+  useEffect(() => {
+    const applyReferralCode = async () => {
+      try {
+        const response = await fetch(`/api/games/referralCode/apply`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            wallet: wallet.publicKey,
+            referralCode: referralCode,
+          }),
+        });
+
+        const { success, message } = await response.json();
+
+        if (success) {
+          successCustom(message);
+        } else {
+          errorCustom(message);
+        }
+      } catch (error: any) {
+        throw new Error(error.message);
+      }
+    };
+
+    if (
+      wallet &&
+      wallet.connected &&
+      status === "authenticated" &&
+      referralCode !== undefined &&
+      referralCode !== null &&
+      referralCode !== ""
+    )
+      applyReferralCode();
+  }, [status, referralCode]);
+
   return (
     <>
       <FOMOHead title={"Home | FOMO.wtf - 0% House Edge, Pure Wins"} />
@@ -65,9 +84,6 @@ export default function Home() {
             <Bets refresh={true} />
           </div>
         </div>
-        {/* <div className="lg:ml-4">
-        <FomoSupply />
-      </div> */}
       </div>
     </>
   );

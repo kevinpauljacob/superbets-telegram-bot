@@ -207,6 +207,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           ).populate("gameSeed");
 
           await updateGameStats(
+            wallet,
             GameType.mines,
             tokenMint,
             0,

@@ -122,7 +122,7 @@ export default function Leaderboard() {
                 className={`${
                   (Math.min(userData?.points ?? 0, 1_000_000) * 100) /
                     pointTiers[pointTier?.index + 1]?.limit ?? 1
-                    ? "opacity-50"
+                    ? "opacity-90"
                     : ""
                 } relative flex transition-width duration-1000 w-full rounded-full overflow-hidden h-6 bg-[#282E3D] mt-2 mb-2`}
               >
@@ -147,9 +147,11 @@ export default function Leaderboard() {
               <div className="flex flex-row justify-between font-chakra capitalize">
                 <span className="text-staking-secondary text-opacity-75 text-sm font-medium">
                   {pointTier?.label
-                    ? translator(pointTier?.label.split(" ")?.[0], language) +
-                      " " +
-                      pointTier?.label.split(" ")?.[1]
+                    ? pointTier?.label.includes(" ")
+                      ? translator(pointTier?.label.split(" ")[0], language) +
+                        " " +
+                        pointTier?.label.split(" ")[1]
+                      : translator(pointTier?.label, language)
                     : ""}
                 </span>
                 <span className="flex items-center gap-1 text-staking-secondary text-opacity-75 text-sm font-medium">
@@ -163,12 +165,17 @@ export default function Leaderboard() {
                     />
                   </div>
                   {pointTiers[pointTier?.index + 1]?.label
-                    ? translator(
-                        pointTiers[pointTier?.index + 1]?.label.split(" ")?.[0],
-                        language,
-                      ) +
-                      " " +
-                      pointTiers[pointTier?.index + 1]?.label.split(" ")?.[1]
+                    ? pointTiers[pointTier?.index + 1]?.label.includes(" ")
+                      ? translator(
+                          pointTiers[pointTier?.index + 1]?.label.split(" ")[0],
+                          language,
+                        ) +
+                        " " +
+                        pointTiers[pointTier?.index + 1]?.label.split(" ")[1]
+                      : translator(
+                          pointTiers[pointTier?.index + 1]?.label,
+                          language,
+                        )
                     : ""}
                 </span>
               </div>

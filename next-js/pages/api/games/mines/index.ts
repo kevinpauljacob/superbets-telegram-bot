@@ -154,7 +154,14 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         { upsert: true, new: true, setDefaultsOnInsert: true },
       );
 
-      await updateGameStats(GameType.mines, tokenMint, amount, addGame, 0);
+      await updateGameStats(
+        wallet,
+        GameType.mines,
+        tokenMint,
+        amount,
+        addGame,
+        0,
+      );
 
       const userData = await StakingUser.findOneAndUpdate(
         { wallet },

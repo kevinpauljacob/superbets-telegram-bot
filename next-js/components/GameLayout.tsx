@@ -165,4 +165,4 @@ const GameLayout: React.FC<LayoutProps> = ({ children, title }) => {
   );
 };
 
-export { GameOptions, GameDisplay, GameLayout, GameTable };
+export { GameDisplay, GameLayout, GameOptions, GameTable };

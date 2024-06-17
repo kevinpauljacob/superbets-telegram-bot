@@ -737,3 +737,67 @@ export const truncateNumber = (num: number, numOfDecimals: number = 4) => {
 export const isArrayUnique = (arr: number[]) => {
   return new Set(arr).size === arr.length;
 };
+
+export const createClaimEarningsTxn = async (
+  wallet: PublicKey,
+  earnings: Record<string, number>,
+  devPublicKey: PublicKey,
+) => {
+  const transaction = new Transaction();
+
+  transaction.feePayer = wallet;
+  const blockhashWithExpiryBlockHeight = await connection.getLatestBlockhash();
+  transaction.recentBlockhash = blockhashWithExpiryBlockHeight.blockhash;
+
+  transaction.add(
+    ComputeBudgetProgram.setComputeUnitLimit({ units: 100000 }),
+    ComputeBudgetProgram.setComputeUnitPrice({ microLamports: 150000 }),
+  );
+
+  for (let tokenMint in earnings) {
+    let splToken = SPL_TOKENS.find((data) => data.tokenMint === tokenMint);
+    if (!splToken) throw new Error("Invalid tokenMint provided!");
+
+    const { tokenName, decimal } = splToken;
+
+    if (tokenName === "SOL") {
+      transaction.add(
+        SystemProgram.transfer({
+          fromPubkey: devPublicKey,
+          toPubkey: wallet,
+          lamports: Math.floor(earnings[tokenMint] * Math.pow(10, 9)),
+        }),
+      );
+    } else {
+      const tokenId = new PublicKey(tokenMint);
+      const userAta = await getAssociatedTokenAddress(tokenId, wallet);
+      const devAta = await getAssociatedTokenAddress(tokenId, devPublicKey);
+
+      transaction.add(
+        createAssociatedTokenAccountIdempotentInstruction(
+          wallet,
+          userAta,
+          wallet,
+          tokenId,
+        ),
+        createTransferInstruction(
+          devAta,
+          userAta,
+          devPublicKey,
+          Math.floor(earnings[tokenMint] * Math.pow(10, decimal)),
+        ),
+      );
+    }
+  }
+
+  transaction.instructions.slice(2).forEach((i) => {
+    i.keys.forEach((k) => {
+      if (k.pubkey.equals(wallet)) {
+        k.isSigner = true;
+        k.isWritable = true;
+      }
+    });
+  });
+
+  return { transaction, blockhashWithExpiryBlockHeight };
+};

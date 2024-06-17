@@ -122,6 +122,9 @@ interface GlobalContextProps {
   showWalletModal: boolean;
   setShowWalletModal: React.Dispatch<React.SetStateAction<boolean>>;
 
+  showCreateCampaignModal: boolean;
+  setShowCreateCampaignModal: React.Dispatch<React.SetStateAction<boolean>>;
+
   isVerifyModalOpen: boolean;
   setIsVerifyModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
 
@@ -258,6 +261,8 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
   });
 
   const [showWalletModal, setShowWalletModal] = useState<boolean>(false);
+  const [showCreateCampaignModal, setShowCreateCampaignModal] =
+    useState<boolean>(false);
   const [isVerifyModalOpen, setIsVerifyModalOpen] = useState<boolean>(false);
   const [verifyModalData, setVerifyModalData] = useState({});
 
@@ -389,8 +394,8 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
     let profit = win
       ? (multiplier * (1 - houseEdge) - 1) * betAmount
       : multiplier <= 1
-      ? multiplier * betAmount - betAmount
-      : -betAmount;
+        ? multiplier * betAmount - betAmount
+        : -betAmount;
     let totalPNL = 0;
 
     if (liveStats.length > 0)
@@ -535,6 +540,7 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
         setWalletBalance,
         coinData,
         showWalletModal,
+        showCreateCampaignModal,
         isVerifyModalOpen,
         setIsVerifyModalOpen,
         verifyModalData,
@@ -584,6 +590,7 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
         openVerifyModal,
         closeVerifyModal,
         setShowWalletModal,
+        setShowCreateCampaignModal,
         setCoinData,
         getUserDetails,
         getGlobalInfo,

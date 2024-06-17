@@ -246,6 +246,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       await wheel.save();
 
       await updateGameStats(
+        wallet,
         GameType.wheel,
         tokenMint,
         amount,
