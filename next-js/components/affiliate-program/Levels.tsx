@@ -92,7 +92,7 @@ function LevelsCard({
               color: `#${colors[level]}`,
             }}
           >
-            Level {level}
+            Level {level + 1}
           </p>
           <p className="text-[#94A3B8]/75 text-[13px] font-semibold bg-[#94A3B8]/5 rounded-[5px] px-1">
             {commissionText}

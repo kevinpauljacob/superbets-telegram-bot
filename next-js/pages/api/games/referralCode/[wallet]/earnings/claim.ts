@@ -3,7 +3,7 @@ import {
   retryTxn,
   verifyFrontendTransaction,
 } from "@/context/transactions";
-import { User } from "@/models/referral";
+import { Campaign } from "@/models/referral";
 import TxnSignature from "@/models/txnSignature";
 import { bs58 } from "@project-serum/anchor/dist/cjs/utils/bytes";
 import {
@@ -29,6 +29,11 @@ export const config = {
   maxDuration: 60,
 };
 
+type InputType = {
+  transactionBase64: string;
+  blockhashWithExpiryBlockHeight: BlockhashWithExpiryBlockHeight;
+};
+
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
     if (req.method !== "POST")
@@ -36,17 +41,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         .status(405)
         .json({ success: false, message: "Method not allowed!" });
 
-    type InputType = {
-      transactionBase64: string;
-      wallet: string;
-      blockhashWithExpiryBlockHeight: BlockhashWithExpiryBlockHeight;
-    };
-
-    const {
-      transactionBase64,
-      wallet,
-      blockhashWithExpiryBlockHeight,
-    }: InputType = req.body;
+    const { wallet } = req.query;
+    const { transactionBase64, blockhashWithExpiryBlockHeight }: InputType =
+      req.body;
 
     const token = await getToken({ req, secret });
 
@@ -63,29 +60,31 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
     await connectDatabase();
 
-    const user = await User.findOne({ wallet }).populate("campaigns");
-
-    if (!user)
-      return res
-        .status(400)
-        .json({ success: false, message: "Wallet info not found!" });
-
-    const earnings: Record<string, number> = {};
-
-    user.campaigns.forEach(
-      (c: { unclaimedEarnings: Record<string, number> }) => {
-        Object.entries(c.unclaimedEarnings).forEach(
-          ([key, value]: [string, number]) => {
-            if (earnings.hasOwnProperty(key)) earnings[key] += value;
-            else earnings[key] = value;
-
-            c.unclaimedEarnings[key] = 0;
+    //TODO: Avoid race conditions
+    const aggregateEarnings = await Campaign.aggregate([
+      { $match: { wallet } },
+      {
+        $project: {
+          unclaimedEarningsArr: {
+            $objectToArray: "$unclaimedEarnings",
           },
-        );
+        },
       },
-    );
+      { $unwind: "$unclaimedEarningsArr" },
+      {
+        $group: {
+          _id: "$unclaimedEarningsArr.k",
+          totalUnclaimedEarnings: { $sum: "$unclaimedEarningsArr.v" },
+        },
+      },
+    ]);
 
-    user.save();
+    const earnings = aggregateEarnings.reduce((acc, item) => {
+      acc[item._id] = item.totalUnclaimedEarnings;
+      return acc;
+    }, {});
+
+    await Campaign.updateMany({ wallet }, { $set: { unclaimedEarnings: {} } });
 
     const { transaction: vTxn } = await createClaimEarningsTxn(
       new PublicKey(wallet),
@@ -113,6 +112,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
     return res.json({
       success: true,
+      earnings,
       message: `Earnings claimed successfully!`,
     });
   } catch (e: any) {

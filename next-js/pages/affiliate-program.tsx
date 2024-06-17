@@ -356,7 +356,7 @@ export default function AffiliateProgram() {
                 errorCustom("Wallet not connected");
               }
             }}
-            label={translator("Reffered", language)}
+            label={translator("Referred", language)}
           />
           <TButton
             active={campaigns}
@@ -455,7 +455,7 @@ export default function AffiliateProgram() {
                 errorCustom("Wallet not connected");
               }
             }}
-            label={translator("Reffered", language)}
+            label={translator("Referred", language)}
           />
           <TButton
             active={campaigns}
