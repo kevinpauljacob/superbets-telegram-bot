@@ -125,7 +125,7 @@ export default function Plinko() {
   const { data: session, status } = useSession();
   const { width, height } = useWindowSize();
   const [lines, setLines] = useState<LinesType>(8);
-  
+
   const world = {
     width:
       width! >= 1440
@@ -320,7 +320,7 @@ export default function Plinko() {
       render.canvas.remove();
       render.textures = {};
     };
-  }, [lines, width]);
+  }, [lines, width, risk]);
 
   const pins: Body[] = [];
 
@@ -399,7 +399,7 @@ export default function Plinko() {
       });
       Composite.add(engine.world, ball);
     },
-    [lines, width],
+    [lines, width, risk],
   );
 
   const floor = Bodies.rectangle(
@@ -512,6 +512,7 @@ export default function Plinko() {
 
     const multiplierValues = multiplier.label.split("-");
     const multiplierValue = +multiplierValues[1];
+    console.log(multiplierValue)
     const multiplierColor = multiplierValues[2] ?? "#ffffff";
     const multiplierSound = multiplierValues[3] ?? "regular";
 
@@ -603,7 +604,8 @@ export default function Plinko() {
         lines
       ].findIndex((multiplier) => multiplier === strikeMultiplier);
       let mappedMultiplier = riskToChance["low"][lines][multiplierRiskIndex];
-      addBall(1, getRandomFromFallMap(lines, mappedMultiplier));
+
+      addBall(1, getRandomFromFallMap(worldWidth, lines, mappedMultiplier));
 
       const win = result === "Won";
       if (betSetting === "auto") {
@@ -815,9 +817,13 @@ export default function Plinko() {
                 <BetAmount
                   betAmt={betAmt}
                   setBetAmt={setUserInput}
-                  currentMultiplier={5.6}
-                  leastMultiplier={0}
-                  game="wheel"
+                  currentMultiplier={multipliers.reduce((max, item) => {
+                    return Math.max(max, item.value);
+                  }, 0)}
+                  leastMultiplier={multipliers.reduce((max, item) => {
+                    return Math.min(max, item.value);
+                  }, 0)}
+                  game="plinko"
                   disabled={disableInput}
                 />
 

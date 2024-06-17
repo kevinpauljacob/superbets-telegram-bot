@@ -255,49 +255,55 @@ export const OpenSidebar = ({
     {
       src: "",
       token: "Dice",
-      link: "/dice", // Update the links to include "/"
+      link: "/dice", 
       active: false,
     },
     {
       src: "",
       token: "Dice 2",
-      link: "/dice2", // Update the links to include "/"
+      link: "/dice2", 
       active: false,
     },
     {
       src: "",
       token: "Coin Flip",
-      link: "/coinflip", // Update the links to include "/"
+      link: "/coinflip", 
       active: false,
     },
     {
       src: "",
       token: "Options",
-      link: "/options", // Update the links to include "/"
+      link: "/options", 
       active: false,
     },
     {
       src: "",
       token: "Limbo",
-      link: "/limbo", // Update the links to include "/"
+      link: "/limbo", 
       active: false,
     },
     {
       src: "",
       token: "Keno",
-      link: "/keno", // Update the links to include "/"
+      link: "/keno", 
       active: false,
     },
     {
       src: "",
       token: "Wheel",
-      link: "/wheel", // Update the links to include "/"
+      link: "/wheel", 
       active: false,
     },
     {
       src: "",
       token: "Mines",
-      link: "/mines", // Update the links to include "/"
+      link: "/mines", 
+      active: false,
+    },
+    {
+      src: "",
+      token: "Plinko",
+      link: "/plinko", 
       active: false,
     },
   ]);

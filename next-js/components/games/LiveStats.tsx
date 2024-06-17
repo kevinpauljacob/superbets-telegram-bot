@@ -25,7 +25,7 @@ export default function LiveStats() {
   const [hoverValue, setHoverValue] = useState<number | null>(null);
 
   const games = ["All", ...Object.values(GameType)].filter(x => {
-    let g = ["hilo", "roulette1", "roulette2", "plinko"];
+    let g = ["hilo", "roulette1", "roulette2"];
     return !g.includes(x);
   })
 
@@ -169,7 +169,7 @@ export default function LiveStats() {
           </div>
 
           {isDropdownOpen && (
-            <div className="absolute w-[89%] mt-12 p-2 max-h-40 bg-[#202329] rounded-md overflow-y-auto modalscrollbar">
+            <div className="absolute w-[89%] mt-12 p-2 max-h-40 bg-[#202329] border-2 border-white border-opacity-5 rounded-md overflow-y-auto modalscrollbar">
               {games.map((game, index) => (
                 <div
                   key={index}
