@@ -58,17 +58,36 @@ interface ReferralLevelData {
   totalEarnings: number;
 }
 
+export const getColor = (level: number): string => {
+  const colors = ["4594FF", "E17AFF", "00C278", "4594FF", "00C278"];
+  return colors[level % colors.length];
+};
+
+export const copyToClipboard = (text?: string) => {
+  if (text) {
+    navigator.clipboard
+      .writeText(text)
+      .catch((err) => console.error("Failed to copy text: ", err));
+  } else {
+    console.warn("No text provided to copy to clipboard.");
+  }
+};
+
 export default function AffiliateProgram() {
   const wallet = useWallet();
   const router = useRouter();
-  const { language, liveTokenPrice } = useGlobalContext();
+  const {
+    language,
+    liveTokenPrice,
+    showCreateCampaignModal,
+    setShowCreateCampaignModal,
+  } = useGlobalContext();
   const transactionsPerPage = 10;
   const [page, setPage] = useState(1);
   const [referred, setReferred] = useState(true);
   const [campaigns, setCampaigns] = useState(false);
   const [earnings, setEarnings] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [modal, setModal] = useState(false);
   const [userId, setUserId] = useState("");
   const [userCampaigns, setUserCampaigns] = useState<CampaignData>([]);
   const [referredUsers, setReferredUsers] = useState<ReferralData>([]);
@@ -80,8 +99,8 @@ export default function AffiliateProgram() {
   const [referralLevelData, setReferralLevelData] = useState<
     ReferralLevelData[]
   >([]);
+  const [buttonText, setButtonText] = useState("Copy");
 
-  console.log("SPL_TOKENS", SPL_TOKENS);
   const referredTabHeaders = [
     "Wallet",
     "Level",
@@ -96,10 +115,6 @@ export default function AffiliateProgram() {
   ];
   const smallScreenReferredTabHeaders = ["Wallet", "Level", "Earned"];
 
-  const toggleModal = () => {
-    setModal(true);
-  };
-
   useEffect(() => {
     const calculateReferralLevels = () => {
       const levels: ReferralLevel[] = referredUsers.map((referredUser) => {
@@ -113,7 +128,7 @@ export default function AffiliateProgram() {
         return { userId: referredUser._id, level };
       });
       setReferralLevels(levels);
-      console.log("referralLevels", levels);
+      // console.log("referralLevels", levels);
     };
 
     calculateReferralLevels();
@@ -164,6 +179,9 @@ export default function AffiliateProgram() {
     );
     referredUsers.forEach((user) => {
       const referralLevel = getReferralLevel(user._id) ?? -1;
+      if (referralLevel === -1) {
+        return;
+      }
       const { feeGenerated } = user;
       let totalEarnings = 0;
 
@@ -177,14 +195,14 @@ export default function AffiliateProgram() {
         }
       }
 
-      console.log("referral level", referralLevel);
+      // console.log("referral level", referralLevel);
       if (referralLevel !== -1) {
         updatedReferralLevelData[referralLevel].signUps += 1;
         updatedReferralLevelData[referralLevel].totalEarnings += totalEarnings;
       }
     });
 
-    console.log("updatedReferralLevelData", updatedReferralLevelData);
+    // console.log("updatedReferralLevelData", updatedReferralLevelData);
     setReferralLevelData(updatedReferralLevelData);
   };
 
@@ -294,8 +312,8 @@ export default function AffiliateProgram() {
           setUserId(user._id);
           setUserCampaigns(user.campaigns);
           setReferredUsers(referredUsers);
-          console.log("user", user);
-          console.log("referredUsers", referredUsers);
+          // console.log("user", user);
+          // console.log("referredUsers", referredUsers);
         }
       } catch (error: any) {
         throw new Error(error.message);
@@ -307,68 +325,23 @@ export default function AffiliateProgram() {
     }
   }, [wallet]);
 
-  useEffect(() => {
-    console.log("userData", user);
-  }, [user]);
+  // useEffect(() => {
+  //   console.log("userData", user);
+  // }, [user]);
 
-  useEffect(() => {
-    console.log("totalClaimed", totalClaimed);
-    console.log("totalClaimable", totalClaimable);
-  }, [totalClaimed, totalClaimable]);
-
-  function getColor(level: number): string {
-    const colors = ["4594FF", "E17AFF", "00C278", "4594FF", "00C278"];
-    return colors[level % colors.length];
-  }
+  // useEffect(() => {
+  //   console.log("totalClaimed", totalClaimed);
+  //   console.log("totalClaimable", totalClaimable);
+  // }, [totalClaimed, totalClaimable]);
 
   return (
     <div className="px-5 lg2:px-[4rem] md:px-[3rem] pt-5">
       <h1 className="font-chakra font-bold text-[1.75rem] text-white mb-3.5">
         AFFILIATE PROGRAM
       </h1>
-      <div className="flex flex-col gap-[14px] mt-7 mb-[3.25rem]">
-        <div className="flex gap-[14px] w-full">
-          <div className="flex flex-col justify-between grow bg-staking-bg rounded-[5px] p-4 w-[30%]">
-            <div>
-              <p className="text-white font-semibold text-base text-opacity-75">
-                Multi-Level Referral
-              </p>
-              <p className="text-[#94A3B8] font-semibold text-[11px] text-opacity-50 md:max-w-[340px]">
-                Our affiliate program includes a comprehensive retention program
-                that keeps referred customers engaged and invested.
-              </p>
-            </div>
-            {userCampaigns.length > 0 && (
-              <div className="mt-3.5">
-                <p className="text-white/50 font-chakra font-semibold text-xs mb-2">
-                  Referral Link
-                </p>
-                <div className="flex gap-3 mb-4">
-                  <span className="text-ellipsis overflow-hidden bg-white/5 rounded-[5px] text-sm font-chakra text-[#94A3B8] font-normal px-4 py-1">
-                    {`referralCode=${userCampaigns[userCampaigns.length - 1]?.referralCode}`}
-                  </span>
-                  <button className="bg-[#7839C5] rounded-[5px] text-white/75 text-[13px] font-chakra font-medium px-5">
-                    Copy
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
-          <div className="hidden lg:flex flex-col justify-between bg-staking-bg rounded-[5px] px-4 pt-4 pb-8">
-            <p className="text-white/75 font-semibold">How it Works?</p>
-            <Image
-              src="/assets/banners/affiliate-program.png"
-              alt="how it works image"
-              width={805}
-              height={205}
-            />
-          </div>
-        </div>
-        <Levels referralLevelData={referralLevelData} />
-      </div>
 
-      {/* tabs */}
-      <div className="flex flex-col sm:flex-row gap-4 justify-between mb-6">
+      {/* mobile tabs */}
+      <div className="flex flex-col sm:hidden gap-4 justify-between mb-4">
         <div className="flex w-full md:w-max items-center gap-2 justify-center md:justify-end border-2 p-1.5 rounded-lg border-white border-opacity-[5%]">
           <TButton
             active={referred}
@@ -404,8 +377,107 @@ export default function AffiliateProgram() {
         </div>
         {campaigns && (
           <button
-            className="bg-[#7839C5] text-white font-chakra font-semibold text-sm rounded-[5px] px-8 py-4"
-            onClick={() => toggleModal()}
+            className="bg-[#7839C5] hover:bg-[#9361d1] focus:bg-[#602E9E] transition-all cursor-pointer text-white font-chakra font-semibold text-sm rounded-[5px] px-8 py-4"
+            onClick={() => setShowCreateCampaignModal(!showCreateCampaignModal)}
+          >
+            CREATE CAMPAIGN
+          </button>
+        )}
+      </div>
+
+      <div
+        className={`${campaigns || earnings ? "hidden sm:flex" : ""} flex flex-col gap-[11px] sm:gap-[14px] sm:mt-7 mb-[1.75rem] sm:mb-[3.25rem]`}
+      >
+        <div className="flex gap-[14px] w-full">
+          <div className="flex flex-col justify-between grow bg-staking-bg rounded-[5px] p-4 w-[30%]">
+            <div>
+              <p className="text-white font-semibold text-base text-opacity-75">
+                Multi-Level Referral
+              </p>
+              <p className="text-[#94A3B8] font-semibold text-[11px] text-opacity-50 md:max-w-[340px]">
+                Our affiliate program includes a comprehensive retention program
+                that keeps referred customers engaged and invested.
+              </p>
+            </div>
+            {userCampaigns.length > 0 && (
+              <div className="mt-3.5">
+                <p className="text-white/50 font-chakra font-semibold text-xs mb-2">
+                  Referral Link
+                </p>
+                <div className="flex gap-3 mb-4">
+                  <span className="text-ellipsis overflow-hidden bg-white/5 rounded-[5px] text-sm font-chakra text-[#94A3B8] font-normal px-4 py-1">
+                    {`referralCode=${userCampaigns[userCampaigns.length - 1]?.referralCode}`}
+                  </span>
+                  <button
+                    onClick={() => {
+                      copyToClipboard(
+                        `http://localhost:3000?referralCode=${userCampaigns[userCampaigns.length - 1]?.referralCode}`,
+                      );
+                      setButtonText("Copied!");
+                      setTimeout(() => {
+                        setButtonText("Copy");
+                      }, 2000);
+                    }}
+                    className="bg-[#7839C5] hover:bg-[#9361d1] focus:bg-[#602E9E] transition-all cursor-pointer rounded-[5px] text-white/75 text-[13px] font-chakra font-medium px-5"
+                  >
+                    {buttonText}
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+          <div className="hidden lg:flex flex-col justify-between bg-staking-bg rounded-[5px] px-4 pt-4 pb-8">
+            <p className="text-white/75 font-semibold">How it Works?</p>
+            <Image
+              src="/assets/banners/affiliate-program.png"
+              alt="how it works image"
+              width={805}
+              height={205}
+            />
+          </div>
+        </div>
+        <Levels referralLevelData={referralLevelData} />
+      </div>
+
+      {/* tabs */}
+      <div className="hidden sm:flex gap-4 justify-between mb-6">
+        <div className="flex w-full md:w-max items-center gap-2 justify-center md:justify-end border-2 p-1.5 rounded-lg border-white border-opacity-[5%]">
+          <TButton
+            active={referred}
+            onClick={() => {
+              if (wallet.publicKey) {
+                setReferred(true);
+                setCampaigns(false);
+                setEarnings(false);
+              } else {
+                errorCustom("Wallet not connected");
+              }
+            }}
+            label={translator("Reffered", language)}
+          />
+          <TButton
+            active={campaigns}
+            onClick={() => {
+              setReferred(false);
+              setCampaigns(true);
+              setEarnings(false);
+            }}
+            label={translator("Campaigns", language)}
+          />
+          <TButton
+            active={earnings}
+            onClick={() => {
+              setReferred(false);
+              setCampaigns(false);
+              setEarnings(true);
+            }}
+            label={translator("Earnings", language)}
+          />
+        </div>
+        {campaigns && (
+          <button
+            className="bg-[#7839C5] hover:bg-[#9361d1] focus:bg-[#602E9E] transition-all cursor-pointer text-white font-chakra font-semibold text-sm rounded-[5px] px-8 py-4"
+            onClick={() => setShowCreateCampaignModal(!showCreateCampaignModal)}
           >
             CREATE CAMPAIGN
           </button>
@@ -414,7 +486,7 @@ export default function AffiliateProgram() {
 
       {/* earnings tab */}
       {earnings && (
-        <div className="flex flex-col sm:flex-row gap-[14px] sm:gap-[1.85rem] w-full mb-[2.63rem]">
+        <div className="flex flex-col sm:flex-row gap-[14px] sm:gap-[1.85rem] w-full mt-[5px] sm:mt-0 mb-[2.15rem] sm:mb-[2.63rem]">
           <div className="flex items-start gap-[12px] bg-staking-bg rounded-[5px] p-4 h-[50%] w-full">
             <div className="flex justify-center items-center bg-[#202329] rounded-lg w-[73px] h-[68px]">
               <Image
@@ -665,7 +737,6 @@ export default function AffiliateProgram() {
           )}
         </div>
       )}
-      {modal && <CreateCampaignModal modal={modal} setModal={setModal} />}
     </div>
   );
 }

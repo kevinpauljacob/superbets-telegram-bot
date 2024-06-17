@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { commissionLevels } from "@/context/config";
 import { truncateNumber } from "@/context/transactions";
+import { getColor } from "@/pages/affiliate-program";
 import User from "@/public/assets/User";
 import Image from "next/image";
 interface ReferralLevelData {
@@ -131,9 +132,4 @@ function LevelsCard({
       </div>
     </div>
   );
-}
-
-function getColor(level: number): string {
-  const colors = ["4594FF", "E17AFF", "00C278", "4594FF", "00C278"];
-  return colors[level % colors.length];
 }
