@@ -6,10 +6,12 @@ export default function ReferralLink({
   campaignName,
   referralCode,
   totalEarnings,
+  signupCount,
 }: {
   campaignName: string;
   referralCode: string;
   totalEarnings: Record<string, any>;
+  signupCount: number;
 }) {
   const [earnings, setEarnings] = useState(0);
   const [buttonText, setButtonText] = useState("Copy");
@@ -56,7 +58,7 @@ export default function ReferralLink({
         <p className="bg-white/5 rounded-[5px] text-sm font-chakra text-[#94A3B8] font-normal px-4 py-2">
           Signups :{" "}
           <span className="font-chakra text-[13px] font-semibold text-[#94A3B8]">
-            45
+            {signupCount}
           </span>
         </p>
         <p className="bg-white/5 rounded-[5px] text-sm font-chakra text-[#94A3B8] font-normal px-4 py-2">

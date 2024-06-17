@@ -33,6 +33,7 @@ interface Campaign {
   referralCode: string;
   totalEarnings: Record<string, any>;
   unclaimedEarnings: Record<string, any>;
+  signupCount: number;
   createdAt: string;
   updatedAt: string;
   __v: number;
@@ -671,6 +672,7 @@ export default function AffiliateProgram() {
                 campaignName={campaign?.campaignName}
                 referralCode={campaign?.referralCode}
                 totalEarnings={campaign?.totalEarnings}
+                signupCount={campaign?.signupCount}
                 key={index}
               />
             ))
