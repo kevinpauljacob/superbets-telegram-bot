@@ -614,7 +614,7 @@ export default function AffiliateProgram() {
                                         color: `#${colors[level]}`,
                                       }}
                                     >
-                                      Level {getReferralLevel(user._id)}
+                                      Level {level + 1}
                                     </span>
                                   </span>
                                   <span className="w-full hidden md:block text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
@@ -627,9 +627,7 @@ export default function AffiliateProgram() {
                                   <span className="w-full hidden md:block text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
                                     {user._id &&
                                       truncateNumber(
-                                        commissionLevels[
-                                          getReferralLevel(user._id)
-                                        ] * 100,
+                                        commissionLevels[level] * 100,
                                       )}
                                     %
                                   </span>
@@ -638,7 +636,7 @@ export default function AffiliateProgram() {
                                     {formatNumber(
                                       calculateFeeGenerated(
                                         user.feeGenerated,
-                                        getReferralLevel(user._id),
+                                        level,
                                       ),
                                       2,
                                     )}
