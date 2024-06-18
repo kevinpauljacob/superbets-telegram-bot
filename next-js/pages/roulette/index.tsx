@@ -23,14 +23,14 @@ const tokens: Token[] = [
   { id: 1, value: '1', image: '/assets/token-1.svg' },
   { id: 2, value: '10', image: '/assets/token-10.svg' },
   { id: 3, value: '100', image: '/assets/token-100.svg' },
-  { id: 4, value: '1K', image: '/assets/token-1k.svg' },
-  { id: 5, value: '10K', image: '/assets/token-10k.svg' },
-  { id: 6, value: '100K', image: '/assets/token-100k.svg' },
-  { id: 7, value: '1M', image: '/assets/token-1M.svg' },
-  { id: 8, value: '10M', image: '/assets/token-10M.svg' },
-  { id: 9, value: '100M', image: '/assets/token-100M.svg' },
-  { id: 10, value: '1B', image: '/assets/token-1B.svg' },
-  { id: 11, value: '10B', image: '/assets/token-10B.svg' },
+  { id: 4, value: '1000', image: '/assets/token-1k.svg' },
+  { id: 5, value: '10000', image: '/assets/token-10k.svg' },
+  { id: 6, value: '100000', image: '/assets/token-100k.svg' },
+  { id: 7, value: '1000000', image: '/assets/token-1M.svg' },
+  { id: 8, value: '10000000', image: '/assets/token-10M.svg' },
+  { id: 9, value: '100000000', image: '/assets/token-100M.svg' },
+  { id: 10, value: '1000000000', image: '/assets/token-1B.svg' },
+  { id: 11, value: '10000000000', image: '/assets/token-10B.svg' },
 ];
 
 const rows = [
@@ -39,20 +39,7 @@ const rows = [
   [1, 4, 7, 10, 13, 16, 19, 22, 25, 28, 31, 34],
 ];
 
-const columns =[
-  [1,2,3],
-  [4,5,6],
-  [7,8,9],
-  [10,11,12],
-  [13,14,15],
-  [16,17,18],
-  [19,20,21],
-  [22,23,24],
-  [25,26,27],
-  [28,29,30],
-  [31,32,33],
-  [34,35,36]
-]
+
 
 type PredefinedBetType = "1-12" | "13-24" | "25-36" | "1-18" | "19-36" | "even" | "odd" | "red" | "black";
 
@@ -107,7 +94,7 @@ export default function Roulette() {
   const [betActive, setBetActive] = useState(false);
   const [betSetting, setBetSetting] = useState<"manual" | "auto">("manual");
   const [isRolling, setIsRolling] = useState(false);
-  const [betss, setBetss] = useState<{ areaId: string, token: { image: string } }[]>([]);
+  const [betss, setBetss] = useState<Bet[]>([]);
   const [hoveredButton, setHoveredButton] = useState<string | null>(null);
   const [hoveredRow, setHoveredRow] = useState<number | null>(null);
   const [hoveredSplit, setHoveredSplit] = useState<number[] | null>(null);
@@ -371,6 +358,61 @@ export default function Roulette() {
   const undoLastBet = () => {
     setBetss((prev) => prev.slice(0, -1));
   };
+  type Bet = {
+    areaId: string;
+    token: Token;
+  };
+  const handleBet= ()=>{
+    const transformedBets = transformBetsToSingleNumbers(betss);
+    console.log(transformedBets);
+  }
+ 
+  
+  const transformBetsToSingleNumbers = (bets: Bet[]): Record<string, Record<string, number>> => {
+    const singleNumberBets: Record<string, number> = {};
+  
+    const addToSingleNumberBet = (number: string, value: number) => {
+      if (singleNumberBets[number]) {
+        singleNumberBets[number] += value;
+      } else {
+        singleNumberBets[number] = value;
+      }
+    };
+  
+    bets.forEach(bet => {
+      const tokenValue = parseInt(bet.token.value);
+  
+      if (bet.areaId.startsWith('split-')) {
+        const [, num1, num2] = bet.areaId.split('-');
+        const halfValue = tokenValue / 2;
+        addToSingleNumberBet(num1, halfValue);
+        addToSingleNumberBet(num2, halfValue);
+      } else if (bet.areaId.startsWith('corner-')) {
+        const nums = bet.areaId.split('-').slice(1);
+        const numValues = nums.length === 4 ? tokenValue / 4 : tokenValue / 3; // Adjust for 3 or 4 numbers
+        nums.forEach(num => addToSingleNumberBet(num, numValues));
+      } else if (bet.areaId.startsWith('column-')) {
+        const nums = bet.areaId.split('-').slice(1);
+        const columnValue = tokenValue / nums.length;
+        nums.forEach(num => addToSingleNumberBet(num, columnValue));
+      } else if (bet.areaId.startsWith('num-')) {
+        const [, num] = bet.areaId.split('-');
+        addToSingleNumberBet(num, tokenValue);
+      }
+    });
+  
+    return {
+      straight: Object.keys(singleNumberBets).reduce((acc, number) => {
+        acc[number] = singleNumberBets[number];
+        return acc;
+      }, {} as Record<string, number>)
+    };
+  };
+  
+
+  
+  const transformedBets = transformBetsToSingleNumbers(bets);
+  console.log(transformedBets);
   
   return (
     <GameLayout title="Roulette">
@@ -420,11 +462,13 @@ export default function Roulette() {
                   game="roulette"
                   disabled={disableInput}
                 />
-                <BetButton
-                  disabled={disableInput}
-                >
+                <button
+                  className="hover:duration-75 hover:opacity-90 w-full h-[3.75rem] rounded-lg transition-all bg-[#7839C5] disabled:bg-[#4b2876] hover:bg-[#9361d1] focus:bg-[#602E9E] flex items-center justify-center font-chakra font-semibold text-xl tracking-wider text-white"
+                  onClick={handleBet}
+                  >
+                  
                   {isRolling ? <Loader /> : "BET"}
-                </BetButton>
+                </button>
               </form>
             </FormProvider>
           </div>
