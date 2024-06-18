@@ -10,6 +10,7 @@ import { optionsEdge, wsEndpoint } from "@/context/config";
 import { Decimal } from "decimal.js";
 import { SPL_TOKENS, maintainance } from "@/context/config";
 import updateGameStats from "../../../../utils/updateGameStats";
+import { getSolPrice } from "@/context/transactions";
 Decimal.set({ precision: 9 });
 
 const secret = process.env.NEXTAUTH_SECRET;
@@ -80,13 +81,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
       await new Promise((r) => setTimeout(r, 2000));
 
-      let betEndPrice = await fetch(
-        `https://hermes.pyth.network/api/get_price_feed?id=0xef0d8b6fda2ceba41da15d4095d1da392a0d2f8ed0c6c7bc0f4cfac8c280b56d&publish_time=${Math.floor(
-          new Date(betEndTime).getTime() / 1000,
-        )}`,
-      )
-        .then((res) => res.json())
-        .then((data) => data.price.price * Math.pow(10, data.price.expo));
+      const betEndTimeInSec = Math.floor(new Date(betEndTime).getTime() / 1000);
+
+      const betEndPrice = await getSolPrice(betEndTimeInSec);
 
       let result = "Lost";
       let amountWon = new Decimal(0);

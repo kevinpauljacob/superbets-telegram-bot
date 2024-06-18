@@ -739,6 +739,23 @@ export const isArrayUnique = (arr: number[]) => {
   return new Set(arr).size === arr.length;
 };
 
+export const getSolPrice = async (timeInSec: number) => {
+  const betEndPrice = await fetch(
+    `https://hermes.pyth.network/api/get_price_feed?id=0xef0d8b6fda2ceba41da15d4095d1da392a0d2f8ed0c6c7bc0f4cfac8c280b56d&publish_time=${timeInSec}`,
+  )
+    .then((res) => res.json())
+    .then((data) => {
+      const { price } = data;
+
+      if (price.publish_time + 2 < timeInSec)
+        throw new Error("Stale price feed!");
+
+      return price.price * Math.pow(10, price.expo);
+    });
+
+  return betEndPrice;
+};
+
 export const createClaimEarningsTxn = async (
   wallet: PublicKey,
   earnings: Record<string, number>,
