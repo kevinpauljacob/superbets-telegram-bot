@@ -1,27 +1,33 @@
-import connectDatabase from "@/utils/database";
-import { getToken } from "next-auth/jwt";
-import { NextApiRequest, NextApiResponse } from "next";
-import { GameSeed, Plinko, User } from "@/models/games";
+import { riskToChance } from "@/components/games/Plinko/RiskToChance";
 import {
-  generateGameResult,
-  GameType,
-  seedStatus,
-  GameTokens,
-} from "@/utils/provably-fair";
-import StakingUser from "@/models/staking/user";
-import {
+  SPL_TOKENS,
   houseEdgeTiers,
+  launchPromoEdge,
   maintainance,
   maxPayouts,
   minAmtFactor,
   pointTiers,
+  stakingTiers,
+  wsEndpoint,
 } from "@/context/config";
-import { launchPromoEdge } from "@/context/config";
-import { minGameAmount, wsEndpoint } from "@/context/config";
+import { GameSeed, Plinko, User } from "@/models/games";
+import StakingUser from "@/models/staking/user";
+import connectDatabase from "@/utils/database";
+import {
+  GameTokens,
+  GameType,
+  decryptServerSeed,
+  generateGameResult,
+  seedStatus,
+} from "@/utils/provably-fair";
+import updateGameStats from "@/utils/updateGameStats";
 import { Decimal } from "decimal.js";
+import { NextApiRequest, NextApiResponse } from "next";
+import { getToken } from "next-auth/jwt";
 Decimal.set({ precision: 9 });
 
 const secret = process.env.NEXTAUTH_SECRET;
+const encryptionKey = Buffer.from(process.env.ENCRYPTION_KEY!, "hex");
 
 export const config = {
   maxDuration: 60,
@@ -30,59 +36,9 @@ export const config = {
 type InputType = {
   wallet: string;
   amount: number;
-  tokenMint: string;
+  tokenMint: GameTokens;
   rows: number;
   risk: "low" | "medium" | "high";
-};
-
-type RiskToChance = Record<string, Record<number, Array<number>>>;
-
-const riskToChance: RiskToChance = {
-  low: {
-    8: [6.9, 2.1, 1.1, 1, 0.5, 1, 1.1, 2.1, 6.9],
-    9: [8.2, 2, 1.6, 1, 0.7, 0.7, 1, 1.6, 2, 8.2],
-    10: [14, 3, 1.4, 1.1, 1, 0.5, 1, 1.1, 1.4, 3, 14],
-    11: [18.6, 3, 1.9, 1.3, 1, 0.7, 0.7, 1, 1.3, 1.9, 3, 18.6],
-    12: [30.9, 3, 1.6, 1.4, 1.1, 1, 0.5, 1, 1.1, 1.4, 1.6, 3, 30.9],
-    13: [49.1, 4, 3, 1.9, 1.2, 0.9, 0.7, 0.7, 0.9, 1.2, 1.9, 3, 4, 49.1],
-    14: [89, 4, 1.9, 1.4, 1.3, 1.1, 1, 0.5, 1, 1.1, 1.3, 1.4, 1.9, 4, 89],
-    15: [178.7, 8, 3, 2, 1.5, 1.1, 1, 0.7, 0.7, 1, 1.1, 1.5, 2, 3, 8, 178.7],
-    16: [
-      344.1, 9, 2, 1.4, 1.4, 1.2, 1.1, 1, 0.5, 1, 1.1, 1.2, 1.4, 1.4, 2, 9,
-      344.1,
-    ],
-  },
-  medium: {
-    8: [14.4, 3, 1.3, 0.7, 0.4, 0.7, 1.3, 3, 14.4],
-    9: [20.2, 4, 1.7, 0.9, 0.5, 0.5, 0.9, 1.7, 4, 20.2],
-    10: [27.6, 5, 2, 1.4, 0.6, 0.4, 0.6, 1.4, 2, 5, 27.6],
-    11: [34, 6, 3, 1.8, 0.7, 0.5, 0.5, 0.7, 1.8, 3, 6, 34],
-    12: [53.7, 11, 4, 2, 1.1, 0.6, 0.3, 0.6, 1.1, 2, 4, 11, 53.7],
-    13: [84.2, 13, 6, 3, 1.3, 0.7, 0.4, 0.4, 0.7, 1.3, 3, 6, 13, 84.2],
-    14: [140.4, 15, 7, 4, 1.9, 1, 0.5, 0.2, 0.5, 1, 1.9, 4, 7, 15, 140.4],
-    15: [
-      252.1, 18, 11, 5, 3, 1.3, 0.5, 0.3, 0.3, 0.5, 1.3, 3, 5, 11, 18, 252.1,
-    ],
-    16: [
-      441.5, 41, 10, 5, 3, 1.5, 1, 0.5, 0.3, 0.5, 1, 1.5, 3, 5, 10, 41, 441.5,
-    ],
-  },
-  high: {
-    8: [30.2, 4, 1.5, 0.3, 0.2, 0.3, 1.5, 4, 30.2],
-    9: [45.4, 7, 2, 0.6, 0.2, 0.2, 0.6, 2, 7, 45.4],
-    10: [80.8, 10, 3, 0.9, 0.3, 0.2, 0.3, 0.9, 3, 10, 80.8],
-    11: [128.6, 14, 5.2, 1.4, 0.4, 0.2, 0.2, 0.4, 1.4, 5.2, 14, 128.6],
-    12: [188.1, 24, 8.1, 2, 0.7, 0.2, 0.2, 0.2, 0.7, 2, 8.1, 24, 188.1],
-    13: [297.4, 37, 11, 4, 1, 0.2, 0.2, 0.2, 0.2, 1, 4, 11, 37, 297.4],
-    14: [503.7, 56, 18, 5, 1.9, 0.3, 0.2, 0.2, 0.2, 0.3, 1.9, 5, 18, 56, 503.7],
-    15: [
-      779.5, 83, 27, 8, 3, 0.5, 0.2, 0.2, 0.2, 0.2, 0.5, 3, 8, 27, 83, 779.5,
-    ],
-    16: [
-      1335.4, 130, 26, 9, 4, 2, 0.2, 0.2, 0.2, 0.2, 0.2, 2, 4, 9, 26, 130,
-      1335.4,
-    ],
-  },
 };
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -105,35 +61,33 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         });
 
       const minGameAmount =
-        maxPayouts[tokenMint as GameTokens]["plinko" as GameType] *
-        minAmtFactor;
+        maxPayouts[tokenMint][GameType.plinko] * minAmtFactor;
 
-      if (!wallet || !amount || tokenMint !== "SOL" || !rows || !risk)
+      if (!wallet || !amount || !tokenMint || !rows || !risk)
         return res
           .status(400)
           .json({ success: false, message: "Missing parameters" });
+
+      const splToken = SPL_TOKENS.find((t) => t.tokenMint === tokenMint);
+      if (
+        typeof amount !== "number" ||
+        !isFinite(amount) ||
+        !splToken ||
+        !(
+          Number.isInteger(rows) &&
+          [8, 9, 10, 11, 12, 13, 14, 15, 16].includes(rows)
+        ) ||
+        !(risk === "low" || risk === "medium" || risk === "high")
+      )
+        return res
+          .status(400)
+          .json({ success: false, message: "Invalid parameters" });
 
       if (amount < minGameAmount)
         return res.status(400).json({
           success: false,
           message: "Invalid bet amount",
         });
-      if (
-        tokenMint !== "SOL" ||
-        //TODO: change rows depending on ui
-        !(
-          Number.isInteger(rows) &&
-          [8, 9, 10, 11, 12, 13, 14, 15, 16].includes(rows)
-        ) ||
-        !(
-          risk.toLowerCase() === "low" ||
-          risk.toLowerCase() === "medium" ||
-          risk.toLowerCase() === "high"
-        )
-      )
-        return res
-          .status(400)
-          .json({ success: false, message: "Invalid parameters" });
 
       const multiplier = riskToChance[risk][rows];
       const maxStrikeMultiplier = multiplier.at(-1)!;
@@ -166,8 +120,19 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         {},
         { upsert: true, new: true },
       );
-      const userTier = userData?.tier ?? 0;
-      const houseEdge = launchPromoEdge ? 0 : houseEdgeTiers[userTier];
+
+      const stakeAmount = userData?.stakedAmount ?? 0;
+      const stakingTier = Object.entries(stakingTiers).reduce((prev, next) => {
+        return stakeAmount >= next[1]?.limit ? next : prev;
+      })[0];
+      const isFomoToken =
+        tokenMint === SPL_TOKENS.find((t) => t.tokenName === "FOMO")?.tokenMint
+          ? true
+          : false;
+      const houseEdge =
+        launchPromoEdge || isFomoToken
+          ? 0
+          : houseEdgeTiers[parseInt(stakingTier)];
 
       const activeGameSeed = await GameSeed.findOneAndUpdate(
         {
@@ -186,7 +151,17 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         throw new Error("Server hash not found!");
       }
 
-      const { serverSeed, clientSeed, nonce } = activeGameSeed;
+      const {
+        serverSeed: encryptedServerSeed,
+        clientSeed,
+        nonce,
+        iv,
+      } = activeGameSeed;
+      const serverSeed = decryptServerSeed(
+        encryptedServerSeed,
+        encryptionKey,
+        Buffer.from(iv, "hex"),
+      );
 
       const strikeNumber = generateGameResult(
         serverSeed,
@@ -222,6 +197,11 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         new Decimal(amount).sub(amountWon).toNumber(),
         0,
       );
+      const feeGenerated = Decimal.mul(amount, strikeMultiplier)
+        .mul(houseEdge)
+        .toNumber();
+
+      const addGame = !user.gamesPlayed.includes(GameType.plinko);
 
       const userUpdate = await User.findOneAndUpdate(
         {
@@ -238,6 +218,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
             "deposit.$.amount": amountWon.sub(amount),
             numOfGamesPlayed: 1,
           },
+          ...(addGame ? { $addToSet: { gamesPlayed: GameType.plinko } } : {}),
         },
         {
           new: true,
@@ -266,6 +247,15 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       });
       await plinko.save();
 
+      await updateGameStats(
+        wallet,
+        GameType.plinko,
+        tokenMint,
+        amount,
+        addGame,
+        feeGenerated,
+      );
+
       const pointsGained =
         0 * user.numOfGamesPlayed + 1.4 * amount * userData.multiplier;
 
@@ -281,9 +271,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         {
           $inc: {
             points: pointsGained,
-          },
-          $set: {
-            tier: newTier,
           },
         },
       );

@@ -48,60 +48,11 @@ import {
   multiplierColorMap,
 } from "@/components/games/Plinko/constants";
 import { GameType } from "@/utils/provably-fair";
-
-type RiskToChance = Record<string, Record<number, Array<number>>>;
+import { riskToChance } from "@/components/games/Plinko/RiskToChance";
 
 export type LinesType = 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15 | 16;
 
-export type RisksType = "Low" | "Medium" | "High";
-
-export const riskToChance: RiskToChance = {
-  low: {
-    8: [6.9, 2.1, 1.1, 1, 0.5, 1, 1.1, 2.1, 6.9],
-    9: [8.2, 2, 1.6, 1, 0.7, 0.7, 1, 1.6, 2, 8.2],
-    10: [14, 3, 1.4, 1.1, 1, 0.5, 1, 1.1, 1.4, 3, 14],
-    11: [18.6, 3, 1.9, 1.3, 1, 0.7, 0.7, 1, 1.3, 1.9, 3, 18.6],
-    12: [30.9, 3, 1.6, 1.4, 1.1, 1, 0.5, 1, 1.1, 1.4, 1.6, 3, 30.9],
-    13: [49.1, 4, 3, 1.9, 1.2, 0.9, 0.7, 0.7, 0.9, 1.2, 1.9, 3, 4, 49.1],
-    14: [89, 4, 1.9, 1.4, 1.3, 1.1, 1, 0.5, 1, 1.1, 1.3, 1.4, 1.9, 4, 89],
-    15: [178.7, 8, 3, 2, 1.5, 1.1, 1, 0.7, 0.7, 1, 1.1, 1.5, 2, 3, 8, 178.7],
-    16: [
-      344.1, 9, 2, 1.4, 1.4, 1.2, 1.1, 1, 0.5, 1, 1.1, 1.2, 1.4, 1.4, 2, 9,
-      344.1,
-    ],
-  },
-  medium: {
-    8: [14.4, 3, 1.3, 0.7, 0.4, 0.7, 1.3, 3, 14.4],
-    9: [20.2, 4, 1.7, 0.9, 0.5, 0.5, 0.9, 1.7, 4, 20.2],
-    10: [27.6, 5, 2, 1.4, 0.6, 0.4, 0.6, 1.4, 2, 5, 27.6],
-    11: [34, 6, 3, 1.8, 0.7, 0.5, 0.5, 0.7, 1.8, 3, 6, 34],
-    12: [53.7, 11, 4, 2, 1.1, 0.6, 0.3, 0.6, 1.1, 2, 4, 11, 53.7],
-    13: [84.2, 13, 6, 3, 1.3, 0.7, 0.4, 0.4, 0.7, 1.3, 3, 6, 13, 84.2],
-    14: [140.4, 15, 7, 4, 1.9, 1, 0.5, 0.2, 0.5, 1, 1.9, 4, 7, 15, 140.4],
-    15: [
-      252.1, 18, 11, 5, 3, 1.3, 0.5, 0.3, 0.3, 0.5, 1.3, 3, 5, 11, 18, 252.1,
-    ],
-    16: [
-      441.5, 41, 10, 5, 3, 1.5, 1, 0.5, 0.3, 0.5, 1, 1.5, 3, 5, 10, 41, 441.5,
-    ],
-  },
-  high: {
-    8: [30.2, 4, 1.5, 0.3, 0.2, 0.3, 1.5, 4, 30.2],
-    9: [45.4, 7, 2, 0.6, 0.2, 0.2, 0.6, 2, 7, 45.4],
-    10: [80.8, 10, 3, 0.9, 0.3, 0.2, 0.3, 0.9, 3, 10, 80.8],
-    11: [128.6, 14, 5.2, 1.4, 0.4, 0.2, 0.2, 0.4, 1.4, 5.2, 14, 128.6],
-    12: [188.1, 24, 8.1, 2, 0.7, 0.2, 0.2, 0.2, 0.7, 2, 8.1, 24, 188.1],
-    13: [297.4, 37, 11, 4, 1, 0.2, 0.2, 0.2, 0.2, 1, 4, 11, 37, 297.4],
-    14: [503.7, 56, 18, 5, 1.9, 0.3, 0.2, 0.2, 0.2, 0.3, 1.9, 5, 18, 56, 503.7],
-    15: [
-      779.5, 83, 27, 8, 3, 0.5, 0.2, 0.2, 0.2, 0.2, 0.5, 3, 8, 27, 83, 779.5,
-    ],
-    16: [
-      1335.4, 130, 26, 9, 4, 2, 0.2, 0.2, 0.2, 0.2, 0.2, 2, 4, 9, 26, 130,
-      1335.4,
-    ],
-  },
-};
+export type RisksType = "low" | "medium" | "high";
 
 function getMultiplier(value: number, line: number, index: number) {
   //todo: dynamic img and sound generation
@@ -116,7 +67,7 @@ function getMultiplier(value: number, line: number, index: number) {
 }
 
 function getMultiplierByLinesQnt(value: LinesType, risk: RisksType) {
-  return riskToChance[risk.toLowerCase()][value].map((multiplier, index) =>
+  return riskToChance[risk][value].map((multiplier, index) =>
     getMultiplier(multiplier, value, index),
   );
 }
@@ -131,22 +82,22 @@ export default function Plinko() {
       width! >= 1440
         ? 750
         : width! >= 1024
-        ? 500
-        : width! >= 700
-        ? 620
-        : width! >= 600
-        ? 500
-        : 340,
+          ? 500
+          : width! >= 700
+            ? 620
+            : width! >= 600
+              ? 500
+              : 340,
     height:
       width! >= 1440
         ? 640
         : width! >= 1024
-        ? 450
-        : width! >= 700
-        ? 570
-        : width! >= 600
-        ? 450
-        : 330,
+          ? 450
+          : width! >= 700
+            ? 570
+            : width! >= 600
+              ? 450
+              : 330,
   };
 
   const ball = {
@@ -154,12 +105,12 @@ export default function Plinko() {
       (width! >= 1440
         ? 15
         : width! >= 1024
-        ? 11
-        : width! >= 700
-        ? 13
-        : width! >= 600
-        ? 11
-        : 8) /
+          ? 11
+          : width! >= 700
+            ? 13
+            : width! >= 600
+              ? 11
+              : 8) /
       (lines / 8),
   };
 
@@ -210,7 +161,7 @@ export default function Plinko() {
 
   const [betAmt, setBetAmt] = useState<number | undefined>();
   const [userInput, setUserInput] = useState<number | undefined>();
-  const [risk, setRisk] = useState<RisksType>("Low");
+  const [risk, setRisk] = useState<RisksType>("low");
   const [result, setResult] = useState<{
     success: boolean;
     message: string;
@@ -243,23 +194,23 @@ export default function Plinko() {
       (width! >= 1440
         ? 9
         : width! >= 1024
-        ? 6
-        : width! >= 700
-        ? 8
-        : width! >= 600
-        ? 6
-        : 6) /
+          ? 6
+          : width! >= 700
+            ? 8
+            : width! >= 600
+              ? 6
+              : 6) /
       (lines / 8),
     pinGap:
       (width! >= 1440
         ? 75
         : width! >= 1024
-        ? 50
-        : width! >= 700
-        ? 65
-        : width! >= 600
-        ? 50
-        : 35) /
+          ? 50
+          : width! >= 700
+            ? 65
+            : width! >= 600
+              ? 50
+              : 35) /
       (lines / 8),
   };
 
@@ -427,12 +378,12 @@ export default function Plinko() {
     width! >= 1440
       ? 1.25
       : width! >= 1024
-      ? 0.8
-      : width! >= 700
-      ? 1.1
-      : width! >= 600
-      ? 0.8
-      : 0.6;
+        ? 0.8
+        : width! >= 700
+          ? 1.1
+          : width! >= 600
+            ? 0.8
+            : 0.6;
 
   multipliers.forEach((multiplier) => {
     const blockSize = 60 / (lines / 8); // height and width
@@ -441,12 +392,12 @@ export default function Plinko() {
         (width! >= 1440
           ? 75
           : width! >= 1024
-          ? 50
-          : width! >= 700
-          ? 65
-          : width! >= 600
-          ? 50
-          : 35) /
+            ? 50
+            : width! >= 700
+              ? 65
+              : width! >= 600
+                ? 50
+                : 35) /
           (lines / 8),
       lines * pinsConfig.pinGap + 15,
       blockSize,
@@ -588,7 +539,7 @@ export default function Plinko() {
           amount: betAmt,
           tokenMint: "SOL",
           rows: lines,
-          risk: risk.toLowerCase(),
+          risk,
         }),
       });
 
@@ -599,7 +550,7 @@ export default function Plinko() {
       setResult({ success, message, result, strikeMultiplier, strikeNumber });
 
       // we only have mapping for low risk multipliers. Since the positions wld be sa,e we need to find the mapped multiplier for other risks
-      let multiplierRiskIndex = riskToChance[risk.toLowerCase()][
+      let multiplierRiskIndex = riskToChance[risk][
         lines
       ].findIndex((multiplier) => multiplier === strikeMultiplier);
       let mappedMultiplier = riskToChance["low"][lines][multiplierRiskIndex];
@@ -677,9 +628,9 @@ export default function Plinko() {
             (autoWinChangeReset || autoLossChangeReset
               ? betAmt
               : autoBetCount === "inf"
-              ? Math.max(0, betAmt)
-              : betAmt *
-                (autoLossChange !== null ? autoLossChange / 100.0 : 0));
+                ? Math.max(0, betAmt)
+                : betAmt *
+                  (autoLossChange !== null ? autoLossChange / 100.0 : 0));
 
         // console.log("Current bet amount:", betAmt);
         // console.log("Auto loss change:", autoLossChange);
@@ -836,41 +787,41 @@ export default function Plinko() {
                   <div className="flex lg:flex-row flex-col gap-2.5 w-full items-center justify-evenly rounded-[8px] text-white font-chakra text-sm font-semibold bg-[#0C0F16] p-4">
                     <div className="flex lg:w-[66.66%] w-full gap-2.5">
                       <button
-                        onClick={() => setRisk("Low")}
+                        onClick={() => setRisk("low")}
                         type="button"
                         className={`text-center w-full rounded-[5px] border-[2px] disabled:cursor-not-allowed disabled:opacity-50 bg-[#202329] py-2 text-xs font-chakra text-white text-opacity-90 transition duration-200 ${
-                          risk === "Low"
+                          risk === "low"
                             ? "border-[#7839C5]"
                             : "border-transparent hover:border-[#7839C580]"
                         }`}
                         disabled={disableInput}
                       >
-                        {translator("Low", language)}
+                        {translator("low", language)}
                       </button>
                       <button
-                        onClick={() => setRisk("Medium")}
+                        onClick={() => setRisk("medium")}
                         type="button"
                         className={`text-center w-full rounded-[5px] border-[2px] disabled:cursor-not-allowed disabled:opacity-50 bg-[#202329] py-2 text-xs font-chakra text-white text-opacity-90 transition duration-200 ${
-                          risk === "Medium"
+                          risk === "medium"
                             ? "border-[#7839C5]"
                             : "border-transparent hover:border-[#7839C580]"
                         }`}
                         disabled={disableInput}
                       >
-                        {translator("Medium", language)}
+                        {translator("medium", language)}
                       </button>
                     </div>
                     <button
-                      onClick={() => setRisk("High")}
+                      onClick={() => setRisk("high")}
                       type="button"
                       className={`text-center lg:w-[33.33%] w-full rounded-[5px] border-[2px] disabled:cursor-not-allowed disabled:opacity-50 bg-[#202329] py-2 text-xs font-chakra text-white text-opacity-90 transition duration-200 ${
-                        risk === "High"
+                        risk === "high"
                           ? "border-[#7839C5]"
                           : "border-transparent hover:border-[#7839C580]"
                       }`}
                       disabled={disableInput}
                     >
-                      {translator("High", language)}
+                      {translator("high", language)}
                     </button>
                   </div>
                 </div>

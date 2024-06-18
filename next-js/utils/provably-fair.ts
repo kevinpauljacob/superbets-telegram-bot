@@ -1,4 +1,3 @@
-import { count } from "console";
 import crypto from "crypto";
 import Decimal from "decimal.js";
 
@@ -235,14 +234,13 @@ export const generateGameResult = <T extends GameType>(
       return a as GameResult<T>;
     }
 
-    //TODO: reverify these
     case GameType.plinko: {
       let n = getFinalValues({
         serverSeed,
         clientSeed,
         nonce,
-        cursor: 0, 
-        count: parameter ? parameter : 0,
+        cursor: 0,
+        count: 1,
       }).map((e) => Math.floor(Math.pow(2, parameter ?? 8) * e) + 1);
 
       return n[0] as GameResult<T>;

@@ -7,6 +7,10 @@ import Arc from "./Wheel/Arc";
 import { useGlobalContext } from "../GlobalContext";
 import { translator } from "@/context/transactions";
 import { multiplierColorMap } from "./Plinko/constants";
+import {
+  RiskToChance,
+  riskToChance as riskToChancePlinko,
+} from "./Plinko/RiskToChance";
 interface VerificationState {
   clientSeed: string;
   serverSeed: string;
@@ -14,7 +18,7 @@ interface VerificationState {
   risk?: string;
   segments?: number;
   parameter?: number;
-  rows?:number;
+  rows?: number;
 }
 
 interface Props {
@@ -22,55 +26,6 @@ interface Props {
   setVerificationState: React.Dispatch<React.SetStateAction<VerificationState>>;
   selectedGameType: GameType;
 }
-type RiskToChance = Record<string, Record<number, Array<number>>>;
-
-const riskToChancePlinko: RiskToChance = {
-  low: {
-    8: [6.9, 2.1, 1.1, 1, 0.5, 1, 1.1, 2.1, 6.9],
-    9: [8.2, 2, 1.6, 1, 0.7, 0.7, 1, 1.6, 2, 8.2],
-    10: [14, 3, 1.4, 1.1, 1, 0.5, 1, 1.1, 1.4, 3, 14],
-    11: [18.6, 3, 1.9, 1.3, 1, 0.7, 0.7, 1, 1.3, 1.9, 3, 18.6],
-    12: [30.9, 3, 1.6, 1.4, 1.1, 1, 0.5, 1, 1.1, 1.4, 1.6, 3, 30.9],
-    13: [49.1, 4, 3, 1.9, 1.2, 0.9, 0.7, 0.7, 0.9, 1.2, 1.9, 3, 4, 49.1],
-    14: [89, 4, 1.9, 1.4, 1.3, 1.1, 1, 0.5, 1, 1.1, 1.3, 1.4, 1.9, 4, 89],
-    15: [178.7, 8, 3, 2, 1.5, 1.1, 1, 0.7, 0.7, 1, 1.1, 1.5, 2, 3, 8, 178.7],
-    16: [
-      344.1, 9, 2, 1.4, 1.4, 1.2, 1.1, 1, 0.5, 1, 1.1, 1.2, 1.4, 1.4, 2, 9,
-      344.1,
-    ],
-  },
-  medium: {
-    8: [14.4, 3, 1.3, 0.7, 0.4, 0.7, 1.3, 3, 14.4],
-    9: [20.2, 4, 1.7, 0.9, 0.5, 0.5, 0.9, 1.7, 4, 20.2],
-    10: [27.6, 5, 2, 1.4, 0.6, 0.4, 0.6, 1.4, 2, 5, 27.6],
-    11: [34, 6, 3, 1.8, 0.7, 0.5, 0.5, 0.7, 1.8, 3, 6, 34],
-    12: [53.7, 11, 4, 2, 1.1, 0.6, 0.3, 0.6, 1.1, 2, 4, 11, 53.7],
-    13: [84.2, 13, 6, 3, 1.3, 0.7, 0.4, 0.4, 0.7, 1.3, 3, 6, 13, 84.2],
-    14: [140.4, 15, 7, 4, 1.9, 1, 0.5, 0.2, 0.5, 1, 1.9, 4, 7, 15, 140.4],
-    15: [
-      252.1, 18, 11, 5, 3, 1.3, 0.5, 0.3, 0.3, 0.5, 1.3, 3, 5, 11, 18, 252.1,
-    ],
-    16: [
-      441.5, 41, 10, 5, 3, 1.5, 1, 0.5, 0.3, 0.5, 1, 1.5, 3, 5, 10, 41, 441.5,
-    ],
-  },
-  high: {
-    8: [30.2, 4, 1.5, 0.3, 0.2, 0.3, 1.5, 4, 30.2],
-    9: [45.4, 7, 2, 0.6, 0.2, 0.2, 0.6, 2, 7, 45.4],
-    10: [80.8, 10, 3, 0.9, 0.3, 0.2, 0.3, 0.9, 3, 10, 80.8],
-    11: [128.6, 14, 5.2, 1.4, 0.4, 0.2, 0.2, 0.4, 1.4, 5.2, 14, 128.6],
-    12: [188.1, 24, 8.1, 2, 0.7, 0.2, 0.2, 0.2, 0.7, 2, 8.1, 24, 188.1],
-    13: [297.4, 37, 11, 4, 1, 0.2, 0.2, 0.2, 0.2, 1, 4, 11, 37, 297.4],
-    14: [503.7, 56, 18, 5, 1.9, 0.3, 0.2, 0.2, 0.2, 0.3, 1.9, 5, 18, 56, 503.7],
-    15: [
-      779.5, 83, 27, 8, 3, 0.5, 0.2, 0.2, 0.2, 0.2, 0.5, 3, 8, 27, 83, 779.5,
-    ],
-    16: [
-      1335.4, 130, 26, 9, 4, 2, 0.2, 0.2, 0.2, 0.2, 0.2, 2, 4, 9, 26, 130,
-      1335.4,
-    ],
-  },
-};
 
 export default function ProvablyFairModal({
   verificationState,
@@ -88,7 +43,7 @@ export default function ProvablyFairModal({
   const [hoveredMultiplier, setHoveredMultiplier] = useState<number | null>(
     null,
   );
-  const [color, setColor] = useState('#ffffff');
+  const [color, setColor] = useState("#ffffff");
 
   const { language } = useGlobalContext();
   // console.log("StrikeMultiplier",strikeMultiplier)
@@ -194,12 +149,12 @@ export default function ProvablyFairModal({
         GameType.plinko,
         verificationState.parameter,
       );
-  
-      const rows = verificationState.parameter || 8; 
-      const risk = verificationState.risk || "low"; 
+
+      const rows = verificationState.parameter || 8;
+      const risk = verificationState.risk || "low";
       const multipliers = riskToChancePlinko[risk]?.[rows];
       let finalMultiplier = 1;
-      
+
       if (multipliers) {
         let totalChance = 0;
         for (let i = 1, chance = 1; i <= rows; i++) {
@@ -211,22 +166,36 @@ export default function ProvablyFairModal({
           }
         }
       }
-  
+
       setStrikeMultiplier(finalMultiplier);
-  
-      const color = getColorForMultiplier(riskToChancePlinko, multiplierColorMap, risk, rows, finalMultiplier);
-      setColor(color || '#ffffff');
+
+      const color = getColorForMultiplier(
+        riskToChancePlinko,
+        multiplierColorMap,
+        risk,
+        rows,
+        finalMultiplier,
+      );
+      setColor(color || "#ffffff");
     }
   }, [verificationState, selectedGameType]);
-  
-  function getColorForMultiplier(riskToChancePlinko: RiskToChance, multiplierColorMap: {[key: number]: string[]}, risk: keyof RiskToChance, line: number , multiplier: number): string | undefined {
+
+  function getColorForMultiplier(
+    riskToChancePlinko: RiskToChance,
+    multiplierColorMap: { [key: number]: string[] },
+    risk: keyof RiskToChance,
+    line: number,
+    multiplier: number,
+  ): string | undefined {
     const multipliers = riskToChancePlinko[risk]?.[line];
     if (!multipliers) return undefined;
-  
+
     const multiplierIndex = multipliers.indexOf(multiplier);
-    return multiplierIndex !== -1 ? multiplierColorMap[line]?.[multiplierIndex] : undefined;
+    return multiplierIndex !== -1
+      ? multiplierColorMap[line]?.[multiplierIndex]
+      : undefined;
   }
-  
+
   const renderKeno = () => (
     <div className="p-4">
       <div className="grid grid-cols-8 gap-2 text-white lg2:text-xl md:text-lg sm:text-base text-sm font-chakra w-full">
@@ -436,7 +405,7 @@ export default function ProvablyFairModal({
       </div>
     </>
   );
-  
+
   const renderMinesCount = () => {
     return (
       <div className="my-4">
@@ -553,62 +522,62 @@ export default function ProvablyFairModal({
       </div>
     );
   };
-  const renderPlinko = ()=>{
-
+  const renderPlinko = () => {
     return (
       <div className="mt-6 pt-7  rounded-md flex flex-col items-center ">
-                  <div className="relative w-1/4 h-10 flex items-center justify-center font-semibold"
-                  style={{
-                    background:"#202329",
-                    borderTop:"0.2rem solid",
-                    borderColor:color,
-                    color:color,
-                    fontSize:"18px",
-                    borderRadius:"0.32rem"
-                  }}>
-                    {strikeMultiplier}
-                  </div>
-                  <div className="flex gap-4 pt-2 mb-8">
-                    <div className="w-full">
-                      <label className="text-xs text-opacity-75 font-changa text-[#F0F0F0]">
-                        {translator("Risk", language)}
-                      </label>
-                      <select
-            name="risk"
-            value={verificationState.risk}
-            onChange={handleChange}
-            className="bg-[#202329] text-white capitalize font-chakra text-xs font-medium mt-1 rounded-md p-3 w-full relative"
-          >
-            <option value={"low"}>{translator("Low", language)}</option>
-            <option value={"medium"}>{translator("Medium", language)}</option>
-            <option value={"high"}>{translator("High", language)}</option>
-          </select>
-                    </div>
-                    <div className="w-full">
-                      <label className="text-xs text-opacity-75 font-changa text-[#F0F0F0]">
-                        {translator("Rows", language)}
-                      </label>
-                      <select
-            name="parameter"
-            value={verificationState.parameter}
-            onChange={handleChange}
-            
-                        className="bg-[#202329] text-white font-chakra text-xs font-medium mt-1 rounded-md p-3 w-full relative"
-          >
-            <option value={8}>8</option>
-            <option value={10}>10</option>
-            <option value={11}>11</option>
-            <option value={12}>12</option>
-            <option value={14}>14</option>
-            <option value={15}>15</option>
-            <option value={15}>15</option>
-            <option value={16}>16</option>
-          </select>
-                    </div>
-                  </div>
-                </div>
-    )
-  }
+        <div
+          className="relative w-1/4 h-10 flex items-center justify-center font-semibold"
+          style={{
+            background: "#202329",
+            borderTop: "0.2rem solid",
+            borderColor: color,
+            color: color,
+            fontSize: "18px",
+            borderRadius: "0.32rem",
+          }}
+        >
+          {strikeMultiplier}
+        </div>
+        <div className="flex gap-4 pt-2 mb-8">
+          <div className="w-full">
+            <label className="text-xs text-opacity-75 font-changa text-[#F0F0F0]">
+              {translator("Risk", language)}
+            </label>
+            <select
+              name="risk"
+              value={verificationState.risk}
+              onChange={handleChange}
+              className="bg-[#202329] text-white capitalize font-chakra text-xs font-medium mt-1 rounded-md p-3 w-full relative"
+            >
+              <option value={"low"}>{translator("Low", language)}</option>
+              <option value={"medium"}>{translator("Medium", language)}</option>
+              <option value={"high"}>{translator("High", language)}</option>
+            </select>
+          </div>
+          <div className="w-full">
+            <label className="text-xs text-opacity-75 font-changa text-[#F0F0F0]">
+              {translator("Rows", language)}
+            </label>
+            <select
+              name="parameter"
+              value={verificationState.parameter}
+              onChange={handleChange}
+              className="bg-[#202329] text-white font-chakra text-xs font-medium mt-1 rounded-md p-3 w-full relative"
+            >
+              <option value={8}>8</option>
+              <option value={10}>10</option>
+              <option value={11}>11</option>
+              <option value={12}>12</option>
+              <option value={14}>14</option>
+              <option value={15}>15</option>
+              <option value={15}>15</option>
+              <option value={16}>16</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    );
+  };
 
   const renderGameVisuals = () => {
     switch (selectedGameType) {
@@ -637,12 +606,7 @@ export default function ProvablyFairModal({
           </>
         );
       case GameType.plinko:
-        return(
-          <>
-          {renderPlinko()}
-          
-          </>
-        )
+        return <>{renderPlinko()}</>;
       default:
         return <div>Unsupported game type</div>;
     }

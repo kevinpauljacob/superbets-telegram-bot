@@ -16,8 +16,7 @@ import {
 import { SPL_TOKENS } from "@/context/config";
 import PlinkoProvablyFairModal from "./PlinkoProvablyFairModal";
 import { multiplierColorMap } from "./constants";
-import { riskToChance } from "@/pages/plinko";
-
+import { riskToChance } from "./RiskToChance";
 
 export interface Plinko {
   createdAt: string;
