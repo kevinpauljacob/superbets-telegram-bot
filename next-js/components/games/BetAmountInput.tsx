@@ -8,6 +8,7 @@ import { translator } from "@/context/transactions";
 import { minGameAmount } from "@/context/config";
 import { riskToChance } from "./Keno/RiskToChance";
 import { SPL_TOKENS } from "@/context/config";
+
 export default function BetAmount({
   betAmt,
   setBetAmt,
@@ -33,38 +34,45 @@ export default function BetAmount({
     selectedCoin,
   } = useGlobalContext();
 
-  //Temperory max bet
+  // Temperory max bet
   const multipliersForRisk = riskToChance[kenoRisk];
   const highestMultiplierForRisk = multipliersForRisk
     ? Math.max(...Object.values(multipliersForRisk).flat())
     : 1;
 
   const [betAmountsModal, setBetAmountsModal] = useState(false);
-
   const [isHovered, setIsHovered] = useState<boolean>(false);
-
   const [highestMaxBetAmt, setHighestMaxBetAmt] = useState<string>("0");
+  const [currentMaxBetAmt, setCurrentMaxBetAmt] = useState(0);
+  const [inputString, setInputString] = useState("");
+
   useEffect(() => {
     if (leastMultiplier !== undefined) {
       setHighestMaxBetAmt(
         (
           maxPayouts[selectedCoin.tokenMint as GameTokens][game as GameType] /
           leastMultiplier
-        ).toFixed(2),
+        ).toFixed(2)
       );
     }
   }, [leastMultiplier, game, kenoRisk]);
 
-  const tempBetAmt = betAmt ?? 0;
-
-  const [currentMaxBetAmt, setCurrentMaxBetAmt] = useState(0);
-  const [inputString, setInputString] = useState("");
-
   useEffect(() => {
-    if (betAmt !== undefined && betAmt > 0) setInputString(betAmt.toString());
+    if (betAmt !== undefined && betAmt > 0) {
+     
+        if(GameType.roulette1){
+          setInputString(betAmt.toFixed(9))
+        }else{
+          setInputString(betAmt.toString());
+        }
+      
+    } else {
+      setInputString('');
+    }
+
     const effectiveMultiplier = currentMultiplier || highestMultiplierForRisk;
 
-    if (tempBetAmt !== undefined && effectiveMultiplier !== undefined) {
+    if (betAmt !== undefined && effectiveMultiplier !== undefined) {
       let calculatedMaxBetAmt =
         maxPayouts[selectedCoin.tokenMint as GameTokens][game as GameType] /
         currentMultiplier;
@@ -73,13 +81,10 @@ export default function BetAmount({
         setCurrentMaxBetAmt(0);
       }
       setCurrentMaxBetAmt(
-        isFinite(calculatedMaxBetAmt) ? calculatedMaxBetAmt : 0,
+        isFinite(calculatedMaxBetAmt) ? calculatedMaxBetAmt : 0
       );
 
-      if (
-        betAmt &&
-        betAmt > (isFinite(calculatedMaxBetAmt) ? calculatedMaxBetAmt : 0)
-      ) {
+      if (betAmt > (isFinite(calculatedMaxBetAmt) ? calculatedMaxBetAmt : 0)) {
         methods.setError("amount", {
           type: "manual",
           message: "Bet amount cannot exceed the maximum bet!",
@@ -88,7 +93,7 @@ export default function BetAmount({
         methods.clearErrors("amount");
       }
     }
-  }, [tempBetAmt, betAmt, currentMultiplier, game, selectedCoin]);
+  }, [betAmt, currentMultiplier, game, selectedCoin]);
 
   useEffect(() => {
     setMaxBetAmt(
@@ -96,10 +101,9 @@ export default function BetAmount({
         truncateNumber(currentMaxBetAmt, 4),
         selectedCoin && selectedCoin?.amount
           ? truncateNumber(selectedCoin.amount, 4)
-          : truncateNumber(currentMaxBetAmt, 4),
-      ),
+          : truncateNumber(currentMaxBetAmt, 4)
+      )
     );
-    console.log(selectedCoin);
   }, [currentMaxBetAmt, coinData, selectedCoin]);
 
   const handleSetMaxBet = () => {
@@ -161,7 +165,7 @@ export default function BetAmount({
           <span className="cursor-pointer" onClick={handleSetMaxBet}>
             {maxBetAmt} $
             {SPL_TOKENS.find(
-              (token) => token.tokenMint === selectedCoin?.tokenMint,
+              (token) => token.tokenMint === selectedCoin?.tokenMint
             )?.tokenName || "Unknown Token"}
           </span>
           <span
@@ -249,30 +253,6 @@ export default function BetAmount({
             <div className="flex flex-col items-center bg-[#202329]/50 text-white font-chakra font-semibold rounded-[5px] py-2 w-full">
               <span className="cursor-pointer group relative text-[10px] text-white text-opacity-50 mb-1">
                 {translator("Max Bet", language)}
-                {/* <BsInfoCircleFill className="text-white text-opacity-50 w-3 h-3 absolute top-1/2 -translate-y-1/2 -right-4" />
-                <span className="absolute hidden group-hover:block transition-all z-[1000] text-justify w-80 p-2 rounded-[5px] top-5 -right-16 translate-x-[30%] md:translate-x-1/4 bg-[#080808] text-white/50 text-xs text-regular font-changa">
-                  The maximum amount you can bet with the current multiplier (
-                  <span className="text-white/80 font-medium">
-                    {isNaN(currentMultiplier)
-                      ? "0"
-                      : `${currentMultiplier ?? 0}x`}
-                  </span>
-                  ) is{" "}
-                  <span className="text-white/80 font-medium">
-                    {currentMaxBetAmt.toFixed(2)} {selectedCoin.tokenName}
-                  </span>
-                  . {translator("Your current wallet balance is", language)}{" "}
-                  <span className="text-white/80 font-medium">
-                    {coinData && coinData[0]?.amount
-                      ? parseFloat(coinData[0].amount.toFixed(4))
-                      : 0.0}
-                  </span>{" "}
-                  . {translator("The maximum amount you can bet in this game is", language)}{" "}
-                  <span className="text-white/80 font-medium">
-                    {highestMaxBetAmt} {selectedCoin.tokenName}
-                  </span>
-                  .
-                </span> */}
               </span>
               <span className="text-xs font-medium">
                 {isNaN(currentMaxBetAmt)
@@ -295,6 +275,7 @@ export default function BetAmount({
       (game === "mines" ||
         game === "keno" ||
         game === "wheel" ||
+        game === "roulette1" ||
         game === "coinflip" ||
         game === "options") ? (
         <div
@@ -315,7 +296,7 @@ export default function BetAmount({
             <span className="text-[11px] font-medium font-chakra mx-3 min-[1412px]:max-w-[200px]">
               {translator(
                 "Maximum amount for a single bet in this game is",
-                language,
+                language
               )}
               <span className="text-white/90 font-semibold">
                 {" "}
@@ -348,8 +329,7 @@ export default function BetAmount({
           autoComplete="off"
           onChange={(e) => {
             let enteredAmount = parseFloat(e.target.value);
-            // console.log(enteredAmount, currentMaxBetAmt);
-            if (maxBetAmt !== undefined && enteredAmount > currentMaxBetAmt) {
+            if (maxBetAmt !== undefined && enteredAmount > maxBetAmt) {
               methods.setError("amount", {
                 type: "manual",
                 message: "Bet amount cannot exceed the maximum bet!",
@@ -403,8 +383,6 @@ export default function BetAmount({
           ? methods.formState.errors["amount"]!.message!.toString()
           : "NONE"}
       </span>
-
-      {/* <BalanceAlert /> */}
     </div>
   );
 }

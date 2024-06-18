@@ -795,7 +795,6 @@ export const placeBet = async (
   }
 };
 
-export const placeFlip = async (
   wallet: WalletContextState,
   amount: number,
   tokenMint: string,

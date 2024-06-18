@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { useSession } from "next-auth/react";
@@ -12,25 +12,28 @@ import Loader from "@/components/games/Loader";
 import { errorCustom } from "@/components/toasts/ToastGroup";
 import Bets from "@/components/games/Bets";
 import { Refresh } from "iconsax-react";
+import { translator } from "@/context/transactions";
+import { SPL_TOKENS } from "@/context/config";// Adjust the import path accordingly
 
 interface Token {
   id: number;
   value: string;
   image: string;
+  tokenName: string; // New property to link to SPL_TOKENS
 }
 
 const tokens: Token[] = [
-  { id: 1, value: '1', image: '/assets/token-1.svg' },
-  { id: 2, value: '10', image: '/assets/token-10.svg' },
-  { id: 3, value: '100', image: '/assets/token-100.svg' },
-  { id: 4, value: '1000', image: '/assets/token-1k.svg' },
-  { id: 5, value: '10000', image: '/assets/token-10k.svg' },
-  { id: 6, value: '100000', image: '/assets/token-100k.svg' },
-  { id: 7, value: '1000000', image: '/assets/token-1M.svg' },
-  { id: 8, value: '10000000', image: '/assets/token-10M.svg' },
-  { id: 9, value: '100000000', image: '/assets/token-100M.svg' },
-  { id: 10, value: '1000000000', image: '/assets/token-1B.svg' },
-  { id: 11, value: '10000000000', image: '/assets/token-10B.svg' },
+  { id: 1, value: '1', image: '/assets/token-1.svg', tokenName: "SOL" },
+  { id: 2, value: '10', image: '/assets/token-10.svg', tokenName: "SOL" },
+  { id: 3, value: '100', image: '/assets/token-100.svg', tokenName: "SOL" },
+  { id: 4, value: '1000', image: '/assets/token-1k.svg', tokenName: "SOL" },
+  { id: 5, value: '10000', image: '/assets/token-10k.svg', tokenName: "SOL" },
+  { id: 6, value: '100000', image: '/assets/token-100k.svg', tokenName: "SOL" },
+  { id: 7, value: '1000000', image: '/assets/token-1M.svg', tokenName: "SOL" },
+  { id: 8, value: '10000000', image: '/assets/token-10M.svg', tokenName: "SOL" },
+  { id: 9, value: '100000000', image: '/assets/token-100M.svg', tokenName: "SOL" },
+  { id: 10, value: '1000000000', image: '/assets/token-1B.svg', tokenName: "SOL" },
+  { id: 11, value: '10000000000', image: '/assets/token-10B.svg', tokenName: "SOL" },
 ];
 
 const rows = [
@@ -38,8 +41,6 @@ const rows = [
   [2, 5, 8, 11, 14, 17, 20, 23, 26, 29, 32, 35],
   [1, 4, 7, 10, 13, 16, 19, 22, 25, 28, 31, 34],
 ];
-
-
 
 type PredefinedBetType = "1-12" | "13-24" | "25-36" | "1-18" | "19-36" | "even" | "odd" | "red" | "black";
 
@@ -84,45 +85,117 @@ export default function Roulette() {
     maxBetAmt,
     language,
   } = useGlobalContext();
-
-  const [betAmt, setBetAmt] = useState<number | undefined>();
+  console.log("MAX",maxBetAmt)
+  type TransformedBets = Record<string, Record<string, number>>;
+  
+  const [betAmt, setBetAmt] = useState<number | undefined>(0);
   const [currentMultiplier, setCurrentMultiplier] = useState<number>(0);
-  const [selectedChip, setSelectedChip] = useState<string | null>(null);
+  const [transformedBets, setTransformedBets] = useState<TransformedBets>({ straight: {} });
+
   const [betAmount, setBetAmount] = useState<string>('0');
   const [selectedToken, setSelectedToken] = useState<Token | null>(tokens[0]);
   const [bets, setBets] = useState<{ areaId: string; token: Token }[]>([]);
   const [betActive, setBetActive] = useState(false);
   const [betSetting, setBetSetting] = useState<"manual" | "auto">("manual");
   const [isRolling, setIsRolling] = useState(false);
-  const [betss, setBetss] = useState<Bet[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [selectedBets, setSelectedBets] = useState<Bet[]>([]);
   const [hoveredButton, setHoveredButton] = useState<string | null>(null);
   const [hoveredRow, setHoveredRow] = useState<number | null>(null);
   const [hoveredSplit, setHoveredSplit] = useState<number[] | null>(null);
   const [hoveredCorner, setHoveredCorner] = useState<number[] | null>(null);
   const [hoveredColumn, setHoveredColumn] = useState<number[] | null>(null);
   const [refresh, setRefresh] = useState(true);
-  console.log(betss);
+
+
+  const getSolEquivalent = (token: Token): number => {
+    const splToken = SPL_TOKENS.find(t => t.tokenName === token.tokenName);
+    if (!splToken) return 0;
+    const tokenValue = parseInt(token.value);
+    return tokenValue / (10 ** splToken.decimal);
+  };
+  const calculateTotalBetAmount = (currentBetAmt: number, newBetValue: number): number => {
+    return currentBetAmt + newBetValue;
+  };
+  const bet = async () => {
+    try {
+      if (!wallet.connected || !wallet.publicKey) {
+        throw new Error(translator("Wallet not Connected", language));
+      }
+      if (!betAmt || betAmt === 0) {
+        throw new Error(translator("Set Amount", language));
+      }
+      if (!transformedBets) {
+        throw new Error(translator("Place at least one Chip", language));
+      }
+      setLoading(true)
+      const response = await fetch(`/api/games/roulette1`,{
+        method: 'POST',
+        headers:{
+          "Content-Type":"application/json"
+        },
+        body:JSON.stringify({
+          wallet:wallet.publicKey,
+          tokenMint:"SOL",
+          wager:transformedBets
+        })
+      })
+      
+      const { success, message, result, strikeNumber } = await response.json();
+      setLoading(false)
+      console.log({"Response":response,"Message":message,"StrikeNumber":strikeNumber})
+    } catch (e: any) {
+      errorCustom(e?.message ?? translator("Could not make bet.", language));
+      setLoading(false);
+      setStartAuto(false);
+      setAutoBetCount(0);
+    }
+  };
 
   const onSubmit = async (data: any) => {
     if (betSetting === "auto") {
       // Auto bet logic
     }
+    if (!wallet.publicKey) {
+      errorCustom(translator("Wallet not connected", language));
+      return;
+    }
+    if (!betAmt || betAmt === 0) {
+      errorCustom(translator("Set Amount.", language));
+      return;
+    }
+    setLoading(true);
+    const transformedBets = transformBetsToSingleNumbers(selectedBets);
+    console.log(transformedBets);
+    setTransformedBets(transformedBets);
+    bet();
   };
 
   const handlePlaceBet = (areaId: string, token: Token | null) => {
-    if (token) {
-      setBetss((prev) => {
-        const betsForArea = prev.filter((bet) => bet.areaId === areaId);
-        if (betsForArea.length < 3) {
-          return [...prev, { areaId, token }];
-        } else {
-          return prev;
-        }
-      });
-    } else {
+    if (!token) {
       errorCustom("Please select a token before placing a bet.");
+      return;
     }
+  
+    const tokenValue = parseInt(token.value);
+    const solEquivalent = getSolEquivalent(token);
+  
+    if (calculateTotalBetAmount(betAmt || 0, solEquivalent) > maxBetAmt!) {
+      errorCustom("Bet amount exceeds the maximum allowed bet.");
+      return;
+    }
+  
+    setSelectedBets((prev) => {
+      const betsForArea = prev.filter((bet) => bet.areaId === areaId);
+      if (betsForArea.length < 3) {
+        setBetAmt((prevBetAmt) => (prevBetAmt || 0) + solEquivalent);
+        return [...prev, { areaId, token }];
+      } else {
+        return prev;
+      }
+    });
   };
+  
 
   const handlePlaceSplitBet = (number1: number, number2: number, token: Token | null) => {
     console.log(number1, number2);
@@ -150,7 +223,7 @@ export default function Roulette() {
   };
 
   const renderRegularToken = (areaId: string) => {
-    const betsForArea = betss.filter((bet) => bet.areaId === areaId);
+    const betsForArea = selectedBets.filter((bet) => bet.areaId === areaId);
     if (betsForArea.length > 0) {
       return (
         <div className="absolute inset-0 flex flex-col items-center justify-center space-y-1 z-10 w-7 sm:w-12 -rotate-90 sm:rotate-0 -left-1">
@@ -174,7 +247,7 @@ export default function Roulette() {
   const renderLeftSplitToken = (number: number, rowIndex: number, colIndex: number) => {
     if (number === 1 || number === 2 || number === 3) {
       const areaId = `split-${number}-0`;
-      const betsForArea = betss.filter((bet) => bet.areaId === areaId);
+      const betsForArea = selectedBets.filter((bet) => bet.areaId === areaId);
   
       if (betsForArea.length > 0) {
         return (
@@ -197,7 +270,7 @@ export default function Roulette() {
     } else if (colIndex > 0) {
       const leftNumber = rows[rowIndex][colIndex - 1];
       const areaId = `split-${number}-${leftNumber}`;
-      const betsForArea = betss.filter((bet) => bet.areaId === areaId);
+      const betsForArea = selectedBets.filter((bet) => bet.areaId === areaId);
   
       if (betsForArea.length > 0) {
         return (
@@ -227,7 +300,7 @@ export default function Roulette() {
       const topNumber = rows[rowIndex - 1][colIndex];
       const areaId = `split-${number}-${topNumber}`;
 
-      const betsForArea = betss.filter((bet) => bet.areaId === areaId);
+      const betsForArea = selectedBets.filter((bet) => bet.areaId === areaId);
       if (betsForArea.length > 0) {
         return (
           <div className="absolute inset-0 flex flex-col items-center justify-center space-y-1 z-10 w-7 sm:w-12 sm:top-6 sm:rotate-0 -rotate-90 left-2 top-2   sm:left-0">
@@ -256,7 +329,7 @@ export default function Roulette() {
       const topRightNumber = rows[rowIndex - 1][colIndex - 1];
       const areaId = `corner-${number}-${rightNumber}-${topNumber}-${topRightNumber}`;
   
-      const betsForArea = betss.filter((bet) => bet.areaId === areaId);
+      const betsForArea = selectedBets.filter((bet) => bet.areaId === areaId);
   
       if (betsForArea.length > 0) {
         return (
@@ -296,7 +369,7 @@ export default function Roulette() {
     if (rowIndex > 0) {
       const topNumber = rows[rowIndex - 1][colIndex];
       const areaId = `corner-${number}-0-${topNumber}`;
-      const betsForArea = betss.filter((bet) => bet.areaId === areaId);
+      const betsForArea = selectedBets.filter((bet) => bet.areaId === areaId);
   
       if (betsForArea.length > 0) {
         return (
@@ -323,7 +396,7 @@ export default function Roulette() {
   const renderTopColumnToken = (colIndex: number) => {
     const columnNumbers = rows.map(row => row[colIndex]);
     const areaId = `column-${columnNumbers.join('-')}`;
-    const betsForArea = betss.filter((bet) => bet.areaId === areaId);
+    const betsForArea = selectedBets.filter((bet) => bet.areaId === areaId);
     if (betsForArea.length > 0) {
       return (
         <div className="absolute inset-0 flex flex-col items-center justify-center space-y-1 w-7 
@@ -352,24 +425,41 @@ export default function Roulette() {
       : false || isRolling || betActive;
   }, [betSetting, startAuto, isRolling, betActive]);
   const clearBets = () => {
-    setBetss([]);
+    setSelectedBets([]);
+    setBetAmt(0); 
   };
 
   const undoLastBet = () => {
-    setBetss((prev) => prev.slice(0, -1));
+    setSelectedBets((prev) => {
+      const lastBet = prev[prev.length - 1];
+      if (lastBet) {
+        const tokenValue = parseInt(lastBet.token.value);
+        const solEquivalent = getSolEquivalent(lastBet.token);
+  
+        setBetAmt((prevBetAmt) => {
+          if (prevBetAmt !== undefined) {
+            return prevBetAmt - solEquivalent;
+          }
+          return prevBetAmt;
+        });
+      }
+      return prev.slice(0, -1);
+    });
   };
+  
   type Bet = {
     areaId: string;
     token: Token;
   };
-  const handleBet= ()=>{
-    const transformedBets = transformBetsToSingleNumbers(betss);
-    console.log(transformedBets);
-  }
+
  
+  const isPredefinedBetType = (value: string): value is PredefinedBetType => {
+    return value in predefinedBets;
+  };
   
   const transformBetsToSingleNumbers = (bets: Bet[]): Record<string, Record<string, number>> => {
     const singleNumberBets: Record<string, number> = {};
+    const predefinedBetTotals: Record<string, number> = {};
   
     const addToSingleNumberBet = (number: string, value: number) => {
       if (singleNumberBets[number]) {
@@ -395,6 +485,12 @@ export default function Roulette() {
         const nums = bet.areaId.split('-').slice(1);
         const columnValue = tokenValue / nums.length;
         nums.forEach(num => addToSingleNumberBet(num, columnValue));
+      } else if (isPredefinedBetType(bet.areaId)) {
+        if (predefinedBetTotals[bet.areaId]) {
+          predefinedBetTotals[bet.areaId] += tokenValue;
+        } else {
+          predefinedBetTotals[bet.areaId] = tokenValue;
+        }
       } else if (bet.areaId.startsWith('num-')) {
         const [, num] = bet.areaId.split('-');
         addToSingleNumberBet(num, tokenValue);
@@ -402,18 +498,11 @@ export default function Roulette() {
     });
   
     return {
-      straight: Object.keys(singleNumberBets).reduce((acc, number) => {
-        acc[number] = singleNumberBets[number];
-        return acc;
-      }, {} as Record<string, number>)
+      straight: singleNumberBets,
+      ...predefinedBetTotals
     };
   };
-  
 
-  
-  const transformedBets = transformBetsToSingleNumbers(bets);
-  console.log(transformedBets);
-  
   return (
     <GameLayout title="Roulette">
       <GameOptions>
@@ -457,18 +546,26 @@ export default function Roulette() {
                 <BetAmount
                   betAmt={betAmt}
                   setBetAmt={setBetAmt}
-                  currentMultiplier={36}
-                  leastMultiplier={1.1}
-                  game="roulette"
+                  currentMultiplier={1}
+                  leastMultiplier={1}
+                  game="roulette1"
                   disabled={disableInput}
                 />
-                <button
-                  className="hover:duration-75 hover:opacity-90 w-full h-[3.75rem] rounded-lg transition-all bg-[#7839C5] disabled:bg-[#4b2876] hover:bg-[#9361d1] focus:bg-[#602E9E] flex items-center justify-center font-chakra font-semibold text-xl tracking-wider text-white"
-                  onClick={handleBet}
+                 <BetButton
+                    disabled={
+                      !selectedToken ||
+                      loading ||
+                      !session?.user ||
+                      (betAmt !== undefined &&
+                        maxBetAmt !== undefined &&
+                        betAmt > maxBetAmt)
+                        ? true
+                        : false
+                      }
+                      onClickFunction={onSubmit}
                   >
-                  
-                  {isRolling ? <Loader /> : "BET"}
-                </button>
+                    {loading ? <Loader /> : "BET"}
+                  </BetButton>
               </form>
             </FormProvider>
           </div>
@@ -664,7 +761,7 @@ export default function Roulette() {
             {/* options */}
           <div className="flex  w-[430px] sm:w-full justify-between">
             {/* w-[430px] rotate-90*/}
-            <div className="h-[27px] w-[27.3px] sm:h-[153px] sm:w-12   bg-transparent"/>
+            <div className="h-[27px] w-[27.3px]  sm:h-[153px] sm:w-12   bg-transparent"/>
             {/*h-[27.3px] w-[123px]  */}
             <div className="flex flex-col w-full gap-1">
               <div className="flex w-full justify-center gap-1">
