@@ -105,6 +105,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       );
 
       const result = amountWon > amount ? "Won" : "Lost";
+      const amountLost = Math.max(Decimal.sub(amount, amountWon).toNumber(), 0);
+
       const record = await Mines.findOneAndUpdate(
         {
           _id: gameId,
@@ -113,7 +115,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         },
         {
           result,
-          $set: { strikeNumbers },
+          $set: { strikeNumbers, amountLost },
         },
         { new: true },
       ).populate("gameSeed");

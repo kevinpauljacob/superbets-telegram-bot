@@ -214,7 +214,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         amountWon = Decimal.mul(amount, strikeMultiplier)
           .mul(Decimal.sub(1, houseEdge))
           .toNumber();
-        amountLost = 0;
+        amountLost = Math.max(Decimal.sub(amount, amountWon).toNumber(), 0);
 
         feeGenerated = Decimal.mul(amount, strikeMultiplier)
           .sub(amountWon)
