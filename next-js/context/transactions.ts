@@ -865,7 +865,9 @@ export const claimEarnings = async (
     });
 
     const { success, message } = await res.json();
-
+    if (success) {
+      successCustom(message);
+    } else errorCustom(message);
     return { success, message };
   } catch (error: any) {
     return { success: false, message: error.message };
