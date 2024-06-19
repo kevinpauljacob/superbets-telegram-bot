@@ -336,7 +336,7 @@ export default function AffiliateProgram() {
   return (
     <div className="px-5 lg2:px-[4rem] md:px-[3rem] pt-5">
       <h1 className="font-chakra font-bold text-[1.75rem] text-white mb-3.5">
-        AFFILIATE PROGRAM
+       {translator("AFFILIATE PROGRAM", language)}
       </h1>
 
       {/* mobile tabs */}
@@ -350,7 +350,7 @@ export default function AffiliateProgram() {
                 setCampaigns(false);
                 setEarnings(false);
               } else {
-                errorCustom("Wallet not connected");
+                errorCustom(translator("Wallet not connected", language));
               }
             }}
             label={translator("Referred", language)}
@@ -379,7 +379,7 @@ export default function AffiliateProgram() {
             className="bg-[#7839C5] hover:bg-[#9361d1] focus:bg-[#602E9E] transition-all cursor-pointer text-white font-chakra font-semibold text-sm rounded-[5px] px-8 py-4"
             onClick={() => setShowCreateCampaignModal(!showCreateCampaignModal)}
           >
-            CREATE CAMPAIGN
+            {translator("CREATE CAMPAIGN", language)}
           </button>
         )}
       </div>
@@ -391,17 +391,16 @@ export default function AffiliateProgram() {
           <div className="flex flex-col justify-between grow bg-staking-bg rounded-[5px] p-4 w-[30%]">
             <div>
               <p className="text-white font-semibold text-base text-opacity-75">
-                Multi-Level Referral
+                {translator("Multi-Level Referral", language)}
               </p>
               <p className="text-[#94A3B8] font-semibold text-[11px] text-opacity-50 md:max-w-[340px]">
-                Our affiliate program includes a comprehensive retention program
-                that keeps referred customers engaged and invested.
+                {translator("Our affiliate program includes a comprehensive retention program that keeps referred customers engaged and invested.", language)}
               </p>
             </div>
             {userCampaigns.length > 0 && (
               <div className="mt-3.5">
                 <p className="text-white/50 font-chakra font-semibold text-xs mb-2">
-                  Referral Link
+                  {translator("Referral Link", language)}
                 </p>
                 <div className="flex gap-3 mb-4">
                   <span className="text-ellipsis overflow-hidden bg-white/5 rounded-[5px] text-sm font-chakra text-[#94A3B8] font-normal px-4 py-1">
@@ -426,7 +425,7 @@ export default function AffiliateProgram() {
             )}
           </div>
           <div className="hidden lg:flex flex-col justify-between bg-staking-bg rounded-[5px] px-4 pt-4 pb-8">
-            <p className="text-white/75 font-semibold">How it Works?</p>
+            <p className="text-white/75 font-semibold">{translator("How it Works?", language)}</p>
             <Image
               src="/assets/banners/affiliate-program.png"
               alt="how it works image"
@@ -478,7 +477,7 @@ export default function AffiliateProgram() {
             className="bg-[#7839C5] hover:bg-[#9361d1] focus:bg-[#602E9E] transition-all cursor-pointer text-white font-chakra font-semibold text-sm rounded-[5px] px-8 py-4"
             onClick={() => setShowCreateCampaignModal(!showCreateCampaignModal)}
           >
-            CREATE CAMPAIGN
+            {translator("CREATE CAMPAIGN", language)}
           </button>
         )}
       </div>
@@ -497,7 +496,7 @@ export default function AffiliateProgram() {
             </div>
             <div>
               <p className="text-white font-medium text-xs lg:text-base text-opacity-50">
-                Total Claimed
+                {translator("Total Claimed", language)}
               </p>
               <p className="text-[#94A3B8] font-semibold text-lg lg:text-2xl">
                 ${formatNumber(totalClaimed, 2) ?? 0}
@@ -516,7 +515,7 @@ export default function AffiliateProgram() {
               </div>
               <div>
                 <p className="text-white font-medium text-xs lg:text-base text-opacity-50">
-                  Total Claimable
+                  {translator("Total Claimable", language)}
                 </p>
                 <p className="text-[#94A3B8] font-semibold text-lg lg:text-2xl">
                   ${formatNumber(totalClaimable, 2) ?? 0}
@@ -529,7 +528,7 @@ export default function AffiliateProgram() {
                 className="disabled:cursor-default disabled:opacity-70 disabled:bg-[#4b2876] text-white text-xs lg:text-base font-semibold font-chakra bg-[#7839C5] hover:bg-[#9361d1] focus:bg-[#602E9E] transition-all cursor-pointer rounded-[5px] py-2 px-7 lg:px-11"
                 onClick={() => claimEarnings(wallet, userCampaigns)}
               >
-                CLAIM
+                {translator("CLAIM", language)}
               </button>
             </div>
           </div>
@@ -611,7 +610,7 @@ export default function AffiliateProgram() {
                                         color: `#${colors[level]}`,
                                       }}
                                     >
-                                      Level {level + 1}
+                                      {translator("Level", language)} {level + 1}
                                     </span>
                                   </span>
                                   <span className="w-full hidden md:block text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
@@ -678,7 +677,7 @@ export default function AffiliateProgram() {
             ))
           ) : (
             <p className="text-center font-changa text-[#F0F0F080]">
-              No campaigns created
+              {translator("No campaigns created", language)}
             </p>
           )}
         </div>
