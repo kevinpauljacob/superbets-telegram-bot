@@ -10,7 +10,7 @@ export default function Telegram({ fill }: { fill: string }) {
       xmlns="http://www.w3.org/2000/svg"
     >
       <rect opacity="0.1" width="21" height="21" rx="10.5" fill={`${fill}`} />
-      <g clip-path="url(#clip0_3514_1359)">
+      <g clipPath="url(#clip0_3514_1359)">
         <path
           d="M11.9843 6.91195C12.8044 7.73205 12.8044 9.0617 11.9843 9.8818C11.1642 10.7019 9.83459 10.7019 9.01449 9.8818C8.19439 9.0617 8.19439 7.73205 9.01449 6.91195C9.83459 6.09185 11.1642 6.09185 11.9843 6.91195Z"
           fill={`${fill}`}
