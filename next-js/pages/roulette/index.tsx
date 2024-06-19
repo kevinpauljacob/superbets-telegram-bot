@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { useSession } from "next-auth/react";
@@ -42,7 +42,7 @@ const rows = [
   [1, 4, 7, 10, 13, 16, 19, 22, 25, 28, 31, 34],
 ];
 
-type PredefinedBetType = "1-12" | "13-24" | "25-36" | "1-18" | "19-36" | "even" | "odd" | "red" | "black";
+type PredefinedBetType = "1-12" | "13-24" | "25-36" | "1-18" | "19-36" | "even" | "odd" | "red" | "black" | "1st-column"| "2nd-column"| "3rd-column";
 
 const predefinedBets: Record<PredefinedBetType, number[]> = {
   "1-12": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
@@ -54,6 +54,9 @@ const predefinedBets: Record<PredefinedBetType, number[]> = {
   "odd": [1, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23, 25, 27, 29, 31, 33, 35],
   "red": [1, 3, 5, 7, 9, 12, 14, 16, 18, 19, 21, 23, 25, 27, 28, 30, 32, 34, 36],
   "black": [2, 4, 6, 8, 10, 11, 13, 15, 17, 20, 22, 24, 26, 29, 31, 33, 35],
+  "1st-column":[3, 6, 9, 12, 15, 18, 21, 24, 27, 30, 33, 36],
+  "2nd-column":[2, 5, 8, 11, 14, 17, 20, 23, 26, 29, 32, 35],
+  "3rd-column":[1, 4, 7, 10, 13, 16, 19, 22, 25, 28, 31, 34],
 };
 
 export default function Roulette() {
@@ -86,8 +89,43 @@ export default function Roulette() {
     language,
   } = useGlobalContext();
   console.log("MAX",maxBetAmt)
+  const [num, setNum] = useState(0);
+  const ball = useRef<HTMLDivElement>(null);
+  const ballContainer = useRef<HTMLDivElement>(null);
+  const spin = () => {
+    const order = [
+      0, 32, 15, 19, 4, 21, 2, 25, 17, 34, 6, 27, 13, 36, 11, 30, 8, 23, 10, 5, 24, 16, 33, 1, 20, 14, 31, 9, 22, 18, 29, 7, 28, 12, 35, 3, 26
+    ];
+
+    if (!ball || !ball.current || !ballContainer || !ballContainer.current) return;
+    const ballElement = ball.current;
+    const ballContainerElement = ballContainer.current;
+
+    let endingDegree = order.indexOf(num) * 9.73;
+
+    ballContainerElement.style.transition = "all linear 4s"
+    ballContainerElement.style.rotate = ((360*3) + endingDegree) + "deg"
+
+    ballElement.classList.add("hole")
+  };
+
   type TransformedBets = Record<string, Record<string, number>>;
-  
+  type WagerType =
+  | "red"
+  | "black"
+  | "green"
+  | "odd"
+  | "even"
+  | "low"
+  | "high"
+  | "1st-12"
+  | "2nd-12"
+  | "3rd-12"
+  | "1st-column"
+  | "2nd-column"
+  | "3rd-column"
+  | "straight";
+
   const [betAmt, setBetAmt] = useState<number | undefined>(0);
   const [currentMultiplier, setCurrentMultiplier] = useState<number>(0);
   const [transformedBets, setTransformedBets] = useState<TransformedBets>({ straight: {} });
@@ -107,13 +145,9 @@ export default function Roulette() {
   const [hoveredColumn, setHoveredColumn] = useState<number[] | null>(null);
   const [refresh, setRefresh] = useState(true);
 
+console.log(selectedBets)
 
-  const getSolEquivalent = (token: Token): number => {
-    const splToken = SPL_TOKENS.find(t => t.tokenName === token.tokenName);
-    if (!splToken) return 0;
-    const tokenValue = parseInt(token.value);
-    return tokenValue / (10 ** splToken.decimal);
-  };
+  
   const calculateTotalBetAmount = (currentBetAmt: number, newBetValue: number): number => {
     return currentBetAmt + newBetValue;
   };
@@ -196,6 +230,7 @@ export default function Roulette() {
     });
   };
   
+  
 
   const handlePlaceSplitBet = (number1: number, number2: number, token: Token | null) => {
     console.log(number1, number2);
@@ -204,13 +239,13 @@ export default function Roulette() {
       handlePlaceBet(areaId, token);
     }
   };
-
   const handlePlaceCornerBet = (number1: number, number2: number, number3: number, number4: number, token: Token | null) => {
     if (token) {
       const areaId = `corner-${number1}-${number2}-${number3}-${number4}`;
       handlePlaceBet(areaId, token);
     }
   };
+  
 
   const handlePlaceColumnBet = (colIndex: number, token: Token | null) => {
     if (token) {
@@ -221,7 +256,13 @@ export default function Roulette() {
       errorCustom("Please select a token before placing a bet.");
     }
   };
-
+  const handlePlaceCornerBetWithTwoColumns = (number: number, adjacentNumbers: number[], token: Token | null) => {
+    if (token) {
+      const areaId = `corner2column-${number}-${adjacentNumbers.join('-')}`;
+      handlePlaceBet(areaId, token);
+    }
+  };
+  
   const renderRegularToken = (areaId: string) => {
     const betsForArea = selectedBets.filter((bet) => bet.areaId === areaId);
     if (betsForArea.length > 0) {
@@ -353,16 +394,13 @@ export default function Roulette() {
     return null;
   };
   
-  const handlePlaceCornerBetWithThreeNumbers = (
-    number: number,
-    adjacentNumbers: number[],
-    token: Token | null
-  ) => {
+  const handlePlaceCornerBetWithThreeNumbers = (number: number, adjacentNumbers: number[], token: Token | null) => {
     if (token) {
-      const areaId = `corner-${number}-${adjacentNumbers.join('-')}`;
+      const areaId = `corner3-${number}-${adjacentNumbers.join('-')}`;
       handlePlaceBet(areaId, token);
     }
   };
+  
   
  
   const renderCornerTokenWithThreeNumbers = (number: number, rowIndex: number, colIndex: number) => {
@@ -452,7 +490,13 @@ export default function Roulette() {
     token: Token;
   };
 
- 
+  const getSolEquivalent = (token: Token): number => {
+    const splToken = SPL_TOKENS.find(t => t.tokenName === token.tokenName);
+    if (!splToken) return 0;
+    const tokenValue = parseInt(token.value);
+    return tokenValue / (10 ** splToken.decimal);
+  };
+  
   const isPredefinedBetType = (value: string): value is PredefinedBetType => {
     return value in predefinedBets;
   };
@@ -470,7 +514,7 @@ export default function Roulette() {
     };
   
     bets.forEach(bet => {
-      const tokenValue = parseInt(bet.token.value);
+      const tokenValue = parseFloat(bet.token.value); // Use parseFloat to handle decimal values
   
       if (bet.areaId.startsWith('split-')) {
         const [, num1, num2] = bet.areaId.split('-');
@@ -478,8 +522,21 @@ export default function Roulette() {
         addToSingleNumberBet(num1, halfValue);
         addToSingleNumberBet(num2, halfValue);
       } else if (bet.areaId.startsWith('corner-')) {
+        const [_, num1, num2, num3, num4] = bet.areaId.split('-');
+        const cornerValue = tokenValue / 4;
+        addToSingleNumberBet(num1, cornerValue);
+        addToSingleNumberBet(num2, cornerValue);
+        addToSingleNumberBet(num3, cornerValue);
+        addToSingleNumberBet(num4, cornerValue);
+      } else if (bet.areaId.startsWith('corner3-')) {
+        const [_, num1, num2, num3] = bet.areaId.split('-');
+        const cornerValue = tokenValue / 3;
+        addToSingleNumberBet(num1, cornerValue);
+        addToSingleNumberBet(num2, cornerValue);
+        addToSingleNumberBet(num3, cornerValue);
+      } else if (bet.areaId.startsWith('corner2column-')) {
         const nums = bet.areaId.split('-').slice(1);
-        const numValues = nums.length === 4 ? tokenValue / 4 : tokenValue / 3; // Adjust for 3 or 4 numbers
+        const numValues = nums.length === 6 ? tokenValue / 6 : tokenValue / 4; // Adjust for 6 or 4 numbers
         nums.forEach(num => addToSingleNumberBet(num, numValues));
       } else if (bet.areaId.startsWith('column-')) {
         const nums = bet.areaId.split('-').slice(1);
@@ -502,7 +559,29 @@ export default function Roulette() {
       ...predefinedBetTotals
     };
   };
+  const reset = () => {
+    if (!ball || !ball.current || !ballContainer || !ballContainer.current) return;
+    const ballElement = ball.current;
+    const ballContainerElement = ballContainer.current;
 
+    ballContainerElement.style.transition = "none"
+    ballElement.classList.remove("hole")
+    ballContainerElement.style.rotate = "0deg"
+  }
+  
+  
+  const rowToColumnLabel = (rowIndex: number): WagerType => {
+    switch (rowIndex) {
+      case 0:
+        return "1st-column";
+      case 1:
+        return "2nd-column";
+      case 2:
+        return "3rd-column";
+      default:
+        throw new Error("Invalid row index");
+    }
+  };
   return (
     <GameLayout title="Roulette">
       <GameOptions>
@@ -572,7 +651,18 @@ export default function Roulette() {
         </>
       </GameOptions>
       <GameDisplay>
-      <div className="sm:p-4 rounded-lg flex flex-col items-center font-chakra font-semibold text-base">
+        
+        
+      <div className="roulette relative w-72 h-72 flex flex-col items-center justify-center">
+        <img className="absolute w-[90%] h-[90%]" src="/bg.svg " />
+        <img className="wheel absolute" src="/wheel.svg" />
+        <img className="needle absolute" src="/needle.svg" />
+
+        <div ref={ballContainer} className="ball_container absolute w-full h-[10%] px-[10%] flex items-center">
+          <div ref={ball} className="ball w-[4%] h-[30%] bg-white rounded-full" />
+        </div>
+      </div>
+      <div className=" rounded-lg flex flex-col items-center font-chakra font-semibold text-base">
         <div className="flex justify-between w-full  text-white mb-1">
           <div className="hidden sm:flex items-center cursor-pointer hover:opacity-90"
             onClick={undoLastBet}>
@@ -740,24 +830,21 @@ export default function Roulette() {
                    </>
                   ))}
             </div>
-            <div className="flex flex-col justify-between  items-center gap-[5px] sm:gap-1  mt-0 ">
-              {/* flex-row  gap-[3px] mt-1*/}
-              {rows.map((_, rowIndex) => (
-                <div
-                  key={`row-${rowIndex}`}
-                  className="h-[40px] w-[27px] sm:w-[48px] sm:h-[48px]  flex items-center justify-center text-center bg-transparent border-2
-                   border-[#26272B] text-white cursor-pointer relative rounded-[5px] hover:border hover:border-slate-200 hover:bg-[#4D5361]"
-                  onMouseEnter={() => setHoveredRow(rowIndex)}
-                  onMouseLeave={() => setHoveredRow(null)}
-                  onClick={() => handlePlaceBet(`row-${rowIndex}`, selectedToken)}
-                >
-                  {/* h-[27px] w-[40px] */}
-                  <p className="-rotate-90 sm:rotate-0">2:1</p>
-                  {renderRegularToken(`row-${rowIndex}`)}
-                </div>
-              ))}
-            </div>
-            </div>
+            <div className="flex flex-col justify-between items-center gap-[5px] sm:gap-1 mt-0">
+  {rows.map((_, rowIndex) => (
+    <div
+      key={`row-${rowIndex}`}
+      className="h-[40px] w-[27px] sm:w-[48px] sm:h-[48px] flex items-center justify-center text-center bg-transparent border-2 border-[#26272B] text-white cursor-pointer relative rounded-[5px] hover:border hover:border-slate-200 hover:bg-[#4D5361]"
+      onMouseEnter={() => setHoveredRow(rowIndex)}
+      onMouseLeave={() => setHoveredRow(null)}
+      onClick={() => handlePlaceBet(rowToColumnLabel(rowIndex), selectedToken)}
+    >
+      <p className="-rotate-90 sm:rotate-0">2:1</p>
+      {renderRegularToken(rowToColumnLabel(rowIndex))}
+    </div>
+  ))}
+</div>
+</div>
             {/* options */}
           <div className="flex  w-[430px] sm:w-full justify-between">
             {/* w-[430px] rotate-90*/}
@@ -899,6 +986,9 @@ export default function Roulette() {
           </div>
           
         </div>
+        <input type="number" value={num} onChange={(e) => setNum(parseInt(e.target.value))} className="mt-8 px-4 py-2 bg-white text-black rounded-md" />
+      <button onClick={() => reset()} className="mt-4 px-4 py-2 bg-white text-black rounded-md">Reset</button>
+      <button onClick={() => spin()} className="mt-4 px-4 py-2 bg-white text-black rounded-md">Spin</button>
       </GameDisplay>
       <GameTable>
         <Bets refresh={refresh}/>
@@ -906,3 +996,6 @@ export default function Roulette() {
     </GameLayout>
   );
 }
+     
+   
+           

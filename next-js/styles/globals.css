@@ -626,3 +626,77 @@ input[type="range"] {
 .slide-out {
   animation: slideOutToRight 1.5s ease-in-out forwards;
 }
+.roulette .wheel {
+  rotate: -90deg;
+  animation: spinAntiR 10s linear infinite;
+}
+
+.roulette .needle {
+  animation: spinR 10s linear infinite;
+}
+
+.roulette .ball_container {
+  animation: spinAntiR 10s linear infinite;
+}
+
+@keyframes bounce {
+
+  0%,
+  60% {
+    margin-left: 0%;
+  }
+
+  70% {
+    margin-left: 10%;
+  }
+
+  75% {
+    margin-left: 18.5%;
+  }
+
+  80% {
+    margin-left: 10%;
+  }
+
+  85% {
+    margin-left: 18.5%;
+  }
+
+  90% {
+    margin-left: 10%;
+  }
+
+  95% {
+    margin-left: 18.5%;
+  }
+
+  100% {
+    margin-left: 14.5%;
+  }
+}
+
+
+.hole {
+  margin-left: 14.5%;
+  animation: bounce 4s cubic-bezier(0.25, 0.1, 0.25, 1);
+}
+
+@keyframes spinAntiR {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(-360deg);
+  }
+}
+
+@keyframes spinR {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
+}
