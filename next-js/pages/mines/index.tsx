@@ -702,6 +702,12 @@ export default function Mines() {
   useEffect(() => {
     setUserBets(defaultUserBets);
     setUserBetsForAuto([]);
+    setCashoutModal({
+      show: false,
+      amountWon: 0,
+      strikeMultiplier: 0,
+      pointsGained: 0,
+    });
   }, [betType]);
 
   useEffect(() => {
