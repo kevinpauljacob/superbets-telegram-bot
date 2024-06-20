@@ -96,9 +96,18 @@ export default function AffiliateProgram() {
   const [earningsData, setEarningsData] = useState<EarningsData>([]);
   const [totalClaimed, setTotalClaimed] = useState(0);
   const [totalClaimable, setTotalClaimable] = useState(0);
+  const initialReferralLevelData: ReferralLevelData[] = Array.from(
+    { length: 5 },
+    () => ({
+      signUps: 0,
+      totalEarnings: 0,
+    }),
+  );
+
   const [referralLevelData, setReferralLevelData] = useState<
     ReferralLevelData[]
-  >([]);
+  >(initialReferralLevelData);
+
   const [buttonText, setButtonText] = useState("Copy");
 
   const colors = ["4594FF", "E17AFF", "00C278", "4594FF", "00C278"];
@@ -175,10 +184,7 @@ export default function AffiliateProgram() {
   };
 
   const referralData = () => {
-    const updatedReferralLevelData: ReferralLevelData[] = Array.from(
-      { length: 5 },
-      () => ({ signUps: 0, totalEarnings: 0 }),
-    );
+    console.log("Here 1");
     referredUsers.forEach((user) => {
       const referralLevel = getReferralLevel(user._id) ?? -1;
       if (referralLevel === -1) {
@@ -199,18 +205,19 @@ export default function AffiliateProgram() {
 
       // console.log("referral level", referralLevel);
       if (referralLevel !== -1) {
-        updatedReferralLevelData[referralLevel].signUps += 1;
-        updatedReferralLevelData[referralLevel].totalEarnings += totalEarnings;
+        initialReferralLevelData[referralLevel].signUps += 1;
+        initialReferralLevelData[referralLevel].totalEarnings += totalEarnings;
       }
     });
 
-    // console.log("updatedReferralLevelData", updatedReferralLevelData);
-    setReferralLevelData(updatedReferralLevelData);
+    console.log("Here 2");
+    console.log("updatedReferralLevelData", initialReferralLevelData);
+    setReferralLevelData(initialReferralLevelData);
   };
 
   useEffect(() => {
     if (referredUsers.length > 0) referralData();
-  }, [referredUsers]);
+  }, [referredUsers, referralLevels]);
 
   const calculateEarnings = () => {
     // Temporary object to accumulate earnings
@@ -332,6 +339,10 @@ export default function AffiliateProgram() {
   //   console.log("totalClaimed", totalClaimed);
   //   console.log("totalClaimable", totalClaimable);
   // }, [totalClaimed, totalClaimable]);
+
+  useEffect(() => {
+    console.log("referralLevelData", referralLevelData);
+  }, [referralLevelData]);
 
   return (
     <div className="px-5 lg2:px-[4rem] md:px-[3rem] pt-5">
