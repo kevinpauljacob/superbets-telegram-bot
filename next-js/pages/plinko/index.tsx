@@ -49,6 +49,8 @@ import {
 } from "@/components/games/Plinko/constants";
 import { GameType } from "@/utils/provably-fair";
 import { riskToChance } from "@/components/games/Plinko/RiskToChance";
+import { handleSignIn } from "@/components/ConnectWallet";
+import { useWalletModal } from "@solana/wallet-adapter-react-ui";
 
 export type LinesType = 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15 | 16;
 
@@ -82,22 +84,22 @@ export default function Plinko() {
       width! >= 1440
         ? 750
         : width! >= 1024
-          ? 500
-          : width! >= 700
-            ? 620
-            : width! >= 600
-              ? 500
-              : 340,
+        ? 500
+        : width! >= 700
+        ? 620
+        : width! >= 600
+        ? 500
+        : 340,
     height:
       width! >= 1440
         ? 640
         : width! >= 1024
-          ? 450
-          : width! >= 700
-            ? 570
-            : width! >= 600
-              ? 450
-              : 330,
+        ? 450
+        : width! >= 700
+        ? 570
+        : width! >= 600
+        ? 450
+        : 330,
   };
 
   const ball = {
@@ -105,12 +107,12 @@ export default function Plinko() {
       (width! >= 1440
         ? 15
         : width! >= 1024
-          ? 11
-          : width! >= 700
-            ? 13
-            : width! >= 600
-              ? 11
-              : 8) /
+        ? 11
+        : width! >= 700
+        ? 13
+        : width! >= 600
+        ? 11
+        : 8) /
       (lines / 8),
   };
 
@@ -127,6 +129,7 @@ export default function Plinko() {
 
   const wallet = useWallet();
   const methods = useForm();
+  const walletModal = useWalletModal();
 
   const {
     coinData,
@@ -154,6 +157,7 @@ export default function Plinko() {
     selectedCoin,
     enableSounds,
     updatePNL,
+    minGameAmount,
   } = useGlobalContext();
 
   const muteRef = useRef<boolean>(false);
@@ -172,9 +176,6 @@ export default function Plinko() {
   const [loading, setLoading] = useState(false);
   const [refresh, setRefresh] = useState(true);
   const [betSetting, setBetSetting] = useState<"manual" | "auto">("manual");
-  const [betResults, setBetResults] = useState<
-    { result: number; win: boolean }[]
-  >([]);
   const [lastMultipliers, setLastMultipliers] = useState<MultiplierHistory[]>(
     [],
   );
@@ -194,23 +195,23 @@ export default function Plinko() {
       (width! >= 1440
         ? 9
         : width! >= 1024
-          ? 6
-          : width! >= 700
-            ? 8
-            : width! >= 600
-              ? 6
-              : 6) /
+        ? 6
+        : width! >= 700
+        ? 8
+        : width! >= 600
+        ? 6
+        : 6) /
       (lines / 8),
     pinGap:
       (width! >= 1440
         ? 75
         : width! >= 1024
-          ? 50
-          : width! >= 700
-            ? 65
-            : width! >= 600
-              ? 50
-              : 35) /
+        ? 50
+        : width! >= 700
+        ? 65
+        : width! >= 600
+        ? 50
+        : 35) /
       (lines / 8),
   };
 
@@ -378,12 +379,12 @@ export default function Plinko() {
     width! >= 1440
       ? 1.25
       : width! >= 1024
-        ? 0.8
-        : width! >= 700
-          ? 1.1
-          : width! >= 600
-            ? 0.8
-            : 0.6;
+      ? 0.8
+      : width! >= 700
+      ? 1.1
+      : width! >= 600
+      ? 0.8
+      : 0.6;
 
   multipliers.forEach((multiplier) => {
     const blockSize = 60 / (lines / 8); // height and width
@@ -392,12 +393,12 @@ export default function Plinko() {
         (width! >= 1440
           ? 75
           : width! >= 1024
-            ? 50
-            : width! >= 700
-              ? 65
-              : width! >= 600
-                ? 50
-                : 35) /
+          ? 50
+          : width! >= 700
+          ? 65
+          : width! >= 600
+          ? 50
+          : 35) /
           (lines / 8),
       lines * pinsConfig.pinGap + 15,
       blockSize,
@@ -473,6 +474,16 @@ export default function Plinko() {
       prev[1],
       prev[2],
     ]);
+    let win = multiplierValue > 1 ? true : false;
+    updatePNL(GameType.plinko, win, betAmt ?? 0, result?.strikeMultiplier ?? 0);
+
+    if (win) {
+      const amountWon = (multiplierValue * (1 - houseEdge) - 1) * (betAmt ?? 0);
+      successCustom(`Congratulations! You won ${amountWon}!`);
+      soundAlert("/sounds/win.wav", muteRef.current);
+    } else errorCustom("Sorry, Better luck next time!");
+
+    setRefresh(true);
 
     if (+ballValue <= 0) return;
   }
@@ -487,35 +498,6 @@ export default function Plinko() {
   }
 
   Events.on(engine, "collisionActive", onBodyCollision);
-
-  useEffect(() => {
-    // console.log(result);
-    if (result && result?.result && betAmt) {
-      if (result?.success !== true) {
-        throw new Error(result?.message);
-      }
-
-      const win = result?.result === "Won";
-
-      updatePNL(GameType.plinko, win, betAmt, result?.strikeMultiplier ?? 0);
-
-      if (win) {
-        successCustom(result?.message);
-        soundAlert("/sounds/win.wav", muteRef.current);
-      } else errorCustom(result?.message);
-      const newBetResult = { result: result?.strikeMultiplier, win };
-
-      setBetResults((prevResults) => {
-        const newResults = [...prevResults, newBetResult];
-        if (newResults.length > 6) {
-          newResults.shift();
-        }
-        return newResults;
-      });
-
-      setRefresh(true);
-    }
-  }, [lastMultipliers]);
 
   const handleBet = async () => {
     try {
@@ -537,7 +519,7 @@ export default function Plinko() {
         body: JSON.stringify({
           wallet: wallet.publicKey,
           amount: betAmt,
-          tokenMint: "SOL",
+          tokenMint: selectedCoin.tokenMint,
           rows: lines,
           risk,
         }),
@@ -550,9 +532,9 @@ export default function Plinko() {
       setResult({ success, message, result, strikeMultiplier, strikeNumber });
 
       // we only have mapping for low risk multipliers. Since the positions wld be sa,e we need to find the mapped multiplier for other risks
-      let multiplierRiskIndex = riskToChance[risk][
-        lines
-      ].findIndex((multiplier) => multiplier === strikeMultiplier);
+      let multiplierRiskIndex = riskToChance[risk][lines].findIndex(
+        (multiplier) => multiplier === strikeMultiplier,
+      );
       let mappedMultiplier = riskToChance["low"][lines][multiplierRiskIndex];
 
       addBall(1, getRandomFromFallMap(worldWidth, lines, mappedMultiplier));
@@ -575,7 +557,9 @@ export default function Plinko() {
         // update profit / loss
         setAutoBetProfit(
           autoBetProfit +
-            (win ? result?.strikeMultiplier * (1 - houseEdge) - 1 : -1) *
+            (win
+              ? result?.strikeMultiplier * (1 - houseEdge) - 1
+              : result?.strikeMultiplier ?? 0 - 1) *
               betAmt,
         );
         // update count
@@ -628,9 +612,9 @@ export default function Plinko() {
             (autoWinChangeReset || autoLossChangeReset
               ? betAmt
               : autoBetCount === "inf"
-                ? Math.max(0, betAmt)
-                : betAmt *
-                  (autoLossChange !== null ? autoLossChange / 100.0 : 0));
+              ? Math.max(0, betAmt)
+              : betAmt *
+                (autoLossChange !== null ? autoLossChange / 100.0 : 0));
 
         // console.log("Current bet amount:", betAmt);
         // console.log("Auto loss change:", autoLossChange);
@@ -743,11 +727,11 @@ export default function Plinko() {
               {loading ? <Loader /> : "BET"}
             </BetButton>
           </div>
-          {betSetting === "auto" && (
+          {/* {betSetting === "auto" && (
             <div className="w-full flex lg:hidden">
               <ConfigureAutoButton disabled={disableInput} />
             </div>
-          )}
+          )} */}
           <div className="w-full hidden lg:flex">
             <BetSetting
               betSetting={betSetting}
@@ -857,9 +841,9 @@ export default function Plinko() {
                 ) : (
                   <div className="w-full flex flex-row items-end gap-3">
                     <AutoCount loading={loading || startAuto} />
-                    <div className="w-full hidden lg:flex">
+                    {/* <div className="w-full hidden lg:flex">
                       <ConfigureAutoButton disabled={disableInput} />
-                    </div>
+                    </div> */}
                   </div>
                 )}
 
@@ -929,43 +913,67 @@ export default function Plinko() {
                 zIndex: 100,
               }}
             >
-              {multipliersBodies.map((multiplierBody, index) => (
-                <div
-                  key={multiplierBody.label}
-                  id={multiplierBody.label}
-                  style={{
-                    position: "absolute",
-                    left: `${
-                      multiplierBody.position.x -
-                      (multiplierBody?.render?.sprite?.xScale ?? 1) * 27
-                    }px`,
-                    top: `${
-                      multiplierBody.position.y -
-                      (multiplierBody?.render?.sprite?.yScale ?? 1) * 27
-                    }px`,
-                    width: `${
-                      (multiplierBody?.render?.sprite?.xScale ?? 1) * 55
-                    }px`,
-                    height: `${
-                      (multiplierBody?.render?.sprite?.yScale ?? 1) *
-                      55 *
-                      (lines / 16)
-                    }px`,
-                    background: "#202329",
-                    borderTop: "0.2rem solid",
-                    borderColor: multiplierColorMap[`${lines}`][index],
-                    color: multiplierColorMap[`${lines}`][index],
-                    borderRadius: "0.32rem",
-                    fontSize: `${
-                      (width! > 640 ? (width! > 1440 ? 1 : 0.75) : 0.5) /
-                      (lines / 8)
-                    }rem`,
-                  }}
-                  className="flex items-center justify-center font-semibold"
-                >
-                  {multipliers[index].value}
+              {!selectedCoin ||
+              selectedCoin.amount < minGameAmount ||
+              !wallet.connected ||
+              !(status === "authenticated") ? (
+                <div className="absolute bottom-0 w-full rounded-lg bg-[#d9d9d90d] bg-opacity-10 flex items-center px-3 py-3 text-white md:px-6">
+                  <div className="w-full text-center font-changa font-medium text-sm md:text-base text-[#F0F0F0] text-opacity-75">
+                    {translator(
+                      "Please deposit funds to start playing. View",
+                      language,
+                    )}{" "}
+                    <u
+                      onClick={() => {
+                        wallet.connected && status === "authenticated"
+                          ? setShowWalletModal(true)
+                          : handleSignIn(wallet, walletModal);
+                      }}
+                      className="cursor-pointer"
+                    >
+                      {translator("WALLET", language)}
+                    </u>
+                  </div>
                 </div>
-              ))}
+              ) : (
+                multipliersBodies.map((multiplierBody, index) => (
+                  <div
+                    key={multiplierBody.label}
+                    id={multiplierBody.label}
+                    style={{
+                      position: "absolute",
+                      left: `${
+                        multiplierBody.position.x -
+                        (multiplierBody?.render?.sprite?.xScale ?? 1) * 27
+                      }px`,
+                      top: `${
+                        multiplierBody.position.y -
+                        (multiplierBody?.render?.sprite?.yScale ?? 1) * 27
+                      }px`,
+                      width: `${
+                        (multiplierBody?.render?.sprite?.xScale ?? 1) * 55
+                      }px`,
+                      height: `${
+                        (multiplierBody?.render?.sprite?.yScale ?? 1) *
+                        55 *
+                        (lines / 16)
+                      }px`,
+                      background: "#202329",
+                      borderTop: "0.2rem solid",
+                      borderColor: multiplierColorMap[`${lines}`][index],
+                      color: multiplierColorMap[`${lines}`][index],
+                      borderRadius: "0.32rem",
+                      fontSize: `${
+                        (width! > 640 ? (width! > 1440 ? 1 : 0.75) : 0.5) /
+                        (lines / 8)
+                      }rem`,
+                    }}
+                    className="flex items-center justify-center font-semibold"
+                  >
+                    {multipliers[index].value}
+                  </div>
+                ))
+              )}
             </div>
           </div>
           <div id="plinko-base" className="" />
