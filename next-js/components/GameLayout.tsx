@@ -99,27 +99,29 @@ export const GameFooterInfo: React.FC<GameFooterProps> = ({
         </>
       )}
 
-      {!selectedCoin ||
-        (selectedCoin.amount < minGameAmount && (
-          <div className="w-full rounded-lg bg-[#d9d9d90d] bg-opacity-10 flex items-center px-3 py-3 text-white md:px-6">
-            <div className="w-full text-center font-changa font-medium text-sm md:text-base text-[#F0F0F0] text-opacity-75">
-              {translator(
-                "Please deposit funds to start playing. View",
-                language,
-              )}{" "}
-              <u
-                onClick={() => {
-                  wallet.connected && status === "authenticated"
-                    ? setShowWalletModal(true)
-                    : handleSignIn(wallet, walletModal);
-                }}
-                className="cursor-pointer"
-              >
-                {translator("WALLET", language)}
-              </u>
-            </div>
+      {(!selectedCoin ||
+        selectedCoin.amount < minGameAmount ||
+        !wallet.connected ||
+        !(status === "authenticated")) && (
+        <div className="w-full rounded-lg bg-[#d9d9d90d] bg-opacity-10 flex items-center px-3 py-3 text-white md:px-6">
+          <div className="w-full text-center font-changa font-medium text-sm md:text-base text-[#F0F0F0] text-opacity-75">
+            {translator(
+              "Please deposit funds to start playing. View",
+              language,
+            )}{" "}
+            <u
+              onClick={() => {
+                wallet.connected && status === "authenticated"
+                  ? setShowWalletModal(true)
+                  : handleSignIn(wallet, walletModal);
+              }}
+              className="cursor-pointer"
+            >
+              {translator("WALLET", language)}
+            </u>
           </div>
-        ))}
+        </div>
+      )}
     </div>
   );
 };
