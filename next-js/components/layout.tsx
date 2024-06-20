@@ -111,11 +111,11 @@ export default function Layout({ children }: LayoutProps) {
 
   useEffect(() => {
     //sound pre-loader
-    soundAlert("/sounds/betbutton.wav", true);
-    soundAlert("/sounds/diceshake.wav", true);
-    soundAlert("/sounds/slider.wav", true);
-    soundAlert("/sounds/win.wav", true);
-    soundAlert("/sounds/bomb.wav", true);
+    // soundAlert("/sounds/betbutton.wav", true);
+    // soundAlert("/sounds/diceshake.wav", true);
+    // soundAlert("/sounds/slider.wav", true);
+    // soundAlert("/sounds/win.wav", true);
+    // soundAlert("/sounds/bomb.wav", true);
   }, []);
 
   useEffect(() => {

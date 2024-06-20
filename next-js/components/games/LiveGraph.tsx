@@ -74,54 +74,56 @@ export default function LiveGraph({ setHoverValue }: { setHoverValue: (value: nu
     }, [data, liveCurrentStat])
 
     return (
-        <ResponsiveContainer style={{
-            borderRadius: "10px",
-        }}>
-            <AreaChart data={combinedData}>
-                <defs>
-                    <linearGradient id="colorpnl" >
-                        <stop offset="100%" stopColor={colors.greenFill} />
-                    </linearGradient>
-                    <linearGradient id="colorpnlNeg">
-                        <stop offset="100%" stopColor={colors.redFill} />
-                    </linearGradient>
-                </defs>
+      <ResponsiveContainer
+        width="100%"
+        height={400}
+        style={{ borderRadius: "10px" }}
+      >
+        <AreaChart data={combinedData}>
+          <defs>
+            <linearGradient id="colorpnl">
+              <stop offset="100%" stopColor={colors.greenFill} />
+            </linearGradient>
+            <linearGradient id="colorpnlNeg">
+              <stop offset="100%" stopColor={colors.redFill} />
+            </linearGradient>
+          </defs>
 
-                <XAxis dataKey="index" type="number" domain={[0, 'dataMax']} hide />
+          <XAxis dataKey="index" type="number" domain={[0, "dataMax"]} hide />
 
-                <Area
-                    type="monotone"
-                    dataKey="positivePNL"
-                    stroke="#00c853"
-                    strokeWidth={2}
-                    fillOpacity={1}
-                    fill="url(#colorpnl)"
-                    isAnimationActive={false}
-                    activeDot={<CustomPositiveDot />}
-                />
-                <Area
-                    type="monotone"
-                    dataKey="negativePNL"
-                    stroke="#d50000"
-                    strokeWidth={2}
-                    fillOpacity={1}
-                    fill="url(#colorpnlNeg)"
-                    isAnimationActive={false}
-                    activeDot={<CustomNegativeDot />}
-                />
+          <Area
+            type="monotone"
+            dataKey="positivePNL"
+            stroke="#00c853"
+            strokeWidth={2}
+            fillOpacity={1}
+            fill="url(#colorpnl)"
+            isAnimationActive={false}
+            activeDot={<CustomPositiveDot />}
+          />
+          <Area
+            type="monotone"
+            dataKey="negativePNL"
+            stroke="#d50000"
+            strokeWidth={2}
+            fillOpacity={1}
+            fill="url(#colorpnlNeg)"
+            isAnimationActive={false}
+            activeDot={<CustomNegativeDot />}
+          />
 
-                <Tooltip
-                    content={<CustomTooltip />}
-                    cursor={{
-                        stroke: colors.mid,
-                        strokeWidth: 2,
-                        fill: 'none',
-                        strokeDasharray: '3 3'
-                    }}
-                />
+          <Tooltip
+            content={<CustomTooltip />}
+            cursor={{
+              stroke: colors.mid,
+              strokeWidth: 2,
+              fill: "none",
+              strokeDasharray: "3 3",
+            }}
+          />
 
-                <ReferenceLine y={0} strokeWidth={2} stroke={colors.mid} />
-            </AreaChart>
-        </ResponsiveContainer>
-    )
+          <ReferenceLine y={0} strokeWidth={2} stroke={colors.mid} />
+        </AreaChart>
+      </ResponsiveContainer>
+    );
 }

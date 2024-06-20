@@ -8,7 +8,7 @@ export default function FOMO({ className }: { className: string }) {
       xmlns="http://www.w3.org/2000/svg"
     >
       <circle cx="16" cy="16" r="16" fill="white" />
-      <g clip-path="url(#clip0_3585_21854)">
+      <g clipPath="url(#clip0_3585_21854)">
         <path
           fill-rule="evenodd"
           clip-rule="evenodd"

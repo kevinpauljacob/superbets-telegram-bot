@@ -318,9 +318,9 @@ export default function Keno() {
             (autoWinChangeReset || autoLossChangeReset
               ? betAmt
               : autoBetCount === "inf"
-                ? Math.max(0, betAmt)
-                : betAmt *
-                  (autoLossChange !== null ? autoLossChange / 100.0 : 0));
+              ? Math.max(0, betAmt)
+              : betAmt *
+                (autoLossChange !== null ? autoLossChange / 100.0 : 0));
 
         // console.log("Current bet amount:", betAmt);
         // console.log("Auto loss change:", autoLossChange);
@@ -637,14 +637,14 @@ export default function Keno() {
                     chosenNumbers.includes(number)
                       ? "bg-[#7839C5] border-transparent"
                       : strikeNumbers.includes(number)
-                        ? chosenNumbers.includes(number)
-                          ? "bg-black border-fomo-green"
-                          : chosenNumbers.length === 0
-                            ? "bg-[#202329] border-transparent"
-                            : "bg-black border-fomo-red text-fomo-red"
-                        : chosenNumbers.includes(number)
-                          ? "bg-[#7839C5] border-transparent"
-                          : "bg-[#202329] border-transparent"
+                      ? chosenNumbers.includes(number)
+                        ? "bg-black border-fomo-green"
+                        : chosenNumbers.length === 0
+                        ? "bg-[#202329] border-transparent"
+                        : "bg-black border-fomo-red text-fomo-red"
+                      : chosenNumbers.includes(number)
+                      ? "bg-[#7839C5] border-transparent"
+                      : "bg-[#202329] border-transparent"
                   } rounded-md text-center border-2 transition-all duration-300 ease-in-out w-[1.75rem] h-[1.75rem] sm:w-[3.4375rem] sm:h-[3.4375rem] md:w-[3.75rem] md:h-[3.75rem] xl:w-[3.8rem] xl:h-[3.8rem]`}
                 >
                   {strikeNumbers.includes(number) &&
@@ -742,7 +742,10 @@ export default function Keno() {
               </div>
             )}
 
-          {!selectedCoin || selectedCoin.amount < minGameAmount ? (
+          {!selectedCoin ||
+          selectedCoin.amount < minGameAmount ||
+          !wallet.connected ||
+          !(status === "authenticated") ? (
             <div className="w-full rounded-lg bg-[#d9d9d90d] bg-opacity-10 flex items-center px-3 py-3 text-white md:px-6">
               <div className="w-full text-center font-changa font-medium text-sm md:text-base text-[#F0F0F0] text-opacity-75">
                 {translator(

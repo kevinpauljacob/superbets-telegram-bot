@@ -393,9 +393,7 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
 
     let profit = win
       ? (multiplier * (1 - houseEdge) - 1) * betAmount
-      : multiplier <= 1
-        ? multiplier * betAmount - betAmount
-        : -betAmount;
+      : (multiplier - 1) * betAmount;
     let totalPNL = 0;
 
     if (liveStats.length > 0)

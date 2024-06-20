@@ -43,7 +43,7 @@ export default function ReferralLink({
           <button
             onClick={() => {
               copyToClipboard(
-                `http://localhost:3000?referralCode=${referralCode}`,
+                `https://fomo-test.onrender.com?referralCode=${referralCode}`,
               );
               setButtonText("Copied!");
               setTimeout(() => {

@@ -93,7 +93,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       const maxStrikeMultiplier = multiplier.at(-1)!;
       const maxPayout = Decimal.mul(amount, maxStrikeMultiplier);
 
-      if (!(maxPayout.toNumber() <= maxPayouts[tokenMint].plinko))
+      if (!(maxPayout.toNumber() <= maxPayouts[tokenMint as GameTokens].plinko))
         return res
           .status(400)
           .json({ success: false, message: "Max payout exceeded" });
@@ -120,7 +120,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         {},
         { upsert: true, new: true },
       );
-
       const stakeAmount = userData?.stakedAmount ?? 0;
       const stakingTier = Object.entries(stakingTiers).reduce((prev, next) => {
         return stakeAmount >= next[1]?.limit ? next : prev;
