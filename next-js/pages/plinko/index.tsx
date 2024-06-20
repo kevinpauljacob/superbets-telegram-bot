@@ -36,7 +36,7 @@ import {
   successCustom,
   warningCustom,
 } from "@/components/toasts/ToastGroup";
-import { translator } from "@/context/transactions";
+import { formatNumber, translator } from "@/context/transactions";
 import { useSession } from "next-auth/react";
 import BetButton from "@/components/games/BetButton";
 import Loader from "@/components/games/Loader";
@@ -479,7 +479,11 @@ export default function Plinko() {
 
     if (win) {
       const amountWon = (multiplierValue * (1 - houseEdge) - 1) * (betAmt ?? 0);
-      successCustom(`Congratulations! You won ${amountWon}!`);
+      successCustom(
+        `Congratulations! You won ${formatNumber(amountWon)} ${
+          selectedCoin.tokenName
+        }!`,
+      );
       soundAlert("/sounds/win.wav", muteRef.current);
     } else errorCustom("Sorry, Better luck next time!");
 
@@ -578,7 +582,9 @@ export default function Plinko() {
           );
       }
     } catch (error: any) {
-      errorCustom(error?.message ?? translator("Could not make the bet.", language));
+      errorCustom(
+        error?.message ?? translator("Could not make the bet.", language),
+      );
       console.error("Error occurred while betting:", error);
       setAutoBetCount(0);
       setStartAuto(false);
@@ -968,8 +974,9 @@ export default function Plinko() {
                       color: multiplierColorMap[`${lines}`][index],
                       borderRadius: "0.32rem",
                       fontSize: `${
-                        (width! > 640 ? (width! > 1440 ? 1 : 0.75) : 0.5) /
-                        (lines / 8)
+                        ((width! > 640 ? (width! >= 1440 ? 1.3 : 1) : 0.6) /
+                          (lines / 8)) *
+                        (lines < 12 ? 0.6 : 1)
                       }rem`,
                     }}
                     className="flex items-center justify-center font-semibold"
