@@ -235,7 +235,6 @@ export const generateGameResult = <T extends GameType>(
       return a as GameResult<T>;
     }
 
-    //TODO: reverify these
     case GameType.plinko: {
       if (!parameter) throw new Error("Game parameter missing!");
 
@@ -250,6 +249,7 @@ export const generateGameResult = <T extends GameType>(
       return n[0] as GameResult<T>;
     }
 
+    //TODO: reverify these
     case GameType.roulette1: {
       let n = getFinalValues({
         serverSeed,

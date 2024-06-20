@@ -6,19 +6,25 @@ import {
   generateGameResult,
   GameType,
   seedStatus,
+  GameTokens,
+  decryptServerSeed,
 } from "@/utils/provably-fair";
 import StakingUser from "@/models/staking/user";
 import {
   houseEdgeTiers,
   launchPromoEdge,
+  maintainance,
+  maxPayouts,
   pointTiers,
+  stakingTiers,
 } from "@/context/transactions";
-import { wsEndpoint } from "@/context/config";
+import { SPL_TOKENS, minGameAmount, wsEndpoint } from "@/context/config";
 import { Decimal } from "decimal.js";
 import updateGameStats from "../../../../utils/updateGameStats";
 Decimal.set({ precision: 9 });
 
 const secret = process.env.NEXTAUTH_SECRET;
+const encryptionKey = Buffer.from(process.env.ENCRYPTION_KEY!, "hex");
 
 export const config = {
   maxDuration: 60,
@@ -113,20 +119,24 @@ const WagerPayout: Record<WagerType, number> = {
   straight: 36,
 };
 
-type Wager = Record<string, number | Record<string, number>>;
+type Wager = Record<WagerType, number | Record<string, number>>;
 
 type InputType = {
   wallet: string;
-  tokenMint: string;
+  tokenMint: GameTokens;
   wager: Wager;
 };
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === "POST") {
     try {
-      
-
       let { wallet, tokenMint, wager }: InputType = req.body;
+
+      if (maintainance)
+        return res.status(400).json({
+          success: false,
+          message: "Under maintenance",
+        });
 
       const token = await getToken({ req, secret });
 
@@ -136,27 +146,19 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           message: "User wallet not authenticated",
         });
 
-      await connectDatabase();
-
       if (!wallet || !tokenMint || !wager)
         return res
           .status(400)
           .json({ success: false, message: "Missing parameters" });
 
+      const splToken = SPL_TOKENS.find((t) => t.tokenMint === tokenMint);
       if (
-        tokenMint !== "SOL" ||
+        !splToken ||
         !Object.keys(wager).every((key) => WagerMapping[key as WagerType])
       )
         return res
           .status(400)
           .json({ success: false, message: "Invalid parameters" });
-
-      let user = await User.findOne({ wallet });
-
-      if (!user)
-        return res
-          .status(400)
-          .json({ success: false, message: "User does not exist !" });
 
       const amount = Object.entries(wager)
         .reduce((acc, next) => {
@@ -172,6 +174,31 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         }, new Decimal(0))
         .toNumber();
 
+      if (amount < minGameAmount)
+        return res.status(400).json({
+          success: false,
+          message: "Invalid bet amount",
+        });
+
+      await connectDatabase();
+
+      //TODO: Amount type check and max payout check
+      // const maxPayout = Decimal.mul(amount, strikeMultiplier);
+
+      // if (
+      //   !(maxPayout.toNumber() <= maxPayouts[tokenMint].roulette1)
+      // )
+      //   return res
+      //     .status(400)
+      //     .json({ success: false, message: "Max payout exceeded" });
+
+      let user = await User.findOne({ wallet });
+
+      if (!user)
+        return res
+          .status(400)
+          .json({ success: false, message: "User does not exist !" });
+
       if (
         user.deposit.find((d: any) => d.tokenMint === tokenMint)?.amount <
         amount
@@ -185,8 +212,19 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         {},
         { upsert: true, new: true },
       );
-      const userTier = userData?.tier ?? 0;
-      const houseEdge = launchPromoEdge ? 0 : houseEdgeTiers[userTier];
+
+      const stakeAmount = userData?.stakedAmount ?? 0;
+      const stakingTier = Object.entries(stakingTiers).reduce((prev, next) => {
+        return stakeAmount >= next[1]?.limit ? next : prev;
+      })[0];
+      const isFomoToken =
+        tokenMint === SPL_TOKENS.find((t) => t.tokenName === "FOMO")?.tokenMint
+          ? true
+          : false;
+      const houseEdge =
+        launchPromoEdge || isFomoToken
+          ? 0
+          : houseEdgeTiers[parseInt(stakingTier)];
 
       const activeGameSeed = await GameSeed.findOneAndUpdate(
         {
@@ -205,7 +243,17 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         throw new Error("Server hash not found!");
       }
 
-      const { serverSeed, clientSeed, nonce } = activeGameSeed;
+      const {
+        serverSeed: encryptedServerSeed,
+        clientSeed,
+        nonce,
+        iv,
+      } = activeGameSeed;
+      const serverSeed = decryptServerSeed(
+        encryptedServerSeed,
+        encryptionKey,
+        Buffer.from(iv, "hex"),
+      );
 
       const strikeNumber = generateGameResult(
         serverSeed,
@@ -213,8 +261,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         nonce,
         GameType.roulette1,
       );
-
-      if (strikeNumber == null) throw new Error("Invalid strike number!");
 
       let amountWon = new Decimal(0);
       let result = "Lost";
@@ -244,8 +290,12 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         }
       });
 
+      const feeGenerated = Decimal.mul(amountWon, houseEdge).toNumber();
+
       amountWon = amountWon.mul(Decimal.sub(1, houseEdge));
       const amountLost = Math.max(Decimal.sub(amount, amountWon).toNumber(), 0);
+
+      const addGame = !user.gamesPlayed.includes(GameType.roulette1);
 
       const userUpdate = await User.findOneAndUpdate(
         {
@@ -262,6 +312,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
             "deposit.$.amount": amountWon.sub(amount),
             numOfGamesPlayed: 1,
           },
+          ...(addGame
+            ? { $addToSet: { gamesPlayed: GameType.roulette1 } }
+            : {}),
         },
         {
           new: true,
@@ -287,7 +340,13 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       });
       await roulette1.save();
 
-      await updateGameStats(GameType.roulette1, wallet, amount, tokenMint);
+      await updateGameStats(
+        GameType.coin,
+        tokenMint,
+        amount,
+        addGame,
+        feeGenerated,
+      );
 
       const pointsGained =
         0 * user.numOfGamesPlayed + 1.4 * amount * userData.multiplier;
@@ -304,9 +363,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         {
           $inc: {
             points: pointsGained,
-          },
-          $set: {
-            tier: newTier,
           },
         },
       );
@@ -341,7 +397,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
             ? `Congratulations! You Won ${amountWon}`
             : "Better luck next time!",
         strikeNumber,
-        amountWon,
+        amountWon: amountWon.toNumber(),
         amountLost,
       });
     } catch (e: any) {
