@@ -131,6 +131,12 @@ export default function Roulette() {
   const [num, setNum] = useState(0);
   const ball = useRef<HTMLDivElement>(null);
   const ballContainer = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (num !== 0) {
+      spin();
+    }
+  }, [num]);
+
   const spin = () => {
     const order = [
       0, 32, 15, 19, 4, 21, 2, 25, 17, 34, 6, 27, 13, 36, 11, 30, 8, 23, 10, 5,
@@ -186,12 +192,16 @@ export default function Roulette() {
   const [hoveredSplit, setHoveredSplit] = useState<number[] | null>(null);
   const [hoveredCorner, setHoveredCorner] = useState<number[] | null>(null);
   const [hoveredColumn, setHoveredColumn] = useState<number[] | null>(null);
-  const [resultNumbers, setResultNumbers] = useState<number[]>([
-    11, 22, 33, 14,
-  ]);
+  const [resultNumbers, setResultNumbers] = useState<number[]>([]);
   const [refresh, setRefresh] = useState(true);
 
   console.log(selectedBets);
+  const getSolEquivalent = (token: Token): number => {
+    const splToken = SPL_TOKENS.find((t) => t.tokenName === token.tokenName);
+    if (!splToken) return 0;
+    const tokenValue = parseFloat(token.value);
+    return parseFloat(((10 / 10 ** splToken.decimal) * tokenValue).toFixed(9));
+  };
 
   const calculateTotalBetAmount = (
     currentBetAmt: number,
@@ -211,6 +221,8 @@ export default function Roulette() {
         throw new Error(translator("Place at least one Chip", language));
       }
       setLoading(true);
+      setNum(0);
+      reset();
       const response = await fetch(`/api/games/roulette1`, {
         method: "POST",
         headers: {
@@ -224,12 +236,15 @@ export default function Roulette() {
       });
 
       const { success, message, result, strikeNumber } = await response.json();
-      setLoading(false);
       console.log({
-        Response: response,
+        Success: success,
+        Result: result,
         Message: message,
         StrikeNumber: strikeNumber,
       });
+      setNum(parseInt(strikeNumber));
+      setResultNumbers((prevNumbers) => [...prevNumbers, strikeNumber]);
+      setLoading(false);
     } catch (e: any) {
       errorCustom(e?.message ?? translator("Could not make bet.", language));
       setLoading(false);
@@ -592,17 +607,9 @@ export default function Roulette() {
     token: Token;
   };
 
-  const getSolEquivalent = (token: Token): number => {
-    const splToken = SPL_TOKENS.find((t) => t.tokenName === token.tokenName);
-    if (!splToken) return 0;
-    const tokenValue = parseInt(token.value);
-    return tokenValue / 10 ** splToken.decimal;
-  };
-
   const isPredefinedBetType = (value: string): value is PredefinedBetType => {
     return value in predefinedBets;
   };
-
   const transformBetsToSingleNumbers = (
     bets: Bet[],
   ): Record<string, Record<string, number>> => {
@@ -618,44 +625,57 @@ export default function Roulette() {
     };
 
     bets.forEach((bet) => {
-      const tokenValue = parseFloat(bet.token.value); // Use parseFloat to handle decimal values
+      const solEquivalent = getSolEquivalent(bet.token);
 
       if (bet.areaId.startsWith("split-")) {
         const [, num1, num2] = bet.areaId.split("-");
-        const halfValue = tokenValue / 2;
+        const halfValue = solEquivalent / 2;
         addToSingleNumberBet(num1, halfValue);
         addToSingleNumberBet(num2, halfValue);
       } else if (bet.areaId.startsWith("corner-")) {
         const [_, num1, num2, num3, num4] = bet.areaId.split("-");
-        const cornerValue = tokenValue / 4;
+        const cornerValue = solEquivalent / 4;
         addToSingleNumberBet(num1, cornerValue);
         addToSingleNumberBet(num2, cornerValue);
         addToSingleNumberBet(num3, cornerValue);
         addToSingleNumberBet(num4, cornerValue);
       } else if (bet.areaId.startsWith("corner3-")) {
         const [_, num1, num2, num3] = bet.areaId.split("-");
-        const cornerValue = tokenValue / 3;
+        const cornerValue = solEquivalent / 3;
         addToSingleNumberBet(num1, cornerValue);
         addToSingleNumberBet(num2, cornerValue);
         addToSingleNumberBet(num3, cornerValue);
       } else if (bet.areaId.startsWith("corner2column-")) {
         const nums = bet.areaId.split("-").slice(1);
-        const numValues = nums.length === 6 ? tokenValue / 6 : tokenValue / 4; // Adjust for 6 or 4 numbers
+        const numValues =
+          nums.length === 6 ? solEquivalent / 6 : solEquivalent / 4;
         nums.forEach((num) => addToSingleNumberBet(num, numValues));
       } else if (bet.areaId.startsWith("column-")) {
         const nums = bet.areaId.split("-").slice(1);
-        const columnValue = tokenValue / nums.length;
+        const columnValue = solEquivalent / nums.length;
         nums.forEach((num) => addToSingleNumberBet(num, columnValue));
       } else if (isPredefinedBetType(bet.areaId)) {
         if (predefinedBetTotals[bet.areaId]) {
-          predefinedBetTotals[bet.areaId] += tokenValue;
+          predefinedBetTotals[bet.areaId] += solEquivalent;
         } else {
-          predefinedBetTotals[bet.areaId] = tokenValue;
+          predefinedBetTotals[bet.areaId] = solEquivalent;
         }
       } else if (bet.areaId.startsWith("num-")) {
         const [, num] = bet.areaId.split("-");
-        addToSingleNumberBet(num, tokenValue);
+        addToSingleNumberBet(num, solEquivalent);
       }
+    });
+
+    // Format predefined bet totals
+    Object.keys(predefinedBetTotals).forEach((key) => {
+      predefinedBetTotals[key] = parseFloat(
+        predefinedBetTotals[key].toFixed(9),
+      );
+    });
+
+    // Format single number bets
+    Object.keys(singleNumberBets).forEach((key) => {
+      singleNumberBets[key] = parseFloat(singleNumberBets[key].toFixed(9));
     });
 
     return {
@@ -663,6 +683,7 @@ export default function Roulette() {
       ...predefinedBetTotals,
     };
   };
+
   const reset = () => {
     if (!ball || !ball.current || !ballContainer || !ballContainer.current)
       return;
@@ -1210,24 +1231,24 @@ export default function Roulette() {
               </div>
             </div>
           </div>
-          <input
+          {/*  <input
             type="number"
             value={num}
             onChange={(e) => setNum(parseInt(e.target.value))}
-            className="hidden mt-8 px-4 py-2 bg-white text-black rounded-md"
+            className=" mt-8 px-4 py-2 bg-white text-black rounded-md"
           />
           <button
             onClick={() => reset()}
-            className="hidden mt-4 px-4 py-2 bg-white text-black rounded-md"
+            className=" mt-4 px-4 py-2 bg-white text-black rounded-md"
           >
             Reset
           </button>
           <button
             onClick={() => spin()}
-            className="hidden mt-4 px-4 py-2 bg-white text-black rounded-md"
+            className=" mt-4 px-4 py-2 bg-white text-black rounded-md"
           >
             Spin
-          </button>
+          </button> */}
         </div>
       </GameDisplay>
       <GameTable>
