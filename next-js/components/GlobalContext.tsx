@@ -1751,10 +1751,25 @@ export const translationsMap = {
     ko: "캠페인 만들기",
     ch: "创建活动",
   },
+  "Create Campaign": {
+    ru: "Создать кампанию",
+    ko: "캠페인 만들기",
+    ch: "创建活动",
+  },
+  "Campaign Name": {
+    ru: "Название кампании",
+    ko: "캠페인 이름",
+    ch: "活动名称",
+  },
   "Multi-Level Referral": {
     ru: "Многоуровневая реферальная",
     ko: "다단계 추천",
     ch: "多级推荐",
+  },
+  "Failed to create campaign!": {
+    ru: "Не удалось создать кампанию!",
+    ko: "캠페인을 만들지 못했습니다!",
+    ch: "创建活动失败！",
   },
   "Our affiliate program includes a comprehensive retention program that keeps referred customers engaged and invested.":
     {
@@ -1778,9 +1793,14 @@ export const translationsMap = {
     ch: "总索赔",
   },
   "Total Claimable": {
-    ru: "Общая сумма для получения",
-    ko: "총 청구 가능 금액",
-    ch: "可领取总额",
+    ru: "Всего подлежащего претензии",
+    ko: "총 청구 가능",
+    ch: "总索赔",
+  },
+  "Total Earned" : {
+    ru: "Всего заработано",
+    ko: "총 수익",
+    ch: "总收入",
   },
   CLAIM: {
     ru: "ЗАЯВИТЬ",
@@ -1807,6 +1827,11 @@ export const translationsMap = {
     ko: "수수료 %",
     ch: "佣金 %",
   },
+  "Commission": {
+    ru: "Комиссия",
+    ko: "수수료",
+    ch: "佣金",
+  },
   Earned: {
     ru: "Заработано",
     ko: "수익",
@@ -1823,8 +1848,28 @@ export const translationsMap = {
     ch: "之前已领取",
   },
   Claimable: {
-    ru: "подлежащий претензии",
+    ru: "Подлежащий претензии",
     ko: "청구 가능",
-    ch: "可索偿",
+    ch: "可索赔",
+  },
+  Signups: {
+    ru: "Регистрации",
+    ko: "가입",
+    ch: "注册",
+  },
+  "Code (Campaign ID)": {
+    ru: "Код (ID кампании)",
+    ko: "코드 (캠페인 ID)",
+    ch: "代码（活动ID）",
+  },
+  Copy: {
+    ru: "Копировать",
+    ko: "복사",
+    ch: "复制",
+  },
+  Copied: {
+    ru: "Скопировано",
+    ko: "복사됨",
+    ch: "复制",
   },
 };

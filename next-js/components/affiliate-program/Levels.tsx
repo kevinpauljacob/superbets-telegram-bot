@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { commissionLevels } from "@/context/config";
-import { truncateNumber } from "@/context/transactions";
+import { truncateNumber, translator } from "@/context/transactions";
 import User from "@/public/assets/User";
 import Image from "next/image";
+import { useGlobalContext } from "../GlobalContext";
 interface ReferralLevelData {
   signUps: number;
   totalEarnings: number;
@@ -75,11 +76,12 @@ function LevelsCard({
   level: number;
   data: ReferralLevelData;
 }) {
+  const { language } = useGlobalContext();
   const colors = ["4594FF", "E17AFF", "00C278", "4594FF", "00C278"];
   const commission = commissionLevels[level] || 0;
   const commissionText = commission
-    ? `${truncateNumber(commission * 100)}% Commission`
-    : "<2% Commission";
+    ? `${truncateNumber(commission * 100)}% ${translator("Commission", language)}`
+    : `2% ${translator("Commission", language)}`;
   return (
     <div className="flex flex-col gap-[30px] bg-staking-bg rounded-[5px] p-4 w-full min-w-[330px]">
       <div className="w-full">
@@ -92,14 +94,14 @@ function LevelsCard({
               color: `#${colors[level]}`,
             }}
           >
-            Level {level + 1}
+            {translator("Level", language)} {level + 1}
           </p>
           <p className="text-[#94A3B8]/75 text-[13px] font-semibold bg-[#94A3B8]/5 rounded-[5px] px-1">
             {commissionText}
           </p>
         </div>
         <div className="flex items-center gap-[7px] font-chakra text-white/50 font-medium text-xs mt-2">
-          <p>Signups</p>
+          <p>{translator("Signups", language)}</p>
           <svg
             width="4"
             height="4"
@@ -113,7 +115,7 @@ function LevelsCard({
               fill="#94A3B8"
             />
           </svg>
-          <p>Earnings</p>
+          <p>{translator("Earnings", language)}</p>
         </div>
       </div>
       <div className="flex items-center justify-end gap-[10px] font-chakra font-semibold text-[20px]">

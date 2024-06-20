@@ -418,7 +418,7 @@ export default function AffiliateProgram() {
                     }}
                     className="bg-[#7839C5] hover:bg-[#9361d1] focus:bg-[#602E9E] transition-all cursor-pointer rounded-[5px] text-white/75 text-[13px] font-chakra font-medium px-5"
                   >
-                    {buttonText}
+                    {translator(buttonText, language)}
                   </button>
                 </div>
               </div>
@@ -448,7 +448,7 @@ export default function AffiliateProgram() {
                 setCampaigns(false);
                 setEarnings(false);
               } else {
-                errorCustom("Wallet not connected");
+                errorCustom(translator("Wallet not connected", language));
               }
             }}
             label={translator("Referred", language)}
