@@ -17,8 +17,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     const token = await getToken({ req, secret });
 
     if (!token || !token.sub || token.sub != wallet)
-      return res.send({
-        error: "User wallet not authenticated",
+      return res.status(400).json({
+        success: false,
+        message: "User wallet not authenticated",
       });
 
     if (!wallet || !referralCode || !campaignName)
