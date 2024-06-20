@@ -140,7 +140,7 @@ export default function SubHeader() {
 
         {/* <div className={`border-2 border-white border-opacity-5 rounded-[5px] p-3 cursor-pointer ${showFullScreen ? "bg-[#d9d9d9] bg-opacity-10" : ""}`} onClick={() => setShowFullScreen(!showFullScreen)}>
           <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 16 16" fill="none">
-            <g opacity="0.75" clip-path="url(#clip0_3204_4400)">
+            <g opacity="0.75" clipPath="url(#clip0_3204_4400)">
               <path fill-rule="evenodd" clip-rule="evenodd" d="M1.14286 10.2857C0.514286 10.2857 0 10.8 0 11.4286V14.8571C0 15.4857 0.514286 16 1.14286 16H4.57143C5.2 16 5.71429 15.4857 5.71429 14.8571C5.71429 14.2286 5.2 13.7143 4.57143 13.7143H2.28571V11.4286C2.28571 10.8 1.77143 10.2857 1.14286 10.2857ZM1.14286 5.71429C1.77143 5.71429 2.28571 5.2 2.28571 4.57143V2.28571H4.57143C5.2 2.28571 5.71429 1.77143 5.71429 1.14286C5.71429 0.514286 5.2 0 4.57143 0H1.14286C0.514286 0 0 0.514286 0 1.14286V4.57143C0 5.2 0.514286 5.71429 1.14286 5.71429ZM13.7143 13.7143H11.4286C10.8 13.7143 10.2857 14.2286 10.2857 14.8571C10.2857 15.4857 10.8 16 11.4286 16H14.8571C15.4857 16 16 15.4857 16 14.8571V11.4286C16 10.8 15.4857 10.2857 14.8571 10.2857C14.2286 10.2857 13.7143 10.8 13.7143 11.4286V13.7143ZM10.2857 1.14286C10.2857 1.77143 10.8 2.28571 11.4286 2.28571H13.7143V4.57143C13.7143 5.2 14.2286 5.71429 14.8571 5.71429C15.4857 5.71429 16 5.2 16 4.57143V1.14286C16 0.514286 15.4857 0 14.8571 0H11.4286C10.8 0 10.2857 0.514286 10.2857 1.14286Z" fill={showFullScreen ? "white" : "#94A3B8"} />
             </g>
             <defs>
@@ -163,7 +163,7 @@ export default function SubHeader() {
             fill="currentColor"
             xmlns="http://www.w3.org/2000/svg"
           >
-            <g opacity="0.75" clip-path="url(#clip0_3181_1728)">
+            <g opacity="0.75" clipPath="url(#clip0_3181_1728)">
               <path
                 d="M15 5H11V15H10V0H6V15H5V8H1V15H0V16H1H5H6H10H11H15H16V15H15V5Z"
                 fill={showLiveStats ? "white" : "#94A3B8"}
@@ -253,7 +253,7 @@ export default function SubHeader() {
               fill="currentColor"
               xmlns="http://www.w3.org/2000/svg"
             >
-              <g opacity="0.75" clip-path="url(#clip0_3181_1728)">
+              <g opacity="0.75" clipPath="url(#clip0_3181_1728)">
                 <path
                   d="M15 5H11V15H10V0H6V15H5V8H1V15H0V16H1H5H6H10H11H15H16V15H15V5Z"
                   fill={showLiveStats ? "white" : "#94A3B8"}

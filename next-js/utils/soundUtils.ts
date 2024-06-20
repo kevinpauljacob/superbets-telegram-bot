@@ -10,7 +10,9 @@ export function soundAlert(audioFilePath: string, muted?: boolean) {
     alertInstance.currentTime = 0;
   }
   if (muted) alertInstance.muted = muted;
-  alertInstance.play();
+  alertInstance.play().catch((error) => {
+    console.error("Audio playback failed:", error);
+  });
 }
 
 let loopInstance: HTMLAudioElement | null = null;
@@ -25,7 +27,10 @@ export function loopSound(
       loopInstance.muted = muted;
     }
     const interval = setInterval(() => {
-      loopInstance && loopInstance.play();
+      loopInstance &&
+        loopInstance.play().catch((error) => {
+          console.error("Audio playback failed:", error);
+        });
     }, loopInstance.duration * 1000);
 
     setTimeout(() => {
