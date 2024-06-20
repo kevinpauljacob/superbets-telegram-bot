@@ -421,7 +421,7 @@ export default function AffiliateProgram() {
                   <button
                     onClick={() => {
                       copyToClipboard(
-                        `http://localhost:3000?referralCode=${userCampaigns[userCampaigns.length - 1]?.referralCode}`,
+                        `https://fomo-test.onrender.com?referralCode=${userCampaigns[userCampaigns.length - 1]?.referralCode}`,
                       );
                       setButtonText("Copied!");
                       setTimeout(() => {
@@ -507,10 +507,10 @@ export default function AffiliateProgram() {
               />
             </div>
             <div>
-              <p className="text-white font-medium text-xs lg:text-base text-opacity-50">
+              <p className="text-white font-medium text-xs lg:text-sm text-opacity-50">
                 Total Claimed
               </p>
-              <p className="text-[#94A3B8] font-semibold text-lg lg:text-2xl">
+              <p className="text-[#94A3B8] font-semibold font-chakra text-lg lg:text-2xl">
                 ${formatNumber(totalClaimed, 2) ?? 0}
               </p>
             </div>
@@ -526,10 +526,10 @@ export default function AffiliateProgram() {
                 />
               </div>
               <div>
-                <p className="text-white font-medium text-xs lg:text-base text-opacity-50">
+                <p className="text-white font-medium text-xs lg:text-sm text-opacity-50">
                   Total Claimable
                 </p>
-                <p className="text-[#94A3B8] font-semibold text-lg lg:text-2xl">
+                <p className="text-[#94A3B8] font-semibold font-chakra text-lg lg:text-2xl">
                   ${formatNumber(totalClaimable, 2) ?? 0}
                 </p>
               </div>
