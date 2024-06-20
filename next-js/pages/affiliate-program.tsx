@@ -96,9 +96,18 @@ export default function AffiliateProgram() {
   const [earningsData, setEarningsData] = useState<EarningsData>([]);
   const [totalClaimed, setTotalClaimed] = useState(0);
   const [totalClaimable, setTotalClaimable] = useState(0);
+  const initialReferralLevelData: ReferralLevelData[] = Array.from(
+    { length: 5 },
+    () => ({
+      signUps: 0,
+      totalEarnings: 0,
+    }),
+  );
+
   const [referralLevelData, setReferralLevelData] = useState<
     ReferralLevelData[]
-  >([]);
+  >(initialReferralLevelData);
+
   const [buttonText, setButtonText] = useState("Copy");
 
   const colors = ["4594FF", "E17AFF", "00C278", "4594FF", "00C278"];
@@ -175,10 +184,7 @@ export default function AffiliateProgram() {
   };
 
   const referralData = () => {
-    const updatedReferralLevelData: ReferralLevelData[] = Array.from(
-      { length: 5 },
-      () => ({ signUps: 0, totalEarnings: 0 }),
-    );
+    console.log("Here 1");
     referredUsers.forEach((user) => {
       const referralLevel = getReferralLevel(user._id) ?? -1;
       if (referralLevel === -1) {
@@ -199,18 +205,19 @@ export default function AffiliateProgram() {
 
       // console.log("referral level", referralLevel);
       if (referralLevel !== -1) {
-        updatedReferralLevelData[referralLevel].signUps += 1;
-        updatedReferralLevelData[referralLevel].totalEarnings += totalEarnings;
+        initialReferralLevelData[referralLevel].signUps += 1;
+        initialReferralLevelData[referralLevel].totalEarnings += totalEarnings;
       }
     });
 
-    // console.log("updatedReferralLevelData", updatedReferralLevelData);
-    setReferralLevelData(updatedReferralLevelData);
+    console.log("Here 2");
+    console.log("updatedReferralLevelData", initialReferralLevelData);
+    setReferralLevelData(initialReferralLevelData);
   };
 
   useEffect(() => {
     if (referredUsers.length > 0) referralData();
-  }, [referredUsers]);
+  }, [referredUsers, referralLevels]);
 
   const calculateEarnings = () => {
     // Temporary object to accumulate earnings
@@ -333,6 +340,10 @@ export default function AffiliateProgram() {
   //   console.log("totalClaimable", totalClaimable);
   // }, [totalClaimed, totalClaimable]);
 
+  useEffect(() => {
+    console.log("referralLevelData", referralLevelData);
+  }, [referralLevelData]);
+
   return (
     <div className="px-5 lg2:px-[4rem] md:px-[3rem] pt-5">
       <h1 className="font-chakra font-bold text-[1.75rem] text-white mb-3.5">
@@ -410,7 +421,7 @@ export default function AffiliateProgram() {
                   <button
                     onClick={() => {
                       copyToClipboard(
-                        `http://localhost:3000?referralCode=${userCampaigns[userCampaigns.length - 1]?.referralCode}`,
+                        `https://fomo-test.onrender.com?referralCode=${userCampaigns[userCampaigns.length - 1]?.referralCode}`,
                       );
                       setButtonText("Copied!");
                       setTimeout(() => {
@@ -496,10 +507,10 @@ export default function AffiliateProgram() {
               />
             </div>
             <div>
-              <p className="text-white font-medium text-xs lg:text-base text-opacity-50">
+              <p className="text-white font-medium text-xs lg:text-sm text-opacity-50">
                 Total Claimed
               </p>
-              <p className="text-[#94A3B8] font-semibold text-lg lg:text-2xl">
+              <p className="text-[#94A3B8] font-semibold font-chakra text-lg lg:text-2xl">
                 ${formatNumber(totalClaimed, 2) ?? 0}
               </p>
             </div>
@@ -515,10 +526,10 @@ export default function AffiliateProgram() {
                 />
               </div>
               <div>
-                <p className="text-white font-medium text-xs lg:text-base text-opacity-50">
+                <p className="text-white font-medium text-xs lg:text-sm text-opacity-50">
                   Total Claimable
                 </p>
-                <p className="text-[#94A3B8] font-semibold text-lg lg:text-2xl">
+                <p className="text-[#94A3B8] font-semibold font-chakra text-lg lg:text-2xl">
                   ${formatNumber(totalClaimable, 2) ?? 0}
                 </p>
               </div>
