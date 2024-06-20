@@ -184,11 +184,15 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           if (i >= strikeNumber) {
             strikeMultiplier = item[j].multiplier;
             if (item[j].multiplier !== 0) {
-              result = "Won";
               amountWon = Decimal.mul(amount, strikeMultiplier).mul(
                 Decimal.sub(1, houseEdge),
               );
-              amountLost = 0;
+              amountLost = Math.max(
+                Decimal.sub(amount, amountWon).toNumber(),
+                0,
+              );
+
+              result = amountWon.toNumber() > amount ? "Won" : "Lost";
 
               feeGenerated = Decimal.mul(amount, strikeMultiplier)
                 .mul(houseEdge)
