@@ -231,7 +231,7 @@ export default function VerifyPlinkoModal({
                         type="text"
                         name="risk"
                         value={translator(Capitalize(bet.risk), language)}
-                        className="bg-[#202329] text-white capitalize font-chakra text-xs font-medium mt-1 rounded-md p-3 w-full relative"
+                        className="bg-[#202329] text-white capitalize font-chakra text-xs font-medium mt-1 rounded-md p-3 w-full relative focus:ring-0 focus:outline-none"
                         readOnly
                       />
                     </div>
@@ -243,7 +243,7 @@ export default function VerifyPlinkoModal({
                         type="text"
                         name="chance"
                         value={bet?.rows}
-                        className="bg-[#202329] text-white font-chakra text-xs font-medium mt-1 rounded-md p-3 w-full relative"
+                        className="bg-[#202329] text-white font-chakra text-xs font-medium mt-1 rounded-md p-3 w-full relative focus:ring-0 focus:outline-none"
                         readOnly
                       />
                     </div>

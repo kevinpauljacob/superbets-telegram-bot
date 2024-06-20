@@ -562,7 +562,7 @@ export default function ProvablyFairModal({
               name="parameter"
               value={verificationState.parameter}
               onChange={handleChange}
-              className="bg-[#202329] text-white font-chakra text-xs font-medium mt-1 rounded-md p-3 w-full relative"
+              className="bg-[#202329] text-white font-chakra text-xs font-medium mt-1 rounded-md p-3 w-full relative focus:ring-0 focus:outline-none"
             >
               <option value={8}>8</option>
               <option value={10}>10</option>
