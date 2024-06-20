@@ -1,6 +1,7 @@
-import { formatNumber } from "@/context/transactions";
+import { formatNumber, translator } from "@/context/transactions";
 import { useState, useEffect } from "react";
 import { copyToClipboard } from "@/pages/affiliate-program";
+import { useGlobalContext } from "../GlobalContext"
 
 export default function ReferralLink({
   campaignName,
@@ -15,6 +16,7 @@ export default function ReferralLink({
 }) {
   const [earnings, setEarnings] = useState(0);
   const [buttonText, setButtonText] = useState("Copy");
+  const {language} = useGlobalContext()
 
   const calculatedTotalEarnings = () => {
     let total = 0;
@@ -50,19 +52,19 @@ export default function ReferralLink({
             }}
             className="bg-[#7839C5] hover:bg-[#9361d1] focus:bg-[#602E9E] transition-all cursor-pointer rounded-[5px] text-white/75 text-[13px] font-chakra font-medium px-5"
           >
-            {buttonText}
+            {translator(buttonText, language)}
           </button>
         </div>
       </div>
       <div className="hidden sm:flex gap-[14px]">
         <p className="bg-white/5 rounded-[5px] text-sm font-chakra text-[#94A3B8] font-normal px-4 py-2">
-          Signups :{" "}
+          {translator("Signups", language)} :{" "}
           <span className="font-chakra text-[13px] font-semibold text-[#94A3B8]">
             {signupCount}
           </span>
         </p>
         <p className="bg-white/5 rounded-[5px] text-sm font-chakra text-[#94A3B8] font-normal px-4 py-2">
-          Total Earned :{" "}
+          {translator("Total Earned", language)}:{" "}
           <span className="font-chakra text-[13px] font-semibold text-[#94A3B8]">
             ${formatNumber(earnings, 2)}
           </span>

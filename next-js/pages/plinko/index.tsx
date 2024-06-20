@@ -502,13 +502,13 @@ export default function Plinko() {
   const handleBet = async () => {
     try {
       if (!wallet.connected || !wallet.publicKey) {
-        throw new Error("Wallet not connected");
+        throw new Error(translator("Wallet not connected", language));
       }
       if (!betAmt || betAmt === 0) {
-        throw new Error("Set Amount.");
+        throw new Error(translator("Set Amount.", language));
       }
       if (selectedCoin && selectedCoin.amount < betAmt) {
-        throw new Error("Insufficient balance for bet !");
+        throw new Error(translator("Insufficient balance for bet !", language));
       }
       setLoading(true);
       const response = await fetch(`/api/games/plinko`, {
@@ -565,7 +565,11 @@ export default function Plinko() {
         // update count
         if (typeof autoBetCount === "number") {
           setAutoBetCount(autoBetCount > 0 ? autoBetCount - 1 : 0);
-          autoBetCount === 1 && warningCustom("Auto bet stopped", "top-right");
+          autoBetCount === 1 &&
+            warningCustom(
+              translator("Auto bet stopped", language),
+              "top-right",
+            );
         } else
           setAutoBetCount(
             autoBetCount.length > 12
@@ -574,7 +578,7 @@ export default function Plinko() {
           );
       }
     } catch (error: any) {
-      errorCustom(error?.message ?? "Could not make the bet.");
+      errorCustom(error?.message ?? translator("Could not make the bet.", language));
       console.error("Error occurred while betting:", error);
       setAutoBetCount(0);
       setStartAuto(false);
@@ -780,7 +784,7 @@ export default function Plinko() {
                         }`}
                         disabled={disableInput}
                       >
-                        {translator("low", language)}
+                        {translator("Low", language)}
                       </button>
                       <button
                         onClick={() => setRisk("medium")}
@@ -792,7 +796,7 @@ export default function Plinko() {
                         }`}
                         disabled={disableInput}
                       >
-                        {translator("medium", language)}
+                        {translator("Medium", language)}
                       </button>
                     </div>
                     <button
@@ -805,7 +809,7 @@ export default function Plinko() {
                       }`}
                       disabled={disableInput}
                     >
-                      {translator("high", language)}
+                      {translator("High", language)}
                     </button>
                   </div>
                 </div>

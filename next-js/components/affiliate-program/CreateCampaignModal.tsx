@@ -43,7 +43,7 @@ export default function CreateCampaignModal() {
         successCustom(message);
         setShowCreateCampaignModal(false);
       } else {
-        errorCustom("Failed to create campaign!");
+        errorCustom(translator("Failed to create campaign!", language));
       }
     } catch (error: any) {
       throw new Error(error.message);
