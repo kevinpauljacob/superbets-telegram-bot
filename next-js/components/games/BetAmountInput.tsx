@@ -52,22 +52,20 @@ export default function BetAmount({
         (
           maxPayouts[selectedCoin.tokenMint as GameTokens][game as GameType] /
           leastMultiplier
-        ).toFixed(2)
+        ).toFixed(2),
       );
     }
   }, [leastMultiplier, game, kenoRisk]);
 
   useEffect(() => {
     if (betAmt !== undefined && betAmt > 0) {
-     
-        if(GameType.roulette1){
-          setInputString(betAmt.toFixed(9))
-        }else{
-          setInputString(betAmt.toString());
-        }
-      
+      if (GameType.roulette1) {
+        setInputString(betAmt.toFixed(9));
+      } else {
+        setInputString(betAmt.toString());
+      }
     } else {
-      setInputString('');
+      setInputString("");
     }
 
     const effectiveMultiplier = currentMultiplier || highestMultiplierForRisk;
@@ -81,7 +79,7 @@ export default function BetAmount({
         setCurrentMaxBetAmt(0);
       }
       setCurrentMaxBetAmt(
-        isFinite(calculatedMaxBetAmt) ? calculatedMaxBetAmt : 0
+        isFinite(calculatedMaxBetAmt) ? calculatedMaxBetAmt : 0,
       );
 
       if (betAmt > (isFinite(calculatedMaxBetAmt) ? calculatedMaxBetAmt : 0)) {
@@ -101,8 +99,8 @@ export default function BetAmount({
         truncateNumber(currentMaxBetAmt, 4),
         selectedCoin && selectedCoin?.amount
           ? truncateNumber(selectedCoin.amount, 4)
-          : truncateNumber(currentMaxBetAmt, 4)
-      )
+          : truncateNumber(currentMaxBetAmt, 4),
+      ),
     );
   }, [currentMaxBetAmt, coinData, selectedCoin]);
 
@@ -165,7 +163,7 @@ export default function BetAmount({
           <span className="cursor-pointer" onClick={handleSetMaxBet}>
             {maxBetAmt} $
             {SPL_TOKENS.find(
-              (token) => token.tokenMint === selectedCoin?.tokenMint
+              (token) => token.tokenMint === selectedCoin?.tokenMint,
             )?.tokenName || "Unknown Token"}
           </span>
           <span
@@ -296,7 +294,7 @@ export default function BetAmount({
             <span className="text-[11px] font-medium font-chakra mx-3 min-[1412px]:max-w-[200px]">
               {translator(
                 "Maximum amount for a single bet in this game is",
-                language
+                language,
               )}
               <span className="text-white/90 font-semibold">
                 {" "}

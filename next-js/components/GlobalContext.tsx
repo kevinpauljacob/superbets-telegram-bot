@@ -135,7 +135,6 @@ interface GlobalContextProps {
 
   openPFModal: boolean;
   setOpenPFModal: React.Dispatch<React.SetStateAction<boolean>>;
-
   //configure auto
   showAutoModal: boolean;
   setShowAutoModal: React.Dispatch<React.SetStateAction<boolean>>;
@@ -427,6 +426,7 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
         return null;
       }
   };
+  console.log(openPFModal);
 
   return (
     <GlobalContext.Provider

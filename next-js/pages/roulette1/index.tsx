@@ -14,11 +14,14 @@ import { useGlobalContext } from "@/components/GlobalContext";
 import BetAmount from "@/components/games/BetAmountInput";
 import BetButton from "@/components/games/BetButton";
 import Loader from "@/components/games/Loader";
-import { errorCustom } from "@/components/toasts/ToastGroup";
+import { errorCustom, successCustom } from "@/components/toasts/ToastGroup";
 import Bets from "@/components/games/Bets";
 import { Refresh } from "iconsax-react";
 import { translator } from "@/context/transactions";
 import { SPL_TOKENS } from "@/context/config"; // Adjust the import path accordingly
+import { soundAlert } from "@/utils/soundUtils";
+import ConfigureAutoButton from "@/components/ConfigureAutoButton";
+import AutoCount from "@/components/AutoCount";
 
 interface Token {
   id: number;
@@ -68,9 +71,9 @@ const rows = [
 ];
 
 type PredefinedBetType =
-  | "1-12"
-  | "13-24"
-  | "25-36"
+  | "1st-12"
+  | "2nd-12"
+  | "3rd-12"
   | "1-18"
   | "19-36"
   | "even"
@@ -80,11 +83,10 @@ type PredefinedBetType =
   | "1st-column"
   | "2nd-column"
   | "3rd-column";
-
 const predefinedBets: Record<PredefinedBetType, number[]> = {
-  "1-12": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
-  "13-24": [13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24],
-  "25-36": [25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36],
+  "1st-12": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+  "2nd-12": [13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24],
+  "3rd-12": [25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36],
   "1-18": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18],
   "19-36": [
     19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36,
@@ -98,7 +100,7 @@ const predefinedBets: Record<PredefinedBetType, number[]> = {
   "3rd-column": [1, 4, 7, 10, 13, 16, 19, 22, 25, 28, 31, 34],
 };
 
-export default function Roulette() {
+export default function Roulette1() {
   const wallet = useWallet();
   const methods = useForm();
   const { data: session, status } = useSession();
@@ -121,40 +123,14 @@ export default function Roulette() {
     setAutoBetProfit,
     useAutoConfig,
     setUseAutoConfig,
-    kenoRisk,
-    setKenoRisk,
+
+    enableSounds,
+
     houseEdge,
     maxBetAmt,
     language,
   } = useGlobalContext();
   console.log("MAX", maxBetAmt);
-  const [num, setNum] = useState(0);
-  const ball = useRef<HTMLDivElement>(null);
-  const ballContainer = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    if (num !== 0) {
-      spin();
-    }
-  }, [num]);
-
-  const spin = () => {
-    const order = [
-      0, 32, 15, 19, 4, 21, 2, 25, 17, 34, 6, 27, 13, 36, 11, 30, 8, 23, 10, 5,
-      24, 16, 33, 1, 20, 14, 31, 9, 22, 18, 29, 7, 28, 12, 35, 3, 26,
-    ];
-
-    if (!ball || !ball.current || !ballContainer || !ballContainer.current)
-      return;
-    const ballElement = ball.current;
-    const ballContainerElement = ballContainer.current;
-
-    let endingDegree = order.indexOf(num) * 9.73;
-
-    ballContainerElement.style.transition = "all linear 4s";
-    ballContainerElement.style.rotate = 360 * 3 + endingDegree + "deg";
-
-    ballElement.classList.add("hole");
-  };
 
   type TransformedBets = Record<string, Record<string, number>>;
   type WagerType =
@@ -183,7 +159,7 @@ export default function Roulette() {
   const [selectedToken, setSelectedToken] = useState<Token | null>(tokens[0]);
   const [bets, setBets] = useState<{ areaId: string; token: Token }[]>([]);
   const [betActive, setBetActive] = useState(false);
-  const [betSetting, setBetSetting] = useState<"manual" | "auto">("manual");
+  const [betSetting, setBetSetting] = useState<"manual" | "auto">("auto");
   const [isRolling, setIsRolling] = useState(false);
   const [loading, setLoading] = useState(false);
   const [selectedBets, setSelectedBets] = useState<Bet[]>([]);
@@ -194,6 +170,42 @@ export default function Roulette() {
   const [hoveredColumn, setHoveredColumn] = useState<number[] | null>(null);
   const [resultNumbers, setResultNumbers] = useState<number[]>([]);
   const [refresh, setRefresh] = useState(true);
+  const [centerNumber, setCenterNumber] = useState<number | null>(null);
+  const [strikeMultiplier, setStrikeMultiplier] = useState<number>();
+  const [spinComplete, setSpinComplete] = useState(true);
+  const [num, setNum] = useState(0);
+  const ball = useRef<HTMLDivElement>(null);
+  const ballContainer = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (num !== 0) {
+      spin();
+    }
+  }, [num]);
+
+  const spin = () => {
+    setSpinComplete(false);
+    const order = [
+      0, 32, 15, 19, 4, 21, 2, 25, 17, 34, 6, 27, 13, 36, 11, 30, 8, 23, 10, 5,
+      24, 16, 33, 1, 20, 14, 31, 9, 22, 18, 29, 7, 28, 12, 35, 3, 26,
+    ];
+
+    if (!ball || !ball.current || !ballContainer || !ballContainer.current)
+      return;
+    const ballElement = ball.current;
+    const ballContainerElement = ballContainer.current;
+
+    let endingDegree = order.indexOf(num) * 9.73;
+
+    ballContainerElement.style.transition = "all linear 4s";
+    ballContainerElement.style.rotate = 360 * 3 + endingDegree + "deg";
+
+    ballElement.classList.add("hole");
+
+    setTimeout(() => {
+      setSpinComplete(true);
+    }, 4000);
+  };
 
   console.log(selectedBets);
   const getSolEquivalent = (token: Token): number => {
@@ -235,16 +247,49 @@ export default function Roulette() {
         }),
       });
 
-      const { success, message, result, strikeNumber } = await response.json();
+      const { success, message, result, strikeNumber, strikeMultiplier } =
+        await response.json();
+
       console.log({
         Success: success,
         Result: result,
         Message: message,
         StrikeNumber: strikeNumber,
+        strikeMultiplier: strikeMultiplier,
       });
-      setNum(parseInt(strikeNumber));
-      setResultNumbers((prevNumbers) => [...prevNumbers, strikeNumber]);
+      if (success !== true) {
+        throw new Error(message);
+      }
+
+      if (success) {
+        setNum(parseInt(strikeNumber));
+        setStrikeMultiplier(strikeMultiplier);
+
+        setRefresh(true);
+      }
+
       setLoading(false);
+
+      const win = result === "Won";
+
+      setSpinComplete(false);
+      const spinCompleteInterval = setInterval(() => {
+        if (spinComplete) {
+          clearInterval(spinCompleteInterval);
+          if (win) {
+            soundAlert("/sounds/win.wav", !enableSounds);
+            successCustom(message);
+          } else {
+            soundAlert("/sounds/lose.wav", !enableSounds);
+            errorCustom(message);
+            setBetAmt(0);
+            clearBets();
+          }
+          setResultNumbers((prevNumbers) => [...prevNumbers, strikeNumber]);
+          setCenterNumber(strikeNumber);
+          setLoading(false);
+        }
+      }, 100);
     } catch (e: any) {
       errorCustom(e?.message ?? translator("Could not make bet.", language));
       setLoading(false);
@@ -582,6 +627,7 @@ export default function Roulette() {
   const clearBets = () => {
     setSelectedBets([]);
     setBetAmt(0);
+    setCenterNumber(null);
   };
 
   const undoLastBet = () => {
@@ -735,6 +781,12 @@ export default function Roulette() {
               {isRolling ? <Loader /> : betActive ? "CASHOUT" : "BET"}
             </BetButton>
           </div>
+          {betSetting === "auto" && (
+            <div className="w-full flex  lg:hidden">
+              <ConfigureAutoButton disabled={disableInput} />
+            </div>
+          )}
+
           <div className="w-full hidden lg:flex">
             <BetSetting
               betSetting={betSetting}
@@ -771,6 +823,16 @@ export default function Roulette() {
                   game="roulette1"
                   disabled={disableInput}
                 />
+                {betSetting === "manual" ? (
+                  <></>
+                ) : (
+                  <div className="w-full flex flex-row items-end gap-3">
+                    <AutoCount loading={isRolling || startAuto} />
+                    <div className="w-full hidden lg:flex">
+                      <ConfigureAutoButton disabled={disableInput} />
+                    </div>
+                  </div>
+                )}
                 <BetButton
                   disabled={
                     !selectedToken ||
@@ -794,10 +856,19 @@ export default function Roulette() {
       <GameDisplay>
         <div className=" my-4 flex sm:flex-col items-center ">
           <ResultDisplay numbers={resultNumbers} />
-          <div className="hidden roulette relative w-72 h-72 sm:flex flex-col items-center justify-center ">
+
+          <div
+            className={`hidden roulette relative min-w-72 min-h-72 sm:flex flex-col items-center justify-center `}
+          >
             <img className="absolute w-[90%] h-[90%]" src="/bg.svg " />
             <img className="wheel absolute" src="/wheel.svg" />
-            <img className="needle absolute" src="/needle.svg" />
+            {centerNumber ? (
+              <div className="text-4xl font-chakra font-semibold text-white absolute">
+                {centerNumber!}
+              </div>
+            ) : (
+              <img className="needle absolute" src="/needle.svg" />
+            )}
 
             <div
               ref={ballContainer}
@@ -1107,35 +1178,35 @@ export default function Roulette() {
                       className="relative  flex items-center justify-center bg-[#0E0F14] border border-[#26272B]
                     text-white cursor-pointer rounded-[5px] w-[120px] h-[40px] sm:w-[213.19px] sm:h-12 hover:border
                      hover:border-slate-200 hover:bg-[#4D5361]"
-                      onMouseEnter={() => setHoveredButton("1-12")}
+                      onMouseEnter={() => setHoveredButton("1st-12")}
                       onMouseLeave={() => setHoveredButton(null)}
-                      onClick={() => handlePlaceBet("1-12", selectedToken)}
+                      onClick={() => handlePlaceBet("1st-12", selectedToken)}
                     >
                       {/* w-[117px] h-[40px] */}1 to 12
-                      {renderRegularToken("1-12")}
+                      {renderRegularToken("1st-12")}
                     </button>
                     <button
                       className="relative col-span-1 flex items-center justify-center bg-[#0E0F14] border border-[#26272B]
                    text-white cursor-pointer rounded-[5px]  w-[120px] h-[40px] sm:w-[213.19px] sm:h-12 hover:border hover:border-slate-200 hover:bg-[#4D5361]"
-                      onMouseEnter={() => setHoveredButton("13-24")}
+                      onMouseEnter={() => setHoveredButton("2nd-12")}
                       onMouseLeave={() => setHoveredButton(null)}
-                      onClick={() => handlePlaceBet("13-24", selectedToken)}
+                      onClick={() => handlePlaceBet("2nd-12", selectedToken)}
                     >
                       {/* w-[117px] h-[40px] */}
                       13 to 24
-                      {renderRegularToken("13-24")}
+                      {renderRegularToken("2nd-12")}
                     </button>
                     <button
                       className="relative col-span-1 flex items-center justify-center bg-[#0E0F14] border border-[#26272B]
                    text-white cursor-pointer rounded-[5px]   w-[120px] h-[40px] sm:w-[213.19px] sm:h-12 hover:border hover:border-slate-200
                     hover:bg-[#4D5361]"
-                      onMouseEnter={() => setHoveredButton("25-36")}
+                      onMouseEnter={() => setHoveredButton("3rd-12")}
                       onMouseLeave={() => setHoveredButton(null)}
-                      onClick={() => handlePlaceBet("25-36", selectedToken)}
+                      onClick={() => handlePlaceBet("3rd-12", selectedToken)}
                     >
                       {/*  w-[117px] h-[40px]*/}
                       25 to 36
-                      {renderRegularToken("25-36")}
+                      {renderRegularToken("3rd-12")}
                     </button>
                   </div>
                   <div className="flex w-full justify-center gap-1">

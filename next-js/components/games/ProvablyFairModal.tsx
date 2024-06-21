@@ -6,6 +6,7 @@ import { riskToChance } from "./Wheel/Segments";
 import Arc from "./Wheel/Arc";
 import { useGlobalContext } from "../GlobalContext";
 import { translator } from "@/context/transactions";
+
 interface VerificationState {
   clientSeed: string;
   serverSeed: string;
@@ -38,6 +39,43 @@ export default function ProvablyFairModal({
     null,
   );
   const { language } = useGlobalContext();
+  const rows = [
+    [3, 6, 9, 12, 15, 18, 21, 24, 27, 30, 33, 36],
+    [2, 5, 8, 11, 14, 17, 20, 23, 26, 29, 32, 35],
+    [1, 4, 7, 10, 13, 16, 19, 22, 25, 28, 31, 34],
+  ];
+
+  type PredefinedBetType =
+    | "1-12"
+    | "13-24"
+    | "25-36"
+    | "1-18"
+    | "19-36"
+    | "even"
+    | "odd"
+    | "red"
+    | "black"
+    | "1st-column"
+    | "2nd-column"
+    | "3rd-column";
+  const predefinedBets: Record<PredefinedBetType, number[]> = {
+    "1-12": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+    "13-24": [13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24],
+    "25-36": [25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36],
+    "1-18": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18],
+    "19-36": [
+      19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36,
+    ],
+    even: [2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 34, 36],
+    odd: [1, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23, 25, 27, 29, 31, 33, 35],
+    red: [
+      1, 3, 5, 7, 9, 12, 14, 16, 18, 19, 21, 23, 25, 27, 28, 30, 32, 34, 36,
+    ],
+    black: [2, 4, 6, 8, 10, 11, 13, 15, 17, 20, 22, 24, 26, 29, 31, 33, 35],
+    "1st-column": [3, 6, 9, 12, 15, 18, 21, 24, 27, 30, 33, 36],
+    "2nd-column": [2, 5, 8, 11, 14, 17, 20, 23, 26, 29, 32, 35],
+    "3rd-column": [1, 4, 7, 10, 13, 16, 19, 22, 25, 28, 31, 34],
+  };
 
   useEffect(() => {
     const result = generateGameResult(
@@ -300,6 +338,88 @@ export default function ProvablyFairModal({
       [name]: name === "segments" ? parseInt(value, 10) : value,
     }));
   };
+  const renderRoulette1 = () => {
+    <>
+      <div className="font-chakra font-semibold text-base rotate-90  sm:top-0 mb-7 mx-2">
+        <div className="flex flex-col w-full text-[12px] items-start gap-1 ">
+          <div className="w-full flex items-start gap-1">
+            <div
+              className={`h-[125px] w-[27.3px] sm:w-[30.6px] sm:h-[207px] flex flex-col justify-center text-center cursor-pointer bg-[#149200] rounded-[5px]
+            text-white relative  ${strikeNumber === 0 ? "border-[#3DD179]" : ""}
+            mb-1`}
+            >
+              <p className="-rotate-90">0</p>
+            </div>
+            <div className="grid grid-cols-12 grid-rows-3 gap-1">
+              {rows.map((row, rowIndex) => (
+                <>
+                  {row.map((number, colIndex) => {
+                    return (
+                      <div
+                        key={colIndex}
+                        className="relative flex justify-center items-center"
+                      >
+                        <button
+                          data-testid={`roulette-tile-${number}`}
+                          className={`h-[40px] w-[27.3px] sm:w-[35px] sm:h-[67px] flex items-center justify-center relative text-center ${
+                            predefinedBets.red.includes(number)
+                              ? "bg-[#F1323E]  "
+                              : "bg-[#2A2E38]  "
+                          }${strikeNumber === number ? "border-[#3DD179] border-2" : ""} text-white rounded-[5px]  `}
+                        >
+                          <p className="-rotate-90">{number}</p>
+                        </button>
+                      </div>
+                    );
+                  })}
+                </>
+              ))}
+            </div>
+            <div className="flex flex-col justify-between items-center gap-[5px] mt-0">
+              {rows.map((_, rowIndex) => (
+                <div
+                  key={`row-${rowIndex}`}
+                  className="h-[40px] w-[27px] sm:w-[30px] sm:h-[67px] flex items-center justify-center text-center bg-transparent border-2 border-[#26272B] text-white cursor-pointer relative rounded-[5px] "
+                >
+                  <p className="-rotate-90">2:1</p>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="flex w-full flex-col gap-[3px]">
+            <div className="flex w-full justify-center gap-1">
+              <button className="relative flex items-center justify-center bg-[#0E0F14] border border-[#26272B] text-white cursor-pointer rounded-[5px] w-[120px] h-[40px] sm:w-[128px] sm:h-[67px]  ">
+                1 to 12
+              </button>
+              <button className="relative flex items-center justify-center bg-[#0E0F14] border border-[#26272B] text-white cursor-pointer rounded-[5px] w-[120px] h-[40px] sm:w-[128px] sm:h-[67px]  ">
+                13 to 24
+              </button>
+              <button className="relative flex items-center justify-center bg-[#0E0F14] border border-[#26272B] text-white cursor-pointer rounded-[5px] w-[120px] h-[40px] sm:w-[128px] sm:h-[67px]  ">
+                25 to 36
+              </button>
+            </div>
+            <div className="flex w-full justify-center gap-1">
+              <button className="relative flex items-center justify-center bg-[#0E0F14] border border-[#26272B] text-white cursor-pointer rounded-md w-[58px] h-[40px] sm:w-[62px] sm:h-[63px]  ">
+                1 to 18
+              </button>
+              <button className="relative flex items-center justify-center bg-[#0E0F14] border border-[#26272B] text-white cursor-pointer rounded-md w-[58px] h-[40px] sm:w-[62px] sm:h-[63px]  ">
+                Even
+              </button>
+              <button className="relative flex items-center justify-center bg-[#F1323E] cursor-pointer rounded-md w-[58px] h-[40px] sm:w-[62px] sm:h-[63px]  "></button>
+              <button className="relative flex items-center justify-center bg-[#2A2E38] cursor-pointer rounded-md w-[58px] h-[40px] sm:w-[62px] sm:h-[63px]  "></button>
+              <button className="relative flex items-center justify-center bg-[#0E0F14] border border-[#26272B] text-white cursor-pointer rounded-md w-[58px] h-[40px] sm:w-[62px] sm:h-[63px]  ">
+                Odd
+              </button>
+              <button className="relative flex items-center justify-center bg-[#0E0F14] border border-[#26272B] text-white cursor-pointer rounded-md w-[58px] h-[40px] sm:w-[62px] sm:h-[63px]  ">
+                19 to 36
+              </button>
+            </div>
+          </div>
+          <div className=" sm:w-12 bg-transparent hidden sm:block" />
+        </div>
+      </div>
+    </>;
+  };
   const renderRiskAndSegments = () => (
     <>
       <div>
@@ -469,6 +589,8 @@ export default function ProvablyFairModal({
         return renderLimbo();
       case GameType.coin:
         return renderCoinFlip();
+      case GameType.roulette1:
+        return renderRoulette1();
       case GameType.wheel:
         return (
           <>

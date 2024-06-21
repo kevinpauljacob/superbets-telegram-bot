@@ -1,28 +1,29 @@
 import { seedStatus } from "@/utils/provably-fair";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { IoIosArrowDown } from "react-icons/io";
-import KenoProvablyFairModal, { PFModalData } from "./MinesProvablyFairModal";
+import Image from "next/image";
+import WheelProvablyFairModal, {
+  PFModalData,
+} from "../Wheel/WheelProvablyFairModal";
 import { useGlobalContext } from "@/components/GlobalContext";
 import { FaRegCopy } from "react-icons/fa6";
+import Arc from "@/components/games/Wheel/Arc";
 import { MdClose } from "react-icons/md";
-import { translator } from "@/context/transactions";
-import Image from "next/image";
-import Bets from "../Bets";
+import { translator, truncateNumber } from "@/context/transactions";
 import Loader from "../Loader";
 import { SPL_TOKENS } from "@/context/config";
+import Roulette1ProvablyFairModal from "./Roulette1ProvablyFairModal";
 
-export interface Mines {
+export interface Roulette1 {
   createdAt: string;
-  minesCount: number;
   wallet: string;
-  userBets: number[];
   amount: number;
-  result: string;
   risk: string;
-  strikeNumbers: number[];
   segments: number;
-  chosenNumbers: number[];
+  result: string;
+  strikeNumber: number;
   strikeMultiplier: number;
+  minesCount?: number;
   amountWon: number;
   nonce?: number;
   tokenMint: string;
@@ -36,7 +37,7 @@ export interface Mines {
 }
 
 interface ModalData {
-  bet: Mines;
+  bet: Roulette1;
 }
 
 interface Props {
@@ -46,18 +47,21 @@ interface Props {
   wallet?: string;
 }
 
-export default function VerifyDice2Modal({
+export default function VerifyRoulette1Modal({
   isOpen,
   onClose,
   modalData,
   wallet,
 }: Props) {
+  //handling dice
   const { bet } = modalData;
+  console.log(modalData);
   const { getProvablyFairData, language } = useGlobalContext();
+  const wheelRef = useRef<HTMLDivElement>(null);
+  const [rotationAngle, setRotationAngle] = useState(0);
 
   //Provably Fair Modal handling
   const [isPFModalOpen, setIsPFModalOpen] = useState(false);
-
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const openPFModal = () => {
     setIsPFModalOpen(true);
@@ -89,6 +93,11 @@ export default function VerifyDice2Modal({
 
   //to handle dropodown
   const [openDropDown, setOpenDropDown] = useState<boolean>(false);
+  const rows = [
+    [3, 6, 9, 12, 15, 18, 21, 24, 27, 30, 33, 36],
+    [2, 5, 8, 11, 14, 17, 20, 23, 26, 29, 32, 35],
+    [1, 4, 7, 10, 13, 16, 19, 22, 25, 28, 31, 34],
+  ];
 
   const handleClose = () => {
     //@ts-ignore
@@ -118,6 +127,18 @@ export default function VerifyDice2Modal({
     return `${day}-${month}-${year} ${hours}:${minutes} UTC`;
   }
 
+  useEffect(() => {
+    if (!wheelRef.current) return;
+    const rotationAngle = 360 / bet.segments;
+    setRotationAngle(rotationAngle);
+  }, [bet.segments]);
+
+  useEffect(() => {
+    const resultAngle = ((bet.strikeNumber - 1) * 360) / 99;
+    if (wheelRef.current) {
+      wheelRef.current.style.transform = `rotate(${360 - resultAngle}deg)`;
+    }
+  }, [isOpen]);
   const handleSeedClick = async () => {
     setIsLoading(true);
     try {
@@ -143,6 +164,37 @@ export default function VerifyDice2Modal({
     }
   };
 
+  type PredefinedBetType =
+    | "1-12"
+    | "13-24"
+    | "25-36"
+    | "1-18"
+    | "19-36"
+    | "even"
+    | "odd"
+    | "red"
+    | "black"
+    | "1st-column"
+    | "2nd-column"
+    | "3rd-column";
+  const predefinedBets: Record<PredefinedBetType, number[]> = {
+    "1-12": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+    "13-24": [13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24],
+    "25-36": [25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36],
+    "1-18": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18],
+    "19-36": [
+      19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36,
+    ],
+    even: [2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 34, 36],
+    odd: [1, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23, 25, 27, 29, 31, 33, 35],
+    red: [
+      1, 3, 5, 7, 9, 12, 14, 16, 18, 19, 21, 23, 25, 27, 28, 30, 32, 34, 36,
+    ],
+    black: [2, 4, 6, 8, 10, 11, 13, 15, 17, 20, 22, 24, 26, 29, 31, 33, 35],
+    "1st-column": [3, 6, 9, 12, 15, 18, 21, 24, 27, 30, 33, 36],
+    "2nd-column": [2, 5, 8, 11, 14, 17, 20, 23, 26, 29, 32, 35],
+    "3rd-column": [1, 4, 7, 10, 13, 16, 19, 22, 25, 28, 31, 34],
+  };
   return (
     <>
       {isOpen && (
@@ -156,7 +208,7 @@ export default function VerifyDice2Modal({
           <div className="relative bg-[#121418] max-h-[80vh] no-scrollbar overflow-y-scroll p-8 rounded-lg z-10 w-11/12 sm:w-[34rem]">
             <div className="flex flex-wrap justify-between items-center mb-4 sm:mb-[1.4rem]">
               <div className="font-changa text-2xl font-semibold text-white mr-4 text-opacity-90">
-                {translator("Mines", language)}
+                {translator("Wheel", language)}
               </div>
               <div className="text-[#F0F0F0] text-opacity-75 font-changa text-sm">
                 {formatDate(bet.createdAt)}
@@ -168,7 +220,7 @@ export default function VerifyDice2Modal({
                   {translator("Bet", language)}
                 </div>
                 <div className="text-white font-chakra text-xs font-medium">
-                  {bet.amount.toFixed(4)} $
+                  {truncateNumber(bet.amount, 4)} $
                   {SPL_TOKENS.find((token) => token.tokenMint === bet.tokenMint)
                     ?.tokenName ?? ""}
                 </div>
@@ -177,81 +229,100 @@ export default function VerifyDice2Modal({
                 <div className="font-changa text-xs text-[#94A3B8] text-opacity-75">
                   {translator("Multiplier", language)}
                 </div>
-                <div className="text-white font-chakra text-xs font-medium">
-                  {bet.strikeMultiplier?.toFixed(1)} x
-                </div>
+                {bet.strikeMultiplier}
               </button>
               <button className="px-1 py-3 flex flex-col items-center justify-center w-full text-white rounded-md bg-[#202329]">
                 <div className="font-changa text-xs text-[#94A3B8] text-opacity-75">
                   {translator("Payout", language)}
                 </div>
                 <div className="text-white font-chakra text-xs font-medium">
-                  {bet.amountWon?.toFixed(4)} $
+                  {truncateNumber(bet.amountWon, 4)} $
                   {SPL_TOKENS.find((token) => token.tokenMint === bet.tokenMint)
                     ?.tokenName ?? ""}
                 </div>
               </button>
             </div>
-            <div className="mt-6 px-4 md:px-12 pt-7 border-2 border-white border-opacity-5 rounded-md">
-              <div className="flex justify-center items-center w-full p-2">
-                <div className="grid grid-cols-5 gap-1 sm:gap-2 text-white text-sm md:text-xl font-chakra">
-                  {Array.from({ length: 25 }, (_, index) => index + 1).map(
-                    (number) => (
-                      <button
-                        key={number}
-                        className={`${
-                          bet.userBets.includes(number - 1)
-                            ? bet.strikeNumbers[number - 1] === 0
-                              ? "border-[#FCB10F] bg-[#FCB10F33]"
-                              : bet.strikeNumbers[number - 1] === 1
-                                ? "border-[#F1323E] bg-[#F1323E33]"
-                                : ""
-                            : "bg-[#202329]"
-                        } flex items-center justify-center cursor-pointer rounded-md text-center transition-all duration-300 ease-in-out 
-          lg2:w-[48px] lg2:h-[48px] md:w-[45px] md:h-[45px] sm:w-[43px] sm:h-[43px] sm2:w-[40px]
-          sm2:h-[40px] xs:w-[38px] xs:h-[38px] w-[33px] h-[33px]`}
-                      >
-                        {bet.strikeNumbers[number - 1] === 0 ? (
-                          <div className="w-full h-full flex items-center justify-center p-1.5 sm:p-3">
-                            <Image
-                              src="/assets/gem.svg"
-                              alt="Gem"
-                              layout="responsive"
-                              height={100}
-                              width={100}
-                            />
-                          </div>
-                        ) : bet.strikeNumbers[number - 1] === 1 ? (
-                          <div className="w-full h-full flex items-center justify-center p-1.5 sm:p-3">
-                            <Image
-                              src="/assets/mine.svg"
-                              alt="Mine"
-                              layout="responsive"
-                              height={100}
-                              width={100}
-                            />
-                          </div>
-                        ) : null}
+            <div className="mt-6 px-4  pt-7 border-2 border-white border-opacity-5 rounded-md  w-full h-[480px] flex items-center ">
+              <div className="font-chakra font-semibold text-base rotate-90  sm:top-0 mb-7 mx-2">
+                <div className="flex flex-col w-full text-[12px] items-start gap-1 ">
+                  <div className="w-full flex items-start gap-1">
+                    <div
+                      className={`h-[125px] w-[27.3px] sm:w-[30.6px] sm:h-[207px] flex flex-col justify-center text-center cursor-pointer bg-[#149200] rounded-[5px]
+            text-white relative  ${bet.strikeNumber === 0 ? "border-[#3DD179]" : ""}
+            mb-1`}
+                    >
+                      <p className="-rotate-90">0</p>
+                    </div>
+                    <div className="grid grid-cols-12 grid-rows-3 gap-1">
+                      {rows.map((row, rowIndex) => (
+                        <>
+                          {row.map((number, colIndex) => {
+                            return (
+                              <div
+                                key={colIndex}
+                                className="relative flex justify-center items-center"
+                              >
+                                <button
+                                  data-testid={`roulette-tile-${number}`}
+                                  className={`h-[40px] w-[27.3px] sm:w-[35px] sm:h-[67px] flex items-center justify-center relative text-center ${
+                                    predefinedBets.red.includes(number)
+                                      ? "bg-[#F1323E]  "
+                                      : "bg-[#2A2E38]  "
+                                  }${bet.strikeNumber === number ? "border-[#3DD179] border-2" : ""} text-white rounded-[5px]  `}
+                                >
+                                  <p className="-rotate-90">{number}</p>
+                                </button>
+                              </div>
+                            );
+                          })}
+                        </>
+                      ))}
+                    </div>
+                    <div className="flex flex-col justify-between items-center gap-[5px] mt-0">
+                      {rows.map((_, rowIndex) => (
+                        <div
+                          key={`row-${rowIndex}`}
+                          className="h-[40px] w-[27px] sm:w-[30px] sm:h-[67px] flex items-center justify-center text-center bg-transparent border-2 border-[#26272B] text-white cursor-pointer relative rounded-[5px] "
+                        >
+                          <p className="-rotate-90">2:1</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="flex w-full flex-col gap-[3px]">
+                    <div className="flex w-full justify-center gap-1">
+                      <button className="relative flex items-center justify-center bg-[#0E0F14] border border-[#26272B] text-white cursor-pointer rounded-[5px] w-[120px] h-[40px] sm:w-[128px] sm:h-[67px]  ">
+                        1 to 12
                       </button>
-                    ),
-                  )}
-                </div>
-              </div>
-              <div className="flex gap-4 pt-7 mb-8">
-                <div className="w-full">
-                  <label className="text-xs text-opacity-75 font-changa text-[#F0F0F0]">
-                    {translator("Mines", language)}
-                  </label>
-                  <input
-                    type="text"
-                    name="multiplier"
-                    value={bet.minesCount}
-                    className="bg-[#202329] text-white font-chakra capitalize text-xs font-medium mt-1 rounded-md p-3 w-full relative"
-                    readOnly
-                  />
+                      <button className="relative flex items-center justify-center bg-[#0E0F14] border border-[#26272B] text-white cursor-pointer rounded-[5px] w-[120px] h-[40px] sm:w-[128px] sm:h-[67px]  ">
+                        13 to 24
+                      </button>
+                      <button className="relative flex items-center justify-center bg-[#0E0F14] border border-[#26272B] text-white cursor-pointer rounded-[5px] w-[120px] h-[40px] sm:w-[128px] sm:h-[67px]  ">
+                        25 to 36
+                      </button>
+                    </div>
+                    <div className="flex w-full justify-center gap-1">
+                      <button className="relative flex items-center justify-center bg-[#0E0F14] border border-[#26272B] text-white cursor-pointer rounded-md w-[58px] h-[40px] sm:w-[62px] sm:h-[63px]  ">
+                        1 to 18
+                      </button>
+                      <button className="relative flex items-center justify-center bg-[#0E0F14] border border-[#26272B] text-white cursor-pointer rounded-md w-[58px] h-[40px] sm:w-[62px] sm:h-[63px]  ">
+                        Even
+                      </button>
+                      <button className="relative flex items-center justify-center bg-[#F1323E] cursor-pointer rounded-md w-[58px] h-[40px] sm:w-[62px] sm:h-[63px]  "></button>
+                      <button className="relative flex items-center justify-center bg-[#2A2E38] cursor-pointer rounded-md w-[58px] h-[40px] sm:w-[62px] sm:h-[63px]  "></button>
+                      <button className="relative flex items-center justify-center bg-[#0E0F14] border border-[#26272B] text-white cursor-pointer rounded-md w-[58px] h-[40px] sm:w-[62px] sm:h-[63px]  ">
+                        Odd
+                      </button>
+                      <button className="relative flex items-center justify-center bg-[#0E0F14] border border-[#26272B] text-white cursor-pointer rounded-md w-[58px] h-[40px] sm:w-[62px] sm:h-[63px]  ">
+                        19 to 36
+                      </button>
+                    </div>
+                  </div>
+                  <div className=" sm:w-12 bg-transparent hidden sm:block" />
                 </div>
               </div>
             </div>
+
             <div className="mt-8 px-4 py-4 border-2 border-white border-opacity-5 rounded-md transition-all">
               <div className="flex items-center justify-between text-[#F0F0F0]">
                 <div className="text-base font-changa font-medium text-[#F0F0F0] text-opacity-90">
@@ -351,7 +422,6 @@ export default function VerifyDice2Modal({
                         </div>
                         <button
                           className="bg-[#7839C5] rounded-md w-full text-sm text-white text-opacity-90 text-semibold py-3"
-                          disabled={isLoading}
                           onClick={handleSeedClick}
                         >
                           {isLoading ? (
@@ -364,10 +434,13 @@ export default function VerifyDice2Modal({
                     ) : (
                       <button
                         className="bg-[#7839C5] rounded-md w-full text-sm text-white text-opacity-90 text-semibold py-3"
-                        disabled={isLoading}
                         onClick={handleVerifyClick}
                       >
-                        {translator("Verify", language)}
+                        {isLoading ? (
+                          <Loader />
+                        ) : (
+                          translator("Verify", language)
+                        )}
                       </button>
                     )}
                   </div>
@@ -383,7 +456,7 @@ export default function VerifyDice2Modal({
               color="#F0F0F0"
             />
           </div>
-          <KenoProvablyFairModal
+          <Roulette1ProvablyFairModal
             isOpen={isPFModalOpen}
             onClose={closePFModal}
             modalData={PFModalData}

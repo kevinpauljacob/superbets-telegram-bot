@@ -35,6 +35,10 @@ import MinesProvablyFairModal from "./games/Mines/MinesProvablyFairModal";
 import Footer from "./Footer";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { soundAlert } from "@/utils/soundUtils";
+import VerifyRoulette1Modal, {
+  Roulette1,
+} from "./games/roulette1/VerifyRoulette1Modal";
+import Roulette1ProvablyFairModal from "./games/roulette1/Roulette1ProvablyFairModal";
 
 interface LayoutProps {
   children: ReactNode;
@@ -72,7 +76,7 @@ export default function Layout({ children }: LayoutProps) {
     setAutoWinChangeReset,
     setAutoLossChangeReset,
     getUserDetails,
-    selectedCoin
+    selectedCoin,
   } = useGlobalContext();
 
   const [modalData, setModalData] = useState({
@@ -284,6 +288,13 @@ export default function Layout({ children }: LayoutProps) {
           modalData={{ bet: (verifyModalData as Mines)! }}
           wallet={wallet.publicKey?.toBase58()}
         />
+      ) : verifyModalData.game === GameType.roulette1 ? (
+        <VerifyRoulette1Modal
+          isOpen={isVerifyModalOpen}
+          onClose={closeVerifyModal}
+          modalData={{ bet: (verifyModalData as Roulette1)! }}
+          wallet={wallet.publicKey?.toBase58()}
+        />
       ) : null}
 
       {/* pf modals  */}
@@ -331,6 +342,13 @@ export default function Layout({ children }: LayoutProps) {
         />
       ) : game === GameType.mines ? (
         <MinesProvablyFairModal
+          isOpen={openPFModal}
+          onClose={closePfModal}
+          modalData={modalData}
+          setModalData={setModalData}
+        />
+      ) : game === GameType.roulette1 ? (
+        <Roulette1ProvablyFairModal
           isOpen={openPFModal}
           onClose={closePfModal}
           modalData={modalData}

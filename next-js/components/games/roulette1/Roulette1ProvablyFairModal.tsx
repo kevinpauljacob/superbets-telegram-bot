@@ -5,7 +5,7 @@ import {
 } from "@/utils/provably-fair";
 import Image from "next/image";
 import { useEffect, useState, useRef } from "react";
-import { Wheel } from "./VerifyWheelModal";
+import { Roulette1 } from "./VerifyRoulette1Modal";
 import { FaRegCopy } from "react-icons/fa6";
 import { MdClose } from "react-icons/md";
 import CheckPF from "@/public/assets/CheckPF.svg";
@@ -40,10 +40,10 @@ interface Props {
   onClose: () => void;
   modalData: PFModalData;
   setModalData: React.Dispatch<React.SetStateAction<PFModalData>>;
-  bet?: Wheel;
+  bet?: Roulette1;
 }
 
-export default function WheelProvablyFairModal({
+export default function Roulette1ProvablyFairModal({
   isOpen,
   onClose,
   modalData,
@@ -56,17 +56,17 @@ export default function WheelProvablyFairModal({
   const [newClientSeed, setNewClientSeed] =
     useState<string>(generateClientSeed());
   const { language } = useGlobalContext();
-  const [strikeNumber, setStrikeNumber] = useState<number>(0);
+  /*   const [strikeNumber, setStrikeNumber] = useState<number>(0);
   const [strikeMultiplier, setStrikeMultiplier] = useState<number>();
   const wheelRef = useRef<HTMLDivElement>(null);
   const [rotationAngle, setRotationAngle] = useState(0);
   const [hoveredMultiplier, setHoveredMultiplier] = useState<number | null>(
     null,
-  );
+  ); */
   const [selectedGameType, setSelectedGameType] = useState<GameType>(
-    GameType.wheel,
+    GameType.roulette1,
   );
-
+  console.log("isOpen", isOpen);
   const [verificationState, setVerificationState] = useState<{
     clientSeed: string;
     serverSeed: string;
@@ -80,36 +80,13 @@ export default function WheelProvablyFairModal({
           clientSeed: bet.gameSeed.clientSeed,
           serverSeed: bet.gameSeed.serverSeed ?? "",
           nonce: bet.nonce?.toString() ?? "",
-          risk:
-            bet.risk ||
-            (selectedGameType === GameType.wheel ? "low" : undefined),
-          segments:
-            bet.segments ||
-            (selectedGameType === GameType.wheel ? 10 : undefined),
-          parameter:
-            bet.minesCount ||
-            (selectedGameType === GameType.mines ? 1 : undefined),
         }
       : {
           clientSeed: "",
           serverSeed: "",
           nonce: "",
-          risk: selectedGameType === GameType.wheel ? "low" : undefined,
-          segments: selectedGameType === GameType.wheel ? 10 : undefined,
-          parameter: selectedGameType === GameType.mines ? 1 : undefined,
         },
   );
-
-  useEffect(() => {
-    setStrikeNumber(
-      generateGameResult(
-        verificationState.serverSeed,
-        verificationState.clientSeed,
-        parseInt(verificationState.nonce),
-        GameType.wheel,
-      ),
-    );
-  }, []);
 
   const handleToggleState = (newState: "seeds" | "verify") => {
     setState(newState);
@@ -139,15 +116,6 @@ export default function WheelProvablyFairModal({
     }));
 
     const { clientSeed, serverSeed, nonce } = verificationState;
-
-    setStrikeNumber(
-      generateGameResult(
-        name === "serverSeed" ? value : serverSeed,
-        name === "clientSeed" ? value : clientSeed,
-        parseInt(name === "nonce" ? value : nonce),
-        GameType.wheel,
-      ),
-    );
   };
 
   const handleSetClientSeed = async () => {
