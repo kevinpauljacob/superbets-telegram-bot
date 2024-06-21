@@ -26,7 +26,7 @@ import {
   successCustom,
   warningCustom,
 } from "@/components/toasts/ToastGroup";
-import { translator, truncateNumber } from "@/context/transactions";
+import { formatNumber, translator, truncateNumber } from "@/context/transactions";
 import { useSession } from "next-auth/react";
 import { GameType } from "@/utils/provably-fair";
 import { handleSignIn } from "@/components/ConnectWallet";
@@ -175,13 +175,13 @@ export default function Wheel() {
         }),
       });
 
-      const { success, message, result, strikeNumber, strikeMultiplier } =
+      const { success, message, result, strikeNumber, strikeMultiplier, amountWon } =
         await response.json();
 
       spinWheel(strikeNumber);
       await new Promise((resolve) => setTimeout(resolve, 3000));
       if (success != true) {
-        throw new Error(message);
+        throw new Error(translator(message, language));
       }
       setIsRolling(false);
       //set strikeMultiplier color
@@ -191,9 +191,9 @@ export default function Wheel() {
       );
       setStrikeMultiplierColor(riskObject ? riskObject.color : "#ffffff");
       if (result == "Won") {
-        successCustom(message);
+        successCustom(translator(message, language) + ` ${formatNumber(amountWon)} ${selectedCoin.tokenName}`);
         soundAlert("/sounds/win.wav", !enableSounds);
-      } else errorCustom(message);
+      } else errorCustom(translator(message, language));
 
       const win = result === "Won";
       const newBetResult = { result: strikeMultiplier, win };
@@ -347,7 +347,7 @@ export default function Wheel() {
         return;
       }
       if (typeof autoBetCount === "number" && autoBetCount <= 0) {
-        errorCustom("Set Bet Count.");
+        errorCustom(translator("Set Bet Count.", language));
         return;
       }
       if (

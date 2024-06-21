@@ -981,6 +981,11 @@ export const translationsMap = {
     ko: "배팅",
     ch: "投注",
   },
+  Flipping: {
+    ru: "Переворот",
+    ko: "뒤집기",
+    ch: "翻转",
+  },
   Profit: {
     ru: "Прибыль",
     ko: "이익",
@@ -1479,6 +1484,11 @@ export const translationsMap = {
     ko: "보석",
     ch: "宝石",
   },
+  Rows: {
+    ru: "Строки",
+    ko: "행",
+    ch: "行",
+  },
   "Current Profit": {
     ru: "Текущая прибыль",
     ko: "현재 이익",
@@ -1498,6 +1508,51 @@ export const translationsMap = {
     ru: "Найдена ожидающая игра!",
     ko: "보류 중인 게임 발견!",
     ch: "找到待处理的游戏！",
+  },
+  "You already have a pending game!": {
+    ru: "У вас уже есть ожидающая игра!",
+    ko: "이미 보류 중인 게임이 있습니다!",
+    ch: "您已经有一个待处理的游戏！",
+  },
+  "Game does not exist!": {
+    ru: "Игра не существует!",
+    ko: "게임이 존재하지 않습니다!",
+    ch: "游戏不存在！",
+  },
+  "No bets placed": {
+    ru: "Ставок не сделано",
+    ko: "베팅 없음",
+    ch: "没有下注",
+  },
+  "Mines game created": {
+    ru: "Создана игра «Майны»",
+    ko: "마인즈 게임 생성됨",
+    ch: "创建了扫雷游戏",
+  },
+  "You have already picked this number!": {
+    ru: "Вы уже выбрали это число!",
+    ko: "이 숫자를 이미 선택했습니다!",
+    ch: "您已经选择了这个数字！",
+  },
+  "Game in progress": {
+    ru: "Игра в процессе",
+    ko: "진행 중인 게임",
+    ch: "游戏进行中",
+  },
+  "Max payout exceeded": {
+    ru: "Превышена максимальная выплата",
+    ko: "최대 지급 한도 초과",
+    ch: "超过最大支付限制",
+  },
+  "Max payout of 25 exceeded! Cashout to continue...": {
+    ru: "Превышена максимальная выплата 25! Выведите, чтобы продолжить...",
+    ko: "25의 최대 지급 한도를 초과했습니다! 계속하려면 현금화하십시오...",
+    ch: "超过25的最大支付限制！提取以继续...",
+  },
+  "Game already concluded!": {
+    ru: "Игра уже завершена!",
+    ko: "게임이 이미 종료되었습니다!",
+    ch: "游戏已经结束！",
   },
   "Could not fetch pending game.": {
     ru: "Не удалось получить ожидающую игру.",
@@ -1539,10 +1594,20 @@ export const translationsMap = {
     ko: "지갑이 연결되지 않았습니다",
     ch: "钱包未连接",
   },
-  "Insufficient balance for bet !": {
+  "Insufficient balance for bet!": {
     ru: "Недостаточно баланса для ставки!",
     ko: "베��에 필요한 잔액이 부족합니다!",
     ch: "投注所需的余额不足！",
+  },
+  "Insufficient balance for action!!": {
+    ru: "Недостаточно средств для действия!!",
+    ko: "작업에 필요한 잔액이 부족합니다!!",
+    ch: "操作所需的余额不足！！",
+  },
+  "Under maintenance": {
+    ru: "Поддержка",
+    ko: "유지 보수 중",
+    ch: "维护中",
   },
   "Profit Limit reached.": {
     ru: "Достигнут предел прибыли.",
@@ -1579,10 +1644,15 @@ export const translationsMap = {
     ko: "베팅을 할 수 없습니다.",
     ch: "无法下注。",
   },
-  "Better luck next time!": {
-    ru: "Следующая попытка!",
-    ko: "다음 시도!",
-    ch: "下次试试吧！",
+  "Sorry, Better luck next time!": {
+    ru: "Извините, удачи в следующий раз!",
+    ko: "죄송합니다. 다음에 다시 시도하세요!",
+    ch: "对不起，下次好运！",
+  },
+  "Pick up to 10 numbers": {
+    ru: "Выберите до 10 чисел",
+    ko: "10개의 숫자를 선택하십시오",
+    ch: "最多选择10个数字",
   },
   "10 numbers can be selected at max": {
     ru: "Максимум 10 чисел можно выбрать",
@@ -1634,10 +1704,10 @@ export const translationsMap = {
     ko: "현재 배수",
     ch: "当前倍数",
   },
-  "Congratulations! You won!": {
-    ru: "Поздравляем! Ты выиграл!",
-    ko: "축하해요! 당신이 이겼어요!",
-    ch: "恭喜！你赢了！",
+  "Congratulations! You won": {
+    ru: "Поздравляем! Ты выиграл",
+    ko: "축하해요! 당신이 이겼어요",
+    ch: "恭喜！你赢了",
   },
   "Invalid strike number!": {
     ru: "Неверный номер удара!",
@@ -1870,4 +1940,69 @@ export const translationsMap = {
     ko: "복사됨",
     ch: "复制",
   },
+  "Multiplier should be at least 1.02": {
+    ru: "Множитель должен быть не менее 1.02",
+    ko: "배수는 최소 1.02이어야 합니다",
+    ch: "倍数应至少为1.02",
+  },
+  "Multiplier cannot be greater than 50": {
+    ru: "Множитель не может быть больше 50",
+    ko: "배수는 50보다 클 수 없습니다",
+    ch: "倍数不能大于50",
+  },
+  "User wallet not authenticated": {
+    ru: "Кошелек пользователя не аутентифицирован",
+    ko: "사용자 지갑이 인증되지 않았습니다",
+    ch: "用户钱包未经身份验证",
+  },
+  "Missing parameters": {
+    ru: "Отсутствуют параметры",
+    ko: "매개 변수 누락",
+    ch: "缺少参数",
+  },
+  "Invalid parameters": {
+    ru: "Неверные параметры",
+    ko: "잘못된 매개 변수",
+    ch: "无效参数",
+  },
+  "Invalid bet amount": {
+    ru: "Неверная сумма ставки",
+    ko: "잘못된 베팅 금액",
+    ch: "无效的投注金额",
+  },
+  "Invalid chosen numbers":{
+    ru: "Неверно выбранные числа",
+    ko: "잘못된 숫자 선택",
+    ch: "无效的选择数字",
+  },
+  "User does not exist!": {
+    ru: "Пользователь не существует!",
+    ko: "사용자가 존재하지 않습니다!",
+    ch: "用户不存在！",
+  },
+  "Server hash not found!": {
+    ru: "Серверный хеш не найден!",
+    ko: "서버 해시를 찾을 수 없습니다!",
+    ch: "找不到服务器哈希！",
+  },
+  "No active bets on this account": {
+    ru: "На этом аккаунте нет активных ставок",
+    ko: "이 계정에 활성화된 베팅이 없습니다",
+    ch: "此帐户上没有活动投注",
+  },
+  "User could not be updated!": {
+    ru: "Пользователь не может быть обновлен!",
+    ko: "사용자를 업데이트할 수 없습니다!",
+    ch: "无法更新用户！",
+  },
+  "Another bet is active on this account": {
+    ru: "На этом аккаунте активна другая ставка",
+    ko: "이 계정에서 다른 베팅이 활성화되어 있습니다",
+    ch: "此帐户上有另一个活动投注",
+  },
+  "Could not fetch result": {
+    ru: "Не удалось получить результат",
+    ko: "결과를 가져올 수 없습니다",
+    ch: "无法获取结果",
+  }
 };

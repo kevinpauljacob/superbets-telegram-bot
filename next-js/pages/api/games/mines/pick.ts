@@ -69,7 +69,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       if (!gameInfo)
         return res
           .status(400)
-          .json({ success: false, message: "Game does not exist !" });
+          .json({ success: false, message: "Game does not exist!" });
 
       let {
         nonce,
@@ -281,9 +281,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         success: true,
         message:
           result === "Won"
-            ? "Congratulations! You won!"
+            ? "Congratulations! You won"
             : result === "Lost"
-              ? "Better luck next time!"
+              ? "Sorry, Better luck next time!"
               : "Game in progress",
         result,
         ...(result === "Pending" ? {} : { strikeNumbers }),

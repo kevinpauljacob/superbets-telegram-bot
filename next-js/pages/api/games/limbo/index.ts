@@ -97,7 +97,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       if (!user)
         return res
           .status(400)
-          .json({ success: false, message: "User does not exist !" });
+          .json({ success: false, message: "User does not exist!" });
 
       if (
         user.deposit.find((d: any) => d.tokenMint === tokenMint)?.amount <
@@ -105,7 +105,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       )
         return res
           .status(400)
-          .json({ success: false, message: "Insufficient balance !" });
+          .json({ success: false, message: "Insufficient balance for bet!" });
 
       const userData = await StakingUser.findOneAndUpdate(
         { wallet },
@@ -282,7 +282,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         success: true,
         message:
           result === "Won"
-            ? "Congratulations! You won!"
+            ? "Congratulations! You won"
             : "Better luck next time!",
         result,
         strikeNumber,

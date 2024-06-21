@@ -183,12 +183,7 @@ export default function Dice() {
         const { strikeNumber, result } = res.data;
         const isWin = result === "Won";
 
-        updatePNL(
-          GameType.dice,
-          isWin,
-          betAmt,
-          winningPays,
-        );
+        updatePNL(GameType.dice, isWin, betAmt, winningPays);
 
         if (isWin) soundAlert("/sounds/win.wav", !enableSounds);
         const newBetResults = [

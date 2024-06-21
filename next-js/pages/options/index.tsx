@@ -3,7 +3,13 @@ import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import { useWallet } from "@solana/wallet-adapter-react";
 import Loader from "../../components/games/Loader";
-import { checkResult as checkResultAPI, placeBet, translator, truncateNumber } from "../../context/transactions";
+import {
+  checkResult as checkResultAPI,
+  formatNumber,
+  placeBet,
+  translator,
+  truncateNumber,
+} from "../../context/transactions";
 import { useGlobalContext } from "@/components/GlobalContext";
 import { FormProvider, useForm } from "react-hook-form";
 import {
@@ -47,7 +53,7 @@ export default function Options() {
     language,
     selectedCoin,
     enableSounds,
-    updatePNL
+    updatePNL,
   } = useGlobalContext();
 
   const [livePrice, setLivePrice] = useState(0);
@@ -97,9 +103,9 @@ export default function Options() {
       let res = await checkResultAPI(wallet);
       if (res.success) {
         if (res?.data?.result == "Won") {
-          successCustom(res?.message);
+          successCustom(translator(res?.message, language) + ` ${formatNumber(res?.data?.amountWon)} ${selectedCoin.tokenName}`);
           soundAlert("/sounds/win.wav", !enableSounds);
-        } else errorCustom(res?.message);
+        } else errorCustom(translator(res?.message, language));
         if (!result) {
           // console.log("updating");
           setResult(res?.data?.result);
@@ -112,12 +118,7 @@ export default function Options() {
 
         let win = res?.data?.result == "Won";
 
-        updatePNL(
-          GameType.options,
-          win,
-          betAmt!,
-          2,
-        );
+        updatePNL(GameType.options, win, betAmt!, 2);
 
         setRefresh(true);
         setLoading(false);
@@ -135,10 +136,12 @@ export default function Options() {
           return newResults;
         });
       } else {
-        throw Error(res?.message ?? "Could not fetch result!");
+        throw Error(
+          translator(res?.message ?? "Could not fetch result", language),
+        );
       }
     } catch (e: any) {
-      errorCustom(e?.message ?? "Could not fetch result.");
+      errorCustom(translator(e?.message ?? "Could not fetch result", language));
       setResult(null);
       setCheckResult(false);
       setLoading(false);
@@ -150,12 +153,12 @@ export default function Options() {
     setCheckResult(false);
     try {
       if (betAmt === undefined) {
-        errorCustom("Invalid amount");
+        errorCustom(translator("Invalid amount", language));
         return;
       }
 
       if (betAmt > selectedCoin!.amount) {
-        errorCustom("Insufficient balance to place bet");
+        errorCustom(translator("Insufficient balance for bet!", language));
         setBetType(null);
         setCheckResult(false);
         setBetEnd(false);
@@ -190,10 +193,10 @@ export default function Options() {
         setCheckResult(false);
         setBetEnd(false);
         setLoading(false);
-        res?.message && errorCustom(res?.message);
+        res?.message && errorCustom(translator(res?.message, language));
       }
     } catch (e) {
-      errorCustom("Could not place bet.");
+      errorCustom(translator("Could not place bet.", language));
       setBetType(null);
       setCheckResult(false);
       setBetEnd(false);
@@ -303,7 +306,8 @@ export default function Options() {
       }
       return;
     } else {
-      if (!wallet.publicKey) errorCustom(translator("Wallet not connected", language));
+      if (!wallet.publicKey)
+        errorCustom(translator("Wallet not connected", language));
       else {
         if (
           betType &&
@@ -314,7 +318,10 @@ export default function Options() {
         ) {
           // setBetType("up");
           await bet(betType);
-        } else errorCustom("Choose amount, interval and type.");
+        } else
+          errorCustom(
+            translator("Choose amount, interval and type.", language),
+          );
       }
     }
   };

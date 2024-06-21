@@ -23,7 +23,7 @@ import {
   successCustom,
   warningCustom,
 } from "@/components/toasts/ToastGroup";
-import { translator, truncateNumber } from "@/context/transactions";
+import { formatNumber, translator, truncateNumber } from "@/context/transactions";
 import { useSession } from "next-auth/react";
 import { GameType } from "@/utils/provably-fair";
 import { handleSignIn } from "@/components/ConnectWallet";
@@ -211,11 +211,11 @@ export default function Keno() {
         }),
       });
 
-      const { success, message, result, strikeNumbers, strikeMultiplier } =
+      const { success, message, result, strikeNumbers, strikeMultiplier, amountWon } =
         await response.json();
 
       if (success != true) {
-        throw new Error(message);
+        throw new Error(translator(message, language));
       }
 
       if (success) {
@@ -233,8 +233,8 @@ export default function Keno() {
           setStrikeNumbers((prevNumbers) => [...prevNumbers, number]);
         }
       }
-      if (result == "Won") successCustom(message);
-      else errorCustom(message);
+      if (result == "Won") successCustom(translator(message, language) + ` ${formatNumber(amountWon)} ${selectedCoin.tokenName}`);
+      else errorCustom(translator(message, language));
 
       const win = result === "Won";
       if (win) soundAlert("/sounds/win.wav", !enableSounds);
@@ -376,7 +376,7 @@ export default function Keno() {
         return;
       }
       if (typeof autoBetCount === "number" && autoBetCount <= 0) {
-        errorCustom("Set Bet Count.");
+        errorCustom(translator("Set Bet Count.", language));
         return;
       }
       if (

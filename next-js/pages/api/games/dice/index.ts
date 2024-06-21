@@ -106,7 +106,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       if (!user)
         return res
           .status(400)
-          .json({ success: false, message: "User does not exist !" });
+          .json({ success: false, message: "User does not exist!" });
 
       if (
         user.deposit.find((d: any) => d.tokenMint === tokenMint)?.amount <
@@ -114,7 +114,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       )
         return res
           .status(400)
-          .json({ success: false, message: "Insufficient balance !" });
+          .json({ success: false, message: "Insufficient balance for bet!" });
 
       const userData = await StakingUser.findOneAndUpdate(
         { wallet },
@@ -213,7 +213,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       );
 
       if (!userUpdate) {
-        throw new Error("Insufficient balance for bet!");
+        throw new Error("Insufficient balance for action!!");
       }
 
       const dice = new Dice({
@@ -291,10 +291,12 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           result,
           amountWon: amountWon.toNumber(),
           amountLost,
+          token: splToken.tokenName
         },
-        message: `${result} ${
-          result == "Won" ? amountWon.toFixed(4) : amountLost.toFixed(4)
-        } ${splToken.tokenName}!`,
+        message:
+          result === "Won"
+            ? "Congratulations! You won" + ` ${amountWon.toNumber()} ${splToken.tokenName}`
+            : "Sorry, Better luck next time!",
       });
     } catch (e: any) {
       console.log(e);
