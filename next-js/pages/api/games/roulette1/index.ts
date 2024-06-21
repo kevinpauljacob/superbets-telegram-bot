@@ -265,30 +265,41 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       let amountWon = new Decimal(0);
       let result = "Lost";
 
+      let strikeMultiplier = new Decimal(0);
+
       Object.entries(wager).forEach(([key, value]) => {
         if (key === "straight") {
           if (
             (value as Record<string, number>)[strikeNumber.toString()] != null
           ) {
-            amountWon = amountWon.add(
-              Decimal.mul(
-                (value as Record<string, number>)[strikeNumber.toString()],
-                WagerPayout[key],
-              ),
+            let winAmount = Decimal.mul(
+              (value as Record<string, number>)[strikeNumber.toString()],
+              WagerPayout[key],
             );
+
+            amountWon = amountWon.add(winAmount);
+
             result = "Won";
+            strikeMultiplier = winAmount.mul(WagerPayout[key]);
           }
         } else if (
           (WagerMapping[key as WagerType] as Array<number>).includes(
             strikeNumber,
           )
         ) {
-          amountWon = amountWon.add(
-            Decimal.mul(value as number, WagerPayout[key as WagerType]),
+          let winAmount = Decimal.mul(
+            value as number,
+            WagerPayout[key as WagerType],
           );
+
+          amountWon = amountWon.add(winAmount);
+
           result = "Won";
+          strikeMultiplier = winAmount.mul(WagerPayout[key as WagerType]);
         }
       });
+
+      strikeMultiplier = Decimal.div(strikeMultiplier, amount);
 
       const feeGenerated = Decimal.mul(amountWon, houseEdge).toNumber();
 
@@ -330,6 +341,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         amount,
         wager,
         strikeNumber,
+        strikeMultiplier,
         result,
         tokenMint,
         houseEdge,
@@ -397,6 +409,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
             ? `Congratulations! You Won ${amountWon}`
             : "Better luck next time!",
         strikeNumber,
+        strikeMultiplier: strikeMultiplier.toNumber(),
         amountWon: amountWon.toNumber(),
         amountLost,
       });
