@@ -334,7 +334,7 @@ export default function Roulette1() {
               totalPNL:
                 liveStats.length > 0
                   ? liveStats[liveStats.length - 1].totalPNL +
-                    (win ? betAmt * newBetResult.result - betAmt : -betAmt)
+                  (win ? betAmt * newBetResult.result - betAmt : -betAmt)
                   : win
                     ? betAmt * newBetResult.result - betAmt
                     : -betAmt,
@@ -424,12 +424,12 @@ export default function Roulette1() {
         potentialLoss =
           autoBetProfit +
           -1 *
-            (autoWinChangeReset || autoLossChangeReset
-              ? betAmt
-              : autoBetCount === "inf"
-                ? Math.max(0, betAmt)
-                : betAmt *
-                  (autoLossChange !== null ? autoLossChange / 100.0 : 0));
+          (autoWinChangeReset || autoLossChangeReset
+            ? betAmt
+            : autoBetCount === "inf"
+              ? Math.max(0, betAmt)
+              : betAmt *
+              (autoLossChange !== null ? autoLossChange / 100.0 : 0));
       }
       if (
         useAutoConfig &&
@@ -932,9 +932,8 @@ export default function Roulette1() {
         {numbers.slice(-3).map((num, index) => (
           <div
             key={index}
-            className={`flex items-center justify-center w-8 h-8 rounded-full text-sm font-semibold ${
-              predefinedBets.red.includes(num) ? "bg-[#F1323E]" : "bg-[#2A2E38]"
-            } text-white`}
+            className={`flex items-center justify-center w-8 h-8 rounded-full text-sm font-semibold ${predefinedBets.red.includes(num) ? "bg-[#F1323E]" : "bg-[#2A2E38]"
+              } text-white`}
           >
             {num}
           </div>
@@ -969,11 +968,11 @@ export default function Roulette1() {
             <BetButton
               disabled={
                 !selectedToken ||
-                loading ||
-                !session?.user ||
-                (betAmt !== undefined &&
-                  maxBetAmt !== undefined &&
-                  betAmt > maxBetAmt)
+                  loading ||
+                  !session?.user ||
+                  (betAmt !== undefined &&
+                    maxBetAmt !== undefined &&
+                    betAmt > maxBetAmt)
                   ? true
                   : false
               }
@@ -1054,15 +1053,15 @@ export default function Roulette1() {
                   <BetButton
                     disabled={
                       !betSetting ||
-                      loading ||
-                      !session?.user ||
-                      (betAmt !== undefined &&
-                        maxBetAmt !== undefined &&
-                        betAmt > maxBetAmt)
+                        loading ||
+                        !session?.user ||
+                        (betAmt !== undefined &&
+                          maxBetAmt !== undefined &&
+                          betAmt > maxBetAmt)
                         ? true
                         : false
                     }
-                    // onClickFunction={onSubmit}
+                  // onClickFunction={onSubmit}
                   >
                     {loading ? <Loader /> : "BET"}
                   </BetButton>
@@ -1076,22 +1075,20 @@ export default function Roulette1() {
         <div
           className={`fadeInUp absolute inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50 ${overlay ? "" : "hidden fadeOutDown"}`}
         >
-          <div
-            className={`hidden roulette relative w-full h-full sm:flex flex-col items-center justify-center rounded-full`}
-          >
-            <img className="absolute w-96 h-96" src="/bg.svg " />
-            <img className="wheel absolute w-96 h-96" src="/wheel.svg" />
+          <div className="roulette relative w-full h-full flex flex-col items-center justify-center rounded-full">
+            <img className="absolute w-96 h-96" src="/bg.svg" style={{ top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }} />
+            <img className="wheel absolute w-96 h-96" src="/wheel.svg" style={{ transform: 'translate(-50%, -50%)' }} />
             {centerNumber ? (
-              <div className="text-4xl font-chakra font-semibold text-white absolute">
-                {centerNumber!}
+              <div className="text-4xl font-chakra font-semibold text-white absolute" style={{ top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}>
+                {centerNumber}
               </div>
             ) : (
-              <img className="needle absolute" src="/needle.svg" />
+              <img className="needle absolute" src="/needle.svg" style={{ transform: 'translate(-50%, -50%)' }} />
             )}
 
             <div
               ref={overlayBallContainer}
-              className="ball_container absolute w-96 h-[22px] px-[50px] flex items-center"
+              className="ball_container absolute w-96 h-[22px] px-[50px] flex items-center" style={{ transform: 'translate(-50%, -50%)' }}
             >
               <div
                 ref={overlayBall}
@@ -1161,16 +1158,14 @@ export default function Roulette1() {
                 <div
                   className={` h-[125px] w-[27.3px]  sm:h-[153px] sm:w-12    flex flex-col justify-center text-center cursor-pointer bg-[#149200] rounded-[5px]
                text-white relative border-4 border-transparent  hover:bg-[#55BA78]
-                hover:border-[2px] hover:border-slate-300 mb-1 ${
-                  hoveredCorner && hoveredCorner.includes(0)
-                    ? "overlay border-[2px] border-white"
-                    : ""
-                }
-                ${
-                  hoveredSplit && hoveredSplit.includes(0)
-                    ? "overlay border-[2px] border-white"
-                    : ""
-                }`}
+                hover:border-[2px] hover:border-slate-300 mb-1 ${hoveredCorner && hoveredCorner.includes(0)
+                      ? "overlay border-[2px] border-white"
+                      : ""
+                    }
+                ${hoveredSplit && hoveredSplit.includes(0)
+                      ? "overlay border-[2px] border-white"
+                      : ""
+                    }`}
                   onClick={() => handlePlaceBet("num-0", selectedToken)}
                 >
                   {/* h-[27.3px] w-[125px] */}
@@ -1189,37 +1184,31 @@ export default function Roulette1() {
                           >
                             <button
                               data-testid={`roulette-tile-${number}`}
-                              className={` h-[40px] w-[27px] sm:w-[48px] sm:h-[48px] flex items-center justify-center  relative text-center  ${
-                                predefinedBets.red.includes(
-                                  number,
-                                ) /* h-[27px] w-[40px] */
-                                  ? "bg-[#F1323E] hover:border hover:border-slate-200 hover:bg-[#FF5C67]"
-                                  : "bg-[#2A2E38] hover:border hover:border-slate-200 hover:bg-[#4D5361]"
-                              } text-white rounded-[5px] border-4 border-transparent ${
-                                hoveredButton &&
-                                predefinedBets[
-                                  hoveredButton as PredefinedBetType
-                                ]?.includes(number)
+                              className={` h-[40px] w-[27px] sm:w-[48px] sm:h-[48px] flex items-center justify-center  relative text-center  ${predefinedBets.red.includes(
+                                number,
+                              ) /* h-[27px] w-[40px] */
+                                ? "bg-[#F1323E] hover:border hover:border-slate-200 hover:bg-[#FF5C67]"
+                                : "bg-[#2A2E38] hover:border hover:border-slate-200 hover:bg-[#4D5361]"
+                                } text-white rounded-[5px] border-4 border-transparent ${hoveredButton &&
+                                  predefinedBets[
+                                    hoveredButton as PredefinedBetType
+                                  ]?.includes(number)
                                   ? "overlay border-[2px] border-white "
                                   : ""
-                              } ${
-                                hoveredRow !== null &&
-                                rows[hoveredRow]?.includes(number)
+                                } ${hoveredRow !== null &&
+                                  rows[hoveredRow]?.includes(number)
                                   ? "overlay border-[2px] border-white"
                                   : ""
-                              } ${
-                                hoveredSplit && hoveredSplit.includes(number)
+                                } ${hoveredSplit && hoveredSplit.includes(number)
                                   ? "overlay border-[2px] border-white"
                                   : ""
-                              } ${
-                                hoveredCorner && hoveredCorner.includes(number)
+                                } ${hoveredCorner && hoveredCorner.includes(number)
                                   ? "overlay border-[2px] border-white"
                                   : ""
-                              } ${
-                                hoveredColumn && hoveredColumn.includes(number)
+                                } ${hoveredColumn && hoveredColumn.includes(number)
                                   ? "overlay border-[2px] border-white"
                                   : ""
-                              }`}
+                                }`}
                               onClick={() =>
                                 selectedToken &&
                                 handlePlaceBet(`num-${number}`, selectedToken)
