@@ -14,7 +14,7 @@ import { useGlobalContext } from "@/components/GlobalContext";
 import BetAmount from "@/components/games/BetAmountInput";
 import BetButton from "@/components/games/BetButton";
 import Loader from "@/components/games/Loader";
-import { errorCustom, successCustom } from "@/components/toasts/ToastGroup";
+import { errorCustom, successCustom, warningCustom } from "@/components/toasts/ToastGroup";
 import Bets from "@/components/games/Bets";
 import { Refresh } from "iconsax-react";
 import { translator } from "@/context/transactions";
@@ -316,6 +316,68 @@ export default function Roulette1() {
     setTransformedBets(transformedBets);
     bet();
   };
+  useEffect(() => {
+    if (refresh && wallet?.publicKey) {
+      getBalance();
+      getWalletBalance();
+      setRefresh(false);
+    }
+  }, [wallet?.publicKey, refresh]);
+  useEffect(() => {
+    setBetAmt(betAmt);
+  }, [betAmt]);
+
+  useEffect(()=>{
+    if(betSetting === "auto" && startAuto &&
+      ((typeof autoBetCount === "string" && autoBetCount.includes('inf')) ||
+    (typeof autoBetCount === 'number' && autoBetCount > 0))
+    ){
+      let potentialLoss = 0;
+      if(betAmt !== undefined){
+        potentialLoss = autoBetProfit+ -1 *
+        (autoWinChangeReset ||autoLossChangeReset ? betAmt : autoBetCount === "inf" ? Math.max(0, betAmt): betAmt * (autoLossChange !== null ? autoLossChange /100.0 :0))
+      }
+      if(useAutoConfig &&
+        autoStopProfit &&
+        autoBetProfit > 0 &&
+        autoBetProfit >= autoStopProfit
+      ){
+        setTimeout(()=>{
+          warningCustom(
+            translator("Profit limit reached.",language),
+            "top-left"
+          );
+        },500);
+        setAutoBetCount(0);
+        setStartAuto(false);
+        return;
+      }
+      if(useAutoConfig &&
+        autoStopLoss &&
+        autoBetProfit < 0 &&
+        potentialLoss < -autoStopLoss
+      ){
+        setTimeout(()=>{
+          warningCustom(
+            translator("Loss limit reached.",language),
+            "top-left"
+          );
+        },500)
+        setAutoBetCount(0);
+        setStartAuto(false);
+        return;
+      }
+      setTimeout(()=>{
+        setLoading(true)
+        
+        bet();
+      },500)
+    }else{
+      setStartAuto(false);
+      setAutoBetProfit(0);
+      setBetAmt(betAmt);
+    }
+  },[startAuto, autoBetCount]);
 
   const handlePlaceBet = (areaId: string, token: Token | null) => {
     if (!token) {
@@ -777,9 +839,37 @@ export default function Roulette1() {
       <GameOptions>
         <>
           <div className="relative w-full flex lg:hidden mb-[1.4rem]">
-            <BetButton disabled={!wallet || !session?.user || isRolling}>
-              {isRolling ? <Loader /> : betActive ? "CASHOUT" : "BET"}
-            </BetButton>
+          {startAuto && (
+              <div
+                onClick={() => {
+                  soundAlert("/sounds/betbutton.wav", !enableSounds);
+                  warningCustom(
+                    translator("Auto bet stopped", language),
+                    "top-left",
+                  );
+                  setAutoBetCount(0);
+                  setStartAuto(false);
+                }}
+                className="cursor-pointer rounded-lg absolute w-full h-full z-20 bg-[#442c62] hover:bg-[#7653A2] focus:bg-[#53307E] flex items-center justify-center font-chakra font-semibold text-2xl tracking-wider text-white"
+              >
+                {translator("STOP", language)}
+              </div>
+            )}
+            <BetButton
+                  disabled={
+                    !selectedToken ||
+                    loading ||
+                    !session?.user ||
+                    (betAmt !== undefined &&
+                      maxBetAmt !== undefined &&
+                      betAmt > maxBetAmt)
+                      ? true
+                      : false
+                  }
+                  onClickFunction={onSubmit}
+                >
+                  {loading ? <Loader /> : "BET"}
+                </BetButton>
           </div>
           {betSetting === "auto" && (
             <div className="w-full flex  lg:hidden">
@@ -833,21 +923,39 @@ export default function Roulette1() {
                     </div>
                   </div>
                 )}
-                <BetButton
-                  disabled={
-                    !selectedToken ||
-                    loading ||
-                    !session?.user ||
-                    (betAmt !== undefined &&
-                      maxBetAmt !== undefined &&
-                      betAmt > maxBetAmt)
-                      ? true
-                      : false
-                  }
-                  onClickFunction={onSubmit}
-                >
-                  {loading ? <Loader /> : "BET"}
-                </BetButton>
+                <div className="relative w-full hidden lg:flex mb-[1.4rem]">
+                  {startAuto && (
+                    <div
+                      onClick={() => {
+                        soundAlert("/sounds/betbutton.wav", !enableSounds);
+                        warningCustom(
+                          translator("Auto bet stopped", language),
+                          "top-left",
+                        );
+                        setAutoBetCount(0);
+                        setStartAuto(false);
+                      }}
+                      className="cursor-pointer rounded-lg absolute w-full h-full z-20 bg-[#442c62] hover:bg-[#7653A2] focus:bg-[#53307E] flex items-center justify-center font-chakra font-semibold text-2xl tracking-wider text-white"
+                    >
+                      {translator("STOP", language)}
+                    </div>
+                  )}
+                  <BetButton
+                    disabled={
+                      !betSetting ||
+                      loading ||
+                      !session?.user ||
+                      (betAmt !== undefined &&
+                        maxBetAmt !== undefined &&
+                        betAmt > maxBetAmt)
+                        ? true
+                        : false
+                    }
+                    // onClickFunction={onSubmit}
+                  >
+                    {loading ? <Loader /> : "BET"}
+                  </BetButton>
+                </div>
               </form>
             </FormProvider>
           </div>
