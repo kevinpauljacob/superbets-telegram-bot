@@ -25,8 +25,12 @@ import { loopSound, soundAlert } from "@/utils/soundUtils";
 import Bets from "../../components/games/Bets";
 import AutoCount from "@/components/AutoCount";
 import ConfigureAutoButton from "@/components/ConfigureAutoButton";
-import { errorCustom, warningCustom } from "@/components/toasts/ToastGroup";
-import { rollDice, translator } from "@/context/transactions";
+import {
+  errorCustom,
+  successCustom,
+  warningCustom,
+} from "@/components/toasts/ToastGroup";
+import { formatNumber, rollDice, translator } from "@/context/transactions";
 import { useSession } from "next-auth/react";
 import { GameType } from "@/utils/provably-fair";
 
@@ -179,13 +183,26 @@ export default function Dice() {
         selectedCoin.tokenMint,
         selectedFace,
       );
+
+      if (res.success != true) {
+        throw new Error(translator(res?.message, language));
+      }
+
       if (res.success) {
-        const { strikeNumber, result } = res.data;
+        const { strikeNumber, result, amountWon } = res.data;
         const isWin = result === "Won";
 
         updatePNL(GameType.dice, isWin, betAmt, winningPays);
 
-        if (isWin) soundAlert("/sounds/win.wav", !enableSounds);
+        if (isWin) {
+          soundAlert("/sounds/win.wav", !enableSounds);
+          successCustom(
+            translator(res?.message, language) +
+              ` ${formatNumber(amountWon)} ${selectedCoin?.tokenName}`,
+          );
+        } else {
+          errorCustom(translator(res?.message, language));
+        }
         const newBetResults = [
           ...(betResults.length <= 4 ? betResults : betResults.slice(-4)),
           { face: strikeNumber, win: isWin },
@@ -194,6 +211,7 @@ export default function Dice() {
         setShowPointer(true);
         setStrikeFace(strikeNumber);
         setRefresh(true);
+
         loopSound("/sounds/diceshake.wav", 0.3, !enableSounds);
 
         // auto options

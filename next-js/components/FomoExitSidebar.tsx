@@ -48,7 +48,7 @@ export default function FomoExitSidebar() {
           <div className="flex items-center gap-3">
             <FomoExitIcon className="min-w-[1.25rem] min-h-[1.25rem] transition-all text-white group-hover:text-[#9945FF] group-focus:text-[#9945FF] opacity-50 hover:opacity-100" />
             <span className="mt-0.5 transition-all text-sm font-changa font-medium text-white text-opacity-90 group-hover:text-opacity-100 group-focus:text-opacity-100">
-              FOMO: {translator("Exit", language)}
+              FOMO: EXIT
             </span>
           </div>
           <span className="text-xs text-fomo-green font-medium mt-[0.5px]">

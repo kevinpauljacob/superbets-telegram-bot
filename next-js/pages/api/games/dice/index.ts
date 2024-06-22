@@ -283,7 +283,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         socket.close();
       };
 
-      return res.json({
+      return res.status(201).json({
         success: true,
         data: {
           strikeNumber,
@@ -291,11 +291,10 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           result,
           amountWon: amountWon.toNumber(),
           amountLost,
-          token: splToken.tokenName
         },
         message:
           result === "Won"
-            ? "Congratulations! You won" + ` ${amountWon.toNumber()} ${splToken.tokenName}`
+            ? "Congratulations! You won"
             : "Sorry, Better luck next time!",
       });
     } catch (e: any) {
