@@ -110,23 +110,31 @@ export default function Layout({ children }: LayoutProps) {
   };
 
   const handleUserInteraction = () => {
-    // Preload sounds with muted audio
-    soundAlert("/sounds/betbutton.wav", true, );
+    soundAlert("/sounds/betbutton.wav", true);
     soundAlert("/sounds/diceshake.wav", true);
     soundAlert("/sounds/slider.wav", true);
     soundAlert("/sounds/win.wav", true);
     soundAlert("/sounds/bomb.wav", true);
 
-    // Remove event listener after the first interaction
     document.removeEventListener("mousemove", handleUserInteraction);
+    document.removeEventListener("touchstart", handleUserInteraction);
+    document.removeEventListener("touchmove", handleUserInteraction);
   };
 
   useEffect(() => {
     document.addEventListener("mousemove", handleUserInteraction, {
       once: true,
     });
+    document.addEventListener("touchstart", handleUserInteraction, {
+      once: true,
+    });
+    document.addEventListener("touchmove", handleUserInteraction, {
+      once: true,
+    });
     return () => {
       document.removeEventListener("mousemove", handleUserInteraction);
+      document.removeEventListener("touchstart", handleUserInteraction);
+      document.removeEventListener("touchmove", handleUserInteraction);
     };
   }, []);
 
@@ -187,7 +195,6 @@ export default function Layout({ children }: LayoutProps) {
     setAutoBetCount(1);
     setStartAuto(false);
     const configOptions = autoConfigState.get(game);
-    // console.log("Auto options", configOptions);
     if (configOptions) {
       setAutoWinChange(configOptions.autoWinChange);
       setAutoLossChange(configOptions.autoLossChange);
