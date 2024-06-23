@@ -680,6 +680,21 @@ export const translationsMap = {
     ko: "하이로",
     ch: "Hilo",
   },
+  Plinko: {
+    ru: "Плинко",
+    ko: "플링코",
+    ch: "Plinko",
+  },
+  Roulette: {
+    ru: "Рулетка",
+    ko: "룰렛",
+    ch: "轮盘",
+  },
+  All: {
+    ru: "Все",
+    ko: "모두",
+    ch: "全部",
+  },
   Withdraw: {
     ru: "Вывод",
     ko: "철수",
@@ -1599,10 +1614,10 @@ export const translationsMap = {
     ko: "베��에 필요한 잔액이 부족합니다!",
     ch: "投注所需的余额不足！",
   },
-  "Insufficient balance for action!!": {
-    ru: "Недостаточно средств для действия!!",
-    ko: "작업에 필요한 잔액이 부족합니다!!",
-    ch: "操作所需的余额不足！！",
+  "Insufficient balance": {
+    ru: "Недостаточно средств",
+    ko: "잔액이 부족합니다",
+    ch: "余额不足",
   },
   "Under maintenance": {
     ru: "Поддержка",

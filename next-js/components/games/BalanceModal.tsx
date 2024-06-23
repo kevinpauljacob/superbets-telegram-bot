@@ -68,7 +68,7 @@ export default function BalanceModal() {
 
           if (!balance || balance < amount) {
             setLoading(false);
-            errorCustom("Insufficient balance");
+            errorCustom(translator("Insufficient balance", language));
             return;
           }
 

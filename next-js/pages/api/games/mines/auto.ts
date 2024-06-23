@@ -130,7 +130,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       );
 
       if (!user) {
-        throw new Error("Insufficient balance for action!!");
+        throw new Error("Insufficient balance for bet!");
       }
 
       const activeGameSeed = await GameSeed.findOneAndUpdate(
