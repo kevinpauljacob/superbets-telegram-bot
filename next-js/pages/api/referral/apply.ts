@@ -1,6 +1,7 @@
 import connectDatabase from "../../../utils/database";
 import { NextApiRequest, NextApiResponse } from "next";
 import { User, Campaign } from "@/models/referral";
+import { v4 as uuidv4 } from "uuid";
 import { getToken } from "next-auth/jwt";
 
 const secret = process.env.NEXTAUTH_SECRET;
@@ -58,7 +59,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       5,
     );
 
-    await User.findOneAndUpdate(
+    const user = await User.findOneAndUpdate(
       {
         wallet,
         referredByChain: [],
@@ -68,7 +69,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           referredByChain,
         },
       },
-      { upsert: true },
+      { upsert: true, new: true },
     ).catch((e) => {
       return res.status(400).json({
         success: false,
@@ -78,6 +79,34 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
     campaign.signupCount += 1;
     await campaign.save();
+
+    if (user.campaigns.length === 0) {
+      const defaultCampaign = "Default Campaign";
+      const campaign = await Campaign.findOneAndUpdate(
+        {
+          wallet,
+          campaignName: defaultCampaign,
+        },
+        {
+          $setOnInsert: {
+            referralCode: uuidv4().slice(0, 8),
+          },
+        },
+        {
+          upsert: true,
+          new: true,
+        },
+      );
+
+      await User.findOneAndUpdate(
+        {
+          wallet,
+        },
+        {
+          $addToSet: { campaigns: campaign._id },
+        },
+      );
+    }
 
     return res.json({
       success: true,
