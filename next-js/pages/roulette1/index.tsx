@@ -20,91 +20,12 @@ import {
   warningCustom,
 } from "@/components/toasts/ToastGroup";
 import Bets from "@/components/games/Bets";
-import { Refresh } from "iconsax-react";
+
 import { translator } from "@/context/transactions";
 import { SPL_TOKENS } from "@/context/config"; // Adjust the import path accordingly
 import { soundAlert } from "@/utils/soundUtils";
 import ConfigureAutoButton from "@/components/ConfigureAutoButton";
 import AutoCount from "@/components/AutoCount";
-import { GameType } from "@/utils/provably-fair";
-import { start } from "repl";
-
-interface Token {
-  id: number;
-  value: string;
-  image: string;
-  tokenName: string; // New property to link to SPL_TOKENS
-}
-
-const tokens: Token[] = [
-  { id: 1, value: "1", image: "/assets/token-1.svg", tokenName: "SOL" },
-  { id: 2, value: "10", image: "/assets/token-10.svg", tokenName: "SOL" },
-  { id: 3, value: "100", image: "/assets/token-100.svg", tokenName: "SOL" },
-  { id: 4, value: "1000", image: "/assets/token-1k.svg", tokenName: "SOL" },
-  { id: 5, value: "10000", image: "/assets/token-10k.svg", tokenName: "SOL" },
-  { id: 6, value: "100000", image: "/assets/token-100k.svg", tokenName: "SOL" },
-  { id: 7, value: "1000000", image: "/assets/token-1M.svg", tokenName: "SOL" },
-  {
-    id: 8,
-    value: "10000000",
-    image: "/assets/token-10M.svg",
-    tokenName: "SOL",
-  },
-  {
-    id: 9,
-    value: "100000000",
-    image: "/assets/token-100M.svg",
-    tokenName: "SOL",
-  },
-  {
-    id: 10,
-    value: "1000000000",
-    image: "/assets/token-1B.svg",
-    tokenName: "SOL",
-  },
-  {
-    id: 11,
-    value: "10000000000",
-    image: "/assets/token-10B.svg",
-    tokenName: "SOL",
-  },
-];
-
-const rows = [
-  [3, 6, 9, 12, 15, 18, 21, 24, 27, 30, 33, 36],
-  [2, 5, 8, 11, 14, 17, 20, 23, 26, 29, 32, 35],
-  [1, 4, 7, 10, 13, 16, 19, 22, 25, 28, 31, 34],
-];
-
-type PredefinedBetType =
-  | "1st-12"
-  | "2nd-12"
-  | "3rd-12"
-  | "1-18"
-  | "19-36"
-  | "even"
-  | "odd"
-  | "red"
-  | "black"
-  | "1st-column"
-  | "2nd-column"
-  | "3rd-column";
-const predefinedBets: Record<PredefinedBetType, number[]> = {
-  "1st-12": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
-  "2nd-12": [13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24],
-  "3rd-12": [25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36],
-  "1-18": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18],
-  "19-36": [
-    19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36,
-  ],
-  even: [2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 34, 36],
-  odd: [1, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23, 25, 27, 29, 31, 33, 35],
-  red: [1, 3, 5, 7, 9, 12, 14, 16, 18, 19, 21, 23, 25, 27, 28, 30, 32, 34, 36],
-  black: [2, 4, 6, 8, 10, 11, 13, 15, 17, 20, 22, 24, 26, 29, 31, 33, 35],
-  "1st-column": [3, 6, 9, 12, 15, 18, 21, 24, 27, 30, 33, 36],
-  "2nd-column": [2, 5, 8, 11, 14, 17, 20, 23, 26, 29, 32, 35],
-  "3rd-column": [1, 4, 7, 10, 13, 16, 19, 22, 25, 28, 31, 34],
-};
 
 export default function Roulette1() {
   const wallet = useWallet();
@@ -129,7 +50,7 @@ export default function Roulette1() {
     setAutoBetProfit,
     useAutoConfig,
     setUseAutoConfig,
-
+    selectedCoin,
     enableSounds,
     setLiveStats,
     liveStats,
@@ -137,7 +58,11 @@ export default function Roulette1() {
     maxBetAmt,
     language,
   } = useGlobalContext();
-  console.log("AutoBetCount", autoBetCount);
+
+  type Bet = {
+    areaId: string;
+    token: Token;
+  };
   type TransformedBets = Record<string, Record<string, number>>;
   type WagerType =
     | "red"
@@ -154,9 +79,121 @@ export default function Roulette1() {
     | "2nd-column"
     | "3rd-column"
     | "straight";
+  type PredefinedBetType =
+    | "1st-12"
+    | "2nd-12"
+    | "3rd-12"
+    | "1-18"
+    | "19-36"
+    | "even"
+    | "odd"
+    | "red"
+    | "black"
+    | "1st-column"
+    | "2nd-column"
+    | "3rd-column";
+  interface Token {
+    id: number;
+    value: string;
+    image: string;
+    tokenName: string; // New property to link to SPL_TOKENS
+  }
 
+  const tokens: Token[] = [
+    {
+      id: 1,
+      value: "1",
+      image: "/assets/token-1.svg",
+      tokenName: selectedCoin.tokenName,
+    },
+    {
+      id: 2,
+      value: "10",
+      image: "/assets/token-10.svg",
+      tokenName: selectedCoin.tokenName,
+    },
+    {
+      id: 3,
+      value: "100",
+      image: "/assets/token-100.svg",
+      tokenName: selectedCoin.tokenName,
+    },
+    {
+      id: 4,
+      value: "1000",
+      image: "/assets/token-1k.svg",
+      tokenName: selectedCoin.tokenName,
+    },
+    {
+      id: 5,
+      value: "10000",
+      image: "/assets/token-10k.svg",
+      tokenName: selectedCoin.tokenName,
+    },
+    {
+      id: 6,
+      value: "100000",
+      image: "/assets/token-100k.svg",
+      tokenName: selectedCoin.tokenName,
+    },
+    {
+      id: 7,
+      value: "1000000",
+      image: "/assets/token-1M.svg",
+      tokenName: selectedCoin.tokenName,
+    },
+    {
+      id: 8,
+      value: "10000000",
+      image: "/assets/token-10M.svg",
+      tokenName: selectedCoin.tokenName,
+    },
+    {
+      id: 9,
+      value: "100000000",
+      image: "/assets/token-100M.svg",
+      tokenName: selectedCoin.tokenName,
+    },
+    {
+      id: 10,
+      value: "1000000000",
+      image: "/assets/token-1B.svg",
+      tokenName: selectedCoin.tokenName,
+    },
+    {
+      id: 11,
+      value: "10000000000",
+      image: "/assets/token-10B.svg",
+      tokenName: selectedCoin.tokenName,
+    },
+  ];
+
+  const rows = [
+    [3, 6, 9, 12, 15, 18, 21, 24, 27, 30, 33, 36],
+    [2, 5, 8, 11, 14, 17, 20, 23, 26, 29, 32, 35],
+    [1, 4, 7, 10, 13, 16, 19, 22, 25, 28, 31, 34],
+  ];
+
+  const predefinedBets: Record<PredefinedBetType, number[]> = {
+    "1st-12": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+    "2nd-12": [13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24],
+    "3rd-12": [25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36],
+    "1-18": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18],
+    "19-36": [
+      19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36,
+    ],
+    even: [2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 34, 36],
+    odd: [1, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23, 25, 27, 29, 31, 33, 35],
+    red: [
+      1, 3, 5, 7, 9, 12, 14, 16, 18, 19, 21, 23, 25, 27, 28, 30, 32, 34, 36,
+    ],
+    black: [2, 4, 6, 8, 10, 11, 13, 15, 17, 20, 22, 24, 26, 29, 31, 33, 35],
+    "1st-column": [3, 6, 9, 12, 15, 18, 21, 24, 27, 30, 33, 36],
+    "2nd-column": [2, 5, 8, 11, 14, 17, 20, 23, 26, 29, 32, 35],
+    "3rd-column": [1, 4, 7, 10, 13, 16, 19, 22, 25, 28, 31, 34],
+  };
   const [betAmt, setBetAmt] = useState<number | undefined>(0);
-  const [currentMultiplier, setCurrentMultiplier] = useState<number>(0);
+
   const [transformedBets, setTransformedBets] = useState<TransformedBets>({
     straight: {},
   });
@@ -177,7 +214,6 @@ export default function Roulette1() {
   const [hoveredColumn, setHoveredColumn] = useState<number[] | null>(null);
   const [resultNumbers, setResultNumbers] = useState<number[]>([]);
   const [refresh, setRefresh] = useState(true);
-  const [centerNumber, setCenterNumber] = useState<number | null>(null);
   const [strikeMultiplier, setStrikeMultiplier] = useState<number>();
   const [spinComplete, setSpinComplete] = useState(false);
   const [num, setNum] = useState<number | null>(null);
@@ -190,6 +226,32 @@ export default function Roulette1() {
   const [win, setWin] = useState(false);
   const [message, setMessage] = useState("");
   const [betInProgress, setBetInProgress] = useState(false);
+  const [rates, setRates] = useState({ USDC: 0, FOMO: 0 });
+
+  useEffect(() => {
+    const fetchRates = async () => {
+      try {
+        const responseUSDC = await fetch(
+          "https://price.jup.ag/v6/price?ids=SOL&vsToken=USDC",
+        );
+        const dataUSDC = await responseUSDC.json();
+        const rateUSDC = dataUSDC.data.SOL.price;
+
+        const responseFOMO = await fetch(
+          "https://price.jup.ag/v6/price?ids=SOL&vsToken=FOMO",
+        );
+        const dataFOMO = await responseFOMO.json();
+        const rateFOMO = dataFOMO.data.SOL.price;
+
+        setRates({ USDC: rateUSDC, FOMO: rateFOMO });
+      } catch (error) {
+        console.error("Error fetching exchange rates:", error);
+      }
+    };
+
+    fetchRates();
+  }, []);
+  console.log("Rates of Coins", rates);
 
   const spin = (strikeNumber: number): Promise<void> => {
     return new Promise((resolve) => {
@@ -252,6 +314,20 @@ export default function Roulette1() {
     return parseFloat(((10 / 10 ** splToken.decimal) * tokenValue).toFixed(9));
   };
 
+  const convertToSelectedToken = (
+    solValue: number,
+    rates: { USDC: number; FOMO: number },
+    selectedToken: string,
+  ): number => {
+    if (selectedToken === "USDC") {
+      return solValue * rates.USDC;
+    } else if (selectedToken === "FOMO") {
+      return solValue * rates.FOMO;
+    } else {
+      return solValue;
+    }
+  };
+
   const calculateTotalBetAmount = (
     currentBetAmt: number,
     newBetValue: number,
@@ -270,7 +346,7 @@ export default function Roulette1() {
     refresh: false,
   };
 
-  const resetState = () => {
+  /*   const resetState = () => {
     setNum(initialState.num);
     setStrikeMultiplier(initialState.strikeMultiplier);
     setResult(initialState.result);
@@ -279,7 +355,7 @@ export default function Roulette1() {
     setSpinComplete(initialState.spinComplete);
     setLoading(initialState.loading);
     setRefresh(initialState.refresh);
-  };
+  }; */
 
   const bet = async () => {
     try {
@@ -302,7 +378,7 @@ export default function Roulette1() {
         },
         body: JSON.stringify({
           wallet: wallet.publicKey,
-          tokenMint: "SOL",
+          tokenMint: selectedCoin.tokenName,
           wager: transformedBets,
         }),
       });
@@ -310,13 +386,6 @@ export default function Roulette1() {
       const { success, message, result, strikeNumber, strikeMultiplier } =
         await response.json();
 
-      console.log({
-        Success: success,
-        Result: result,
-        Message: message,
-        StrikeNumber: strikeNumber,
-        strikeMultiplier: strikeMultiplier,
-      });
       if (success !== true) {
         throw new Error(message);
       }
@@ -390,10 +459,6 @@ export default function Roulette1() {
   };
 
   useEffect(() => {
-    console.log("betInProgress", betInProgress);
-  }, [betInProgress]);
-
-  useEffect(() => {
     if (spinComplete && result !== null) {
       if (win) {
         soundAlert("/sounds/win.wav", !enableSounds);
@@ -406,7 +471,7 @@ export default function Roulette1() {
       }
 
       num !== null && setResultNumbers((prevNumbers) => [...prevNumbers, num]);
-      setCenterNumber(num);
+
       setRefresh(true);
       setLoading(false);
       /* setLiveStats([
@@ -434,10 +499,6 @@ export default function Roulette1() {
       setSpinComplete(false); // Mark spin complete for the next round
     }
   }, [spinComplete, result, win, message, num, autoBetCount]);
-
-  useEffect(() => {
-    console.log("autoBetCount", autoBetCount);
-  }, [autoBetCount]);
 
   useEffect(() => {
     if (
@@ -502,10 +563,6 @@ export default function Roulette1() {
     }
   }, [startAuto, autoBetCount]);
 
-  useEffect(() => {
-    console.log("start auto, autBetCount", startAuto, autoBetCount);
-  }, [startAuto, autoBetCount]);
-
   const onSubmit = async (data: any) => {
     if (betSetting === "auto") {
       if (betAmt === 0) {
@@ -539,7 +596,11 @@ export default function Roulette1() {
     setBetAmt(userInput);
   }, [userInput]);
   useEffect(() => {
-    const transformedBets = transformBetsToSingleNumbers(selectedBets);
+    const transformedBets = transformBetsToSingleNumbers(
+      selectedBets,
+      rates,
+      selectedCoin.tokenName,
+    );
 
     setTransformedBets(transformedBets);
   }, [selectedBets]);
@@ -568,12 +629,144 @@ export default function Roulette1() {
     });
   };
 
+  const isPredefinedBetType = (value: string): value is PredefinedBetType => {
+    return value in predefinedBets;
+  };
+
+  const transformBetsToSingleNumbers = (
+    bets: Bet[],
+    rates: { USDC: number; FOMO: number },
+    selectedToken: string,
+  ): Record<string, Record<string, number>> => {
+    const singleNumberBets: Record<string, number> = {};
+    const predefinedBetTotals: Record<string, number> = {};
+
+    const addToSingleNumberBet = (number: string, value: number) => {
+      if (singleNumberBets[number]) {
+        singleNumberBets[number] += value;
+      } else {
+        singleNumberBets[number] = value;
+      }
+    };
+
+    bets.forEach((bet) => {
+      const solEquivalent = getSolEquivalent(bet.token);
+      const tokenEquivalent = convertToSelectedToken(
+        solEquivalent,
+        rates,
+        selectedToken,
+      );
+
+      if (bet.areaId.startsWith("split-")) {
+        const [, num1, num2] = bet.areaId.split("-");
+        const halfValue = tokenEquivalent / 2;
+        addToSingleNumberBet(num1, halfValue);
+        addToSingleNumberBet(num2, halfValue);
+      } else if (bet.areaId.startsWith("corner-")) {
+        const [_, num1, num2, num3, num4] = bet.areaId.split("-");
+        const cornerValue = tokenEquivalent / 4;
+        addToSingleNumberBet(num1, cornerValue);
+        addToSingleNumberBet(num2, cornerValue);
+        addToSingleNumberBet(num3, cornerValue);
+        addToSingleNumberBet(num4, cornerValue);
+      } else if (bet.areaId.startsWith("corner3-")) {
+        const [_, num1, num2, num3] = bet.areaId.split("-");
+        const cornerValue = tokenEquivalent / 3;
+        addToSingleNumberBet(num1, cornerValue);
+        addToSingleNumberBet(num2, cornerValue);
+        addToSingleNumberBet(num3, cornerValue);
+      } else if (bet.areaId.startsWith("corner2column-")) {
+        const nums = bet.areaId.split("-").slice(1);
+        const numValues =
+          nums.length === 6 ? tokenEquivalent / 6 : tokenEquivalent / 4;
+        nums.forEach((num) => addToSingleNumberBet(num, numValues));
+      } else if (bet.areaId.startsWith("column-")) {
+        const nums = bet.areaId.split("-").slice(1);
+        const columnValue = tokenEquivalent / nums.length;
+        nums.forEach((num) => addToSingleNumberBet(num, columnValue));
+      } else if (isPredefinedBetType(bet.areaId)) {
+        if (predefinedBetTotals[bet.areaId]) {
+          predefinedBetTotals[bet.areaId] += tokenEquivalent;
+        } else {
+          predefinedBetTotals[bet.areaId] = tokenEquivalent;
+        }
+      } else if (bet.areaId.startsWith("num-")) {
+        const [, num] = bet.areaId.split("-");
+        addToSingleNumberBet(num, tokenEquivalent);
+      }
+    });
+
+    // Format predefined bet totals
+    Object.keys(predefinedBetTotals).forEach((key) => {
+      predefinedBetTotals[key] = parseFloat(
+        predefinedBetTotals[key].toFixed(9),
+      );
+    });
+
+    // Format single number bets
+    Object.keys(singleNumberBets).forEach((key) => {
+      singleNumberBets[key] = parseFloat(singleNumberBets[key].toFixed(9));
+    });
+
+    return {
+      straight: singleNumberBets,
+      ...predefinedBetTotals,
+    };
+  };
+
+  const reset = () => {
+    if (
+      !ball ||
+      !ball.current ||
+      !ballContainer ||
+      !ballContainer.current ||
+      !overlayBall ||
+      !overlayBall.current ||
+      !overlayBallContainer ||
+      !overlayBallContainer.current
+    )
+      return;
+    const ballElement = ball.current;
+    const ballContainerElement = ballContainer.current;
+    const overlayBallElement = overlayBall.current;
+    const overlayBallContainerElement = overlayBallContainer.current;
+
+    ballContainerElement.style.transition = "none";
+    ballElement.classList.remove("hole");
+    ballContainerElement.style.rotate = "0deg";
+
+    overlayBallContainerElement.style.transition = "none";
+    overlayBallElement.classList.remove("overlayHole");
+    overlayBallContainerElement.style.rotate = "0deg";
+  };
+  const clearBets = () => {
+    setSelectedBets([]);
+    setBetAmt(0);
+  };
+
+  const undoLastBet = () => {
+    setSelectedBets((prev) => {
+      const lastBet = prev[prev.length - 1];
+      if (lastBet) {
+        const tokenValue = parseInt(lastBet.token.value);
+        const solEquivalent = getSolEquivalent(lastBet.token);
+
+        setBetAmt((prevBetAmt) => {
+          if (prevBetAmt !== undefined) {
+            return prevBetAmt - solEquivalent;
+          }
+          return prevBetAmt;
+        });
+      }
+      return prev.slice(0, -1);
+    });
+  };
+
   const handlePlaceSplitBet = (
     number1: number,
     number2: number,
     token: Token | null,
   ) => {
-    console.log(number1, number2);
     if (token) {
       const areaId = `split-${number1}-${number2}`;
       handlePlaceBet(areaId, token);
@@ -850,137 +1043,6 @@ export default function Roulette1() {
       ? true
       : false || isRolling || betActive;
   }, [betSetting, startAuto, isRolling, betActive]);
-  const clearBets = () => {
-    setSelectedBets([]);
-    setBetAmt(0);
-    setCenterNumber(null);
-  };
-
-  const undoLastBet = () => {
-    setSelectedBets((prev) => {
-      const lastBet = prev[prev.length - 1];
-      if (lastBet) {
-        const tokenValue = parseInt(lastBet.token.value);
-        const solEquivalent = getSolEquivalent(lastBet.token);
-
-        setBetAmt((prevBetAmt) => {
-          if (prevBetAmt !== undefined) {
-            return prevBetAmt - solEquivalent;
-          }
-          return prevBetAmt;
-        });
-      }
-      return prev.slice(0, -1);
-    });
-  };
-
-  type Bet = {
-    areaId: string;
-    token: Token;
-  };
-
-  const isPredefinedBetType = (value: string): value is PredefinedBetType => {
-    return value in predefinedBets;
-  };
-  const transformBetsToSingleNumbers = (
-    bets: Bet[],
-  ): Record<string, Record<string, number>> => {
-    const singleNumberBets: Record<string, number> = {};
-    const predefinedBetTotals: Record<string, number> = {};
-
-    const addToSingleNumberBet = (number: string, value: number) => {
-      if (singleNumberBets[number]) {
-        singleNumberBets[number] += value;
-      } else {
-        singleNumberBets[number] = value;
-      }
-    };
-
-    bets.forEach((bet) => {
-      const solEquivalent = getSolEquivalent(bet.token);
-
-      if (bet.areaId.startsWith("split-")) {
-        const [, num1, num2] = bet.areaId.split("-");
-        const halfValue = solEquivalent / 2;
-        addToSingleNumberBet(num1, halfValue);
-        addToSingleNumberBet(num2, halfValue);
-      } else if (bet.areaId.startsWith("corner-")) {
-        const [_, num1, num2, num3, num4] = bet.areaId.split("-");
-        const cornerValue = solEquivalent / 4;
-        addToSingleNumberBet(num1, cornerValue);
-        addToSingleNumberBet(num2, cornerValue);
-        addToSingleNumberBet(num3, cornerValue);
-        addToSingleNumberBet(num4, cornerValue);
-      } else if (bet.areaId.startsWith("corner3-")) {
-        const [_, num1, num2, num3] = bet.areaId.split("-");
-        const cornerValue = solEquivalent / 3;
-        addToSingleNumberBet(num1, cornerValue);
-        addToSingleNumberBet(num2, cornerValue);
-        addToSingleNumberBet(num3, cornerValue);
-      } else if (bet.areaId.startsWith("corner2column-")) {
-        const nums = bet.areaId.split("-").slice(1);
-        const numValues =
-          nums.length === 6 ? solEquivalent / 6 : solEquivalent / 4;
-        nums.forEach((num) => addToSingleNumberBet(num, numValues));
-      } else if (bet.areaId.startsWith("column-")) {
-        const nums = bet.areaId.split("-").slice(1);
-        const columnValue = solEquivalent / nums.length;
-        nums.forEach((num) => addToSingleNumberBet(num, columnValue));
-      } else if (isPredefinedBetType(bet.areaId)) {
-        if (predefinedBetTotals[bet.areaId]) {
-          predefinedBetTotals[bet.areaId] += solEquivalent;
-        } else {
-          predefinedBetTotals[bet.areaId] = solEquivalent;
-        }
-      } else if (bet.areaId.startsWith("num-")) {
-        const [, num] = bet.areaId.split("-");
-        addToSingleNumberBet(num, solEquivalent);
-      }
-    });
-
-    // Format predefined bet totals
-    Object.keys(predefinedBetTotals).forEach((key) => {
-      predefinedBetTotals[key] = parseFloat(
-        predefinedBetTotals[key].toFixed(9),
-      );
-    });
-
-    // Format single number bets
-    Object.keys(singleNumberBets).forEach((key) => {
-      singleNumberBets[key] = parseFloat(singleNumberBets[key].toFixed(9));
-    });
-
-    return {
-      straight: singleNumberBets,
-      ...predefinedBetTotals,
-    };
-  };
-
-  const reset = () => {
-    if (
-      !ball ||
-      !ball.current ||
-      !ballContainer ||
-      !ballContainer.current ||
-      !overlayBall ||
-      !overlayBall.current ||
-      !overlayBallContainer ||
-      !overlayBallContainer.current
-    )
-      return;
-    const ballElement = ball.current;
-    const ballContainerElement = ballContainer.current;
-    const overlayBallElement = overlayBall.current;
-    const overlayBallContainerElement = overlayBallContainer.current;
-
-    ballContainerElement.style.transition = "none";
-    ballElement.classList.remove("hole");
-    ballContainerElement.style.rotate = "0deg";
-
-    overlayBallContainerElement.style.transition = "none";
-    overlayBallElement.classList.remove("overlayHole");
-    overlayBallContainerElement.style.rotate = "0deg";
-  };
 
   const rowToColumnLabel = (rowIndex: number): WagerType => {
     switch (rowIndex) {
