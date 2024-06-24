@@ -711,31 +711,31 @@ input[type="range"] {
 @keyframes overlayBounce {
   0%,
   60% {
-    margin-left: 0%;
+    margin-left: -1%;
   }
 
   70% {
-    margin-left: 10px;
+    margin-left: 2%;
   }
 
   75% {
-    margin-left: 36px;
+    margin-left: 14.5%;
   }
 
   80% {
-    margin-left: 15px;
+    margin-left: 2%;
   }
 
   85% {
-    margin-left: 36px;
+    margin-left: 14.5%;
   }
 
   90% {
-    margin-left: 15px;
+    margin-left: 2%;
   }
 
   95% {
-    margin-left: 36px;
+    margin-left: 14.5%;
   }
 
   100% {
@@ -751,7 +751,7 @@ input[type="range"] {
 
 .overlayHole {
   margin-left: 32px;
-  animation: overlayBounce 4s cubic-bezier(0.25, 0.1, 0.25, 1);
+  animation: overlayBounce 4s ease-out;
 }
 
 @keyframes spinAntiR {

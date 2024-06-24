@@ -10,18 +10,11 @@ import {
   decryptServerSeed,
 } from "@/utils/provably-fair";
 import StakingUser from "@/models/staking/user";
-import { houseEdgeTiers, pointTiers } from "@/context/config";
+import { houseEdgeTiers, maintainance, pointTiers, stakingTiers } from "@/context/config";
 import { launchPromoEdge } from "@/context/config";
 import { wsEndpoint } from "@/context/config";
-import {
-  houseEdgeTiers,
-  launchPromoEdge,
-  maintainance,
-  maxPayouts,
-  pointTiers,
-  stakingTiers,
-} from "@/context/transactions";
-import { SPL_TOKENS, minGameAmount, wsEndpoint } from "@/context/config";
+
+import { SPL_TOKENS, minGameAmount} from "@/context/config";
 import { Decimal } from "decimal.js";
 import updateGameStats from "../../../../utils/updateGameStats";
 Decimal.set({ precision: 9 });
@@ -356,11 +349,12 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       await roulette1.save();
 
       await updateGameStats(
-        GameType.coin,
+        wallet,
+        GameType.roulette1,
         tokenMint,
         amount,
         addGame,
-        feeGenerated,
+        feeGenerated
       );
 
       const pointsGained =

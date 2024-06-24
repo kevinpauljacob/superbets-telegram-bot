@@ -409,7 +409,7 @@ export default function Roulette1() {
       setCenterNumber(num);
       setRefresh(true);
       setLoading(false);
-      setLiveStats([
+      /* setLiveStats([
         ...liveStats,
         {
           game: GameType.wheel,
@@ -428,7 +428,7 @@ export default function Roulette1() {
                 ? (betAmt ?? 0) * (strikeMultiplier ?? 1) - (betAmt ?? 0)
                 : -(betAmt ?? 0),
         },
-      ]);
+      ]); */
 
       setResult(null); // Reset the result state
       setSpinComplete(false); // Mark spin complete for the next round
@@ -507,11 +507,6 @@ export default function Roulette1() {
   }, [startAuto, autoBetCount]);
 
   const onSubmit = async (data: any) => {
-    const transformedBets = transformBetsToSingleNumbers(selectedBets);
-    console.log(transformedBets);
-    setTransformedBets(transformedBets);
-    setLoading(true);
-
     if (betSetting === "auto") {
       if (betAmt === 0) {
         errorCustom(translator("Set Amount.", language));
@@ -527,7 +522,9 @@ export default function Roulette1() {
       ) {
         setStartAuto(true);
       }
-    } else if (wallet.connected) bet();
+    } else if (wallet.connected) {
+      bet();
+    }
   };
 
   useEffect(() => {
@@ -541,7 +538,11 @@ export default function Roulette1() {
   useEffect(() => {
     setBetAmt(userInput);
   }, [userInput]);
+  useEffect(() => {
+    const transformedBets = transformBetsToSingleNumbers(selectedBets);
 
+    setTransformedBets(transformedBets);
+  }, [selectedBets]);
   const handlePlaceBet = (areaId: string, token: Token | null) => {
     if (!token) {
       errorCustom("Please select a token before placing a bet.");
@@ -1253,7 +1254,12 @@ export default function Roulette1() {
                     ? "overlay border-[2px] border-white"
                     : ""
                 }`}
-                  onClick={() => handlePlaceBet("num-0", selectedToken)}
+                  onClick={() => {
+                    if (selectedToken) {
+                      handlePlaceBet("num-0", selectedToken);
+                    }
+                    soundAlert("/sounds/betbutton.wav", !enableSounds);
+                  }}
                 >
                   {/* h-[27.3px] w-[125px] */}
                   <p className="-rotate-90 sm:rotate-0">0</p>
@@ -1302,10 +1308,18 @@ export default function Roulette1() {
                                   ? "overlay border-[2px] border-white"
                                   : ""
                               }`}
-                              onClick={() =>
-                                selectedToken &&
-                                handlePlaceBet(`num-${number}`, selectedToken)
-                              }
+                              onClick={() => {
+                                if (selectedToken) {
+                                  handlePlaceBet(
+                                    `num-${number}`,
+                                    selectedToken,
+                                  );
+                                }
+                                soundAlert(
+                                  "/sounds/betbutton.wav",
+                                  !enableSounds,
+                                );
+                              }}
                             >
                               <p className="-rotate-90 sm:rotate-0 ">
                                 {number}
@@ -1318,10 +1332,18 @@ export default function Roulette1() {
                               <button
                                 data-testid={`roulette-tile-${number}-top`}
                                 className="absolute w-full h-3 bg-transparent -top-2"
-                                onClick={() =>
-                                  colIndex < rows[0].length &&
-                                  handlePlaceColumnBet(colIndex, selectedToken)
-                                }
+                                onClick={() => {
+                                  if (colIndex < rows[0].length) {
+                                    handlePlaceColumnBet(
+                                      colIndex,
+                                      selectedToken,
+                                    );
+                                  }
+                                  soundAlert(
+                                    "/sounds/betbutton.wav",
+                                    !enableSounds,
+                                  );
+                                }}
                                 onMouseEnter={() =>
                                   setHoveredColumn(
                                     rows.map((row) => row[colIndex]),
@@ -1335,14 +1357,19 @@ export default function Roulette1() {
                               <button
                                 data-testid={`roulette-tile-${number}-top`}
                                 className="absolute w-full h-3 bg-transparent -top-2"
-                                onClick={() =>
-                                  rowIndex > 0 &&
-                                  handlePlaceSplitBet(
-                                    number,
-                                    rows[rowIndex - 1][colIndex],
-                                    selectedToken,
-                                  )
-                                }
+                                onClick={() => {
+                                  if (rowIndex > 0) {
+                                    handlePlaceSplitBet(
+                                      number,
+                                      rows[rowIndex - 1][colIndex],
+                                      selectedToken,
+                                    );
+                                  }
+                                  soundAlert(
+                                    "/sounds/betbutton.wav",
+                                    !enableSounds,
+                                  );
+                                }}
                                 onMouseEnter={() =>
                                   rowIndex > 0 &&
                                   setHoveredSplit([
@@ -1383,6 +1410,10 @@ export default function Roulette1() {
                                       selectedToken,
                                     );
                                   }
+                                  soundAlert(
+                                    "/sounds/betbutton.wav",
+                                    !enableSounds,
+                                  );
                                 }}
                                 onMouseEnter={() => {
                                   if (
@@ -1434,6 +1465,10 @@ export default function Roulette1() {
                                     );
                                   }
                                 }
+                                soundAlert(
+                                  "/sounds/betbutton.wav",
+                                  !enableSounds,
+                                );
                               }}
                               onMouseEnter={() => {
                                 if (rowIndex > 0) {
@@ -1482,12 +1517,13 @@ export default function Roulette1() {
                       className="h-[40px] w-[27px] sm:w-[48px] sm:h-[48px] flex items-center justify-center text-center bg-transparent border-2 border-[#26272B] text-white cursor-pointer relative rounded-[5px] hover:border hover:border-slate-200 hover:bg-[#4D5361]"
                       onMouseEnter={() => setHoveredRow(rowIndex)}
                       onMouseLeave={() => setHoveredRow(null)}
-                      onClick={() =>
+                      onClick={() => {
                         handlePlaceBet(
                           rowToColumnLabel(rowIndex),
                           selectedToken,
-                        )
-                      }
+                        );
+                        soundAlert("/sounds/betbutton.wav", !enableSounds);
+                      }}
                     >
                       <p className="-rotate-90 sm:rotate-0">2:1</p>
                       {renderRegularToken(rowToColumnLabel(rowIndex))}
