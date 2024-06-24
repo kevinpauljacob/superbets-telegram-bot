@@ -10,7 +10,11 @@ import toast from "react-hot-toast";
 import { FaRegCopy } from "react-icons/fa6";
 import { MdClose } from "react-icons/md";
 import CheckPF from "@/public/assets/CheckPF.svg";
-import { errorAlert, errorCustom, successAlert } from "@/components/toasts/ToastGroup";
+import {
+  errorAlert,
+  errorCustom,
+  successAlert,
+} from "@/components/toasts/ToastGroup";
 import ProvablyFairModal from "../ProvablyFairModal";
 import { translator } from "@/context/transactions";
 import { useGlobalContext } from "@/components/GlobalContext";
@@ -52,11 +56,10 @@ export default function MinesProvablyFairModal({
   bet,
 }: Props) {
   const [state, setState] = useState<"seeds" | "verify">(
-    modalData.tab ?? "seeds"
+    modalData.tab ?? "seeds",
   );
-  const [newClientSeed, setNewClientSeed] = useState<string>(
-    generateClientSeed(),
-  );
+  const [newClientSeed, setNewClientSeed] =
+    useState<string>(generateClientSeed());
 
   const [selectedGameType, setSelectedGameType] = useState<GameType>(
     GameType.mines,
@@ -68,7 +71,7 @@ export default function MinesProvablyFairModal({
     nonce: string;
     risk?: string;
     segments?: number;
-    parameter?:number;
+    parameter?: number;
   }>(
     bet?.gameSeed
       ? {
@@ -81,10 +84,9 @@ export default function MinesProvablyFairModal({
           segments:
             bet.segments ||
             (selectedGameType === GameType.wheel ? 10 : undefined),
-            parameter:
-            bet.minesCount || 
-            (selectedGameType === GameType.mines ? 1 : undefined)
-      
+          parameter:
+            bet.minesCount ||
+            (selectedGameType === GameType.mines ? 1 : undefined),
         }
       : {
           clientSeed: "",
@@ -92,7 +94,6 @@ export default function MinesProvablyFairModal({
           nonce: "",
           risk: selectedGameType === GameType.wheel ? "low" : undefined,
           segments: selectedGameType === GameType.wheel ? 10 : undefined,
-        
         },
   );
 
@@ -126,7 +127,7 @@ export default function MinesProvablyFairModal({
 
   const handleSetClientSeed = async () => {
     if (!/^[\x00-\x7F]*$/.test(newClientSeed) || newClientSeed.trim() === "")
-      return errorCustom(translator("Invalid client seed", language));;
+      return errorCustom(translator("Invalid client seed", language));
 
     let data = await fetch(`/api/games/gameSeed/change`, {
       method: "POST",
@@ -140,7 +141,7 @@ export default function MinesProvablyFairModal({
     }).then((res) => res.json());
 
     if (!data.success) return errorAlert(data.message);
-    successAlert("Successfully changed the server seed")
+    successAlert("Successfully changed the server seed");
     setModalData(data);
     setNewClientSeed(generateClientSeed());
   };
@@ -296,21 +297,24 @@ export default function MinesProvablyFairModal({
             {state === "verify" && (
               <div className="grid w-full text-white">
                 <div className="grid gap-2">
-                  <div className="border-2 border-opacity-5 border-[#FFFFFF] md:px-8">
+                  <div
+                    className={`md:px-8 py-2 mt-6 px-4  pt-7 border-2 border-white border-opacity-5 rounded-md ${selectedGameType === GameType.roulette1 ? "w-full h-[480px] flex items-center " : ""}`}
+                  >
                     <ProvablyFairModal
                       setVerificationState={setVerificationState}
                       verificationState={verificationState}
                       selectedGameType={selectedGameType}
-                       />
+                    />
                   </div>
                   <div>
                     <label className="text-xs text-opacity-75 font-changa text-[#F0F0F0]">
                       {translator("Game", language)}
                     </label>
                     <div className="flex items-center">
-                    <GameSelect
-                      selectedGameType={selectedGameType}
-                      setSelectedGameType={setSelectedGameType}/>
+                      <GameSelect
+                        selectedGameType={selectedGameType}
+                        setSelectedGameType={setSelectedGameType}
+                      />
                     </div>
                   </div>
                   <div>

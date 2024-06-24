@@ -1,7 +1,4 @@
-import {
-  GameType,
-  generateClientSeed,
-} from "@/utils/provably-fair";
+import { GameType, generateClientSeed } from "@/utils/provably-fair";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { Dice } from "./VerifyDiceModal";
@@ -60,9 +57,8 @@ export default function RollDiceProvablyFairModal({
   const [selectedGameType, setSelectedGameType] = useState<GameType>(
     GameType.dice,
   );
-  const [newClientSeed, setNewClientSeed] = useState<string>(
-    generateClientSeed(),
-  );
+  const [newClientSeed, setNewClientSeed] =
+    useState<string>(generateClientSeed());
 
   const { language } = useGlobalContext();
 
@@ -130,7 +126,7 @@ export default function RollDiceProvablyFairModal({
     if (!data.success) return errorCustom(data.message);
 
     setModalData(data);
-    successCustom("Successfully changed the server seed")
+    successCustom("Successfully changed the server seed");
     setNewClientSeed(generateClientSeed());
   };
 
@@ -285,7 +281,9 @@ export default function RollDiceProvablyFairModal({
             {state === "verify" && (
               <div className="grid w-full text-white">
                 <div className="grid gap-2">
-                  <div className="border-2 border-opacity-5 border-[#FFFFFF] md:px-8">
+                  <div
+                    className={`md:px-8 py-2 mt-6 px-4  pt-7 border-2 border-white border-opacity-5 rounded-md ${selectedGameType === GameType.roulette1 ? "w-full h-[480px] flex items-center " : ""}`}
+                  >
                     <ProvablyFairModal
                       verificationState={verificationState}
                       setVerificationState={setVerificationState}

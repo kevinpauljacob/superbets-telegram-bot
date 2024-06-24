@@ -27,6 +27,7 @@ import { soundAlert } from "@/utils/soundUtils";
 import ConfigureAutoButton from "@/components/ConfigureAutoButton";
 import AutoCount from "@/components/AutoCount";
 import { GameType } from "@/utils/provably-fair";
+import { start } from "repl";
 
 interface Token {
   id: number;
@@ -136,8 +137,7 @@ export default function Roulette1() {
     maxBetAmt,
     language,
   } = useGlobalContext();
-  console.log("MAX", maxBetAmt);
-
+  console.log("AutoBetCount", autoBetCount);
   type TransformedBets = Record<string, Record<string, number>>;
   type WagerType =
     | "red"
@@ -161,11 +161,12 @@ export default function Roulette1() {
     straight: {},
   });
 
-  const [betAmount, setBetAmount] = useState<string>("0");
   const [selectedToken, setSelectedToken] = useState<Token | null>(tokens[0]);
-  const [bets, setBets] = useState<{ areaId: string; token: Token }[]>([]);
+
   const [betActive, setBetActive] = useState(false);
-  const [betSetting, setBetSetting] = useState<"manual" | "auto">("auto");
+  const [betSetting, setBetSetting] = useState<"manual" | "auto">("manual");
+  const [userInput, setUserInput] = useState<number | undefined>();
+
   const [isRolling, setIsRolling] = useState(false);
   const [loading, setLoading] = useState(false);
   const [selectedBets, setSelectedBets] = useState<Bet[]>([]);
@@ -178,67 +179,69 @@ export default function Roulette1() {
   const [refresh, setRefresh] = useState(true);
   const [centerNumber, setCenterNumber] = useState<number | null>(null);
   const [strikeMultiplier, setStrikeMultiplier] = useState<number>();
-  const [spinComplete, setSpinComplete] = useState(true);
-  const [num, setNum] = useState(0);
+  const [spinComplete, setSpinComplete] = useState(false);
+  const [num, setNum] = useState<number | null>(null);
   const ball = useRef<HTMLDivElement>(null);
   const ballContainer = useRef<HTMLDivElement>(null);
   const [overlay, setOverlay] = useState(false);
   const overlayBall = useRef<HTMLDivElement>(null);
   const overlayBallContainer = useRef<HTMLDivElement>(null);
+  const [result, setResult] = useState(null);
+  const [win, setWin] = useState(false);
+  const [message, setMessage] = useState("");
+  const [betInProgress, setBetInProgress] = useState(false);
 
-  useEffect(() => {
-    if (num !== 0) {
-      spin();
-    }
-  }, [num]);
+  const spin = (strikeNumber: number): Promise<void> => {
+    return new Promise((resolve) => {
+      setOverlay(true);
+      setSpinComplete(false);
+      const order = [
+        0, 32, 15, 19, 4, 21, 2, 25, 17, 34, 6, 27, 13, 36, 11, 30, 8, 23, 10,
+        5, 24, 16, 33, 1, 20, 14, 31, 9, 22, 18, 29, 7, 28, 12, 35, 3, 26,
+      ];
 
-  const spin = () => {
-    setOverlay(true);
-    setSpinComplete(false);
-    const order = [
-      0, 32, 15, 19, 4, 21, 2, 25, 17, 34, 6, 27, 13, 36, 11, 30, 8, 23, 10, 5,
-      24, 16, 33, 1, 20, 14, 31, 9, 22, 18, 29, 7, 28, 12, 35, 3, 26,
-    ];
+      if (
+        !ball ||
+        !ball.current ||
+        !ballContainer ||
+        !ballContainer.current ||
+        !overlayBall ||
+        !overlayBall.current ||
+        !overlayBallContainer ||
+        !overlayBallContainer.current
+      ) {
+        resolve(); // Resolve immediately if any elements are missing
+        return;
+      }
 
-    if (
-      !ball ||
-      !ball.current ||
-      !ballContainer ||
-      !ballContainer.current ||
-      !overlayBall ||
-      !overlayBall.current ||
-      !overlayBallContainer ||
-      !overlayBallContainer.current
-    )
-      return;
-    const ballElement = ball.current;
-    const ballContainerElement = ballContainer.current;
-    const overlayBallElement = overlayBall.current;
-    const overlayBallContainerElement = overlayBallContainer.current;
+      const ballElement = ball.current;
+      const ballContainerElement = ballContainer.current;
+      const overlayBallElement = overlayBall.current;
+      const overlayBallContainerElement = overlayBallContainer.current;
 
-    let endingDegree = order.indexOf(num) * 9.73;
+      let endingDegree = order.indexOf(strikeNumber) * 9.73;
 
-    ballContainerElement.style.transition = "all linear 4s";
-    ballContainerElement.style.rotate = 360 * 3 + endingDegree + "deg";
+      ballContainerElement.style.transition = "all linear 4s";
+      ballContainerElement.style.rotate = 360 * 3 + endingDegree + "deg";
 
-    setTimeout(() => {
-      overlayBallContainerElement.style.transition = "all linear 4s";
-      overlayBallContainerElement.style.rotate = 360 * 3 + endingDegree + "deg";
+      setTimeout(() => {
+        overlayBallContainerElement.style.transition = "all linear 4s";
+        overlayBallContainerElement.style.rotate =
+          360 * 3 + endingDegree + "deg";
 
-      overlayBallElement.classList.add("overlayHole");
-    }, 1000);
+        overlayBallElement.classList.add("overlayHole");
+      }, 1000);
 
-    ballElement.classList.add("hole");
-
-    setTimeout(() => {
-      setSpinComplete(true);
+      ballElement.classList.add("hole");
 
       setTimeout(() => {
         setOverlay(false);
         overlayBallElement.classList.remove("overlayHole");
         overlayBallContainerElement.style.rotate = "0deg";
-      }, 2000);
-    }, 4000);
+        setSpinComplete(true);
+        resolve(); // Resolve the promise once the spin is complete
+      }, 6000);
+    });
   };
 
   console.log(selectedBets);
@@ -255,6 +258,29 @@ export default function Roulette1() {
   ): number => {
     return currentBetAmt + newBetValue;
   };
+
+  const initialState = {
+    num: 0,
+    strikeMultiplier: 1,
+    result: null,
+    win: false,
+    message: "",
+    spinComplete: false,
+    loading: false,
+    refresh: false,
+  };
+
+  const resetState = () => {
+    setNum(initialState.num);
+    setStrikeMultiplier(initialState.strikeMultiplier);
+    setResult(initialState.result);
+    setWin(initialState.win);
+    setMessage(initialState.message);
+    setSpinComplete(initialState.spinComplete);
+    setLoading(initialState.loading);
+    setRefresh(initialState.refresh);
+  };
+
   const bet = async () => {
     try {
       if (!wallet.connected || !wallet.publicKey) {
@@ -267,7 +293,7 @@ export default function Roulette1() {
         throw new Error(translator("Place at least one Chip", language));
       }
       setLoading(true);
-      setNum(0);
+      setBetInProgress(true); // Set bet in progress
       reset();
       const response = await fetch(`/api/games/roulette1`, {
         method: "POST",
@@ -296,121 +322,122 @@ export default function Roulette1() {
       }
 
       if (success) {
+        await spin(parseInt(strikeNumber)); // Wait for the spin to complete
         setNum(parseInt(strikeNumber));
-        setStrikeMultiplier(strikeMultiplier);
-
+        setStrikeMultiplier(strikeMultiplier ?? 1);
+        setResult(result);
+        setMessage(message);
+        setWin(result === "Won");
         setRefresh(true);
+
+        if (betSetting === "auto") {
+          if (useAutoConfig && result === "Won") {
+            setBetAmt(
+              autoWinChangeReset
+                ? userInput!
+                : (betAmt ?? 0) +
+                    ((autoWinChange ?? 0) * (betAmt ?? 0)) / 100.0,
+            );
+          } else if (useAutoConfig && result !== "Won") {
+            setBetAmt(
+              autoLossChangeReset
+                ? userInput!
+                : (betAmt ?? 0) +
+                    ((autoLossChange ?? 0) * (betAmt ?? 0)) / 100.0,
+            );
+          }
+          setAutoBetProfit(
+            autoBetProfit +
+              (result === "Won"
+                ? (strikeMultiplier ?? 1) * (1 - houseEdge) - 1
+                : -1) *
+                (betAmt ?? 0),
+          );
+
+          setTimeout(() => {
+            if (typeof autoBetCount === "number") {
+              setAutoBetCount(autoBetCount > 0 ? autoBetCount - 1 : 0);
+              if (autoBetCount === 1) {
+                warningCustom(
+                  translator("Auto bet stopped", language),
+                  "top-left",
+                );
+              }
+            } else {
+              setAutoBetCount(
+                autoBetCount.length > 12
+                  ? autoBetCount.slice(0, 5)
+                  : autoBetCount + 1,
+              );
+            }
+          }, 600);
+        }
       }
 
       setLoading(false);
-
-      const win = result === "Won";
-
-      setSpinComplete(false);
-      const spinCompleteInterval = setInterval(() => {
-        if (spinComplete) {
-          clearInterval(spinCompleteInterval);
-          if (win) {
-            soundAlert("/sounds/win.wav", !enableSounds);
-            successCustom(message);
-          } else {
-            soundAlert("/sounds/lose.wav", !enableSounds);
-            errorCustom(message);
-            setBetAmt(0);
-            clearBets();
-          }
-          const newBetResult = { result: strikeNumber, win };
-          setResultNumbers((prevNumbers) => [...prevNumbers, strikeNumber]);
-          setCenterNumber(strikeNumber);
-          setRefresh(true);
-          setLoading(false);
-          setLiveStats([
-            ...liveStats,
-            {
-              game: GameType.roulette1,
-              amount: betAmt,
-              result: win ? "Won" : "Lost",
-              pnl: win ? betAmt * newBetResult.result - betAmt : -betAmt,
-              totalPNL:
-                liveStats.length > 0
-                  ? liveStats[liveStats.length - 1].totalPNL +
-                  (win ? betAmt * newBetResult.result - betAmt : -betAmt)
-                  : win
-                    ? betAmt * newBetResult.result - betAmt
-                    : -betAmt,
-            },
-          ]);
-        }
-        if (betSetting === "auto") {
-          if (useAutoConfig && win) {
-            setBetAmt(
-              autoWinChangeReset
-                ? betAmt!
-                : betAmt + ((autoWinChange ?? 0) * betAmt) / 100.0,
-            );
-          } else if (useAutoConfig && !win) {
-            setBetAmt(
-              autoLossChangeReset
-                ? betAmt!
-                : betAmt + ((autoLossChange ?? 0) * betAmt) / 100.0,
-            );
-          }
-          // update profit / loss
-          setAutoBetProfit(
-            autoBetProfit + (win ? 2 * (1 - houseEdge) - 1 : -1) * betAmt,
-          );
-          // update count
-          if (typeof autoBetCount === "number") {
-            setAutoBetCount(autoBetCount > 0 ? autoBetCount - 1 : 0);
-            autoBetCount === 1 &&
-              warningCustom(
-                translator("Auto bet stopped", language),
-                "top-left",
-              );
-          } else
-            setAutoBetCount(
-              autoBetCount.length > 12
-                ? autoBetCount.slice(0, 5)
-                : autoBetCount + 1,
-            );
-        }
-      }, 100);
-    } catch (e: any) {
-      errorCustom(e?.message ?? translator("Could not make bet.", language));
+    } catch (e) {
+      const errorMessage =
+        e instanceof Error
+          ? e.message
+          : translator("Could not make bet.", language);
+      errorCustom(errorMessage);
       setLoading(false);
       setStartAuto(false);
       setAutoBetCount(0);
+    } finally {
+      setBetInProgress(false); // Reset bet in progress
     }
   };
 
-  const onSubmit = async (data: any) => {
-    if (betSetting === "auto") {
-      // Auto bet logic
-    }
-    if (!wallet.publicKey) {
-      errorCustom(translator("Wallet not connected", language));
-      return;
-    }
-    if (!betAmt || betAmt === 0) {
-      errorCustom(translator("Set Amount.", language));
-      return;
-    }
-    setLoading(true);
-    const transformedBets = transformBetsToSingleNumbers(selectedBets);
-    console.log(transformedBets);
-    setTransformedBets(transformedBets);
-    bet();
-  };
   useEffect(() => {
-    if (refresh && wallet?.publicKey) {
-      getBalance();
-      getWalletBalance();
-      setRefresh(false);
-    }
-  }, [wallet?.publicKey, refresh]);
+    console.log("betInProgress", betInProgress);
+  }, [betInProgress]);
+
   useEffect(() => {
-    setBetAmt(betAmt);
-  }, [betAmt]);
+    if (spinComplete && result !== null) {
+      if (win) {
+        soundAlert("/sounds/win.wav", !enableSounds);
+        successCustom(message);
+      } else {
+        soundAlert("/sounds/lose.wav", !enableSounds);
+        errorCustom(message);
+        setBetAmt(0);
+        clearBets();
+      }
+
+      num !== null && setResultNumbers((prevNumbers) => [...prevNumbers, num]);
+      setCenterNumber(num);
+      setRefresh(true);
+      setLoading(false);
+      setLiveStats([
+        ...liveStats,
+        {
+          game: GameType.wheel,
+          amount: betAmt ?? 0, // Default to 0 if undefined
+          result: win ? "Won" : "Lost",
+          pnl: win
+            ? (betAmt ?? 0) * (strikeMultiplier ?? 1) - (betAmt ?? 0)
+            : -(betAmt ?? 0),
+          totalPNL:
+            liveStats.length > 0
+              ? liveStats[liveStats.length - 1].totalPNL +
+                (win
+                  ? (betAmt ?? 0) * (strikeMultiplier ?? 1) - (betAmt ?? 0)
+                  : -(betAmt ?? 0))
+              : win
+                ? (betAmt ?? 0) * (strikeMultiplier ?? 1) - (betAmt ?? 0)
+                : -(betAmt ?? 0),
+        },
+      ]);
+
+      setResult(null); // Reset the result state
+      setSpinComplete(false); // Mark spin complete for the next round
+    }
+  }, [spinComplete, result, win, message, num, autoBetCount]);
+
+  useEffect(() => {
+    console.log("autoBetCount", autoBetCount);
+  }, [autoBetCount]);
 
   useEffect(() => {
     if (
@@ -424,12 +451,12 @@ export default function Roulette1() {
         potentialLoss =
           autoBetProfit +
           -1 *
-          (autoWinChangeReset || autoLossChangeReset
-            ? betAmt
-            : autoBetCount === "inf"
-              ? Math.max(0, betAmt)
-              : betAmt *
-              (autoLossChange !== null ? autoLossChange / 100.0 : 0));
+            (autoWinChangeReset || autoLossChangeReset
+              ? betAmt
+              : autoBetCount === "inf"
+                ? Math.max(0, betAmt)
+                : betAmt *
+                  (autoLossChange !== null ? autoLossChange / 100.0 : 0));
       }
       if (
         useAutoConfig &&
@@ -463,17 +490,57 @@ export default function Roulette1() {
         setStartAuto(false);
         return;
       }
-      setTimeout(() => {
-        setLoading(true);
 
+      setLoading(true);
+      setTimeout(() => {
         bet();
-      }, 500);
+      }, 200);
     } else {
       setStartAuto(false);
       setAutoBetProfit(0);
-      setBetAmt(betAmt);
+      setUserInput(betAmt);
     }
   }, [startAuto, autoBetCount]);
+
+  useEffect(() => {
+    console.log("start auto, autBetCount", startAuto, autoBetCount);
+  }, [startAuto, autoBetCount]);
+
+  const onSubmit = async (data: any) => {
+    const transformedBets = transformBetsToSingleNumbers(selectedBets);
+    console.log(transformedBets);
+    setTransformedBets(transformedBets);
+    setLoading(true);
+
+    if (betSetting === "auto") {
+      if (betAmt === 0) {
+        errorCustom(translator("Set Amount.", language));
+        return;
+      }
+      if (typeof autoBetCount === "number" && autoBetCount <= 0) {
+        errorCustom("Set Bet Count.");
+        return;
+      }
+      if (
+        (typeof autoBetCount === "string" && autoBetCount.includes("inf")) ||
+        (typeof autoBetCount === "number" && autoBetCount > 0)
+      ) {
+        setStartAuto(true);
+      }
+    } else if (wallet.connected) bet();
+  };
+
+  useEffect(() => {
+    if (refresh && wallet?.publicKey) {
+      getBalance();
+      getWalletBalance();
+      setRefresh(false);
+    }
+  }, [wallet?.publicKey, refresh]);
+
+  useEffect(() => {
+    setBetAmt(userInput);
+  }, [userInput]);
 
   const handlePlaceBet = (areaId: string, token: Token | null) => {
     if (!token) {
@@ -932,8 +999,9 @@ export default function Roulette1() {
         {numbers.slice(-3).map((num, index) => (
           <div
             key={index}
-            className={`flex items-center justify-center w-8 h-8 rounded-full text-sm font-semibold ${predefinedBets.red.includes(num) ? "bg-[#F1323E]" : "bg-[#2A2E38]"
-              } text-white`}
+            className={`flex items-center justify-center w-8 h-8 rounded-full text-sm font-semibold ${
+              predefinedBets.red.includes(num) ? "bg-[#F1323E]" : "bg-[#2A2E38]"
+            } text-white`}
           >
             {num}
           </div>
@@ -968,11 +1036,11 @@ export default function Roulette1() {
             <BetButton
               disabled={
                 !selectedToken ||
-                  loading ||
-                  !session?.user ||
-                  (betAmt !== undefined &&
-                    maxBetAmt !== undefined &&
-                    betAmt > maxBetAmt)
+                loading ||
+                !session?.user ||
+                (betAmt !== undefined &&
+                  maxBetAmt !== undefined &&
+                  betAmt > maxBetAmt)
                   ? true
                   : false
               }
@@ -1017,7 +1085,7 @@ export default function Roulette1() {
                 </div>
                 <BetAmount
                   betAmt={betAmt}
-                  setBetAmt={setBetAmt}
+                  setBetAmt={setUserInput}
                   currentMultiplier={1}
                   leastMultiplier={1}
                   game="roulette1"
@@ -1053,15 +1121,15 @@ export default function Roulette1() {
                   <BetButton
                     disabled={
                       !betSetting ||
-                        loading ||
-                        !session?.user ||
-                        (betAmt !== undefined &&
-                          maxBetAmt !== undefined &&
-                          betAmt > maxBetAmt)
+                      loading ||
+                      !session?.user ||
+                      (betAmt !== undefined &&
+                        maxBetAmt !== undefined &&
+                        betAmt > maxBetAmt)
                         ? true
                         : false
                     }
-                  // onClickFunction={onSubmit}
+                    // onClickFunction={onSubmit}
                   >
                     {loading ? <Loader /> : "BET"}
                   </BetButton>
@@ -1076,19 +1144,36 @@ export default function Roulette1() {
           className={`fadeInUp absolute inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50 ${overlay ? "" : "hidden fadeOutDown"}`}
         >
           <div className="roulette relative w-full h-full flex flex-col items-center justify-center rounded-full">
-            <img className="absolute w-96 h-96" src="/bg.svg" style={{ top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }} />
-            <img className="wheel absolute w-96 h-96" src="/wheel.svg" style={{ transform: 'translate(-50%, -50%)' }} />
-            {centerNumber ? (
+            <img
+              className="absolute w-96 h-96"
+              src="/bg.svg"
+              style={{
+                top: "50%",
+                left: "50%",
+                transform: "translate(-50%, -50%)",
+              }}
+            />
+            <img
+              className="wheel absolute w-96 h-96"
+              src="/wheel.svg"
+              style={{ transform: "translate(-50%, -50%)" }}
+            />
+            {/*   {centerNumber ? (
               <div className="text-4xl font-chakra font-semibold text-white absolute" style={{ top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}>
                 {centerNumber}
               </div>
-            ) : (
-              <img className="needle absolute" src="/needle.svg" style={{ transform: 'translate(-50%, -50%)' }} />
-            )}
-
+            ) : ( */}
+            <img
+              className="needle absolute"
+              src="/needle.svg"
+              style={{ transform: "translate(-50%, -50%)" }}
+            />
+            {/*     )}
+             */}
             <div
               ref={overlayBallContainer}
-              className="ball_container absolute w-96 h-[22px] px-[50px] flex items-center" style={{ transform: 'translate(-50%, -50%)' }}
+              className="ball_container absolute w-96 h-[22px] px-[50px] flex items-center"
+              style={{ transform: "translate(-50%, -50%)" }}
             >
               <div
                 ref={overlayBall}
@@ -1101,17 +1186,17 @@ export default function Roulette1() {
           <ResultDisplay numbers={resultNumbers} />
 
           <div
-            className={`hidden roulette relative min-w-72 min-h-72 sm:flex flex-col items-center justify-center `}
+            className={`hidden roulette relative min-w-72 min-h-72 sm:flex flex-col items-center justify-center ${overlay ? "hidden fadeOutDown" : ""}`}
           >
             <img className="absolute w-[90%] h-[90%]" src="/bg.svg " />
             <img className="wheel absolute" src="/wheel.svg" />
-            {centerNumber ? (
+            {/*  {centerNumber ? (
               <div className="text-4xl font-chakra font-semibold text-white absolute">
                 {centerNumber!}
               </div>
-            ) : (
-              <img className="needle absolute" src="/needle.svg" />
-            )}
+            ) : ( */}
+            <img className="needle absolute" src="/needle.svg" />
+            {/*  )} */}
 
             <div
               ref={ballContainer}
@@ -1158,14 +1243,16 @@ export default function Roulette1() {
                 <div
                   className={` h-[125px] w-[27.3px]  sm:h-[153px] sm:w-12    flex flex-col justify-center text-center cursor-pointer bg-[#149200] rounded-[5px]
                text-white relative border-4 border-transparent  hover:bg-[#55BA78]
-                hover:border-[2px] hover:border-slate-300 mb-1 ${hoveredCorner && hoveredCorner.includes(0)
-                      ? "overlay border-[2px] border-white"
-                      : ""
-                    }
-                ${hoveredSplit && hoveredSplit.includes(0)
-                      ? "overlay border-[2px] border-white"
-                      : ""
-                    }`}
+                hover:border-[2px] hover:border-slate-300 mb-1 ${
+                  hoveredCorner && hoveredCorner.includes(0)
+                    ? "overlay border-[2px] border-white"
+                    : ""
+                }
+                ${
+                  hoveredSplit && hoveredSplit.includes(0)
+                    ? "overlay border-[2px] border-white"
+                    : ""
+                }`}
                   onClick={() => handlePlaceBet("num-0", selectedToken)}
                 >
                   {/* h-[27.3px] w-[125px] */}
@@ -1184,31 +1271,37 @@ export default function Roulette1() {
                           >
                             <button
                               data-testid={`roulette-tile-${number}`}
-                              className={` h-[40px] w-[27px] sm:w-[48px] sm:h-[48px] flex items-center justify-center  relative text-center  ${predefinedBets.red.includes(
-                                number,
-                              ) /* h-[27px] w-[40px] */
-                                ? "bg-[#F1323E] hover:border hover:border-slate-200 hover:bg-[#FF5C67]"
-                                : "bg-[#2A2E38] hover:border hover:border-slate-200 hover:bg-[#4D5361]"
-                                } text-white rounded-[5px] border-4 border-transparent ${hoveredButton &&
-                                  predefinedBets[
-                                    hoveredButton as PredefinedBetType
-                                  ]?.includes(number)
+                              className={` h-[40px] w-[27px] sm:w-[48px] sm:h-[48px] flex items-center justify-center  relative text-center  ${
+                                predefinedBets.red.includes(
+                                  number,
+                                ) /* h-[27px] w-[40px] */
+                                  ? "bg-[#F1323E] hover:border hover:border-slate-200 hover:bg-[#FF5C67]"
+                                  : "bg-[#2A2E38] hover:border hover:border-slate-200 hover:bg-[#4D5361]"
+                              } text-white rounded-[5px] border-4 border-transparent ${
+                                hoveredButton &&
+                                predefinedBets[
+                                  hoveredButton as PredefinedBetType
+                                ]?.includes(number)
                                   ? "overlay border-[2px] border-white "
                                   : ""
-                                } ${hoveredRow !== null &&
-                                  rows[hoveredRow]?.includes(number)
+                              } ${
+                                hoveredRow !== null &&
+                                rows[hoveredRow]?.includes(number)
                                   ? "overlay border-[2px] border-white"
                                   : ""
-                                } ${hoveredSplit && hoveredSplit.includes(number)
+                              } ${
+                                hoveredSplit && hoveredSplit.includes(number)
                                   ? "overlay border-[2px] border-white"
                                   : ""
-                                } ${hoveredCorner && hoveredCorner.includes(number)
+                              } ${
+                                hoveredCorner && hoveredCorner.includes(number)
                                   ? "overlay border-[2px] border-white"
                                   : ""
-                                } ${hoveredColumn && hoveredColumn.includes(number)
+                              } ${
+                                hoveredColumn && hoveredColumn.includes(number)
                                   ? "overlay border-[2px] border-white"
                                   : ""
-                                }`}
+                              }`}
                               onClick={() =>
                                 selectedToken &&
                                 handlePlaceBet(`num-${number}`, selectedToken)

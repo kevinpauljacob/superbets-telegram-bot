@@ -28,7 +28,8 @@ export default function ProvablyFairModal({
   selectedGameType,
 }: Props) {
   const [strikeNumbers, setStrikeNumbers] = useState<number[]>([]);
-  const [strikeNumber, setStrikeNumber] = useState<number>(50.0);
+  const [rouletteNumer, setRouletteNumber] = useState<number | null>(null);
+  const [strikeNumber, setStrikeNumber] = useState<number>(0);
   const [wonDiceFace, setWonDiceFace] = useState<number>(1);
   const [multiplier, setMultiplier] = useState<string>("1.00");
   const [wonCoinFace, setWonCoinface] = useState<"heads" | "tails">("heads");
@@ -116,6 +117,18 @@ export default function ProvablyFairModal({
     );
   }, [verificationState, selectedGameType]);
 
+  useEffect(() => {
+    if (selectedGameType === GameType.roulette1) {
+      setRouletteNumber(
+        generateGameResult(
+          verificationState.serverSeed,
+          verificationState.clientSeed,
+          parseInt(verificationState.nonce),
+          selectedGameType,
+        ),
+      );
+    }
+  }, [verificationState, selectedGameType]);
   useEffect(() => {
     setMultiplier(
       (
@@ -339,14 +352,14 @@ export default function ProvablyFairModal({
     }));
   };
   const renderRoulette1 = () => {
-    <>
-      <div className="font-chakra font-semibold text-base rotate-90  sm:top-0 mb-7 mx-2">
+    return (
+      <div className="font-chakra font-semibold text-base rotate-90 top-0 mb-7 mx-2">
         <div className="flex flex-col w-full text-[12px] items-start gap-1 ">
           <div className="w-full flex items-start gap-1">
             <div
               className={`h-[125px] w-[27.3px] sm:w-[30.6px] sm:h-[207px] flex flex-col justify-center text-center cursor-pointer bg-[#149200] rounded-[5px]
-            text-white relative  ${strikeNumber === 0 ? "border-[#3DD179]" : ""}
-            mb-1`}
+              text-white relative  ${rouletteNumer === 0 ? "border-[#3DD179]" : ""}
+              mb-1`}
             >
               <p className="-rotate-90">0</p>
             </div>
@@ -365,7 +378,11 @@ export default function ProvablyFairModal({
                             predefinedBets.red.includes(number)
                               ? "bg-[#F1323E]  "
                               : "bg-[#2A2E38]  "
-                          }${strikeNumber === number ? "border-[#3DD179] border-2" : ""} text-white rounded-[5px]  `}
+                          }${
+                            rouletteNumer === number
+                              ? "border-[#3DD179] border-2"
+                              : ""
+                          } text-white rounded-[5px]  `}
                         >
                           <p className="-rotate-90">{number}</p>
                         </button>
@@ -418,8 +435,9 @@ export default function ProvablyFairModal({
           <div className=" sm:w-12 bg-transparent hidden sm:block" />
         </div>
       </div>
-    </>;
+    );
   };
+
   const renderRiskAndSegments = () => (
     <>
       <div>
