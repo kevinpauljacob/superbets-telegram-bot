@@ -3,28 +3,25 @@ import { useGlobalContext } from "./GlobalContext";
 import { useState, useEffect } from "react";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/router";
+import { SPL_TOKENS } from "@/context/config";
 
 const CountdownTimer = dynamic(() => import("./CountdownTimer"), {
   ssr: false,
 });
 
-export interface Coins {
-  SOL: number;
-  EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v: number;
-  Cx9oLynYgC3RrgXzin7U417hNY9D6YB1eMGw4ZMbWJgw: number;
-}
+export type TokenVolumes = {
+  [token: string]: number;
+};
 
 export default function InfoBar() {
   const { language } = useGlobalContext();
   const router = useRouter();
 
-  //TODO: Don't hardcode the mint addresses here
   const [stats, setStats] = useState({
-    totalVolumes: {
-      SOL: 0,
-      EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v: 0,
-      Cx9oLynYgC3RrgXzin7U417hNY9D6YB1eMGw4ZMbWJgw: 0,
-    },
+    totalVolumes: SPL_TOKENS.reduce((acc: TokenVolumes, token) => {
+      acc[token.tokenMint] = 0;
+      return acc;
+    }, {}),
     totalPlayers: 0,
   });
 
@@ -32,7 +29,7 @@ export default function InfoBar() {
   const [animationClass, setAnimationClass] = useState("slide-in");
   const [volume, setVolume] = useState<number>(0);
 
-  const getVolume = async (totalVolume: Coins) => {
+  const getVolume = async (totalVolume: TokenVolumes) => {
     const mintIds = Object.keys(totalVolume).join(",");
     const data = await (
       await fetch(`https://price.jup.ag/v6/price?ids=${mintIds}&vsToken=SOL`)
@@ -109,8 +106,8 @@ export default function InfoBar() {
         </div>
       </div>
       {/* medium screen */}
-      {slides.map(({ label, value }) => (
-        <div className="hidden md:flex items-center gap-1">
+      {slides.map(({ label, value }, index) => (
+        <div key={index} className="hidden md:flex items-center gap-1">
           <span className="text-[#e7e7e7] text-opacity-70 text-xs font-normal">
             {label} :
           </span>

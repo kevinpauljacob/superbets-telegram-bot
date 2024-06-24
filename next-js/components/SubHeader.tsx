@@ -7,7 +7,6 @@ import { GameType } from "@/utils/provably-fair";
 import { useRouter } from "next/router";
 import useWebSocket from "react-use-websocket";
 import { trimStringToLength, truncateNumber } from "@/context/transactions";
-import { SPL_TOKENS } from "@/context/config";
 import CoinSelector from "./CoinSelector";
 
 export default function SubHeader() {
@@ -16,15 +15,13 @@ export default function SubHeader() {
     setShowWalletModal,
     setLiveBets,
     language,
-    setSelectedCoin,
     selectedCoin,
     coinData,
     showLiveStats,
     setShowLiveStats,
-    showFullScreen,
-    setShowFullScreen,
     enableSounds,
     setEnableSounds,
+    liveTokenPrice
   } = useGlobalContext();
 
   type Card = {
@@ -34,6 +31,7 @@ export default function SubHeader() {
     result: "Won" | "Lost";
     userTier: number;
     tokenMint: string;
+    usdValue: number;
   };
   const [cards, setCards] = useState<Array<Card>>([]);
 
@@ -61,11 +59,13 @@ export default function SubHeader() {
       if (!response.payload) return;
 
       const payload = response.payload;
-      if (payload.result === "Won")
+      if (payload.result === "Won") {
+        payload.usdValue = payload.amountWon * (liveTokenPrice.find(x => x.mintAddress === payload.tokenMint) ? liveTokenPrice.find(x => x.mintAddress === payload.tokenMint)!.price : 1);
         setCards((prev) => {
           const newCards = [payload, ...prev];
           return newCards.slice(0, 15);
         });
+      }
 
       setLiveBets((prev) => [payload, ...prev]);
     },
@@ -84,16 +84,19 @@ export default function SubHeader() {
       .then((res) => res.json())
       .then((data) => {
         if (!data.success) return console.error(data.message);
+        data.data = data.data.map((x: Card) => {
+          x.usdValue = x.amountWon * (liveTokenPrice.find(y => y.mintAddress === x.tokenMint) ? liveTokenPrice.find(y => y.mintAddress === x.tokenMint)!.price : 1);
+          return x;
+        })
         setCards(data.data);
       });
-  }, []);
+  }, [liveTokenPrice]);
 
   return (
     <div className="flex flex-col w-full z-[80] absolute top-0 right-0">
       <div
-        className={`${
-          router.pathname === "/" ? "flex" : "hidden md:flex"
-        } w-full text-white h-[4.4rem] flex items-center border-b border-[#1E2220] px-4 lg:px-6 bg-[#121418]`}
+        className={`${router.pathname === "/" ? "flex" : "hidden md:flex"
+          } w-full text-white h-[4.4rem] flex items-center border-b border-[#1E2220] px-4 lg:px-6 bg-[#121418]`}
       >
         <div className="flex w-full items-center overflow-x-auto no-scrollbar">
           <div ref={endOfListRef} />
@@ -123,10 +126,7 @@ export default function SubHeader() {
                   </span>
                 </div>
                 <p className="text-[#72F238] font-changa text-sm mt-1">
-                  +{truncateNumber(card.amountWon ?? 0, 2)}{" "}
-                  {SPL_TOKENS.find(
-                    (token) => token.tokenMint === card.tokenMint,
-                  )?.tokenName ?? ""}
+                  +${truncateNumber(card.usdValue ?? 0, 4)}
                 </p>
               </div>
             </Link>
@@ -134,14 +134,13 @@ export default function SubHeader() {
         </div>
 
         <div
-          className={`${
-            router.pathname === "/" ? "hidden md:flex" : "hidden md:flex"
-          } h-10 border border-white border-opacity-5 rounded-[5px] mx-4`}
+          className={`${router.pathname === "/" ? "hidden md:flex" : "hidden md:flex"
+            } h-10 border border-white border-opacity-5 rounded-[5px] mx-4`}
         />
 
         {/* <div className={`border-2 border-white border-opacity-5 rounded-[5px] p-3 cursor-pointer ${showFullScreen ? "bg-[#d9d9d9] bg-opacity-10" : ""}`} onClick={() => setShowFullScreen(!showFullScreen)}>
           <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 16 16" fill="none">
-            <g opacity="0.75" clip-path="url(#clip0_3204_4400)">
+            <g opacity="0.75" clipPath="url(#clip0_3204_4400)">
               <path fill-rule="evenodd" clip-rule="evenodd" d="M1.14286 10.2857C0.514286 10.2857 0 10.8 0 11.4286V14.8571C0 15.4857 0.514286 16 1.14286 16H4.57143C5.2 16 5.71429 15.4857 5.71429 14.8571C5.71429 14.2286 5.2 13.7143 4.57143 13.7143H2.28571V11.4286C2.28571 10.8 1.77143 10.2857 1.14286 10.2857ZM1.14286 5.71429C1.77143 5.71429 2.28571 5.2 2.28571 4.57143V2.28571H4.57143C5.2 2.28571 5.71429 1.77143 5.71429 1.14286C5.71429 0.514286 5.2 0 4.57143 0H1.14286C0.514286 0 0 0.514286 0 1.14286V4.57143C0 5.2 0.514286 5.71429 1.14286 5.71429ZM13.7143 13.7143H11.4286C10.8 13.7143 10.2857 14.2286 10.2857 14.8571C10.2857 15.4857 10.8 16 11.4286 16H14.8571C15.4857 16 16 15.4857 16 14.8571V11.4286C16 10.8 15.4857 10.2857 14.8571 10.2857C14.2286 10.2857 13.7143 10.8 13.7143 11.4286V13.7143ZM10.2857 1.14286C10.2857 1.77143 10.8 2.28571 11.4286 2.28571H13.7143V4.57143C13.7143 5.2 14.2286 5.71429 14.8571 5.71429C15.4857 5.71429 16 5.2 16 4.57143V1.14286C16 0.514286 15.4857 0 14.8571 0H11.4286C10.8 0 10.2857 0.514286 10.2857 1.14286Z" fill={showFullScreen ? "white" : "#94A3B8"} />
             </g>
             <defs>
@@ -153,9 +152,8 @@ export default function SubHeader() {
         </div> */}
 
         <div
-          className={`${
-            router.pathname === "/" ? "hidden md:flex" : "hidden md:flex"
-          } border-2 border-[#26282C] rounded-[5px] p-[0.563rem] cursor-pointer transition-all hover:bg-[#26282C]/50 hover:transition-all ${showLiveStats ? "bg-[#26282C] border-[#26282C] hover:bg-[#26282C]" : ""}`}
+          className={`${router.pathname === "/" ? "hidden md:flex" : "hidden md:flex"
+            } border-2 border-[#26282C] rounded-[5px] p-[0.563rem] cursor-pointer transition-all hover:bg-[#26282C]/50 hover:transition-all ${showLiveStats ? "bg-[#26282C] border-[#26282C] hover:bg-[#26282C]" : ""}`}
           onClick={() => setShowLiveStats(!showLiveStats)}
         >
           <svg
@@ -165,7 +163,7 @@ export default function SubHeader() {
             fill="currentColor"
             xmlns="http://www.w3.org/2000/svg"
           >
-            <g opacity="0.75" clip-path="url(#clip0_3181_1728)">
+            <g opacity="0.75" clipPath="url(#clip0_3181_1728)">
               <path
                 d="M15 5H11V15H10V0H6V15H5V8H1V15H0V16H1H5H6H10H11H15H16V15H15V5Z"
                 fill={showLiveStats ? "white" : "#94A3B8"}
@@ -180,9 +178,8 @@ export default function SubHeader() {
         </div>
 
         <div
-          className={`${
-            router.pathname === "/" ? "hidden md:flex" : "hidden md:flex"
-          } border-2 border-[#26282C] rounded-[5px] p-[0.563rem] cursor-pointer ml-3 transition-all hover:bg-[#26282C]/50 hover:transition-all ${enableSounds ? "bg-[#26282C] border-[#26282C] hover:bg-[#26282C]" : ""}`}
+          className={`${router.pathname === "/" ? "hidden md:flex" : "hidden md:flex"
+            } border-2 border-[#26282C] rounded-[5px] p-[0.563rem] cursor-pointer ml-3 transition-all hover:bg-[#26282C]/50 hover:transition-all ${enableSounds ? "bg-[#26282C] border-[#26282C] hover:bg-[#26282C]" : ""}`}
           onClick={() => setEnableSounds(!enableSounds)}
         >
           {!enableSounds && (
@@ -232,9 +229,8 @@ export default function SubHeader() {
         </div>
 
         <div
-          className={`${
-            router.pathname === "/" ? "hidden md:flex" : "hidden md:flex"
-          } h-10 border border-white border-opacity-5 rounded-[5px] mx-4`}
+          className={`${router.pathname === "/" ? "hidden md:flex" : "hidden md:flex"
+            } h-10 border border-white border-opacity-5 rounded-[5px] mx-4`}
         />
 
         <div className="hidden md:flex items-center md:min-w-fit">
@@ -242,9 +238,8 @@ export default function SubHeader() {
         </div>
       </div>
       <div
-        className={`${
-          router.pathname === "/" ? "hidden" : "flex"
-        } md:hidden items-center justify-between my-4 mx-2 rounded-[5px] bg-[#121418] py-3 px-4 md:min-w-fit`}
+        className={`${router.pathname === "/" ? "hidden" : "flex"
+          } md:hidden items-center justify-between my-4 mx-2 rounded-[5px] bg-[#121418] py-3 px-4 md:min-w-fit`}
       >
         <div className="flex items-center ">
           <div
@@ -258,7 +253,7 @@ export default function SubHeader() {
               fill="currentColor"
               xmlns="http://www.w3.org/2000/svg"
             >
-              <g opacity="0.75" clip-path="url(#clip0_3181_1728)">
+              <g opacity="0.75" clipPath="url(#clip0_3181_1728)">
                 <path
                   d="M15 5H11V15H10V0H6V15H5V8H1V15H0V16H1H5H6H10H11H15H16V15H15V5Z"
                   fill={showLiveStats ? "white" : "#94A3B8"}

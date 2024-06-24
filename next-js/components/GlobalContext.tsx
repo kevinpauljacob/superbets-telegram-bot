@@ -1,12 +1,6 @@
-import {
-  User,
-  connection,
-  houseEdgeTiers,
-  launchPromoEdge,
-  pointTiers,
-  stakingTiers,
-  translator,
-} from "@/context/transactions";
+import { User, connection, translator } from "@/context/transactions";
+import { houseEdgeTiers, pointTiers, stakingTiers } from "@/context/config";
+import { launchPromoEdge } from "@/context/config";
 import { useWallet } from "@solana/wallet-adapter-react";
 import React, {
   createContext,
@@ -19,12 +13,14 @@ import { LAMPORTS_PER_SOL, PublicKey } from "@solana/web3.js";
 import { errorCustom } from "./toasts/ToastGroup";
 import SOL from "@/public/assets/coins/SOL";
 import { GameType } from "@/utils/provably-fair";
+import { SPL_TOKENS } from "@/context/config";
 
 export interface GameStat {
   game: GameType;
   amount: number;
   pnl: number;
   totalPNL: number;
+  token: string;
   result: "Won" | "Lost";
 }
 
@@ -74,6 +70,11 @@ interface AutoConfigOptions {
   useAutoConfig: boolean;
 }
 
+interface LiveTokenPrice {
+  mintAddress: string;
+  price: number; // 1 Token Price in USD
+}
+
 interface GlobalContextProps {
   loading: boolean;
   setLoading: (stake: boolean) => void;
@@ -121,6 +122,9 @@ interface GlobalContextProps {
   showWalletModal: boolean;
   setShowWalletModal: React.Dispatch<React.SetStateAction<boolean>>;
 
+  showCreateCampaignModal: boolean;
+  setShowCreateCampaignModal: React.Dispatch<React.SetStateAction<boolean>>;
+
   isVerifyModalOpen: boolean;
   setIsVerifyModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
 
@@ -166,8 +170,6 @@ interface GlobalContextProps {
   setLiveCurrentStat: React.Dispatch<React.SetStateAction<GameType | "All">>;
   showLiveStats: boolean;
   setShowLiveStats: React.Dispatch<React.SetStateAction<boolean>>;
-  showFullScreen: boolean;
-  setShowFullScreen: React.Dispatch<React.SetStateAction<boolean>>;
   enableSounds: boolean;
   setEnableSounds: React.Dispatch<React.SetStateAction<boolean>>;
 
@@ -194,12 +196,22 @@ interface GlobalContextProps {
   maxBetAmt: number | undefined;
   setMaxBetAmt: React.Dispatch<React.SetStateAction<number>>;
 
+  minGameAmount: number;
+  setMinGameAmount: React.Dispatch<React.SetStateAction<number>>;
+
   kenoRisk: "classic" | "low" | "medium" | "high";
   setKenoRisk: React.Dispatch<
     React.SetStateAction<"classic" | "low" | "medium" | "high">
   >;
   userTokens: TokenAccount[]; // Add this line
   setUserTokens: React.Dispatch<React.SetStateAction<TokenAccount[]>>;
+  updatePNL: (
+    game: GameType,
+    win: boolean,
+    betAmount: number,
+    multiplier: number,
+  ) => void;
+  liveTokenPrice: LiveTokenPrice[];
 }
 
 const GlobalContext = createContext<GlobalContextProps | undefined>(undefined);
@@ -248,6 +260,8 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
   });
 
   const [showWalletModal, setShowWalletModal] = useState<boolean>(false);
+  const [showCreateCampaignModal, setShowCreateCampaignModal] =
+    useState<boolean>(false);
   const [isVerifyModalOpen, setIsVerifyModalOpen] = useState<boolean>(false);
   const [verifyModalData, setVerifyModalData] = useState({});
 
@@ -275,7 +289,7 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
   const [liveCurrentStat, setLiveCurrentStat] = useState<GameType | "All">(
     "All",
   );
-  const [showFullScreen, setShowFullScreen] = useState<boolean>(false);
+  const [liveTokenPrice, setLiveTokenPrice] = useState<LiveTokenPrice[]>([]);
   const [enableSounds, setEnableSounds] = useState<boolean>(true);
 
   const [autoConfigState, setAutoConfigState] = useState<
@@ -288,6 +302,7 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
 
   const [houseEdge, setHouseEdge] = useState<number>(0);
   const [maxBetAmt, setMaxBetAmt] = useState<number>(0);
+  const [minGameAmount, setMinGameAmount] = useState<number>(0.0001);
   const [kenoRisk, setKenoRisk] = useState<
     "classic" | "low" | "medium" | "high"
   >("classic");
@@ -358,6 +373,74 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
       console.error(e);
     }
   };
+
+  const updatePNL = async (
+    game: GameType,
+    win: boolean,
+    betAmount: number,
+    multiplier: number,
+  ) => {
+    let token = liveTokenPrice.find(
+      (token) => token.mintAddress === selectedCoin.tokenMint,
+    );
+    if (!token)
+      token = (await updateLivePrices()).find(
+        (token) => token.mintAddress === selectedCoin.tokenMint,
+      )!;
+
+    betAmount = token.price * betAmount;
+
+    let profit = win
+      ? (multiplier * (1 - houseEdge) - 1) * betAmount
+      : (multiplier - 1) * betAmount;
+    let totalPNL = 0;
+
+    if (liveStats.length > 0)
+      totalPNL = liveStats[liveStats.length - 1].totalPNL;
+
+    totalPNL += profit;
+
+    setLiveStats([
+      ...liveStats,
+      {
+        game: game,
+        amount: betAmount,
+        result: win ? "Won" : "Lost",
+        pnl: profit,
+        totalPNL,
+        token: selectedCoin.tokenMint,
+      },
+    ]);
+  };
+
+  const updateLivePrices = async () => {
+    let prices = [];
+    let data = await (
+      await fetch(
+        `https://price.jup.ag/v6/price?ids=${SPL_TOKENS.map(
+          (x) => x.tokenMint,
+        ).join(",")}&vsToken=USDC`,
+      )
+    ).json();
+
+    for (let token of SPL_TOKENS) {
+      let price = data?.data[token.tokenMint]?.price ?? 0;
+      prices.push({ mintAddress: token.tokenMint, price: price });
+    }
+
+    setLiveTokenPrice(prices);
+    return prices;
+  };
+
+  useEffect(() => {
+    updateLivePrices();
+    setInterval(
+      () => {
+        updateLivePrices();
+      },
+      5 * 60 * 1000,
+    );
+  }, []);
 
   const getWalletBalance = async () => {
     if (wallet && wallet.publicKey)
@@ -455,6 +538,7 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
         setWalletBalance,
         coinData,
         showWalletModal,
+        showCreateCampaignModal,
         isVerifyModalOpen,
         setIsVerifyModalOpen,
         verifyModalData,
@@ -496,12 +580,15 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
         houseEdge,
         setHouseEdge,
         maxBetAmt,
+        minGameAmount,
+        setMinGameAmount,
         kenoRisk,
         setKenoRisk,
         setMaxBetAmt,
         openVerifyModal,
         closeVerifyModal,
         setShowWalletModal,
+        setShowCreateCampaignModal,
         setCoinData,
         getUserDetails,
         getGlobalInfo,
@@ -516,12 +603,12 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
         setLiveStats,
         showLiveStats,
         setShowLiveStats,
-        showFullScreen,
-        setShowFullScreen,
         enableSounds,
         setEnableSounds,
         liveCurrentStat,
         setLiveCurrentStat,
+        updatePNL,
+        liveTokenPrice,
       }}
     >
       {children}
@@ -1361,12 +1448,67 @@ export const translationsMap = {
     ko: "하우스 엣지",
     ch: "庄家优势",
   },
-  "I agree with Privacy Policy and with Terms of Use, Gambling isn't forbidden by my local authorities and I'm at least 18 years old.":
+  "I agree with the Privacy Policy and with the Terms of Use, Gambling is not forbidden by my local authorities and I am at least 18 years old.":
     {
-      ru: "Я согласен с Политикой конфиденциальности и Условиями использования, азартные игры не запрещены моими местными властями, и мне исполнилось 18 лет.",
-      ko: "개인정보 보호정책 및 이용 약관에 동의하며, 도박은 현지 당국에 의해 금지되지 않으며 나는 18세 이상입니다.",
-      ch: "我同意隐私政策和使用条款，赌博未被当地政府禁止并且我已满18岁。",
+      ru: "Я согласен с Политикой конфиденциальности и Условиями использования, азартные игры не запрещены моими местными властями, и мне как минимум 18 лет.",
+      ko: "개인정보 처리방침 및 이용 약관에 동의합니다. 도박은 현지 당국에 의해 금지되지 않았으며, 저는 만 18세 이상입니다.",
+      ch: "我同意隐私政策和使用条款，我所在地区的法律不禁止赌博，并且我已满18岁。",
     },
+  "LIVE STATS": {
+    ru: "Живые статистики",
+    ko: "실시간 통계",
+    ch: "实时统计",
+  },
+  Wins: {
+    ru: "Победы",
+    ko: "승리",
+    ch: "胜",
+  },
+  Losses: {
+    ru: "Поражения",
+    ko: "패배",
+    ch: "败",
+  },
+  Wagered: {
+    ru: "Сделанные ставки",
+    ko: "베팅",
+    ch: "投注",
+  },
+  Gems: {
+    ru: "Самоцветы",
+    ko: "보석",
+    ch: "宝石",
+  },
+  "Current Profit": {
+    ru: "Текущая прибыль",
+    ko: "현재 이익",
+    ch: "当前利润",
+  },
+  "Profit on next tile": {
+    ru: "Прибыль на следующем квадрате",
+    ko: "다음 타일에서의 이익",
+    ch: "下一个方块的利润",
+  },
+  CASHOUT: {
+    ru: "ВЫВОД",
+    ko: "출금",
+    ch: "提现",
+  },
+  "Pending game found!": {
+    ru: "Найдена ожидающая игра!",
+    ko: "보류 중인 게임 발견!",
+    ch: "找到待处理的游戏！",
+  },
+  "Could not fetch pending game.": {
+    ru: "Не удалось получить ожидающую игру.",
+    ko: "보류 중인 게임을 가져올 수 없습니다.",
+    ch: "无法获取待处理游戏。",
+  },
+  "Select at least one tile to bet on.": {
+    ru: "Выберите по крайней мере один квадрат для ставки.",
+    ko: "최소 1개의 타일을 선택하여 베팅하십시오.",
+    ch: "至少选择1个方块进行投注。",
+  },
   "High Rollers": {
     ru: "Крупные игроки",
     ko: "하이 롤러",
@@ -1581,5 +1723,151 @@ export const translationsMap = {
     ru: "Не удалось получить доску лидеров.",
     ko: "리더 보드를 가져올 수 없습니다.",
     ch: "无法获取排行榜。",
+  },
+  "AFFILIATE PROGRAM": {
+    ru: "ПАРТНЕРСКАЯ ПРОГРАММА",
+    ko: "제휴 프로그램",
+    ch: "联盟计划",
+  },
+  Referred: {
+    ru: "Рекомендованный",
+    ko: "추천",
+    ch: "推荐",
+  },
+  Earnings: {
+    ru: "Доход",
+    ko: "수익",
+    ch: "收益",
+  },
+  Campaigns: {
+    ru: "Кампании",
+    ko: "캠페인",
+    ch: "活动",
+  },
+  "CREATE CAMPAIGN": {
+    ru: "СОЗДАТЬ КАМПАНИЮ",
+    ko: "캠페인 만들기",
+    ch: "创建活动",
+  },
+  "Create Campaign": {
+    ru: "Создать кампанию",
+    ko: "캠페인 만들기",
+    ch: "创建活动",
+  },
+  "Campaign Name": {
+    ru: "Название кампании",
+    ko: "캠페인 이름",
+    ch: "活动名称",
+  },
+  "Multi-Level Referral": {
+    ru: "Многоуровневая реферальная",
+    ko: "다단계 추천",
+    ch: "多级推荐",
+  },
+  "Failed to create campaign!": {
+    ru: "Не удалось создать кампанию!",
+    ko: "캠페인을 만들지 못했습니다!",
+    ch: "创建活动失败！",
+  },
+  "Our affiliate program includes a comprehensive retention program that keeps referred customers engaged and invested.":
+    {
+      ru: "Наша партнерская программа включает в себя комплексную программу удержания, которая удерживает рекомендованных клиентов и заинтересованных.",
+      ko: "저희 제휴 프로그램에는 추천된 고객이 참여하고 투자하도록 유지하는 포괄적인 유지 프로그램이 포함되어 있습니다.",
+      ch: "我们的联盟计划包括全面的保留计划，使推荐的客户保持参与和投资。",
+    },
+  "Referral Link": {
+    ru: "Реферальная ссылка",
+    ko: "추천 링크",
+    ch: "推荐链接",
+  },
+  "How it Works?": {
+    ru: "Как это работает?",
+    ko: "작동 방식",
+    ch: "它是如何工作的？",
+  },
+  "Total Claimed": {
+    ru: "Всего заявлено",
+    ko: "총 청구",
+    ch: "总索赔",
+  },
+  "Total Claimable": {
+    ru: "Всего подлежащего претензии",
+    ko: "총 청구 가능",
+    ch: "总索赔",
+  },
+  "Total Earned" : {
+    ru: "Всего заработано",
+    ko: "총 수익",
+    ch: "总收入",
+  },
+  CLAIM: {
+    ru: "ЗАЯВИТЬ",
+    ko: "청구",
+    ch: "索赔",
+  },
+  Level: {
+    ru: "Уровень",
+    ko: "레벨",
+    ch: "等级",
+  },
+  "No have not referred anyone.": {
+    ru: "Нет, никто не был приглашён.",
+    ko: "추천한 사람이 없습니다.",
+    ch: "没有推荐任何人。",
+  },
+  "No campaigns created": {
+    ru: "Нет созданных кампаний",
+    ko: "생성된 캠페인이 없습니다",
+    ch: "没有创建任何活动",
+  },
+  "Commission %": {
+    ru: "Комиссия %",
+    ko: "수수료 %",
+    ch: "佣金 %",
+  },
+  "Commission": {
+    ru: "Комиссия",
+    ko: "수수료",
+    ch: "佣金",
+  },
+  Earned: {
+    ru: "Заработано",
+    ko: "수익",
+    ch: "赚取的",
+  },
+  Cryptocurrency: {
+    ru: "Криптовалюта",
+    ko: "암호화폐",
+    ch: "加密货币",
+  },
+  "Previously Claimed": {
+    ru: "Ранее заявленные",
+    ko: "이전에 청구된",
+    ch: "之前已领取",
+  },
+  Claimable: {
+    ru: "Подлежащий претензии",
+    ko: "청구 가능",
+    ch: "可索赔",
+  },
+  Signups: {
+    ru: "Регистрации",
+    ko: "가입",
+    ch: "注册",
+  },
+  "Code (Campaign ID)": {
+    ru: "Код (ID кампании)",
+    ko: "코드 (캠페인 ID)",
+    ch: "代码（活动ID）",
+  },
+  Copy: {
+    ru: "Копировать",
+    ko: "복사",
+    ch: "复制",
+  },
+  Copied: {
+    ru: "Скопировано",
+    ko: "복사됨",
+    ch: "复制",
   },
 };

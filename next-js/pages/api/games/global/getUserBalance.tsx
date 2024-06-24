@@ -42,14 +42,14 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
       let totalBalance = netBalance + pnl;
 
-      console.log(
-        "netBalance: ",
-        netBalance,
-        "pnl: ",
-        pnl,
-        "totalBalance: ",
-        totalBalance,
-      );
+      // console.log(
+      //   "netBalance: ",
+      //   netBalance,
+      //   "pnl: ",
+      //   pnl,
+      //   "totalBalance: ",
+      //   totalBalance,
+      // );
 
       return res.json({
         success: true,

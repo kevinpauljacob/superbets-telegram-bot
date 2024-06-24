@@ -23,7 +23,7 @@ import { Limbo } from "./games/Limbo/VerifyLimboModal";
 import { Wheel } from "./games/Wheel/VerifyWheelModal";
 import { Keno } from "./games/Keno/VerifyKenoModal";
 import { Mines } from "./games/Mines/VerifyMinesModal";
-import { GameType } from "@/utils/provably-fair";
+import { GameTokens, GameType } from "@/utils/provably-fair";
 import ConfigureAutoModal from "./games/ConfigureAutoModal";
 import RollDiceProvablyFairModal from "./games/Dice/DiceProvablyFairModal";
 import Dice2ProvablyFairModal from "./games/Dice2/Dice2ProvablyFairModal";
@@ -32,6 +32,7 @@ import LimboProvablyFairModal from "./games/Limbo/LimboProvablyFairModal";
 import WheelProvablyFairModal from "./games/Wheel/WheelProvablyFairModal";
 import KenoProvablyFairModal from "./games/Keno/KenoProvablyFairModal";
 import MinesProvablyFairModal from "./games/Mines/MinesProvablyFairModal";
+import CreateCampaignModal from "@/components/affiliate-program/CreateCampaignModal";
 import Footer from "./Footer";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { soundAlert } from "@/utils/soundUtils";
@@ -39,6 +40,9 @@ import VerifyRoulette1Modal, {
   Roulette1,
 } from "./games/roulette1/VerifyRoulette1Modal";
 import Roulette1ProvablyFairModal from "./games/roulette1/Roulette1ProvablyFairModal";
+import { maxPayouts, minAmtFactor } from "@/context/config";
+import VerifyPlinkoModal, { Plinko } from "./games/Plinko/VerifyPlinkoModal";
+import PlinkoProvablyFairModal from "./games/Plinko/PlinkoProvablyFairModal";
 
 interface LayoutProps {
   children: ReactNode;
@@ -52,6 +56,8 @@ export default function Layout({ children }: LayoutProps) {
 
   const {
     showWalletModal,
+    showCreateCampaignModal,
+    setShowCreateCampaignModal,
     getBalance,
     getWalletBalance,
     isVerifyModalOpen,
@@ -77,6 +83,8 @@ export default function Layout({ children }: LayoutProps) {
     setAutoLossChangeReset,
     getUserDetails,
     selectedCoin,
+    minGameAmount,
+    setMinGameAmount,
   } = useGlobalContext();
 
   const [modalData, setModalData] = useState({
@@ -107,11 +115,11 @@ export default function Layout({ children }: LayoutProps) {
 
   useEffect(() => {
     //sound pre-loader
-    soundAlert("/sounds/betbutton.wav", true);
-    soundAlert("/sounds/diceshake.wav", true);
-    soundAlert("/sounds/slider.wav", true);
-    soundAlert("/sounds/win.wav", true);
-    soundAlert("/sounds/bomb.wav", true);
+    // soundAlert("/sounds/betbutton.wav", true);
+    // soundAlert("/sounds/diceshake.wav", true);
+    // soundAlert("/sounds/slider.wav", true);
+    // soundAlert("/sounds/win.wav", true);
+    // soundAlert("/sounds/bomb.wav", true);
   }, []);
 
   useEffect(() => {
@@ -204,6 +212,10 @@ export default function Layout({ children }: LayoutProps) {
     if (session?.user) {
       getUserDetails();
     }
+    setMinGameAmount(
+      maxPayouts[selectedCoin.tokenMint as GameTokens][game as GameType] *
+        minAmtFactor,
+    );
   }, [wallet?.publicKey, session?.user, game, selectedCoin]);
 
   return (
@@ -237,7 +249,7 @@ export default function Layout({ children }: LayoutProps) {
         <MobileNavbar sidebar={mobileSidebar} toggleSidebar={toggleSidebar} />
       </div>
       {showWalletModal && <BalanceModal />}
-
+      {showCreateCampaignModal && <CreateCampaignModal />}
       {/* verify modals  */}
       {verifyModalData.game === GameType.coin ? (
         <VerifyFlipModal
@@ -295,6 +307,13 @@ export default function Layout({ children }: LayoutProps) {
           modalData={{ bet: (verifyModalData as Roulette1)! }}
           wallet={wallet.publicKey?.toBase58()}
         />
+      ) : verifyModalData.game === GameType.plinko ? (
+        <VerifyPlinkoModal
+          isOpen={isVerifyModalOpen}
+          onClose={closeVerifyModal}
+          modalData={{ bet: (verifyModalData as Plinko)! }}
+          wallet={wallet.publicKey?.toBase58()}
+        />
       ) : null}
 
       {/* pf modals  */}
@@ -349,6 +368,13 @@ export default function Layout({ children }: LayoutProps) {
         />
       ) : game === GameType.roulette1 ? (
         <Roulette1ProvablyFairModal
+          isOpen={openPFModal}
+          onClose={closePfModal}
+          modalData={modalData}
+          setModalData={setModalData}
+        />
+      ) : game === GameType.plinko ? (
+        <PlinkoProvablyFairModal
           isOpen={openPFModal}
           onClose={closePfModal}
           modalData={modalData}

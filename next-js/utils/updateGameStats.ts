@@ -1,7 +1,11 @@
-import GameStats from "@/models/games/gameStats";
+import { commissionLevels } from "@/context/config";
+import { GameStats } from "@/models/games";
+import { Campaign, User } from "@/models/referral";
 import { GameType } from "@/utils/provably-fair";
+import Decimal from "decimal.js";
 
 async function updateGameStats(
+  wallet: string,
   game: GameType,
   tokenMint: string,
   amount: number,
@@ -9,7 +13,7 @@ async function updateGameStats(
   feeGenerated: number,
 ) {
   const gameStat = await GameStats.findOne({ game }).then((res) =>
-    res.toJSON(),
+    res?.toJSON(),
   );
 
   const numOfWallets = incrementWallets ? 1 : 0;
@@ -46,6 +50,33 @@ async function updateGameStats(
           },
         },
       );
+  }
+
+  const referralInfo = await User.findOneAndUpdate(
+    { wallet },
+    {
+      $inc: {
+        [`volume.${tokenMint}`]: amount,
+        [`feeGenerated.${tokenMint}`]: feeGenerated,
+      },
+    },
+    { upsert: true, new: true },
+  );
+
+  for (let i = 0; i < referralInfo.referredByChain.length; i++) {
+    const _id = referralInfo.referredByChain[i];
+
+    const earnings = Decimal.mul(commissionLevels[i], feeGenerated).toNumber();
+
+    await Campaign.findOneAndUpdate(
+      { _id },
+      {
+        $inc: {
+          [`totalEarnings.${tokenMint}`]: earnings,
+          [`unclaimedEarnings.${tokenMint}`]: earnings,
+        },
+      },
+    );
   }
 }
 

@@ -2,10 +2,10 @@ import { useGlobalContext } from "@/components/GlobalContext";
 import LeaderboardTable from "@/components/Leaderboard";
 import {
   obfuscatePubKey,
-  pointTiers,
   translator,
   truncateNumber,
 } from "@/context/transactions";
+import { pointTiers } from "@/context/config";
 import { useWallet } from "@solana/wallet-adapter-react";
 import Image from "next/legacy/image";
 import { useEffect } from "react";
@@ -20,8 +20,8 @@ export default function Leaderboard() {
     const tier = Object.entries(pointTiers).reduce((prev, next) => {
       return points >= next[1]?.limit ? next : prev;
     });
-    console.log(tier, pointTiers["2"]);
-    console.log("pointTiers", pointTiers);
+    // console.log(tier, pointTiers["2"]);
+    // console.log("pointTiers", pointTiers);
     setPointTier({
       index: parseInt(tier[0]),
       limit: tier[1]?.limit,
@@ -60,7 +60,14 @@ export default function Leaderboard() {
                         : "...."}
                     </span>
                     <span className="text-staking-secondary text-sm font-medium">
-                      {pointTier?.label ?? ""}
+                      {pointTier?.label
+                        ? translator(
+                            pointTier?.label.split(" ")?.[0],
+                            language,
+                          ) +
+                          " " +
+                          pointTier?.label.split(" ")?.[1]
+                        : ""}
                     </span>
                   </div>
                 </div>
@@ -97,7 +104,7 @@ export default function Leaderboard() {
 
               <div className="flex flex-row justify-between font-chakra mt-4">
                 <span className="text-sm text-white text-right text-opacity-75">
-                  Your level progress
+                  {translator("Your level progress", language)}
                 </span>
                 {(pointTier?.index ?? 0) < 7 && (
                   <div className="flex flex-col items-end">
@@ -105,7 +112,7 @@ export default function Leaderboard() {
                       {truncateNumber(
                         pointTiers[pointTier?.index + 1]?.limit ?? 0,
                         0,
-                      ) + " Points"}
+                      ) + ` ${translator("Points", language)}`}
                     </span>
                   </div>
                 )}
@@ -115,7 +122,7 @@ export default function Leaderboard() {
                 className={`${
                   (Math.min(userData?.points ?? 0, 1_000_000) * 100) /
                     pointTiers[pointTier?.index + 1]?.limit ?? 1
-                    ? "opacity-50"
+                    ? "opacity-90"
                     : ""
                 } relative flex transition-width duration-1000 w-full rounded-full overflow-hidden h-6 bg-[#282E3D] mt-2 mb-2`}
               >
@@ -139,7 +146,13 @@ export default function Leaderboard() {
               </div>
               <div className="flex flex-row justify-between font-chakra capitalize">
                 <span className="text-staking-secondary text-opacity-75 text-sm font-medium">
-                  {pointTier?.label ?? ""}
+                  {pointTier?.label
+                    ? pointTier?.label.includes(" ")
+                      ? translator(pointTier?.label.split(" ")[0], language) +
+                        " " +
+                        pointTier?.label.split(" ")[1]
+                      : translator(pointTier?.label, language)
+                    : ""}
                 </span>
                 <span className="flex items-center gap-1 text-staking-secondary text-opacity-75 text-sm font-medium">
                   <div className="flex relative min-w-[1rem] h-[1rem]">
@@ -151,7 +164,19 @@ export default function Leaderboard() {
                       objectPosition="center"
                     />
                   </div>
-                  {pointTiers[pointTier?.index + 1]?.label ?? ""}
+                  {pointTiers[pointTier?.index + 1]?.label
+                    ? pointTiers[pointTier?.index + 1]?.label.includes(" ")
+                      ? translator(
+                          pointTiers[pointTier?.index + 1]?.label.split(" ")[0],
+                          language,
+                        ) +
+                        " " +
+                        pointTiers[pointTier?.index + 1]?.label.split(" ")[1]
+                      : translator(
+                          pointTiers[pointTier?.index + 1]?.label,
+                          language,
+                        )
+                    : ""}
                 </span>
               </div>
             </div>
@@ -168,18 +193,20 @@ export default function Leaderboard() {
               </div>
               <div>
                 <p className="text-white font-semibold text-base text-opacity-75">
-                  Boost Your Tier by Staking!
+                  {translator("Boost Your Tier by Staking!", language)}
                 </p>
                 <p className="text-[#94A3B8] font-semibold text-[11px] text-opacity-50 max-w-[290px]">
-                  You can stake your $FOMO to obtain higher multiplier for your
-                  points!
+                  {translator(
+                    "You can stake your $FOMO to obtain higher multiplier for your points!",
+                    language,
+                  )}
                 </p>
               </div>
             </div>
             <div className="flex gap-[12px] w-full h-[50%]">
               <div className="flex flex-col justify-between gap-[12px] bg-staking-bg rounded-[5px] p-4 w-full h-full">
                 <p className="text-xs font-medium text-opacity-50 text-white">
-                  Current Tier
+                  {translator("Current Tier", language)}
                 </p>
                 <p className="font-chakra text-2xl font-semibold text-[#94A3B8] text-right">
                   T{userData?.tier ?? 0}
@@ -187,7 +214,7 @@ export default function Leaderboard() {
               </div>
               <div className="flex flex-col justify-between gap-[12px] bg-staking-bg rounded-[5px] p-4 w-full h-full">
                 <p className="text-xs font-medium text-opacity-50 text-white">
-                  Current Multiplier
+                  {translator("Current Multiplier", language)}
                 </p>
                 <p className="font-chakra text-2xl font-semibold text-[#94A3B8] text-right">
                   {`${userData?.multiplier ?? 0.5}x`}

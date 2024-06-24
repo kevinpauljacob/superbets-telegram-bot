@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { GameType } from "@/utils/provably-fair";
 import { useGlobalContext } from "./GlobalContext";
 import { translator, truncateNumber } from "@/context/transactions";
-import { Coins } from "./Infobar";
+import { TokenVolumes } from "./Infobar";
 
 export default function GameHeader() {
   const router = useRouter();
@@ -12,7 +12,7 @@ export default function GameHeader() {
 
   const { coinData, houseEdge, setOpenPFModal, language } = useGlobalContext();
 
-  const getVolume = async (totalVolume: Coins): Promise<number> => {
+  const getVolume = async (totalVolume: TokenVolumes): Promise<number> => {
     const mintIds = Object.keys(totalVolume).join(",");
     const data = await (
       await fetch(`https://price.jup.ag/v6/price?ids=${mintIds}&vsToken=SOL`)
@@ -107,6 +107,10 @@ export default function GameHeader() {
       icon: "/assets/dice.png",
       name: "Roulette",
     },
+    plinko: {
+      icon: "/assets/plinko.png",
+      name: "Plinko",
+    },
   });
 
   // Get the game details based on the extracted game name
@@ -118,7 +122,7 @@ export default function GameHeader() {
       <div className="flex flex-row w-full items-center justify-between">
         <div className="flex items-center">
           <Image
-            src={selectedGame.icon}
+            src={"/assets/gameIcon.svg"}
             alt={selectedGame.name}
             width={30}
             height={30}

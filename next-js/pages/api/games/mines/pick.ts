@@ -8,15 +8,11 @@ import {
   decryptServerSeed,
 } from "@/utils/provably-fair";
 import StakingUser from "@/models/staking/user";
-import {
-  houseEdgeTiers,
-  launchPromoEdge,
-  pointTiers,
-  stakingTiers,
-} from "@/context/transactions";
+import { houseEdgeTiers, pointTiers, stakingTiers } from "@/context/config";
+import { launchPromoEdge } from "@/context/config";
 import { wsEndpoint } from "@/context/config";
 import Decimal from "decimal.js";
-import { SPL_TOKENS } from "@/context/config";
+import { SPL_TOKENS, maintainance } from "@/context/config";
 import updateGameStats from "../../../../utils/updateGameStats";
 Decimal.set({ precision: 9 });
 
@@ -37,6 +33,12 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === "POST") {
     try {
       let { wallet, gameId, userBet }: InputType = req.body;
+
+      if (maintainance)
+        return res.status(400).json({
+          success: false,
+          message: "Under maintenance",
+        });
 
       const token = await getToken({ req, secret });
 
@@ -205,6 +207,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           ).populate("gameSeed");
 
           await updateGameStats(
+            wallet,
             GameType.mines,
             tokenMint,
             0,

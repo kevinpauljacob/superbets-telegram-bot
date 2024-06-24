@@ -12,12 +12,12 @@ import {
 import StakingUser from "@/models/staking/user";
 import {
   houseEdgeTiers,
-  launchPromoEdge,
-  maintainance,
   maxPayouts,
+  minAmtFactor,
   pointTiers,
   stakingTiers,
-} from "@/context/transactions";
+} from "@/context/config";
+import { launchPromoEdge, maintainance } from "@/context/config";
 import { minGameAmount, wsEndpoint } from "@/context/config";
 import { riskToChance } from "@/components/games/Wheel/Segments";
 import { Decimal } from "decimal.js";
@@ -44,6 +44,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === "POST") {
     try {
       let { wallet, amount, tokenMint, segments, risk }: InputType = req.body;
+
+      const minGameAmount =
+        maxPayouts[tokenMint as GameTokens]["wheel" as GameType] * minAmtFactor;
 
       if (maintainance)
         return res.status(400).json({
@@ -181,11 +184,15 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           if (i >= strikeNumber) {
             strikeMultiplier = item[j].multiplier;
             if (item[j].multiplier !== 0) {
-              result = "Won";
               amountWon = Decimal.mul(amount, strikeMultiplier).mul(
                 Decimal.sub(1, houseEdge),
               );
-              amountLost = 0;
+              amountLost = Math.max(
+                Decimal.sub(amount, amountWon).toNumber(),
+                0,
+              );
+
+              result = amountWon.toNumber() > amount ? "Won" : "Lost";
 
               feeGenerated = Decimal.mul(amount, strikeMultiplier)
                 .mul(houseEdge)
@@ -243,6 +250,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       await wheel.save();
 
       await updateGameStats(
+        wallet,
         GameType.wheel,
         tokenMint,
         amount,

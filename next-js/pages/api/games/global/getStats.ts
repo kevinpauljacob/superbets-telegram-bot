@@ -16,12 +16,14 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
       await connectDatabase();
 
-      const gameStats = await GameStats.findOne({ game }).lean();
+      let gameStats = await GameStats.findOne({ game }).lean();
 
       if (!gameStats)
-        return res
-          .status(400)
-          .json({ success: false, message: "Stat not found!" });
+        gameStats = await GameStats.create({
+          game,
+          volume: {},
+          feeGenerated: {},
+        });
 
       return res.json({
         success: true,

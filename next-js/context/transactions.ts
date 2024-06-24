@@ -13,7 +13,6 @@ import {
 } from "@solana/spl-token";
 import { WalletContextState } from "@solana/wallet-adapter-react";
 import { translationsMap } from "@/components/GlobalContext";
-import { GameTokens, GameType } from "@/utils/provably-fair";
 import {
   errorCustom,
   successCustom,
@@ -30,12 +29,6 @@ const stakingPublicKey = new PublicKey(
   process.env.NEXT_PUBLIC_STAKING_PUBLIC_KEY!,
 );
 
-export const fomoToken = "Cx9oLynYgC3RrgXzin7U417hNY9D6YB1eMGw4ZMbWJgw";
-
-export const launchPromoEdge = false;
-
-export const maintainance = false;
-
 export interface User {
   wallet: string;
   solAmount: number;
@@ -51,217 +44,6 @@ export const formatNumber = (number: number, fractions?: number) => {
     maximumFractionDigits: fractions ?? 4,
     minimumFractionDigits: fractions ?? 4,
   });
-};
-
-export const stakingTiers: Record<
-  number,
-  {
-    limit: number;
-    multiplier: number;
-  }
-> = {
-  0: {
-    limit: 0,
-    multiplier: 0.5,
-  },
-  1: {
-    limit: 300,
-    multiplier: 1,
-  },
-  2: {
-    limit: 3000,
-    multiplier: 1.05,
-  },
-  3: {
-    limit: 15000,
-    multiplier: 1.15,
-  },
-  4: {
-    limit: 40000,
-    multiplier: 1.3,
-  },
-  5: {
-    limit: 75000,
-    multiplier: 1.5,
-  },
-  6: {
-    limit: 150000,
-    multiplier: 1.75,
-  },
-  7: {
-    limit: 600000,
-    multiplier: 2,
-  },
-};
-
-export const pointTiers: Record<
-  number,
-  {
-    limit: number;
-    label: string;
-    text: string;
-  }
-> = {
-  0: {
-    limit: 0,
-    label: "BRONZE I",
-    text: "Do you even FOMO bro?",
-  },
-  1: {
-    limit: 300,
-    label: "BRONZE II",
-    text: "Do you even FOMO bro?",
-  },
-  2: {
-    limit: 875,
-    label: "BRONZE III",
-    text: "Do you even FOMO bro?",
-  },
-  3: {
-    limit: 1500,
-    label: "BRONZE IV",
-    text: "Do you even FOMO bro?",
-  },
-  4: {
-    limit: 2700,
-    label: "BRONZE V",
-    text: "Do you even FOMO bro?",
-  },
-  5: {
-    limit: 5000,
-    label: "SILVER I",
-    text: "Caught the FOMO bug?",
-  },
-  6: {
-    limit: 8000,
-    label: "SILVER II",
-    text: "Caught the FOMO bug?",
-  },
-  7: {
-    limit: 11500,
-    label: "SILVER III",
-    text: "Caught the FOMO bug?",
-  },
-  8: {
-    limit: 15500,
-    label: "SILVER IV",
-    text: "Caught the FOMO bug?",
-  },
-  9: {
-    limit: 20000,
-    label: "SILVER V",
-    text: "Caught the FOMO bug?",
-  },
-  10: {
-    limit: 25000,
-    label: "GOLD I",
-    text: "FOMO is rising...",
-  },
-  11: {
-    limit: 32000,
-    label: "GOLD II",
-    text: "FOMO is rising...",
-  },
-  12: {
-    limit: 44000,
-    label: "GOLD III",
-    text: "FOMO is rising...",
-  },
-  13: {
-    limit: 60000,
-    label: "GOLD IV",
-    text: "FOMO is rising...",
-  },
-  14: {
-    limit: 79000,
-    label: "GOLD V",
-    text: "FOMO is rising...",
-  },
-  15: {
-    limit: 100_000,
-    label: "PLATINUM",
-    text: "On your way to FOMOtopia.",
-  },
-  16: {
-    limit: 250_000,
-    label: "ELITE",
-    text: "FOMO Jedi - May the gains be with you.",
-  },
-  17: {
-    limit: 500_000,
-    label: "SUPREME",
-    text: "FOMO Wizard - Spreading magic.",
-  },
-  18: {
-    limit: 750_000,
-    label: "LEGENDARY",
-    text: "FOMO God – Missing out is for mortals, not you.",
-  },
-  19: {
-    limit: 1_000_000,
-    label: "MYTHICAL",
-    text: "FOMO is You and You are FOMO.",
-  },
-};
-
-export const houseEdgeTiers: Record<number, number> = {
-  0: 0.01,
-  1: 0.009,
-  2: 0.0075,
-  3: 0.006,
-  4: 0.005,
-  5: 0.0035,
-  6: 0.0015,
-  7: 0,
-};
-
-type PayoutValue<T> = number;
-
-export const maxPayouts: {
-  [K in GameTokens]: { [K in GameType]: PayoutValue<K> };
-} = {
-  [GameTokens.SOL]: {
-    [GameType.dice]: 1,
-    [GameType.coin]: 1,
-    [GameType.options]: 1,
-    [GameType.dice2]: 1,
-    [GameType.wheel]: 1,
-    [GameType.plinko]: 1,
-    [GameType.limbo]: 1,
-    [GameType.roulette1]: 1,
-    [GameType.roulette2]: 1,
-    [GameType.keno]: 1,
-    [GameType.mines]: 1,
-    [GameType.hilo]: 1,
-  },
-  [GameTokens.FOMO]: {
-    [GameType.dice]: 1,
-    [GameType.coin]: 1,
-    [GameType.options]: 1,
-    [GameType.dice2]: 1,
-    [GameType.wheel]: 1,
-    [GameType.plinko]: 1,
-    [GameType.limbo]: 1,
-    [GameType.roulette1]: 1,
-    [GameType.roulette2]: 1,
-    [GameType.keno]: 1,
-    [GameType.mines]: 1,
-    [GameType.hilo]: 1,
-  },
-  [GameTokens.USDC]: {
-    [GameType.dice]: 1,
-    [GameType.coin]: 1,
-    [GameType.options]: 1,
-    [GameType.dice2]: 1,
-    [GameType.wheel]: 1,
-    [GameType.plinko]: 1,
-    [GameType.limbo]: 1,
-    [GameType.roulette1]: 1,
-    [GameType.roulette2]: 1,
-    [GameType.keno]: 1,
-    [GameType.mines]: 1,
-    [GameType.hilo]: 1,
-  },
 };
 
 export const obfuscatePubKey = (address: string) => {
@@ -704,7 +486,8 @@ export const verifyFrontendTransaction = (
     ),
   );
 
-  console.log(transactionInstructions, verificationTransactionInstructions);
+  console.log(transactionInstructions);
+  console.log(verificationTransactionInstructions);
 
   return transactionInstructions === verificationTransactionInstructions;
 };
@@ -953,4 +736,139 @@ export const truncateNumber = (num: number, numOfDecimals: number = 4) => {
 
 export const isArrayUnique = (arr: number[]) => {
   return new Set(arr).size === arr.length;
+};
+
+export const getSolPrice = async (timeInSec: number) => {
+  const betEndPrice = await fetch(
+    `https://hermes.pyth.network/api/get_price_feed?id=0xef0d8b6fda2ceba41da15d4095d1da392a0d2f8ed0c6c7bc0f4cfac8c280b56d&publish_time=${timeInSec}`,
+  )
+    .then((res) => res.json())
+    .then((data) => {
+      const { price } = data;
+
+      if (price.publish_time + 2 < timeInSec)
+        throw new Error("Stale price feed!");
+
+      return price.price * Math.pow(10, price.expo);
+    });
+
+  return betEndPrice;
+};
+
+export const createClaimEarningsTxn = async (
+  wallet: PublicKey,
+  earnings: Record<string, number>,
+) => {
+  const transaction = new Transaction();
+
+  transaction.feePayer = wallet;
+  const blockhashWithExpiryBlockHeight = await connection.getLatestBlockhash();
+  transaction.recentBlockhash = blockhashWithExpiryBlockHeight.blockhash;
+
+  transaction.add(
+    ComputeBudgetProgram.setComputeUnitLimit({ units: 100000 }),
+    ComputeBudgetProgram.setComputeUnitPrice({ microLamports: 150000 }),
+  );
+
+  //sort earnings by key alphabetically
+  earnings = Object.fromEntries(
+    Object.entries(earnings).sort((a, b) => a[0].localeCompare(b[0])),
+  );
+
+  for (let tokenMint in earnings) {
+    let splToken = SPL_TOKENS.find((data) => data.tokenMint === tokenMint);
+    if (!splToken) throw new Error("Invalid tokenMint provided!");
+
+    const { tokenName, decimal } = splToken;
+
+    if (tokenName === "SOL") {
+      transaction.add(
+        SystemProgram.transfer({
+          fromPubkey: casinoPublicKey,
+          toPubkey: wallet,
+          lamports: Math.floor(earnings[tokenMint] * Math.pow(10, 9)),
+        }),
+      );
+    } else {
+      const tokenId = new PublicKey(tokenMint);
+      const userAta = await getAssociatedTokenAddress(tokenId, wallet);
+      const devAta = await getAssociatedTokenAddress(tokenId, casinoPublicKey);
+
+      transaction.add(
+        createAssociatedTokenAccountIdempotentInstruction(
+          wallet,
+          userAta,
+          wallet,
+          tokenId,
+        ),
+        createTransferInstruction(
+          devAta,
+          userAta,
+          casinoPublicKey,
+          Math.floor(earnings[tokenMint] * Math.pow(10, decimal)),
+        ),
+      );
+    }
+  }
+
+  transaction.instructions.slice(2).forEach((i) => {
+    i.keys.forEach((k) => {
+      if (k.pubkey.equals(wallet) || k.pubkey.equals(casinoPublicKey)) {
+        k.isSigner = true;
+        k.isWritable = true;
+      }
+    });
+  });
+
+  return { transaction, blockhashWithExpiryBlockHeight };
+};
+
+export const claimEarnings = async (
+  wallet: WalletContextState,
+  campaigns: Array<{ unclaimedEarnings: Record<string, number> }>,
+) => {
+  if (!wallet.publicKey) {
+    errorCustom("Wallet not connected");
+    return { success: true, message: "Wallet not connected" };
+  }
+
+  try {
+    const earnings: Record<string, number> = {};
+
+    campaigns.forEach((c: { unclaimedEarnings: Record<string, number> }) => {
+      Object.entries(c.unclaimedEarnings).forEach(
+        ([key, value]: [string, number]) => {
+          if (earnings.hasOwnProperty(key)) earnings[key] += value;
+          else earnings[key] = value;
+        },
+      );
+    });
+
+    let { transaction, blockhashWithExpiryBlockHeight } =
+      await createClaimEarningsTxn(wallet.publicKey, earnings);
+
+    transaction = await wallet.signTransaction!(transaction);
+    const transactionBase64 = transaction
+      .serialize({ requireAllSignatures: false })
+      .toString("base64");
+
+    const res = await fetch(`/api/referral/${wallet.publicKey}/claim`, {
+      method: "POST",
+      body: JSON.stringify({
+        transactionBase64,
+        blockhashWithExpiryBlockHeight,
+      }),
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    const { success, message } = await res.json();
+    if (success) {
+      successCustom(message);
+    } else errorCustom(message);
+    return { success, message };
+  } catch (error: any) {
+    return { success: false, message: error.message };
+  }
 };

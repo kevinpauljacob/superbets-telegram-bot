@@ -25,7 +25,6 @@ import {
   warningCustom,
 } from "@/components/toasts/ToastGroup";
 import { placeFlip, translator } from "@/context/transactions";
-import { minGameAmount } from "@/context/config";
 import { useSession } from "next-auth/react";
 import { GameType } from "@/utils/provably-fair";
 
@@ -62,8 +61,7 @@ export default function Flip() {
     houseEdge,
     maxBetAmt,
     language,
-    liveStats,
-    setLiveStats,
+    updatePNL,
     enableSounds,
   } = useGlobalContext();
 
@@ -131,22 +129,12 @@ export default function Flip() {
             setLoading(false);
             setFlipping(false);
 
-            setLiveStats([
-              ...liveStats,
-              {
-                game: GameType.coin,
-                amount: betAmt,
-                result: win ? "Won" : "Lost",
-                pnl: win ? betAmt * newBetResult.result - betAmt : -betAmt,
-                totalPNL:
-                  liveStats.length > 0
-                    ? liveStats[liveStats.length - 1].totalPNL +
-                      (win ? betAmt * newBetResult.result - betAmt : -betAmt)
-                    : win
-                      ? betAmt * newBetResult.result - betAmt
-                      : -betAmt,
-              },
-            ]);
+            updatePNL(
+              GameType.coin,
+              win,
+              betAmt,
+              newBetResult.result,
+            );
 
             // auto options
             if (betSetting === "auto") {
@@ -356,6 +344,8 @@ export default function Flip() {
                 !betType ||
                 loading ||
                 !session?.user ||
+                autoBetCount === 0 ||
+                Number.isNaN(autoBetCount) ||
                 (betAmt !== undefined &&
                   maxBetAmt !== undefined &&
                   betAmt > maxBetAmt)
@@ -480,6 +470,8 @@ export default function Flip() {
                       !betType ||
                       loading ||
                       !session?.user ||
+                      autoBetCount === 0 ||
+                      Number.isNaN(autoBetCount) ||
                       (betAmt !== undefined &&
                         maxBetAmt !== undefined &&
                         betAmt > maxBetAmt)

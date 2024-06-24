@@ -2,13 +2,14 @@ import connectDatabase from "../../../../utils/database";
 import { User, Option } from "../../../../models/games";
 import { getToken } from "next-auth/jwt";
 import { NextApiRequest, NextApiResponse } from "next";
-import { minGameAmount, wsEndpoint } from "@/context/config";
+import { wsEndpoint } from "@/context/config";
 import { Decimal } from "decimal.js";
-import { maintainance, maxPayouts } from "@/context/transactions";
+import { maxPayouts, minAmtFactor, maintainance } from "@/context/config";
 import StakingUser from "@/models/staking/user";
 import { GameTokens, GameType } from "@/utils/provably-fair";
 import { SPL_TOKENS } from "@/context/config";
 import updateGameStats from "../../../../utils/updateGameStats";
+import { getSolPrice } from "@/context/transactions";
 Decimal.set({ precision: 9 });
 
 const secret = process.env.NEXTAUTH_SECRET;
@@ -30,6 +31,10 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     try {
       let { wallet, amount, tokenMint, betType, timeFrame }: InputType =
         req.body;
+
+      const minGameAmount =
+        maxPayouts[tokenMint as GameTokens]["options" as GameType] *
+        minAmtFactor;
 
       if (maintainance)
         return res.status(400).json({
@@ -85,18 +90,13 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
       await connectDatabase();
 
-      let betTime = new Date();
-      let betEndTime = new Date(betTime.getTime() + timeFrame * 60 * 1000);
+      const betTime = new Date();
+      const betEndTime = new Date(betTime.getTime() + timeFrame * 60 * 1000);
+      const betTimeInSec = Math.floor(betTime.getTime() / 1000);
 
       await new Promise((r) => setTimeout(r, 2000));
 
-      let strikePrice = await fetch(
-        `https://hermes.pyth.network/api/get_price_feed?id=0xef0d8b6fda2ceba41da15d4095d1da392a0d2f8ed0c6c7bc0f4cfac8c280b56d&publish_time=${Math.floor(
-          betTime.getTime() / 1000,
-        )}`,
-      )
-        .then((res) => res.json())
-        .then((data) => data.price.price * Math.pow(10, data.price.expo));
+      const strikePrice = await getSolPrice(betTimeInSec);
 
       let user = await User.findOne({ wallet });
       let bet = await Option.findOne({ wallet, result: "Pending" });
@@ -166,7 +166,14 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       });
       await record.save();
 
-      await updateGameStats(GameType.options, tokenMint, amount, addGame, 0);
+      await updateGameStats(
+        wallet,
+        GameType.options,
+        tokenMint,
+        amount,
+        addGame,
+        0,
+      );
 
       const userData = await StakingUser.findOneAndUpdate(
         { wallet },

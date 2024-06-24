@@ -27,7 +27,6 @@ import {
   warningCustom,
 } from "@/components/toasts/ToastGroup";
 import { translator } from "@/context/transactions";
-import { minGameAmount } from "@/context/config";
 import { useSession } from "next-auth/react";
 import { GameType } from "@/utils/provably-fair";
 import { handleSignIn } from "@/components/ConnectWallet";
@@ -58,10 +57,10 @@ export default function Dice2() {
     maxBetAmt,
     language,
     selectedCoin,
-    liveStats,
-    setLiveStats,
     enableSounds,
     setShowWalletModal,
+    updatePNL,
+    minGameAmount,
   } = useGlobalContext();
   const [betAmt, setBetAmt] = useState<number | undefined>();
   const [userInput, setUserInput] = useState<number | undefined>();
@@ -191,22 +190,7 @@ export default function Dice2() {
       } else errorCustom(message);
       const newBetResult = { result: strikeNumber, win };
 
-      setLiveStats([
-        ...liveStats,
-        {
-          game: GameType.dice2,
-          amount: betAmt,
-          result: win ? "Won" : "Lost",
-          pnl: win ? betAmt * multiplier - betAmt : -betAmt,
-          totalPNL:
-            liveStats.length > 0
-              ? liveStats[liveStats.length - 1].totalPNL +
-                (win ? betAmt * multiplier - betAmt : -betAmt)
-              : win
-                ? betAmt * multiplier - betAmt
-                : -betAmt,
-        },
-      ]);
+      updatePNL(GameType.dice2, win, betAmt, multiplier);
 
       setBetResults((prevResults) => {
         const newResults = [...prevResults, newBetResult];
@@ -329,9 +313,9 @@ export default function Dice2() {
             (autoWinChangeReset || autoLossChangeReset
               ? betAmt
               : autoBetCount === "inf"
-                ? Math.max(0, betAmt)
-                : betAmt *
-                  (autoLossChange !== null ? autoLossChange / 100.0 : 0));
+              ? Math.max(0, betAmt)
+              : betAmt *
+                (autoLossChange !== null ? autoLossChange / 100.0 : 0));
 
         // console.log("Current bet amount:", betAmt);
         // console.log("Auto loss change:", autoLossChange);
@@ -424,6 +408,8 @@ export default function Dice2() {
                 !wallet ||
                 !session?.user ||
                 isRolling ||
+                autoBetCount === 0 ||
+                Number.isNaN(autoBetCount) ||
                 (betAmt !== undefined &&
                   maxBetAmt !== undefined &&
                   betAmt > maxBetAmt)
@@ -499,13 +485,15 @@ export default function Dice2() {
                       !wallet ||
                       !session?.user ||
                       isRolling ||
+                      autoBetCount === 0 ||
+                      Number.isNaN(autoBetCount) ||
                       (betAmt !== undefined &&
                         maxBetAmt !== undefined &&
                         betAmt > maxBetAmt)
                         ? true
                         : false
                     }
-                    onClickFunction={onSubmit}
+                    // onClickFunction={onSubmit}
                   >
                     {isRolling ? <Loader /> : "BET"}
                   </BetButton>
@@ -607,7 +595,10 @@ export default function Dice2() {
               )}
             </>
           )}
-          {(!selectedCoin || selectedCoin.amount < minGameAmount) && (
+          {(!selectedCoin ||
+            selectedCoin.amount < minGameAmount ||
+            !wallet.connected ||
+            !(status === "authenticated")) && (
             <div className="w-full rounded-lg bg-[#d9d9d90d] bg-opacity-10 flex items-center px-3 py-3 text-white md:px-6">
               <div className="w-full text-center font-changa font-medium text-sm md:text-base text-[#F0F0F0] text-opacity-75">
                 {translator(

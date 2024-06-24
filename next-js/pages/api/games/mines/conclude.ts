@@ -8,12 +8,8 @@ import {
   decryptServerSeed,
 } from "@/utils/provably-fair";
 import StakingUser from "@/models/staking/user";
-import {
-  houseEdgeTiers,
-  launchPromoEdge,
-  pointTiers,
-  stakingTiers,
-} from "@/context/transactions";
+import { houseEdgeTiers, pointTiers, stakingTiers } from "@/context/config";
+import { launchPromoEdge, maintainance } from "@/context/config";
 import { wsEndpoint } from "@/context/config";
 import { Decimal } from "decimal.js";
 import { SPL_TOKENS } from "@/context/config";
@@ -36,6 +32,12 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === "POST") {
     try {
       let { wallet, gameId }: InputType = req.body;
+
+      if (maintainance)
+        return res.status(400).json({
+          success: false,
+          message: "Under maintenance",
+        });
 
       const token = await getToken({ req, secret });
 
@@ -103,6 +105,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       );
 
       const result = amountWon > amount ? "Won" : "Lost";
+      const amountLost = Math.max(Decimal.sub(amount, amountWon).toNumber(), 0);
+
       const record = await Mines.findOneAndUpdate(
         {
           _id: gameId,
@@ -111,7 +115,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         },
         {
           result,
-          $set: { strikeNumbers },
+          $set: { strikeNumbers, amountLost },
         },
         { new: true },
       ).populate("gameSeed");
@@ -125,7 +129,14 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         .mul(houseEdge)
         .toNumber();
 
-      await updateGameStats(GameType.mines, tokenMint, 0, false, feeGenerated);
+      await updateGameStats(
+        wallet,
+        GameType.mines,
+        tokenMint,
+        0,
+        false,
+        feeGenerated,
+      );
 
       const user = await User.findOneAndUpdate(
         {

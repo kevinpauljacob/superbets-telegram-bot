@@ -1,4 +1,3 @@
-import { count } from "console";
 import crypto from "crypto";
 import Decimal from "decimal.js";
 
@@ -113,7 +112,7 @@ export enum seedStatus {
 export enum GameTokens {
   SOL = "SOL",
   USDC = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
-  FOMO = "Cx9oLynYgC3RrgXzin7U417hNY9D6YB1eMGw4ZMbWJgw"
+  FOMO = "Cx9oLynYgC3RrgXzin7U417hNY9D6YB1eMGw4ZMbWJgw",
 }
 
 export enum GameType {
@@ -236,15 +235,13 @@ export const generateGameResult = <T extends GameType>(
     }
 
     case GameType.plinko: {
-      if (!parameter) throw new Error("Game parameter missing!");
-
       let n = getFinalValues({
         serverSeed,
         clientSeed,
         nonce,
         cursor: 0,
         count: 1,
-      }).map((e) => Math.floor(Math.pow(2, parameter) * e) + 1);
+      }).map((e) => Math.floor(Math.pow(2, parameter ?? 8) * e) + 1);
 
       return n[0] as GameResult<T>;
     }

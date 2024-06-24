@@ -4,16 +4,12 @@ import Image from "next/legacy/image";
 import { useEffect, useState } from "react";
 import { WalletContextState, useWallet } from "@solana/wallet-adapter-react";
 import { useSession } from "next-auth/react";
-import {
-  connection,
-  fomoToken,
-  translator,
-  truncateNumber,
-} from "@/context/transactions";
+import { connection, translator, truncateNumber } from "@/context/transactions";
 import { PublicKey } from "@solana/web3.js";
 import { useGlobalContext } from "@/components/GlobalContext";
 import { getAssociatedTokenAddressSync } from "@solana/spl-token";
 import FOMOHead from "@/components/HeadElement";
+import { SPL_TOKENS } from "@/context/config";
 
 export async function getFOMOBalance(
   wallet: WalletContextState,
@@ -21,6 +17,9 @@ export async function getFOMOBalance(
 ) {
   if (wallet && wallet.publicKey)
     try {
+      const fomoToken = SPL_TOKENS.find(
+        (token) => token.tokenName === "FOMO",
+      )?.tokenMint!;
       let address = new PublicKey(fomoToken);
       const ata = getAssociatedTokenAddressSync(address, wallet.publicKey);
       const res = await connection.getTokenAccountBalance(ata, "recent");
@@ -110,7 +109,7 @@ export default function Stake() {
                   {translator("Total FOMO Staked", language)}
                 </span>
                 <div className="flex w-full mt-3 sm:mt-0 justify-end sm:justify-start items-end gap-2 font-chakra">
-                  <span className="text-white text-opacity-80 text-2xl sm:text-2xl font-semibold">
+                  <span className="flex items-center gap-1 text-white text-opacity-80 text-2xl sm:text-2xl font-semibold">
                     {truncateNumber(globalInfo?.stakedTotal)}{" "}
                     <span className="hidden sm:block">$FOMO</span>
                   </span>
@@ -126,7 +125,12 @@ export default function Stake() {
                 </div>
               </div>
               <div className="hidden sm:flex">
-                <Image src={"/assets/stakeLock.svg"} alt="Lock" width={60} height={60} />
+                <Image
+                  src={"/assets/stakeLock.svg"}
+                  alt="Lock"
+                  width={60}
+                  height={60}
+                />
               </div>
             </div>
           </div>

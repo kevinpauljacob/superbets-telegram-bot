@@ -10,16 +10,17 @@ import {
   seedStatus,
 } from "@/utils/provably-fair";
 import StakingUser from "@/models/staking/user";
-import { minGameAmount, wsEndpoint } from "@/context/config";
+import { wsEndpoint, maintainance } from "@/context/config";
 import Decimal from "decimal.js";
+import { isArrayUnique } from "@/context/transactions";
 import {
   houseEdgeTiers,
-  isArrayUnique,
-  launchPromoEdge,
   maxPayouts,
+  minAmtFactor,
   pointTiers,
   stakingTiers,
-} from "@/context/transactions";
+} from "@/context/config";
+import { launchPromoEdge } from "@/context/config";
 import { SPL_TOKENS } from "@/context/config";
 import updateGameStats from "../../../../utils/updateGameStats";
 
@@ -43,6 +44,15 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     try {
       let { wallet, amount, tokenMint, minesCount, userBets }: InputType =
         req.body;
+
+      if (maintainance)
+        return res.status(400).json({
+          success: false,
+          message: "Under maintenance",
+        });
+
+      const minGameAmount =
+        maxPayouts[tokenMint as GameTokens]["mines" as GameType] * minAmtFactor;
 
       const token = await getToken({ req, secret });
 
@@ -89,7 +99,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       if (
         !(
           maxPayout.toNumber() <=
-          maxPayouts[splToken.tokenName as GameTokens].mines
+          maxPayouts[splToken.tokenMint as GameTokens].mines
         )
       )
         return res
@@ -204,7 +214,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         amountWon = Decimal.mul(amount, strikeMultiplier)
           .mul(Decimal.sub(1, houseEdge))
           .toNumber();
-        amountLost = 0;
+        amountLost = Math.max(Decimal.sub(amount, amountWon).toNumber(), 0);
 
         feeGenerated = Decimal.mul(amount, strikeMultiplier)
           .sub(amountWon)
@@ -259,6 +269,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           .json({ success: false, message: "Pending game found!" });
 
       await updateGameStats(
+        wallet,
         GameType.mines,
         tokenMint,
         amount,

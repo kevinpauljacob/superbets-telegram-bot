@@ -3,17 +3,14 @@ import { Option, User } from "../../../../models/games";
 import { NextApiRequest, NextApiResponse } from "next";
 import { getToken } from "next-auth/jwt";
 import StakingUser from "@/models/staking/user";
-import {
-  houseEdgeTiers,
-  launchPromoEdge,
-  pointTiers,
-  stakingTiers,
-} from "@/context/transactions";
+import { houseEdgeTiers, pointTiers, stakingTiers } from "@/context/config";
+import { launchPromoEdge } from "@/context/config";
 import { GameType } from "@/utils/provably-fair";
 import { optionsEdge, wsEndpoint } from "@/context/config";
 import { Decimal } from "decimal.js";
-import { SPL_TOKENS } from "@/context/config";
+import { SPL_TOKENS, maintainance } from "@/context/config";
 import updateGameStats from "../../../../utils/updateGameStats";
+import { getSolPrice } from "@/context/transactions";
 Decimal.set({ precision: 9 });
 
 const secret = process.env.NEXTAUTH_SECRET;
@@ -26,6 +23,12 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === "POST") {
     try {
       let { wallet } = req.body;
+
+      if (maintainance)
+        return res.status(400).json({
+          success: false,
+          message: "Under maintenance",
+        });
 
       const token = await getToken({ req, secret });
 
@@ -78,13 +81,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
       await new Promise((r) => setTimeout(r, 2000));
 
-      let betEndPrice = await fetch(
-        `https://hermes.pyth.network/api/get_price_feed?id=0xef0d8b6fda2ceba41da15d4095d1da392a0d2f8ed0c6c7bc0f4cfac8c280b56d&publish_time=${Math.floor(
-          new Date(betEndTime).getTime() / 1000,
-        )}`,
-      )
-        .then((res) => res.json())
-        .then((data) => data.price.price * Math.pow(10, data.price.expo));
+      const betEndTimeInSec = Math.floor(new Date(betEndTime).getTime() / 1000);
+
+      const betEndPrice = await getSolPrice(betEndTimeInSec);
 
       let result = "Lost";
       let amountWon = new Decimal(0);
@@ -145,6 +144,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           .json({ success: false, message: "Game already concluded!" });
 
       await updateGameStats(
+        wallet,
         GameType.options,
         tokenMint,
         0,
