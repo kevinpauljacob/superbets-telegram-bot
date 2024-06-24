@@ -199,7 +199,7 @@ export default function Roulette1() {
   });
 
   const [selectedToken, setSelectedToken] = useState<Token | null>(tokens[0]);
-
+  console.log(selectedToken);
   const [betActive, setBetActive] = useState(false);
   const [betSetting, setBetSetting] = useState<"manual" | "auto">("manual");
   const [userInput, setUserInput] = useState<number | undefined>();
@@ -308,10 +308,8 @@ export default function Roulette1() {
 
   console.log(selectedBets);
   const getSolEquivalent = (token: Token): number => {
-    const splToken = SPL_TOKENS.find((t) => t.tokenName === token.tokenName);
-    if (!splToken) return 0;
     const tokenValue = parseFloat(token.value);
-    return parseFloat(((10 / 10 ** splToken.decimal) * tokenValue).toFixed(9));
+    return parseFloat(((10 / 10 ** 9) * tokenValue).toFixed(9));
   };
 
   const convertToSelectedToken = (
@@ -651,6 +649,7 @@ export default function Roulette1() {
 
     bets.forEach((bet) => {
       const solEquivalent = getSolEquivalent(bet.token);
+      console.log("Sol:", solEquivalent);
       const tokenEquivalent = convertToSelectedToken(
         solEquivalent,
         rates,
@@ -1138,7 +1137,7 @@ export default function Roulette1() {
                     {tokens.map((chip) => (
                       <div
                         key={chip.id}
-                        className={`border rounded cursor-pointer bg-[#1e2024] flex justify-center items-center py-1 px-[-2px] ${selectedToken === chip ? "border-white" : "border-gray-600"}`}
+                        className={`border rounded cursor-pointer bg-[#1e2024] flex justify-center items-center py-1 px-[-2px] ${selectedToken?.value === chip.value ? "border-gray-200" : "border-gray-600"}`}
                         onClick={() => setSelectedToken(chip)}
                       >
                         <img src={chip.image} alt={chip.value} />
