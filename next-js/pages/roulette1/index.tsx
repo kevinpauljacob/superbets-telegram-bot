@@ -27,6 +27,17 @@ import { soundAlert } from "@/utils/soundUtils";
 import ConfigureAutoButton from "@/components/ConfigureAutoButton";
 import AutoCount from "@/components/AutoCount";
 
+function debounce<T extends (...args: any[]) => void>(
+  func: T,
+  wait: number,
+): T {
+  let timeout: NodeJS.Timeout;
+  return function (this: any, ...args: any[]) {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => func.apply(this, args), wait);
+  } as T;
+}
+
 export default function Roulette1() {
   const wallet = useWallet();
   const methods = useForm();
@@ -561,12 +572,32 @@ export default function Roulette1() {
     }
   }, [startAuto, autoBetCount]);
 
+  const minBetAmounts: Record<string, number> = {
+    USDC: 0.000138,
+    SOL: 0.000001,
+    FOMO: 0.002345,
+  };
+
   const onSubmit = async (data: any) => {
+    if (betAmt === undefined) {
+      errorCustom(translator("Set Amount.", language));
+      return;
+    }
+
+    const selectedTokenName = selectedCoin?.tokenName;
+    const minBetAmt = minBetAmounts[selectedTokenName];
+
+    if (betAmt < minBetAmt) {
+      errorCustom(
+        translator(
+          `Minimum bet amount for ${selectedTokenName} is ${minBetAmt}.`,
+          language,
+        ),
+      );
+      return;
+    }
+
     if (betSetting === "auto") {
-      if (betAmt === 0) {
-        errorCustom(translator("Set Amount.", language));
-        return;
-      }
       if (typeof autoBetCount === "number" && autoBetCount <= 0) {
         errorCustom("Set Bet Count.");
         return;
@@ -765,7 +796,7 @@ export default function Roulette1() {
       return prev.slice(0, -1);
     });
   };
-
+  const debouncedUndoLastBet = debounce(undoLastBet, 100);
   const handlePlaceSplitBet = (
     number1: number,
     number2: number,
@@ -798,7 +829,7 @@ export default function Roulette1() {
       errorCustom("Please select a token before placing a bet.");
     }
   };
-  const handlePlaceCornerBetWithTwoColumns = (
+  /*   const handlePlaceCornerBetWithTwoColumns = (
     number: number,
     adjacentNumbers: number[],
     token: Token | null,
@@ -807,7 +838,7 @@ export default function Roulette1() {
       const areaId = `corner2column-${number}-${adjacentNumbers.join("-")}`;
       handlePlaceBet(areaId, token);
     }
-  };
+  }; */
 
   const renderRegularToken = (areaId: string) => {
     const betsForArea = selectedBets.filter((bet) => bet.areaId === areaId);
@@ -1280,7 +1311,7 @@ export default function Roulette1() {
             <div className="flex justify-between w-full  text-white mb-1">
               <div
                 className="hidden sm:flex items-center cursor-pointer hover:opacity-90"
-                onClick={undoLastBet}
+                onClick={debouncedUndoLastBet}
               >
                 <Image
                   src="/assets/Undo.png"
