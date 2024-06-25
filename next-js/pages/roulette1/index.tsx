@@ -376,7 +376,7 @@ export default function Roulette1() {
         },
         body: JSON.stringify({
           wallet: wallet.publicKey,
-          tokenMint: selectedCoin.tokenName,
+          tokenMint: selectedCoin.tokenMint,
           wager: transformedBets,
         }),
       });
@@ -1151,7 +1151,7 @@ export default function Roulette1() {
                   currentMultiplier={1}
                   leastMultiplier={1}
                   game="roulette1"
-                  disabled={disableInput}
+                  disabled={true}
                 />
                 {betSetting === "manual" ? (
                   <></>
