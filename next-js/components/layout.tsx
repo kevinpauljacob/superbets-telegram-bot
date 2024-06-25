@@ -109,13 +109,33 @@ export default function Layout({ children }: LayoutProps) {
     }
   };
 
+  const handleUserInteraction = () => {
+    soundAlert("/sounds/betbutton.wav", true);
+    soundAlert("/sounds/diceshake.wav", true);
+    soundAlert("/sounds/slider.wav", true);
+    soundAlert("/sounds/win.wav", true);
+    soundAlert("/sounds/bomb.wav", true);
+
+    document.removeEventListener("mousemove", handleUserInteraction);
+    document.removeEventListener("touchstart", handleUserInteraction);
+    document.removeEventListener("touchmove", handleUserInteraction);
+  };
+
   useEffect(() => {
-    //sound pre-loader
-    // soundAlert("/sounds/betbutton.wav", true);
-    // soundAlert("/sounds/diceshake.wav", true);
-    // soundAlert("/sounds/slider.wav", true);
-    // soundAlert("/sounds/win.wav", true);
-    // soundAlert("/sounds/bomb.wav", true);
+    document.addEventListener("mousemove", handleUserInteraction, {
+      once: true,
+    });
+    document.addEventListener("touchstart", handleUserInteraction, {
+      once: true,
+    });
+    document.addEventListener("touchmove", handleUserInteraction, {
+      once: true,
+    });
+    return () => {
+      document.removeEventListener("mousemove", handleUserInteraction);
+      document.removeEventListener("touchstart", handleUserInteraction);
+      document.removeEventListener("touchmove", handleUserInteraction);
+    };
   }, []);
 
   useEffect(() => {
@@ -175,7 +195,6 @@ export default function Layout({ children }: LayoutProps) {
     setAutoBetCount(1);
     setStartAuto(false);
     const configOptions = autoConfigState.get(game);
-    // console.log("Auto options", configOptions);
     if (configOptions) {
       setAutoWinChange(configOptions.autoWinChange);
       setAutoLossChange(configOptions.autoLossChange);
