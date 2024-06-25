@@ -3,7 +3,6 @@ import { getToken } from "next-auth/jwt";
 import { NextApiRequest, NextApiResponse } from "next";
 import { GameSeed, Hilo, Mines } from "@/models/games";
 import { generateServerSeed, seedStatus } from "@/utils/provably-fair";
-import mongoose from "mongoose";
 
 const secret = process.env.NEXTAUTH_SECRET;
 const encryptionKey = Buffer.from(process.env.ENCRYPTION_KEY!, "hex");
@@ -50,98 +49,80 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
     await connectDatabase();
 
-    const session = await mongoose.startSession();
-    session.startTransaction();
+    const pendingMines = await Mines.findOne({
+      wallet,
+      result: "Pending",
+    });
 
-    try {
-      const pendingMines = await Mines.findOne({
+    if (pendingMines) {
+      return res.status(400).json({
+        success: false,
+        message: "Pending mines game!",
+      });
+    }
+
+    // const pendingHilo = await Hilo.findOne({ wallet, result: "Pending" });
+    // if (pendingHilo) {
+    //   return res.status(400).json({
+    //     success: false,
+    //     message: "Pending hilo game!",
+    //   });
+    // }
+
+    const expiredGameSeed = await GameSeed.findOneAndUpdate(
+      {
         wallet,
-        result: "Pending",
-      }).session(session);
+        status: seedStatus.ACTIVE,
+        pendingMines: false,
+      },
+      {
+        $set: {
+          status: seedStatus.EXPIRED,
+        },
+      },
+      {
+        new: true,
+      },
+    );
 
-      if (pendingMines) {
-        await session.abortTransaction();
-        session.endSession();
-        return res.status(400).json({
-          success: false,
-          message: "Pending mines game!",
-        });
-      }
+    if (!expiredGameSeed) {
+      throw new Error("Server hash not found!");
+    }
 
-      // const pendingHilo = await Hilo.findOne({ wallet, result: "Pending" }).session(session);
-      // if (pendingHilo) {
-      //   await session.abortTransaction();
-      //   session.endSession();
-      //   return res.status(400).json({
-      //     success: false,
-      //     message: "Pending hilo game!",
-      //   });
-      // }
-
-      const expiredGameSeed = await GameSeed.findOneAndUpdate(
-        {
-          wallet,
+    const activeGameSeed = await GameSeed.findOneAndUpdate(
+      {
+        wallet,
+        status: seedStatus.NEXT,
+        pendingMines: false,
+      },
+      {
+        $set: {
+          clientSeed,
           status: seedStatus.ACTIVE,
         },
-        {
-          $set: {
-            status: seedStatus.EXPIRED,
-          },
-        },
-        {
-          new: true,
-          session,
-        },
-      );
+      },
+      { projection: { serverSeed: 0 }, new: true },
+    );
 
-      if (!expiredGameSeed) {
-        throw new Error("Server hash not found!");
-      }
+    const { encryptedServerSeed, serverSeedHash, iv } =
+      generateServerSeed(encryptionKey);
 
-      const activeGameSeed = await GameSeed.findOneAndUpdate(
-        {
-          wallet,
-          status: seedStatus.NEXT,
-        },
-        {
-          $set: {
-            clientSeed,
-            status: seedStatus.ACTIVE,
-          },
-        },
-        { projection: { serverSeed: 0 }, new: true, session },
-      );
+    const nextGameSeed = await GameSeed.create([
+      {
+        wallet,
+        serverSeed: encryptedServerSeed,
+        serverSeedHash,
+        iv: iv.toString("hex"),
+      },
+    ]).then((res) => res.at(0));
 
-      const { encryptedServerSeed, serverSeedHash, iv } =
-        generateServerSeed(encryptionKey);
+    let { serverSeed, ...rest } = nextGameSeed.toObject();
 
-      const nextGameSeed = await GameSeed.create(
-        [
-          {
-            wallet,
-            serverSeed: encryptedServerSeed,
-            serverSeedHash,
-            iv: iv.toString("hex"),
-          },
-        ],
-        { session },
-      ).then((res) => res.at(0));
-
-      await session.commitTransaction();
-      session.endSession();
-
-      let { serverSeed, ...rest } = nextGameSeed.toObject();
-
-      return res.status(201).json({
-        success: true,
-        activeGameSeed,
-        nextGameSeed: rest,
-      });
-    } catch (error: any) {
-      await session.abortTransaction();
-      session.endSession();
-      return res.status(500).json({ success: false, message: error.message });
-    }
+    return res.status(201).json({
+      success: true,
+      activeGameSeed,
+      nextGameSeed: rest,
+    });
   } catch (e: any) {
     return res.status(500).json({ success: false, message: e.message });
   }

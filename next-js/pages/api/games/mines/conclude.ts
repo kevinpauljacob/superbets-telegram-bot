@@ -1,18 +1,15 @@
+import { maintainance, pointTiers, wsEndpoint } from "@/context/config";
+import { GameSeed, Mines, User } from "@/models/games";
+import StakingUser from "@/models/staking/user";
 import connectDatabase from "@/utils/database";
-import { getToken } from "next-auth/jwt";
-import { NextApiRequest, NextApiResponse } from "next";
-import { Mines, User } from "@/models/games";
 import {
-  generateGameResult,
   GameType,
   decryptServerSeed,
+  generateGameResult,
 } from "@/utils/provably-fair";
-import StakingUser from "@/models/staking/user";
-import { houseEdgeTiers, pointTiers, stakingTiers } from "@/context/config";
-import { launchPromoEdge, maintainance } from "@/context/config";
-import { wsEndpoint } from "@/context/config";
 import { Decimal } from "decimal.js";
-import { SPL_TOKENS } from "@/context/config";
+import { NextApiRequest, NextApiResponse } from "next";
+import { getToken } from "next-auth/jwt";
 import updateGameStats from "../../../../utils/updateGameStats";
 Decimal.set({ precision: 9 });
 
@@ -124,6 +121,18 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         return res
           .status(400)
           .json({ success: false, message: "Game already concluded!" });
+
+      await GameSeed.findOneAndUpdate(
+        {
+          _id: record.gameSeed._id,
+          pendingMines: true,
+        },
+        {
+          $set: {
+            pendingMines: false,
+          },
+        },
+      );
 
       const feeGenerated = Decimal.mul(amount, strikeMultiplier)
         .mul(houseEdge)

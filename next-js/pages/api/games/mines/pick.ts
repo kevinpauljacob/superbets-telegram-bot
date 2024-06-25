@@ -1,7 +1,7 @@
 import connectDatabase from "@/utils/database";
 import { getToken } from "next-auth/jwt";
 import { NextApiRequest, NextApiResponse } from "next";
-import { Mines, User } from "@/models/games";
+import { GameSeed, Mines, User } from "@/models/games";
 import {
   generateGameResult,
   GameType,
@@ -232,6 +232,18 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       }
 
       if (result !== "Pending") {
+        await GameSeed.findOneAndUpdate(
+          {
+            _id: record.gameSeed._id,
+            pendingMines: true,
+          },
+          {
+            $set: {
+              pendingMines: false,
+            },
+          },
+        );
+
         const pointsGained =
           0 * user.numOfGamesPlayed + 1.4 * amount * userData.multiplier;
 

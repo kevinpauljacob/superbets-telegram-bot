@@ -118,10 +118,14 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         {
           wallet,
           status: seedStatus.ACTIVE,
+          pendingMines: false,
         },
         {
           $inc: {
             nonce: 1,
+          },
+          $set: {
+            pendingMines: true,
           },
         },
         { new: true },
