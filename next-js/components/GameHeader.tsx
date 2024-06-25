@@ -103,6 +103,10 @@ export default function GameHeader() {
       icon: "/assets/dice.png",
       name: "Mines",
     },
+    roulette1: {
+      icon: "/assets/dice.png",
+      name: "Roulette",
+    },
     plinko: {
       icon: "/assets/plinko.png",
       name: "Plinko",

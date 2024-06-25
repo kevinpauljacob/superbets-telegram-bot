@@ -57,9 +57,8 @@ export default function CoinFlipProvablyFairModal({
   const [state, setState] = useState<"seeds" | "verify">(
     modalData.tab ?? "seeds",
   );
-  const [newClientSeed, setNewClientSeed] = useState<string>(
-    generateClientSeed(),
-  );
+  const [newClientSeed, setNewClientSeed] =
+    useState<string>(generateClientSeed());
   const [selectedGameType, setSelectedGameType] = useState<GameType>(
     GameType.coin,
   );
@@ -138,8 +137,7 @@ export default function CoinFlipProvablyFairModal({
 
   const copyToClipboard = (text?: string) => {
     if (text) navigator.clipboard.writeText(text);
-        successAlert("Successfully copied to clipboard");
-
+    successAlert("Successfully copied to clipboard");
   };
 
   return (
@@ -190,10 +188,9 @@ export default function CoinFlipProvablyFairModal({
                           </span>
                           <FaRegCopy
                             onClick={() =>
-                   {           copyToClipboard(
+                              copyToClipboard(
                                 modalData.activeGameSeed.clientSeed,
-                                
-                              )}
+                              )
                             }
                             className="w-5 h-5 text-[#555555] cursor-pointer"
                           />
@@ -244,7 +241,7 @@ export default function CoinFlipProvablyFairModal({
                               value={newClientSeed}
                               type="text"
                               onChange={(e) => setNewClientSeed(e.target.value)}
-                              className="bg-[#202329] text-[#B9B9BA] text-xs font-semibold rounded-md px-5 py-4 w-full relative flex items-center justify-between  focus:outline-none focus:ring-0"
+                              className="bg-[#202329] text-[#B9B9BA] text-xs font-semibold rounded-md px-5 py-4 w-full relative flex items-center justify-between focus:outline-none focus:ring-0"
                             />
                             <button
                               className="flex items-center justify-center h-full mx-2 px-5 py-1 my-auto bg-[#7839C5] text-white rounded-md font-bold text-sm"
@@ -279,7 +276,9 @@ export default function CoinFlipProvablyFairModal({
                 {state === "verify" && (
                   <div className="grid w-full text-white">
                     <div className="grid gap-2">
-                      <div className="border-2 border-opacity-5 border-[#FFFFFF] md:px-8 py-2 sm:px-8">
+                      <div
+                        className={`md:px-8 py-2 mt-6 px-4  pt-7 border-2 border-white border-opacity-5 rounded-md ${selectedGameType === GameType.roulette1 ? "w-full h-[480px] flex items-center " : ""}`}
+                      >
                         <ProvablyFairModal
                           verificationState={verificationState}
                           setVerificationState={setVerificationState}

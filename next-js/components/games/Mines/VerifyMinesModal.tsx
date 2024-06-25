@@ -198,8 +198,8 @@ export default function VerifyDice2Modal({
                                 ? bet.strikeNumbers[number - 1] === 0
                                   ? "border-[#FCB10F] bg-[#FCB10F33]"
                                   : bet.strikeNumbers[number - 1] === 1
-                                  ? "border-[#F1323E] bg-[#F1323E33]"
-                                  : ""
+                                    ? "border-[#F1323E] bg-[#F1323E33]"
+                                    : ""
                                 : "bg-[#202329]"
                             } flex items-center justify-center cursor-pointer rounded-md text-center transition-all duration-300 ease-in-out 
           lg2:w-[48px] lg2:h-[48px] md:w-[45px] md:h-[45px] sm:w-[43px] sm:h-[43px] sm2:w-[40px]

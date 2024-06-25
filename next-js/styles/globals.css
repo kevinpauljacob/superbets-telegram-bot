@@ -8,6 +8,7 @@
 
 @tailwind base;
 @tailwind components;
+
 @layer utilities {
   .modalscrollbar::-webkit-scrollbar {
     width: 10px;
@@ -138,9 +139,11 @@ text-shadow-gold {
   0% {
     opacity: 0.3;
   }
+
   50% {
     opacity: 1;
   }
+
   100% {
     opacity: 0.3;
   }
@@ -158,9 +161,11 @@ text-shadow-gold {
   0% {
     opacity: 0.5;
   }
+
   50% {
     opacity: 0.2;
   }
+
   100% {
     opacity: 0.5;
   }
@@ -174,9 +179,11 @@ text-shadow-gold {
   0% {
     color: #202329;
   }
+
   50% {
     color: #47484a;
   }
+
   100% {
     color: #202329;
   }
@@ -190,9 +197,11 @@ text-shadow-gold {
   0% {
     border-color: #fcb10f;
   }
+
   50% {
     border-color: #fcb10f80;
   }
+
   100% {
     border-color: #fcb10f;
   }
@@ -213,18 +222,23 @@ text-shadow-gold {
   0% {
     top: 0rem;
   }
+
   16% {
     top: 0rem;
   }
+
   33% {
     top: -1.5rem;
   }
+
   66% {
     top: -1.5rem;
   }
+
   82% {
     top: 0rem;
   }
+
   100% {
     top: 0rem;
   }
@@ -250,11 +264,9 @@ text-shadow-gold {
   height: 1275px;
   border-radius: 1695px;
   opacity: 0.1;
-  background: radial-gradient(
-    50% 50% at 50% 50%,
-    #f200f2 0%,
-    rgba(0, 0, 0, 0) 100%
-  );
+  background: radial-gradient(50% 50% at 50% 50%,
+      #f200f2 0%,
+      rgba(0, 0, 0, 0) 100%);
   z-index: -10;
 }
 
@@ -266,11 +278,9 @@ text-shadow-gold {
   height: 949.454px;
   border-radius: 1263px;
   opacity: 0.1;
-  background: radial-gradient(
-    50% 50% at 50% 50%,
-    #f200f2 0%,
-    rgba(0, 0, 0, 0) 100%
-  );
+  background: radial-gradient(50% 50% at 50% 50%,
+      #f200f2 0%,
+      rgba(0, 0, 0, 0) 100%);
   z-index: -10;
 }
 
@@ -283,6 +293,7 @@ text-shadow-gold {
   background-color: green;
   border-radius: 100%;
 }
+
 @keyframes blinker {
   50% {
     opacity: 0.6;
@@ -331,8 +342,7 @@ text-shadow-gold {
 
 .leapfrog_dot:nth-child(2) {
   transform: translateX(calc(var(--uib-size) * 0.4));
-  animation: leapFrog var(--uib-speed) ease calc(var(--uib-speed) / -1.5)
-    infinite;
+  animation: leapFrog var(--uib-speed) ease calc(var(--uib-speed) / -1.5) infinite;
 }
 
 .leapfrog_dot:nth-child(3) {
@@ -393,6 +403,7 @@ button.dark-bg {
   from {
     transform: translateX(0) rotateY(0deg);
   }
+
   to {
     transform: translateX(0) rotateY(360deg);
   }
@@ -406,15 +417,19 @@ button.dark-bg {
   0% {
     z-index: 50;
   }
+
   49.99% {
     z-index: 50;
   }
+
   50% {
     z-index: 1;
   }
+
   99.99% {
     z-index: 1;
   }
+
   100% {
     z-index: 50;
   }
@@ -436,8 +451,10 @@ button.dark-bg {
 
 /* Hide scrollbar for IE, Edge, and Firefox */
 .no-scrollbar {
-  -ms-overflow-style: none; /* IE and Edge */
-  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none;
+  /* IE and Edge */
+  scrollbar-width: none;
+  /* Firefox */
 }
 
 @keyframes fadeInUp {
@@ -445,6 +462,7 @@ button.dark-bg {
     opacity: 0;
     transform: translateY(20px);
   }
+
   100% {
     opacity: 1;
     transform: translateY(0);
@@ -460,6 +478,7 @@ button.dark-bg {
     opacity: 0;
     transform: translateY(-20px);
   }
+
   100% {
     opacity: 1;
     transform: translateY(0px);
@@ -479,6 +498,7 @@ button.dark-bg {
     opacity: 1;
     transform: translateY(0);
   }
+
   100% {
     opacity: 0;
     transform: translateY(20px);
@@ -493,6 +513,7 @@ button.dark-bg {
   0% {
     opacity: 0;
   }
+
   100% {
     opacity: 1;
   }
@@ -506,6 +527,7 @@ button.dark-bg {
   0% {
     transform: translateX(20px);
   }
+
   100% {
     transform: translateX(0);
   }
@@ -515,6 +537,7 @@ button.dark-bg {
   from {
     transform: rotate(0deg);
   }
+
   to {
     transform: rotate(360deg);
   }
@@ -524,10 +547,10 @@ button.dark-bg {
   from {
     transform: rotate(0deg);
   }
+
   to {
-    transform: rotate(
-      var(--result-angle)
-    ); /* Use CSS variable for the stopping angle */
+    transform: rotate(var(--result-angle));
+    /* Use CSS variable for the stopping angle */
   }
 }
 
@@ -569,8 +592,10 @@ input[type="range"] {
 
 .defaultSlider::-webkit-slider-thumb {
   -webkit-appearance: none;
-  width: 21px; /* Set thumb width as desired */
-  height: 21px; /* Set thumb height as desired */
+  width: 21px;
+  /* Set thumb width as desired */
+  height: 21px;
+  /* Set thumb height as desired */
   background-color: white;
   cursor: pointer;
   border-radius: 100%;
@@ -578,19 +603,36 @@ input[type="range"] {
 
 .maxBetsSlider::-webkit-slider-thumb {
   -webkit-appearance: none;
-  width: 21px; /* Set thumb width as desired */
-  height: 21px; /* Set thumb height as desired */
+  width: 21px;
+  /* Set thumb width as desired */
+  height: 21px;
+  /* Set thumb height as desired */
   cursor: pointer;
   border-radius: 100%;
 }
 
-/* animation for Infobar */
-/* globals.css */
+.overlay::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(255, 255, 255, 0.1);
+  /* White color with 20% opacity */
+  pointer-events: none;
+  /* Ensure the overlay does not block interactions */
+  /* Ensure the overlay has the same rounded corners as the button */
+  /* animation for Infobar */
+  /* globals.css */
+}
+
 @keyframes slideInFromLeft {
   from {
     transform: translateX(-100%);
     opacity: 0;
   }
+
   to {
     transform: translateX(0);
     opacity: 1;
@@ -602,6 +644,7 @@ input[type="range"] {
     transform: translateX(0);
     opacity: 1;
   }
+
   to {
     transform: translateX(100%);
     opacity: 0;
@@ -614,4 +657,119 @@ input[type="range"] {
 
 .slide-out {
   animation: slideOutToRight 1.5s ease-in-out forwards;
+}
+
+.roulette .wheel {
+  rotate: -90deg;
+  animation: spinAntiR 10s linear infinite;
+}
+
+.roulette .needle {
+  animation: spinR 10s linear infinite;
+}
+
+.roulette .ball_container {
+  animation: spinAntiR 10s linear infinite;
+}
+
+@keyframes bounce {
+
+  0%,
+  60% {
+    margin-left: 0%;
+  }
+
+  70% {
+    margin-left: 10%;
+  }
+
+  75% {
+    margin-left: 18.5%;
+  }
+
+  80% {
+    margin-left: 10%;
+  }
+
+  85% {
+    margin-left: 18.5%;
+  }
+
+  90% {
+    margin-left: 10%;
+  }
+
+  95% {
+    margin-left: 18.5%;
+  }
+
+  100% {
+    margin-left: 14.5%;
+  }
+}
+
+@keyframes overlayBounce {
+  0%,
+  60% {
+    margin-left: -1%;
+  }
+
+  70% {
+    margin-left: 2%;
+  }
+
+  75% {
+    margin-left: 14.5%;
+  }
+
+  80% {
+    margin-left: 2%;
+  }
+
+  85% {
+    margin-left: 14.5%;
+  }
+
+  90% {
+    margin-left: 2%;
+  }
+
+  95% {
+    margin-left: 14.5%;
+  }
+
+  100% {
+    margin-left: 32px;
+  }
+}
+
+
+.hole {
+  margin-left: 14.5%;
+  animation: bounce 4s cubic-bezier(0.25, 0.1, 0.25, 1);
+}
+
+.overlayHole {
+  margin-left: 32px;
+  animation: overlayBounce 4s ease-out;
+}
+
+@keyframes spinAntiR {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(-360deg);
+  }
+}
+
+@keyframes spinR {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
 }

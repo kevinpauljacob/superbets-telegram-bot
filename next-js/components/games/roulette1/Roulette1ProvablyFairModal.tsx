@@ -5,7 +5,7 @@ import {
 } from "@/utils/provably-fair";
 import Image from "next/image";
 import { useEffect, useState, useRef } from "react";
-import { Wheel } from "./VerifyWheelModal";
+import { Roulette1 } from "./VerifyRoulette1Modal";
 import { FaRegCopy } from "react-icons/fa6";
 import { MdClose } from "react-icons/md";
 import CheckPF from "@/public/assets/CheckPF.svg";
@@ -14,8 +14,6 @@ import { useGlobalContext } from "@/components/GlobalContext";
 import { translator } from "@/context/transactions";
 import ProvablyFairModal from "../ProvablyFairModal";
 import GameSelect from "../GameSelect";
-import { AdaptiveModal, AdaptiveModalContent } from "@/components/AdaptiveModal";
-import { successAlert } from "@/components/toasts/ToastGroup";
 
 export interface PFModalData {
   activeGameSeed: {
@@ -42,10 +40,10 @@ interface Props {
   onClose: () => void;
   modalData: PFModalData;
   setModalData: React.Dispatch<React.SetStateAction<PFModalData>>;
-  bet?: Wheel;
+  bet?: Roulette1;
 }
 
-export default function WheelProvablyFairModal({
+export default function Roulette1ProvablyFairModal({
   isOpen,
   onClose,
   modalData,
@@ -58,17 +56,17 @@ export default function WheelProvablyFairModal({
   const [newClientSeed, setNewClientSeed] =
     useState<string>(generateClientSeed());
   const { language } = useGlobalContext();
-  const [strikeNumber, setStrikeNumber] = useState<number>(0);
+  /*   const [strikeNumber, setStrikeNumber] = useState<number>(0);
   const [strikeMultiplier, setStrikeMultiplier] = useState<number>();
   const wheelRef = useRef<HTMLDivElement>(null);
   const [rotationAngle, setRotationAngle] = useState(0);
   const [hoveredMultiplier, setHoveredMultiplier] = useState<number | null>(
     null,
-  );
+  ); */
   const [selectedGameType, setSelectedGameType] = useState<GameType>(
-    GameType.wheel,
+    GameType.roulette1,
   );
-
+  console.log("isOpen", isOpen);
   const [verificationState, setVerificationState] = useState<{
     clientSeed: string;
     serverSeed: string;
@@ -82,39 +80,25 @@ export default function WheelProvablyFairModal({
           clientSeed: bet.gameSeed.clientSeed,
           serverSeed: bet.gameSeed.serverSeed ?? "",
           nonce: bet.nonce?.toString() ?? "",
-          risk:
-            bet.risk ||
-            (selectedGameType === GameType.wheel ? "low" : undefined),
-          segments:
-            bet.segments ||
-            (selectedGameType === GameType.wheel ? 10 : undefined),
-          parameter:
-            bet.minesCount ||
-            (selectedGameType === GameType.mines ? 1 : undefined),
         }
       : {
           clientSeed: "",
           serverSeed: "",
           nonce: "",
-          risk: selectedGameType === GameType.wheel ? "low" : undefined,
-          segments: selectedGameType === GameType.wheel ? 10 : undefined,
-          parameter: selectedGameType === GameType.mines ? 1 : undefined,
         },
   );
 
-  useEffect(() => {
-    setStrikeNumber(
-      generateGameResult(
-        verificationState.serverSeed,
-        verificationState.clientSeed,
-        parseInt(verificationState.nonce),
-        GameType.wheel,
-      ),
-    );
-  }, []);
-
   const handleToggleState = (newState: "seeds" | "verify") => {
     setState(newState);
+  };
+
+  const handleClose = () => {
+    //@ts-ignore
+    document.addEventListener("click", function (event) {
+      //@ts-ignore
+      var targetId = event.target.id;
+      if (targetId && targetId === "pf-modal-bg") onClose();
+    });
   };
 
   useEffect(() => {
@@ -132,15 +116,6 @@ export default function WheelProvablyFairModal({
     }));
 
     const { clientSeed, serverSeed, nonce } = verificationState;
-
-    setStrikeNumber(
-      generateGameResult(
-        name === "serverSeed" ? value : serverSeed,
-        name === "clientSeed" ? value : clientSeed,
-        parseInt(name === "nonce" ? value : nonce),
-        GameType.wheel,
-      ),
-    );
   };
 
   const handleSetClientSeed = async () => {
@@ -167,19 +142,32 @@ export default function WheelProvablyFairModal({
 
   const copyToClipboard = (text?: string) => {
     if (text) navigator.clipboard.writeText(text);
-        successAlert("Successfully copied to clipboard");
-
   };
 
   return (
     <>
       {isOpen && (
-        <AdaptiveModal open={isOpen} onOpenChange={() => onClose()}>
-          <AdaptiveModalContent className="bg-[#121418] h-[85%] overflow-y-scroll p-7 rounded-lg sm:max-h-[80dvh] sm:h-auto sm:w-[90%] sm:max-w-[36rem]  md:mt-0 nobar">
-            <div className="flex font-chakra tracking-wider text-2xl font-semibold text-[#F0F0F0] items-center justify-center sm:justify-between">
+        <div
+          onClick={() => {
+            handleClose();
+          }}
+          id="pf-modal-bg"
+          className="absolute z-[150] left-0 top-0 flex h-full w-full items-center justify-center bg-[#33314680] backdrop-blur-[0px] transition-all"
+        >
+          <div className="bg-[#121418] max-h-[80dvh]  overflow-y-scroll p-8 rounded-lg z-10 w-11/12 sm:w-[32rem] -mt-[4.7rem] md:mt-0 nobar">
+            <div className="flex font-chakra tracking-wider text-2xl font-semibold text-[#F0F0F0] items-center justify-between">
               <div className="flex items-center gap-2">
                 <Image src={CheckPF} alt="" />
                 {translator("PROVABLY FAIR", language)}
+              </div>
+              <div className="hover:cursor-pointer hover:bg-[#26282c] transition-all rounded-full p-[2px]">
+                <MdClose
+                  size={25}
+                  color="#F0F0F0"
+                  onClick={() => {
+                    onClose();
+                  }}
+                />
               </div>
             </div>
             <div className="my-4 flex w-full items-center justify-center">
@@ -228,7 +216,7 @@ export default function WheelProvablyFairModal({
                       {translator("Active Server Seed (Hashed)", language)}
                     </label>
                     <div className="bg-[#202329] mt-1 rounded-md px-5 py-4 w-full relative flex items-center justify-between">
-                      <span className="truncate max-w-[26rem] text-[#B9B9BA] text-xs font-semibold">
+                      <span className="truncate text-[#B9B9BA] text-xs font-semibold">
                         {modalData.activeGameSeed.serverSeedHash}
                       </span>
                       <FaRegCopy
@@ -249,7 +237,7 @@ export default function WheelProvablyFairModal({
                       type="text"
                       name="totalBets"
                       placeholder={modalData.activeGameSeed.nonce.toString()}
-                      className="bg-[#202329] text-[#B9B9BA] text-xs font-semibold mt-1 rounded-md px-5 py-4 w-full relative flex items-center justify-between focus:ring-0 focus:outline-none focus:ring-0 focus:outline-none"
+                      className="bg-[#202329] text-[#B9B9BA] text-xs font-semibold mt-1 rounded-md px-5 py-4 w-full relative flex items-center justify-between"
                       readOnly
                     />
                   </div>
@@ -268,7 +256,7 @@ export default function WheelProvablyFairModal({
                           value={newClientSeed}
                           type="text"
                           onChange={(e) => setNewClientSeed(e.target.value)}
-                          className="bg-[#202329] text-[#B9B9BA] text-xs font-semibold rounded-md px-5 py-4 w-full relative flex items-center justify-between focus:ring-0 focus:outline-none"
+                          className="bg-[#202329] text-[#B9B9BA] text-xs font-semibold rounded-md px-5 py-4 w-full relative flex items-center justify-between"
                         />
                         <button
                           className="flex items-center justify-center h-full mx-2 px-5 py-1 my-auto bg-[#7839C5] text-white rounded-md font-bold text-sm"
@@ -283,7 +271,7 @@ export default function WheelProvablyFairModal({
                         {translator("Next Server Seed", language)}
                       </label>
                       <div className="bg-[#202329] mt-1 rounded-md px-5 py-4 w-full relative flex items-center justify-between">
-                        <span className="truncate max-w-[26rem] text-[#B9B9BA] text-xs font-semibold">
+                        <span className="truncate text-[#B9B9BA] text-xs font-semibold">
                           {modalData.nextGameSeed.serverSeedHash}
                         </span>
                         <FaRegCopy
@@ -332,7 +320,7 @@ export default function WheelProvablyFairModal({
                       name="clientSeed"
                       value={verificationState.clientSeed}
                       onChange={handleChange}
-                      className="bg-[#202329] text-white font-chakra text-xs font-medium mt-1 rounded-md px-5 py-4 w-full relative focus:ring-0 focus:outline-none"
+                      className="bg-[#202329] text-white font-chakra text-xs font-medium mt-1 rounded-md px-5 py-4 w-full relative"
                     />
                   </div>
                   <div>
@@ -344,7 +332,7 @@ export default function WheelProvablyFairModal({
                       name="serverSeed"
                       value={verificationState.serverSeed}
                       onChange={handleChange}
-                      className="bg-[#202329] text-white font-chakra text-xs font-medium mt-1 rounded-md px-5 py-4 w-full relative focus:ring-0 focus:outline-none"
+                      className="bg-[#202329] text-white font-chakra text-xs font-medium mt-1 rounded-md px-5 py-4 w-full relative"
                     />
                   </div>
                   <div>
@@ -356,14 +344,14 @@ export default function WheelProvablyFairModal({
                       name="nonce"
                       value={verificationState.nonce}
                       onChange={handleChange}
-                      className="bg-[#202329] text-white font-chakra text-xs font-medium mt-1 rounded-md px-5 py-4 w-full relative focus:ring-0 focus:outline-none"
+                      className="bg-[#202329] text-white font-chakra text-xs font-medium mt-1 rounded-md px-5 py-4 w-full relative"
                     />
                   </div>
                 </div>
               </div>
             )}
-          </AdaptiveModalContent>
-        </AdaptiveModal>
+          </div>
+        </div>
       )}
     </>
   );

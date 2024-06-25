@@ -577,7 +577,6 @@ export const placeBet = async (
     return { success: false, message: "Unexpected error", data: null };
   }
 };
-
 export const placeFlip = async (
   wallet: WalletContextState,
   amount: number,

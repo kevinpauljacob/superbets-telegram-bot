@@ -6,11 +6,7 @@ import { riskToChance } from "./Wheel/Segments";
 import Arc from "./Wheel/Arc";
 import { useGlobalContext } from "../GlobalContext";
 import { translator } from "@/context/transactions";
-import { multiplierColorMap } from "./Plinko/constants";
-import {
-  RiskToChance,
-  riskToChance as riskToChancePlinko,
-} from "./Plinko/RiskToChance";
+
 interface VerificationState {
   clientSeed: string;
   serverSeed: string;
@@ -18,7 +14,6 @@ interface VerificationState {
   risk?: string;
   segments?: number;
   parameter?: number;
-  rows?: number;
 }
 
 interface Props {
@@ -33,7 +28,8 @@ export default function ProvablyFairModal({
   selectedGameType,
 }: Props) {
   const [strikeNumbers, setStrikeNumbers] = useState<number[]>([]);
-  const [strikeNumber, setStrikeNumber] = useState<number>(50.0);
+  const [rouletteNumer, setRouletteNumber] = useState<number | null>(null);
+  const [strikeNumber, setStrikeNumber] = useState<number>(0);
   const [wonDiceFace, setWonDiceFace] = useState<number>(1);
   const [multiplier, setMultiplier] = useState<string>("1.00");
   const [wonCoinFace, setWonCoinface] = useState<"heads" | "tails">("heads");
@@ -43,12 +39,45 @@ export default function ProvablyFairModal({
   const [hoveredMultiplier, setHoveredMultiplier] = useState<number | null>(
     null,
   );
-  const [color, setColor] = useState("#ffffff");
-
   const { language } = useGlobalContext();
-  // console.log("StrikeMultiplier",strikeMultiplier)
-  // console.log("StrikeNumber",strikeNumber)
-  // console.log(verificationState)
+  const rows = [
+    [3, 6, 9, 12, 15, 18, 21, 24, 27, 30, 33, 36],
+    [2, 5, 8, 11, 14, 17, 20, 23, 26, 29, 32, 35],
+    [1, 4, 7, 10, 13, 16, 19, 22, 25, 28, 31, 34],
+  ];
+
+  type PredefinedBetType =
+    | "1-12"
+    | "13-24"
+    | "25-36"
+    | "1-18"
+    | "19-36"
+    | "even"
+    | "odd"
+    | "red"
+    | "black"
+    | "1st-column"
+    | "2nd-column"
+    | "3rd-column";
+  const predefinedBets: Record<PredefinedBetType, number[]> = {
+    "1-12": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+    "13-24": [13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24],
+    "25-36": [25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36],
+    "1-18": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18],
+    "19-36": [
+      19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36,
+    ],
+    even: [2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 34, 36],
+    odd: [1, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23, 25, 27, 29, 31, 33, 35],
+    red: [
+      1, 3, 5, 7, 9, 12, 14, 16, 18, 19, 21, 23, 25, 27, 28, 30, 32, 34, 36,
+    ],
+    black: [2, 4, 6, 8, 10, 11, 13, 15, 17, 20, 22, 24, 26, 29, 31, 33, 35],
+    "1st-column": [3, 6, 9, 12, 15, 18, 21, 24, 27, 30, 33, 36],
+    "2nd-column": [2, 5, 8, 11, 14, 17, 20, 23, 26, 29, 32, 35],
+    "3rd-column": [1, 4, 7, 10, 13, 16, 19, 22, 25, 28, 31, 34],
+  };
+
   useEffect(() => {
     const result = generateGameResult(
       verificationState.serverSeed,
@@ -88,6 +117,18 @@ export default function ProvablyFairModal({
     );
   }, [verificationState, selectedGameType]);
 
+  useEffect(() => {
+    if (selectedGameType === GameType.roulette1) {
+      setRouletteNumber(
+        generateGameResult(
+          verificationState.serverSeed,
+          verificationState.clientSeed,
+          parseInt(verificationState.nonce),
+          selectedGameType,
+        ),
+      );
+    }
+  }, [verificationState, selectedGameType]);
   useEffect(() => {
     setMultiplier(
       (
@@ -140,61 +181,6 @@ export default function ProvablyFairModal({
       }
     }
   }, [verificationState, selectedGameType, strikeNumber]);
-  useEffect(() => {
-    if (selectedGameType === GameType.plinko) {
-      const strikeNumber = generateGameResult(
-        verificationState.serverSeed,
-        verificationState.clientSeed,
-        parseInt(verificationState.nonce),
-        GameType.plinko,
-        verificationState.parameter,
-      );
-
-      const rows = verificationState.parameter || 8;
-      const risk = verificationState.risk || "low";
-      const multipliers = riskToChancePlinko[risk]?.[rows];
-      let finalMultiplier = 1;
-
-      if (multipliers) {
-        let totalChance = 0;
-        for (let i = 1, chance = 1; i <= rows; i++) {
-          chance = (chance * (rows - i + 1)) / i;
-          totalChance += chance;
-          if (strikeNumber <= totalChance) {
-            finalMultiplier = multipliers[i - 1];
-            break;
-          }
-        }
-      }
-
-      setStrikeMultiplier(finalMultiplier);
-
-      const color = getColorForMultiplier(
-        riskToChancePlinko,
-        multiplierColorMap,
-        risk,
-        rows,
-        finalMultiplier,
-      );
-      setColor(color || "#ffffff");
-    }
-  }, [verificationState, selectedGameType]);
-
-  function getColorForMultiplier(
-    riskToChancePlinko: RiskToChance,
-    multiplierColorMap: { [key: number]: string[] },
-    risk: keyof RiskToChance,
-    line: number,
-    multiplier: number,
-  ): string | undefined {
-    const multipliers = riskToChancePlinko[risk]?.[line];
-    if (!multipliers) return undefined;
-
-    const multiplierIndex = multipliers.indexOf(multiplier);
-    return multiplierIndex !== -1
-      ? multiplierColorMap[line]?.[multiplierIndex]
-      : undefined;
-  }
 
   const renderKeno = () => (
     <div className="p-4">
@@ -365,6 +351,93 @@ export default function ProvablyFairModal({
       [name]: name === "segments" ? parseInt(value, 10) : value,
     }));
   };
+  const renderRoulette1 = () => {
+    return (
+      <div className="font-chakra font-semibold text-base rotate-90 top-0 mb-7 mx-2">
+        <div className="flex flex-col w-full text-[12px] items-start gap-1 ">
+          <div className="w-full flex items-start gap-1">
+            <div
+              className={`h-[125px] w-[27.3px] sm:w-[30.6px] sm:h-[207px] flex flex-col justify-center text-center cursor-pointer bg-[#149200] rounded-[5px]
+              text-white relative  ${rouletteNumer === 0 ? "border-[#3DD179]" : ""}
+              mb-1`}
+            >
+              <p className="-rotate-90">0</p>
+            </div>
+            <div className="grid grid-cols-12 grid-rows-3 gap-1">
+              {rows.map((row, rowIndex) => (
+                <>
+                  {row.map((number, colIndex) => {
+                    return (
+                      <div
+                        key={colIndex}
+                        className="relative flex justify-center items-center"
+                      >
+                        <button
+                          data-testid={`roulette-tile-${number}`}
+                          className={`h-[40px] w-[27.3px] sm:w-[35px] sm:h-[67px] flex items-center justify-center relative text-center ${
+                            predefinedBets.red.includes(number)
+                              ? "bg-[#F1323E]  "
+                              : "bg-[#2A2E38]  "
+                          }${
+                            rouletteNumer === number
+                              ? "border-[#3DD179] border-2"
+                              : ""
+                          } text-white rounded-[5px]  `}
+                        >
+                          <p className="-rotate-90">{number}</p>
+                        </button>
+                      </div>
+                    );
+                  })}
+                </>
+              ))}
+            </div>
+            <div className="flex flex-col justify-between items-center gap-[5px] mt-0">
+              {rows.map((_, rowIndex) => (
+                <div
+                  key={`row-${rowIndex}`}
+                  className="h-[40px] w-[27px] sm:w-[30px] sm:h-[67px] flex items-center justify-center text-center bg-transparent border-2 border-[#26272B] text-white cursor-pointer relative rounded-[5px] "
+                >
+                  <p className="-rotate-90">2:1</p>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="flex w-full flex-col gap-[3px]">
+            <div className="flex w-full justify-center gap-1">
+              <button className="relative flex items-center justify-center bg-[#0E0F14] border border-[#26272B] text-white cursor-pointer rounded-[5px] w-[120px] h-[40px] sm:w-[128px] sm:h-[67px]  ">
+                1 to 12
+              </button>
+              <button className="relative flex items-center justify-center bg-[#0E0F14] border border-[#26272B] text-white cursor-pointer rounded-[5px] w-[120px] h-[40px] sm:w-[128px] sm:h-[67px]  ">
+                13 to 24
+              </button>
+              <button className="relative flex items-center justify-center bg-[#0E0F14] border border-[#26272B] text-white cursor-pointer rounded-[5px] w-[120px] h-[40px] sm:w-[128px] sm:h-[67px]  ">
+                25 to 36
+              </button>
+            </div>
+            <div className="flex w-full justify-center gap-1">
+              <button className="relative flex items-center justify-center bg-[#0E0F14] border border-[#26272B] text-white cursor-pointer rounded-md w-[58px] h-[40px] sm:w-[62px] sm:h-[63px]  ">
+                1 to 18
+              </button>
+              <button className="relative flex items-center justify-center bg-[#0E0F14] border border-[#26272B] text-white cursor-pointer rounded-md w-[58px] h-[40px] sm:w-[62px] sm:h-[63px]  ">
+                Even
+              </button>
+              <button className="relative flex items-center justify-center bg-[#F1323E] cursor-pointer rounded-md w-[58px] h-[40px] sm:w-[62px] sm:h-[63px]  "></button>
+              <button className="relative flex items-center justify-center bg-[#2A2E38] cursor-pointer rounded-md w-[58px] h-[40px] sm:w-[62px] sm:h-[63px]  "></button>
+              <button className="relative flex items-center justify-center bg-[#0E0F14] border border-[#26272B] text-white cursor-pointer rounded-md w-[58px] h-[40px] sm:w-[62px] sm:h-[63px]  ">
+                Odd
+              </button>
+              <button className="relative flex items-center justify-center bg-[#0E0F14] border border-[#26272B] text-white cursor-pointer rounded-md w-[58px] h-[40px] sm:w-[62px] sm:h-[63px]  ">
+                19 to 36
+              </button>
+            </div>
+          </div>
+          <div className=" sm:w-12 bg-transparent hidden sm:block" />
+        </div>
+      </div>
+    );
+  };
+
   const renderRiskAndSegments = () => (
     <>
       <div>
@@ -405,7 +478,6 @@ export default function ProvablyFairModal({
       </div>
     </>
   );
-
   const renderMinesCount = () => {
     return (
       <div className="my-4">
@@ -522,62 +594,6 @@ export default function ProvablyFairModal({
       </div>
     );
   };
-  const renderPlinko = () => {
-    return (
-      <div className="mt-6 pt-7  rounded-md flex flex-col items-center ">
-        <div
-          className="relative w-1/4 h-10 flex items-center justify-center font-semibold"
-          style={{
-            background: "#202329",
-            borderTop: "0.2rem solid",
-            borderColor: color,
-            color: color,
-            fontSize: "18px",
-            borderRadius: "0.32rem",
-          }}
-        >
-          {strikeMultiplier}
-        </div>
-        <div className="flex gap-4 pt-2 mb-8">
-          <div className="w-full">
-            <label className="text-xs text-opacity-75 font-changa text-[#F0F0F0]">
-              {translator("Risk", language)}
-            </label>
-            <select
-              name="risk"
-              value={verificationState.risk}
-              onChange={handleChange}
-              className="bg-[#202329] text-white capitalize font-chakra text-xs font-medium mt-1 rounded-md p-3 w-full relative"
-            >
-              <option value={"low"}>{translator("Low", language)}</option>
-              <option value={"medium"}>{translator("Medium", language)}</option>
-              <option value={"high"}>{translator("High", language)}</option>
-            </select>
-          </div>
-          <div className="w-full">
-            <label className="text-xs text-opacity-75 font-changa text-[#F0F0F0]">
-              {translator("Rows", language)}
-            </label>
-            <select
-              name="parameter"
-              value={verificationState.parameter}
-              onChange={handleChange}
-              className="bg-[#202329] text-white font-chakra text-xs font-medium mt-1 rounded-md p-3 w-full relative focus:ring-0 focus:outline-none"
-            >
-              <option value={8}>8</option>
-              <option value={10}>10</option>
-              <option value={11}>11</option>
-              <option value={12}>12</option>
-              <option value={14}>14</option>
-              <option value={15}>15</option>
-              <option value={15}>15</option>
-              <option value={16}>16</option>
-            </select>
-          </div>
-        </div>
-      </div>
-    );
-  };
 
   const renderGameVisuals = () => {
     switch (selectedGameType) {
@@ -591,6 +607,8 @@ export default function ProvablyFairModal({
         return renderLimbo();
       case GameType.coin:
         return renderCoinFlip();
+      case GameType.roulette1:
+        return renderRoulette1();
       case GameType.wheel:
         return (
           <>
@@ -605,8 +623,7 @@ export default function ProvablyFairModal({
             {renderMinesCount()}
           </>
         );
-      case GameType.plinko:
-        return <>{renderPlinko()}</>;
+
       default:
         return <div>Unsupported game type</div>;
     }

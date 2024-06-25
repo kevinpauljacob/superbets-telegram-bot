@@ -14,7 +14,14 @@ const roulette1Schema = new mongoose.Schema(
       type: Object,
       required: true,
     },
-    strikeNumber: Number,
+    strikeNumber: {
+      type: Number,
+      required: true,
+    },
+    strikeMultiplier: {
+      type: Number,
+      required: true,
+    },
     result: {
       type: String,
       enum: ["Won", "Lost"],

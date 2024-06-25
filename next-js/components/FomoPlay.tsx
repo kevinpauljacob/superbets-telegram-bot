@@ -44,6 +44,10 @@ export default function FomoPlay() {
       href: "/plinko",
       src: "/assets/game-cards/plinko.png",
     },
+    {
+      href: "/roulette",
+      src: "/assets/game-cards/roulette.png",
+    }
   ];
 
   const [currentSlide, setCurrentSlide] = useState(0);
