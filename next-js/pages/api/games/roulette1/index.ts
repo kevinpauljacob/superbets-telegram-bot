@@ -411,6 +411,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         amountWon: amountWon.toNumber(),
         amountLost,
       });
+      
     } catch (e: any) {
       console.log(e);
       return res.status(500).json({ success: false, message: e.message });

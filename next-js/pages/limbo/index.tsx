@@ -128,9 +128,9 @@ export default function Limbo() {
           if (win) {
             soundAlert("/sounds/win.wav", !enableSounds);
             successCustom(
-              `Won ${resultAmount.toFixed(4)} ${selectedCoin.tokenName}!`,
+              translator(`Congratulations! You won`, language) + ` ${resultAmount.toFixed(4)} ${selectedCoin.tokenName}`,
             );
-          } else result && errorCustom("Better luck next time!");
+          } else result && errorCustom(translator("Sorry, Better luck next time!", language));
           const newBetResult = { result: targetMultiplier, win };
           setLastMultipliers((prevResults) => {
             const newResults = [...prevResults, newBetResult];
@@ -206,10 +206,10 @@ export default function Limbo() {
         throw new Error(translator("Insufficient balance for bet !", language));
       }
       if (inputMultiplier < multiplierLimits[0]) {
-        throw new Error("Multiplier should be at least 1.02");
+        throw new Error(translator("Multiplier should be at least 1.02", language));
       }
       if (inputMultiplier > multiplierLimits[1]) {
-        throw new Error("Multiplier cannot be greater than 50");
+        throw new Error(translator("Multiplier cannot be greater than 50", language));
       }
       setLoading(true);
       setDisplayMultiplier(multiplierLimits[0]);
@@ -222,7 +222,7 @@ export default function Limbo() {
         selectedCoin.tokenMint,
       );
 
-      if (!response.success) throw new Error(response.message);
+      if (!response.success) throw new Error(translator(response.message, language));
 
       const winningMultiplier = parseFloat(
         truncateNumber(response.strikeNumber, 2).toString(),
@@ -240,7 +240,7 @@ export default function Limbo() {
       setRefresh(true);
       //auto options are in the useEffect to modify displayMultiplier
     } catch (e: any) {
-      errorCustom(e?.message ?? "Could not make Bet.");
+      errorCustom(translator(e?.message ?? "Could not make Bet.", language));
       setFlipping(false);
       setLoading(false);
       setResult(null);
@@ -337,7 +337,7 @@ export default function Limbo() {
         return;
       }
       if (typeof autoBetCount === "number" && autoBetCount <= 0) {
-        errorCustom("Set Bet Count.");
+        errorCustom(translator("Set Bet Count.", language));
         return;
       }
       if (

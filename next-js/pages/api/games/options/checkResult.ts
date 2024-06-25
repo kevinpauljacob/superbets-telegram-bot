@@ -48,7 +48,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       if (!user)
         return res
           .status(400)
-          .json({ success: false, message: "User does not exist !" });
+          .json({ success: false, message: "User does not exist!" });
 
       const bet = await Option.findOne({ wallet, result: "Pending" });
       if (!bet)
@@ -123,7 +123,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       );
 
       if (!status) {
-        throw new Error("User could not be updated !");
+        throw new Error("User could not be updated!");
       }
 
       const record = await Option.findOneAndUpdate(

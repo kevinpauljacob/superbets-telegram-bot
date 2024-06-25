@@ -1,7 +1,7 @@
 import connectDatabase from "@/utils/database";
 import { getToken } from "next-auth/jwt";
 import { NextApiRequest, NextApiResponse } from "next";
-import { Mines, User } from "@/models/games";
+import { GameSeed, Mines, User } from "@/models/games";
 import {
   generateGameResult,
   GameType,
@@ -69,7 +69,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       if (!gameInfo)
         return res
           .status(400)
-          .json({ success: false, message: "Game does not exist !" });
+          .json({ success: false, message: "Game does not exist!" });
 
       let {
         nonce,
@@ -232,6 +232,18 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       }
 
       if (result !== "Pending") {
+        await GameSeed.findOneAndUpdate(
+          {
+            _id: record.gameSeed._id,
+            pendingMines: true,
+          },
+          {
+            $set: {
+              pendingMines: false,
+            },
+          },
+        );
+
         const pointsGained =
           0 * user.numOfGamesPlayed + 1.4 * amount * userData.multiplier;
 
@@ -281,9 +293,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         success: true,
         message:
           result === "Won"
-            ? "Congratulations! You won!"
+            ? "Congratulations! You won"
             : result === "Lost"
-              ? "Better luck next time!"
+              ? "Sorry, Better luck next time!"
               : "Game in progress",
         result,
         ...(result === "Pending" ? {} : { strikeNumbers }),

@@ -677,14 +677,6 @@ export const rollDice = async (
 
     const { success, message, data } = await res.json();
 
-    if (success != true) {
-      errorCustom(message);
-      throw new Error(message);
-    }
-
-    if (data.result == "Won") successCustom(message);
-    else errorCustom(message);
-
     return { success, message, data };
   } catch (error) {
     return { success: false, message: "Unexpected error", data: null };

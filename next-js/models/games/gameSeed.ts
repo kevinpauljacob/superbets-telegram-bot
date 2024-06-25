@@ -31,6 +31,11 @@ const gameSeedSchema = new mongoose.Schema(
       required: true,
       default: seedStatus.NEXT,
     },
+    pendingMines: {
+      type: Boolean,
+      required: true,
+      default: false,
+    },
   },
   { timestamps: true },
 );

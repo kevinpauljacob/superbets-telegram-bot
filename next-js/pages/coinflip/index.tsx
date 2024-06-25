@@ -109,7 +109,7 @@ export default function Flip() {
         () => {
           if (response.success) {
             response?.data?.result == "Won"
-              ? successCustom(translator(response?.message, language))
+              ? successCustom(translator(response?.message, language) + ` ${response?.data?.amountWon} ${selectedCoin?.tokenName}`)
               : errorCustom(translator(response?.message, language));
 
             const win = response?.data?.result === "Won";
@@ -129,12 +129,7 @@ export default function Flip() {
             setLoading(false);
             setFlipping(false);
 
-            updatePNL(
-              GameType.coin,
-              win,
-              betAmt,
-              newBetResult.result,
-            );
+            updatePNL(GameType.coin, win, betAmt, newBetResult.result);
 
             // auto options
             if (betSetting === "auto") {
@@ -296,7 +291,7 @@ export default function Flip() {
           return;
         }
         if (typeof autoBetCount === "number" && autoBetCount <= 0) {
-          errorCustom("Set Bet Count.");
+          errorCustom(translator("Set Bet Count.", language));
           return;
         }
         if (
@@ -499,7 +494,7 @@ export default function Flip() {
           <div className={`w-full flex items-center justify-between h-8`}>
             <span className="text-xs md:text-sm font-chakra font-medium text-[#f0f0f0] text-opacity-75">
               {flipping
-                ? "Flipping..."
+                ? `${translator("Flipping", language)}...`
                 : result
                   ? result === "Won"
                     ? translator("You Won!", language)

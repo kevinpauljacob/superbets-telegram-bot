@@ -58,7 +58,7 @@ export default function InfoBar() {
       })} SOL`,
     },
     {
-      label: translator("Exit Game", language),
+      label: `EXIT ` + translator("Game", language),
       value: (
         <CountdownTimer
           targetDate={new Date(Date.UTC(2024, 5, 2, 19, 30, 0))}

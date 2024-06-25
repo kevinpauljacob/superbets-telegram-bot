@@ -24,7 +24,7 @@ import {
   successCustom,
   warningCustom,
 } from "@/components/toasts/ToastGroup";
-import { translator, truncateNumber } from "@/context/transactions";
+import { formatNumber, translator, truncateNumber } from "@/context/transactions";
 import { useSession } from "next-auth/react";
 import user from "@/models/staking/user";
 import Decimal from "decimal.js";
@@ -167,15 +167,15 @@ export default function Mines() {
       } = await response.json();
 
       if (success != true) {
-        errorCustom(message);
-        throw new Error(message);
+        errorCustom(translator(message, language));
+        throw new Error(translator(message, language));
       }
 
       const win = result === "Won";
       if (win) {
-        successCustom(message);
+        successCustom(translator(message, language) + ` ${formatNumber(amountWon)}  ${selectedCoin.tokenName}`);
         soundAlert("/sounds/win.wav", !enableSounds);
-      } else errorCustom(message);
+      } else errorCustom(translator(message, language));
 
       if (success) {
         const updatedUserBetsWithResult = userBets.map((bet, index) => ({
@@ -263,7 +263,7 @@ export default function Mines() {
       } = await response.json();
 
       if (success != true) {
-        throw new Error(message);
+        throw new Error(translator(message, language));
       }
 
       const updatedUserBets = userBets;
@@ -314,7 +314,7 @@ export default function Mines() {
         setNextProfit(0);
         setAmountWon(0);
         setBetActive(false);
-        errorCustom(message);
+        errorCustom(translator(message, language));
         setIsRolling(false);
         setProcessing(false);
         setPendingRequests([]);
@@ -354,7 +354,7 @@ export default function Mines() {
         setRefresh(true);
         setIsRolling(false);
       }
-      errorCustom(error.message);
+      errorCustom(translator(error.message, language));
       console.error("Error occurred while betting:", error);
     }
   };
@@ -405,7 +405,7 @@ export default function Mines() {
         throw new Error(translator("Insufficient balance for bet !", language));
       }
       if (userBetsForAuto.length === 0) {
-        throw new Error("Select at least one tile to bet on.");
+        throw new Error(translator("Select at least one tile to bet on.", language));
       }
 
       setIsRolling(true);
@@ -442,7 +442,7 @@ export default function Mines() {
       } = await response.json();
 
       if (success != true) {
-        throw new Error(message);
+        throw new Error(translator(message, language));
       }
 
       if (success) {
@@ -460,7 +460,7 @@ export default function Mines() {
       const win = result === "Won";
       if (win) {
         soundAlert("/sounds/win.wav", !enableSounds);
-        successCustom(message);
+        successCustom(translator(message, language) + ` ${formatNumber(amountWon)} ${selectedCoin.tokenName}`);
         setCashoutModal({
           show: true,
           amountWon: amountWon,
@@ -472,7 +472,7 @@ export default function Mines() {
       const lose = result === "Lost";
       if (lose) {
         soundAlert("/sounds/bomb.wav", !enableSounds);
-        errorCustom(message);
+        errorCustom(translator(message, language));
       }
 
       // auto options
@@ -566,14 +566,14 @@ export default function Mines() {
           setBetActive(true);
           setRefresh(true);
         }
-        throw new Error(message);
+        throw new Error(translator(message, language));
       }
 
       if (success) {
         setGameId(gameId);
         setBetActive(true);
         setRefresh(true);
-        successCustom(message);
+        successCustom(translator(message, language));
       }
     } catch (error: any) {
       errorCustom(
@@ -608,7 +608,7 @@ export default function Mines() {
       const { success, message, pendingGame, result } = await response.json();
 
       if (success === false) {
-        throw new Error(message);
+        throw new Error(translator(message, language));
       }
 
       if (success) {
@@ -806,7 +806,7 @@ export default function Mines() {
       //   return;
       // }
       if (typeof autoBetCount === "number" && autoBetCount <= 0) {
-        errorCustom("Set Bet Count.");
+        errorCustom(translator("Set Bet Count.", language));
         return;
       }
       if (
@@ -915,7 +915,7 @@ export default function Mines() {
                 {!betActive && betType !== "auto" && (
                   <div className="mb-6 flex flex-col w-full">
                     <div className="mb-1 w-full text-xs font-changa text-opacity-90">
-                      <label className="text-white/90">Mines</label>
+                      <label className="text-white/90">{translator("Mines", language)}</label>
                     </div>
                     <div
                       className={`${
@@ -964,7 +964,7 @@ export default function Mines() {
                     <div className="flex gap-2 w-full mb-8">
                       <div className="w-1/2">
                         <label className="text-xs text-white/90 font-changa mb-1">
-                          Mines
+                          {translator("Mines", language)}
                         </label>
                         <div className="bg-[#202329] text-[#94A3B8] font-chakra rounded-[8px] flex items-center h-11 px-4">
                           {minesCount}
@@ -972,7 +972,7 @@ export default function Mines() {
                       </div>
                       <div className="w-1/2">
                         <label className="text-xs text-white/90 font-changa mb-1">
-                          Gems
+                          {translator("Gems", language)}
                         </label>
                         <div className="bg-[#202329] text-[#94A3B8] font-chakra rounded-[8px] flex items-center h-11 px-4">
                           {25 - minesCount}
@@ -982,7 +982,7 @@ export default function Mines() {
                     <div className="border border-[#FFFFFF0D] rounded-[5px] font-changa text-white text-sm font-medium p-5 mb-6">
                       <div>
                         <div className="flex justify-between items-center mb-2">
-                          <p>Current Profit</p>
+                          <p>{translator("Current Profit", language)}</p>
                           <p>
                             {truncateNumber(currentProfit, 7)}{" "}
                             {selectedCoin.tokenName}
@@ -1007,7 +1007,7 @@ export default function Mines() {
                       </div>
                       <div>
                         <div className="flex justify-between items-center mb-2">
-                          <p>Profit on next tile</p>
+                          <p>{translator("Profit on next tile", language)}</p>
                           <p>
                             {truncateNumber(nextProfit, 7)}{" "}
                             {selectedCoin.tokenName}
@@ -1027,7 +1027,7 @@ export default function Mines() {
                     <div className="flex gap-2 w-full mb-8">
                       <div className="w-1/2">
                         <label className="text-xs text-white/90 font-changa mb-1">
-                          Mines
+                          {translator("Mines", language)}
                         </label>
                         <div
                           className={`${
@@ -1072,7 +1072,7 @@ export default function Mines() {
                       </div>
                       <div className="w-1/2">
                         <label className="text-xs text-white/90 font-changa mb-1">
-                          Gems
+                          {translator("Gems", language)}
                         </label>
                         <div className="bg-[#202329] text-[#94A3B8] font-chakra rounded-[8px] flex items-center h-11 px-4">
                           {25 - minesCount}
