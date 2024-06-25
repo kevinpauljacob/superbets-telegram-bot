@@ -1605,7 +1605,10 @@ export default function Roulette1() {
                      hover:border-slate-200 hover:bg-[#4D5361]"
                       onMouseEnter={() => setHoveredButton("1st-12")}
                       onMouseLeave={() => setHoveredButton(null)}
-                      onClick={() => handlePlaceBet("1st-12", selectedToken)}
+                      onClick={() => {
+                        handlePlaceBet("1st-12", selectedToken);
+                        soundAlert("/sounds/betbutton.wav", !enableSounds);
+                      }}
                     >
                       {/* w-[117px] h-[40px] */}1 to 12
                       {renderRegularToken("1st-12")}
@@ -1615,7 +1618,10 @@ export default function Roulette1() {
                    text-white cursor-pointer rounded-[5px]  w-[120px] h-[40px] sm:w-[213.19px] sm:h-12 hover:border hover:border-slate-200 hover:bg-[#4D5361]"
                       onMouseEnter={() => setHoveredButton("2nd-12")}
                       onMouseLeave={() => setHoveredButton(null)}
-                      onClick={() => handlePlaceBet("2nd-12", selectedToken)}
+                      onClick={() => {
+                        handlePlaceBet("2nd-12", selectedToken);
+                        soundAlert("/sounds/betbutton.wav", !enableSounds);
+                      }}
                     >
                       {/* w-[117px] h-[40px] */}
                       13 to 24
@@ -1627,7 +1633,10 @@ export default function Roulette1() {
                     hover:bg-[#4D5361]"
                       onMouseEnter={() => setHoveredButton("3rd-12")}
                       onMouseLeave={() => setHoveredButton(null)}
-                      onClick={() => handlePlaceBet("3rd-12", selectedToken)}
+                      onClick={() => {
+                        handlePlaceBet("3rd-12", selectedToken);
+                        soundAlert("/sounds/betbutton.wav", !enableSounds);
+                      }}
                     >
                       {/*  w-[117px] h-[40px]*/}
                       25 to 36
@@ -1640,7 +1649,10 @@ export default function Roulette1() {
                    sm:h-[49.5px]  sm:w-[104px] w-[57px] h-[40px] hover:border hover:border-slate-200 hover:bg-[#4D5361]"
                       onMouseEnter={() => setHoveredButton("1-18")}
                       onMouseLeave={() => setHoveredButton(null)}
-                      onClick={() => handlePlaceBet("1-18", selectedToken)}
+                      onClick={() => {
+                        handlePlaceBet("1-18", selectedToken);
+                        soundAlert("/sounds/betbutton.wav", !enableSounds);
+                      }}
                     >
                       {/* w-[57px] h-[40px] */}1 to 18
                       {renderRegularToken("1-18")}
@@ -1650,7 +1662,10 @@ export default function Roulette1() {
                   sm:h-[49.5px]  sm:w-[104px] w-[57px] h-[40px] hover:border hover:border-slate-200 hover:bg-[#4D5361]"
                       onMouseEnter={() => setHoveredButton("even")}
                       onMouseLeave={() => setHoveredButton(null)}
-                      onClick={() => handlePlaceBet("even", selectedToken)}
+                      onClick={() => {
+                        handlePlaceBet("even", selectedToken);
+                        soundAlert("/sounds/betbutton.wav", !enableSounds);
+                      }}
                     >
                       {/*  w-[57px] h-[40px]*/}
                       Even
@@ -1661,7 +1676,10 @@ export default function Roulette1() {
                    hover:border-slate-200 hover:bg-[#FF5C67]"
                       onMouseEnter={() => setHoveredButton("red")}
                       onMouseLeave={() => setHoveredButton(null)}
-                      onClick={() => handlePlaceBet("red", selectedToken)}
+                      onClick={() => {
+                        handlePlaceBet("red", selectedToken);
+                        soundAlert("/sounds/betbutton.wav", !enableSounds);
+                      }}
                     >
                       {/*w-[57px] h-[40px]  */}
                       {renderRegularToken("red")}
@@ -1670,7 +1688,10 @@ export default function Roulette1() {
                       className="relative  flex items-center justify-center bg-[#2A2E38] cursor-pointer rounded-md  sm:h-[49.5px]  sm:w-[104px] w-[57px] h-[40px] hover:border hover:border-slate-200 hover:bg-[#4D5361]"
                       onMouseEnter={() => setHoveredButton("black")}
                       onMouseLeave={() => setHoveredButton(null)}
-                      onClick={() => handlePlaceBet("black", selectedToken)}
+                      onClick={() => {
+                        handlePlaceBet("black", selectedToken);
+                        soundAlert("/sounds/betbutton.wav", !enableSounds);
+                      }}
                     >
                       {/* w-[57px] h-[40px] */}
                       {renderRegularToken("black")}
@@ -1680,7 +1701,10 @@ export default function Roulette1() {
                    rounded-md  sm:h-[49.5px]  sm:w-[104px] w-[57px] h-[40px] hover:border hover:border-slate-200 hover:bg-[#4D5361]"
                       onMouseEnter={() => setHoveredButton("odd")}
                       onMouseLeave={() => setHoveredButton(null)}
-                      onClick={() => handlePlaceBet("odd", selectedToken)}
+                      onClick={() => {
+                        handlePlaceBet("odd", selectedToken);
+                        soundAlert("/sounds/betbutton.wav", !enableSounds);
+                      }}
                     >
                       {/*  w-[57px] h-[40px]*/}
                       Odd
@@ -1691,7 +1715,10 @@ export default function Roulette1() {
                   sm:h-[49.5px]  sm:w-[104px] w-[57px] h-[40px] hover:border hover:border-slate-200 hover:bg-[#4D5361]"
                       onMouseEnter={() => setHoveredButton("19-36")}
                       onMouseLeave={() => setHoveredButton(null)}
-                      onClick={() => handlePlaceBet("19-36", selectedToken)}
+                      onClick={() => {
+                        handlePlaceBet("19-36", selectedToken);
+                        soundAlert("/sounds/betbutton.wav", !enableSounds);
+                      }}
                     >
                       {/* w-[57px] h-[40px] */}
                       19 to 36
