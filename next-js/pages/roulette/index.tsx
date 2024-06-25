@@ -1284,7 +1284,7 @@ export default function Roulette1() {
           <ResultDisplay numbers={resultNumbers} />
 
           <div
-            className={`hidden roulette relative min-w-72 min-h-72 sm:flex flex-col items-center justify-center ${overlay ? "hidden fadeOutDown" : ""}`}
+            className={`hidden roulette relative min-w-[18rem] min-h-[18rem] sm:flex flex-col items-center justify-center ${overlay ? "hidden fadeOutDown" : ""}`}
           >
             <img className="absolute w-[90%] h-[90%]" src="/bg.svg " />
             <img className="wheel absolute" src="/wheel.svg" />
