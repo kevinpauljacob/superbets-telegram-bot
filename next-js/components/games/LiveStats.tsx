@@ -151,7 +151,7 @@ export default function LiveStats() {
             onClick={() => setIsDropdownOpen(!isDropdownOpen)}
           >
             <h1 className="text-white text-[12px] font-chakra uppercase">
-              {liveCurrentStat}
+              {translator(liveCurrentStat, language)}
             </h1>
             <svg
               width="12"
@@ -180,7 +180,7 @@ export default function LiveStats() {
                   }}
                 >
                   <h1 className="text-white text-[12px] font-chakra uppercase">
-                    {game}
+                    {translator(game, language)}
                   </h1>
                 </div>
               ))}

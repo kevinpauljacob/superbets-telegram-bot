@@ -26,7 +26,7 @@ import {
   successCustom,
   warningCustom,
 } from "@/components/toasts/ToastGroup";
-import { translator } from "@/context/transactions";
+import { formatNumber, translator } from "@/context/transactions";
 import { useSession } from "next-auth/react";
 import { GameType } from "@/utils/provably-fair";
 import { handleSignIn } from "@/components/ConnectWallet";
@@ -177,7 +177,7 @@ export default function Dice2() {
         }),
       });
 
-      const { success, message, result, strikeNumber } = await response.json();
+      const { success, message, result, strikeNumber, amountWon } = await response.json();
 
       if (success !== true) {
         throw new Error(message);
@@ -185,9 +185,9 @@ export default function Dice2() {
 
       const win = result === "Won";
       if (win) {
-        successCustom(message);
+        successCustom(translator(message, language) + ` ${formatNumber(amountWon)} ${selectedCoin?.tokenName}`);
         soundAlert("/sounds/win.wav", !enableSounds);
-      } else errorCustom(message);
+      } else errorCustom(translator(message, language));
       const newBetResult = { result: strikeNumber, win };
 
       updatePNL(GameType.dice2, win, betAmt, multiplier);
@@ -369,7 +369,7 @@ export default function Dice2() {
         return;
       }
       if (typeof autoBetCount === "number" && autoBetCount <= 0) {
-        errorCustom("Set Bet Count.");
+        errorCustom(translator("Set Bet Count.", language));
         return;
       }
       if (
