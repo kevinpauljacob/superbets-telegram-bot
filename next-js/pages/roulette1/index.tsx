@@ -83,8 +83,8 @@ export default function Roulette1() {
     | "1st-12"
     | "2nd-12"
     | "3rd-12"
-    | "1-18"
-    | "19-36"
+    | "low"
+    | "high"
     | "even"
     | "odd"
     | "red"
@@ -178,8 +178,8 @@ export default function Roulette1() {
     "1st-12": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
     "2nd-12": [13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24],
     "3rd-12": [25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36],
-    "1-18": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18],
-    "19-36": [
+    low: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18],
+    high: [
       19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36,
     ],
     even: [2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 34, 36],
@@ -333,7 +333,7 @@ export default function Roulette1() {
     return currentBetAmt + newBetValue;
   };
 
-  const initialState = {
+  /*   const initialState = {
     num: 0,
     strikeMultiplier: 1,
     result: null,
@@ -342,7 +342,7 @@ export default function Roulette1() {
     spinComplete: false,
     loading: false,
     refresh: false,
-  };
+  }; */
 
   /*   const resetState = () => {
     setNum(initialState.num);
@@ -599,6 +599,7 @@ export default function Roulette1() {
       rates,
       selectedCoin.tokenName,
     );
+    console.log("Transformed Bets", transformedBets);
 
     setTransformedBets(transformedBets);
   }, [selectedBets]);
@@ -1651,15 +1652,15 @@ export default function Roulette1() {
                     <button
                       className="relative  flex items-center justify-center bg-[#0E0F14] border border-[#26272B] text-white cursor-pointer rounded-md
                    sm:h-[49.5px]  sm:w-[104px] w-[57px] h-[40px] hover:border hover:border-slate-200 hover:bg-[#4D5361]"
-                      onMouseEnter={() => setHoveredButton("1-18")}
+                      onMouseEnter={() => setHoveredButton("low")}
                       onMouseLeave={() => setHoveredButton(null)}
                       onClick={() => {
-                        handlePlaceBet("1-18", selectedToken);
+                        handlePlaceBet("low", selectedToken);
                         soundAlert("/sounds/betbutton.wav", !enableSounds);
                       }}
                     >
                       {/* w-[57px] h-[40px] */}1 to 18
-                      {renderRegularToken("1-18")}
+                      {renderRegularToken("low")}
                     </button>
                     <button
                       className="relative  flex items-center justify-center bg-[#0E0F14] border border-[#26272B] text-white cursor-pointer rounded-md 
@@ -1717,16 +1718,16 @@ export default function Roulette1() {
                     <button
                       className="relative  flex items-center justify-center bg-[#0E0F14] border border-[#26272B] text-white cursor-pointer rounded-md 
                   sm:h-[49.5px]  sm:w-[104px] w-[57px] h-[40px] hover:border hover:border-slate-200 hover:bg-[#4D5361]"
-                      onMouseEnter={() => setHoveredButton("19-36")}
+                      onMouseEnter={() => setHoveredButton("high")}
                       onMouseLeave={() => setHoveredButton(null)}
                       onClick={() => {
-                        handlePlaceBet("19-36", selectedToken);
+                        handlePlaceBet("high", selectedToken);
                         soundAlert("/sounds/betbutton.wav", !enableSounds);
                       }}
                     >
                       {/* w-[57px] h-[40px] */}
                       19 to 36
-                      {renderRegularToken("19-36")}
+                      {renderRegularToken("high")}
                     </button>
                   </div>
                 </div>
