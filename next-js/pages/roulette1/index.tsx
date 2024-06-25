@@ -608,10 +608,14 @@ export default function Roulette1() {
       return;
     }
 
-    const tokenValue = parseInt(token.value);
     const solEquivalent = getSolEquivalent(token);
+    const tokenEquivalent = convertToSelectedToken(
+      solEquivalent,
+      rates,
+      selectedCoin.tokenName,
+    );
 
-    if (calculateTotalBetAmount(betAmt || 0, solEquivalent) > maxBetAmt!) {
+    if (calculateTotalBetAmount(betAmt || 0, tokenEquivalent) > maxBetAmt!) {
       errorCustom("Bet amount exceeds the maximum allowed bet.");
       return;
     }
@@ -619,7 +623,7 @@ export default function Roulette1() {
     setSelectedBets((prev) => {
       const betsForArea = prev.filter((bet) => bet.areaId === areaId);
       if (betsForArea.length < 3) {
-        setBetAmt((prevBetAmt) => (prevBetAmt || 0) + solEquivalent);
+        setBetAmt((prevBetAmt) => (prevBetAmt || 0) + tokenEquivalent);
         return [...prev, { areaId, token }];
       } else {
         return prev;
