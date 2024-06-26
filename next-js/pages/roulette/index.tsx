@@ -265,7 +265,17 @@ export default function Roulette1() {
     fetchRates();
   }, []);
   console.log("Rates of Coins", rates);
+  const ballBounceSound = useMemo(() => {
+    const audio = new Audio("/sounds/PingPong.wav");
+    audio.volume = 0.3;
+    return audio;
+  }, []);
 
+  const playBounceSound = (volume: number) => {
+    ballBounceSound.volume = volume; // Set the volume for this play
+    ballBounceSound.currentTime = 0; // Reset sound to start
+    ballBounceSound.play();
+  };
   const spin = (strikeNumber: number): Promise<void> => {
     return new Promise((resolve) => {
       setOverlay(true);
@@ -285,7 +295,7 @@ export default function Roulette1() {
         !overlayBallContainer ||
         !overlayBallContainer.current
       ) {
-        resolve(); // Resolve immediately if any elements are missing
+        resolve();
         return;
       }
 
@@ -305,6 +315,12 @@ export default function Roulette1() {
           360 * 3 + endingDegree + "deg";
 
         overlayBallElement.classList.add("overlayHole");
+
+        const bounceVolumes = [1, 0.7, 0.5, 0.35, 0.25, 0.2];
+        const bounceTimes = [2800, 3000, 3200, 3400, 3600, 3800];
+        bounceTimes.forEach((time, index) => {
+          setTimeout(() => playBounceSound(bounceVolumes[index]), time);
+        });
       }, 1000);
 
       ballElement.classList.add("hole");
@@ -620,6 +636,7 @@ export default function Roulette1() {
 
     setTransformedBets(transformedBets);
   }, [selectedBets]);
+
   const handlePlaceBet = (areaId: string, token: Token | null) => {
     if (!token) {
       errorCustom(
@@ -1345,7 +1362,7 @@ export default function Roulette1() {
                     if (selectedToken) {
                       handlePlaceBet("num-0", selectedToken);
                     }
-                    soundAlert("/sounds/betbutton.wav", !enableSounds);
+                    soundAlert("/sounds/rouletteChipPlace.wav", !enableSounds);
                   }}
                 >
                   {/* h-[27.3px] w-[125px] */}
@@ -1403,7 +1420,7 @@ export default function Roulette1() {
                                   );
                                 }
                                 soundAlert(
-                                  "/sounds/betbutton.wav",
+                                  "/sounds/rouletteChipPlace.wav",
                                   !enableSounds,
                                 );
                               }}
@@ -1427,7 +1444,7 @@ export default function Roulette1() {
                                     );
                                   }
                                   soundAlert(
-                                    "/sounds/betbutton.wav",
+                                    "/sounds/rouletteChipPlace.wav",
                                     !enableSounds,
                                   );
                                 }}
@@ -1453,7 +1470,7 @@ export default function Roulette1() {
                                     );
                                   }
                                   soundAlert(
-                                    "/sounds/betbutton.wav",
+                                    "/sounds/rouletteChipPlace.wav",
                                     !enableSounds,
                                   );
                                 }}
@@ -1498,7 +1515,7 @@ export default function Roulette1() {
                                     );
                                   }
                                   soundAlert(
-                                    "/sounds/betbutton.wav",
+                                    "/sounds/rouletteChipPlace.wav",
                                     !enableSounds,
                                   );
                                 }}
@@ -1553,7 +1570,7 @@ export default function Roulette1() {
                                   }
                                 }
                                 soundAlert(
-                                  "/sounds/betbutton.wav",
+                                  "/sounds/rouletteChipPlace.wav",
                                   !enableSounds,
                                 );
                               }}
@@ -1609,7 +1626,10 @@ export default function Roulette1() {
                           rowToColumnLabel(rowIndex),
                           selectedToken,
                         );
-                        soundAlert("/sounds/betbutton.wav", !enableSounds);
+                        soundAlert(
+                          "/sounds/rouletteChipPlace.wav",
+                          !enableSounds,
+                        );
                       }}
                     >
                       <p className="-rotate-90 sm:rotate-0">2:1</p>
@@ -1633,7 +1653,10 @@ export default function Roulette1() {
                       onMouseLeave={() => setHoveredButton(null)}
                       onClick={() => {
                         handlePlaceBet("1st-12", selectedToken);
-                        soundAlert("/sounds/betbutton.wav", !enableSounds);
+                        soundAlert(
+                          "/sounds/rouletteChipPlace.wav",
+                          !enableSounds,
+                        );
                       }}
                     >
                       {/* w-[117px] h-[40px] */}1 to 12
@@ -1646,7 +1669,10 @@ export default function Roulette1() {
                       onMouseLeave={() => setHoveredButton(null)}
                       onClick={() => {
                         handlePlaceBet("2nd-12", selectedToken);
-                        soundAlert("/sounds/betbutton.wav", !enableSounds);
+                        soundAlert(
+                          "/sounds/rouletteChipPlace.wav",
+                          !enableSounds,
+                        );
                       }}
                     >
                       {/* w-[117px] h-[40px] */}
@@ -1661,7 +1687,10 @@ export default function Roulette1() {
                       onMouseLeave={() => setHoveredButton(null)}
                       onClick={() => {
                         handlePlaceBet("3rd-12", selectedToken);
-                        soundAlert("/sounds/betbutton.wav", !enableSounds);
+                        soundAlert(
+                          "/sounds/rouletteChipPlace.wav",
+                          !enableSounds,
+                        );
                       }}
                     >
                       {/*  w-[117px] h-[40px]*/}
@@ -1677,7 +1706,10 @@ export default function Roulette1() {
                       onMouseLeave={() => setHoveredButton(null)}
                       onClick={() => {
                         handlePlaceBet("low", selectedToken);
-                        soundAlert("/sounds/betbutton.wav", !enableSounds);
+                        soundAlert(
+                          "/sounds/rouletteChipPlace.wav",
+                          !enableSounds,
+                        );
                       }}
                     >
                       {/* w-[57px] h-[40px] */}1 to 18
@@ -1690,7 +1722,10 @@ export default function Roulette1() {
                       onMouseLeave={() => setHoveredButton(null)}
                       onClick={() => {
                         handlePlaceBet("even", selectedToken);
-                        soundAlert("/sounds/betbutton.wav", !enableSounds);
+                        soundAlert(
+                          "/sounds/rouletteChipPlace.wav",
+                          !enableSounds,
+                        );
                       }}
                     >
                       {/*  w-[57px] h-[40px]*/}
@@ -1704,7 +1739,10 @@ export default function Roulette1() {
                       onMouseLeave={() => setHoveredButton(null)}
                       onClick={() => {
                         handlePlaceBet("red", selectedToken);
-                        soundAlert("/sounds/betbutton.wav", !enableSounds);
+                        soundAlert(
+                          "/sounds/rouletteChipPlace.wav",
+                          !enableSounds,
+                        );
                       }}
                     >
                       {/*w-[57px] h-[40px]  */}
@@ -1716,7 +1754,10 @@ export default function Roulette1() {
                       onMouseLeave={() => setHoveredButton(null)}
                       onClick={() => {
                         handlePlaceBet("black", selectedToken);
-                        soundAlert("/sounds/betbutton.wav", !enableSounds);
+                        soundAlert(
+                          "/sounds/rouletteChipPlace.wav",
+                          !enableSounds,
+                        );
                       }}
                     >
                       {/* w-[57px] h-[40px] */}
@@ -1729,7 +1770,10 @@ export default function Roulette1() {
                       onMouseLeave={() => setHoveredButton(null)}
                       onClick={() => {
                         handlePlaceBet("odd", selectedToken);
-                        soundAlert("/sounds/betbutton.wav", !enableSounds);
+                        soundAlert(
+                          "/sounds/rouletteChipPlace.wav",
+                          !enableSounds,
+                        );
                       }}
                     >
                       {/*  w-[57px] h-[40px]*/}
@@ -1743,7 +1787,10 @@ export default function Roulette1() {
                       onMouseLeave={() => setHoveredButton(null)}
                       onClick={() => {
                         handlePlaceBet("high", selectedToken);
-                        soundAlert("/sounds/betbutton.wav", !enableSounds);
+                        soundAlert(
+                          "/sounds/rouletteChipPlace.wav",
+                          !enableSounds,
+                        );
                       }}
                     >
                       {/* w-[57px] h-[40px] */}
