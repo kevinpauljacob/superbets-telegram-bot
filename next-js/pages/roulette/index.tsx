@@ -1252,7 +1252,7 @@ export default function Roulette1() {
         >
           <div className="roulette relative w-full h-full flex flex-col items-center justify-center rounded-full">
             <img
-              className="absolute w-96 h-96"
+              className="absolute w-[30rem] h-[30rem]"
               src="/bg.svg"
               style={{
                 top: "50%",
@@ -1261,7 +1261,7 @@ export default function Roulette1() {
               }}
             />
             <img
-              className="wheel absolute w-96 h-96"
+              className="wheel absolute w-[30rem] h-[30rem]"
               src="/wheel.svg"
               style={{ transform: "translate(-50%, -50%)" }}
             />
@@ -1271,7 +1271,7 @@ export default function Roulette1() {
               </div>
             ) : ( */}
             <img
-              className="needle absolute"
+              className="needle absolute w-[10rem] h-[10rem]"
               src="/needle.svg"
               style={{ transform: "translate(-50%, -50%)" }}
             />
@@ -1279,7 +1279,7 @@ export default function Roulette1() {
              */}
             <div
               ref={overlayBallContainer}
-              className="ball_container absolute w-96 h-[22px] px-[50px] flex items-center"
+              className="ball_container absolute w-[30rem] h-[22px] px-[50px] flex items-center"
               style={{ transform: "translate(-50%, -50%)" }}
             >
               <div
