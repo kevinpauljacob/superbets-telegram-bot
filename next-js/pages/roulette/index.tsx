@@ -264,18 +264,7 @@ export default function Roulette1() {
 
     fetchRates();
   }, []);
-  console.log("Rates of Coins", rates);
-  const ballBounceSound = useMemo(() => {
-    const audio = new Audio("/sounds/PingPong.wav");
-    audio.volume = 0.3;
-    return audio;
-  }, []);
 
-  const playBounceSound = (volume: number) => {
-    ballBounceSound.volume = volume; // Set the volume for this play
-    ballBounceSound.currentTime = 0; // Reset sound to start
-    ballBounceSound.play();
-  };
   const spin = (strikeNumber: number): Promise<void> => {
     return new Promise((resolve) => {
       setOverlay(true);
@@ -315,12 +304,6 @@ export default function Roulette1() {
           360 * 3 + endingDegree + "deg";
 
         overlayBallElement.classList.add("overlayHole");
-
-        const bounceVolumes = [1, 0.7, 0.5, 0.35, 0.25, 0.2];
-        const bounceTimes = [2800, 3000, 3200, 3400, 3600, 3800];
-        bounceTimes.forEach((time, index) => {
-          setTimeout(() => playBounceSound(bounceVolumes[index]), time);
-        });
       }, 1000);
 
       ballElement.classList.add("hole");
