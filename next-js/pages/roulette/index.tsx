@@ -26,6 +26,7 @@ import { SPL_TOKENS } from "@/context/config"; // Adjust the import path accordi
 import { soundAlert } from "@/utils/soundUtils";
 import ConfigureAutoButton from "@/components/ConfigureAutoButton";
 import AutoCount from "@/components/AutoCount";
+import { GameType } from "@/utils/provably-fair";
 
 function debounce<T extends (...args: any[]) => void>(
   func: T,
@@ -65,6 +66,7 @@ export default function Roulette1() {
     enableSounds,
     setLiveStats,
     liveStats,
+    updatePNL,
     houseEdge,
     maxBetAmt,
     language,
@@ -493,29 +495,8 @@ export default function Roulette1() {
 
       setRefresh(true);
       setLoading(false);
-      /* setLiveStats([
-        ...liveStats,
-        {
-          game: GameType.wheel,
-          amount: betAmt ?? 0, // Default to 0 if undefined
-          result: win ? "Won" : "Lost",
-          pnl: win
-            ? (betAmt ?? 0) * (strikeMultiplier ?? 1) - (betAmt ?? 0)
-            : -(betAmt ?? 0),
-          totalPNL:
-            liveStats.length > 0
-              ? liveStats[liveStats.length - 1].totalPNL +
-                (win
-                  ? (betAmt ?? 0) * (strikeMultiplier ?? 1) - (betAmt ?? 0)
-                  : -(betAmt ?? 0))
-              : win
-                ? (betAmt ?? 0) * (strikeMultiplier ?? 1) - (betAmt ?? 0)
-                : -(betAmt ?? 0),
-        },
-      ]); */
-
-      setResult(null); // Reset the result state
-      setSpinComplete(false); // Mark spin complete for the next round
+      updatePNL(GameType.roulette1, win, betAmt ?? 0, strikeMultiplier ?? 0);
+      setResult(null); // Mark spin complete for the next round
     }
   }, [spinComplete, result, win, message, num, autoBetCount]);
 
