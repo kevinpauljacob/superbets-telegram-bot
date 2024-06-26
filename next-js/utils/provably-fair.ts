@@ -124,7 +124,7 @@ export enum GameType {
   plinko = "plinko",
   limbo = "limbo",
   keno = "keno",
-  roulette1 = "roulette1",
+  roulette1 = "roulette",
   roulette2 = "roulette2",
   mines = "mines",
   hilo = "hilo",

@@ -47,7 +47,7 @@ export default function FomoPlay() {
     {
       href: "/roulette",
       src: "/assets/game-cards/roulette.png",
-    }
+    },
   ];
 
   const [currentSlide, setCurrentSlide] = useState(0);

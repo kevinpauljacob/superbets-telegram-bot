@@ -21,7 +21,7 @@ import {
 } from "@/components/toasts/ToastGroup";
 import Bets from "@/components/games/Bets";
 
-import { translator } from "@/context/transactions";
+import { formatNumber, translator } from "@/context/transactions";
 import { SPL_TOKENS } from "@/context/config"; // Adjust the import path accordingly
 import { soundAlert } from "@/utils/soundUtils";
 import ConfigureAutoButton from "@/components/ConfigureAutoButton";
@@ -238,7 +238,7 @@ export default function Roulette1() {
   const [message, setMessage] = useState("");
   const [betInProgress, setBetInProgress] = useState(false);
   const [rates, setRates] = useState({ USDC: 0, FOMO: 0 });
-
+  const [amountWon, setAmountWon] = useState<number>(0);
   useEffect(() => {
     const fetchRates = async () => {
       try {
@@ -392,8 +392,14 @@ export default function Roulette1() {
         }),
       });
 
-      const { success, message, result, strikeNumber, strikeMultiplier } =
-        await response.json();
+      const {
+        success,
+        message,
+        result,
+        strikeNumber,
+        strikeMultiplier,
+        amountWon,
+      } = await response.json();
 
       if (success !== true) {
         throw new Error(message);
@@ -405,6 +411,7 @@ export default function Roulette1() {
         setStrikeMultiplier(strikeMultiplier ?? 1);
         setResult(result);
         setMessage(message);
+        setAmountWon(amountWon);
         setWin(result === "Won");
         setRefresh(true);
 
@@ -471,10 +478,13 @@ export default function Roulette1() {
     if (spinComplete && result !== null) {
       if (win) {
         soundAlert("/sounds/win.wav", !enableSounds);
-        successCustom(message);
+        successCustom(
+          translator(`Congratulations! You won`, language) +
+            ` ${formatNumber(amountWon)} ${selectedCoin.tokenName}`,
+        );
       } else {
         soundAlert("/sounds/lose.wav", !enableSounds);
-        errorCustom(message);
+        errorCustom(translator("Sorry, Better luck next time!", language));
         setBetAmt(0);
         clearBets();
       }
@@ -588,18 +598,13 @@ export default function Roulette1() {
     const minBetAmt = minBetAmounts[selectedTokenName];
 
     if (betAmt < minBetAmt) {
-      errorCustom(
-        translator(
-          `Minimum bet amount for ${selectedTokenName} is ${minBetAmt}.`,
-          language,
-        ),
-      );
+      errorCustom(translator("Bet above minimum amount.", language));
       return;
     }
 
     if (betSetting === "auto") {
       if (typeof autoBetCount === "number" && autoBetCount <= 0) {
-        errorCustom("Set Bet Count.");
+        errorCustom(translator("Set Bet Count.", language));
         return;
       }
       if (
@@ -636,7 +641,9 @@ export default function Roulette1() {
   }, [selectedBets]);
   const handlePlaceBet = (areaId: string, token: Token | null) => {
     if (!token) {
-      errorCustom("Please select a token before placing a bet.");
+      errorCustom(
+        translator("Please select a token before placing a bet.", language),
+      );
       return;
     }
 
@@ -648,7 +655,9 @@ export default function Roulette1() {
     );
 
     if (calculateTotalBetAmount(betAmt || 0, tokenEquivalent) > maxBetAmt!) {
-      errorCustom("Bet amount exceeds the maximum allowed bet.");
+      errorCustom(
+        translator("Bet amount exceeds the maximum allowed bet.", language),
+      );
       return;
     }
 
@@ -1186,7 +1195,7 @@ export default function Roulette1() {
                   setBetAmt={setUserInput}
                   currentMultiplier={1}
                   leastMultiplier={1}
-                  game="roulette1"
+                  game="roulette"
                   disabled={true}
                 />
                 {betSetting === "manual" ? (
