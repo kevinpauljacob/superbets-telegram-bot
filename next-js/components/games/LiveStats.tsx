@@ -2,6 +2,7 @@ import Draggable from "react-draggable";
 import { useGlobalContext } from "../GlobalContext";
 import { useEffect, useState } from "react";
 import { GameType } from "@/utils/provably-fair";
+import { translator } from "@/context/transactions";
 import LiveGraph from "./LiveGraph";
 
 export default function LiveStats() {
@@ -12,6 +13,7 @@ export default function LiveStats() {
     setLiveCurrentStat,
     liveStats,
     setLiveStats,
+    language
   } = useGlobalContext();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [data, setData] = useState({
@@ -22,7 +24,10 @@ export default function LiveStats() {
   });
   const [hoverValue, setHoverValue] = useState<number | null>(null);
 
-  const games = ["All", ...Object.values(GameType)]
+  const games = ["All", ...Object.values(GameType)].filter(x => {
+    let g = ["hilo", "roulette1", "roulette2"];
+    return !g.includes(x);
+  })
 
   useEffect(() => {
     if (liveCurrentStat === "All") {
@@ -80,7 +85,9 @@ export default function LiveStats() {
         }}
       >
         <div className="handle w-full h-16 flex flex-row items-center justify-between p-5 cursor-move select-none">
-          <h1 className="text-white text-[16px] font-chakra">LIVE STATS</h1>
+          <h1 className="text-white text-[16px] font-chakra">
+            {translator("LIVE STATS", language)}
+          </h1>
 
           <div className="flex flex-row gap-2">
             <div
@@ -141,7 +148,7 @@ export default function LiveStats() {
             onClick={() => setIsDropdownOpen(!isDropdownOpen)}
           >
             <h1 className="text-white text-[12px] font-chakra uppercase">
-              {liveCurrentStat}
+              {translator(liveCurrentStat, language)}
             </h1>
             <svg
               width="12"
@@ -170,7 +177,7 @@ export default function LiveStats() {
                   }}
                 >
                   <h1 className="text-white text-[12px] font-chakra uppercase">
-                    {game}
+                    {translator(game, language)}
                   </h1>
                 </div>
               ))}
@@ -180,7 +187,7 @@ export default function LiveStats() {
           <div className="w-full flex flex-row mt-3">
             <div className="w-1/2 flex flex-col bg-[#202329] rounded-lg p-2 mr-1">
               <div className="text-[10px] text-[#94A3B8] font-chakra text-left">
-                Wagered
+                {translator("Wagered", language)}
               </div>
               <div className="text-white text-[12px] font-chakra flex flex-row items-center justify-end">
                 <span>{data.wagered.toFixed(4)}</span>
@@ -250,7 +257,7 @@ export default function LiveStats() {
 
             <div className="w-1/2 flex flex-col bg-[#202329] rounded-lg p-2 ml-1">
               <div className="text-[10px] text-[#94A3B8] font-chakra text-left">
-                Profit
+                {translator("Profit", language)}
               </div>
               <div className="text-white text-[12px] font-chakra flex flex-row items-center justify-end">
                 <span
@@ -327,7 +334,7 @@ export default function LiveStats() {
           <div className="w-full flex flex-row mt-3">
             <div className="w-1/2 flex flex-col bg-[#202329] rounded-lg p-2 mr-1">
               <div className="text-[10px] text-[#94A3B8] font-chakra text-left">
-                Wins
+                {translator("Wins", language)}
               </div>
               <div className="text-[12px] font-chakra flex flex-row items-center justify-end text-[#72F238]">
                 {data.wins}
@@ -336,7 +343,7 @@ export default function LiveStats() {
 
             <div className="w-1/2 flex flex-col bg-[#202329] rounded-lg p-2 ml-1">
               <div className="text-[10px] text-[#94A3B8] font-chakra text-left">
-                Losses
+                {translator("Losses", language)}
               </div>
               <div className="text-[12px] font-chakra flex flex-row items-center justify-end text-[#F1323E]">
                 {data.losses}
