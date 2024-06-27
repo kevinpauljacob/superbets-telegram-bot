@@ -1880,7 +1880,7 @@ export const translationsMap = {
     ko: "총 청구 가능",
     ch: "总索赔",
   },
-  "Total Earned" : {
+  "Total Earned": {
     ru: "Всего заработано",
     ko: "총 수익",
     ch: "总收入",
@@ -1910,7 +1910,7 @@ export const translationsMap = {
     ko: "수수료 %",
     ch: "佣金 %",
   },
-  "Commission": {
+  Commission: {
     ru: "Комиссия",
     ko: "수수료",
     ch: "佣金",
@@ -1985,7 +1985,7 @@ export const translationsMap = {
     ko: "잘못된 베팅 금액",
     ch: "无效的投注金额",
   },
-  "Invalid chosen numbers":{
+  "Invalid chosen numbers": {
     ru: "Неверно выбранные числа",
     ko: "잘못된 숫자 선택",
     ch: "无效的选择数字",
@@ -2019,5 +2019,55 @@ export const translationsMap = {
     ru: "Не удалось получить результат",
     ko: "결과를 가져올 수 없습니다",
     ch: "无法获取结果",
+  },
+  "Place at least one Chip": {
+    ru: "Поставьте хотя бы одну фишку",
+    ko: "칩을 하나 이상 놓으십시오",
+    ch: "至少放置一个筹码",
+  },
+  "Bet amount exceeds the maximum allowed bet.": {
+    ru: "Сумма ставки превышает максимально допустимую ставку.",
+    ko: "베팅 금액이 허용된 최대 베팅을 초과합니다.",
+    ch: "投注金额超过了允许的最高投注。",
+  },
+  "Please select a token before placing a bet.": {
+    ru: "Пожалуйста, выберите токен перед размещением ставки.",
+    ko: "베팅을 배치하기 전에 토큰을 선택하��시오.",
+    ch: "请在放置投注之前选择一个令牌。",
+  },
+  "Chip Value": {
+    ru: "Значение фишки",
+    ko: "칩 가치",
+    ch: "筹码价值",
+  },
+  Undo: {
+    ru: "Отменить",
+    ko: "실행 취소",
+    ch: "撤消",
+  },
+  Clear: {
+    ru: "Очистить",
+    ko: "지우기",
+    ch: "清除",
+  },
+  to: {
+    ru: "до",
+    ko: "까지",
+    ch: "至",
+  },
+  Odd: {
+    ru: "Нечет",
+    ko: "홀수",
+    ch: "奇数",
+  },
+  "Invalid row index": {
+    ru: "Неверный индекс строки",
+    ko: "잘못된 행 인덱스",
+    ch: "无效的行索引",
+  },
+  Even: {
+    ru: "Чет",
+    ko: "짝수",
+    ch: "偶数",
   }
 };
