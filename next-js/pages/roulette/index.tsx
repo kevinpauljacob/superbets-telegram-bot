@@ -267,7 +267,6 @@ export default function Roulette1() {
 
   const spin = (strikeNumber: number): Promise<void> => {
     return new Promise((resolve) => {
-      setOverlay(true);
       setSpinComplete(false);
       const order = [
         0, 32, 15, 19, 4, 21, 2, 25, 17, 34, 6, 27, 13, 36, 11, 30, 8, 23, 10,
@@ -378,9 +377,11 @@ export default function Roulette1() {
       if (!transformedBets) {
         throw new Error(translator("Place at least one Chip", language));
       }
+
       setLoading(true);
       setBetInProgress(true); // Set bet in progress
       reset();
+      setOverlay(true);
       const response = await fetch(`/api/games/roulette1`, {
         method: "POST",
         headers: {
@@ -553,6 +554,7 @@ export default function Roulette1() {
 
       setLoading(true);
       setTimeout(() => {
+        setOverlay(true);
         bet();
       }, 200);
     } else {
@@ -1246,18 +1248,13 @@ export default function Roulette1() {
               src="/wheel.svg"
               style={{ transform: "translate(-50%, -50%)" }}
             />
-            {/*   {centerNumber ? (
-              <div className="text-4xl font-chakra font-semibold text-white absolute" style={{ top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}>
-                {centerNumber}
-              </div>
-            ) : ( */}
+
             <img
               className="needle absolute w-[10rem] h-[10rem]"
               src="/needle.svg"
               style={{ transform: "translate(-50%, -50%)" }}
             />
-            {/*     )}
-             */}
+
             <div
               ref={overlayBallContainer}
               className="ball_container absolute w-[30rem] h-[22px] px-[50px] flex items-center"
@@ -1278,13 +1275,8 @@ export default function Roulette1() {
           >
             <img className="absolute w-[90%] h-[90%]" src="/bg.svg " />
             <img className="wheel absolute" src="/wheel.svg" />
-            {/*  {centerNumber ? (
-              <div className="text-4xl font-chakra font-semibold text-white absolute">
-                {centerNumber!}
-              </div>
-            ) : ( */}
+
             <img className="needle absolute" src="/needle.svg" />
-            {/*  )} */}
 
             <div
               ref={ballContainer}
