@@ -8,6 +8,10 @@ const config: Config = {
   ],
   theme: {
     extend: {
+      gridTemplateColumns: {
+        // Adding a custom 14-column configuration
+        14: "repeat(14, minmax(0, 1fr))",
+      },
       dropShadow:{
         "3xl":'0px 4px 4px #1D1D1D'
       },

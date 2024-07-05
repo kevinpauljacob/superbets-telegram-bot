@@ -111,6 +111,11 @@ export default function GameHeader() {
       icon: "/assets/plinko.png",
       name: "Plinko",
     },
+
+    roulette2: {
+      icon: "/assets/plinko.png",
+      name: "Roulette-2",
+    },
   });
 
   // Get the game details based on the extracted game name
