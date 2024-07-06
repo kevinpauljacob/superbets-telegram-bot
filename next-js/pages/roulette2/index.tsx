@@ -292,7 +292,7 @@ export default function Roulette1() {
       const overlayBallElement = overlayBall.current;
       const overlayBallContainerElement = overlayBallContainer.current;
 
-      let endingDegree = order.indexOf(strikeNumber) * 9.73;
+      let endingDegree = order.indexOf(strikeNumber) * (360 / order.length)
 
       ballContainerElement.style.transition = "all linear 4s";
       ballContainerElement.style.rotate = 360 * 3 + endingDegree + "deg";
