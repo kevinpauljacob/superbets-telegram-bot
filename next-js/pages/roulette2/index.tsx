@@ -186,7 +186,7 @@ export default function Roulette1() {
     [2, 5, 8, 11, 14, 17, 20, 23, 26, 29, 32, 35],
     [1, 4, 7, 10, 13, 16, 19, 22, 25, 28, 31, 34],
   ];
-
+  const specialNumbers = { 0: "0", [-1]: "00" };
   const predefinedBets: Record<PredefinedBetType, number[]> = {
     "1st-12": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
     "2nd-12": [13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24],
@@ -621,7 +621,7 @@ export default function Roulette1() {
 
     setTransformedBets(transformedBets);
   }, [selectedBets]);
-
+  console.log("Transformed Bets", transformedBets);
   const handlePlaceBet = (areaId: string, token: Token | null) => {
     if (!token) {
       errorCustom(
@@ -991,11 +991,17 @@ export default function Roulette1() {
 
   const handlePlaceCornerBetWithThreeNumbers = (
     number: number,
-    adjacentNumbers: number[],
     token: Token | null,
   ) => {
     if (token) {
-      const areaId = `corner-${number}-${adjacentNumbers.join("-")}`;
+      let areaId: string;
+      if (number === 2) {
+        areaId = `corner-2-0-3`;
+      } else if (number === 1) {
+        areaId = `corner-1--1-2`;
+      } else {
+        areaId = `corner-${number}`;
+      }
       handlePlaceBet(areaId, token);
     }
   };
@@ -1005,7 +1011,67 @@ export default function Roulette1() {
     rowIndex: number,
     colIndex: number,
   ) => {
-    if (rowIndex > 0) {
+    if (number === 2) {
+      const areaId = `corner-2-0-3`;
+      const betsForArea = selectedBets.filter((bet) => bet.areaId === areaId);
+
+      if (betsForArea.length > 0) {
+        return (
+          <div
+            className="absolute inset-0 flex flex-col items-center justify-center space-y-1 z-10 
+            sm:w-12 w-7 h-full sm:rotate-0 -rotate-90 -left-2 -top-3 sm:-top-0 sm:-left-1"
+          >
+            {betsForArea.slice(0, 3).map((bet, index) => (
+              <Image
+                key={index}
+                width={35}
+                height={35}
+                src={bet.token.image}
+                alt={`token-${index}`}
+                className="absolute drop-shadow-3xl"
+                style={{
+                  left: "20%",
+                  transform: "translateX(-50%)",
+                  bottom: `${index * 3}px`,
+                }}
+              />
+            ))}
+          </div>
+        );
+      }
+    } else if (number === 1) {
+      const areaId = `corner-1--1-2`;
+      const betsForArea = selectedBets.filter((bet) => bet.areaId === areaId);
+
+      if (betsForArea.length > 0) {
+        return (
+          <div
+            className="absolute inset-0 flex flex-col items-center justify-center space-y-1 z-10 
+            sm:w-12 w-7 h-full sm:rotate-0 -rotate-90 -left-2 -top-3 sm:-top-0 sm:-left-1"
+          >
+            {betsForArea.slice(0, 3).map((bet, index) => (
+              <Image
+                key={index}
+                width={35}
+                height={35}
+                src={bet.token.image}
+                alt={`token-${index}`}
+                className="absolute drop-shadow-3xl"
+                style={{
+                  left: "20%",
+                  transform: "translateX(-50%)",
+                  bottom: `${index * 3}px`,
+                }}
+              />
+            ))}
+          </div>
+        );
+      }
+    } else if (
+      rowIndex > 0 &&
+      colIndex > 0 &&
+      colIndex < rows[rowIndex].length
+    ) {
       const topNumber = rows[rowIndex - 1][colIndex];
       const areaId = `corner-${number}-0-${topNumber}`;
       const betsForArea = selectedBets.filter((bet) => bet.areaId === areaId);
@@ -1014,7 +1080,7 @@ export default function Roulette1() {
         return (
           <div
             className="absolute inset-0 flex flex-col items-center justify-center space-y-1 z-10 
-          sm:w-12 w-7 h-full sm:rotate-0 -rotate-90 -left-2 -top-3 sm:-top-0 sm:-left-1 "
+            sm:w-12 w-7 h-full sm:rotate-0 -rotate-90 -left-2 -top-3 sm:-top-0 sm:-left-1"
           >
             {betsForArea.slice(0, 3).map((bet, index) => (
               <Image
@@ -1352,18 +1418,18 @@ export default function Roulette1() {
                     className={` h-[125px] w-[27.3px]  sm:h-[76px] sm:w-12    flex flex-col justify-center text-center cursor-pointer bg-[#149200] rounded-[5px]
                text-white relative border-4 border-transparent  hover:bg-[#55BA78]
                 hover:border-[2px] hover:border-slate-300 mb-1 ${
-                  hoveredCorner && hoveredCorner.includes(0)
+                  hoveredCorner && hoveredCorner.includes(-1)
                     ? "overlay border-[2px] border-white"
                     : ""
                 }
                 ${
-                  hoveredSplit && hoveredSplit.includes(0)
+                  hoveredSplit && hoveredSplit.includes(-1)
                     ? "overlay border-[2px] border-white"
                     : ""
                 }`}
                     onClick={() => {
                       if (selectedToken) {
-                        handlePlaceBet("num-0", selectedToken);
+                        handlePlaceBet("num--1", selectedToken);
                       }
                       soundAlert(
                         "/sounds/rouletteChipPlace.wav",
@@ -1373,7 +1439,7 @@ export default function Roulette1() {
                   >
                     {/* h-[27.3px] w-[125px] */}
                     <p className="-rotate-90 sm:rotate-0">00</p>
-                    {renderRegularToken("num-0")}
+                    {renderRegularToken("num--1")}
                   </div>
                 </div>
                 <div className="grid grid-cols-12 grid-rows-3 gap-[4px] sm:gap-1 sm:w-full sm:mb-[7px] ">
@@ -1557,13 +1623,11 @@ export default function Roulette1() {
                                   if (number === 2) {
                                     handlePlaceCornerBetWithThreeNumbers(
                                       number,
-                                      [0, rows[rowIndex - 1][colIndex]],
                                       selectedToken,
                                     );
                                   } else if (number === 1) {
                                     handlePlaceCornerBetWithThreeNumbers(
                                       number,
-                                      [0, rows[rowIndex - 1][colIndex]],
                                       selectedToken,
                                     );
                                   } else {
@@ -1584,17 +1648,9 @@ export default function Roulette1() {
                               onMouseEnter={() => {
                                 if (rowIndex > 0) {
                                   if (number === 2) {
-                                    setHoveredCorner([
-                                      number,
-                                      0,
-                                      rows[rowIndex - 1][colIndex],
-                                    ]);
+                                    setHoveredCorner([2, 0, 3]);
                                   } else if (number === 1) {
-                                    setHoveredCorner([
-                                      number,
-                                      0,
-                                      rows[rowIndex - 1][colIndex],
-                                    ]);
+                                    setHoveredCorner([1, 2, -1]);
                                   } else {
                                     setHoveredCorner([
                                       number,
