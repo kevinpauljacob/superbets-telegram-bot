@@ -59,6 +59,7 @@ const WagerMapping: Record<WagerType, Array<number> | Record<string, number>> =
     "3rd-column": [3, 6, 9, 12, 15, 18, 21, 24, 27, 30, 33, 36],
     straight: {
       "0": 0,
+      "99": 99,
       "1": 1,
       "2": 2,
       "3": 3,
