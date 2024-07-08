@@ -1413,9 +1413,9 @@ export default function Roulette2() {
               {/* table ui flex-row-reverse w-[211px]  text-[12px] rotate-90 gap-2*/}
               <div className="w-full flex items-start gap-1   ">
                 {/* flex-col */}
-                <div className=" flex flex-col items-center justify-center">
+                <div className=" flex flex-col items-center justify-center h-[132px] sm:h-[157px]">
                   <div
-                    className={` h-[62.5px] w-[27.3px]  sm:h-[76px] sm:w-12    flex flex-col justify-center text-center cursor-pointer bg-[#149200] rounded-[5px]
+                    className={` h-1/2 w-[27.3px]   sm:w-12    flex flex-col justify-center text-center cursor-pointer bg-[#149200] rounded-[5px]
                text-white relative border-4 border-transparent  hover:bg-[#55BA78]
                 hover:border-[2px] hover:border-slate-300 mb-1 ${
                   hoveredCorner && hoveredCorner.includes(0)
@@ -1442,7 +1442,7 @@ export default function Roulette2() {
                     {renderRegularToken("num-0")}
                   </div>{" "}
                   <div
-                    className={` h-[62.5px] w-[27.3px]  sm:h-[76px] sm:w-12    flex flex-col justify-center text-center cursor-pointer bg-[#149200] rounded-[5px]
+                    className={` h-1/2 w-[27.3px]   sm:w-12    flex flex-col justify-center text-center cursor-pointer bg-[#149200] rounded-[5px]
                text-white relative border-4 border-transparent  hover:bg-[#55BA78]
                 hover:border-[2px] hover:border-slate-300 mb-1 ${
                   hoveredCorner && hoveredCorner.includes(99)

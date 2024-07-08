@@ -690,6 +690,16 @@ export const translationsMap = {
     ko: "룰렛",
     ch: "轮盘",
   },
+  "Roulette-2": {
+    ru: "Рулетка-2",
+    ko: "룰렛-2",
+    ch: "轮盘-2",
+  },
+  Roulette2: {
+    ru: "Рулетка2",
+    ko: "룰렛2",
+    ch: "轮盘2",
+  },
   All: {
     ru: "Все",
     ko: "모두",

@@ -48,6 +48,10 @@ export default function FomoPlay() {
       href: "/roulette",
       src: "/assets/game-cards/roulette.png",
     },
+    {
+      href: "/roulette2",
+      src: "/assets/game-cards/roulette.png",
+    },
   ];
 
   const [currentSlide, setCurrentSlide] = useState(0);

@@ -113,7 +113,7 @@ export default function GameHeader() {
     },
 
     roulette2: {
-      icon: "/assets/plinko.png",
+      icon: "/assets/dice.png",
       name: "Roulette-2",
     },
   });
