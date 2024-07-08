@@ -14,7 +14,10 @@ import { useGlobalContext } from "@/components/GlobalContext";
 import { translator } from "@/context/transactions";
 import ProvablyFairModal from "../ProvablyFairModal";
 import GameSelect from "../GameSelect";
-import { AdaptiveModal, AdaptiveModalContent } from "@/components/AdaptiveModal";
+import {
+  AdaptiveModal,
+  AdaptiveModalContent,
+} from "@/components/AdaptiveModal";
 import { successAlert } from "@/components/toasts/ToastGroup";
 
 export interface PFModalData {
@@ -167,8 +170,7 @@ export default function WheelProvablyFairModal({
 
   const copyToClipboard = (text?: string) => {
     if (text) navigator.clipboard.writeText(text);
-        successAlert("Successfully copied to clipboard");
-
+    successAlert("Successfully copied to clipboard");
   };
 
   return (
@@ -304,7 +306,7 @@ export default function WheelProvablyFairModal({
               <div className="grid w-full text-white ">
                 <div className="grid gap-2">
                   <div
-                    className={`md:px-8 py-2 mt-6 px-4  pt-7 border-2 border-white border-opacity-5 rounded-md ${selectedGameType === GameType.roulette1 ? "w-full h-[480px] flex items-center " : ""}`}
+                    className={`md:px-8 py-2 mt-6 px-4  pt-7 border-2 border-white border-opacity-5 rounded-md ${selectedGameType === GameType.roulette1 || GameType.roulette2 ? "w-full h-[480px] flex items-center " : ""}`}
                   >
                     <ProvablyFairModal
                       setVerificationState={setVerificationState}

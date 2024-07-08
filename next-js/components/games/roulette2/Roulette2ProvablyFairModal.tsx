@@ -5,7 +5,7 @@ import {
 } from "@/utils/provably-fair";
 import Image from "next/image";
 import { useEffect, useState, useRef } from "react";
-import { Roulette1 } from "./VerifyRoulette1Modal";
+import { Roulette2 } from "./VerifyRoulette2Modal";
 import { FaRegCopy } from "react-icons/fa6";
 import { MdClose } from "react-icons/md";
 import CheckPF from "@/public/assets/CheckPF.svg";
@@ -40,10 +40,10 @@ interface Props {
   onClose: () => void;
   modalData: PFModalData;
   setModalData: React.Dispatch<React.SetStateAction<PFModalData>>;
-  bet?: Roulette1;
+  bet?: Roulette2;
 }
 
-export default function Roulette1ProvablyFairModal({
+export default function Roulette2ProvablyFairModal({
   isOpen,
   onClose,
   modalData,
@@ -64,7 +64,7 @@ export default function Roulette1ProvablyFairModal({
     null,
   ); */
   const [selectedGameType, setSelectedGameType] = useState<GameType>(
-    GameType.roulette1,
+    GameType.roulette2,
   );
   console.log("isOpen", isOpen);
   const [verificationState, setVerificationState] = useState<{
@@ -292,7 +292,8 @@ export default function Roulette1ProvablyFairModal({
               <div className="grid w-full text-white ">
                 <div className="grid gap-2">
                   <div
-                    className={`md:px-8 py-2 mt-6 px-4  pt-7 border-2 border-white border-opacity-5 rounded-md ${selectedGameType === GameType.roulette1 || selectedGameType === GameType.roulette2 ? "w-full h-[480px] flex items-center " : ""}`}
+                    className={`md:px-8 py-2 mt-6 px-4  pt-7 border-2 border-white border-opacity-5 rounded-md ${selectedGameType === GameType.roulette1 || selectedGameType === GameType.roulette2 ? "w-full h-[480px] flex items-center " : ""}
+                    `}
                   >
                     <ProvablyFairModal
                       setVerificationState={setVerificationState}

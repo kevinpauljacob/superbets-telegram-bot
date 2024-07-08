@@ -348,7 +348,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         gameSeed: activeGameSeed._id,
       });
       await roulette2.save();
-
+      
       await updateGameStats(
         wallet,
         GameType.roulette2,

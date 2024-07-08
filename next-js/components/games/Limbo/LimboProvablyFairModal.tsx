@@ -58,9 +58,8 @@ export default function LimboProvablyFairModal({
   const [state, setState] = useState<"seeds" | "verify">(
     modalData.tab ?? "seeds",
   );
-  const [newClientSeed, setNewClientSeed] = useState<string>(
-    generateClientSeed(),
-  );
+  const [newClientSeed, setNewClientSeed] =
+    useState<string>(generateClientSeed());
   const [multiplier, setMultiplier] = useState<string>("1.00");
   const [selectedGameType, setSelectedGameType] = useState<GameType>(
     GameType.limbo,
@@ -153,8 +152,7 @@ export default function LimboProvablyFairModal({
 
   const copyToClipboard = (text?: string) => {
     if (text) navigator.clipboard.writeText(text);
-        successAlert("Successfully copied to clipboard");
-
+    successAlert("Successfully copied to clipboard");
   };
 
   return (
@@ -293,7 +291,9 @@ export default function LimboProvablyFairModal({
                 {state === "verify" && (
                   <div className="grid w-full text-white">
                     <div className="grid gap-2">
-                      <div className="border-2 border-opacity-5 border-[#FFFFFF] md:px-8 py-2">
+                      <div
+                        className={`md:px-8 py-2 mt-6 px-4  pt-7 border-2 border-white border-opacity-5 rounded-md ${selectedGameType === GameType.roulette1 || selectedGameType === GameType.roulette2 ? "w-full h-[480px] flex items-center " : ""}`}
+                      >
                         <ProvablyFairModal
                           verificationState={verificationState}
                           setVerificationState={setVerificationState}
