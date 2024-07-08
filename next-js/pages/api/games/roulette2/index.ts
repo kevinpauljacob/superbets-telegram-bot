@@ -6,16 +6,21 @@ import {
   generateGameResult,
   GameType,
   seedStatus,
+  GameTokens,
+  decryptServerSeed,
 } from "@/utils/provably-fair";
 import StakingUser from "@/models/staking/user";
-import { houseEdgeTiers, pointTiers } from "@/context/config";
+import { houseEdgeTiers, maintainance, pointTiers, stakingTiers } from "@/context/config";
 import { launchPromoEdge } from "@/context/config";
 import { wsEndpoint } from "@/context/config";
+
+import { SPL_TOKENS, minGameAmount} from "@/context/config";
 import { Decimal } from "decimal.js";
 import updateGameStats from "../../../../utils/updateGameStats";
 Decimal.set({ precision: 9 });
 
 const secret = process.env.NEXTAUTH_SECRET;
+const encryptionKey = Buffer.from(process.env.ENCRYPTION_KEY!, "hex");
 
 export const config = {
   maxDuration: 60,
@@ -41,7 +46,7 @@ const WagerMapping: Record<WagerType, Array<number> | Record<string, number>> =
   {
     red: [1, 3, 5, 7, 12, 14, 16, 18, 19, 21, 23, 25, 27, 30, 32, 34, 36],
     black: [2, 4, 6, 8, 10, 11, 13, 15, 17, 20, 22, 24, 26, 28, 29, 31, 33, 35],
-    green: [-1, 0],
+    green: [0,99],
     odd: [1, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23, 25, 27, 29, 31, 33, 35],
     even: [2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 34, 36],
     low: [...Array(18).keys()].map((x) => x + 1),
@@ -110,239 +115,303 @@ const WagerPayout: Record<WagerType, number> = {
   straight: 36,
 };
 
-type Wager = Record<string, number | Record<string, number>>;
+type Wager = Record<WagerType, number | Record<string, number>>;
 
 type InputType = {
   wallet: string;
-  tokenMint: string;
+  tokenMint: GameTokens;
   wager: Wager;
 };
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === "POST") {
     try {
-      return res
-        .status(400)
-        .json({ success: false, message: "GAME UNDER DEVELOPMENT !" });
+      let { wallet, tokenMint, wager }: InputType = req.body;
 
-      // let { wallet, tokenMint, wager }: InputType = req.body;
+      if (maintainance)
+        return res.status(400).json({
+          success: false,
+          message: "Under maintenance",
+        });
 
-      // const token = await getToken({ req, secret });
+      const token = await getToken({ req, secret });
 
-      // if (!token || !token.sub || token.sub != wallet)
-      //   return res.status(400).json({
-      //     success: false,
-      //     message: "User wallet not authenticated",
-      //   });
+      if (!token || !token.sub || token.sub != wallet)
+        return res.status(400).json({
+          success: false,
+          message: "User wallet not authenticated",
+        });
 
-      // await connectDatabase();
+      if (!wallet || !tokenMint || !wager)
+        return res
+          .status(400)
+          .json({ success: false, message: "Missing parameters" });
 
-      // if (!wallet || !tokenMint || !wager)
-      //   return res
-      //     .status(400)
-      //     .json({ success: false, message: "Missing parameters" });
+      const splToken = SPL_TOKENS.find((t) => t.tokenMint === tokenMint);
+      if (
+        !splToken ||
+        !Object.keys(wager).every((key) => WagerMapping[key as WagerType])
+      )
+        return res
+          .status(400)
+          .json({ success: false, message: "Invalid parameters" });
+
+      const amount = Object.entries(wager)
+        .reduce((acc, next) => {
+          if (next[0] === "straight") {
+            const straightTotal = Object.values(
+              next[1] as Record<string, number>,
+            ).reduce((acc, next) => acc.add(next), new Decimal(0));
+
+            return acc.add(straightTotal);
+          } else {
+            return acc.add(next[1] as number);
+          }
+        }, new Decimal(0))
+        .toNumber();
+
+      if (amount < minGameAmount)
+        return res.status(400).json({
+          success: false,
+          message: "Invalid bet amount",
+        });
+
+      await connectDatabase();
+
+      //TODO: Amount type check and max payout check
+      // const maxPayout = Decimal.mul(amount, strikeMultiplier);
 
       // if (
-      //   tokenMint !== "SOL" ||
-      //   !Object.keys(wager).every((key) => WagerMapping[key as WagerType])
+      //   !(maxPayout.toNumber() <= maxPayouts[tokenMint].roulette1)
       // )
       //   return res
       //     .status(400)
-      //     .json({ success: false, message: "Invalid parameters" });
+      //     .json({ success: false, message: "Max payout exceeded" });
 
-      // let user = await User.findOne({ wallet });
+      let user = await User.findOne({ wallet });
 
-      // if (!user)
-      //   return res
-      //     .status(400)
-      //     .json({ success: false, message: "User does not exist !" });
+      if (!user)
+        return res
+          .status(400)
+          .json({ success: false, message: "User does not exist !" });
 
-      // const amount = Object.entries(wager)
-      //   .reduce((acc, next) => {
-      //     if (next[0] === "straight") {
-      //       const straightTotal = Object.values(
-      //         next[1] as Record<string, number>,
-      //       ).reduce((acc, next) => acc.add(next), new Decimal(0));
+    /*   if (
+        user.deposit.find((d: any) => d.tokenMint === tokenMint)?.amount <
+        amount
+      )
+        return res
+          .status(400)
+          .json({ success: false, message: "Insufficient balance !" }); */
 
-      //       return acc.add(straightTotal);
-      //     } else {
-      //       return acc.add(next[1] as number);
-      //     }
-      //   }, new Decimal(0))
-      //   .toNumber();
+      const userData = await StakingUser.findOneAndUpdate(
+        { wallet },
+        {},
+        { upsert: true, new: true },
+      );
 
-      // if (
-      //   user.deposit.find((d: any) => d.tokenMint === tokenMint)?.amount <
-      //   amount
-      // )
-      //   return res
-      //     .status(400)
-      //     .json({ success: false, message: "Insufficient balance !" });
+      const stakeAmount = userData?.stakedAmount ?? 0;
+      const stakingTier = Object.entries(stakingTiers).reduce((prev, next) => {
+        return stakeAmount >= next[1]?.limit ? next : prev;
+      })[0];
+      const isFomoToken =
+        tokenMint === SPL_TOKENS.find((t) => t.tokenName === "FOMO")?.tokenMint
+          ? true
+          : false;
+      const houseEdge =
+        launchPromoEdge || isFomoToken
+          ? 0
+          : houseEdgeTiers[parseInt(stakingTier)];
 
-      // const userData = await StakingUser.findOneAndUpdate(
-      //   { wallet },
-      //   {},
-      //   { upsert: true, new: true },
-      // );
-      // const userTier = userData?.tier ?? 0;
-      // const houseEdge = launchPromoEdge ? 0 : houseEdgeTiers[userTier];
+      const activeGameSeed = await GameSeed.findOneAndUpdate(
+        {
+          wallet,
+          status: seedStatus.ACTIVE,
+        },
+        {
+          $inc: {
+            nonce: 1,
+          },
+        },
+        { new: true },
+      );
 
-      // const activeGameSeed = await GameSeed.findOneAndUpdate(
-      //   {
-      //     wallet,
-      //     status: seedStatus.ACTIVE,
-      //   },
-      //   {
-      //     $inc: {
-      //       nonce: 1,
-      //     },
-      //   },
-      //   { new: true },
-      // );
+      if (!activeGameSeed) {
+        throw new Error("Server hash not found!");
+      }
 
-      // if (!activeGameSeed) {
-      //   throw new Error("Server hash not found!");
-      // }
+      const {
+        serverSeed: encryptedServerSeed,
+        clientSeed,
+        nonce,
+        iv,
+      } = activeGameSeed;
+      const serverSeed = decryptServerSeed(
+        encryptedServerSeed,
+        encryptionKey,
+        Buffer.from(iv, "hex"),
+      );
 
-      // const { serverSeed, clientSeed, nonce } = activeGameSeed;
+      const strikeNumber = generateGameResult(
+        serverSeed,
+        clientSeed,
+        nonce,
+        GameType.roulette2,
+      );
 
-      // const strikeNumber = generateGameResult(
-      //   serverSeed,
-      //   clientSeed,
-      //   nonce,
-      //   GameType.roulette2,
-      // );
+      let amountWon = new Decimal(0);
+      let result = "Lost";
 
-      // if (strikeNumber == null) throw new Error("Invalid strike number!");
+      let strikeMultiplier = new Decimal(0);
 
-      // let amountWon = new Decimal(0);
-      // let result = "Lost";
+      Object.entries(wager).forEach(([key, value]) => {
+        if (key === "straight") {
+          if (
+            (value as Record<string, number>)[strikeNumber.toString()] != null
+          ) {
+            let winAmount = Decimal.mul(
+              (value as Record<string, number>)[strikeNumber.toString()],
+              WagerPayout[key],
+            );
 
-      // Object.entries(wager).forEach(([key, value]) => {
-      //   if (key === "straight") {
-      //     if (
-      //       (value as Record<string, number>)[strikeNumber.toString()] != null
-      //     ) {
-      //       amountWon = amountWon.add(
-      //         Decimal.mul(
-      //           (value as Record<string, number>)[strikeNumber.toString()],
-      //           WagerPayout[key],
-      //         ),
-      //       );
-      //       result = "Won";
-      //     }
-      //   } else if (
-      //     (WagerMapping[key as WagerType] as Array<number>).includes(
-      //       strikeNumber,
-      //     )
-      //   ) {
-      //     amountWon = amountWon.add(
-      //       Decimal.mul(value as number, WagerPayout[key as WagerType]),
-      //     );
-      //     result = "Won";
-      //   }
-      // });
+            amountWon = amountWon.add(winAmount);
 
-      // amountWon = amountWon.mul(Decimal.sub(1, houseEdge));
-      // const amountLost = Math.max(Decimal.sub(amount, amountWon).toNumber(), 0);
+            result = "Won";
+            strikeMultiplier = winAmount.mul(WagerPayout[key]);
+          }
+        } else if (
+          (WagerMapping[key as WagerType] as Array<number>).includes(
+            strikeNumber,
+          )
+        ) {
+          let winAmount = Decimal.mul(
+            value as number,
+            WagerPayout[key as WagerType],
+          );
 
-      // const userUpdate = await User.findOneAndUpdate(
-      //   {
-      //     wallet,
-      //     deposit: {
-      //       $elemMatch: {
-      //         tokenMint,
-      //         amount: { $gte: amount },
-      //       },
-      //     },
-      //   },
-      //   {
-      //     $inc: {
-      //       "deposit.$.amount": amountWon.sub(amount),
-      //       numOfGamesPlayed: 1,
-      //     },
-      //   },
-      //   {
-      //     new: true,
-      //   },
-      // );
+          amountWon = amountWon.add(winAmount);
 
-      // if (!userUpdate) {
-      //   throw new Error("insufficient balance for bet!");
-      // }
+          result = "Won";
+          strikeMultiplier = winAmount.mul(WagerPayout[key as WagerType]);
+        }
+      });
 
-      // const roulette2 = new Roulette2({
-      //   wallet,
-      //   amount,
-      //   wager,
-      //   strikeNumber,
-      //   result,
-      //   tokenMint,
-      //   houseEdge,
-      //   amountWon,
-      //   amountLost,
-      //   nonce,
-      //   gameSeed: activeGameSeed._id,
-      // });
-      // await roulette2.save();
+      strikeMultiplier = Decimal.div(strikeMultiplier, amount);
 
-      // await updateGameStats(GameType.roulette2, wallet, amount, tokenMint);
+      const feeGenerated = Decimal.mul(amountWon, houseEdge).toNumber();
 
-      // const pointsGained =
-      //   0 * user.numOfGamesPlayed + 1.4 * amount * userData.multiplier;
+      amountWon = amountWon.mul(Decimal.sub(1, houseEdge));
+      const amountLost = Math.max(Decimal.sub(amount, amountWon).toNumber(), 0);
 
-      // const points = userData.points + pointsGained;
-      // const newTier = Object.entries(pointTiers).reduce((prev, next) => {
-      //   return points >= next[1]?.limit ? next : prev;
-      // })[0];
+      const addGame = !user.gamesPlayed.includes(GameType.roulette2);
 
-      // await StakingUser.findOneAndUpdate(
-      //   {
-      //     wallet,
-      //   },
-      //   {
-      //     $inc: {
-      //       points: pointsGained,
-      //     },
-      //     $set: {
-      //       tier: newTier,
-      //     },
-      //   },
-      // );
+      const userUpdate = await User.findOneAndUpdate(
+        {
+          wallet,
+          deposit: {
+            $elemMatch: {
+              tokenMint,
+              amount: { $gte: amount },
+            },
+          },
+        },
+        {
+          $inc: {
+            "deposit.$.amount": amountWon.sub(amount),
+            numOfGamesPlayed: 1,
+          },
+          ...(addGame
+            ? { $addToSet: { gamesPlayed: GameType.roulette2 } }
+            : {}),
+        },
+        {
+          new: true,
+        },
+      );
 
-      // const record = await Roulette2.populate(roulette2, "gameSeed");
-      // const { gameSeed, ...rest } = record.toObject();
-      // rest.game = GameType.roulette2;
-      // rest.userTier = parseInt(newTier);
-      // rest.gameSeed = { ...gameSeed, serverSeed: undefined };
+      if (!userUpdate) {
+        throw new Error("Insufficient balance for action!!");
+      }
 
-      // const payload = rest;
+      const roulette2 = new Roulette2({
+        wallet,
+        amount,
+        wager,
+        strikeNumber,
+        strikeMultiplier,
+        result,
+        tokenMint,
+        houseEdge,
+        amountWon,
+        amountLost,
+        nonce,
+        gameSeed: activeGameSeed._id,
+      });
+      await roulette2.save();
 
-      // const socket = new WebSocket(wsEndpoint);
+      await updateGameStats(
+        wallet,
+        GameType.roulette2,
+        tokenMint,
+        amount,
+        addGame,
+        feeGenerated
+      );
 
-      // socket.onopen = () => {
-      //   socket.send(
-      //     JSON.stringify({
-      //       clientType: "api-client",
-      //       channel: "fomo-casino_games-channel",
-      //       authKey: process.env.FOMO_CHANNEL_AUTH_KEY!,
-      //       payload,
-      //     }),
-      //   );
+      const pointsGained =
+        0 * user.numOfGamesPlayed + 1.4 * amount * userData.multiplier;
 
-      //   socket.close();
-      // };
+      const points = userData.points + pointsGained;
+      const newTier = Object.entries(pointTiers).reduce((prev, next) => {
+        return points >= next[1]?.limit ? next : prev;
+      })[0];
 
-      // return res.status(201).json({
-      //   success: true,
-      //   message:
-      //     result === "Won"
-      //       ? `Congratulations! You Won ${amountWon}`
-      //       : "Better luck next time!",
-      //   strikeNumber,
-      //   amountWon,
-      //   amountLost,
-      // });
+      await StakingUser.findOneAndUpdate(
+        {
+          wallet,
+        },
+        {
+          $inc: {
+            points: pointsGained,
+          },
+        },
+      );
+
+      const record = await Roulette2.populate(roulette2, "gameSeed");
+      const { gameSeed, ...rest } = record.toObject();
+      rest.game = GameType.roulette2;
+      rest.userTier = parseInt(newTier);
+      rest.gameSeed = { ...gameSeed, serverSeed: undefined };
+
+      const payload = rest;
+
+      const socket = new WebSocket(wsEndpoint);
+
+      socket.onopen = () => {
+        socket.send(
+          JSON.stringify({
+            clientType: "api-client",
+            channel: "fomo-casino_games-channel",
+            authKey: process.env.FOMO_CHANNEL_AUTH_KEY!,
+            payload,
+          }),
+        );
+
+        socket.close();
+      };
+
+      return res.status(201).json({
+        success: true,
+        message:
+          result === "Won"
+            ? `Congratulations! You Won ${amountWon}`
+            : "Better luck next time!",
+        strikeNumber,
+        result,
+        strikeMultiplier: strikeMultiplier.toNumber(),
+        amountWon: amountWon.toNumber(),
+        amountLost,
+      });
+      
     } catch (e: any) {
       console.log(e);
       return res.status(500).json({ success: false, message: e.message });
