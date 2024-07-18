@@ -26,6 +26,7 @@ import { SPL_TOKENS } from "@/context/config"; // Adjust the import path accordi
 import { soundAlert } from "@/utils/soundUtils";
 import ConfigureAutoButton from "@/components/ConfigureAutoButton";
 import AutoCount from "@/components/AutoCount";
+import { GameType } from "@/utils/provably-fair";
 
 function debounce<T extends (...args: any[]) => void>(
   func: T,
@@ -63,6 +64,7 @@ export default function Roulette1() {
     setUseAutoConfig,
     selectedCoin,
     enableSounds,
+    updatePNL,
     setLiveStats,
     liveStats,
     houseEdge,
@@ -225,7 +227,7 @@ export default function Roulette1() {
   const [hoveredColumn, setHoveredColumn] = useState<number[] | null>(null);
   const [resultNumbers, setResultNumbers] = useState<number[]>([]);
   const [refresh, setRefresh] = useState(true);
-  const [strikeMultiplier, setStrikeMultiplier] = useState<number>();
+  const [strikeMultiplier, setStrikeMultiplier] = useState<number>(1);
   const [spinComplete, setSpinComplete] = useState(false);
   const [num, setNum] = useState<number | null>(null);
   const ball = useRef<HTMLDivElement>(null);
@@ -463,7 +465,7 @@ export default function Roulette1() {
       setStartAuto(false);
       setAutoBetCount(0);
     } finally {
-      setBetInProgress(false); // Reset bet in progress
+      setBetInProgress(false);
     }
   };
 
@@ -475,12 +477,12 @@ export default function Roulette1() {
       } else {
         soundAlert("/sounds/lose.wav", !enableSounds);
         errorCustom(message);
-        setBetAmt(0);
-        clearBets();
+        /* setBetAmt(0);
+        clearBets(); */
       }
 
       num !== null && setResultNumbers((prevNumbers) => [...prevNumbers, num]);
-
+      updatePNL(GameType.roulette1, win, betAmt!, strikeMultiplier);
       setRefresh(true);
       setLoading(false);
       /* setLiveStats([

@@ -24,10 +24,10 @@ export default function LiveStats() {
   });
   const [hoverValue, setHoverValue] = useState<number | null>(null);
 
-  const games = ["All", ...Object.values(GameType)].filter(x => {
+  const games = ["All", ...Object.values(GameType)].filter((x) => {
     let g = ["hilo", "roulette1", "roulette2"];
     return !g.includes(x);
-  })
+  });
 
   useEffect(() => {
     if (liveCurrentStat === "All") {
@@ -80,7 +80,7 @@ export default function LiveStats() {
   return (
     <Draggable bounds="parent" handle=".handle">
       <div
-        className={`absolute m-4 w-[269px] h-[449px] bg-[#121418] border border-white/10 rounded-lg flex flex-col ${
+        className={`absolute m-4 w-[269px] h-[449px] bg-[#121418] border border-white/10 rounded-lg flex flex-col  ${
           showLiveStats ? "" : "hidden"
         }`}
         style={{
@@ -145,283 +145,287 @@ export default function LiveStats() {
 
         <div className="border border-white/10"></div>
 
-        <div className="flex flex-col grow p-4 relative select-none">
-          <div
-            className="w-full h-[41px] bg-[#202329] rounded-md cursor-pointer flex flex-row items-center justify-between p-3"
-            onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-          >
-            <h1 className="text-white text-[12px] font-chakra uppercase">
-              {translator(liveCurrentStat, language)}
-            </h1>
-            <svg
-              width="12"
-              height="7"
-              viewBox="0 0 12 7"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-              className={isDropdownOpen ? "rotate-180" : ""}
+        <div className="overflow-y-scroll no-scrollbar">
+          <div className="flex flex-col grow p-4 relative select-none">
+            <div
+              className="w-full h-[41px] bg-[#202329] rounded-md cursor-pointer flex flex-row items-center justify-between p-3"
+              onClick={() => setIsDropdownOpen(!isDropdownOpen)}
             >
-              <path
-                d="M5.46967 6.53043C5.76256 6.82332 6.23744 6.82332 6.53033 6.53043L11.3033 1.75746C11.5962 1.46457 11.5962 0.989692 11.3033 0.696799C11.0104 0.403906 10.5355 0.403906 10.2426 0.696799L6 4.93944L1.75736 0.696799C1.46447 0.403906 0.989593 0.403906 0.696699 0.696799C0.403806 0.989692 0.403806 1.46457 0.696699 1.75746L5.46967 6.53043ZM5.25 6V6.0001H6.75V6H5.25Z"
-                fill="white"
-              />
-            </svg>
-          </div>
+              <h1 className="text-white text-[12px] font-chakra uppercase">
+                {translator(liveCurrentStat, language)}
+              </h1>
+              <svg
+                width="12"
+                height="7"
+                viewBox="0 0 12 7"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+                className={isDropdownOpen ? "rotate-180" : ""}
+              >
+                <path
+                  d="M5.46967 6.53043C5.76256 6.82332 6.23744 6.82332 6.53033 6.53043L11.3033 1.75746C11.5962 1.46457 11.5962 0.989692 11.3033 0.696799C11.0104 0.403906 10.5355 0.403906 10.2426 0.696799L6 4.93944L1.75736 0.696799C1.46447 0.403906 0.989593 0.403906 0.696699 0.696799C0.403806 0.989692 0.403806 1.46457 0.696699 1.75746L5.46967 6.53043ZM5.25 6V6.0001H6.75V6H5.25Z"
+                  fill="white"
+                />
+              </svg>
+            </div>
 
-          {isDropdownOpen && (
-            <div className="absolute w-[89%] mt-12 p-2 max-h-40 bg-[#202329] border-2 border-white border-opacity-5 rounded-md overflow-y-auto modalscrollbar">
-              {games.map((game, index) => (
-                <div
-                  key={index}
-                  className="w-full h-8 flex flex-row items-center justify-between p-3 cursor-pointer hover:bg-[#30363D] rounded-md"
-                  onClick={() => {
-                    setLiveCurrentStat(game as GameType);
-                    setIsDropdownOpen(false);
-                  }}
-                >
-                  <h1 className="text-white text-[12px] font-chakra uppercase">
-                    {translator(game, language)}
-                  </h1>
+            {isDropdownOpen && (
+              <div className="absolute w-[89%] mt-12 p-2 max-h-40 bg-[#202329] border-2 border-white border-opacity-5 rounded-md overflow-y-auto modalscrollbar">
+                {games.map((game, index) => (
+                  <div
+                    key={index}
+                    className="w-full h-8 flex flex-row items-center justify-between p-3 cursor-pointer hover:bg-[#30363D] rounded-md"
+                    onClick={() => {
+                      setLiveCurrentStat(game as GameType);
+                      setIsDropdownOpen(false);
+                    }}
+                  >
+                    <h1 className="text-white text-[12px] font-chakra uppercase">
+                      {translator(game, language)}
+                    </h1>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            <div className="w-full flex flex-row mt-3">
+              <div className="w-1/2 flex flex-col bg-[#202329] rounded-lg p-2 mr-1">
+                <div className="text-[10px] text-[#94A3B8] font-chakra text-left">
+                  {translator("Wagered", language)}
                 </div>
-              ))}
-            </div>
-          )}
+                <div className="text-white text-[12px] font-chakra flex flex-row items-center justify-end">
+                  <span>{data.wagered.toFixed(4)}</span>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="14"
+                    height="14"
+                    viewBox="0 0 14 14"
+                    fill="none"
+                    className="ml-1 -mt-0.5"
+                  >
+                    <g opacity="0.5">
+                      <path
+                        d="M7 12.25C9.8995 12.25 12.25 9.8995 12.25 7C12.25 4.10051 9.8995 1.75 7 1.75C4.10051 1.75 1.75 4.10051 1.75 7C1.75 9.8995 4.10051 12.25 7 12.25Z"
+                        stroke="#F0F0F0"
+                        strokeWidth="0.5"
+                      />
+                      <path
+                        d="M6.12405 10.3906C5.37119 10.1979 4.70389 9.76001 4.22737 9.1461C3.75084 8.5322 3.49219 7.77715 3.49219 7C3.49219 6.22285 3.75084 5.4678 4.22737 4.8539C4.70389 4.23999 5.37119 3.80214 6.12405 3.60938"
+                        stroke="#F0F0F0"
+                        strokeWidth="0.5"
+                      />
+                      <path
+                        d="M7.875 3.60938C8.62786 3.80214 9.29516 4.23999 9.77168 4.8539C10.2482 5.4678 10.5069 6.22285 10.5069 7C10.5069 7.77715 10.2482 8.5322 9.77168 9.1461C9.29516 9.76001 8.62786 10.1979 7.875 10.3906"
+                        stroke="#F0F0F0"
+                        strokeWidth="0.5"
+                      />
+                      <path
+                        d="M6.5625 7C6.33044 7 6.10788 6.90781 5.94378 6.74372C5.77969 6.57962 5.6875 6.35706 5.6875 6.125C5.6875 5.89294 5.77969 5.67038 5.94378 5.50628C6.10788 5.34219 6.33044 5.25 6.5625 5.25"
+                        stroke="#F0F0F0"
+                        strokeWidth="0.5"
+                      />
+                      <path
+                        d="M7.4375 7C7.66956 7 7.89212 7.09219 8.05622 7.25628C8.22031 7.42038 8.3125 7.64294 8.3125 7.875C8.3125 8.10706 8.22031 8.32962 8.05622 8.49372C7.89212 8.65781 7.66956 8.75 7.4375 8.75"
+                        stroke="#F0F0F0"
+                        strokeWidth="0.5"
+                      />
+                      <path
+                        d="M7 4.375V5.25"
+                        stroke="#F0F0F0"
+                        strokeWidth="0.5"
+                      />
+                      <path
+                        d="M7 8.75V9.625"
+                        stroke="#F0F0F0"
+                        strokeWidth="0.5"
+                      />
+                      <path
+                        d="M6.5625 7H7.4375"
+                        stroke="#F0F0F0"
+                        strokeWidth="0.5"
+                      />
+                      <path
+                        d="M8.3125 5.6875C8.3125 5.6875 7.875 5.25 7.4375 5.25H6.5625"
+                        stroke="#F0F0F0"
+                        strokeWidth="0.5"
+                      />
+                      <path
+                        d="M5.6875 8.3125C5.6875 8.3125 6.125 8.75 6.5625 8.75H7.4375"
+                        stroke="#F0F0F0"
+                        strokeWidth="0.5"
+                      />
+                    </g>
+                  </svg>
+                </div>
+              </div>
 
-          <div className="w-full flex flex-row mt-3">
-            <div className="w-1/2 flex flex-col bg-[#202329] rounded-lg p-2 mr-1">
-              <div className="text-[10px] text-[#94A3B8] font-chakra text-left">
-                {translator("Wagered", language)}
-              </div>
-              <div className="text-white text-[12px] font-chakra flex flex-row items-center justify-end">
-                <span>{data.wagered.toFixed(4)}</span>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="14"
-                  height="14"
-                  viewBox="0 0 14 14"
-                  fill="none"
-                  className="ml-1 -mt-0.5"
-                >
-                  <g opacity="0.5">
-                    <path
-                      d="M7 12.25C9.8995 12.25 12.25 9.8995 12.25 7C12.25 4.10051 9.8995 1.75 7 1.75C4.10051 1.75 1.75 4.10051 1.75 7C1.75 9.8995 4.10051 12.25 7 12.25Z"
-                      stroke="#F0F0F0"
-                      strokeWidth="0.5"
-                    />
-                    <path
-                      d="M6.12405 10.3906C5.37119 10.1979 4.70389 9.76001 4.22737 9.1461C3.75084 8.5322 3.49219 7.77715 3.49219 7C3.49219 6.22285 3.75084 5.4678 4.22737 4.8539C4.70389 4.23999 5.37119 3.80214 6.12405 3.60938"
-                      stroke="#F0F0F0"
-                      strokeWidth="0.5"
-                    />
-                    <path
-                      d="M7.875 3.60938C8.62786 3.80214 9.29516 4.23999 9.77168 4.8539C10.2482 5.4678 10.5069 6.22285 10.5069 7C10.5069 7.77715 10.2482 8.5322 9.77168 9.1461C9.29516 9.76001 8.62786 10.1979 7.875 10.3906"
-                      stroke="#F0F0F0"
-                      strokeWidth="0.5"
-                    />
-                    <path
-                      d="M6.5625 7C6.33044 7 6.10788 6.90781 5.94378 6.74372C5.77969 6.57962 5.6875 6.35706 5.6875 6.125C5.6875 5.89294 5.77969 5.67038 5.94378 5.50628C6.10788 5.34219 6.33044 5.25 6.5625 5.25"
-                      stroke="#F0F0F0"
-                      strokeWidth="0.5"
-                    />
-                    <path
-                      d="M7.4375 7C7.66956 7 7.89212 7.09219 8.05622 7.25628C8.22031 7.42038 8.3125 7.64294 8.3125 7.875C8.3125 8.10706 8.22031 8.32962 8.05622 8.49372C7.89212 8.65781 7.66956 8.75 7.4375 8.75"
-                      stroke="#F0F0F0"
-                      strokeWidth="0.5"
-                    />
-                    <path
-                      d="M7 4.375V5.25"
-                      stroke="#F0F0F0"
-                      strokeWidth="0.5"
-                    />
-                    <path
-                      d="M7 8.75V9.625"
-                      stroke="#F0F0F0"
-                      strokeWidth="0.5"
-                    />
-                    <path
-                      d="M6.5625 7H7.4375"
-                      stroke="#F0F0F0"
-                      strokeWidth="0.5"
-                    />
-                    <path
-                      d="M8.3125 5.6875C8.3125 5.6875 7.875 5.25 7.4375 5.25H6.5625"
-                      stroke="#F0F0F0"
-                      strokeWidth="0.5"
-                    />
-                    <path
-                      d="M5.6875 8.3125C5.6875 8.3125 6.125 8.75 6.5625 8.75H7.4375"
-                      stroke="#F0F0F0"
-                      strokeWidth="0.5"
-                    />
-                  </g>
-                </svg>
-              </div>
-            </div>
-
-            <div className="w-1/2 flex flex-col bg-[#202329] rounded-lg p-2 ml-1">
-              <div className="text-[10px] text-[#94A3B8] font-chakra text-left">
-                {translator("Profit", language)}
-              </div>
-              <div className="text-white text-[12px] font-chakra flex flex-row items-center justify-end">
-                <span
-                  className={data.pnl > 0 ? "text-[#72F238]" : "text-[#F1323E]"}
-                >
-                  {data.pnl > 0 ? "+" : ""}
-                  {data.pnl.toFixed(4)}
-                </span>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="14"
-                  height="14"
-                  viewBox="0 0 14 14"
-                  fill="none"
-                  className="ml-1 -mt-0.5"
-                >
-                  <g opacity="0.5">
-                    <path
-                      d="M7 12.25C9.8995 12.25 12.25 9.8995 12.25 7C12.25 4.10051 9.8995 1.75 7 1.75C4.10051 1.75 1.75 4.10051 1.75 7C1.75 9.8995 4.10051 12.25 7 12.25Z"
-                      stroke="#F0F0F0"
-                      strokeWidth="0.5"
-                    />
-                    <path
-                      d="M6.12405 10.3906C5.37119 10.1979 4.70389 9.76001 4.22737 9.1461C3.75084 8.5322 3.49219 7.77715 3.49219 7C3.49219 6.22285 3.75084 5.4678 4.22737 4.8539C4.70389 4.23999 5.37119 3.80214 6.12405 3.60938"
-                      stroke="#F0F0F0"
-                      strokeWidth="0.5"
-                    />
-                    <path
-                      d="M7.875 3.60938C8.62786 3.80214 9.29516 4.23999 9.77168 4.8539C10.2482 5.4678 10.5069 6.22285 10.5069 7C10.5069 7.77715 10.2482 8.5322 9.77168 9.1461C9.29516 9.76001 8.62786 10.1979 7.875 10.3906"
-                      stroke="#F0F0F0"
-                      strokeWidth="0.5"
-                    />
-                    <path
-                      d="M6.5625 7C6.33044 7 6.10788 6.90781 5.94378 6.74372C5.77969 6.57962 5.6875 6.35706 5.6875 6.125C5.6875 5.89294 5.77969 5.67038 5.94378 5.50628C6.10788 5.34219 6.33044 5.25 6.5625 5.25"
-                      stroke="#F0F0F0"
-                      strokeWidth="0.5"
-                    />
-                    <path
-                      d="M7.4375 7C7.66956 7 7.89212 7.09219 8.05622 7.25628C8.22031 7.42038 8.3125 7.64294 8.3125 7.875C8.3125 8.10706 8.22031 8.32962 8.05622 8.49372C7.89212 8.65781 7.66956 8.75 7.4375 8.75"
-                      stroke="#F0F0F0"
-                      strokeWidth="0.5"
-                    />
-                    <path
-                      d="M7 4.375V5.25"
-                      stroke="#F0F0F0"
-                      strokeWidth="0.5"
-                    />
-                    <path
-                      d="M7 8.75V9.625"
-                      stroke="#F0F0F0"
-                      strokeWidth="0.5"
-                    />
-                    <path
-                      d="M6.5625 7H7.4375"
-                      stroke="#F0F0F0"
-                      strokeWidth="0.5"
-                    />
-                    <path
-                      d="M8.3125 5.6875C8.3125 5.6875 7.875 5.25 7.4375 5.25H6.5625"
-                      stroke="#F0F0F0"
-                      strokeWidth="0.5"
-                    />
-                    <path
-                      d="M5.6875 8.3125C5.6875 8.3125 6.125 8.75 6.5625 8.75H7.4375"
-                      stroke="#F0F0F0"
-                      strokeWidth="0.5"
-                    />
-                  </g>
-                </svg>
-              </div>
-            </div>
-          </div>
-
-          <div className="w-full flex flex-row mt-3">
-            <div className="w-1/2 flex flex-col bg-[#202329] rounded-lg p-2 mr-1">
-              <div className="text-[10px] text-[#94A3B8] font-chakra text-left">
-                {translator("Wins", language)}
-              </div>
-              <div className="text-[12px] font-chakra flex flex-row items-center justify-end text-[#72F238]">
-                {data.wins}
+              <div className="w-1/2 flex flex-col bg-[#202329] rounded-lg p-2 ml-1">
+                <div className="text-[10px] text-[#94A3B8] font-chakra text-left">
+                  {translator("Profit", language)}
+                </div>
+                <div className="text-white text-[12px] font-chakra flex flex-row items-center justify-end">
+                  <span
+                    className={
+                      data.pnl > 0 ? "text-[#72F238]" : "text-[#F1323E]"
+                    }
+                  >
+                    {data.pnl > 0 ? "+" : ""}
+                    {data.pnl.toFixed(4)}
+                  </span>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="14"
+                    height="14"
+                    viewBox="0 0 14 14"
+                    fill="none"
+                    className="ml-1 -mt-0.5"
+                  >
+                    <g opacity="0.5">
+                      <path
+                        d="M7 12.25C9.8995 12.25 12.25 9.8995 12.25 7C12.25 4.10051 9.8995 1.75 7 1.75C4.10051 1.75 1.75 4.10051 1.75 7C1.75 9.8995 4.10051 12.25 7 12.25Z"
+                        stroke="#F0F0F0"
+                        strokeWidth="0.5"
+                      />
+                      <path
+                        d="M6.12405 10.3906C5.37119 10.1979 4.70389 9.76001 4.22737 9.1461C3.75084 8.5322 3.49219 7.77715 3.49219 7C3.49219 6.22285 3.75084 5.4678 4.22737 4.8539C4.70389 4.23999 5.37119 3.80214 6.12405 3.60938"
+                        stroke="#F0F0F0"
+                        strokeWidth="0.5"
+                      />
+                      <path
+                        d="M7.875 3.60938C8.62786 3.80214 9.29516 4.23999 9.77168 4.8539C10.2482 5.4678 10.5069 6.22285 10.5069 7C10.5069 7.77715 10.2482 8.5322 9.77168 9.1461C9.29516 9.76001 8.62786 10.1979 7.875 10.3906"
+                        stroke="#F0F0F0"
+                        strokeWidth="0.5"
+                      />
+                      <path
+                        d="M6.5625 7C6.33044 7 6.10788 6.90781 5.94378 6.74372C5.77969 6.57962 5.6875 6.35706 5.6875 6.125C5.6875 5.89294 5.77969 5.67038 5.94378 5.50628C6.10788 5.34219 6.33044 5.25 6.5625 5.25"
+                        stroke="#F0F0F0"
+                        strokeWidth="0.5"
+                      />
+                      <path
+                        d="M7.4375 7C7.66956 7 7.89212 7.09219 8.05622 7.25628C8.22031 7.42038 8.3125 7.64294 8.3125 7.875C8.3125 8.10706 8.22031 8.32962 8.05622 8.49372C7.89212 8.65781 7.66956 8.75 7.4375 8.75"
+                        stroke="#F0F0F0"
+                        strokeWidth="0.5"
+                      />
+                      <path
+                        d="M7 4.375V5.25"
+                        stroke="#F0F0F0"
+                        strokeWidth="0.5"
+                      />
+                      <path
+                        d="M7 8.75V9.625"
+                        stroke="#F0F0F0"
+                        strokeWidth="0.5"
+                      />
+                      <path
+                        d="M6.5625 7H7.4375"
+                        stroke="#F0F0F0"
+                        strokeWidth="0.5"
+                      />
+                      <path
+                        d="M8.3125 5.6875C8.3125 5.6875 7.875 5.25 7.4375 5.25H6.5625"
+                        stroke="#F0F0F0"
+                        strokeWidth="0.5"
+                      />
+                      <path
+                        d="M5.6875 8.3125C5.6875 8.3125 6.125 8.75 6.5625 8.75H7.4375"
+                        stroke="#F0F0F0"
+                        strokeWidth="0.5"
+                      />
+                    </g>
+                  </svg>
+                </div>
               </div>
             </div>
 
-            <div className="w-1/2 flex flex-col bg-[#202329] rounded-lg p-2 ml-1">
-              <div className="text-[10px] text-[#94A3B8] font-chakra text-left">
-                {translator("Losses", language)}
+            <div className="w-full flex flex-row mt-3">
+              <div className="w-1/2 flex flex-col bg-[#202329] rounded-lg p-2 mr-1">
+                <div className="text-[10px] text-[#94A3B8] font-chakra text-left">
+                  {translator("Wins", language)}
+                </div>
+                <div className="text-[12px] font-chakra flex flex-row items-center justify-end text-[#72F238]">
+                  {data.wins}
+                </div>
               </div>
-              <div className="text-[12px] font-chakra flex flex-row items-center justify-end text-[#F1323E]">
-                {data.losses}
+
+              <div className="w-1/2 flex flex-col bg-[#202329] rounded-lg p-2 ml-1">
+                <div className="text-[10px] text-[#94A3B8] font-chakra text-left">
+                  {translator("Losses", language)}
+                </div>
+                <div className="text-[12px] font-chakra flex flex-row items-center justify-end text-[#F1323E]">
+                  {data.losses}
+                </div>
               </div>
             </div>
           </div>
-        </div>
 
-        <div className="bg-[#202329] grow m-4 mt-0 rounded-lg flex flex-col p-3">
-          <div className="text-white text-[12px] font-chakra flex flex-row items-center justify-start">
-            <span
-              className={
-                (hoverValue ? hoverValue : data.pnl) > 0
-                  ? "text-[#72F238]"
-                  : "text-[#F1323E]"
-              }
-            >
-              {(hoverValue ? hoverValue : data.pnl) > 0 ? "+" : ""}
-              {(hoverValue ? hoverValue : data.pnl).toFixed(4)}
-            </span>
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="14"
-              height="14"
-              viewBox="0 0 14 14"
-              fill="none"
-              className="ml-1"
-            >
-              <g opacity="0.5">
-                <path
-                  d="M7 12.25C9.8995 12.25 12.25 9.8995 12.25 7C12.25 4.10051 9.8995 1.75 7 1.75C4.10051 1.75 1.75 4.10051 1.75 7C1.75 9.8995 4.10051 12.25 7 12.25Z"
-                  stroke="#F0F0F0"
-                  strokeWidth="0.5"
-                />
-                <path
-                  d="M6.12405 10.3906C5.37119 10.1979 4.70389 9.76001 4.22737 9.1461C3.75084 8.5322 3.49219 7.77715 3.49219 7C3.49219 6.22285 3.75084 5.4678 4.22737 4.8539C4.70389 4.23999 5.37119 3.80214 6.12405 3.60938"
-                  stroke="#F0F0F0"
-                  strokeWidth="0.5"
-                />
-                <path
-                  d="M7.875 3.60938C8.62786 3.80214 9.29516 4.23999 9.77168 4.8539C10.2482 5.4678 10.5069 6.22285 10.5069 7C10.5069 7.77715 10.2482 8.5322 9.77168 9.1461C9.29516 9.76001 8.62786 10.1979 7.875 10.3906"
-                  stroke="#F0F0F0"
-                  strokeWidth="0.5"
-                />
-                <path
-                  d="M6.5625 7C6.33044 7 6.10788 6.90781 5.94378 6.74372C5.77969 6.57962 5.6875 6.35706 5.6875 6.125C5.6875 5.89294 5.77969 5.67038 5.94378 5.50628C6.10788 5.34219 6.33044 5.25 6.5625 5.25"
-                  stroke="#F0F0F0"
-                  strokeWidth="0.5"
-                />
-                <path
-                  d="M7.4375 7C7.66956 7 7.89212 7.09219 8.05622 7.25628C8.22031 7.42038 8.3125 7.64294 8.3125 7.875C8.3125 8.10706 8.22031 8.32962 8.05622 8.49372C7.89212 8.65781 7.66956 8.75 7.4375 8.75"
-                  stroke="#F0F0F0"
-                  strokeWidth="0.5"
-                />
-                <path d="M7 4.375V5.25" stroke="#F0F0F0" strokeWidth="0.5" />
-                <path d="M7 8.75V9.625" stroke="#F0F0F0" strokeWidth="0.5" />
-                <path
-                  d="M6.5625 7H7.4375"
-                  stroke="#F0F0F0"
-                  strokeWidth="0.5"
-                />
-                <path
-                  d="M8.3125 5.6875C8.3125 5.6875 7.875 5.25 7.4375 5.25H6.5625"
-                  stroke="#F0F0F0"
-                  strokeWidth="0.5"
-                />
-                <path
-                  d="M5.6875 8.3125C5.6875 8.3125 6.125 8.75 6.5625 8.75H7.4375"
-                  stroke="#F0F0F0"
-                  strokeWidth="0.5"
-                />
-              </g>
-            </svg>
+          <div className="bg-[#202329] grow m-4 mt-0 rounded-lg flex flex-col p-3 ">
+            <div className="text-white text-[12px] font-chakra flex flex-row items-center justify-start">
+              <span
+                className={
+                  (hoverValue ? hoverValue : data.pnl) > 0
+                    ? "text-[#72F238]"
+                    : "text-[#F1323E]"
+                }
+              >
+                {(hoverValue ? hoverValue : data.pnl) > 0 ? "+" : ""}
+                {(hoverValue ? hoverValue : data.pnl).toFixed(4)}
+              </span>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="14"
+                height="14"
+                viewBox="0 0 14 14"
+                fill="none"
+                className="ml-1"
+              >
+                <g opacity="0.5">
+                  <path
+                    d="M7 12.25C9.8995 12.25 12.25 9.8995 12.25 7C12.25 4.10051 9.8995 1.75 7 1.75C4.10051 1.75 1.75 4.10051 1.75 7C1.75 9.8995 4.10051 12.25 7 12.25Z"
+                    stroke="#F0F0F0"
+                    strokeWidth="0.5"
+                  />
+                  <path
+                    d="M6.12405 10.3906C5.37119 10.1979 4.70389 9.76001 4.22737 9.1461C3.75084 8.5322 3.49219 7.77715 3.49219 7C3.49219 6.22285 3.75084 5.4678 4.22737 4.8539C4.70389 4.23999 5.37119 3.80214 6.12405 3.60938"
+                    stroke="#F0F0F0"
+                    strokeWidth="0.5"
+                  />
+                  <path
+                    d="M7.875 3.60938C8.62786 3.80214 9.29516 4.23999 9.77168 4.8539C10.2482 5.4678 10.5069 6.22285 10.5069 7C10.5069 7.77715 10.2482 8.5322 9.77168 9.1461C9.29516 9.76001 8.62786 10.1979 7.875 10.3906"
+                    stroke="#F0F0F0"
+                    strokeWidth="0.5"
+                  />
+                  <path
+                    d="M6.5625 7C6.33044 7 6.10788 6.90781 5.94378 6.74372C5.77969 6.57962 5.6875 6.35706 5.6875 6.125C5.6875 5.89294 5.77969 5.67038 5.94378 5.50628C6.10788 5.34219 6.33044 5.25 6.5625 5.25"
+                    stroke="#F0F0F0"
+                    strokeWidth="0.5"
+                  />
+                  <path
+                    d="M7.4375 7C7.66956 7 7.89212 7.09219 8.05622 7.25628C8.22031 7.42038 8.3125 7.64294 8.3125 7.875C8.3125 8.10706 8.22031 8.32962 8.05622 8.49372C7.89212 8.65781 7.66956 8.75 7.4375 8.75"
+                    stroke="#F0F0F0"
+                    strokeWidth="0.5"
+                  />
+                  <path d="M7 4.375V5.25" stroke="#F0F0F0" strokeWidth="0.5" />
+                  <path d="M7 8.75V9.625" stroke="#F0F0F0" strokeWidth="0.5" />
+                  <path
+                    d="M6.5625 7H7.4375"
+                    stroke="#F0F0F0"
+                    strokeWidth="0.5"
+                  />
+                  <path
+                    d="M8.3125 5.6875C8.3125 5.6875 7.875 5.25 7.4375 5.25H6.5625"
+                    stroke="#F0F0F0"
+                    strokeWidth="0.5"
+                  />
+                  <path
+                    d="M5.6875 8.3125C5.6875 8.3125 6.125 8.75 6.5625 8.75H7.4375"
+                    stroke="#F0F0F0"
+                    strokeWidth="0.5"
+                  />
+                </g>
+              </svg>
+            </div>
+            <LiveGraph setHoverValue={setHoverValue} />
           </div>
-          <LiveGraph setHoverValue={setHoverValue} />
         </div>
       </div>
     </Draggable>
