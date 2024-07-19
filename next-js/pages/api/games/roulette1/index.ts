@@ -193,7 +193,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       if (!user)
         return res
           .status(400)
-          .json({ success: false, message: "User does not exist !" });
+          .json({ success: false, message: "User does not exist!" });
 
     /*   if (
         user.deposit.find((d: any) => d.tokenMint === tokenMint)?.amount <
@@ -329,7 +329,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       );
 
       if (!userUpdate) {
-        throw new Error("Insufficient balance for action!!");
+        throw new Error("Insufficient balance for bet!");
       }
 
       const roulette1 = new Roulette1({
@@ -403,8 +403,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         success: true,
         message:
           result === "Won"
-            ? `Congratulations! You Won ${amountWon}`
-            : "Better luck next time!",
+            ? `Congratulations! You won${amountWon}`
+            : "Sorry, Better luck next time!",
         strikeNumber,
         result,
         strikeMultiplier: strikeMultiplier.toNumber(),

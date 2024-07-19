@@ -467,7 +467,7 @@ export default function Roulette1() {
         e instanceof Error
           ? e.message
           : translator("Could not make bet.", language);
-      errorCustom(errorMessage);
+      errorCustom(translator(errorMessage, language));
       setLoading(false);
       setStartAuto(false);
       setAutoBetCount(0);
@@ -479,14 +479,15 @@ export default function Roulette1() {
   useEffect(() => {
     if (spinComplete && result !== null) {
       if (win) {
+        const [text, amount] = message.split(/(\d+\.\d{6})/);
         soundAlert("/sounds/win.wav", !enableSounds);
+        console.log(text)
         successCustom(
-          translator(`Congratulations! You won`, language) +
-            ` ${formatNumber(amountWon)} ${selectedCoin.tokenName}`,
+          translator(text, language) + ` ${amount} ${selectedCoin.tokenName}`,
         );
       } else {
         soundAlert("/sounds/lose.wav", !enableSounds);
-        errorCustom(translator("Sorry, Better luck next time!", language));
+        errorCustom(translator(message, language));
         setBetAmt(0);
         clearBets();
       }
@@ -580,7 +581,15 @@ export default function Roulette1() {
     const minBetAmt = minBetAmounts[selectedTokenName];
 
     if (betAmt < minBetAmt) {
-      errorCustom(translator("Bet above minimum amount.", language));
+      errorCustom(
+        translator(
+          `Minimum bet amount for` +
+            ` ${selectedTokenName}` +
+            ` is` +
+            ` ${minBetAmt}.`,
+          language,
+        ),
+      );
       return;
     }
 
@@ -818,7 +827,9 @@ export default function Roulette1() {
       const areaId = `column-${columnNumbers.join("-")}`;
       handlePlaceBet(areaId, token);
     } else {
-      errorCustom("Please select a token before placing a bet.");
+      errorCustom(
+        translator("Please select a token before placing a bet.", language),
+      );
     }
   };
   /*   const handlePlaceCornerBetWithTwoColumns = (
@@ -1080,7 +1091,7 @@ export default function Roulette1() {
       case 2:
         return "3rd-column";
       default:
-        throw new Error("Invalid row index");
+        throw new Error(translator("Invalid row index", language));
     }
   };
   const ResultDisplay = ({ numbers }: { numbers: number[] }) => {
@@ -1160,7 +1171,9 @@ export default function Roulette1() {
                 onSubmit={methods.handleSubmit(onSubmit)}
               >
                 <div className="mb-4">
-                  <h3 className="text-white/90 font-changa">Chip Value</h3>
+                  <h3 className="text-white/90 font-changa">
+                    {translator("Chip Value", language)}
+                  </h3>
                   <div className="grid grid-cols-6 gap-2 mt-2">
                     {tokens.map((chip) => (
                       <div
@@ -1301,7 +1314,9 @@ export default function Roulette1() {
                   height={20}
                   alt="undo"
                 />
-                <p className="font-sans text-[16px]">Undo</p>
+                <p className="font-sans text-[16px]">
+                  {translator("Undo", language)}
+                </p>
               </div>
               <div
                 className="hidden sm:flex items-center cursor-pointer hover:opacity-90"
@@ -1313,7 +1328,9 @@ export default function Roulette1() {
                   height={20}
                   alt="clear"
                 />
-                <p className="font-sans text-[16px]">Clear</p>
+                <p className="font-sans text-[16px]">
+                  {translator("Clear", language)}
+                </p>
               </div>
             </div>
             <div className="flex flex-col    h-[415px] sm:h-[256px] w-full  text-[12px] sm:text-[16px]  itmes-start  gap-1 sm:gap-0 ">
@@ -1634,7 +1651,8 @@ export default function Roulette1() {
                         );
                       }}
                     >
-                      {/* w-[117px] h-[40px] */}1 to 12
+                      {/* w-[117px] h-[40px] */}1 {translator("to", language)}{" "}
+                      12
                       {renderRegularToken("1st-12")}
                     </button>
                     <button
@@ -1651,7 +1669,7 @@ export default function Roulette1() {
                       }}
                     >
                       {/* w-[117px] h-[40px] */}
-                      13 to 24
+                      13 {translator("to", language)} 24
                       {renderRegularToken("2nd-12")}
                     </button>
                     <button
@@ -1669,7 +1687,7 @@ export default function Roulette1() {
                       }}
                     >
                       {/*  w-[117px] h-[40px]*/}
-                      25 to 36
+                      25 {translator("to", language)} 36
                       {renderRegularToken("3rd-12")}
                     </button>
                   </div>
@@ -1687,7 +1705,7 @@ export default function Roulette1() {
                         );
                       }}
                     >
-                      {/* w-[57px] h-[40px] */}1 to 18
+                      {/* w-[57px] h-[40px] */}1 {translator("to", language)} 18
                       {renderRegularToken("low")}
                     </button>
                     <button
@@ -1704,7 +1722,7 @@ export default function Roulette1() {
                       }}
                     >
                       {/*  w-[57px] h-[40px]*/}
-                      Even
+                      {translator("Even", language)}
                       {renderRegularToken("even")}
                     </button>
                     <button
@@ -1752,7 +1770,7 @@ export default function Roulette1() {
                       }}
                     >
                       {/*  w-[57px] h-[40px]*/}
-                      Odd
+                      {translator("Odd", language)}
                       {renderRegularToken("odd")}
                     </button>
                     <button
@@ -1769,7 +1787,7 @@ export default function Roulette1() {
                       }}
                     >
                       {/* w-[57px] h-[40px] */}
-                      19 to 36
+                      19 {translator("to", language)} 36
                       {renderRegularToken("high")}
                     </button>
                   </div>
