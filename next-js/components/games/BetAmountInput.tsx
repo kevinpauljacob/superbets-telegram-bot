@@ -276,7 +276,7 @@ export default function BetAmount({
       (game === "mines" ||
         game === "keno" ||
         game === "wheel" ||
-        game === "roulette1" ||
+        game === "roulette" ||
         game === "coinflip" ||
         game === "options" ||
         game === "plinko") ? (

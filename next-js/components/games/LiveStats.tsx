@@ -2,8 +2,8 @@ import Draggable from "react-draggable";
 import { useGlobalContext } from "../GlobalContext";
 import { useEffect, useState } from "react";
 import { GameType } from "@/utils/provably-fair";
-import LiveGraph from "./LiveGraph";
 import { translator } from "@/context/transactions";
+import LiveGraph from "./LiveGraph";
 
 export default function LiveStats() {
   const {
@@ -13,7 +13,7 @@ export default function LiveStats() {
     setLiveCurrentStat,
     liveStats,
     setLiveStats,
-    language,
+    language
   } = useGlobalContext();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [data, setData] = useState({
@@ -31,13 +31,12 @@ export default function LiveStats() {
 
   useEffect(() => {
     if (liveCurrentStat === "All") {
-      if (liveStats.length === 0)
-        return setData({
-          wagered: 0,
-          pnl: 0,
-          wins: 0,
-          losses: 0,
-        });
+      if (liveStats.length === 0) return setData({
+        wagered: 0,
+        pnl: 0,
+        wins: 0,
+        losses: 0,
+      });
 
       const wagered = liveStats.reduce((acc, curr) => acc + curr.amount, 0);
       const pnl = liveStats.reduce((acc, curr) => acc + curr.pnl, 0);
@@ -167,6 +166,7 @@ export default function LiveStats() {
                   fill="white"
                 />
               </svg>
+
             </div>
 
             {isDropdownOpen && (
@@ -187,7 +187,6 @@ export default function LiveStats() {
                 ))}
               </div>
             )}
-
             <div className="w-full flex flex-row mt-3">
               <div className="w-1/2 flex flex-col bg-[#202329] rounded-lg p-2 mr-1">
                 <div className="text-[10px] text-[#94A3B8] font-chakra text-left">

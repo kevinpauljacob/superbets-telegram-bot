@@ -75,8 +75,6 @@ export default function LiveGraph({ setHoverValue }: { setHoverValue: (value: nu
 
     return (
       <ResponsiveContainer
-        width="100%"
-        height={400}
         style={{ borderRadius: "10px" }}
       >
         <AreaChart data={combinedData}>

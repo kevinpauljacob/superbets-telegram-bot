@@ -266,7 +266,7 @@ export default function Dice2ProvablyFairModal({
                   <div className="grid w-full text-white">
                     <div className="grid gap-2">
                       <div
-                        className={`md:px-8 py-2 mt-6 px-4  pt-7 border-2 border-white border-opacity-5 rounded-md ${selectedGameType === GameType.roulette1 ? "w-full h-[480px] flex items-center " : ""}`}
+                        className={`md:px-8 py-2 mt-6 px-4  pt-7 border-2 border-white border-opacity-5 rounded-md${selectedGameType === GameType.roulette1 || selectedGameType === GameType.roulette2 ? "w-full h-[480px] flex items-center " : ""}`}
                       >
                         <ProvablyFairModal
                           verificationState={verificationState}

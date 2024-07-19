@@ -39,16 +39,20 @@ import { soundAlert } from "@/utils/soundUtils";
 import VerifyRoulette1Modal, {
   Roulette1,
 } from "./games/roulette1/VerifyRoulette1Modal";
+import VerifyRoulette2Modal, {
+  Roulette2,
+} from "./games/roulette2/VerifyRoulette2Modal";
 import Roulette1ProvablyFairModal from "./games/roulette1/Roulette1ProvablyFairModal";
+import Roulette2ProvablyFairModal from "./games/roulette2/Roulette2ProvablyFairModal";
 import { maxPayouts, minAmtFactor } from "@/context/config";
 import VerifyPlinkoModal, { Plinko } from "./games/Plinko/VerifyPlinkoModal";
 import PlinkoProvablyFairModal from "./games/Plinko/PlinkoProvablyFairModal";
 
-interface LayoutProps {
+interface Props {
   children: ReactNode;
 }
 
-export default function Layout({ children }: LayoutProps) {
+export default function ({ children }: Props) {
   const router = useRouter();
   const wallet = useWallet();
   const game = router.pathname.split("/")[1];
@@ -326,6 +330,13 @@ export default function Layout({ children }: LayoutProps) {
           modalData={{ bet: (verifyModalData as Roulette1)! }}
           wallet={wallet.publicKey?.toBase58()}
         />
+      ) : verifyModalData.game === GameType.roulette2 ? (
+        <VerifyRoulette2Modal
+          isOpen={isVerifyModalOpen}
+          onClose={closeVerifyModal}
+          modalData={{ bet: (verifyModalData as Roulette2)! }}
+          wallet={wallet.publicKey?.toBase58()}
+        />
       ) : verifyModalData.game === GameType.plinko ? (
         <VerifyPlinkoModal
           isOpen={isVerifyModalOpen}
@@ -387,6 +398,13 @@ export default function Layout({ children }: LayoutProps) {
         />
       ) : game === GameType.roulette1 ? (
         <Roulette1ProvablyFairModal
+          isOpen={openPFModal}
+          onClose={closePfModal}
+          modalData={modalData}
+          setModalData={setModalData}
+        />
+      ) : game === GameType.roulette2 ? (
+        <Roulette2ProvablyFairModal
           isOpen={openPFModal}
           onClose={closePfModal}
           modalData={modalData}
