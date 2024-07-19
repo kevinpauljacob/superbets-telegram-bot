@@ -19,6 +19,10 @@ const roulette2Schema = new mongoose.Schema(
       type: String,
       enum: ["Won", "Lost"],
     },
+    strikeMultiplier: {
+      type: Number,
+      required: true,
+    },
     tokenMint: {
       type: String,
       required: false,

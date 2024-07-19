@@ -21,7 +21,7 @@ export default function SubHeader() {
     setShowLiveStats,
     enableSounds,
     setEnableSounds,
-    liveTokenPrice
+    liveTokenPrice,
   } = useGlobalContext();
 
   type Card = {
@@ -60,7 +60,12 @@ export default function SubHeader() {
 
       const payload = response.payload;
       if (payload.result === "Won") {
-        payload.usdValue = payload.amountWon * (liveTokenPrice.find(x => x.mintAddress === payload.tokenMint) ? liveTokenPrice.find(x => x.mintAddress === payload.tokenMint)!.price : 1);
+        payload.usdValue =
+          payload.amountWon *
+          (liveTokenPrice.find((x) => x.mintAddress === payload.tokenMint)
+            ? liveTokenPrice.find((x) => x.mintAddress === payload.tokenMint)!
+                .price
+            : 1);
         setCards((prev) => {
           const newCards = [payload, ...prev];
           return newCards.slice(0, 15);
@@ -85,9 +90,13 @@ export default function SubHeader() {
       .then((data) => {
         if (!data.success) return console.error(data.message);
         data.data = data.data.map((x: Card) => {
-          x.usdValue = x.amountWon * (liveTokenPrice.find(y => y.mintAddress === x.tokenMint) ? liveTokenPrice.find(y => y.mintAddress === x.tokenMint)!.price : 1);
+          x.usdValue =
+            x.amountWon *
+            (liveTokenPrice.find((y) => y.mintAddress === x.tokenMint)
+              ? liveTokenPrice.find((y) => y.mintAddress === x.tokenMint)!.price
+              : 1);
           return x;
-        })
+        });
         setCards(data.data);
       });
   }, [liveTokenPrice]);
@@ -95,8 +104,9 @@ export default function SubHeader() {
   return (
     <div className="flex flex-col w-full z-[80] absolute top-0 right-0">
       <div
-        className={`${router.pathname === "/" ? "flex" : "hidden md:flex"
-          } w-full text-white h-[4.4rem] flex items-center border-b border-[#1E2220] px-4 lg:px-6 bg-[#121418]`}
+        className={`${
+          router.pathname === "/" ? "flex" : "hidden md:flex"
+        } w-full text-white h-[4.4rem] flex items-center border-b border-[#1E2220] px-4 lg:px-6 bg-[#121418]`}
       >
         <div className="flex w-full items-center overflow-x-auto no-scrollbar">
           <div ref={endOfListRef} />
@@ -134,8 +144,9 @@ export default function SubHeader() {
         </div>
 
         <div
-          className={`${router.pathname === "/" ? "hidden md:flex" : "hidden md:flex"
-            } h-10 border border-white border-opacity-5 rounded-[5px] mx-4`}
+          className={`${
+            router.pathname === "/" ? "hidden md:flex" : "hidden md:flex"
+          } h-10 border border-white border-opacity-5 rounded-[5px] mx-4`}
         />
 
         {/* <div className={`border-2 border-white border-opacity-5 rounded-[5px] p-3 cursor-pointer ${showFullScreen ? "bg-[#d9d9d9] bg-opacity-10" : ""}`} onClick={() => setShowFullScreen(!showFullScreen)}>
@@ -152,8 +163,9 @@ export default function SubHeader() {
         </div> */}
 
         <div
-          className={`${router.pathname === "/" ? "hidden md:flex" : "hidden md:flex"
-            } border-2 border-[#26282C] rounded-[5px] p-[0.563rem] cursor-pointer transition-all hover:bg-[#26282C]/50 hover:transition-all ${showLiveStats ? "bg-[#26282C] border-[#26282C] hover:bg-[#26282C]" : ""}`}
+          className={`${
+            router.pathname === "/" ? "hidden md:flex" : "hidden md:flex"
+          } border-2 border-[#26282C] rounded-[5px] p-[0.563rem] cursor-pointer transition-all hover:bg-[#26282C]/50 hover:transition-all ${showLiveStats ? "bg-[#26282C] border-[#26282C] hover:bg-[#26282C]" : ""}`}
           onClick={() => setShowLiveStats(!showLiveStats)}
         >
           <svg
@@ -178,8 +190,9 @@ export default function SubHeader() {
         </div>
 
         <div
-          className={`${router.pathname === "/" ? "hidden md:flex" : "hidden md:flex"
-            } border-2 border-[#26282C] rounded-[5px] p-[0.563rem] cursor-pointer ml-3 transition-all hover:bg-[#26282C]/50 hover:transition-all ${enableSounds ? "bg-[#26282C] border-[#26282C] hover:bg-[#26282C]" : ""}`}
+          className={`${
+            router.pathname === "/" ? "hidden md:flex" : "hidden md:flex"
+          } border-2 border-[#26282C] rounded-[5px] p-[0.563rem] cursor-pointer ml-3 transition-all hover:bg-[#26282C]/50 hover:transition-all ${enableSounds ? "bg-[#26282C] border-[#26282C] hover:bg-[#26282C]" : ""}`}
           onClick={() => setEnableSounds(!enableSounds)}
         >
           {!enableSounds && (
@@ -229,8 +242,9 @@ export default function SubHeader() {
         </div>
 
         <div
-          className={`${router.pathname === "/" ? "hidden md:flex" : "hidden md:flex"
-            } h-10 border border-white border-opacity-5 rounded-[5px] mx-4`}
+          className={`${
+            router.pathname === "/" ? "hidden md:flex" : "hidden md:flex"
+          } h-10 border border-white border-opacity-5 rounded-[5px] mx-4`}
         />
 
         <div className="hidden md:flex items-center md:min-w-fit">
@@ -238,8 +252,9 @@ export default function SubHeader() {
         </div>
       </div>
       <div
-        className={`${router.pathname === "/" ? "hidden" : "flex"
-          } md:hidden items-center justify-between my-4 mx-2 rounded-[5px] bg-[#121418] py-3 px-4 md:min-w-fit`}
+        className={`${
+          router.pathname === "/" ? "hidden" : "flex"
+        } md:hidden items-center justify-between my-4 mx-2 rounded-[5px] bg-[#121418] py-3 px-4 md:min-w-fit`}
       >
         <div className="flex items-center ">
           <div

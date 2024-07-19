@@ -715,31 +715,31 @@ input[type="range"] {
   }
 
   70% {
-    margin-left: 2%;
+    margin-left: 4%;
   }
 
   75% {
-    margin-left: 14.5%;
+    margin-left: 18.5%;
   }
 
   80% {
-    margin-left: 2%;
+    margin-left: 4%;
   }
 
   85% {
-    margin-left: 14.5%;
+    margin-left: 18.5%;
   }
 
   90% {
-    margin-left: 2%;
+    margin-left: 4%;
   }
 
   95% {
-    margin-left: 14.5%;
+    margin-left: 18.5%;
   }
 
   100% {
-    margin-left: 32px;
+    margin-left: 55px;
   }
 }
 
@@ -750,7 +750,7 @@ input[type="range"] {
 }
 
 .overlayHole {
-  margin-left: 32px;
+  margin-left: 55px;
   animation: overlayBounce 4s ease-out;
 }
 
