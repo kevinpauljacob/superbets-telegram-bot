@@ -64,7 +64,6 @@ export default function Roulette1() {
     setUseAutoConfig,
     selectedCoin,
     enableSounds,
-    updatePNL,
     setLiveStats,
     liveStats,
     updatePNL,
