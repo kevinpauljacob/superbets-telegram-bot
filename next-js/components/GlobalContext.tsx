@@ -690,6 +690,16 @@ export const translationsMap = {
     ko: "룰렛",
     ch: "轮盘",
   },
+  "Roulette-2": {
+    ru: "Рулетка-2",
+    ko: "룰렛-2",
+    ch: "轮盘-2",
+  },
+  Roulette2: {
+    ru: "Рулетка2",
+    ko: "룰렛2",
+    ch: "轮盘2",
+  },
   All: {
     ru: "Все",
     ko: "모두",
@@ -1880,7 +1890,7 @@ export const translationsMap = {
     ko: "총 청구 가능",
     ch: "总索赔",
   },
-  "Total Earned" : {
+  "Total Earned": {
     ru: "Всего заработано",
     ko: "총 수익",
     ch: "总收入",
@@ -1910,7 +1920,7 @@ export const translationsMap = {
     ko: "수수료 %",
     ch: "佣金 %",
   },
-  "Commission": {
+  Commission: {
     ru: "Комиссия",
     ko: "수수료",
     ch: "佣金",
@@ -1985,7 +1995,7 @@ export const translationsMap = {
     ko: "잘못된 베팅 금액",
     ch: "无效的投注金额",
   },
-  "Invalid chosen numbers":{
+  "Invalid chosen numbers": {
     ru: "Неверно выбранные числа",
     ko: "잘못된 숫자 선택",
     ch: "无效的选择数字",
@@ -2019,5 +2029,20 @@ export const translationsMap = {
     ru: "Не удалось получить результат",
     ko: "결과를 가져올 수 없습니다",
     ch: "无法获取结果",
-  }
+  },
+  "Bet above minimum amount.": {
+    ru: "Ставьте выше минимальной суммы.",
+    ko: "최소 금액 이상 베팅하세요",
+    ch: "投注超过最低金额",
+  },
+  "Please select a token before placing a bet.": {
+    ru: "Пожалуйста, выберите токен перед размещением ставки.",
+    ko: "베팅하기 전에 토큰을 선택하세요.",
+    ch: "请在下注前选择一个代币。",
+  },
+  "Bet amount exceeds the maximum allowed bet.": {
+    ru: "Сумма ставки превышает максимально допустимую.",
+    ko: "投注金额超过最高允许额。",
+    ch: "베팅 금액이 최대 허용 베팅을 초과합니다.",
+  },
 };

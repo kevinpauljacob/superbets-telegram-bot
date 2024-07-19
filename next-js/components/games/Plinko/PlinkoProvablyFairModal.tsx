@@ -57,9 +57,8 @@ export default function PlinkoProvablyFairModal({
   const [state, setState] = useState<"seeds" | "verify">(
     modalData.tab ?? "seeds",
   );
-  const [newClientSeed, setNewClientSeed] = useState<string>(
-    generateClientSeed(),
-  );
+  const [newClientSeed, setNewClientSeed] =
+    useState<string>(generateClientSeed());
   const { language } = useGlobalContext();
   const [strikeNumber, setStrikeNumber] = useState<number>(0);
   const [strikeMultiplier, setStrikeMultiplier] = useState<number>();
@@ -88,17 +87,16 @@ export default function PlinkoProvablyFairModal({
           risk:
             bet.risk ||
             (selectedGameType === GameType.wheel ? "low" : undefined),
-          
+
           parameter:
-            bet.rows ||
-            (selectedGameType === GameType.mines ? 1 : undefined),
+            bet.rows || (selectedGameType === GameType.mines ? 1 : undefined),
         }
       : {
           clientSeed: "",
           serverSeed: "",
           nonce: "",
           risk: selectedGameType === GameType.wheel ? "low" : undefined,
-          
+
           parameter: selectedGameType === GameType.plinko ? 8 : undefined,
         },
   );
@@ -306,7 +304,9 @@ export default function PlinkoProvablyFairModal({
                 {state === "verify" && (
                   <div className="grid w-full text-white ">
                     <div className="grid gap-2">
-                      <div className="border-2 border-opacity-5 border-[#FFFFFF] md:px-8 py-2">
+                      <div
+                        className={`md:px-8 py-2 mt-6 px-4  pt-7 border-2 border-white border-opacity-5 rounded-md ${selectedGameType === GameType.roulette1 || selectedGameType === GameType.roulette2 ? "w-full h-[480px] flex items-center " : ""}`}
+                      >
                         <ProvablyFairModal
                           setVerificationState={setVerificationState}
                           verificationState={verificationState}
