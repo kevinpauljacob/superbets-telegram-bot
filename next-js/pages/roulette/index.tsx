@@ -64,6 +64,7 @@ export default function Roulette1() {
     setUseAutoConfig,
     selectedCoin,
     enableSounds,
+    updatePNL,
     setLiveStats,
     liveStats,
     updatePNL,
@@ -227,7 +228,7 @@ export default function Roulette1() {
   const [hoveredColumn, setHoveredColumn] = useState<number[] | null>(null);
   const [resultNumbers, setResultNumbers] = useState<number[]>([]);
   const [refresh, setRefresh] = useState(true);
-  const [strikeMultiplier, setStrikeMultiplier] = useState<number>();
+  const [strikeMultiplier, setStrikeMultiplier] = useState<number>(1);
   const [spinComplete, setSpinComplete] = useState(false);
   const [num, setNum] = useState<number | null>(null);
   const ball = useRef<HTMLDivElement>(null);
@@ -472,7 +473,7 @@ export default function Roulette1() {
       setStartAuto(false);
       setAutoBetCount(0);
     } finally {
-      setBetInProgress(false); // Reset bet in progress
+      setBetInProgress(false);
     }
   };
 
@@ -487,13 +488,13 @@ export default function Roulette1() {
         );
       } else {
         soundAlert("/sounds/lose.wav", !enableSounds);
-        errorCustom(translator(message, language));
-        setBetAmt(0);
-        clearBets();
+        errorCustom(message);
+        /* setBetAmt(0);
+        clearBets(); */
       }
 
       num !== null && setResultNumbers((prevNumbers) => [...prevNumbers, num]);
-
+      updatePNL(GameType.roulette1, win, betAmt!, strikeMultiplier);
       setRefresh(true);
       setLoading(false);
       updatePNL(GameType.roulette1, win, betAmt ?? 0, strikeMultiplier ?? 0);
