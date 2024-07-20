@@ -32,7 +32,7 @@ export default function Bets({ refresh }: { refresh: boolean }) {
 
   const router = useRouter();
   const home = router.pathname.split("/")[1] === "";
-
+  console.log("All bets:", allBets);
   useEffect(() => {
     if (!all) {
       setMyBets((prev) => {
@@ -113,7 +113,9 @@ export default function Bets({ refresh }: { refresh: boolean }) {
   }, [all]);
 
   return (
-    <div className={`relative w-full ${home ? "mt-[2rem] md:mt-[4rem] mb-5:" : ""}`}>
+    <div
+      className={`relative w-full ${home ? "mt-[2rem] md:mt-[4rem] mb-5:" : ""}`}
+    >
       <Table
         all={all}
         setAll={setAll}
@@ -123,7 +125,6 @@ export default function Bets({ refresh }: { refresh: boolean }) {
         bets={all ? allBets : myBets}
         loading={loading}
       />
-      
     </div>
   );
 }

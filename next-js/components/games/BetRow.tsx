@@ -79,9 +79,23 @@ const BetRow: React.FC<BetRowProps> = ({
         <span className="w-full text-center font-changa text-sm text-opacity-75 text-[#F0F0F0]">
           {translator("Pending", language)}
         </span>
+      ) : (bet.game === "roulette" || bet.game === "roulette2") &&
+        bet.amountLost > 0.0 ? (
+        <span className="w-full text-center font-changa text-sm text-opacity-75 text-fomo-red">
+          {truncateNumber(-bet.amountLost, 6)}{" "}
+          {SPL_TOKENS.find((token) => token.tokenMint === bet?.tokenMint)
+            ?.tokenName ?? ""}
+        </span>
+      ) : (bet.game === "roulette" || bet.game === "roulette2") &&
+        bet.amountLost === 0 ? (
+        <span className="w-full text-center font-changa text-sm text-opacity-75 text-fomo-green">
+          {truncateNumber(bet.amountWon, 6)}{" "}
+          {SPL_TOKENS.find((token) => token.tokenMint === bet?.tokenMint)
+            ?.tokenName ?? ""}
+        </span>
       ) : bet.amountWon > bet.amount ? (
         <span className="w-full text-center font-changa text-sm text-opacity-75 text-fomo-green">
-          {truncateNumber(bet?.amountWon, 4)}{" "}
+          {truncateNumber(bet.amountWon, 4)}{" "}
           {SPL_TOKENS.find((token) => token.tokenMint === bet?.tokenMint)
             ?.tokenName ?? ""}
         </span>
