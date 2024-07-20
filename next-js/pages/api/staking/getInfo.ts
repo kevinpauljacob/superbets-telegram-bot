@@ -1,7 +1,7 @@
 import connectDatabase from "@/utils/database";
 import user from "@/models/staking/user";
 import GameUser from "@/models/games/gameUser";
-import { User, Web2User } from "@/context/transactions";
+import { User } from "@/context/transactions";
 import { NextApiRequest, NextApiResponse } from "next";
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -77,7 +77,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         }
         // get web2 user leaderboard
         case 4: {
-          let usersInfo: Web2User[] | null = await GameUser.aggregate([
+          let usersInfo = await GameUser.aggregate([
             { $match: { isWeb2User: true } },
             { $unwind: "$deposit" },
             { $match: { "deposit.tokenMint": "web2" } },
