@@ -402,7 +402,6 @@ export default function Roulette1() {
         strikeMultiplier,
         amountWon,
       } = await response.json();
-      console.log("Response:", response);
       if (success !== true) {
         throw new Error(message);
       }

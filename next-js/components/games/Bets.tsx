@@ -32,7 +32,6 @@ export default function Bets({ refresh }: { refresh: boolean }) {
 
   const router = useRouter();
   const home = router.pathname.split("/")[1] === "";
-  console.log("All bets:", allBets);
   useEffect(() => {
     if (!all) {
       setMyBets((prev) => {
