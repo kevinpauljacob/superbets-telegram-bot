@@ -2040,11 +2040,7 @@ export const translationsMap = {
     ko: "베팅 금액이 허용된 최대 베팅을 초과합니다.",
     ch: "投注金额超过了允许的最高投注。",
   },
-  "Please select a token before placing a bet.": {
-    ru: "Пожалуйста, выберите токен перед размещением ставки.",
-    ko: "베팅을 배치하기 전에 토큰을 선택하��시오.",
-    ch: "请在放置投注之前选择一个令牌。",
-  },
+
   "Chip Value": {
     ru: "Значение фишки",
     ko: "칩 가치",
@@ -2079,7 +2075,7 @@ export const translationsMap = {
     ru: "Чет",
     ko: "짝수",
     ch: "偶数",
-  }
+  },
   "Bet above minimum amount.": {
     ru: "Ставьте выше минимальной суммы.",
     ko: "최소 금액 이상 베팅하세요",
@@ -2087,12 +2083,7 @@ export const translationsMap = {
   },
   "Please select a token before placing a bet.": {
     ru: "Пожалуйста, выберите токен перед размещением ставки.",
-    ko: "베팅하기 전에 토큰을 선택하세요.",
-    ch: "请在下注前选择一个代币。",
-  },
-  "Bet amount exceeds the maximum allowed bet.": {
-    ru: "Сумма ставки превышает максимально допустимую.",
-    ko: "投注金额超过最高允许额。",
-    ch: "베팅 금액이 최대 허용 베팅을 초과합니다.",
+    ko: "베팅을 배치하기 전에 토큰을 선택하��시오.",
+    ch: "请在放置投注之前选择一个令牌。",
   },
 };

@@ -1,6 +1,6 @@
 import connectDatabase from "@/utils/database";
 import user from "@/models/staking/user";
-import { User } from "@/context/transactions";
+import { User, Web2User } from "@/context/transactions";
 import { NextApiRequest, NextApiResponse } from "next";
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -73,6 +73,19 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
             success: true,
             data: globalInfo[0],
           });
+        }
+        // get web2 user leaderboard
+        case 4: {
+          let usersInfo: Web2User[] | null = await user
+            .find({ web2User: true })
+            .sort({ tokenBalance: -1 });
+          if (!usersInfo)
+            return res.status(400).json({
+              success: false,
+              message: "Unable to fetch data.",
+            });
+
+          return res.json({ success: true, users: usersInfo });
         }
         default:
           return res

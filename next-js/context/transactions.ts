@@ -39,6 +39,13 @@ export interface User {
   points: number;
 }
 
+export interface Web2User {
+  email: string;
+  wallet: string;
+  name: string;
+  tokenBalance: string;
+}
+
 export const formatNumber = (number: number, fractions?: number) => {
   return number?.toLocaleString(undefined, {
     maximumFractionDigits: fractions ?? 4,
