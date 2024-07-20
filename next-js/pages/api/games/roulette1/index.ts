@@ -10,11 +10,16 @@ import {
   decryptServerSeed,
 } from "@/utils/provably-fair";
 import StakingUser from "@/models/staking/user";
-import { houseEdgeTiers, maintainance, pointTiers, stakingTiers } from "@/context/config";
+import {
+  houseEdgeTiers,
+  maintainance,
+  pointTiers,
+  stakingTiers,
+} from "@/context/config";
 import { launchPromoEdge } from "@/context/config";
 import { wsEndpoint } from "@/context/config";
 
-import { SPL_TOKENS, minGameAmount} from "@/context/config";
+import { SPL_TOKENS, minGameAmount } from "@/context/config";
 import { Decimal } from "decimal.js";
 import updateGameStats from "../../../../utils/updateGameStats";
 Decimal.set({ precision: 9 });
@@ -195,7 +200,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           .status(400)
           .json({ success: false, message: "User does not exist!" });
 
-    /*   if (
+      /*   if (
         user.deposit.find((d: any) => d.tokenMint === tokenMint)?.amount <
         amount
       )
@@ -322,6 +327,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           ...(addGame
             ? { $addToSet: { gamesPlayed: GameType.roulette1 } }
             : {}),
+          $set: {
+            isWeb2User: false,
+          },
         },
         {
           new: true,
@@ -354,7 +362,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         tokenMint,
         amount,
         addGame,
-        feeGenerated
+        feeGenerated,
       );
 
       const pointsGained =
@@ -411,7 +419,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         amountWon: amountWon.toNumber(),
         amountLost,
       });
-      
     } catch (e: any) {
       console.log(e);
       return res.status(500).json({ success: false, message: e.message });

@@ -10,11 +10,16 @@ import {
   decryptServerSeed,
 } from "@/utils/provably-fair";
 import StakingUser from "@/models/staking/user";
-import { houseEdgeTiers, maintainance, pointTiers, stakingTiers } from "@/context/config";
+import {
+  houseEdgeTiers,
+  maintainance,
+  pointTiers,
+  stakingTiers,
+} from "@/context/config";
 import { launchPromoEdge } from "@/context/config";
 import { wsEndpoint } from "@/context/config";
 
-import { SPL_TOKENS, minGameAmount} from "@/context/config";
+import { SPL_TOKENS, minGameAmount } from "@/context/config";
 import { Decimal } from "decimal.js";
 import updateGameStats from "../../../../utils/updateGameStats";
 Decimal.set({ precision: 9 });
@@ -46,7 +51,7 @@ const WagerMapping: Record<WagerType, Array<number> | Record<string, number>> =
   {
     red: [1, 3, 5, 7, 12, 14, 16, 18, 19, 21, 23, 25, 27, 30, 32, 34, 36],
     black: [2, 4, 6, 8, 10, 11, 13, 15, 17, 20, 22, 24, 26, 28, 29, 31, 33, 35],
-    green: [0,99],
+    green: [0, 99],
     odd: [1, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23, 25, 27, 29, 31, 33, 35],
     even: [2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 34, 36],
     low: [...Array(18).keys()].map((x) => x + 1),
@@ -196,7 +201,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           .status(400)
           .json({ success: false, message: "User does not exist !" });
 
-    /*   if (
+      /*   if (
         user.deposit.find((d: any) => d.tokenMint === tokenMint)?.amount <
         amount
       )
@@ -323,6 +328,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           ...(addGame
             ? { $addToSet: { gamesPlayed: GameType.roulette2 } }
             : {}),
+          $set: {
+            isWeb2User: false,
+          },
         },
         {
           new: true,
@@ -348,14 +356,14 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         gameSeed: activeGameSeed._id,
       });
       await roulette2.save();
-      
+
       await updateGameStats(
         wallet,
         GameType.roulette2,
         tokenMint,
         amount,
         addGame,
-        feeGenerated
+        feeGenerated,
       );
 
       const pointsGained =
@@ -412,7 +420,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         amountWon: amountWon.toNumber(),
         amountLost,
       });
-      
     } catch (e: any) {
       console.log(e);
       return res.status(500).json({ success: false, message: e.message });

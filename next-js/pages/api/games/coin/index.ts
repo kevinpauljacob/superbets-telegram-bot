@@ -203,6 +203,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
             numOfGamesPlayed: 1,
           },
           ...(addGame ? { $addToSet: { gamesPlayed: GameType.coin } } : {}),
+          $set: {
+            isWeb2User: false,
+          },
         },
         {
           new: true,
@@ -281,9 +284,12 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       };
 
       return res.json({
-        success: true, 
-        data: { strikeNumber, result, amountWon, amountLost},
-        message: result == "Won" ? "Congratulations! You won" : "Sorry, Better luck next time!",
+        success: true,
+        data: { strikeNumber, result, amountWon, amountLost },
+        message:
+          result == "Won"
+            ? "Congratulations! You won"
+            : "Sorry, Better luck next time!",
       });
     } catch (e: any) {
       console.log(e);

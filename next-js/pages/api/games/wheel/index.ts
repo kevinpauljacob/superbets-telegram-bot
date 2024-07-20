@@ -222,6 +222,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
             numOfGamesPlayed: 1,
           },
           ...(addGame ? { $addToSet: { gamesPlayed: GameType.wheel } } : {}),
+          $set: {
+            isWeb2User: false,
+          },
         },
         {
           new: true,

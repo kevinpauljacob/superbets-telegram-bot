@@ -140,6 +140,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           },
           isOptionOngoing: true,
           ...(addGame ? { $addToSet: { gamesPlayed: GameType.options } } : {}),
+          $set: {
+            isWeb2User: false,
+          },
         },
         {
           new: true,
