@@ -400,7 +400,7 @@ export default function Keno() {
           disabled={disableInput}
           className={`${
             autoPick === true
-              ? "border-[#7839C5] text-opacity-100"
+              ? "border-[#5F4DFF] text-opacity-100"
               : "border-transparent hover:border-[#7839C580] text-opacity-80"
           } w-full flex items-center justify-center disabled:opacity-50 gap-1 rounded-lg text-center cursor-pointer border-2 bg-[#202329] h-[3.75rem] lg:h-11 font-chakra text-base tracking-wider text-white font-semibold`}
         >
@@ -508,7 +508,7 @@ export default function Keno() {
                       onClick={() => setKenoRisk("classic")}
                       className={`text-center w-full rounded-[5px] border-[2px] bg-[#202329] py-2 text-xs font-chakra disabled:opacity-50 text-white text-opacity-90 transition duration-200 ${
                         kenoRisk === "classic"
-                          ? "border-[#7839C5]"
+                          ? "border-[#5F4DFF]"
                           : "border-transparent hover:border-[#7839C580]"
                       }`}
                       disabled={disableInput}
@@ -520,7 +520,7 @@ export default function Keno() {
                       onClick={() => setKenoRisk("low")}
                       className={`text-center w-full rounded-[5px] border-[2px] bg-[#202329] py-2 text-xs font-chakra disabled:opacity-50 text-white text-opacity-90 transition duration-200 ${
                         kenoRisk === "low"
-                          ? "border-[#7839C5]"
+                          ? "border-[#5F4DFF]"
                           : "border-transparent hover:border-[#7839C580]"
                       }`}
                       disabled={disableInput}
@@ -532,7 +532,7 @@ export default function Keno() {
                       onClick={() => setKenoRisk("medium")}
                       className={`text-center w-full block m-auto rounded-[5px] border-[2px] bg-[#202329] py-2 text-xs font-chakra disabled:opacity-50 text-white text-opacity-90 transition duration-200 ${
                         kenoRisk === "medium"
-                          ? "border-[#7839C5]"
+                          ? "border-[#5F4DFF]"
                           : "border-transparent hover:border-[#7839C580]"
                       }`}
                       disabled={disableInput}
@@ -544,7 +544,7 @@ export default function Keno() {
                       onClick={() => setKenoRisk("high")}
                       className={`text-center w-full rounded-[5px] border-[2px] bg-[#202329] py-2 text-xs font-chakra disabled:opacity-50 text-white text-opacity-90 transition duration-200 ${
                         kenoRisk === "high"
-                          ? "border-[#7839C5]"
+                          ? "border-[#5F4DFF]"
                           : "border-transparent hover:border-[#7839C580]"
                       }`}
                       disabled={disableInput}
@@ -635,7 +635,7 @@ export default function Keno() {
                     !isRolling &&
                     strikeNumbers.length === 0 &&
                     chosenNumbers.includes(number)
-                      ? "bg-[#7839C5] border-transparent"
+                      ? "bg-[#5F4DFF] border-transparent"
                       : strikeNumbers.includes(number)
                       ? chosenNumbers.includes(number)
                         ? "bg-black border-fomo-green"
@@ -643,7 +643,7 @@ export default function Keno() {
                         ? "bg-[#202329] border-transparent"
                         : "bg-black border-fomo-red text-fomo-red"
                       : chosenNumbers.includes(number)
-                      ? "bg-[#7839C5] border-transparent"
+                      ? "bg-[#5F4DFF] border-transparent"
                       : "bg-[#202329] border-transparent"
                   } rounded-md text-center border-2 transition-all duration-300 ease-in-out w-[1.75rem] h-[1.75rem] sm:w-[3.4375rem] sm:h-[3.4375rem] md:w-[3.75rem] md:h-[3.75rem] xl:w-[3.8rem] xl:h-[3.8rem]`}
                 >

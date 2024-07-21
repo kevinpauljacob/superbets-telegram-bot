@@ -404,7 +404,7 @@ export default function Flip() {
                     disabled={disableInput}
                     className={`${
                       betType === "Heads"
-                        ? "border-[#7839C5] text-opacity-100"
+                        ? "border-[#5F4DFF] text-opacity-100"
                         : "border-transparent hover:border-[#7839C580] text-opacity-80"
                     } w-full flex items-center disabled:opacity-50 disabled:cursor-not-allowed justify-center gap-2 rounded-lg text-center cursor-pointer border-2 bg-[#202329] py-2.5 font-changa text-xl text-white font-semibold`}
                   >
@@ -427,7 +427,7 @@ export default function Flip() {
                     disabled={disableInput}
                     className={`${
                       betType === "Tails"
-                        ? "border-[#7839C5] text-opacity-100"
+                        ? "border-[#5F4DFF] text-opacity-100"
                         : "border-transparent hover:border-[#7839C580] text-opacity-80"
                     } w-full flex items-center disabled:opacity-50 disabled:cursor-not-allowed justify-center gap-2 rounded-lg text-center cursor-pointer border-2 bg-[#202329] py-2.5 font-changa text-xl text-white font-semibold`}
                   >

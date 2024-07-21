@@ -560,7 +560,7 @@ export default function BalanceModal() {
                 {actionType !== "History" && (
                   <button
                     type="submit"
-                    className="rounded-[5px] -mt-1 mb-4 disabled:opacity-50 border border-[#F200F21A] bg-[#7839C5] hover:bg-[#9361d1] focus:bg-[#602E9E] transition-all py-2.5 font-changa text-base font-medium text-[#F0F0F0] text-opacity-90"
+                    className="rounded-[5px] -mt-1 mb-4 disabled:opacity-50 border border-[#F200F21A] bg-[#5F4DFF] hover:bg-[#9361d1] focus:bg-[#602E9E] transition-all py-2.5 font-changa text-base font-medium text-[#F0F0F0] text-opacity-90"
                     disabled={actionType === "Deposit" && !checked}
                   >
                     {loading ? <Loader /> : translator(actionType, language)}

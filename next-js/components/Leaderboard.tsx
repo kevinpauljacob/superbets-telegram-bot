@@ -89,7 +89,7 @@ function Leaderboard() {
             )}
 
             {myData && (
-              <div className="mb-2.5 flex w-full flex-row items-center gap-2 rounded-[5px] border-2 border-[#9945ff] border-opacity-50 bg-[#9945FF] bg-opacity-[0.075] py-3 pr-10">
+              <div className="mb-2.5 flex w-full flex-row items-center gap-2 rounded-[5px] border-2 border-[#9945ff] border-opacity-50 bg-[#5F4DFF] bg-opacity-[0.075] py-3 pr-10">
                 <span className="w-[10%] text-center ml-10 font-changa text-sm font-light text-[#F0F0F0] text-opacity-75">
                   {myData?.rank}
                 </span>

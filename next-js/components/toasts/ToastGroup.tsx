@@ -144,7 +144,7 @@ export const warningCustom = (
         } flex flex-col rounded-md bg-[#17181A]`}
       >
         <div className="w-full h-11 flex flex-row px-3 gap-3 items-center">
-          <PiWarningCircle className="w-6 h-6 text-[#7839C5]" />
+          <PiWarningCircle className="w-6 h-6 text-[#5F4DFF]" />
           <span className="text-white text-sm flex-1">{text}</span>
           <AiOutlineClose
             onClick={() => {

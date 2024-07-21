@@ -5,6 +5,7 @@ import { useRouter } from "next/router";
 import { translator } from "@/context/transactions";
 import { useGlobalContext } from "./GlobalContext";
 import FomoPlayIcon from "@/public/assets/fomoplay.svg";
+import Store from "@/public/assets/sidebar-icons/Store";
 
 export default function FomoPlay() {
   const games = [
@@ -76,13 +77,10 @@ export default function FomoPlay() {
     <div className="mt-5">
       <div className="flex justify-between items-center mb-1">
         <div className="flex items-center">
-          <Image src={FomoPlayIcon} alt="" width={26} height={26} />
+          <Store className="w-5 h-5" />
           <span className="font-medium font-changa text-xl text-opacity-90 pl-3">
             <span className="hidden sm:inline text-white">
-              FOMO: {translator("Play - The best casino games", language)}
-            </span>
-            <span className="sm:hidden text-white">
-              FOMO: {translator("Play", language)}
+              SuperBets Games
             </span>
           </span>
         </div>

@@ -142,7 +142,7 @@ export default function GameHeader() {
             <p className="font-light text-xs">
               {translator("House Edge", language)} :&nbsp;
             </p>
-            <p className="text-[#7839C5] font-semibold text-xs">
+            <p className="text-[#5F4DFF] font-semibold text-xs">
               {houseEdge * 100}%
             </p>
           </div>
@@ -150,7 +150,7 @@ export default function GameHeader() {
             <p className="font-thin text-xs">
               {translator("Volume", language)} :&nbsp;
             </p>
-            <p className="text-[#7839C5] font-semibold text-xs">
+            <p className="text-[#5F4DFF] font-semibold text-xs">
               {truncateNumber(selectedGame.stats?.volume ?? 0, 2)}
             </p>
           </div>
@@ -158,7 +158,7 @@ export default function GameHeader() {
             <p className="font-thin text-xs">
               {translator("Unique Players", language)} :&nbsp;
             </p>
-            <p className="text-[#7839C5] font-semibold text-xs">
+            <p className="text-[#5F4DFF] font-semibold text-xs">
               {selectedGame.stats?.players}
             </p>
           </div>

@@ -29,7 +29,7 @@ export default function Progressbar({
   return (
     <div className="h-[6px] w-full rounded-full bg-[#FFFFFF1A]">
       <div
-        className="transition-width h-[6px] rounded-full bg-[#7839C5] duration-100"
+        className="transition-width h-[6px] rounded-full bg-[#5F4DFF] duration-100"
         style={{
           width: `${(timeLeft * 100) / (minutes * 60000)}%`,
         }}

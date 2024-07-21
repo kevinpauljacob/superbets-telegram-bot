@@ -784,7 +784,7 @@ export default function Plinko() {
                         type="button"
                         className={`text-center w-full rounded-[5px] border-[2px] disabled:cursor-not-allowed disabled:opacity-50 bg-[#202329] py-2 text-xs font-chakra text-white text-opacity-90 transition duration-200 ${
                           risk === "low"
-                            ? "border-[#7839C5]"
+                            ? "border-[#5F4DFF]"
                             : "border-transparent hover:border-[#7839C580]"
                         }`}
                         disabled={disableInput}
@@ -796,7 +796,7 @@ export default function Plinko() {
                         type="button"
                         className={`text-center w-full rounded-[5px] border-[2px] disabled:cursor-not-allowed disabled:opacity-50 bg-[#202329] py-2 text-xs font-chakra text-white text-opacity-90 transition duration-200 ${
                           risk === "medium"
-                            ? "border-[#7839C5]"
+                            ? "border-[#5F4DFF]"
                             : "border-transparent hover:border-[#7839C580]"
                         }`}
                         disabled={disableInput}
@@ -809,7 +809,7 @@ export default function Plinko() {
                       type="button"
                       className={`text-center lg:w-[33.33%] w-full rounded-[5px] border-[2px] disabled:cursor-not-allowed disabled:opacity-50 bg-[#202329] py-2 text-xs font-chakra text-white text-opacity-90 transition duration-200 ${
                         risk === "high"
-                          ? "border-[#7839C5]"
+                          ? "border-[#5F4DFF]"
                           : "border-transparent hover:border-[#7839C580]"
                       }`}
                       disabled={disableInput}

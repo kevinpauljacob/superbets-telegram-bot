@@ -243,16 +243,16 @@ export default function ({ children }: Props) {
 
   return (
     <>
-      <InfoBar />
+      {/* <InfoBar /> */}
       <Header sidebar={sidebar} toggleSidebar={toggleSidebar} />
-      <section className="relative flex flex-1 max-h-[calc(100%-6.25rem)]">
+      <section className="relative flex flex-1 max-h-[calc(100%-4.7rem)]">
         <Sidebar sidebar={sidebar} setSidebar={setSidebar} />
         <section className="w-full relative overflow-hidden">
           <MobileSidebar />
-          <section className="relative w-full h-full pt-[4.4rem]">
+          <section className="relative w-full h-full pt-[4.4rem] md:pt-0">
             <SubHeader />
             <main
-              className={`marker:w-full h-full max-h-[calc(100%-1rem)] pt-6`}
+              className={`marker:w-full h-full max-h-[calc(100%-0rem)] pt-6`}
             >
               <section className="w-full h-full overflow-y-auto no-scrollbar">
                 <div

@@ -113,7 +113,7 @@ export function BetActions({
           onClick={() => {
             onRunBet(1);
           }}
-          className="rounded-md bg-[#7839C5] py-4 px-2 font-changa w-full"
+          className="rounded-md bg-[#5F4DFF] py-4 px-2 font-changa w-full"
         >
           Bet
         </button>

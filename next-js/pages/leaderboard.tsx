@@ -77,7 +77,7 @@ export default function Leaderboard() {
                 <span className="text-white text-base text-opacity-50">
                   {translator("Next Tier", language)}
                 </span>
-                <span className="text-base font-semibold text-opacity-75 text-[#9945FF]">
+                <span className="text-base font-semibold text-opacity-75 text-[#5F4DFF]">
                   {pointTiers[pointTier?.index + 1]?.label ?? ""}
                 </span>
               </div>
@@ -91,7 +91,7 @@ export default function Leaderboard() {
                   <span className="flex text-white text-xs text-opacity-50">
                     {translator("Next Tier", language)}
                   </span>
-                  <span className="text-base font-semibold text-opacity-75 text-[#9945FF]">
+                  <span className="text-base font-semibold text-opacity-75 text-[#5F4DFF]">
                     {pointTiers[pointTier?.index + 1]?.label ?? ""}
                   </span>
                 </div>

@@ -401,7 +401,7 @@ export default function Options() {
                     }}
                     className={`${
                       betInterval === 3
-                        ? "border-[#7839C5]"
+                        ? "border-[#5F4DFF]"
                         : "border-transparent hover:border-[#7839C580]"
                     } disabled:pointer-events-none disabled:opacity-50 w-full rounded-[5px] border-[2px] bg-[#202329] py-2 text-xs font-chakra text-white text-opacity-90 transition duration-200`}
                   >
@@ -415,7 +415,7 @@ export default function Options() {
                     }}
                     className={`${
                       betInterval === 4
-                        ? "border-[#7839C5]"
+                        ? "border-[#5F4DFF]"
                         : "border-transparent hover:border-[#7839C580]"
                     } disabled:pointer-events-none disabled:opacity-50 w-full rounded-[5px] border-[2px] bg-[#202329] py-2 text-xs font-chakra text-white text-opacity-90 transition duration-200`}
                   >
@@ -430,7 +430,7 @@ export default function Options() {
                   }}
                   className={`${
                     betInterval === 5
-                      ? "border-[#7839C5]"
+                      ? "border-[#5F4DFF]"
                       : "border-transparent hover:border-[#7839C580]"
                   } lg:w-[33.33%] disabled:pointer-events-none disabled:opacity-50 w-full rounded-[5px] border-[2px] bg-[#202329] py-2 text-xs font-chakra text-white text-opacity-90 transition duration-200`}
                 >
@@ -449,7 +449,7 @@ export default function Options() {
                 }}
                 className={`${
                   betType === "up"
-                    ? "border-[#7839C5]"
+                    ? "border-[#5F4DFF]"
                     : "border-transparent hover:border-[#7839C580]"
                 } w-full rounded-lg disabled:pointer-events-none disabled:opacity-50 text-center cursor-pointer border-2 bg-[#202329] py-2.5 font-changa text-xl text-white shadow-[0px_4px_15px_0px_rgba(0,0,0,0.25)]`}
               >
@@ -463,7 +463,7 @@ export default function Options() {
                 }}
                 className={`${
                   betType === "down"
-                    ? "border-[#7839C5]"
+                    ? "border-[#5F4DFF]"
                     : "border-transparent hover:border-[#7839C580]"
                 } w-full rounded-lg disabled:pointer-events-none disabled:opacity-50 text-center cursor-pointer border-2 bg-[#202329] py-2.5 font-changa text-xl text-white shadow-[0px_4px_15px_0px_rgba(0,0,0,0.25)] `}
               >

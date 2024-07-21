@@ -157,7 +157,7 @@ export default function StakeFomo() {
         <button
           className={`${
             stake
-              ? "text-white border-[#9945FF]"
+              ? "text-white border-[#5F4DFF]"
               : "text-[#ffffff80] border-transparent hover:text-[#ffffffb5]"
           } p-2  border-b-2 text-base font-medium transition-all w-full sm:w-max`}
           onClick={() => {
@@ -169,7 +169,7 @@ export default function StakeFomo() {
         <button
           className={`${
             !stake
-              ? "text-white border-[#9945FF]"
+              ? "text-white border-[#5F4DFF]"
               : "text-[#ffffff80] border-transparent hover:text-[#ffffffb5]"
           } p-2 border-b-2 text-base font-medium transition-all w-full sm:w-max`}
           onClick={() => {
@@ -265,7 +265,7 @@ export default function StakeFomo() {
           handleRequest();
         }}
         disabled={loading || !session?.user}
-        className="w-full flex py-3 items-center justify-center gap-1 p-1.5 mt-4 bg-[#9945FF] hover:bg-opacity-50 disabled:bg-opacity-20 transition-all text-white text-md tracking-wider font-semibold rounded-[5px]"
+        className="w-full flex py-3 items-center justify-center gap-1 p-1.5 mt-4 bg-[#5F4DFF] hover:bg-opacity-50 disabled:bg-opacity-20 transition-all text-white text-md tracking-wider font-semibold rounded-[5px]"
       >
         {loading && <Spinner />}
         {stake

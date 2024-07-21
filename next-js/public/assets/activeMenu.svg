@@ -1,10 +1,10 @@
-<svg width="20" height="20" viewBox="0 0 20 20" fill="#9945FF" xmlns="http://www.w3.org/2000/svg">
+<svg width="20" height="20" viewBox="0 0 20 20" fill="#5F4DFF" xmlns="http://www.w3.org/2000/svg">
   <g opacity="0.5">
-    <path d="M6.25 5H17.5" stroke="#9945FF" />
-    <path d="M6.25 10H17.5" stroke="#9945FF" />
-    <path d="M6.25 15H17.5" stroke="#9945FF" />
-    <path d="M2.5 5H3.75" stroke="#9945FF" />
-    <path d="M2.5 10H3.75" stroke="#9945FF" />
-    <path d="M2.5 15H3.75" stroke="#9945FF" />
+    <path d="M6.25 5H17.5" stroke="#5F4DFF" />
+    <path d="M6.25 10H17.5" stroke="#5F4DFF" />
+    <path d="M6.25 15H17.5" stroke="#5F4DFF" />
+    <path d="M2.5 5H3.75" stroke="#5F4DFF" />
+    <path d="M2.5 10H3.75" stroke="#5F4DFF" />
+    <path d="M2.5 15H3.75" stroke="#5F4DFF" />
   </g>
 </svg>

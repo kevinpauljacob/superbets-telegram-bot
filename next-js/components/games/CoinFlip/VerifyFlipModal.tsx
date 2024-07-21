@@ -311,7 +311,7 @@ export default function VerifyFlipModal({
                               )}
                             </div>
                             <button
-                              className="bg-[#7839C5] rounded-md w-full text-sm text-white text-opacity-90 text-semibold py-3 disabled:opacity-70"
+                              className="bg-[#5F4DFF] rounded-md w-full text-sm text-white text-opacity-90 text-semibold py-3 disabled:opacity-70"
                               disabled
                             >
                               {translator("Rotate", language)}
@@ -326,7 +326,7 @@ export default function VerifyFlipModal({
                               )}
                             </div>
                             <button
-                              className="bg-[#7839C5] rounded-md w-full text-sm text-white text-opacity-90 text-semibold py-3"
+                              className="bg-[#5F4DFF] rounded-md w-full text-sm text-white text-opacity-90 text-semibold py-3"
                               onClick={handleSeedClick}
                               disabled={isLoading}
                             >
@@ -339,7 +339,7 @@ export default function VerifyFlipModal({
                           </>
                         ) : (
                           <button
-                            className="bg-[#7839C5] rounded-md w-full text-sm text-white text-opacity-90 text-semibold py-3"
+                            className="bg-[#5F4DFF] rounded-md w-full text-sm text-white text-opacity-90 text-semibold py-3"
                             onClick={handleVerifyClick}
                           >
                             {isLoading ? (

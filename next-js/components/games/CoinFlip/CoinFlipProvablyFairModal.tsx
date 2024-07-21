@@ -244,7 +244,7 @@ export default function CoinFlipProvablyFairModal({
                               className="bg-[#202329] text-[#B9B9BA] text-xs font-semibold rounded-md px-5 py-4 w-full relative flex items-center justify-between focus:outline-none focus:ring-0"
                             />
                             <button
-                              className="flex items-center justify-center h-full mx-2 px-5 py-1 my-auto bg-[#7839C5] text-white rounded-md font-bold text-sm"
+                              className="flex items-center justify-center h-full mx-2 px-5 py-1 my-auto bg-[#5F4DFF] text-white rounded-md font-bold text-sm"
                               onClick={handleSetClientSeed}
                             >
                               {translator("Change", language)}

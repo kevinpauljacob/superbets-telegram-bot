@@ -3,10 +3,15 @@ import { Transaction } from "@solana/web3.js";
 import { NextApiRequest, NextApiResponse } from "next";
 import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
+import GoogleProvider from "next-auth/providers/google";
 import { getCsrfToken } from "next-auth/react";
 
 export default async function auth(req: NextApiRequest, res: NextApiResponse) {
   const providers = [
+    GoogleProvider({
+      clientId: process.env.GOOGLE_CLIENT_ID!,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+    }),
     CredentialsProvider({
       name: "Solana",
       credentials: {
@@ -65,6 +70,7 @@ export default async function auth(req: NextApiRequest, res: NextApiResponse) {
     secret: process.env.NEXTAUTH_SECRET,
     callbacks: {
       async session({ session, token }) {
+        console.log(session.user)
         // @ts-ignore
         session.publicKey = token.sub;
 

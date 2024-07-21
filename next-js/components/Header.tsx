@@ -11,6 +11,9 @@ import Leaderboard from "/public/assets/Leaderboard1.svg";
 import Store from "/public/assets/store1.svg";
 import { useWallet } from "@solana/wallet-adapter-react";
 import HoverToolTip from "./ToolTipHover";
+import Thunder from "../public/assets/thunder.svg";
+import Trophy from "../public/assets/trophy.svg";
+import CoinSelector from "./CoinSelector";
 
 export function Header({
   sidebar,
@@ -34,9 +37,7 @@ export function Header({
   useEffect(() => {
     if (!userData && wallet && wallet.publicKey) getUserDetails();
   }, [wallet.publicKey]);
-  useEffect(() => {
-    localStorage.setItem("language", language);
-  }, [language]);
+
   return (
     <div
       className={`${
@@ -48,7 +49,7 @@ export function Header({
           sidebar ? "" : ""
         } w-full bg-[#121418] flex flex-col items-center py-4 px-4 border-b border-[#1E2220]`}
       >
-        <div className="w-full flex flex-row items-center justify-between">
+        <div className="w-full relative flex flex-row items-center justify-between">
           {/* right */}
           <div className="flex flex-row items-center cursor-pointer gap-2">
             <div
@@ -68,7 +69,9 @@ export function Header({
             </div>
             <RiMenuLine
               onClick={() => toggleSidebar()}
-              className={`hidden sm:flex text-white w-7 h-7 hover:text-[#8033D7] transition-all duration-75 ${sidebar ? "text-[#8033d7]" : "text-white"}`}
+              className={`hidden sm:flex text-white w-7 h-7 hover:text-[#8033D7] transition-all duration-75 ${
+                sidebar ? "text-[#8033d7]" : "text-white"
+              }`}
             />
             <span
               onClick={() => {
@@ -79,12 +82,14 @@ export function Header({
               FOMO
             </span>
           </div>
-
+          <div className="w-full justify-center absolute hidden md:flex">
+            <CoinSelector />
+          </div>
           {/* left  */}
           <div className="flex ml-2 lg:mr-2 sm:items-center items-end sm:flex-row">
             <div className="flex gap-8 mr-6 items-end">
               {/* Language selector */}
-              <button
+              {/* <button
                 onClick={() => {
                   setLangSelect(!langSelect);
                 }}
@@ -96,12 +101,12 @@ export function Header({
                   {language === "en"
                     ? "English"
                     : language === "ru"
-                      ? "Русский"
-                      : language === "ko"
-                        ? "한국인"
-                        : language === "ch"
-                          ? "中国人"
-                          : ""}
+                    ? "Русский"
+                    : language === "ko"
+                    ? "한국인"
+                    : language === "ch"
+                    ? "中国人"
+                    : ""}
                 </span>
                 <FaChevronDown className="w-3 h-3 text-white z-[150]" />
                 {langSelect && (
@@ -144,7 +149,7 @@ export function Header({
                     </span>
                   </div>
                 )}
-              </button>
+              </button> */}
               {/* <div className="flex sm:gap-8 flex-col sm:flex-row items-end sm:items-center">
               <span className="whitespace-nowrap flex items-center mt-0.5 sm:mt-0 gap-1 text-[#F0F0F0] text-opacity-75 font-medium text-sm sm:text-base">
                 <Key className="text-white text-opacity-50" />
@@ -167,44 +172,59 @@ export function Header({
                   onClick={() => {
                     router.push("store");
                   }}
-                  className={`hidden sm:flex items-center text-white text-opacity-50 hover:text-opacity-90 focus:text-opacity-90 rounded-full border-2 border-[rgba(255,255,255,0.05)] ${
-                    router.pathname.includes("store") ? "bg-[#7839C5]" : ""
-                  } hover:bg-[#555555] focus:bg-[#7839C5] transition-all font-medium text-sm p-2`}
+                  className={`hidden xl:flex items-center text-white text-opacity-50 hover:text-opacity-90 focus:text-opacity-90 rounded-full ${
+                    router.pathname.includes("store")
+                      ? "bg-[#5F4DFF] text-opacity-75"
+                      : ""
+                  } bg-white/5 hover:bg-[#555555] focus:bg-[#5F4DFF] transition-all font-medium text-sm p-3 rounded-[0.625rem] gap-1`}
                 >
-                  <Image src={Store} alt="Store" width={20} height={20} />
+                  <Image
+                    src={Thunder}
+                    alt="Store"
+                    className="w-4 h-4"
+                    width={20}
+                    height={20}
+                  />
+                  <span className="text-sm font-medium tracking-wider font-sans">
+                    Challenges
+                  </span>
                 </button>
-              </HoverToolTip>{" "}
+              </HoverToolTip>
               <HoverToolTip text="Leaderboard">
                 <button
                   onClick={() => {
                     router.push("leaderboard");
                   }}
-                  className={`hidden sm:flex items-center text-white text-opacity-50 hover:text-opacity-90 focus:text-opacity-90 rounded-full border-2 border-[rgba(255,255,255,0.05)] ${
+                  className={`hidden xl:flex items-center text-white text-opacity-50 hover:text-opacity-90 focus:text-opacity-90 rounded-full ${
                     router.pathname.includes("leaderboard")
-                      ? "bg-[#7839C5]"
+                      ? "bg-[#5F4DFF] text-opacity-75"
                       : ""
-                  } hover:bg-[#555555] focus:bg-[#7839C5] transition-all font-medium text-sm p-2`}
+                  } bg-white/5 hover:bg-[#555555] focus:bg-[#5F4DFF] transition-all font-medium text-sm p-3 rounded-[0.625rem] gap-2.5`}
                 >
                   <Image
-                    src={Leaderboard}
+                    src={Trophy}
                     alt="Leaderboard"
+                    className="w-4 h-4"
                     width={20}
                     height={20}
                   />
+                  <span className="text-sm font-medium tracking-wider font-sans">
+                    Leaderboard
+                  </span>
                 </button>
               </HoverToolTip>
-              <HoverToolTip text="Staking">
+              {/* <HoverToolTip text="Staking">
                 <button
                   onClick={() => {
                     router.push("stake");
                   }}
                   className={`hidden sm:flex items-center text-white text-opacity-50 hover:text-opacity-90 focus:text-opacity-90 rounded-full border-2 border-[rgba(255,255,255,0.05)] ${
-                    router.pathname.includes("stake") ? "bg-[#7839C5]" : ""
-                  } hover:bg-[#555555] focus:bg-[#7839C5] transition-all font-medium text-sm p-2`}
+                    router.pathname.includes("stake") ? "bg-[#5F4DFF]" : ""
+                  } hover:bg-[#555555] focus:bg-[#5F4DFF] transition-all font-medium text-sm p-2`}
                 >
                   <Image src={Staking} alt="Staking" width={20} height={20} />
                 </button>
-              </HoverToolTip>
+              </HoverToolTip> */}
               <ConnectWallet />
             </div>
           </div>

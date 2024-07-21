@@ -192,7 +192,7 @@ export default function VerifyDice2Modal({
                             className={`flex items-center justify-center cursor-pointer ${
                               bet.strikeNumbers?.length === 0 &&
                               bet.chosenNumbers?.includes(number)
-                                ? "bg-[#7839C5]"
+                                ? "bg-[#5F4DFF]"
                                 : bet.strikeNumbers?.includes(number) &&
                                   bet.chosenNumbers?.includes(number)
                                 ? "bg-black border-2 border-fomo-green"
@@ -314,7 +314,7 @@ export default function VerifyDice2Modal({
                               )}
                             </div>
                             <button
-                              className="bg-[#7839C5] rounded-md w-full text-sm text-white text-opacity-90 text-semibold py-3 disabled:opacity-70"
+                              className="bg-[#5F4DFF] rounded-md w-full text-sm text-white text-opacity-90 text-semibold py-3 disabled:opacity-70"
                               disabled
                             >
                               {translator("Rotate", language)}
@@ -329,7 +329,7 @@ export default function VerifyDice2Modal({
                               )}
                             </div>
                             <button
-                              className="bg-[#7839C5] rounded-md w-full text-sm text-white text-opacity-90 text-semibold py-3"
+                              className="bg-[#5F4DFF] rounded-md w-full text-sm text-white text-opacity-90 text-semibold py-3"
                               onClick={handleSeedClick}
                             >
                               {isLoading ? (
@@ -341,7 +341,7 @@ export default function VerifyDice2Modal({
                           </>
                         ) : (
                           <button
-                            className="bg-[#7839C5] rounded-md w-full text-sm text-white text-opacity-90 text-semibold py-3"
+                            className="bg-[#5F4DFF] rounded-md w-full text-sm text-white text-opacity-90 text-semibold py-3"
                             onClick={handleVerifyClick}
                           >
                             {isLoading ? (

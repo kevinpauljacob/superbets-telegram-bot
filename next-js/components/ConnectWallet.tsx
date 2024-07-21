@@ -61,6 +61,12 @@ export default function ConnectWallet() {
     }
   }, [wallet.connected]);
 
+  const handleTwitter = async () => {
+    // if (loading) return;
+    signIn("twitter", { redirect: false });
+    return;
+  };
+
   useEffect(() => {
     console.log(status);
   }, [status]);

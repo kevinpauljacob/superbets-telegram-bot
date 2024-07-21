@@ -92,7 +92,7 @@ export default function CreateCampaignModal() {
             </div>
             <button
               type="submit"
-              className="bg-[#7839C5] rounded-[5px] font-chakra uppercase font-semibold text-lg text-center text-white w-full mt-11 py-4"
+              className="bg-[#5F4DFF] rounded-[5px] font-chakra uppercase font-semibold text-lg text-center text-white w-full mt-11 py-4"
             >
               {translator("Create Campaign", language)}
             </button>

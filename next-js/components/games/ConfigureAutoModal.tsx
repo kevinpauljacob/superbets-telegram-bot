@@ -140,7 +140,7 @@ export default function ConfigureAutoModal() {
                     <span
                       className={`${
                         autoWinChangeReset
-                          ? "bg-[#7839C5] text-opacity-90"
+                          ? "bg-[#5F4DFF] text-opacity-90"
                           : "bg-[#292C32] hover:bg-[#47484A] focus:bg-[#47484A] text-opacity-50"
                       } text-xs font-chakra font-medium text-white transition-all rounded-[5px] py-1.5 px-4`}
                       onClick={() => {
@@ -153,7 +153,7 @@ export default function ConfigureAutoModal() {
                     <span
                       className={`${
                         !autoWinChangeReset
-                          ? "bg-[#7839C5] text-opacity-90"
+                          ? "bg-[#5F4DFF] text-opacity-90"
                           : "bg-[#292C32] hover:bg-[#47484A] focus:bg-[#47484A] text-opacity-50"
                       } mx-2 whitespace-nowrap text-xs font-chakra font-medium text-white text-opacity-50 transition-all rounded-[5px] py-1.5 px-4`}
                       onClick={() => setAutoWinChangeReset(false)}
@@ -209,7 +209,7 @@ export default function ConfigureAutoModal() {
                     <span
                       className={`${
                         autoLossChangeReset
-                          ? "bg-[#7839C5] text-opacity-90"
+                          ? "bg-[#5F4DFF] text-opacity-90"
                           : "bg-[#292C32] hover:bg-[#47484A] focus:bg-[#47484A] text-opacity-50"
                       } text-xs font-chakra font-medium text-white transition-all rounded-[5px] py-1.5 px-4`}
                       onClick={() => {
@@ -222,7 +222,7 @@ export default function ConfigureAutoModal() {
                     <span
                       className={`${
                         !autoLossChangeReset
-                          ? "bg-[#7839C5] text-opacity-90"
+                          ? "bg-[#5F4DFF] text-opacity-90"
                           : "bg-[#292C32] hover:bg-[#47484A] focus:bg-[#47484A] text-opacity-50"
                       } mx-2 whitespace-nowrap text-xs font-chakra font-medium text-white text-opacity-50 transition-all rounded-[5px] py-1.5 px-4`}
                       onClick={() => setAutoLossChangeReset(false)}
@@ -383,7 +383,7 @@ export default function ConfigureAutoModal() {
                       !autoStopProfit
                     }
                     onClick={onSubmit}
-                    className={`disabled:cursor-default disabled:opacity-70 hover:duration-75 hover:opacity-90 w-full h-[3.75rem] rounded-lg transition-all bg-[#7839C5] disabled:bg-[#4b2876] hover:bg-[#9361d1] focus:bg-[#602E9E] flex items-center justify-center font-chakra font-semibold text-xl tracking-wider text-white`}
+                    className={`disabled:cursor-default disabled:opacity-70 hover:duration-75 hover:opacity-90 w-full h-[3.75rem] rounded-lg transition-all bg-[#5F4DFF] disabled:bg-[#4b2876] hover:bg-[#9361d1] focus:bg-[#602E9E] flex items-center justify-center font-chakra font-semibold text-xl tracking-wider text-white`}
                   >
                     {translator("APPLY", language)}
                   </button>

@@ -105,7 +105,7 @@ export default function SubHeader() {
     <div className="flex flex-col w-full z-[80] absolute top-0 right-0">
       <div
         className={`${
-          router.pathname === "/" ? "flex" : "hidden md:flex"
+          router.pathname === "/" ? "hidden" : "hidden md:hidden"
         } w-full text-white h-[4.4rem] flex items-center border-b border-[#1E2220] px-4 lg:px-6 bg-[#121418]`}
       >
         <div className="flex w-full items-center overflow-x-auto no-scrollbar">
