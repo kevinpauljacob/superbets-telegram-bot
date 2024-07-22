@@ -61,6 +61,7 @@ export default function Limbo() {
     getBalance,
     getWalletBalance,
     setShowWalletModal,
+    setShowConnectModal,
     setShowAutoModal,
     autoWinChange,
     autoLossChange,
@@ -583,7 +584,7 @@ export default function Limbo() {
                   onClick={() => {
                     wallet.connected && status === "authenticated"
                       ? setShowWalletModal(true)
-                      : handleSignIn(wallet, walletModal);
+                      : setShowConnectModal(true)
                   }}
                   className="cursor-pointer"
                 >

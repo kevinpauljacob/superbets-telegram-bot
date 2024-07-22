@@ -5,8 +5,17 @@ const gameUserSchema = new Schema(
   {
     wallet: {
       type: String,
-      required: true,
       unique: true,
+    },
+    name: {
+      type: String,
+    },
+    email: {
+      type: String,
+      unique: true,
+    },
+    image: {
+      type: String,
     },
     deposit: [
       {
@@ -38,9 +47,22 @@ const gameUserSchema = new Schema(
       default: [],
       required: true,
     },
+    isWeb2User: {
+      type: Boolean,
+      default: true,
+      required: true,
+    },
   },
   { timestamps: true },
 );
+
+// gameUserSchema.pre("validate", function (next) {
+//   if (!this.wallet && !this.email) {
+//     this.invalidate("wallet", "Either wallet or email must be provided");
+//     this.invalidate("email", "Either wallet or email must be provided");
+//   }
+//   next();
+// });
 
 let GameUser =
   mongoose.models.GameUser || mongoose.model("GameUser", gameUserSchema);

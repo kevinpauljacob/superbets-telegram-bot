@@ -22,7 +22,7 @@ export const handleSignIn = async (
     if (!wallet.connected) {
       walletModal.setVisible(true);
     }
-
+    console.log("going sign in");
     if (!wallet.publicKey || !wallet.signTransaction) return;
 
     let nonce = await getCsrfToken();
@@ -34,7 +34,7 @@ export const handleSignIn = async (
 
     // Encode and send tx to signer, decode and sign
     let signedTx = await wallet.signTransaction(tx);
-
+    console.log("calling sign in");
     // Encode, send back, decode and verify signedTx signature
     await signIn("credentials", {
       redirect: false,
@@ -47,13 +47,18 @@ export const handleSignIn = async (
   }
 };
 
+export const handleGoogle = async () => {
+  signIn("google", { redirect: false });
+  return;
+};
+
 export default function ConnectWallet() {
   const { data: session, status } = useSession();
 
-  let wallet = useWallet();
+  const wallet = useWallet();
   const walletModal = useWalletModal();
 
-  const { language, setLanguage } = useGlobalContext();
+  const { language, setLanguage, setShowConnectModal } = useGlobalContext();
 
   useEffect(() => {
     if (wallet.connected && status == "unauthenticated") {
@@ -61,14 +66,9 @@ export default function ConnectWallet() {
     }
   }, [wallet.connected]);
 
-  const handleTwitter = async () => {
-    // if (loading) return;
-    signIn("twitter", { redirect: false });
-    return;
-  };
-
   useEffect(() => {
     console.log(status);
+    if (status === "unauthenticated") wallet.disconnect();
   }, [status]);
 
   return (
@@ -76,15 +76,16 @@ export default function ConnectWallet() {
       {(!session || !wallet.publicKey) && (
         <button
           onClick={() => {
-            handleSignIn(wallet, walletModal);
+            setShowConnectModal(true);
+            // handleSignIn(wallet, walletModal);
           }}
-          className="bg-[#192634] hover:bg-[#121D28] transition-all w-full sm:w-fit flex items-center rounded-md min-w-[8rem] h-10 px-5"
+          className="bg-[#192634] hover:bg-[#121D28] transition-all w-full sm:w-fit flex items-center rounded-md h-10 px-5"
         >
           {wallet.connected && status === "unauthenticated" ? (
             <Loader className="scale-75" />
           ) : (
             <span className="connect-wallet text-white font-semibold rounded-md text-sm">
-              {translator("Connect Wallet", language)}
+              {translator("Connect", language)}
             </span>
           )}
         </button>

@@ -31,8 +31,8 @@ const config: Config = {
         lg2: '1160px'
       },
       colors: {
-        "fomo-green": "#72F238",
-        "fomo-red": "#F1323E",
+        "fomo-green": "#3ED179",
+        "fomo-red": "#D13E40",
         "staking-secondary": "#94A3B8",
         "staking-bg": "#121418",
         "table-secondary": "#171A20"

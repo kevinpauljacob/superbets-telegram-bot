@@ -31,6 +31,7 @@ export function Header({
     getUserDetails,
     mobileSidebar,
     setMobileSidebar,
+    setShowConnectModal
   } = useGlobalContext();
   const [langSelect, setLangSelect] = useState(false);
 
@@ -51,7 +52,7 @@ export function Header({
       >
         <div className="w-full relative flex flex-row items-center justify-between">
           {/* right */}
-          <div className="flex flex-row items-center cursor-pointer gap-2">
+          <div className="flex flex-row items-center cursor-pointer gap-2 z-10">
             <div
               onClick={() => {
                 if (mobileSidebar === true) setMobileSidebar(false);
@@ -85,8 +86,9 @@ export function Header({
           <div className="w-full justify-center absolute hidden md:flex">
             <CoinSelector />
           </div>
+          <div className="w-5 h-5 bg-red-200 z-10" onClick={() => {setShowConnectModal(true)}}/>
           {/* left  */}
-          <div className="flex ml-2 lg:mr-2 sm:items-center items-end sm:flex-row">
+          <div className="flex ml-2 lg:mr-2 sm:items-center items-end sm:flex-row z-10">
             <div className="flex gap-8 mr-6 items-end">
               {/* Language selector */}
               {/* <button

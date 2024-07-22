@@ -120,12 +120,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       const stakingTier = Object.entries(stakingTiers).reduce((prev, next) => {
         return stakeAmount >= next[1]?.limit ? next : prev;
       })[0];
-      const isFomoToken =
-        tokenMint === SPL_TOKENS.find((t) => t.tokenName === "FOMO")?.tokenMint
-          ? true
-          : false;
       const houseEdge =
-        launchPromoEdge || isFomoToken
+        launchPromoEdge
           ? 0
           : houseEdgeTiers[parseInt(stakingTier)];
 

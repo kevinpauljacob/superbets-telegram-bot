@@ -80,7 +80,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           let usersInfo = await GameUser.aggregate([
             { $match: { isWeb2User: true } },
             { $unwind: "$deposit" },
-            { $match: { "deposit.tokenMint": "web2" } },
+            { $match: { "deposit.tokenMint": "WEB2" } },
             { $sort: { "deposit.amount": -1 } },
           ]);
 

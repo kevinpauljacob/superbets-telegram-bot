@@ -44,6 +44,7 @@ export const GameFooterInfo: React.FC<GameFooterProps> = ({
   const {
     coinData,
     setShowWalletModal,
+    setShowConnectModal,
     currentGame,
     houseEdge,
     language,
@@ -113,7 +114,7 @@ export const GameFooterInfo: React.FC<GameFooterProps> = ({
               onClick={() => {
                 wallet.connected && status === "authenticated"
                   ? setShowWalletModal(true)
-                  : handleSignIn(wallet, walletModal);
+                  : setShowConnectModal(true);
               }}
               className="cursor-pointer"
             >

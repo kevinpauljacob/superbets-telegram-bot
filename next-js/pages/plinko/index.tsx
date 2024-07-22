@@ -84,22 +84,22 @@ export default function Plinko() {
       width! >= 1440
         ? 750
         : width! >= 1024
-          ? 500
-          : width! >= 700
-            ? 620
-            : width! >= 600
-              ? 500
-              : 340,
+        ? 500
+        : width! >= 700
+        ? 620
+        : width! >= 600
+        ? 500
+        : 340,
     height:
       width! >= 1440
         ? 640
         : width! >= 1024
-          ? 450
-          : width! >= 700
-            ? 570
-            : width! >= 600
-              ? 450
-              : 330,
+        ? 450
+        : width! >= 700
+        ? 570
+        : width! >= 600
+        ? 450
+        : 330,
   };
 
   const ball = {
@@ -107,12 +107,12 @@ export default function Plinko() {
       (width! >= 1440
         ? 15
         : width! >= 1024
-          ? 11
-          : width! >= 700
-            ? 13
-            : width! >= 600
-              ? 11
-              : 8) /
+        ? 11
+        : width! >= 700
+        ? 13
+        : width! >= 600
+        ? 11
+        : 8) /
       (lines / 8),
   };
 
@@ -136,6 +136,7 @@ export default function Plinko() {
     getBalance,
     getWalletBalance,
     setShowWalletModal,
+    setShowConnectModal,
     setShowAutoModal,
     autoWinChange,
     autoLossChange,
@@ -195,23 +196,23 @@ export default function Plinko() {
       (width! >= 1440
         ? 9
         : width! >= 1024
-          ? 6
-          : width! >= 700
-            ? 8
-            : width! >= 600
-              ? 6
-              : 6) /
+        ? 6
+        : width! >= 700
+        ? 8
+        : width! >= 600
+        ? 6
+        : 6) /
       (lines / 8),
     pinGap:
       (width! >= 1440
         ? 75
         : width! >= 1024
-          ? 50
-          : width! >= 700
-            ? 65
-            : width! >= 600
-              ? 50
-              : 35) /
+        ? 50
+        : width! >= 700
+        ? 65
+        : width! >= 600
+        ? 50
+        : 35) /
       (lines / 8),
   };
 
@@ -379,12 +380,12 @@ export default function Plinko() {
     width! >= 1440
       ? 1.25
       : width! >= 1024
-        ? 0.8
-        : width! >= 700
-          ? 1.1
-          : width! >= 600
-            ? 0.8
-            : 0.6;
+      ? 0.8
+      : width! >= 700
+      ? 1.1
+      : width! >= 600
+      ? 0.8
+      : 0.6;
 
   multipliers.forEach((multiplier) => {
     const blockSize = 60 / (lines / 8); // height and width
@@ -393,12 +394,12 @@ export default function Plinko() {
         (width! >= 1440
           ? 75
           : width! >= 1024
-            ? 50
-            : width! >= 700
-              ? 65
-              : width! >= 600
-                ? 50
-                : 35) /
+          ? 50
+          : width! >= 700
+          ? 65
+          : width! >= 600
+          ? 50
+          : 35) /
           (lines / 8),
       lines * pinsConfig.pinGap + 15,
       blockSize,
@@ -621,9 +622,9 @@ export default function Plinko() {
             (autoWinChangeReset || autoLossChangeReset
               ? betAmt
               : autoBetCount === "inf"
-                ? Math.max(0, betAmt)
-                : betAmt *
-                  (autoLossChange !== null ? autoLossChange / 100.0 : 0));
+              ? Math.max(0, betAmt)
+              : betAmt *
+                (autoLossChange !== null ? autoLossChange / 100.0 : 0));
 
         // console.log("Current bet amount:", betAmt);
         // console.log("Auto loss change:", autoLossChange);
@@ -936,7 +937,7 @@ export default function Plinko() {
                       onClick={() => {
                         wallet.connected && status === "authenticated"
                           ? setShowWalletModal(true)
-                          : handleSignIn(wallet, walletModal);
+                          : setShowConnectModal(true)
                       }}
                       className="cursor-pointer"
                     >

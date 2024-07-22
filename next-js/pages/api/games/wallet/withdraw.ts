@@ -78,6 +78,12 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           error: "User wallet not authenticated",
         });
 
+      if (tokenMint === "WEB2")
+        return res.status(405).json({
+          success: false,
+          message: "Withdraw not allowed for this token!",
+        });
+
       if (
         !wallet ||
         !transactionBase64 ||
@@ -284,9 +290,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
       // netTransfer = 1000000000;
 
-      const tokenName = SPL_TOKENS.find(
-        (t) => t.tokenMint === tokenMint,
-      )?.tokenName!;
+      const tokenName = SPL_TOKENS.find((t) => t.tokenMint === tokenMint)
+        ?.tokenName!;
 
       if (netTransfer > timeWeightedAvgLimit[tokenName]) {
         await Deposit.create({
@@ -348,7 +353,10 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
       return res.json({
         success: true,
-        message: `${amount} ${SPL_TOKENS.find((token) => token.tokenMint === tokenMint)?.tokenName ?? ""} successfully withdrawn!`,
+        message: `${amount} ${
+          SPL_TOKENS.find((token) => token.tokenMint === tokenMint)
+            ?.tokenName ?? ""
+        } successfully withdrawn!`,
       });
     } catch (e: any) {
       console.log(e);

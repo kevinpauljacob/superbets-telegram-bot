@@ -16,6 +16,7 @@ export default function CoinSelector() {
 
   const {
     setShowWalletModal,
+    setShowConnectModal,
     setLiveBets,
     language,
     setSelectedCoin,
@@ -142,7 +143,7 @@ export default function CoinSelector() {
         onClick={() => {
           wallet.connected && status === "authenticated"
             ? setShowWalletModal(true)
-            : handleSignIn(wallet, walletModal);
+            : setShowConnectModal(true)
         }}
         className="flex items-center h-[2.3rem] md:h-10 px-5 md:px-4 py-0 md:py-2 gap-1 md:gap-1.5 bg-[#5F4DFF] hover:bg-[#9361d1] focus:bg-[#602E9E] transition-all cursor-pointer rounded-[5px]"
       >

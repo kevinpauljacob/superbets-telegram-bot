@@ -26,7 +26,11 @@ import {
   successCustom,
   warningCustom,
 } from "@/components/toasts/ToastGroup";
-import { formatNumber, translator, truncateNumber } from "@/context/transactions";
+import {
+  formatNumber,
+  translator,
+  truncateNumber,
+} from "@/context/transactions";
 import { useSession } from "next-auth/react";
 import { GameType } from "@/utils/provably-fair";
 import { handleSignIn } from "@/components/ConnectWallet";
@@ -61,6 +65,7 @@ export default function Wheel() {
     language,
     enableSounds,
     setShowWalletModal,
+    setShowConnectModal,
     updatePNL,
     minGameAmount,
   } = useGlobalContext();
@@ -175,8 +180,14 @@ export default function Wheel() {
         }),
       });
 
-      const { success, message, result, strikeNumber, strikeMultiplier, amountWon } =
-        await response.json();
+      const {
+        success,
+        message,
+        result,
+        strikeNumber,
+        strikeMultiplier,
+        amountWon,
+      } = await response.json();
 
       spinWheel(strikeNumber);
       await new Promise((resolve) => setTimeout(resolve, 3000));
@@ -191,7 +202,10 @@ export default function Wheel() {
       );
       setStrikeMultiplierColor(riskObject ? riskObject.color : "#ffffff");
       if (result == "Won") {
-        successCustom(translator(message, language) + ` ${formatNumber(amountWon)} ${selectedCoin.tokenName}`);
+        successCustom(
+          translator(message, language) +
+            ` ${formatNumber(amountWon)} ${selectedCoin.tokenName}`,
+        );
         soundAlert("/sounds/win.wav", !enableSounds);
       } else errorCustom(translator(message, language));
 
@@ -692,7 +706,7 @@ export default function Wheel() {
                   onClick={() => {
                     wallet.connected && status === "authenticated"
                       ? setShowWalletModal(true)
-                      : handleSignIn(wallet, walletModal);
+                      : setShowConnectModal(true);
                   }}
                   className="cursor-pointer"
                 >

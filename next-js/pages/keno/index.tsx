@@ -23,7 +23,11 @@ import {
   successCustom,
   warningCustom,
 } from "@/components/toasts/ToastGroup";
-import { formatNumber, translator, truncateNumber } from "@/context/transactions";
+import {
+  formatNumber,
+  translator,
+  truncateNumber,
+} from "@/context/transactions";
 import { useSession } from "next-auth/react";
 import { GameType } from "@/utils/provably-fair";
 import { handleSignIn } from "@/components/ConnectWallet";
@@ -59,6 +63,7 @@ export default function Keno() {
     language,
     enableSounds,
     setShowWalletModal,
+    setShowConnectModal,
     updatePNL,
     minGameAmount,
   } = useGlobalContext();
@@ -211,8 +216,14 @@ export default function Keno() {
         }),
       });
 
-      const { success, message, result, strikeNumbers, strikeMultiplier, amountWon } =
-        await response.json();
+      const {
+        success,
+        message,
+        result,
+        strikeNumbers,
+        strikeMultiplier,
+        amountWon,
+      } = await response.json();
 
       if (success != true) {
         throw new Error(translator(message, language));
@@ -233,7 +244,11 @@ export default function Keno() {
           setStrikeNumbers((prevNumbers) => [...prevNumbers, number]);
         }
       }
-      if (result == "Won") successCustom(translator(message, language) + ` ${formatNumber(amountWon)} ${selectedCoin.tokenName}`);
+      if (result == "Won")
+        successCustom(
+          translator(message, language) +
+            ` ${formatNumber(amountWon)} ${selectedCoin.tokenName}`,
+        );
       else errorCustom(translator(message, language));
 
       const win = result === "Won";
@@ -756,7 +771,7 @@ export default function Keno() {
                   onClick={() => {
                     wallet.connected && status === "authenticated"
                       ? setShowWalletModal(true)
-                      : handleSignIn(wallet, walletModal);
+                      : setShowConnectModal(true);
                   }}
                   className="cursor-pointer"
                 >

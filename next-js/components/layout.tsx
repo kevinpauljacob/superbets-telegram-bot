@@ -47,6 +47,7 @@ import Roulette2ProvablyFairModal from "./games/roulette2/Roulette2ProvablyFairM
 import { maxPayouts, minAmtFactor } from "@/context/config";
 import VerifyPlinkoModal, { Plinko } from "./games/Plinko/VerifyPlinkoModal";
 import PlinkoProvablyFairModal from "./games/Plinko/PlinkoProvablyFairModal";
+import ConnectModal from "./games/ConnectModal";
 
 interface Props {
   children: ReactNode;
@@ -60,6 +61,7 @@ export default function ({ children }: Props) {
 
   const {
     showWalletModal,
+    showConnectModal,
     showCreateCampaignModal,
     setShowCreateCampaignModal,
     getBalance,
@@ -272,6 +274,7 @@ export default function ({ children }: Props) {
         <MobileNavbar sidebar={mobileSidebar} toggleSidebar={toggleSidebar} />
       </div>
       {showWalletModal && <BalanceModal />}
+      {showConnectModal && <ConnectModal />}
       {showCreateCampaignModal && <CreateCampaignModal />}
       {/* verify modals  */}
       {verifyModalData.game === GameType.coin ? (

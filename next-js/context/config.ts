@@ -31,12 +31,12 @@ const SPL_TOKENS: Array<spl_token> = [
     decimal: 9,
     icon: FOMO,
   },
-  // {
-  //   tokenName: "USDT",
-  //   tokenMint: "Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB",
-  //   decimal: 6,
-  //   icon: "https://upload.wikimedia.org/wikipedia/commons/0/01/USDT_Logo.png",
-  // },
+  {
+    tokenName: "WEB2",
+    tokenMint: "WEB2",
+    decimal: 6,
+    icon: FOMO,
+  },
 ];
 
 export const stakingTiers: Record<
@@ -276,6 +276,20 @@ if (environment === "development") {
       [GameType.mines]: 1,
       [GameType.hilo]: 1,
     },
+    [GameTokens.WEB2]: {
+      [GameType.dice]: 1,
+      [GameType.coin]: 1,
+      [GameType.options]: 1,
+      [GameType.dice2]: 1,
+      [GameType.wheel]: 1,
+      [GameType.plinko]: 1,
+      [GameType.limbo]: 1,
+      [GameType.roulette1]: 1,
+      [GameType.roulette2]: 1,
+      [GameType.keno]: 1,
+      [GameType.mines]: 1,
+      [GameType.hilo]: 1,
+    },
   };
 
   wsEndpoint = "wss://fomo-staking-1.onrender.com";
@@ -337,6 +351,20 @@ if (environment === "development") {
       [GameType.keno]: 125,
       [GameType.mines]: 125,
       [GameType.hilo]: 125,
+    },
+    [GameTokens.WEB2]: {
+      [GameType.dice]: 1,
+      [GameType.coin]: 1,
+      [GameType.options]: 1,
+      [GameType.dice2]: 1,
+      [GameType.wheel]: 1,
+      [GameType.plinko]: 1,
+      [GameType.limbo]: 1,
+      [GameType.roulette1]: 1,
+      [GameType.roulette2]: 1,
+      [GameType.keno]: 1,
+      [GameType.mines]: 1,
+      [GameType.hilo]: 1,
     },
   };
 

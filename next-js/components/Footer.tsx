@@ -19,7 +19,7 @@ function Footer() {
   const wallet = useWallet();
   const walletModal = useWalletModal();
 
-  const { language, setLanguage, setShowWalletModal } = useGlobalContext();
+  const { language, setLanguage, setShowWalletModal, setShowConnectModal } = useGlobalContext();
   const [langSelect, setLangSelect] = useState(false);
   const router = useRouter();
 
@@ -69,7 +69,7 @@ function Footer() {
                   onClick={() => {
                     wallet.connected && status === "authenticated"
                       ? setShowWalletModal(true)
-                      : handleSignIn(wallet, walletModal);
+                      : setShowConnectModal(true)
                   }}
                 >
                   {translator("Wallet", language)}

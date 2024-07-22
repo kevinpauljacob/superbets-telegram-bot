@@ -139,6 +139,9 @@ interface GlobalContextProps {
 
   openPFModal: boolean;
   setOpenPFModal: React.Dispatch<React.SetStateAction<boolean>>;
+
+  showConnectModal: boolean;
+  setShowConnectModal: React.Dispatch<React.SetStateAction<boolean>>;
   //configure auto
   showAutoModal: boolean;
   setShowAutoModal: React.Dispatch<React.SetStateAction<boolean>>;
@@ -269,6 +272,8 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
   const [mobileSidebar, setMobileSidebar] = useState<boolean>(false);
 
   const [openPFModal, setOpenPFModal] = useState<boolean>(false);
+
+  const [showConnectModal, setShowConnectModal] = useState<boolean>(false);
 
   // configure auto
   const [showAutoModal, setShowAutoModal] = useState<boolean>(false);
@@ -415,20 +420,24 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
 
   const updateLivePrices = async () => {
     let prices = [];
-    let data = await (
-      await fetch(
-        `https://price.jup.ag/v6/price?ids=${SPL_TOKENS.map(
-          (x) => x.tokenMint,
-        ).join(",")}&vsToken=USDC`,
-      )
-    ).json();
+    try {
+      let data = await (
+        await fetch(
+          `https://price.jup.ag/v6/price?ids=${SPL_TOKENS.map(
+            (x) => x.tokenMint,
+          ).join(",")}&vsToken=USDC`,
+        )
+      ).json();
 
-    for (let token of SPL_TOKENS) {
-      let price = data?.data[token.tokenMint]?.price ?? 0;
-      prices.push({ mintAddress: token.tokenMint, price: price });
+      for (let token of SPL_TOKENS) {
+        let price = data?.data[token.tokenMint]?.price ?? 0;
+        prices.push({ mintAddress: token.tokenMint, price: price });
+      }
+
+      setLiveTokenPrice(prices);
+    } catch (e) {
+      console.error("Could not fetch prices!");
     }
-
-    setLiveTokenPrice(prices);
     return prices;
   };
 
@@ -547,6 +556,8 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
         setSidebar,
         mobileSidebar,
         setMobileSidebar,
+        showConnectModal,
+        setShowConnectModal,
         openPFModal,
         setOpenPFModal,
         showAutoModal,
@@ -740,9 +751,9 @@ export const translationsMap = {
     ko: "영어",
     ch: "英语",
   },
-  "Connect Wallet": {
-    ru: "Подключить кошелек",
-    ko: "지갑 연결",
+  Connect: {
+    ru: "Подключить",
+    ko: "지갑",
     ch: "连接钱包",
   },
   Back: {

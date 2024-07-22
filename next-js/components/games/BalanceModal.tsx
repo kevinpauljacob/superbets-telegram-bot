@@ -201,6 +201,7 @@ export default function BalanceModal() {
       <AdaptiveModalContent className="bg-[#121418] sm:overflow-y-auto min-h-[50dvh] max-h-[80dvh] w-full pb-6">
         <div className="flex flex-1 px-6 sm:p-0 justify-center overflow-y-auto nobar">
           <div className="flex flex-col w-full">
+            {/* header and logo  */}
             <div className="flex justify-center sm:justify-start items-center w-full mb-7 gap-2 mt-2">
               <Image
                 src={"/assets/wallet_color.png"}
@@ -213,6 +214,7 @@ export default function BalanceModal() {
               </span>
             </div>
 
+            {/* option buttons  */}
             <div className="w-full flex mb-8 mt-2 gap-2">
               <button
                 className={`w-full border-2 rounded-md py-2 text-white font-semibold text-xs sm:text-sm transition hover:duration-75 ease-in-out ${
@@ -264,6 +266,7 @@ export default function BalanceModal() {
                 autoComplete="off"
                 onSubmit={methods.handleSubmit(onSubmit)}
               >
+                {/* coin selector  */}
                 {actionType !== "History" && (
                   <div className="relative mb-0 flex w-full flex-col rounded-md">
                     <label className="mb-1 font-changa font-medium text-xs text-white text-opacity-90 ">
@@ -288,45 +291,49 @@ export default function BalanceModal() {
 
                     {isSelectModalOpen && (
                       <div className="absolute z-[100] top-[calc(100%+10px)] left-0 w-full bg-[#202329] rounded-[5px] border-2 border-white border-opacity-10">
-                        {SPL_TOKENS.map((token, index) => (
-                          <div
-                            key={index}
-                            className="w-full h-11 flex flex-row items-center border-y  border-white border-opacity-10  bg-[#202329] px-4 py-2 text-[#94A3B8] text-base font-chakra gap-2 cursor-pointer hover:bg-[#292C32]"
-                            onClick={() => {
-                              setSelectedToken(token);
-                              setIsSelectModalOpen(false);
-                            }}
-                          >
-                            <token.icon className="" />
-                            <span>{token.tokenName}</span>
-                            <div className="grow" />
-                            <span className="text-gray-400">
-                              {actionType === "Deposit" &&
-                                truncateNumber(
-                                  userTokens.find(
-                                    (t) =>
-                                      t?.mintAddress &&
-                                      t?.mintAddress === token?.tokenMint,
-                                  )?.balance ?? 0,
-                                )}
-                              {actionType === "Withdraw" &&
-                                truncateNumber(
-                                  coinData
-                                    ? coinData.find(
-                                        (coin) =>
-                                          coin?.tokenMint &&
-                                          coin?.tokenMint === token?.tokenMint,
-                                      )?.amount ?? 0
-                                    : 0,
-                                )}
-                            </span>
-                          </div>
-                        ))}
+                        {SPL_TOKENS.filter((t) => t.tokenMint !== "WEB2").map(
+                          (token, index) => (
+                            <div
+                              key={index}
+                              className="w-full h-11 flex flex-row items-center border-y  border-white border-opacity-10  bg-[#202329] px-4 py-2 text-[#94A3B8] text-base font-chakra gap-2 cursor-pointer hover:bg-[#292C32]"
+                              onClick={() => {
+                                setSelectedToken(token);
+                                setIsSelectModalOpen(false);
+                              }}
+                            >
+                              <token.icon className="" />
+                              <span>{token.tokenName}</span>
+                              <div className="grow" />
+                              <span className="text-gray-400">
+                                {actionType === "Deposit" &&
+                                  truncateNumber(
+                                    userTokens.find(
+                                      (t) =>
+                                        t?.mintAddress &&
+                                        t?.mintAddress === token?.tokenMint,
+                                    )?.balance ?? 0,
+                                  )}
+                                {actionType === "Withdraw" &&
+                                  truncateNumber(
+                                    coinData
+                                      ? coinData.find(
+                                          (coin) =>
+                                            coin?.tokenMint &&
+                                            coin?.tokenMint ===
+                                              token?.tokenMint,
+                                        )?.amount ?? 0
+                                      : 0,
+                                  )}
+                              </span>
+                            </div>
+                          ),
+                        )}
                       </div>
                     )}
                   </div>
                 )}
 
+                {/* wallet box  */}
                 {actionType !== "History" && (
                   <div className="mb-0 flex w-full flex-col">
                     <label className="mb-1 font-changa font-medium text-xs text-white text-opacity-90">

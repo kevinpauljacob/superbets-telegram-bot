@@ -356,6 +356,11 @@ export const deposit = async (
     return { success: true, message: "Wallet not connected" };
   }
 
+  if (tokenMint === "WEB2") {
+    errorCustom("Deposit not allowed for this token!");
+    return { success: true, message: "Deposit not allowed for this token!" };
+  }
+
   try {
     let { transaction, blockhashWithExpiryBlockHeight } =
       await createDepositTxn(
@@ -419,6 +424,11 @@ export const withdraw = async (
   if (!wallet.publicKey) {
     errorCustom("Wallet not connected");
     return { success: true, message: "Wallet not connected" };
+  }
+
+  if (tokenMint === "WEB2") {
+    errorCustom("Withdraw not allowed for this token!");
+    return { success: true, message: "Withdraw not allowed for this token!" };
   }
 
   try {

@@ -59,6 +59,7 @@ export default function Dice2() {
     selectedCoin,
     enableSounds,
     setShowWalletModal,
+    setShowConnectModal,
     updatePNL,
     minGameAmount,
   } = useGlobalContext();
@@ -177,7 +178,8 @@ export default function Dice2() {
         }),
       });
 
-      const { success, message, result, strikeNumber, amountWon } = await response.json();
+      const { success, message, result, strikeNumber, amountWon } =
+        await response.json();
 
       if (success !== true) {
         throw new Error(message);
@@ -185,7 +187,10 @@ export default function Dice2() {
 
       const win = result === "Won";
       if (win) {
-        successCustom(translator(message, language) + ` ${formatNumber(amountWon)} ${selectedCoin?.tokenName}`);
+        successCustom(
+          translator(message, language) +
+            ` ${formatNumber(amountWon)} ${selectedCoin?.tokenName}`,
+        );
         soundAlert("/sounds/win.wav", !enableSounds);
       } else errorCustom(translator(message, language));
       const newBetResult = { result: strikeNumber, win };
@@ -609,7 +614,7 @@ export default function Dice2() {
                   onClick={() => {
                     wallet.connected && status === "authenticated"
                       ? setShowWalletModal(true)
-                      : handleSignIn(wallet, walletModal);
+                      : setShowConnectModal(true);
                   }}
                   className="cursor-pointer"
                 >
