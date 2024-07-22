@@ -25,12 +25,12 @@ const SPL_TOKENS: Array<spl_token> = [
     decimal: 6,
     icon: USDC,
   },
-  {
-    tokenName: "FOMO",
-    tokenMint: "Cx9oLynYgC3RrgXzin7U417hNY9D6YB1eMGw4ZMbWJgw",
-    decimal: 9,
-    icon: FOMO,
-  },
+  // {
+  //   tokenName: "FOMO",
+  //   tokenMint: "Cx9oLynYgC3RrgXzin7U417hNY9D6YB1eMGw4ZMbWJgw",
+  //   decimal: 9,
+  //   icon: FOMO,
+  // },
   {
     tokenName: "WEB2",
     tokenMint: "WEB2",

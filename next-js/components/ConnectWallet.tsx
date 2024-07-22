@@ -13,6 +13,17 @@ import {
 } from "@/context/transactions";
 import { useGlobalContext } from "./GlobalContext";
 import Loader from "./games/Loader";
+import { Session } from "next-auth";
+
+export interface SessionUser {
+  user: {
+    name: string;
+    email: string;
+    image: string;
+    isWeb2User: boolean;
+    wallet: string;
+  };
+}
 
 export const handleSignIn = async (
   wallet: WalletContextState,
@@ -53,12 +64,11 @@ export const handleGoogle = async () => {
 };
 
 export default function ConnectWallet() {
-  const { data: session, status } = useSession();
-
   const wallet = useWallet();
   const walletModal = useWalletModal();
 
-  const { language, setLanguage, setShowConnectModal } = useGlobalContext();
+  const { language, setLanguage, setShowConnectModal, session, status } =
+    useGlobalContext();
 
   useEffect(() => {
     if (wallet.connected && status == "unauthenticated") {

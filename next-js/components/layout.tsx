@@ -57,7 +57,6 @@ export default function ({ children }: Props) {
   const router = useRouter();
   const wallet = useWallet();
   const game = router.pathname.split("/")[1];
-  const { data: session } = useSession();
 
   const {
     showWalletModal,
@@ -91,6 +90,8 @@ export default function ({ children }: Props) {
     selectedCoin,
     minGameAmount,
     setMinGameAmount,
+    session,
+    status,
   } = useGlobalContext();
 
   const [modalData, setModalData] = useState({
@@ -150,7 +151,10 @@ export default function ({ children }: Props) {
 
   useEffect(() => {
     (async () => {
-      if (wallet?.publicKey && session?.user) {
+      if (
+        (wallet?.publicKey && session?.user?.wallet) ||
+        session?.user?.email
+      ) {
         const pfData = await getProvablyFairData();
         if (pfData) setModalData(pfData);
       }

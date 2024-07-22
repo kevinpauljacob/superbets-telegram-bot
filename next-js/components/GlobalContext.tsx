@@ -14,6 +14,8 @@ import { errorCustom } from "./toasts/ToastGroup";
 import SOL from "@/public/assets/coins/SOL";
 import { GameType } from "@/utils/provably-fair";
 import { SPL_TOKENS } from "@/context/config";
+import { useSession } from "next-auth/react";
+import { SessionUser } from "./ConnectWallet";
 
 export interface GameStat {
   game: GameType;
@@ -215,6 +217,9 @@ interface GlobalContextProps {
     multiplier: number,
   ) => void;
   liveTokenPrice: LiveTokenPrice[];
+
+  session: SessionUser | null;
+  status: "loading" | "authenticated" | "unauthenticated";
 }
 
 const GlobalContext = createContext<GlobalContextProps | undefined>(undefined);
@@ -225,6 +230,10 @@ interface GlobalProviderProps {
 
 export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
   const wallet = useWallet();
+  const { data: session, status } = useSession() as {
+    data: SessionUser | null;
+    status: "loading" | "authenticated" | "unauthenticated";
+  };
 
   const [loading, setLoading] = useState(false);
   const [language, setLanguage] = useState<"en" | "ru" | "ko" | "ch">("en");
@@ -465,9 +474,13 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
 
   const getBalance = async () => {
     setLoading(true);
+    console.log("User", session?.user);
     try {
-      if (wallet?.publicKey)
-        fetch(`/api/games/user/getUser?wallet=${wallet.publicKey?.toBase58()}`)
+      if (wallet?.publicKey || session?.user.email) {
+        let query = session?.user?.wallet
+          ? `wallet=${wallet.publicKey?.toBase58()}`
+          : `email=${session?.user?.email}`;
+        fetch(`/api/games/user/getUser?${query}`)
           .then((res) => res.json())
           .then((balance) => {
             if (
@@ -487,6 +500,7 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
             }
             setLoading(false);
           });
+      }
     } catch (e) {
       // console.log("Could not fetch balance.");
       setLoading(false);
@@ -496,33 +510,34 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
   };
 
   const getProvablyFairData = async () => {
-    if (wallet?.publicKey)
-      try {
-        const res = await fetch(`/api/games/gameSeed`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            wallet: wallet.publicKey.toBase58(),
-          }),
-        });
+    let query = {};
+    if (session?.user?.wallet && wallet?.publicKey)
+      query = { wallet: wallet.publicKey.toBase58() };
+    else if (session?.user?.email) query = { email: session?.user?.email };
+    try {
+      const res = await fetch(`/api/games/gameSeed`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(query),
+      });
 
-        let data = await res.json();
-        if (data.success) return data;
-        else return null;
-      } catch (e) {
-        errorCustom(
-          translator("Unable to fetch provably fair data.", language),
-        );
-        return null;
-      }
+      let data = await res.json();
+      if (data.success) return data;
+      else return null;
+    } catch (e) {
+      errorCustom(translator("Unable to fetch provably fair data.", language));
+      return null;
+    }
   };
   console.log(openPFModal);
 
   return (
     <GlobalContext.Provider
       value={{
+        session,
+        status,
         loading,
         setLoading,
         language,

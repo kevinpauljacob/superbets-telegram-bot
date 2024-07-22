@@ -19,6 +19,7 @@ import {
   warningCustom,
 } from "@/components/toasts/ToastGroup";
 import { SPL_TOKENS } from "./config";
+import { SessionUser } from "@/components/ConnectWallet";
 
 export const connection = new Connection(process.env.NEXT_PUBLIC_RPC!);
 
@@ -589,19 +590,23 @@ export const placeBet = async (
 };
 export const placeFlip = async (
   wallet: WalletContextState,
+  session: SessionUser | null,
   amount: number,
   tokenMint: string,
   flipType: string, // heads / tails
 ) => {
   try {
-    if (!wallet.publicKey) throw new Error("Wallet not connected");
+    if (session?.user?.wallet && !wallet.publicKey) throw new Error("Wallet not connected");
+
+    if (!session?.user?.isWeb2User && tokenMint === "WEB2") throw new Error("You cannot bet with this token!");
 
     if (flipType == null) throw new Error("Invalid flip type");
 
     const res = await fetch(`/api/games/coin`, {
       method: "POST",
       body: JSON.stringify({
-        wallet: wallet.publicKey,
+        wallet: wallet?.publicKey,
+        email: session?.user?.email, 
         amount,
         flipType,
         tokenMint: tokenMint,

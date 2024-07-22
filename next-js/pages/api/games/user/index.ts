@@ -2,7 +2,7 @@ import { NextApiRequest, NextApiResponse } from "next";
 import { v4 as uuidv4 } from "uuid";
 import User from "../../../../models/games/gameUser";
 import connectDatabase from "../../../../utils/database";
-import { authenticateUser } from "@/utils/authenticate";
+import authenticateUser from "../../../../utils/authenticate";
 
 export default async function handler(
   req: NextApiRequest,
@@ -20,7 +20,7 @@ export default async function handler(
 
     await connectDatabase();
 
-    let user;
+    let user: any;
 
     if (email) user = await User.findOne({ email });
     else if (wallet) user = await User.findOne({ wallet });

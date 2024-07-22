@@ -52,32 +52,32 @@ async function updateGameStats(
       );
   }
 
-  const referralInfo = await User.findOneAndUpdate(
-    { wallet },
-    {
-      $inc: {
-        [`volume.${tokenMint}`]: amount,
-        [`feeGenerated.${tokenMint}`]: feeGenerated,
-      },
-    },
-    { upsert: true, new: true },
-  );
+  // const referralInfo = await User.findOneAndUpdate(
+  //   { wallet },
+  //   {
+  //     $inc: {
+  //       [`volume.${tokenMint}`]: amount,
+  //       [`feeGenerated.${tokenMint}`]: feeGenerated,
+  //     },
+  //   },
+  //   { upsert: true, new: true },
+  // );
 
-  for (let i = 0; i < referralInfo.referredByChain.length; i++) {
-    const _id = referralInfo.referredByChain[i];
+  // for (let i = 0; i < referralInfo.referredByChain.length; i++) {
+  //   const _id = referralInfo.referredByChain[i];
 
-    const earnings = Decimal.mul(commissionLevels[i], feeGenerated).toNumber();
+  //   const earnings = Decimal.mul(commissionLevels[i], feeGenerated).toNumber();
 
-    await Campaign.findOneAndUpdate(
-      { _id },
-      {
-        $inc: {
-          [`totalEarnings.${tokenMint}`]: earnings,
-          [`unclaimedEarnings.${tokenMint}`]: earnings,
-        },
-      },
-    );
-  }
+  //   await Campaign.findOneAndUpdate(
+  //     { _id },
+  //     {
+  //       $inc: {
+  //         [`totalEarnings.${tokenMint}`]: earnings,
+  //         [`unclaimedEarnings.${tokenMint}`]: earnings,
+  //       },
+  //     },
+  //   );
+  // }
 }
 
 export default updateGameStats;

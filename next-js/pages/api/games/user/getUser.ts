@@ -14,9 +14,17 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     try {
       await connectDatabase();
 
-      const wallet = req.query.wallet;
+      const wallet = req?.query?.wallet;
+      const email = req?.query?.email;
 
-      let user = await User.findOne({ wallet });
+      if (!wallet && !email)
+        return res
+          .status(400)
+          .json({ success: false, message: "Missing parameters" });
+
+      let user;
+      if (wallet) user = await User.findOne({ wallet });
+      else user = await User.findOne({ email });
 
       let deposit = [];
       if (user) {

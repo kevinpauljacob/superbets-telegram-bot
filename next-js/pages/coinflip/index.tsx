@@ -38,7 +38,6 @@ const Progress = dynamic(() => import("../../components/games/Progressbar"), {
 export default function Flip() {
   const wallet = useWallet();
   const methods = useForm();
-  const { data: session, status } = useSession();
 
   const {
     getBalance,
@@ -63,6 +62,8 @@ export default function Flip() {
     language,
     updatePNL,
     enableSounds,
+    session,
+    status,
   } = useGlobalContext();
 
   const [betAmt, setBetAmt] = useState<number | undefined>();
@@ -81,7 +82,12 @@ export default function Flip() {
 
   const bet = async () => {
     try {
-      if (!wallet.connected || !wallet.publicKey) {
+      if (!session?.user?.isWeb2User && selectedCoin.tokenMint === "WEB2") {
+        throw new Error(
+          translator("You cannot bet with this token!", language),
+        );
+      }
+      if (session?.user?.wallet && (!wallet.connected || !wallet.publicKey)) {
         throw new Error(translator("Wallet not connected", language));
       }
       if (!betAmt || betAmt === 0) {
@@ -94,6 +100,7 @@ export default function Flip() {
       // console.log("Placing Flip");
       let response = await placeFlip(
         wallet,
+        session,
         betAmt,
         selectedCoin.tokenMint,
         betType === "Heads" ? "heads" : "tails",
@@ -109,7 +116,10 @@ export default function Flip() {
         () => {
           if (response.success) {
             response?.data?.result == "Won"
-              ? successCustom(translator(response?.message, language) + ` ${response?.data?.amountWon} ${selectedCoin?.tokenName}`)
+              ? successCustom(
+                  translator(response?.message, language) +
+                    ` ${response?.data?.amountWon} ${selectedCoin?.tokenName}`,
+                )
               : errorCustom(translator(response?.message, language));
 
             const win = response?.data?.result === "Won";
@@ -222,9 +232,9 @@ export default function Flip() {
             (autoWinChangeReset || autoLossChangeReset
               ? betAmt
               : autoBetCount === "inf"
-                ? Math.max(0, betAmt)
-                : betAmt *
-                  (autoLossChange !== null ? autoLossChange / 100.0 : 0));
+              ? Math.max(0, betAmt)
+              : betAmt *
+                (autoLossChange !== null ? autoLossChange / 100.0 : 0));
 
         // console.log("Current bet amount:", betAmt);
         // console.log("Auto loss change:", autoLossChange);
@@ -276,10 +286,6 @@ export default function Flip() {
   }, [startAuto, autoBetCount]);
 
   const onSubmit = async (data: any) => {
-    if (!wallet.publicKey) {
-      errorCustom(translator("Wallet not connected", language));
-      return;
-    }
     if (!betAmt || betAmt === 0) {
       errorCustom(translator("Set Amount.", language));
       return;
@@ -496,10 +502,10 @@ export default function Flip() {
               {flipping
                 ? `${translator("Flipping", language)}...`
                 : result
-                  ? result === "Won"
-                    ? translator("You Won!", language)
-                    : translator("You Lost!", language)
-                  : ""}
+                ? result === "Won"
+                  ? translator("You Won!", language)
+                  : translator("You Lost!", language)
+                : ""}
             </span>
             <div className="flex items-center gap-2">
               {betResults.map((result, index) => (
@@ -547,16 +553,16 @@ export default function Flip() {
                 betType && loading
                   ? "translateZ1"
                   : result
-                    ? result === "Won"
-                      ? betType === "Tails"
-                        ? "z-[100]"
-                        : "z-[10]"
-                      : betType === "Tails"
-                        ? "z-[10]"
-                        : "z-[100]"
-                    : betType === "Tails"
+                  ? result === "Won"
+                    ? betType === "Tails"
                       ? "z-[100]"
                       : "z-[10]"
+                    : betType === "Tails"
+                    ? "z-[10]"
+                    : "z-[100]"
+                  : betType === "Tails"
+                  ? "z-[100]"
+                  : "z-[10]"
               }`}
             />
             <Image
@@ -569,16 +575,16 @@ export default function Flip() {
                 betType && loading
                   ? "z-[10]"
                   : result
-                    ? result === "Won"
-                      ? betType === "Heads"
-                        ? "z-[100]"
-                        : "z-[1]"
-                      : betType === "Heads"
-                        ? "z-[1]"
-                        : "z-[100]"
-                    : betType === "Heads"
+                  ? result === "Won"
+                    ? betType === "Heads"
                       ? "z-[100]"
-                      : "z-[10]"
+                      : "z-[1]"
+                    : betType === "Heads"
+                    ? "z-[1]"
+                    : "z-[100]"
+                  : betType === "Heads"
+                  ? "z-[100]"
+                  : "z-[10]"
               }`}
             />
           </div>

@@ -3,8 +3,9 @@ import mongoose from "mongoose";
 
 const gameSeedSchema = new mongoose.Schema(
   {
-    wallet: {
-      type: String,
+    account: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
       required: true,
     },
     clientSeed: String,

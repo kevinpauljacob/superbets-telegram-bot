@@ -1,7 +1,7 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import { getToken } from "next-auth/jwt";
 
-export const authenticateUser = async (
+const authenticateUser = async (
   req: NextApiRequest,
   res: NextApiResponse,
 ) => {
@@ -24,3 +24,5 @@ export const authenticateUser = async (
       message: "User wallet not authenticated",
     });
 };
+
+export default authenticateUser
