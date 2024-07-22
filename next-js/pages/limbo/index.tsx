@@ -55,7 +55,7 @@ export default function Limbo() {
   const wallet = useWallet();
   const walletModal = useWalletModal();
   const methods = useForm();
-  const { data: session, status } = useSession();
+  const { status } = useSession();
 
   const {
     getBalance,
@@ -83,6 +83,7 @@ export default function Limbo() {
     enableSounds,
     updatePNL,
     minGameAmount,
+    session
   } = useGlobalContext();
 
   const multiplierLimits = [1.02, 50];
@@ -197,7 +198,12 @@ export default function Limbo() {
 
   const bet = async () => {
     try {
-      if (!wallet.publicKey) {
+      if (!session?.user?.isWeb2User && selectedCoin.tokenMint === "WEB2") {
+        throw new Error(
+          translator("You cannot bet with this token!", language),
+        );
+      }
+      if (session?.user?.wallet && (!wallet.connected || !wallet.publicKey)) {
         throw new Error(translator("Wallet not connected", language));
       }
       if (!betAmt || betAmt === 0) {
