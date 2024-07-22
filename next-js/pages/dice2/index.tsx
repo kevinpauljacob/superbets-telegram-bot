@@ -36,7 +36,7 @@ export default function Dice2() {
   const wallet = useWallet();
   const walletModal = useWalletModal();
   const methods = useForm();
-  const { data: session, status } = useSession();
+  const { status } = useSession();
   const {
     getBalance,
     getWalletBalance,
@@ -62,6 +62,7 @@ export default function Dice2() {
     setShowConnectModal,
     updatePNL,
     minGameAmount,
+    session
   } = useGlobalContext();
   const [betAmt, setBetAmt] = useState<number | undefined>();
   const [userInput, setUserInput] = useState<number | undefined>();
@@ -154,7 +155,12 @@ export default function Dice2() {
     //   betAmt,
     // );
     try {
-      if (!wallet.connected || !wallet.publicKey) {
+      if (!session?.user?.isWeb2User && selectedCoin.tokenMint === "WEB2") {
+        throw new Error(
+          translator("You cannot bet with this token!", language),
+        );
+      }
+      if (session?.user?.wallet && (!wallet.connected || !wallet.publicKey)) {
         throw new Error(translator("Wallet not connected", language));
       }
       if (!betAmt || betAmt === 0) {

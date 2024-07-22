@@ -37,7 +37,6 @@ import { GameType } from "@/utils/provably-fair";
 export default function Dice() {
   const wallet = useWallet();
   const methods = useForm();
-  const { data: session, status } = useSession();
 
   const {
     selectedCoin,
@@ -64,6 +63,7 @@ export default function Dice() {
     language,
     updatePNL,
     enableSounds,
+    session
   } = useGlobalContext();
 
   const [userInput, setUserInput] = useState<number | undefined>();
@@ -164,7 +164,12 @@ export default function Dice() {
     //   maxBetAmt,
     // );
     try {
-      if (!wallet.connected || !wallet.publicKey) {
+      if (!session?.user?.isWeb2User && selectedCoin.tokenMint === "WEB2") {
+        throw new Error(
+          translator("You cannot bet with this token!", language),
+        );
+      }
+      if (session?.user?.wallet && (!wallet.connected || !wallet.publicKey)) {
         throw new Error(translator("Wallet not connected", language));
       }
       if (!betAmt || betAmt === 0) {
