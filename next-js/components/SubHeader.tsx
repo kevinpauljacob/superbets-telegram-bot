@@ -8,6 +8,7 @@ import { useRouter } from "next/router";
 import useWebSocket from "react-use-websocket";
 import { trimStringToLength, truncateNumber } from "@/context/transactions";
 import CoinSelector from "./CoinSelector";
+import { Card } from "iconsax-react";
 
 export default function SubHeader() {
   const router = useRouter();
@@ -132,7 +133,7 @@ export default function SubHeader() {
                     height={13}
                   />
                   <span className="text-xs font-changa font-medium text-white">
-                    {trimStringToLength(card.wallet, 3)}
+                    {trimStringToLength(card.wallet?card.wallet:"", 3)}
                   </span>
                 </div>
                 <p className="text-[#72F238] font-changa text-sm mt-1">

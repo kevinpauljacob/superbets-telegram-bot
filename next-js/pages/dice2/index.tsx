@@ -36,7 +36,6 @@ export default function Dice2() {
   const wallet = useWallet();
   const walletModal = useWalletModal();
   const methods = useForm();
-  const { status } = useSession();
   const {
     getBalance,
     getWalletBalance,
@@ -62,7 +61,8 @@ export default function Dice2() {
     setShowConnectModal,
     updatePNL,
     minGameAmount,
-    session
+    session,
+    status
   } = useGlobalContext();
   const [betAmt, setBetAmt] = useState<number | undefined>();
   const [userInput, setUserInput] = useState<number | undefined>();
@@ -176,7 +176,8 @@ export default function Dice2() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          wallet: wallet.publicKey,
+          wallet: wallet?.publicKey,
+          email: session?.user?.email,
           amount: betAmt,
           tokenMint: selectedCoin?.tokenMint,
           chance: chance,
@@ -195,7 +196,7 @@ export default function Dice2() {
       if (win) {
         successCustom(
           translator(message, language) +
-            ` ${formatNumber(amountWon)} ${selectedCoin?.tokenName}`,
+          ` ${formatNumber(amountWon)} ${selectedCoin?.tokenName}`,
         );
         soundAlert("/sounds/win.wav", !enableSounds);
       } else errorCustom(translator(message, language));
@@ -240,7 +241,7 @@ export default function Dice2() {
         // update profit / loss
         setAutoBetProfit(
           autoBetProfit +
-            (win ? multiplier * (1 - houseEdge) - 1 : -1) * betAmt,
+          (win ? multiplier * (1 - houseEdge) - 1 : -1) * betAmt,
         );
         // update count
         if (typeof autoBetCount === "number") {
@@ -321,12 +322,12 @@ export default function Dice2() {
         potentialLoss =
           autoBetProfit +
           -1 *
-            (autoWinChangeReset || autoLossChangeReset
-              ? betAmt
-              : autoBetCount === "inf"
+          (autoWinChangeReset || autoLossChangeReset
+            ? betAmt
+            : autoBetCount === "inf"
               ? Math.max(0, betAmt)
               : betAmt *
-                (autoLossChange !== null ? autoLossChange / 100.0 : 0));
+              (autoLossChange !== null ? autoLossChange / 100.0 : 0));
 
         // console.log("Current bet amount:", betAmt);
         // console.log("Auto loss change:", autoLossChange);
@@ -390,7 +391,7 @@ export default function Dice2() {
         // console.log("Auto betting. config: ", useAutoConfig);
         setStartAuto(true);
       }
-    } else if (wallet.connected) handleBet();
+    } else if (wallet.connected || session?.user.isWeb2User) handleBet();
   };
 
   return (
@@ -416,14 +417,13 @@ export default function Dice2() {
             )}
             <BetButton
               disabled={
-                !wallet ||
-                !session?.user ||
-                isRolling ||
-                autoBetCount === 0 ||
-                Number.isNaN(autoBetCount) ||
-                (betAmt !== undefined &&
-                  maxBetAmt !== undefined &&
-                  betAmt > maxBetAmt)
+                !(wallet && session?.user.isWeb2User) ||
+                  isRolling ||
+                  autoBetCount === 0 ||
+                  Number.isNaN(autoBetCount) ||
+                  (betAmt !== undefined &&
+                    maxBetAmt !== undefined &&
+                    betAmt > maxBetAmt)
                   ? true
                   : false
               }
@@ -493,18 +493,17 @@ export default function Dice2() {
                   )}
                   <BetButton
                     disabled={
-                      !wallet ||
-                      !session?.user ||
-                      isRolling ||
-                      autoBetCount === 0 ||
-                      Number.isNaN(autoBetCount) ||
-                      (betAmt !== undefined &&
-                        maxBetAmt !== undefined &&
-                        betAmt > maxBetAmt)
+                      !(wallet && session?.user.isWeb2User) ||
+                        isRolling ||
+                        autoBetCount === 0 ||
+                        Number.isNaN(autoBetCount) ||
+                        (betAmt !== undefined &&
+                          maxBetAmt !== undefined &&
+                          betAmt > maxBetAmt)
                         ? true
                         : false
                     }
-                    // onClickFunction={onSubmit}
+                    onClickFunction={onSubmit}
                   >
                     {isRolling ? <Loader /> : "BET"}
                   </BetButton>
@@ -608,27 +607,27 @@ export default function Dice2() {
           )}
           {(!selectedCoin ||
             selectedCoin.amount < minGameAmount ||
-            !wallet.connected ||
-            !(status === "authenticated")) && (
-            <div className="w-full rounded-lg bg-[#d9d9d90d] bg-opacity-10 flex items-center px-3 py-3 text-white md:px-6">
-              <div className="w-full text-center font-changa font-medium text-sm md:text-base text-[#F0F0F0] text-opacity-75">
-                {translator(
-                  "Please deposit funds to start playing. View",
-                  language,
-                )}{" "}
-                <u
-                  onClick={() => {
-                    wallet.connected && status === "authenticated"
-                      ? setShowWalletModal(true)
-                      : setShowConnectModal(true);
-                  }}
-                  className="cursor-pointer"
-                >
-                  {translator("WALLET", language)}
-                </u>
+            !(wallet.connected || session?.user.isWeb2User))
+            && (
+              <div className="w-full rounded-lg bg-[#d9d9d90d] bg-opacity-10 flex items-center px-3 py-3 text-white md:px-6">
+                <div className="w-full text-center font-changa font-medium text-sm md:text-base text-[#F0F0F0] text-opacity-75">
+                  {translator(
+                    "Please deposit funds to start playing. View",
+                    language,
+                  )}{" "}
+                  <u
+                    onClick={() => {
+                      wallet.connected && status === "authenticated"
+                        ? setShowWalletModal(true)
+                        : setShowConnectModal(true);
+                    }}
+                    className="cursor-pointer"
+                  >
+                    {translator("WALLET", language)}
+                  </u>
+                </div>
               </div>
-            </div>
-          )}
+            )}
         </div>
       </GameDisplay>
       <GameTable>
