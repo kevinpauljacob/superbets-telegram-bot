@@ -220,7 +220,7 @@ export default function Options() {
     setLoading(true);
     try {
       fetch(
-        `/api/games/options/getActiveBet?wallet=${wallet.publicKey?.toBase58() || session?.user?.email}`,
+        `/api/games/options/getActiveBet?wallet=${wallet.publicKey?.toBase58()}&email=${session?.user?.email}`,
       )
         .then((res) => res.json())
         .then(async (bets) => {

@@ -11,8 +11,12 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       // const wallet = searchParams.get("wallet");
 
       const wallet = req.query.wallet;
+      const email = req.query.email;
 
-      let bets = await Option.findOne({ wallet: wallet, result: "Pending" });
+      let bets = await Option.find({
+        $or: [{ wallet: wallet }, { email: email }],
+        result: "Pending"
+      })
 
       return res.json({
         success: true,
