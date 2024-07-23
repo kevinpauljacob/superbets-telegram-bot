@@ -3,8 +3,9 @@ const Schema = mongoose.Schema;
 
 const OptionSchema = new Schema(
   {
-    wallet: {
-      type: String,
+    account: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
       required: true,
     },
     betTime: {

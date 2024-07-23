@@ -22,13 +22,14 @@ export const config = {
 
 type InputType = {
   wallet: string;
+  email: string;
   gameId: string;
 };
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === "POST") {
     try {
-      let { wallet, gameId }: InputType = req.body;
+      let { wallet, email, gameId }: InputType = req.body;
 
       if (maintainance)
         return res.status(400).json({
@@ -38,15 +39,24 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
       const token = await getToken({ req, secret });
 
-      if (!token || !token.sub || token.sub != wallet)
+      if (
+        !token ||
+        !token.sub ||
+        (wallet && token.sub != wallet) ||
+        (email && token.email !== email)
+      )
         return res.status(400).json({
           success: false,
-          message: "User wallet not authenticated",
+          message: "User not authenticated",
         });
 
       await connectDatabase();
 
-      if (!wallet || !gameId)
+      let isUser = await User.findOne({
+        $or: [{ wallet: wallet }, { email: email }],
+      });
+
+      if ((!wallet && !email) || !gameId)
         return res
           .status(400)
           .json({ success: false, message: "Missing parameters" });
@@ -79,11 +89,15 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           .status(400)
           .json({ success: false, message: "No bets placed" });
 
-      const userData = await StakingUser.findOneAndUpdate(
-        { wallet },
-        {},
-        { upsert: true, new: true },
-      );
+      const account = isUser._id;
+
+      let userData;
+      if (wallet)
+        userData = await StakingUser.findOneAndUpdate(
+          { wallet },
+          {},
+          { upsert: true, new: true },
+        );
 
       const { serverSeed: encryptedServerSeed, clientSeed, iv } = gameSeed;
 
@@ -108,7 +122,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         {
           _id: gameId,
           result: "Pending",
-          wallet,
+          account,
         },
         {
           result,
@@ -149,7 +163,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
       const user = await User.findOneAndUpdate(
         {
-          wallet,
+          _id: account,
           deposit: {
             $elemMatch: {
               tokenMint,
@@ -164,28 +178,28 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         { new: true },
       );
 
-      const pointsGained =
-        0 * user.numOfGamesPlayed + 1.4 * amount * userData.multiplier;
+      // const pointsGained =
+      //   0 * user.numOfGamesPlayed + 1.4 * amount * userData.multiplier;
 
-      const points = userData.points + pointsGained;
-      const newTier = Object.entries(pointTiers).reduce((prev, next) => {
-        return points >= next[1]?.limit ? next : prev;
-      })[0];
+      // const points = userData.points + pointsGained;
+      // const newTier = Object.entries(pointTiers).reduce((prev, next) => {
+      //   return points >= next[1]?.limit ? next : prev;
+      // })[0];
 
-      await StakingUser.findOneAndUpdate(
-        {
-          wallet,
-        },
-        {
-          $inc: {
-            points: pointsGained,
-          },
-        },
-      );
+      // await StakingUser.findOneAndUpdate(
+      //   {
+      //     wallet,
+      //   },
+      //   {
+      //     $inc: {
+      //       points: pointsGained,
+      //     },
+      //   },
+      // );
 
       const { gameSeed: savedGS, ...rest } = record.toObject();
       rest.game = GameType.mines;
-      rest.userTier = parseInt(newTier);
+      rest.userTier = 0;
       rest.gameSeed = { ...savedGS, serverSeed: undefined };
 
       const payload = rest;

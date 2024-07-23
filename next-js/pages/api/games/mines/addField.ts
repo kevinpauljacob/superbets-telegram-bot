@@ -18,6 +18,7 @@ export const config = {
 
 type InputType = {
   wallet: string;
+  email: string;
   amount: number;
   tokenMint: string;
   minesCount: number;

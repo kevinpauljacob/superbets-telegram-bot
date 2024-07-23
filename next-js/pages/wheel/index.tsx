@@ -38,9 +38,7 @@ import { useWalletModal } from "@solana/wallet-adapter-react-ui";
 
 export default function Wheel() {
   const wallet = useWallet();
-  const walletModal = useWalletModal();
   const methods = useForm();
-  const { data: session, status } = useSession();
   const wheelRef = useRef<HTMLDivElement>(null);
   const {
     getBalance,
@@ -68,6 +66,8 @@ export default function Wheel() {
     setShowConnectModal,
     updatePNL,
     minGameAmount,
+    session,
+    status,
   } = useGlobalContext();
   const [betAmt, setBetAmt] = useState<number | undefined>();
   const [userInput, setUserInput] = useState<number | undefined>();
@@ -108,14 +108,14 @@ export default function Wheel() {
     segments === 10
       ? 0
       : segments === 20
-      ? 25
-      : segments === 30
-      ? 50
-      : segments === 40
-      ? 75
-      : segments === 50
-      ? 100
-      : null;
+        ? 25
+        : segments === 30
+          ? 50
+          : segments === 40
+            ? 75
+            : segments === 50
+              ? 100
+              : null;
 
   useEffect(() => {
     if (!wheelRef.current) return;
@@ -154,7 +154,12 @@ export default function Wheel() {
 
   const handleBet = async () => {
     try {
-      if (!wallet.connected || !wallet.publicKey) {
+      if (!session?.user?.isWeb2User && selectedCoin.tokenMint === "WEB2") {
+        throw new Error(
+          translator("You cannot bet with this token!", language),
+        );
+      }
+      if (session?.user?.wallet && (!wallet.connected || !wallet.publicKey)) {
         throw new Error(translator("Wallet not connected", language));
       }
       if (!betAmt || betAmt === 0) {
@@ -173,6 +178,7 @@ export default function Wheel() {
         },
         body: JSON.stringify({
           wallet: wallet.publicKey,
+          email: session?.user?.email,
           amount: betAmt,
           tokenMint: selectedCoin?.tokenMint,
           segments: segments,
@@ -303,9 +309,9 @@ export default function Wheel() {
             (autoWinChangeReset || autoLossChangeReset
               ? betAmt
               : autoBetCount === "inf"
-              ? Math.max(0, betAmt)
-              : betAmt *
-                (autoLossChange !== null ? autoLossChange / 100.0 : 0));
+                ? Math.max(0, betAmt)
+                : betAmt *
+                  (autoLossChange !== null ? autoLossChange / 100.0 : 0));
 
         // console.log("Current bet amount:", betAmt);
         // console.log("Auto loss change:", autoLossChange);
@@ -371,7 +377,7 @@ export default function Wheel() {
         // console.log("Auto betting. config: ", useAutoConfig);
         setStartAuto(true);
       }
-    } else if (wallet.connected) handleBet();
+    } else if(wallet.connected || session?.user?.email) handleBet();
   };
 
   const disableInput = useMemo(() => {

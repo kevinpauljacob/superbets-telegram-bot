@@ -12,12 +12,13 @@ export const config = {
 
 type InputType = {
   wallet: string;
+  email: string;
 };
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === "POST") {
     try {
-      let { wallet }: InputType = req.body;
+      let { wallet, email }: InputType = req.body;
 
       if (maintainance)
         return res.status(400).json({
@@ -27,20 +28,28 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
       const token = await getToken({ req, secret });
 
-      if (!token || !token.sub || token.sub != wallet)
+      if (
+        !token ||
+        !token.sub ||
+        (wallet && token.sub != wallet) ||
+        (email && token.email !== email)
+      )
         return res.status(400).json({
           success: false,
-          message: "User wallet not authenticated",
+          message: "User not authenticated",
         });
 
-      if (!wallet)
+      if (!wallet && !email)
         return res
           .status(400)
           .json({ success: false, message: "Missing parameters" });
 
       await connectDatabase();
 
-      const pendingGame = await Mines.findOne({ wallet, result: "Pending" });
+      const pendingGame = await Mines.findOne({
+        $or: [{ wallet: wallet }, { email: email }],
+        result: "Pending",
+      });
       const result = pendingGame !== null ? true : false;
 
       return res.status(201).json({
