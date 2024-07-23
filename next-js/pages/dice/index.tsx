@@ -184,6 +184,7 @@ export default function Dice() {
       setIsRolling(true);
       const res = await rollDice(
         wallet,
+        session,
         betAmt,
         selectedCoin.tokenMint,
         selectedFace,
@@ -203,7 +204,7 @@ export default function Dice() {
           soundAlert("/sounds/win.wav", !enableSounds);
           successCustom(
             translator(res?.message, language) +
-              ` ${formatNumber(amountWon)} ${selectedCoin?.tokenName}`,
+            ` ${formatNumber(amountWon)} ${selectedCoin?.tokenName}`,
           );
         } else {
           errorCustom(translator(res?.message, language));
@@ -237,7 +238,7 @@ export default function Dice() {
           // update profit / loss
           setAutoBetProfit(
             autoBetProfit +
-              (isWin ? winningPays * (1 - houseEdge) - 1 : -1) * betAmt,
+            (isWin ? winningPays * (1 - houseEdge) - 1 : -1) * betAmt,
           );
           // update count
           if (typeof autoBetCount === "number") {
@@ -349,12 +350,12 @@ export default function Dice() {
         potentialLoss =
           autoBetProfit +
           -1 *
-            (autoWinChangeReset || autoLossChangeReset
-              ? betAmt
-              : autoBetCount === "inf"
-                ? Math.max(0, betAmt)
-                : betAmt *
-                  (autoLossChange !== null ? autoLossChange / 100.0 : 0));
+          (autoWinChangeReset || autoLossChangeReset
+            ? betAmt
+            : autoBetCount === "inf"
+              ? Math.max(0, betAmt)
+              : betAmt *
+              (autoLossChange !== null ? autoLossChange / 100.0 : 0));
 
         // console.log("Current bet amount:", betAmt);
         // console.log("Auto loss change:", autoLossChange);
@@ -418,7 +419,7 @@ export default function Dice() {
         // console.log("Auto betting. config: ", useAutoConfig);
         setStartAuto(true);
       }
-    } else if (wallet.connected && selectedFace.length > 0) diceRoll();
+    } else if (session?.user && selectedFace.length > 0) diceRoll();
   };
 
   const disableInput = useMemo(() => {
@@ -454,15 +455,14 @@ export default function Dice() {
             )}
             <BetButton
               disabled={
-                !wallet ||
-                !session?.user ||
-                selectedFace.length === 0 ||
-                isRolling ||
-                autoBetCount === 0 ||
-                Number.isNaN(autoBetCount) ||
-                (betAmt !== undefined &&
-                  maxBetAmt !== undefined &&
-                  betAmt > maxBetAmt)
+                !(wallet && session?.user.isWeb2User) ||
+                  selectedFace.length === 0 ||
+                  isRolling ||
+                  autoBetCount === 0 ||
+                  Number.isNaN(autoBetCount) ||
+                  (betAmt !== undefined &&
+                    maxBetAmt !== undefined &&
+                    betAmt > maxBetAmt)
                   ? true
                   : false
               }
@@ -534,19 +534,18 @@ export default function Dice() {
                   )}
                   <BetButton
                     disabled={
-                      !wallet ||
-                      !session?.user ||
-                      selectedFace.length === 0 ||
-                      isRolling ||
-                      autoBetCount === 0 ||
-                      Number.isNaN(autoBetCount) ||
-                      (betAmt !== undefined &&
-                        maxBetAmt !== undefined &&
-                        betAmt > maxBetAmt)
+                      !(wallet && session?.user.isWeb2User) ||
+                        selectedFace.length === 0 ||
+                        isRolling ||
+                        autoBetCount === 0 ||
+                        Number.isNaN(autoBetCount) ||
+                        (betAmt !== undefined &&
+                          maxBetAmt !== undefined &&
+                          betAmt > maxBetAmt)
                         ? true
                         : false
                     }
-                    // onClickFunction={onSubmit}
+                    onClickFunction={onSubmit}
                   >
                     {isRolling ? <Loader /> : "BET"}
                   </BetButton>
@@ -572,8 +571,8 @@ export default function Dice() {
                   {selectedFace.length === 0
                     ? translator("Choose Upto 5 Faces", language)
                     : `${selectedFace.length
-                        .toString()
-                        .padStart(2, "0")}/0${translator("5 Faces", language)}`}
+                      .toString()
+                      .padStart(2, "0")}/0${translator("5 Faces", language)}`}
                 </div>
               )}
             </div>
@@ -581,9 +580,8 @@ export default function Dice() {
               {betResults.map((result, index) => (
                 <div
                   key={index}
-                  className={`${
-                    result.win ? "text-fomo-green" : "text-fomo-red"
-                  }`}
+                  className={`${result.win ? "text-fomo-green" : "text-fomo-red"
+                    }`}
                 >
                   {result.face === 1 && <Dice1 className="w-7 h-7" />}
                   {result.face === 2 && <Dice2 className="w-7 h-7" />}
@@ -599,20 +597,18 @@ export default function Dice() {
           <div className="relative w-full my-16 md:my-20">
             {/* win pointer  */}
             <div
-              className={`${
-                showPointer ? "opacity-100" : "opacity-0"
-              } transition-all duration-300 h-4 bg-transparent flex w-full`}
+              className={`${showPointer ? "opacity-100" : "opacity-0"
+                } transition-all duration-300 h-4 bg-transparent flex w-full`}
             >
               <div
                 ref={topWinPointerRef}
                 className="absolute -top-[1rem] z-[10] transition-all ease-in-out duration-300"
               >
                 <WinPointer
-                  className={`relative ${
-                    selectedFace.includes(strikeFace)
-                      ? "text-fomo-green"
-                      : "text-fomo-red"
-                  }`}
+                  className={`relative ${selectedFace.includes(strikeFace)
+                    ? "text-fomo-green"
+                    : "text-fomo-red"
+                    }`}
                 />
               </div>
             </div>
@@ -733,17 +729,16 @@ function DiceFace({
       }}
     >
       <Icon
-        className={`${
-          selectedFaces[diceNumber]
-            ? selectedFace.includes(diceNumber)
-              ? strikeFace === diceNumber
-                ? "text-fomo-green" // Use winning dice face image if strikeFace is 1
-                : "text-[#94A3B8]" // Use selected dice face image if face 1 is selected but not strikeFace
-              : "text-[#202329] hover:text-[#47484A] hover:duration-75" // Use regular dice face image if face 1 is not selected
-            : strikeFace === diceNumber
-              ? "text-fomo-red" // Use losing dice face image if strikeFace is 1 and face 1 is not selected
-              : "text-[#202329] hover:text-[#47484A] hover:duration-75" // Use regular dice face image if face 1 is not selected and strikeFace is not 1
-        } cursor-pointer w-10 h-10 md:w-12 md:h-12 transition-all duration-300 ease-in-out dice-face-icon-${diceNumber}`}
+        className={`${selectedFaces[diceNumber]
+          ? selectedFace.includes(diceNumber)
+            ? strikeFace === diceNumber
+              ? "text-fomo-green" // Use winning dice face image if strikeFace is 1
+              : "text-[#94A3B8]" // Use selected dice face image if face 1 is selected but not strikeFace
+            : "text-[#202329] hover:text-[#47484A] hover:duration-75" // Use regular dice face image if face 1 is not selected
+          : strikeFace === diceNumber
+            ? "text-fomo-red" // Use losing dice face image if strikeFace is 1 and face 1 is not selected
+            : "text-[#202329] hover:text-[#47484A] hover:duration-75" // Use regular dice face image if face 1 is not selected and strikeFace is not 1
+          } cursor-pointer w-10 h-10 md:w-12 md:h-12 transition-all duration-300 ease-in-out dice-face-icon-${diceNumber}`}
       />
     </div>
   );

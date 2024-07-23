@@ -55,7 +55,6 @@ export default function Limbo() {
   const wallet = useWallet();
   const walletModal = useWalletModal();
   const methods = useForm();
-  const { status } = useSession();
 
   const {
     getBalance,
@@ -83,7 +82,8 @@ export default function Limbo() {
     enableSounds,
     updatePNL,
     minGameAmount,
-    session
+    session,
+    status
   } = useGlobalContext();
 
   const multiplierLimits = [1.02, 50];
@@ -169,7 +169,7 @@ export default function Limbo() {
             // update profit / loss
             setAutoBetProfit(
               autoBetProfit +
-                (win ? multiplier * (1 - houseEdge) - 1 : -1) * betAmt,
+              (win ? multiplier * (1 - houseEdge) - 1 : -1) * betAmt,
             );
             // update count
             if (typeof autoBetCount === "number") {
@@ -224,6 +224,7 @@ export default function Limbo() {
 
       const response = await limboBet(
         wallet,
+        session,
         betAmt,
         inputMultiplier,
         selectedCoin.tokenMint,
@@ -281,12 +282,12 @@ export default function Limbo() {
         potentialLoss =
           autoBetProfit +
           -1 *
-            (autoWinChangeReset || autoLossChangeReset
-              ? betAmt
-              : autoBetCount === "inf"
+          (autoWinChangeReset || autoLossChangeReset
+            ? betAmt
+            : autoBetCount === "inf"
               ? Math.max(0, betAmt)
               : betAmt *
-                (autoLossChange !== null ? autoLossChange / 100.0 : 0));
+              (autoLossChange !== null ? autoLossChange / 100.0 : 0));
 
         // console.log("Current bet amount:", betAmt);
         // console.log("Auto loss change:", autoLossChange);
@@ -354,7 +355,7 @@ export default function Limbo() {
         // console.log("Auto betting. config: ", useAutoConfig);
         setStartAuto(true);
       }
-    } else if (wallet.connected) {
+    } else if (wallet.connected || (session?.user && session.user.isWeb2User)) {
       setResult(null);
       bet();
     }
@@ -388,12 +389,12 @@ export default function Limbo() {
             <BetButton
               disabled={
                 loading ||
-                !session?.user ||
-                autoBetCount === 0 ||
-                Number.isNaN(autoBetCount) ||
-                (betAmt !== undefined &&
-                  maxBetAmt !== undefined &&
-                  betAmt > maxBetAmt)
+                  !(wallet && session?.user.isWeb2User) ||
+                  autoBetCount === 0 ||
+                  Number.isNaN(autoBetCount) ||
+                  (betAmt !== undefined &&
+                    maxBetAmt !== undefined &&
+                    betAmt > maxBetAmt)
                   ? true
                   : false
               }
@@ -474,16 +475,16 @@ export default function Limbo() {
                   <BetButton
                     disabled={
                       loading ||
-                      !session?.user ||
-                      autoBetCount === 0 ||
-                      Number.isNaN(autoBetCount) ||
-                      (betAmt !== undefined &&
-                        maxBetAmt !== undefined &&
-                        betAmt > maxBetAmt)
+                        !(wallet && session?.user.isWeb2User) ||
+                        autoBetCount === 0 ||
+                        Number.isNaN(autoBetCount) ||
+                        (betAmt !== undefined &&
+                          maxBetAmt !== undefined &&
+                          betAmt > maxBetAmt)
                         ? true
                         : false
                     }
-                    // onClickFunction={onSubmit}
+                    onClickFunction={onSubmit}
                   >
                     {loading ? <Loader /> : "BET"}
                   </BetButton>
@@ -515,15 +516,14 @@ export default function Limbo() {
         <div className="grid place-items-center">
           <div className="bg-black border-2 border-white border-opacity-20 px-8 py-6 sm:px-10 lg:px-[4.5rem] lg:py-10 my-10 md:my-10 lg:my-0 place-content-center text-center rounded-[10px]">
             <span
-              className={`${
-                result
-                  ? displayMultiplier === targetMultiplier
-                    ? displayMultiplier >= multiplier
-                      ? "text-fomo-green"
-                      : "text-fomo-red"
-                    : "text-white"
+              className={`${result
+                ? displayMultiplier === targetMultiplier
+                  ? displayMultiplier >= multiplier
+                    ? "text-fomo-green"
+                    : "text-fomo-red"
                   : "text-white"
-              } font-chakra inline-block transition-transform duration-1000 ease-out text-[5rem] font-black`}
+                : "text-white"
+                } font-chakra inline-block transition-transform duration-1000 ease-out text-[5rem] font-black`}
             >
               {truncateNumber(displayMultiplier, 2)}x
             </span>
@@ -550,12 +550,12 @@ export default function Limbo() {
                 <span className="bg-[#202329] font-chakra text-xs text-white rounded-md px-2 md:px-5 py-3">
                   {betAmt && inputMultiplier
                     ? truncateNumber(
-                        Math.max(
-                          0,
-                          betAmt * (inputMultiplier * (1 - houseEdge) - 1),
-                        ),
-                        4,
-                      )
+                      Math.max(
+                        0,
+                        betAmt * (inputMultiplier * (1 - houseEdge) - 1),
+                      ),
+                      4,
+                    )
                     : 0.0}{" "}
                   ${selectedCoin.tokenName}
                 </span>
@@ -578,27 +578,27 @@ export default function Limbo() {
 
           {(!selectedCoin ||
             selectedCoin.amount < minGameAmount ||
-            !wallet.connected ||
-            !(status === "authenticated")) && (
-            <div className="w-full rounded-lg bg-[#d9d9d90d] bg-opacity-10 flex items-center px-3 py-3 text-white md:px-6">
-              <div className="w-full text-center font-changa font-medium text-sm md:text-base text-[#F0F0F0] text-opacity-75">
-                {translator(
-                  "Please deposit funds to start playing. View",
-                  language,
-                )}{" "}
-                <u
-                  onClick={() => {
-                    wallet.connected && status === "authenticated"
-                      ? setShowWalletModal(true)
-                      : setShowConnectModal(true)
-                  }}
-                  className="cursor-pointer"
-                >
-                  {translator("WALLET", language)}
-                </u>
+            !(wallet.connected || session?.user.isWeb2User))
+            && (
+              <div className="w-full rounded-lg bg-[#d9d9d90d] bg-opacity-10 flex items-center px-3 py-3 text-white md:px-6">
+                <div className="w-full text-center font-changa font-medium text-sm md:text-base text-[#F0F0F0] text-opacity-75">
+                  {translator(
+                    "Please deposit funds to start playing. View",
+                    language,
+                  )}{" "}
+                  <u
+                    onClick={() => {
+                      wallet.connected && status === "authenticated"
+                        ? setShowWalletModal(true)
+                        : setShowConnectModal(true)
+                    }}
+                    className="cursor-pointer"
+                  >
+                    {translator("WALLET", language)}
+                  </u>
+                </div>
               </div>
-            </div>
-          )}
+            )}
         </div>
       </GameDisplay>
       <GameTable>
