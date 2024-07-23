@@ -37,7 +37,6 @@ const Progress = dynamic(() => import("../../components/games/Progressbar"), {
 export default function Options() {
   const wallet = useWallet();
   const methods = useForm();
-  const { data: session, status } = useSession();
   const router = useRouter();
 
   let checkBet: NodeJS.Timeout | null = null;
@@ -54,6 +53,8 @@ export default function Options() {
     selectedCoin,
     enableSounds,
     updatePNL,
+    session,
+    status,
   } = useGlobalContext();
 
   const [livePrice, setLivePrice] = useState(0);
@@ -100,10 +101,13 @@ export default function Options() {
     setLoading(true);
     setCheckResult(true);
     try {
-      let res = await checkResultAPI(wallet);
+      let res = await checkResultAPI(wallet, session);
       if (res.success) {
         if (res?.data?.result == "Won") {
-          successCustom(translator(res?.message, language) + ` ${formatNumber(res?.data?.amountWon)} ${selectedCoin.tokenName}`);
+          successCustom(
+            translator(res?.message, language) +
+              ` ${formatNumber(res?.data?.amountWon)} ${selectedCoin.tokenName}`,
+          );
           soundAlert("/sounds/win.wav", !enableSounds);
         } else errorCustom(translator(res?.message, language));
         if (!result) {
@@ -167,6 +171,7 @@ export default function Options() {
       }
       let res = await placeBet(
         wallet,
+        session,
         betAmt,
         selectedCoin.tokenMint,
         betType === "up" ? "betUp" : "betDown",
@@ -210,11 +215,12 @@ export default function Options() {
   };
 
   const getActiveBet = async () => {
-    if (!wallet || !wallet.publicKey || loading) return;
+    if (!wallet || !wallet.publicKey || !session?.user?.email || loading)
+      return;
     setLoading(true);
     try {
       fetch(
-        `/api/games/options/getActiveBet?wallet=${wallet.publicKey?.toBase58()}`,
+        `/api/games/options/getActiveBet?wallet=${wallet.publicKey?.toBase58() || session?.user?.email}`,
       )
         .then((res) => res.json())
         .then(async (bets) => {
@@ -306,9 +312,9 @@ export default function Options() {
       }
       return;
     } else {
-      if (!wallet.publicKey)
-        errorCustom(translator("Wallet not connected", language));
-      else {
+      // if (!wallet.publicKey || !session?.user?.email) {
+        // errorCustom(translator("Wallet not connected", language));
+      // } else {
         if (
           betType &&
           betAmt !== undefined &&
@@ -322,7 +328,7 @@ export default function Options() {
           errorCustom(
             translator("Choose amount, interval and type.", language),
           );
-      }
+      // }
     }
   };
 

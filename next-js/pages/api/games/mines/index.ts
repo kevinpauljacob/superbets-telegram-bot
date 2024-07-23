@@ -18,6 +18,7 @@ export const config = {
 
 type InputType = {
   wallet: string;
+  email: string;
   amount: number;
   tokenMint: string;
   minesCount: number;
@@ -26,7 +27,8 @@ type InputType = {
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === "POST") {
     try {
-      let { wallet, amount, tokenMint, minesCount }: InputType = req.body;
+      let { wallet, email, amount, tokenMint, minesCount }: InputType =
+        req.body;
 
       if (maintainance)
         return res.status(400).json({
@@ -39,13 +41,18 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
       const token = await getToken({ req, secret });
 
-      if (!token || !token.sub || token.sub != wallet)
+      if (
+        !token ||
+        !token.sub ||
+        (wallet && token.sub != wallet) ||
+        (email && token.email !== email)
+      )
         return res.status(400).json({
           success: false,
           message: "User wallet not authenticated",
         });
 
-      if (!wallet || !amount || !tokenMint || !minesCount)
+      if ((!wallet && !email) || !amount || !tokenMint || !minesCount)
         return res
           .status(400)
           .json({ success: false, message: "Missing parameters" });
@@ -85,12 +92,17 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           message: "You already have a pending game!",
         });
 
-      const user = await User.findOne({ wallet });
+      let user = await User.findOne({
+        $or: [{ wallet: wallet }, { email: email }],
+      });
+
+      const account = user._id;
+
       const addGame = !user.gamesPlayed.includes(GameType.mines);
 
       const userUpdate = await User.findOneAndUpdate(
         {
-          wallet,
+          _id: account,
           deposit: {
             $elemMatch: {
               tokenMint,
@@ -105,7 +117,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           },
           ...(addGame ? { $addToSet: { gamesPlayed: GameType.mines } } : {}),
           $set: {
-            isWeb2User: false,
+            isWeb2User: tokenMint === "WEB2",
           },
         },
         {
@@ -119,7 +131,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
       const activeGameSeed = await GameSeed.findOneAndUpdate(
         {
-          wallet,
+          account,
           status: seedStatus.ACTIVE,
           pendingMines: false,
         },
@@ -143,7 +155,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       let result = "Pending";
 
       const minesGame = await Mines.findOneAndUpdate(
-        { wallet, result },
+        { account, result },
         {
           $setOnInsert: {
             wallet,
@@ -170,16 +182,19 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         0,
       );
 
-      const userData = await StakingUser.findOneAndUpdate(
-        { wallet },
-        {},
-        { upsert: true, new: true },
-      );
+      let userData;
+      if (wallet)
+        userData = await StakingUser.findOneAndUpdate(
+          { wallet },
+          {},
+          { upsert: true, new: true },
+        );
+
       const userTier = userData?.tier ?? 0;
 
       const rest = minesGame.toObject();
       rest.game = GameType.mines;
-      rest.userTier = userTier;
+      rest.userTier = 0;
 
       const payload = rest;
 

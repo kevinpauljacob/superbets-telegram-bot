@@ -35,6 +35,7 @@ export const config = {
 
 type InputType = {
   wallet: string;
+  email: string;
   amount: number;
   tokenMint: GameTokens;
   rows: number;
@@ -44,14 +45,20 @@ type InputType = {
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === "POST") {
     try {
-      let { wallet, amount, tokenMint, rows, risk }: InputType = req.body;
+      let { wallet, email, amount, tokenMint, rows, risk }: InputType =
+        req.body;
 
       const token = await getToken({ req, secret });
 
-      if (!token || !token.sub || token.sub != wallet)
+      if (
+        !token ||
+        !token.sub ||
+        (wallet && token.sub != wallet) ||
+        (email && token.email !== email)
+      )
         return res.status(400).json({
           success: false,
-          message: "User wallet not authenticated",
+          message: "User not authenticated",
         });
 
       if (maintainance)
@@ -63,7 +70,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       const minGameAmount =
         maxPayouts[tokenMint][GameType.plinko] * minAmtFactor;
 
-      if (!wallet || !amount || !tokenMint || !rows || !risk)
+      if ((!wallet && !email) || !amount || !tokenMint || !rows || !risk)
         return res
           .status(400)
           .json({ success: false, message: "Missing parameters" });
@@ -100,12 +107,19 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
       await connectDatabase();
 
-      let user = await User.findOne({ wallet });
+      let user = await User.findOne({
+        $or: [{ wallet: wallet }, { email: email }],
+      });
 
       if (!user)
         return res
           .status(400)
           .json({ success: false, message: "User does not exist!" });
+
+      if (!user.isWeb2User && tokenMint === "WEB2")
+        return res
+          .status(400)
+          .json({ success: false, message: "You cannot bet with this token!" });
 
       if (
         user.deposit.find((d: any) => d.tokenMint === tokenMint)?.amount <
@@ -115,23 +129,27 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           .status(400)
           .json({ success: false, message: "Insufficient balance !" });
 
-      const userData = await StakingUser.findOneAndUpdate(
-        { wallet },
-        {},
-        { upsert: true, new: true },
-      );
+      const account = user._id;
+
+      let userData;
+      if (wallet)
+        userData = await StakingUser.findOneAndUpdate(
+          { wallet },
+          {},
+          { upsert: true, new: true },
+        );
+
       const stakeAmount = userData?.stakedAmount ?? 0;
       const stakingTier = Object.entries(stakingTiers).reduce((prev, next) => {
         return stakeAmount >= next[1]?.limit ? next : prev;
       })[0];
-      const houseEdge =
-        launchPromoEdge
-          ? 0
-          : houseEdgeTiers[parseInt(stakingTier)];
+      const houseEdge = launchPromoEdge
+        ? 0
+        : houseEdgeTiers[parseInt(stakingTier)];
 
       const activeGameSeed = await GameSeed.findOneAndUpdate(
         {
-          wallet,
+          account,
           status: seedStatus.ACTIVE,
         },
         {
@@ -200,7 +218,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
       const userUpdate = await User.findOneAndUpdate(
         {
-          wallet,
+          _id: account,
           deposit: {
             $elemMatch: {
               tokenMint,
@@ -215,7 +233,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           },
           ...(addGame ? { $addToSet: { gamesPlayed: GameType.plinko } } : {}),
           $set: {
-            isWeb2User: false,
+            isWeb2User: tokenMint === "WEB2",
           },
         },
         {
@@ -229,7 +247,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
       const result = amountWon.toNumber() > amount ? "Won" : "Lost";
       const plinko = new Plinko({
-        wallet,
+        account,
         amount,
         rows,
         risk,
@@ -254,29 +272,29 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         feeGenerated,
       );
 
-      const pointsGained =
-        0 * user.numOfGamesPlayed + 1.4 * amount * userData.multiplier;
+      // const pointsGained =
+      //   0 * user.numOfGamesPlayed + 1.4 * amount * userData.multiplier;
 
-      const points = userData.points + pointsGained;
-      const newTier = Object.entries(pointTiers).reduce((prev, next) => {
-        return points >= next[1]?.limit ? next : prev;
-      })[0];
+      // const points = userData.points + pointsGained;
+      // const newTier = Object.entries(pointTiers).reduce((prev, next) => {
+      //   return points >= next[1]?.limit ? next : prev;
+      // })[0];
 
-      await StakingUser.findOneAndUpdate(
-        {
-          wallet,
-        },
-        {
-          $inc: {
-            points: pointsGained,
-          },
-        },
-      );
+      // await StakingUser.findOneAndUpdate(
+      //   {
+      //     wallet,
+      //   },
+      //   {
+      //     $inc: {
+      //       points: pointsGained,
+      //     },
+      //   },
+      // );
 
       const record = await Plinko.populate(plinko, "gameSeed");
       const { gameSeed, ...rest } = record.toObject();
       rest.game = GameType.plinko;
-      rest.userTier = parseInt(newTier);
+      rest.userTier = 0;
       rest.gameSeed = { ...gameSeed, serverSeed: undefined };
 
       const payload = rest;

@@ -125,6 +125,7 @@ type Wager = Record<WagerType, number | Record<string, number>>;
 
 type InputType = {
   wallet: string;
+  email: string;
   tokenMint: GameTokens;
   wager: Wager;
 };
@@ -132,7 +133,7 @@ type InputType = {
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === "POST") {
     try {
-      let { wallet, tokenMint, wager }: InputType = req.body;
+      let { wallet, email, tokenMint, wager }: InputType = req.body;
 
       if (maintainance)
         return res.status(400).json({
@@ -142,13 +143,18 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
       const token = await getToken({ req, secret });
 
-      if (!token || !token.sub || token.sub != wallet)
+      if (
+        !token ||
+        !token.sub ||
+        (wallet && token.sub != wallet) ||
+        (email && token.email !== email)
+      )
         return res.status(400).json({
           success: false,
           message: "User wallet not authenticated",
         });
 
-      if (!wallet || !tokenMint || !wager)
+      if ((!wallet && !email) || !tokenMint || !wager)
         return res
           .status(400)
           .json({ success: false, message: "Missing parameters" });
@@ -194,7 +200,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       //     .status(400)
       //     .json({ success: false, message: "Max payout exceeded" });
 
-      let user = await User.findOne({ wallet });
+      let user = await User.findOne({
+        $or: [{ wallet: wallet }, { email: email }],
+      });
 
       if (!user)
         return res
@@ -209,24 +217,32 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           .status(400)
           .json({ success: false, message: "Insufficient balance !" }); */
 
-      const userData = await StakingUser.findOneAndUpdate(
-        { wallet },
-        {},
-        { upsert: true, new: true },
-      );
+      if (!user.isWeb2User && tokenMint === "WEB2")
+        return res
+          .status(400)
+          .json({ success: false, message: "You cannot bet with this token!" });
+
+      const account = user._id;
+
+      let userData;
+      if (wallet)
+        userData = await StakingUser.findOneAndUpdate(
+          { wallet },
+          {},
+          { upsert: true, new: true },
+        );
 
       const stakeAmount = userData?.stakedAmount ?? 0;
       const stakingTier = Object.entries(stakingTiers).reduce((prev, next) => {
         return stakeAmount >= next[1]?.limit ? next : prev;
       })[0];
-      const houseEdge =
-        launchPromoEdge
-          ? 0
-          : houseEdgeTiers[parseInt(stakingTier)];
+      const houseEdge = launchPromoEdge
+        ? 0
+        : houseEdgeTiers[parseInt(stakingTier)];
 
       const activeGameSeed = await GameSeed.findOneAndUpdate(
         {
-          wallet,
+          account,
           status: seedStatus.ACTIVE,
         },
         {
@@ -308,7 +324,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
       const userUpdate = await User.findOneAndUpdate(
         {
-          wallet,
+          _id: account,
           deposit: {
             $elemMatch: {
               tokenMint,
@@ -325,7 +341,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
             ? { $addToSet: { gamesPlayed: GameType.roulette2 } }
             : {}),
           $set: {
-            isWeb2User: false,
+            isWeb2User: tokenMint === "WEB2",
           },
         },
         {
@@ -338,7 +354,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       }
 
       const roulette2 = new Roulette2({
-        wallet,
+        account,
         amount,
         wager,
         strikeNumber,
@@ -362,29 +378,29 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         feeGenerated,
       );
 
-      const pointsGained =
-        0 * user.numOfGamesPlayed + 1.4 * amount * userData.multiplier;
+      // const pointsGained =
+      //   0 * user.numOfGamesPlayed + 1.4 * amount * userData.multiplier;
 
-      const points = userData.points + pointsGained;
-      const newTier = Object.entries(pointTiers).reduce((prev, next) => {
-        return points >= next[1]?.limit ? next : prev;
-      })[0];
+      // const points = userData.points + pointsGained;
+      // const newTier = Object.entries(pointTiers).reduce((prev, next) => {
+      //   return points >= next[1]?.limit ? next : prev;
+      // })[0];
 
-      await StakingUser.findOneAndUpdate(
-        {
-          wallet,
-        },
-        {
-          $inc: {
-            points: pointsGained,
-          },
-        },
-      );
+      // await StakingUser.findOneAndUpdate(
+      //   {
+      //     wallet,
+      //   },
+      //   {
+      //     $inc: {
+      //       points: pointsGained,
+      //     },
+      //   },
+      // );
 
       const record = await Roulette2.populate(roulette2, "gameSeed");
       const { gameSeed, ...rest } = record.toObject();
       rest.game = GameType.roulette2;
-      rest.userTier = parseInt(newTier);
+      rest.userTier = 0;
       rest.gameSeed = { ...gameSeed, serverSeed: undefined };
 
       const payload = rest;
