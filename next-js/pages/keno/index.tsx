@@ -467,7 +467,7 @@ export default function Keno() {
             )}
             <BetButton
               disabled={
-                !(wallet && session?.user.isWeb2User) ||
+                !session?.user ||
                   isRolling ||
                   autoBetCount === 0 ||
                   Number.isNaN(autoBetCount) ||
@@ -602,7 +602,7 @@ export default function Keno() {
                   )}
                   <BetButton
                     disabled={
-                      !(wallet && session?.user.isWeb2User) ||
+                      !session?.user ||
                         isRolling ||
                         autoBetCount === 0 ||
                         Number.isNaN(autoBetCount) ||

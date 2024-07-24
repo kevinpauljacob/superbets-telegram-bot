@@ -455,7 +455,7 @@ export default function Dice() {
             )}
             <BetButton
               disabled={
-                !(wallet && session?.user.isWeb2User) ||
+                !session?.user ||
                   selectedFace.length === 0 ||
                   isRolling ||
                   autoBetCount === 0 ||
@@ -534,7 +534,7 @@ export default function Dice() {
                   )}
                   <BetButton
                     disabled={
-                      !(wallet && session?.user.isWeb2User) ||
+                      !session?.user ||
                         selectedFace.length === 0 ||
                         isRolling ||
                         autoBetCount === 0 ||

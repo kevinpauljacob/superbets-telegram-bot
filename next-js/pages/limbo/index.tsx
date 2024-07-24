@@ -389,7 +389,7 @@ export default function Limbo() {
             <BetButton
               disabled={
                 loading ||
-                  !(wallet && session?.user.isWeb2User) ||
+                  !session?.user ||
                   autoBetCount === 0 ||
                   Number.isNaN(autoBetCount) ||
                   (betAmt !== undefined &&
@@ -475,7 +475,7 @@ export default function Limbo() {
                   <BetButton
                     disabled={
                       loading ||
-                        !(wallet && session?.user.isWeb2User) ||
+                        !session?.user ||
                         autoBetCount === 0 ||
                         Number.isNaN(autoBetCount) ||
                         (betAmt !== undefined &&

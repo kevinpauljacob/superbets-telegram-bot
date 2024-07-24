@@ -417,7 +417,7 @@ export default function Dice2() {
             )}
             <BetButton
               disabled={
-                !(wallet && session?.user.isWeb2User) ||
+                !session?.user ||
                   isRolling ||
                   autoBetCount === 0 ||
                   Number.isNaN(autoBetCount) ||
@@ -493,7 +493,7 @@ export default function Dice2() {
                   )}
                   <BetButton
                     disabled={
-                      !(wallet && session?.user.isWeb2User) ||
+                      !session?.user ||
                         isRolling ||
                         autoBetCount === 0 ||
                         Number.isNaN(autoBetCount) ||
