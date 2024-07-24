@@ -402,7 +402,6 @@ export default function Roulette1() {
         strikeMultiplier,
         amountWon,
       } = await response.json();
-
       if (success !== true) {
         throw new Error(message);
       }
@@ -481,7 +480,7 @@ export default function Roulette1() {
       if (win) {
         const [text, amount] = message.split(/(\d+\.\d{6})/);
         soundAlert("/sounds/win.wav", !enableSounds);
-        console.log(text)
+        console.log(text);
         successCustom(
           translator(text, language) + ` ${amount} ${selectedCoin.tokenName}`,
         );
