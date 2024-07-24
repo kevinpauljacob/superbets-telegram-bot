@@ -133,7 +133,7 @@ export default function SubHeader() {
                     height={13}
                   />
                   <span className="text-xs font-changa font-medium text-white">
-                    {trimStringToLength(card.wallet?card.wallet:"", 3)}
+                    {trimStringToLength(card.wallet ? card.wallet : "", 3)}
                   </span>
                 </div>
                 <p className="text-[#72F238] font-changa text-sm mt-1">
@@ -166,7 +166,11 @@ export default function SubHeader() {
         <div
           className={`${
             router.pathname === "/" ? "hidden md:flex" : "hidden md:flex"
-          } border-2 border-[#26282C] rounded-[5px] p-[0.563rem] cursor-pointer transition-all hover:bg-[#26282C]/50 hover:transition-all ${showLiveStats ? "bg-[#26282C] border-[#26282C] hover:bg-[#26282C]" : ""}`}
+          } border-2 border-[#26282C] rounded-[5px] p-[0.563rem] cursor-pointer transition-all hover:bg-[#26282C]/50 hover:transition-all ${
+            showLiveStats
+              ? "bg-[#26282C] border-[#26282C] hover:bg-[#26282C]"
+              : ""
+          }`}
           onClick={() => setShowLiveStats(!showLiveStats)}
         >
           <svg
@@ -193,7 +197,11 @@ export default function SubHeader() {
         <div
           className={`${
             router.pathname === "/" ? "hidden md:flex" : "hidden md:flex"
-          } border-2 border-[#26282C] rounded-[5px] p-[0.563rem] cursor-pointer ml-3 transition-all hover:bg-[#26282C]/50 hover:transition-all ${enableSounds ? "bg-[#26282C] border-[#26282C] hover:bg-[#26282C]" : ""}`}
+          } border-2 border-[#26282C] rounded-[5px] p-[0.563rem] cursor-pointer ml-3 transition-all hover:bg-[#26282C]/50 hover:transition-all ${
+            enableSounds
+              ? "bg-[#26282C] border-[#26282C] hover:bg-[#26282C]"
+              : ""
+          }`}
           onClick={() => setEnableSounds(!enableSounds)}
         >
           {!enableSounds && (
@@ -259,7 +267,11 @@ export default function SubHeader() {
       >
         <div className="flex items-center ">
           <div
-            className={`border-2 border-white/5 rounded-[5px] p-[0.563rem] cursor-pointer transition-all hover:bg-[#26282C]/50 hover:transition-all ${showLiveStats ? "bg-[#26282C] border-[#26282C] hover:bg-[#26282C]" : ""}`}
+            className={`border-2 border-white/5 rounded-[5px] p-[0.563rem] cursor-pointer transition-all hover:bg-[#26282C]/50 hover:transition-all ${
+              showLiveStats
+                ? "bg-[#26282C] border-[#26282C] hover:bg-[#26282C]"
+                : ""
+            }`}
             onClick={() => setShowLiveStats(!showLiveStats)}
           >
             <svg
@@ -284,7 +296,11 @@ export default function SubHeader() {
           </div>
 
           <div
-            className={`border-2 border-white/5 rounded-[5px] p-[0.563rem] cursor-pointer ml-2 transition-all hover:bg-[#26282C]/50 hover:transition-all ${enableSounds ? "bg-[#26282C] border-[#26282C] hover:bg-[#26282C]" : ""}`}
+            className={`border-2 border-white/5 rounded-[5px] p-[0.563rem] cursor-pointer ml-2 transition-all hover:bg-[#26282C]/50 hover:transition-all ${
+              enableSounds
+                ? "bg-[#26282C] border-[#26282C] hover:bg-[#26282C]"
+                : ""
+            }`}
             onClick={() => setEnableSounds(!enableSounds)}
           >
             {!enableSounds && (

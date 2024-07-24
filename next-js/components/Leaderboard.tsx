@@ -9,7 +9,7 @@ import { errorCustom } from "./toasts/ToastGroup";
 function Leaderboard() {
   const wallet = useWallet();
 
-  const { getUserDetails, language } = useGlobalContext();
+  const { getUserDetails, language, session } = useGlobalContext();
 
   const [maxPages, setMaxPages] = useState<number>(0);
 
@@ -42,9 +42,9 @@ function Leaderboard() {
 
         setData(users);
 
-        if (sessionStorage.getItem("email")) {
+        if (session?.user?.email) {
           let userInfo = users.find(
-            (info: any) => info.email == sessionStorage.getItem("email"),
+            (info: any) => info.email == session?.user?.email,
           );
 
           setMyData(userInfo);
@@ -63,7 +63,7 @@ function Leaderboard() {
   useEffect(() => {
     getLeaderBoard();
     // if (wallet.publicKey) getUserDetails();
-  }, [sessionStorage.getItem("email")]);
+  }, [session?.user]);
 
   const headers = ["Rank", "User", "Token Balance"];
 
@@ -111,7 +111,9 @@ function Leaderboard() {
                     maximumFractionDigits: 2,
                     minimumFractionDigits: 0,
                   })} */}
-                  {parseInt(myData?.tokenBalance ?? 0)}
+                  {parseInt(
+                    myData?.deposit?.amount ?? 0
+                  )}
                 </span>
               </div>
             )}
@@ -123,7 +125,7 @@ function Leaderboard() {
                   page * transactionsPerPage,
                 )
                 .filter(
-                  (data) => data.email !== sessionStorage.getItem("email"),
+                  (data) => data.email !== session?.user?.email,
                 )
                 .map((data, index) => (
                   <div
@@ -153,7 +155,7 @@ function Leaderboard() {
                       {data?.name}
                     </span>
                     <span className="w-[15%] text-right font-chakra text-sm font-bold text-[#ffffff]">
-                      {parseInt(data?.tokenBalance ?? 0)}
+                      {parseInt(myData?.deposit?.amount ?? 0)}
                     </span>
                   </div>
                 ))

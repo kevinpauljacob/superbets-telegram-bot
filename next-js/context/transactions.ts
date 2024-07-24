@@ -561,9 +561,11 @@ export const placeBet = async (
   timeFrame: number,
 ) => {
   try {
-    if (session?.user?.wallet && !wallet.publicKey) throw new Error("Wallet not connected");
+    if (session?.user?.wallet && !wallet.publicKey)
+      throw new Error("Wallet not connected");
 
-    if (!session?.user?.isWeb2User && tokenMint === "WEB2") throw new Error("You cannot bet with this token!");
+    if (!session?.user?.isWeb2User && tokenMint === "WEB2")
+      throw new Error("You cannot bet with this token!");
 
     if (betType == null) throw new Error("Invalid bet type");
 
@@ -571,7 +573,7 @@ export const placeBet = async (
       method: "POST",
       body: JSON.stringify({
         wallet: wallet.publicKey,
-        email: session?.user?.email, 
+        email: session?.user?.email,
         amount: amount,
         tokenMint: tokenMint,
         betType,
@@ -604,9 +606,11 @@ export const placeFlip = async (
   flipType: string, // heads / tails
 ) => {
   try {
-    if (session?.user?.wallet && !wallet.publicKey) throw new Error("Wallet not connected");
+    if (session?.user?.wallet && !wallet.publicKey)
+      throw new Error("Wallet not connected");
 
-    if (!session?.user?.isWeb2User && tokenMint === "WEB2") throw new Error("You cannot bet with this token!");
+    if (!session?.user?.isWeb2User && tokenMint === "WEB2")
+      throw new Error("You cannot bet with this token!");
 
     if (flipType == null) throw new Error("Invalid flip type");
 
@@ -633,13 +637,16 @@ export const placeFlip = async (
   }
 };
 
-export const checkResult = async (wallet: WalletContextState, session: SessionUser | null) => {
+export const checkResult = async (
+  wallet: WalletContextState,
+  session: SessionUser | null,
+) => {
   try {
     const res = await fetch(`/api/games/options/checkResult`, {
       method: "POST",
       body: JSON.stringify({
         wallet: wallet.publicKey,
-        email: session?.user?.email
+        email: session?.user?.email,
       }),
       headers: {
         "Content-Type": "application/json",
@@ -685,9 +692,11 @@ export const rollDice = async (
   chosenNumbers: number[],
 ) => {
   try {
-    if (session?.user?.wallet && !wallet.publicKey) throw new Error("Wallet not connected");
+    if (session?.user?.wallet && !wallet.publicKey)
+      throw new Error("Wallet not connected");
 
-    if (!session?.user?.isWeb2User && tokenMint === "WEB2") throw new Error("You cannot bet with this token!");
+    if (!session?.user?.isWeb2User && tokenMint === "WEB2")
+      throw new Error("You cannot bet with this token!");
 
     const res = await fetch(`/api/games/dice`, {
       method: "POST",
@@ -719,9 +728,11 @@ export const limboBet = async (
   tokenMint: string,
 ) => {
   try {
-    if (session?.user?.wallet && !wallet.publicKey) throw new Error("Wallet not connected");
+    if (session?.user?.wallet && !wallet.publicKey)
+      throw new Error("Wallet not connected");
 
-    if (!session?.user?.isWeb2User && tokenMint === "WEB2") throw new Error("You cannot bet with this token!");
+    if (!session?.user?.isWeb2User && tokenMint === "WEB2")
+      throw new Error("You cannot bet with this token!");
 
     const res = await fetch(`/api/games/limbo`, {
       method: "POST",
@@ -746,11 +757,11 @@ export const limboBet = async (
 };
 
 export function trimStringToLength(str: string, desiredLength: number): string {
-  return (
-    str?.substring(0, desiredLength) +
-    "..." +
-    str?.substring(str.length - desiredLength, str.length)
-  );
+  return str
+    ? str.substring(0, desiredLength) +
+        "..." +
+        str.substring(str.length - desiredLength, str.length)
+    : "";
 }
 
 export const truncateNumber = (num: number, numOfDecimals: number = 4) => {

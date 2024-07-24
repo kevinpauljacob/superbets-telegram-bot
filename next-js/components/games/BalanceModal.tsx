@@ -220,7 +220,7 @@ export default function BalanceModal() {
                 className={`w-full border-2 rounded-md py-2 text-white font-semibold text-xs sm:text-sm transition hover:duration-75 ease-in-out ${
                   actionType === "Deposit"
                     ? "bg-[#d9d9d90d] border-transparent text-opacity-90"
-                    : "border-[#d9d9d90d] hover:bg-[#9361d1] focus:bg-[#602E9E] text-opacity-50 hover:text-opacity-90"
+                    : "border-[#d9d9d90d] hover:bg-[#7F71FF] focus:bg-[#4C3ECC] text-opacity-50 hover:text-opacity-90"
                 }`}
                 onClick={() => setActionType("Deposit")}
               >
@@ -230,7 +230,7 @@ export default function BalanceModal() {
                 className={`w-full border-2 rounded-md py-2 text-white font-semibold text-xs sm:text-sm transition-all hover:duration-75 ease-in-out ${
                   actionType === "Withdraw"
                     ? "bg-[#d9d9d90d] border-transparent text-opacity-90"
-                    : "border-[#d9d9d90d] hover:bg-[#9361d1] focus:bg-[#602E9E] text-opacity-50 hover:text-opacity-90"
+                    : "border-[#d9d9d90d] hover:bg-[#7F71FF] focus:bg-[#4C3ECC] text-opacity-50 hover:text-opacity-90"
                 }`}
                 onClick={() => setActionType("Withdraw")}
               >
@@ -240,7 +240,7 @@ export default function BalanceModal() {
                 className={`w-full border-2 rounded-md py-2 text-white font-semibold text-xs sm:text-sm transition hover:duration-75 ease-in-out flex items-center justify-center gap-1 ${
                   actionType === "History"
                     ? "bg-[#d9d9d90d] border-transparent text-opacity-90"
-                    : "border-[#d9d9d90d] hover:bg-[#9361d1] focus:bg-[#602E9E] text-opacity-50 hover:text-opacity-90"
+                    : "border-[#d9d9d90d] hover:bg-[#7F71FF] focus:bg-[#4C3ECC] text-opacity-50 hover:text-opacity-90"
                 }`}
                 onClick={() => setActionType("History")}
               >
@@ -567,7 +567,7 @@ export default function BalanceModal() {
                 {actionType !== "History" && (
                   <button
                     type="submit"
-                    className="rounded-[5px] -mt-1 mb-4 disabled:opacity-50 border border-[#F200F21A] bg-[#5F4DFF] hover:bg-[#9361d1] focus:bg-[#602E9E] transition-all py-2.5 font-changa text-base font-medium text-[#F0F0F0] text-opacity-90"
+                    className="rounded-[5px] -mt-1 mb-4 disabled:opacity-50 border border-[#F200F21A] bg-[#5F4DFF] hover:bg-[#7F71FF] focus:bg-[#4C3ECC] transition-all py-2.5 font-changa text-base font-medium text-[#F0F0F0] text-opacity-90"
                     disabled={actionType === "Deposit" && !checked}
                   >
                     {loading ? <Loader /> : translator(actionType, language)}

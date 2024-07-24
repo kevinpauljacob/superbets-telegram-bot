@@ -67,7 +67,7 @@ export default function ConnectModal() {
             </div>
 
             <button
-              className={`w-full border-2 rounded-md py-2 text-white font-semibold text-xs sm:text-sm transition hover:duration-75 ease-in-out border-[#d9d9d90d] hover:bg-[#9361d1] focus:bg-[#602E9E] text-opacity-50 hover:text-opacity-90`}
+              className={`w-full border-2 rounded-md py-2 text-white font-semibold text-xs sm:text-sm transition hover:duration-75 ease-in-out border-[#d9d9d90d] hover:bg-[#7F71FF] focus:bg-[#4C3ECC] text-opacity-50 hover:text-opacity-90`}
               onClick={handleGoogle}
             >
               {translator("Google", language)}
@@ -78,7 +78,7 @@ export default function ConnectModal() {
             </span>
 
             <button
-              className={`w-full border-2 rounded-md py-2 text-white font-semibold text-xs sm:text-sm transition hover:duration-75 ease-in-out border-[#d9d9d90d] hover:bg-[#9361d1] focus:bg-[#602E9E] text-opacity-50 hover:text-opacity-90`}
+              className={`w-full border-2 rounded-md py-2 text-white font-semibold text-xs sm:text-sm transition hover:duration-75 ease-in-out border-[#d9d9d90d] hover:bg-[#7F71FF] focus:bg-[#4C3ECC] text-opacity-50 hover:text-opacity-90`}
               onClick={() => {
                 setShowConnectModal(false);
                 handleSignIn(wallet, walletModal);

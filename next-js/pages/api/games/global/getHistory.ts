@@ -66,7 +66,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       });
 
       const wallets: string[] = Array.from(
-        new Set(data.map((doc: any) => doc.wallet)),
+        new Set(data.map((doc: any) => doc?.account)),
       );
 
       const userData = await StakingUser.find({

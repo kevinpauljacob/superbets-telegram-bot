@@ -145,7 +145,7 @@ export default function CoinSelector() {
             ? setShowWalletModal(true)
             : setShowConnectModal(true)
         }}
-        className="flex items-center h-[2.3rem] md:h-10 px-5 md:px-4 py-0 md:py-2 gap-1 md:gap-1.5 bg-[#5F4DFF] hover:bg-[#9361d1] focus:bg-[#602E9E] transition-all cursor-pointer rounded-[5px]"
+        className="flex items-center h-[2.3rem] md:h-10 px-5 md:px-4 py-0 md:py-2 gap-1 md:gap-1.5 bg-[#5F4DFF] hover:bg-[#7F71FF] focus:bg-[#4C3ECC] transition-all cursor-pointer rounded-[5px]"
       >
         <Image src={"/assets/wallet.png"} alt="" width={17} height={17} />
         <span className="text-xs md:text-sm leading-3 mt-0.5 text-white text-opacity-90">
