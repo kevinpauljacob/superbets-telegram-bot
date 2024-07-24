@@ -144,7 +144,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
       const activeGameSeed = await GameSeed.findOneAndUpdate(
         {
-          wallet,
+          account,
           status: seedStatus.ACTIVE,
         },
         {
