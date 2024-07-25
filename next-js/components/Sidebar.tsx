@@ -86,7 +86,7 @@ export default function Sidebar({
                   src={"/assets/logowhite.svg"}
                   width={35}
                   height={35}
-                  alt={"FOMO"}
+                  alt={"SUPERBETS"}
                   className=""
                 />
               </div>
@@ -392,7 +392,7 @@ export const OpenSidebar = ({
               src={"/assets/logowhite.svg"}
               width={35}
               height={35}
-              alt={"FOMO"}
+              alt={"SUPERBETS"}
               className=""
             />
           </div>

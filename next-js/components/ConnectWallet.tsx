@@ -83,7 +83,7 @@ export default function ConnectWallet() {
 
   return (
     <>
-      {(!session || !wallet.publicKey) && (
+      {(!session || (!session?.user?.email && !wallet.publicKey)) && (
         <button
           onClick={() => {
             setShowConnectModal(true);
@@ -101,21 +101,17 @@ export default function ConnectWallet() {
         </button>
       )}
 
-      {session?.user && wallet.publicKey && (
+      {session?.user && (wallet.publicKey || session?.user?.email) && (
         <>
           <button
             className="w-full sm:w-fit flex text-white bg-[#192634] hover:bg-[#121D28] transition-all font-medium rounded-md text-sm px-5 py-2.5"
-            onClick={async (e) => {
-              try {
-                e.preventDefault();
-                await wallet.disconnect();
-                await signOut();
-              } catch (e) {
-                console.log(e);
-              }
+            onClick={() => {
+              setShowConnectModal(true);
             }}
           >
-            {wallet.publicKey
+            {session?.user?.email
+              ? session?.user?.name
+              : wallet?.publicKey
               ? obfuscatePubKey(wallet.publicKey.toBase58())
               : translator("Signing Out ...", language)}
           </button>

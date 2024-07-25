@@ -145,7 +145,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         },
         { new: true },
       );
-
+      console.log(activeGameSeed);
       if (!activeGameSeed) {
         throw new Error("Server hash not found!");
       }
@@ -158,7 +158,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         { account, result },
         {
           $setOnInsert: {
-            wallet,
+            account,
             amount,
             minesCount,
             strikeMultiplier: 1,

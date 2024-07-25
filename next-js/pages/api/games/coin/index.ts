@@ -54,18 +54,18 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           message: "Under maintenance",
         });
 
-      const token = await getToken({ req, secret });
+      // const token = await getToken({ req, secret });
 
-      if (
-        !token ||
-        !token.sub ||
-        (wallet && token.sub != wallet) ||
-        (email && token.email !== email)
-      )
-        return res.status(400).json({
-          success: false,
-          message: "User not authenticated",
-        });
+      // if (
+      //   !token ||
+      //   !token.sub ||
+      //   (wallet && token.sub != wallet) ||
+      //   (email && token.email !== email)
+      // )
+      //   return res.status(400).json({
+      //     success: false,
+      //     message: "User not authenticated",
+      //   });
 
       if ((!wallet && !email) || !amount || !flipType || !tokenMint)
         return res

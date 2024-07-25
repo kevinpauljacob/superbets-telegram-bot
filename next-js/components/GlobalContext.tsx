@@ -439,10 +439,12 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
       ).json();
 
       for (let token of SPL_TOKENS) {
-        let price = data?.data[token.tokenMint]?.price ?? 0;
+        let price =
+          data?.data[token.tokenMint]?.price ?? token?.tokenMint === "WEB2"
+            ? 1
+            : 0;
         prices.push({ mintAddress: token.tokenMint, price: price });
       }
-
       setLiveTokenPrice(prices);
     } catch (e) {
       console.error("Could not fetch prices!");

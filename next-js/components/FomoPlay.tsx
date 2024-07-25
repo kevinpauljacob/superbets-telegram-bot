@@ -79,7 +79,7 @@ export default function FomoPlay() {
         <div className="flex items-center">
           <Store className="w-5 h-5" />
           <span className="font-medium font-changa text-xl text-opacity-90 pl-3">
-            <span className="hidden sm:inline text-white">
+            <span className="inline text-white">
               SuperBets Games
             </span>
           </span>
