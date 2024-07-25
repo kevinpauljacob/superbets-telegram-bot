@@ -206,7 +206,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       const numBets = userBets.length;
 
       const userData = await StakingUser.findOneAndUpdate(
-        { wallet },
+        { account },
         {},
         { upsert: true, new: true },
       );
