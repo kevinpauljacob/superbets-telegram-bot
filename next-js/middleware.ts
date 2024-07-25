@@ -1,16 +1,15 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { Ratelimit } from "@upstash/ratelimit";
-import { Redis } from "@upstash/redis";
+// import { Ratelimit } from "@upstash/ratelimit";
+// import { Redis } from "@upstash/redis";
 import { getToken } from "next-auth/jwt";
-// import { User } from "./models/games";
 
-const rateLimit = new Ratelimit({
-  redis: Redis.fromEnv(),
-  limiter: Ratelimit.fixedWindow(10, "1 s"),
-  analytics: true,
-  timeout: 10000,
-});
+// const rateLimit = new Ratelimit({
+//   redis: Redis.fromEnv(),
+//   limiter: Ratelimit.fixedWindow(10, "1 s"),
+//   analytics: true,
+//   timeout: 10000,
+// });
 
 const API_KEY_HEADER = "x-api-key";
 const secret = process.env.NEXTAUTH_SECRET;
@@ -25,8 +24,12 @@ const whiteListRoutes = ["/api/auth", "/api/games/global", "/api/games/user", "/
 export async function middleware(request: NextRequest) {
   const ip = request.ip ?? "127.0.0.1";
 
-  const { success, pending, limit, reset, remaining } =
-    await rateLimit.limit(ip);
+  // const { success, pending, limit, reset, remaining } =
+  //   await rateLimit.limit(ip);
+  const success = true
+  const limit = 0
+  const reset = 0
+  const remaining = 0
 
   let res: NextResponse = new NextResponse("Unauthorized", { status: 401 });
 
