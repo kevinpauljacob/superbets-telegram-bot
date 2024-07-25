@@ -120,9 +120,25 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
       await connectDatabase();
 
+      let users = await User.findOne({
+        $or: [{ wallet: wallet }, { email: email }],
+      });
+
+      if (!users)
+        return res
+          .status(400)
+          .json({ success: false, message: "User does not exist!" });
+
+      if (!users.isWeb2User && tokenMint === "WEB2")
+        return res
+          .status(400)
+          .json({ success: false, message: "You cannot bet with this token!" });
+
+      const account = users._id;
+
       const user = await User.findOneAndUpdate(
         {
-          wallet,
+          account,
           deposit: {
             $elemMatch: {
               tokenMint,
@@ -147,7 +163,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
       const activeGameSeed = await GameSeed.findOneAndUpdate(
         {
-          wallet,
+          account,
           status: seedStatus.ACTIVE,
           pendingMines: false,
         },
@@ -232,7 +248,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
         await User.findOneAndUpdate(
           {
-            wallet,
+            account,
             deposit: {
               $elemMatch: {
                 tokenMint,
@@ -250,7 +266,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       }
 
       const record = await Mines.findOneAndUpdate(
-        { wallet, result: "Pending" },
+        { account, result: "Pending" },
         {
           $setOnInsert: {
             wallet,
@@ -285,28 +301,28 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         feeGenerated,
       );
 
-      const pointsGained =
-        0 * user.numOfGamesPlayed + 1.4 * amount * userData.multiplier;
+      // const pointsGained =
+      //   0 * user.numOfGamesPlayed + 1.4 * amount * userData.multiplier;
 
-      const points = userData.points + pointsGained;
-      const newTier = Object.entries(pointTiers).reduce((prev, next) => {
-        return points >= next[1]?.limit ? next : prev;
-      })[0];
+      // const points = userData.points + pointsGained;
+      // const newTier = Object.entries(pointTiers).reduce((prev, next) => {
+      //   return points >= next[1]?.limit ? next : prev;
+      // })[0];
 
-      await StakingUser.findOneAndUpdate(
-        {
-          wallet,
-        },
-        {
-          $inc: {
-            points: pointsGained,
-          },
-        },
-      );
+      // await StakingUser.findOneAndUpdate(
+      //   {
+      //     wallet,
+      //   },
+      //   {
+      //     $inc: {
+      //       points: pointsGained,
+      //     },
+      //   },
+      // );
 
       const { gameSeed, ...rest } = record.toObject();
       rest.game = GameType.mines;
-      rest.userTier = parseInt(newTier);
+      rest.userTier = 0;
       rest.gameSeed = { ...gameSeed, serverSeed: undefined };
 
       const payload = rest;

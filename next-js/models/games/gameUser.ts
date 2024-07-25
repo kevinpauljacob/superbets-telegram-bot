@@ -65,5 +65,5 @@ const gameUserSchema = new Schema(
 // });
 
 let GameUser =
-  mongoose.models.GameUser || mongoose.model("GameUser", gameUserSchema);
+  mongoose.models?.GameUser || mongoose.model("GameUser", gameUserSchema);
 export default GameUser;

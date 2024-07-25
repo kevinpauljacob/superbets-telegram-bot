@@ -215,46 +215,53 @@ export default function Options() {
   };
 
   const getActiveBet = async () => {
-    if (!wallet || !wallet.publicKey || !session?.user?.email || loading)
+    if ((!wallet?.publicKey && !session?.user?.email) || loading) {
       return;
-    setLoading(true);
-    try {
-      fetch(
-        `/api/games/options/getActiveBet?wallet=${wallet.publicKey?.toBase58()}&email=${session?.user?.email}`,
-      )
-        .then((res) => res.json())
-        .then(async (bets) => {
-          let bet = bets.data;
-          if (bets.success && bet && bet.result === "Pending") {
-            setBetType(bet?.betType === "betUp" ? "up" : "down");
-            setBetAmt(bet?.amount);
-            setBetInterval(bet?.timeFrame / 60);
-            setStrikePrice(bet?.strikePrice);
-            setBetTime(bet?.betTime);
-            setTimeLeft(
-              new Date(bet?.betTime).getTime() +
-                bet?.timeFrame * 1000 -
-                Date.now(),
-            );
-            const remainingTime =
-              new Date(bet?.betTime).getTime() +
-              bet?.timeFrame * 1000 -
-              Date.now();
-            setBetEnd(new Date(bet.betEndTime!).getTime() < Date.now());
-            if (!checkBet) {
-              checkBet = setTimeout(async () => {
-                setBetEnd(true);
-                setCheckResult(true);
-                if (!checkResult) getResult();
-              }, remainingTime);
-            }
-          }
-          setLoading(false);
-        });
-    } catch (e) {
-      setLoading(false);
-      console.error(e);
     }
+
+    setLoading(true);
+
+    try {
+      const walletParam = wallet?.publicKey?.toBase58() || null;
+      const emailParam = session?.user?.email || null;
+      const response = await fetch(
+        `/api/games/options/getActiveBet?wallet=${walletParam}&email=${emailParam}`,
+      );
+
+      if (!response.ok) {
+        throw new Error("Network response was not ok");
+      }
+
+      const bets = await response.json();
+      let bet = bets.data;
+
+      if (bets.success && bet && bet.result === "Pending") {
+        setBetType(bet?.betType === "betUp" ? "up" : "down");
+        setBetAmt(bet?.amount);
+        setBetInterval(bet?.timeFrame / 60);
+        setStrikePrice(bet?.strikePrice);
+        setBetTime(bet?.betTime);
+
+        const remainingTime =
+          new Date(bet?.betTime).getTime() + bet?.timeFrame * 1000 - Date.now();
+        setTimeLeft(remainingTime);
+
+        setBetEnd(new Date(bet.betEndTime!).getTime() < Date.now());
+
+        if (!checkBet) {
+          checkBet = setTimeout(async () => {
+            setBetEnd(true);
+            setCheckResult(true);
+            if (!checkResult) await getResult();
+          }, remainingTime);
+        }
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setLoading(false);
+    }
+
     return () => {
       if (checkBet) {
         clearTimeout(checkBet);
@@ -312,22 +319,20 @@ export default function Options() {
       }
       return;
     } else {
-      // if (!wallet.publicKey || !session?.user?.email) {
-        // errorCustom(translator("Wallet not connected", language));
+      // if (wallet.publicKey || session?.user?.email) {
+      // errorCustom(translator("User not connected", language));
       // } else {
-        if (
-          betType &&
-          betAmt !== undefined &&
-          betAmt !== 0 &&
-          betInterval !== 0 &&
-          !loading
-        ) {
-          // setBetType("up");
-          await bet(betType);
-        } else
-          errorCustom(
-            translator("Choose amount, interval and type.", language),
-          );
+      if (
+        betType &&
+        betAmt !== undefined &&
+        betAmt !== 0 &&
+        betInterval !== 0 &&
+        !loading
+      ) {
+        // setBetType("up");
+        await bet(betType);
+      } else
+        errorCustom(translator("Choose amount, interval and type.", language));
       // }
     }
   };

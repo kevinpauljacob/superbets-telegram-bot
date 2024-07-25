@@ -10,7 +10,6 @@ import StoreBanner from "@/components/Banner";
 import FomoPlay from "@/components/FomoPlay";
 import FOMOHead from "@/components/HeadElement";
 import Bets from "@/components/games/Bets";
-import { handleSignIn } from "@/components/ConnectWallet";
 
 const inter = Inter({ subsets: ["latin"] });
 

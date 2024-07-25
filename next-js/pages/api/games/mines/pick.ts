@@ -66,10 +66,21 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           .status(400)
           .json({ success: false, message: "Invalid parameters" });
 
+      let user = await User.findOne({
+        $or: [{ wallet: wallet }, { email: email }],
+      });
+
+      if (!user)
+        return res
+          .status(400)
+          .json({ success: false, message: "User does not exist!" });
+
+      const account = user._id;
+
       let gameInfo = await Mines.findOne({
         _id: gameId,
         result: "Pending",
-        wallet,
+        account,
       }).populate("gameSeed");
 
       if (!gameInfo)
@@ -121,12 +132,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           message: "Max payout of 25 exceeded! Cashout to continue...",
         });
 
-      let user = await User.findOne({
-        $or: [{ wallet: wallet }, { email: email }],
-      });
-
-      const account = user._id;
-
       let userData;
       if (wallet)
         userData = await StakingUser.findOneAndUpdate(
@@ -151,7 +156,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           {
             _id: gameId,
             result: "Pending",
-            wallet,
+            account,
             userBets: { $ne: userBet },
           },
           {

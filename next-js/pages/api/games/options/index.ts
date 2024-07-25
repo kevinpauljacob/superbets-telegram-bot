@@ -108,11 +108,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         $or: [{ wallet: wallet }, { email: email }],
       });
 
-      let bet = await Option.findOne({
-        $or: [{ wallet: wallet }, { email: email }],
-        result: "Pending",
-      });
-
       if (!user)
         return res
           .status(400)
@@ -122,6 +117,13 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         return res
           .status(400)
           .json({ success: false, message: "You cannot bet with this token!" });
+
+      const account = user._id;
+
+      let bet = await Option.findOne({
+        account,
+        result: "Pending",
+      });
 
       if (bet)
         return res.status(400).json({
@@ -135,11 +137,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       )
         return res
           .status(400)
-          .json({ success: false, message: "Insufficient balance " });
+          .json({ success: false, message: "Insufficient balance for bet!" });
 
       const addGame = !user.gamesPlayed.includes(GameType.options);
-
-      const account = user._id;
 
       const result = await User.findOneAndUpdate(
         {
