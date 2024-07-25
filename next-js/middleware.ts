@@ -19,17 +19,22 @@ const validateApiKey = async (apiKey: string): Promise<boolean> => {
   return validApiKeys.includes(apiKey);
 };
 
-const whiteListRoutes = ["/api/auth", "/api/games/global", "/api/games/user", "/api/getInfo"];
+const whiteListRoutes = [
+  "/api/auth",
+  "/api/games/global",
+  "/api/games/user",
+  "/api/getInfo",
+];
 
 export async function middleware(request: NextRequest) {
   const ip = request.ip ?? "127.0.0.1";
 
   // const { success, pending, limit, reset, remaining } =
   //   await rateLimit.limit(ip);
-  const success = true
-  const limit = 0
-  const reset = 0
-  const remaining = 0
+  const success = true;
+  const limit = 0;
+  const reset = 0;
+  const remaining = 0;
 
   let res: NextResponse = new NextResponse("Unauthorized", { status: 401 });
 
@@ -44,6 +49,7 @@ export async function middleware(request: NextRequest) {
 
     if (apiKey) {
       const isValidApiKey = await validateApiKey(apiKey);
+      console.log(isValidApiKey, success);
       if (isValidApiKey) {
         if (success) res = NextResponse.next();
         else res = NextResponse.rewrite(new URL("/api/blocked", request.url));
@@ -52,36 +58,36 @@ export async function middleware(request: NextRequest) {
           { success: false, message: "Unauthorized" },
           { status: 401 },
         );
-    }
-
-    const token = await getToken({ req: request, secret });
-    if (token && token.sub) {
-      let body = await request.json();
-      const wallet = body?.wallet;
-      const email = body?.email;
-      const account = body?.account;
-      if (
-        (!wallet && !email && !account) ||
-        //@ts-ignore
-        (wallet && token?.user?.wallet != wallet) ||
-        //@ts-ignore
-        (email && token?.user?.email !== email) ||
-        //@ts-ignore
-        (account && token?.user?.id !== account)
-      )
+    } else {
+      const token = await getToken({ req: request, secret });
+      if (token && token.sub) {
+        let body = await request.json();
+        const wallet = body?.wallet;
+        const email = body?.email;
+        const account = body?.account;
+        if (
+          (!wallet && !email && !account) ||
+          //@ts-ignore
+          (wallet && token?.user?.wallet != wallet) ||
+          //@ts-ignore
+          (email && token?.user?.email !== email) ||
+          //@ts-ignore
+          (account && token?.user?.id !== account)
+        )
+          return NextResponse.json(
+            { success: false, message: "Unauthorized" },
+            { status: 401 },
+          );
+        else {
+          if (success) res = NextResponse.next();
+          else res = NextResponse.rewrite(new URL("/api/blocked", request.url));
+        }
+      } else
         return NextResponse.json(
           { success: false, message: "Unauthorized" },
           { status: 401 },
         );
-      else {
-        if (success) res = NextResponse.next();
-        else res = NextResponse.rewrite(new URL("/api/blocked", request.url));
-      }
-    } else
-      return NextResponse.json(
-        { success: false, message: "Unauthorized" },
-        { status: 401 },
-      );
+    }
   }
   res.headers.set("X-RateLimit-Limit", limit.toString());
   res.headers.set("X-RateLimit-Remaining", remaining.toString());
