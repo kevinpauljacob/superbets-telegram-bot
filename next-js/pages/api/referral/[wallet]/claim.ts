@@ -47,14 +47,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     const { transactionBase64, blockhashWithExpiryBlockHeight }: InputType =
       req.body;
 
-    const token = await getToken({ req, secret });
-
-    if (!token || !token.sub || token.sub != wallet)
-      return res.status(400).json({
-        success: false,
-        message: "User wallet not authenticated",
-      });
-
     if (!wallet || !transactionBase64 || !blockhashWithExpiryBlockHeight)
       return res
         .status(400)

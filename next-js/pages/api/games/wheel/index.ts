@@ -55,20 +55,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           success: false,
           message: "Under maintenance",
         });
-
-      const token = await getToken({ req, secret });
-
-      if (
-        !token ||
-        !token.sub ||
-        (wallet && token.sub != wallet) ||
-        (email && token.email !== email)
-      )
-        return res.status(400).json({
-          success: false,
-          message: "User not authenticated",
-        });
-
+        
       if ((!wallet && !email) || !amount || !tokenMint || !segments || !risk)
         return res
           .status(400)

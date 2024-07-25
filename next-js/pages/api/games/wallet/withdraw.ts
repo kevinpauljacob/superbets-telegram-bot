@@ -71,13 +71,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         blockhashWithExpiryBlockHeight,
       }: InputType = req.body;
 
-      const token = await getToken({ req, secret });
-
-      if (!token || !token.sub || token.sub != wallet)
-        return res.send({
-          error: "User wallet not authenticated",
-        });
-
       if (tokenMint === "WEB2")
         return res.status(405).json({
           success: false,

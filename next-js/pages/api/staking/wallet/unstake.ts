@@ -36,13 +36,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         blockhashWithExpiryBlockHeight,
       } = req.body;
 
-      const token = await getToken({ req, secret });
-
-      if (!token || !token.sub || token.sub != wallet)
-        return res.send({
-          error: "User wallet not authenticated",
-        });
-
       await connectDatabase();
 
       const fomoToken = SPL_TOKENS.find(

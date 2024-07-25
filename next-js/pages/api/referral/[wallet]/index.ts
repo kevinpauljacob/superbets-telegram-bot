@@ -13,20 +13,12 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         .status(405)
         .json({ success: false, message: "Method not allowed!" });
 
-    const token = await getToken({ req, secret });
-
     const { wallet } = req.query;
 
     if (!wallet)
       return res
         .status(400)
         .json({ success: false, message: "Wallet is required!" });
-
-    if (!token || !token.sub || token.sub != wallet)
-      return res.status(400).json({
-        success: false,
-        message: "User wallet not authenticated",
-      });
 
     await connectDatabase();
 

@@ -39,19 +39,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       const minGameAmount =
         maxPayouts[tokenMint as GameTokens]["mines" as GameType] * minAmtFactor;
 
-      const token = await getToken({ req, secret });
-
-      if (
-        !token ||
-        !token.sub ||
-        (wallet && token.sub != wallet) ||
-        (email && token.email !== email)
-      )
-        return res.status(400).json({
-          success: false,
-          message: "User wallet not authenticated",
-        });
-
       if ((!wallet && !email) || !amount || !tokenMint || !minesCount)
         return res
           .status(400)

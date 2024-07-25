@@ -48,19 +48,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       let { wallet, email, amount, tokenMint, rows, risk }: InputType =
         req.body;
 
-      const token = await getToken({ req, secret });
-
-      if (
-        !token ||
-        !token.sub ||
-        (wallet && token.sub != wallet) ||
-        (email && token.email !== email)
-      )
-        return res.status(400).json({
-          success: false,
-          message: "User not authenticated",
-        });
-
       if (maintainance)
         return res.status(400).json({
           success: false,
