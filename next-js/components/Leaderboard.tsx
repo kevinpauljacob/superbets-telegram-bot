@@ -9,7 +9,7 @@ import { errorCustom } from "./toasts/ToastGroup";
 function Leaderboard() {
   const wallet = useWallet();
 
-  const { getUserDetails, pointTier, language } = useGlobalContext();
+  const { getUserDetails, language, session } = useGlobalContext();
 
   const [maxPages, setMaxPages] = useState<number>(0);
 
@@ -24,8 +24,7 @@ function Leaderboard() {
       const res = await fetch("/api/staking/getInfo", {
         method: "POST",
         body: JSON.stringify({
-          option: 2,
-          wallet: wallet.publicKey,
+          option: 4,
         }),
         headers: {
           "Content-Type": "application/json",
@@ -43,9 +42,9 @@ function Leaderboard() {
 
         setData(users);
 
-        if (wallet.publicKey) {
+        if (session?.user?.email) {
           let userInfo = users.find(
-            (info: any) => info.wallet == wallet.publicKey?.toBase58(),
+            (info: any) => info.email == session?.user?.email,
           );
 
           setMyData(userInfo);
@@ -63,10 +62,10 @@ function Leaderboard() {
 
   useEffect(() => {
     getLeaderBoard();
-    if (wallet.publicKey) getUserDetails();
-  }, [wallet.publicKey]);
+    // if (wallet.publicKey) getUserDetails();
+  }, [session?.user]);
 
-  const headers = ["Rank", "Wallet", "Points"];
+  const headers = ["Rank", "User", "Token Balance"];
 
   return (
     <div className="relative mt-8 mb-10 flex h-full w-full flex-col flex-wrap items-center justify-center">
@@ -90,12 +89,12 @@ function Leaderboard() {
             )}
 
             {myData && (
-              <div className="mb-2.5 flex w-full flex-row items-center gap-2 rounded-[5px] border-2 border-[#9945ff] border-opacity-50 bg-[#9945FF] bg-opacity-[0.075] py-3 pr-10">
+              <div className="mb-2.5 flex w-full flex-row items-center gap-2 rounded-[5px] border-2 border-[#9945ff] border-opacity-50 bg-[#5F4DFF] bg-opacity-[0.075] py-3 pr-10">
                 <span className="w-[10%] text-center ml-10 font-changa text-sm font-light text-[#F0F0F0] text-opacity-75">
                   {myData?.rank}
                 </span>
                 <span className="w-[70%] flex items-center gap-2 text-left font-changa text-sm font-light text-[#F0F0F0] text-opacity-75 pl-[15%]">
-                  <div className="relative w-8 h-8">
+                  {/* <div className="relative w-8 h-8">
                     <Image
                       src={pointTier?.image}
                       alt={pointTier?.label}
@@ -103,14 +102,18 @@ function Leaderboard() {
                       objectFit="contain"
                       objectPosition="center"
                     />
-                  </div>
-                  {obfuscatePubKey(myData.wallet ?? "")}
+                  </div> */}
+                  {/* {obfuscatePubKey(myData.wallet ?? "")} */}
+                  {myData?.name}
                 </span>
                 <span className="w-[15%] text-right font-chakra text-sm font-bold text-[#FFFFFF]">
-                  {myData.points.toLocaleString("en-US", {
+                  {/* {myData.points.toLocaleString("en-US", {
                     maximumFractionDigits: 2,
                     minimumFractionDigits: 0,
-                  })}
+                  })} */}
+                  {parseInt(
+                    myData?.deposit?.amount ?? 0
+                  )}
                 </span>
               </div>
             )}
@@ -121,7 +124,9 @@ function Leaderboard() {
                   page * transactionsPerPage - transactionsPerPage,
                   page * transactionsPerPage,
                 )
-                .filter((data) => data.wallet !== wallet.publicKey?.toBase58())
+                .filter(
+                  (data) => data.email !== session?.user?.email,
+                )
                 .map((data, index) => (
                   <div
                     key={index}
@@ -131,7 +136,7 @@ function Leaderboard() {
                       {data?.rank}
                     </span>
                     <span className="w-[70%] flex items-center gap-2 text-left font-changa text-sm font-light text-[#FFFFFF] text-opacity-[0.78] pl-[15%]">
-                      <div className="relative w-8 h-8">
+                      {/* <div className="relative w-8 h-8">
                         <Image
                           src={`/assets/badges/T-${Object.entries(
                             pointTiers,
@@ -145,11 +150,12 @@ function Leaderboard() {
                           objectFit="contain"
                           objectPosition="center"
                         />
-                      </div>
-                      {obfuscatePubKey(data.wallet ?? "")}
+                      </div> */}
+                      {/* {obfuscatePubKey(data.wallet ?? "")} */}
+                      {data?.name}
                     </span>
                     <span className="w-[15%] text-right font-chakra text-sm font-bold text-[#ffffff]">
-                      {parseInt(data?.points ?? 0)}
+                      {parseInt(myData?.deposit?.amount ?? 0)}
                     </span>
                   </div>
                 ))

@@ -42,7 +42,7 @@ function debounce<T extends (...args: any[]) => void>(
 export default function Roulette1() {
   const wallet = useWallet();
   const methods = useForm();
-  const { data: session, status } = useSession();
+
   const {
     coinData,
     getBalance,
@@ -70,6 +70,8 @@ export default function Roulette1() {
     houseEdge,
     maxBetAmt,
     language,
+    session,
+    status,
   } = useGlobalContext();
 
   type Bet = {
@@ -368,7 +370,12 @@ export default function Roulette1() {
 
   const bet = async () => {
     try {
-      if (!wallet.connected || !wallet.publicKey) {
+      if (!session?.user?.isWeb2User && selectedCoin.tokenMint === "WEB2") {
+        throw new Error(
+          translator("You cannot bet with this token!", language),
+        );
+      }
+      if (session?.user?.wallet && (!wallet.connected || !wallet.publicKey)) {
         throw new Error(translator("Wallet not Connected", language));
       }
       if (!betAmt || betAmt === 0) {
@@ -389,6 +396,7 @@ export default function Roulette1() {
         },
         body: JSON.stringify({
           wallet: wallet.publicKey,
+          email: session?.user?.email,
           tokenMint: selectedCoin.tokenMint,
           wager: transformedBets,
         }),
@@ -603,7 +611,7 @@ export default function Roulette1() {
       ) {
         setStartAuto(true);
       }
-    } else if (wallet.connected) {
+    } else if (wallet.connected || session?.user?.email) {
       bet();
     }
   };

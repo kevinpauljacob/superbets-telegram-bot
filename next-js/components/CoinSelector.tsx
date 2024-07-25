@@ -16,6 +16,7 @@ export default function CoinSelector() {
 
   const {
     setShowWalletModal,
+    setShowConnectModal,
     setLiveBets,
     language,
     setSelectedCoin,
@@ -45,7 +46,9 @@ export default function CoinSelector() {
   return (
     <div className="relative flex items-center gap-2">
       <div
-        className={`flex flex-col min-w-[8rem] h-10 ${startAuto ? "opacity-50" : ""}`}
+        className={`flex flex-col min-w-[8rem] h-10 ${
+          startAuto ? "opacity-50" : ""
+        }`}
       >
         <div
           className="flex flex-row justify-left items-center px-4 py-[2px] h-10 gap-2 border-2 border-white border-opacity-5 transition-all hover:bg-[#26282C]/50 hover:transition-all rounded-[5px] cursor-pointer"
@@ -75,7 +78,11 @@ export default function CoinSelector() {
           {SPL_TOKENS.map((coin, index) => (
             <div
               key={index}
-              className={`flex items-center justify-between h-10 px-4 gap-1.5 text-[#F0F0F0] ${selectedCoin.tokenName === coin.tokenName ? "bg-[#2A2E38] text-opacity-100" : "bg-[#2A2E381A] text-opacity-75"} hover:text-opacity-100  hover:bg-[#2A2E38] border-b border-white border-opacity-10 transition-all cursor-pointer`}
+              className={`flex items-center justify-between h-10 px-4 gap-1.5 text-[#F0F0F0] ${
+                selectedCoin.tokenName === coin.tokenName
+                  ? "bg-[#2A2E38] text-opacity-100"
+                  : "bg-[#2A2E381A] text-opacity-75"
+              } hover:text-opacity-100  hover:bg-[#2A2E38] border-b border-white border-opacity-10 transition-all cursor-pointer`}
               onClick={() => {
                 setSelectedCoin({
                   amount:
@@ -113,7 +120,7 @@ export default function CoinSelector() {
               type="button"
               onClick={() => setFiat(!fiat)}
               className={`w-11 p-1 flex items-center relative transition duration-500 delay-100 ${
-                fiat ? "bg-[#9945FF]" : "bg-[#121418]"
+                fiat ? "bg-[#5F4DFF]" : "bg-[#121418]"
               } rounded-full`}
             >
               <div
@@ -136,9 +143,9 @@ export default function CoinSelector() {
         onClick={() => {
           wallet.connected && status === "authenticated"
             ? setShowWalletModal(true)
-            : handleSignIn(wallet, walletModal);
+            : setShowConnectModal(true)
         }}
-        className="flex items-center h-[2.3rem] md:h-10 px-5 md:px-4 py-0 md:py-2 gap-1 md:gap-1.5 bg-[#7839C5] hover:bg-[#9361d1] focus:bg-[#602E9E] transition-all cursor-pointer rounded-[5px]"
+        className="flex items-center h-[2.3rem] md:h-10 px-5 md:px-4 py-0 md:py-2 gap-1 md:gap-1.5 bg-[#5F4DFF] hover:bg-[#7F71FF] focus:bg-[#4C3ECC] transition-all cursor-pointer rounded-[5px]"
       >
         <Image src={"/assets/wallet.png"} alt="" width={17} height={17} />
         <span className="text-xs md:text-sm leading-3 mt-0.5 text-white text-opacity-90">

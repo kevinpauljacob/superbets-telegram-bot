@@ -75,7 +75,6 @@ function getMultiplierByLinesQnt(value: LinesType, risk: RisksType) {
 }
 
 export default function Plinko() {
-  const { data: session, status } = useSession();
   const { width, height } = useWindowSize();
   const [lines, setLines] = useState<LinesType>(8);
 
@@ -129,13 +128,13 @@ export default function Plinko() {
 
   const wallet = useWallet();
   const methods = useForm();
-  const walletModal = useWalletModal();
 
   const {
     coinData,
     getBalance,
     getWalletBalance,
     setShowWalletModal,
+    setShowConnectModal,
     setShowAutoModal,
     autoWinChange,
     autoLossChange,
@@ -158,6 +157,8 @@ export default function Plinko() {
     enableSounds,
     updatePNL,
     minGameAmount,
+    session,
+    status,
   } = useGlobalContext();
 
   const muteRef = useRef<boolean>(false);
@@ -504,7 +505,12 @@ export default function Plinko() {
 
   const handleBet = async () => {
     try {
-      if (!wallet.connected || !wallet.publicKey) {
+      if (!session?.user?.isWeb2User && selectedCoin.tokenMint === "WEB2") {
+        throw new Error(
+          translator("You cannot bet with this token!", language),
+        );
+      }
+      if (session?.user?.wallet && (!wallet.connected || !wallet.publicKey)) {
         throw new Error(translator("Wallet not connected", language));
       }
       if (!betAmt || betAmt === 0) {
@@ -521,6 +527,7 @@ export default function Plinko() {
         },
         body: JSON.stringify({
           wallet: wallet.publicKey,
+          email: session?.user?.email,
           amount: betAmt,
           tokenMint: selectedCoin.tokenMint,
           rows: lines,
@@ -688,7 +695,7 @@ export default function Plinko() {
         // console.log("Auto betting. config: ", useAutoConfig);
         setStartAuto(true);
       }
-    } else if (wallet.connected) handleBet();
+    } else if(wallet.connected || session?.user?.email) handleBet();
     // addBall(1, betAmt!);
   };
 
@@ -784,7 +791,7 @@ export default function Plinko() {
                         type="button"
                         className={`text-center w-full rounded-[5px] border-[2px] disabled:cursor-not-allowed disabled:opacity-50 bg-[#202329] py-2 text-xs font-chakra text-white text-opacity-90 transition duration-200 ${
                           risk === "low"
-                            ? "border-[#7839C5]"
+                            ? "border-[#5F4DFF]"
                             : "border-transparent hover:border-[#7839C580]"
                         }`}
                         disabled={disableInput}
@@ -796,7 +803,7 @@ export default function Plinko() {
                         type="button"
                         className={`text-center w-full rounded-[5px] border-[2px] disabled:cursor-not-allowed disabled:opacity-50 bg-[#202329] py-2 text-xs font-chakra text-white text-opacity-90 transition duration-200 ${
                           risk === "medium"
-                            ? "border-[#7839C5]"
+                            ? "border-[#5F4DFF]"
                             : "border-transparent hover:border-[#7839C580]"
                         }`}
                         disabled={disableInput}
@@ -809,7 +816,7 @@ export default function Plinko() {
                       type="button"
                       className={`text-center lg:w-[33.33%] w-full rounded-[5px] border-[2px] disabled:cursor-not-allowed disabled:opacity-50 bg-[#202329] py-2 text-xs font-chakra text-white text-opacity-90 transition duration-200 ${
                         risk === "high"
-                          ? "border-[#7839C5]"
+                          ? "border-[#5F4DFF]"
                           : "border-transparent hover:border-[#7839C580]"
                       }`}
                       disabled={disableInput}
@@ -936,7 +943,7 @@ export default function Plinko() {
                       onClick={() => {
                         wallet.connected && status === "authenticated"
                           ? setShowWalletModal(true)
-                          : handleSignIn(wallet, walletModal);
+                          : setShowConnectModal(true);
                       }}
                       className="cursor-pointer"
                     >

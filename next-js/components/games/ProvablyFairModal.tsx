@@ -443,7 +443,7 @@ export default function ProvablyFairModal({
       <div
         className={`bg-[#202329] py-4 px-3 rounded-md flex gap-2 items-center justify-center w-full ${
           wonCoinFace === "heads"
-            ? "border-2 border-[#7839C5]"
+            ? "border-2 border-[#5F4DFF]"
             : "border-[rgb(192,201,210)]"
         }`}
       >
@@ -453,7 +453,7 @@ export default function ProvablyFairModal({
       <div
         className={`bg-[#202329] py-4 px-3 rounded-md flex gap-2 items-center justify-center w-full  ${
           wonCoinFace === "tails"
-            ? "border-2 border-[#7839C5]"
+            ? "border-2 border-[#5F4DFF]"
             : "border-[rgb(192,201,210)]"
         }`}
       >

@@ -2,8 +2,9 @@ import mongoose from "mongoose";
 
 const userSchema = new mongoose.Schema(
   {
-    wallet: {
-      type: String,
+    account: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
       required: true,
     },
     solAmount: {
@@ -32,7 +33,7 @@ const userSchema = new mongoose.Schema(
       required: true,
     },
     //TODO: remove this field after docs are updated
-    tier:Number,
+    tier: Number,
   },
   { timestamps: true },
 );

@@ -20,6 +20,7 @@ export const config = {
 
 type InputType = {
   wallet: string;
+  email: string;
   amount: number;
   tokenMint: string;
   betType: "betUp" | "betDown";
@@ -29,7 +30,7 @@ type InputType = {
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === "POST") {
     try {
-      let { wallet, amount, tokenMint, betType, timeFrame }: InputType =
+      let { wallet, email, amount, tokenMint, betType, timeFrame }: InputType =
         req.body;
 
       const minGameAmount =
@@ -44,13 +45,18 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
       const token = await getToken({ req, secret });
 
-      if (!token || !token.sub || token.sub != wallet)
+      if (
+        !token ||
+        !token.sub ||
+        (wallet && token.sub != wallet) ||
+        (email && token.email !== email)
+      )
         return res.status(400).json({
           success: false,
-          message: "User wallet not authenticated",
+          message: "User not authenticated",
         });
 
-      if (!wallet || !amount || !tokenMint || !betType)
+      if ((!wallet && !email) || !amount || !tokenMint || !betType)
         return res
           .status(400)
           .json({ success: false, message: "Missing parameters" });
@@ -98,13 +104,24 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
       const strikePrice = await getSolPrice(betTimeInSec);
 
-      let user = await User.findOne({ wallet });
-      let bet = await Option.findOne({ wallet, result: "Pending" });
+      let user = await User.findOne({
+        $or: [{ wallet: wallet }, { email: email }],
+      });
+
+      let bet = await Option.findOne({
+        $or: [{ wallet: wallet }, { email: email }],
+        result: "Pending",
+      });
 
       if (!user)
         return res
           .status(400)
           .json({ success: false, message: "User does not exist !" });
+
+      if (!user.isWeb2User && tokenMint === "WEB2")
+        return res
+          .status(400)
+          .json({ success: false, message: "You cannot bet with this token!" });
 
       if (bet)
         return res.status(400).json({
@@ -122,9 +139,11 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
       const addGame = !user.gamesPlayed.includes(GameType.options);
 
+      const account = user._id;
+
       const result = await User.findOneAndUpdate(
         {
-          wallet,
+          _id: account,
           deposit: {
             $elemMatch: {
               tokenMint: tokenMint,
@@ -140,6 +159,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           },
           isOptionOngoing: true,
           ...(addGame ? { $addToSet: { gamesPlayed: GameType.options } } : {}),
+          $set: {
+            isWeb2User: tokenMint === "WEB2",
+          },
         },
         {
           new: true,
@@ -151,7 +173,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       }
 
       const record = new Option({
-        wallet,
+        account,
         betTime,
         betEndTime,
         amount,
@@ -175,16 +197,19 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         0,
       );
 
-      const userData = await StakingUser.findOneAndUpdate(
-        { wallet },
-        {},
-        { upsert: true, new: true },
-      );
+      let userData;
+      if (wallet)
+        userData = await StakingUser.findOneAndUpdate(
+          { wallet },
+          {},
+          { upsert: true, new: true },
+        );
+
       const userTier = userData?.tier ?? 0;
 
       const rest = record.toObject();
       rest.game = GameType.options;
-      rest.userTier = userTier;
+      rest.userTier = 0;
 
       const payload = rest;
 

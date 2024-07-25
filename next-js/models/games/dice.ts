@@ -2,8 +2,9 @@ import mongoose from "mongoose";
 
 const diceSchema = new mongoose.Schema(
   {
-    wallet: {
-      type: String,
+    account: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
       required: true,
     },
     amount: {

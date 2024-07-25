@@ -1,7 +1,7 @@
 import connectDatabase from "@/utils/database";
 import { getToken } from "next-auth/jwt";
 import { NextApiRequest, NextApiResponse } from "next";
-import { GameSeed } from "@/models/games";
+import { GameSeed, User } from "@/models/games";
 import {
   generateClientSeed,
   generateServerSeed,
@@ -17,16 +17,22 @@ export const config = {
 
 type InputType = {
   wallet: string;
+  email: string;
 };
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === "POST") {
     try {
-      let { wallet }: InputType = req.body;
+      let { wallet, email }: InputType = req.body;
 
       const token = await getToken({ req, secret });
 
-      if (!token || !token.sub || token.sub != wallet)
+      if (
+        !token ||
+        !token.sub ||
+        (wallet && token.sub != wallet) ||
+        (email && token.email !== email)
+      )
         return res.status(400).json({
           success: false,
           message: "User wallet not authenticated",
@@ -34,10 +40,22 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
       await connectDatabase();
 
-      if (!wallet)
+      if (!wallet && !email)
         return res
           .status(400)
           .json({ success: false, message: "Missing parameters" });
+
+      let user: any;
+
+      if (email) user = await User.findOne({ email });
+      else if (wallet) user = await User.findOne({ wallet });
+
+      const account = user._id;
+
+      if (!account || !user)
+        return res
+          .status(400)
+          .json({ success: false, message: "User not found!" });
 
       const clientSeed = generateClientSeed();
       const serverSeedInfo1 = generateServerSeed(encryptionKey);
@@ -45,7 +63,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
       const activeGameSeed = await GameSeed.findOneAndUpdate(
         {
-          wallet,
+          account,
           status: seedStatus.ACTIVE,
         },
         {
@@ -69,7 +87,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
       const nextGameSeed = await GameSeed.findOneAndUpdate(
         {
-          wallet,
+          account,
           status: seedStatus.NEXT,
         },
         {

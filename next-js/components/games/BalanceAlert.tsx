@@ -9,8 +9,13 @@ export default function BalanceAlert() {
   const { data: session, status } = useSession();
   const wallet = useWallet();
   const walletModal = useWalletModal();
-  const { setShowWalletModal, language, selectedCoin, minGameAmount } =
-    useGlobalContext();
+  const {
+    setShowWalletModal,
+    setShowConnectModal,
+    language,
+    selectedCoin,
+    minGameAmount,
+  } = useGlobalContext();
   return (
     (!selectedCoin ||
       (selectedCoin && selectedCoin.amount < minGameAmount) ||
@@ -23,7 +28,7 @@ export default function BalanceAlert() {
             onClick={() => {
               wallet.connected && status === "authenticated"
                 ? setShowWalletModal(true)
-                : handleSignIn(wallet, walletModal);
+                : setShowConnectModal(true);
             }}
             className="cursor-pointer"
           >

@@ -24,7 +24,11 @@ import {
   successCustom,
   warningCustom,
 } from "@/components/toasts/ToastGroup";
-import { formatNumber, translator, truncateNumber } from "@/context/transactions";
+import {
+  formatNumber,
+  translator,
+  truncateNumber,
+} from "@/context/transactions";
 import { useSession } from "next-auth/react";
 import user from "@/models/staking/user";
 import Decimal from "decimal.js";
@@ -35,7 +39,6 @@ Decimal.set({ precision: 9 });
 export default function Mines() {
   const wallet = useWallet();
   const methods = useForm();
-  const { data: session, status } = useSession();
   const {
     coinData,
     getBalance,
@@ -64,6 +67,8 @@ export default function Mines() {
     enableSounds,
     updatePNL,
     minGameAmount,
+    session,
+    status,
   } = useGlobalContext();
   const [betAmt, setBetAmt] = useState<number | undefined>();
   const [userInput, setUserInput] = useState<number | undefined>();
@@ -152,6 +157,7 @@ export default function Mines() {
         },
         body: JSON.stringify({
           wallet: wallet.publicKey,
+          email: session?.user?.email,
           gameId: gameId,
         }),
       });
@@ -173,7 +179,10 @@ export default function Mines() {
 
       const win = result === "Won";
       if (win) {
-        successCustom(translator(message, language) + ` ${formatNumber(amountWon)}  ${selectedCoin.tokenName}`);
+        successCustom(
+          translator(message, language) +
+            ` ${formatNumber(amountWon)}  ${selectedCoin.tokenName}`,
+        );
         soundAlert("/sounds/win.wav", !enableSounds);
       } else errorCustom(translator(message, language));
 
@@ -248,6 +257,7 @@ export default function Mines() {
         },
         body: JSON.stringify({
           wallet: wallet.publicKey,
+          email: session?.user?.email,
           gameId: gameId,
           userBet: number - 1,
         }),
@@ -395,7 +405,12 @@ export default function Mines() {
 
   const handleAutoBet = async () => {
     try {
-      if (!wallet.connected || !wallet.publicKey) {
+      if (!session?.user?.isWeb2User && selectedCoin.tokenMint === "WEB2") {
+        throw new Error(
+          translator("You cannot bet with this token!", language),
+        );
+      }
+      if (session?.user?.wallet && (!wallet.connected || !wallet.publicKey)) {
         throw new Error(translator("Wallet not connected", language));
       }
       if (!betAmt || betAmt === 0) {
@@ -405,7 +420,9 @@ export default function Mines() {
         throw new Error(translator("Insufficient balance for bet !", language));
       }
       if (userBetsForAuto.length === 0) {
-        throw new Error(translator("Select at least one tile to bet on.", language));
+        throw new Error(
+          translator("Select at least one tile to bet on.", language),
+        );
       }
 
       setIsRolling(true);
@@ -424,6 +441,7 @@ export default function Mines() {
         },
         body: JSON.stringify({
           wallet: wallet.publicKey,
+          email: session?.user?.email,
           amount: betAmt,
           tokenMint: selectedCoin.tokenMint,
           minesCount: minesCount,
@@ -460,7 +478,10 @@ export default function Mines() {
       const win = result === "Won";
       if (win) {
         soundAlert("/sounds/win.wav", !enableSounds);
-        successCustom(translator(message, language) + ` ${formatNumber(amountWon)} ${selectedCoin.tokenName}`);
+        successCustom(
+          translator(message, language) +
+            ` ${formatNumber(amountWon)} ${selectedCoin.tokenName}`,
+        );
         setCashoutModal({
           show: true,
           amountWon: amountWon,
@@ -527,7 +548,12 @@ export default function Mines() {
     setGameStatus("Not Started");
     // setSelectTile(true);
     try {
-      if (!wallet.connected || !wallet.publicKey) {
+      if (!session?.user?.isWeb2User && selectedCoin.tokenMint === "WEB2") {
+        throw new Error(
+          translator("You cannot bet with this token!", language),
+        );
+      }
+      if (session?.user?.wallet && (!wallet.connected || !wallet.publicKey)) {
         throw new Error(translator("Wallet not connected", language));
       }
       if (!betAmt || betAmt === 0) {
@@ -552,6 +578,7 @@ export default function Mines() {
         },
         body: JSON.stringify({
           wallet: wallet.publicKey,
+          email: session?.user?.email,
           amount: betAmt,
           tokenMint: selectedCoin.tokenMint,
           minesCount: minesCount,
@@ -602,6 +629,7 @@ export default function Mines() {
         },
         body: JSON.stringify({
           wallet: wallet.publicKey,
+          email: session?.user?.email,
         }),
       });
 
@@ -878,7 +906,7 @@ export default function Mines() {
                   betType === "manual" &&
                   !userBets.some((bet) => bet.pick)
                 }
-                className="disabled:cursor-default disabled:opacity-70 hover:duration-75 hover:opacity-90 w-full h-[3.75rem] rounded-lg transition-all bg-[#7839C5] disabled:bg-[#4b2876] hover:bg-[#9361d1] focus:bg-[#602E9E] flex items-center justify-center font-chakra font-semibold text-xl tracking-wider text-white"
+                className="disabled:cursor-default disabled:opacity-70 hover:duration-75 hover:opacity-90 w-full h-[3.75rem] rounded-lg transition-all bg-[#5F4DFF] disabled:bg-[#555555] hover:bg-[#7F71FF] focus:bg-[#4C3ECC] flex items-center justify-center font-chakra font-semibold text-xl tracking-wider text-white"
               >
                 {isRolling ? <Loader /> : translator("CASHOUT", language)}
               </button>
@@ -915,7 +943,9 @@ export default function Mines() {
                 {!betActive && betType !== "auto" && (
                   <div className="mb-6 flex flex-col w-full">
                     <div className="mb-1 w-full text-xs font-changa text-opacity-90">
-                      <label className="text-white/90">{translator("Mines", language)}</label>
+                      <label className="text-white/90">
+                        {translator("Mines", language)}
+                      </label>
                     </div>
                     <div
                       className={`${
@@ -1151,7 +1181,7 @@ export default function Mines() {
                         betType === "manual" &&
                         !userBets.some((bet) => bet.pick)
                       }
-                      className="disabled:cursor-default disabled:opacity-70 hover:duration-75 hover:opacity-90 w-full h-[3.75rem] rounded-lg transition-all bg-[#7839C5] disabled:bg-[#4b2876] hover:bg-[#9361d1] focus:bg-[#602E9E] flex items-center justify-center font-chakra font-semibold text-xl tracking-wider text-white"
+                      className="disabled:cursor-default disabled:opacity-70 hover:duration-75 hover:opacity-90 w-full h-[3.75rem] rounded-lg transition-all bg-[#5F4DFF] disabled:bg-[#555555] hover:bg-[#7F71FF] focus:bg-[#4C3ECC] flex items-center justify-center font-chakra font-semibold text-xl tracking-wider text-white"
                     >
                       {isRolling ? <Loader /> : translator("CASHOUT", language)}
                     </button>

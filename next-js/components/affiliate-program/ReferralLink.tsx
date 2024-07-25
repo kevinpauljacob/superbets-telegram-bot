@@ -50,7 +50,7 @@ export default function ReferralLink({
                 setButtonText("Copy");
               }, 2000);
             }}
-            className="bg-[#7839C5] hover:bg-[#9361d1] focus:bg-[#602E9E] transition-all cursor-pointer rounded-[5px] text-white/75 text-[13px] font-chakra font-medium px-5"
+            className="bg-[#5F4DFF] hover:bg-[#7F71FF] focus:bg-[#4C3ECC] transition-all cursor-pointer rounded-[5px] text-white/75 text-[13px] font-chakra font-medium px-5"
           >
             {translator(buttonText, language)}
           </button>

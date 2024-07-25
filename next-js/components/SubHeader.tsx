@@ -8,6 +8,7 @@ import { useRouter } from "next/router";
 import useWebSocket from "react-use-websocket";
 import { trimStringToLength, truncateNumber } from "@/context/transactions";
 import CoinSelector from "./CoinSelector";
+import { Card } from "iconsax-react";
 
 export default function SubHeader() {
   const router = useRouter();
@@ -26,7 +27,7 @@ export default function SubHeader() {
 
   type Card = {
     game: GameType;
-    wallet: string;
+    account: string;
     amountWon: number;
     result: "Won" | "Lost";
     userTier: number;
@@ -106,7 +107,7 @@ export default function SubHeader() {
       <div
         className={`${
           router.pathname === "/" ? "flex" : "hidden md:flex"
-        } w-full text-white h-[4.4rem] flex items-center border-b border-[#1E2220] px-4 lg:px-6 bg-[#121418]`}
+        } w-full text-white h-[4.4rem] flex items-center border-l border-b border-[#1E2220] px-4 lg:px-6 bg-[#121418]`}
       >
         <div className="flex w-full items-center overflow-x-auto no-scrollbar">
           <div ref={endOfListRef} />
@@ -125,14 +126,14 @@ export default function SubHeader() {
               />
               <div className="pl-2 pr-2">
                 <div className="flex items-center gap-1">
-                  <Image
+                  {/* <Image
                     src={`/assets/badges/T-${card.userTier}.png`}
                     alt="userBadge"
                     width={13}
                     height={13}
-                  />
+                  /> */}
                   <span className="text-xs font-changa font-medium text-white">
-                    {trimStringToLength(card.wallet, 3)}
+                    {trimStringToLength(card?.account ?? "Player", 3)}
                   </span>
                 </div>
                 <p className="text-[#72F238] font-changa text-sm mt-1">
@@ -165,7 +166,11 @@ export default function SubHeader() {
         <div
           className={`${
             router.pathname === "/" ? "hidden md:flex" : "hidden md:flex"
-          } border-2 border-[#26282C] rounded-[5px] p-[0.563rem] cursor-pointer transition-all hover:bg-[#26282C]/50 hover:transition-all ${showLiveStats ? "bg-[#26282C] border-[#26282C] hover:bg-[#26282C]" : ""}`}
+          } border-2 border-[#26282C] rounded-[5px] p-[0.563rem] cursor-pointer transition-all hover:bg-[#26282C]/50 hover:transition-all ${
+            showLiveStats
+              ? "bg-[#26282C] border-[#26282C] hover:bg-[#26282C]"
+              : ""
+          }`}
           onClick={() => setShowLiveStats(!showLiveStats)}
         >
           <svg
@@ -192,7 +197,11 @@ export default function SubHeader() {
         <div
           className={`${
             router.pathname === "/" ? "hidden md:flex" : "hidden md:flex"
-          } border-2 border-[#26282C] rounded-[5px] p-[0.563rem] cursor-pointer ml-3 transition-all hover:bg-[#26282C]/50 hover:transition-all ${enableSounds ? "bg-[#26282C] border-[#26282C] hover:bg-[#26282C]" : ""}`}
+          } border-2 border-[#26282C] rounded-[5px] p-[0.563rem] cursor-pointer ml-3 transition-all hover:bg-[#26282C]/50 hover:transition-all ${
+            enableSounds
+              ? "bg-[#26282C] border-[#26282C] hover:bg-[#26282C]"
+              : ""
+          }`}
           onClick={() => setEnableSounds(!enableSounds)}
         >
           {!enableSounds && (
@@ -241,15 +250,15 @@ export default function SubHeader() {
           )}
         </div>
 
-        <div
+        {/* <div
           className={`${
             router.pathname === "/" ? "hidden md:flex" : "hidden md:flex"
           } h-10 border border-white border-opacity-5 rounded-[5px] mx-4`}
-        />
+        /> */}
 
-        <div className="hidden md:flex items-center md:min-w-fit">
+        {/* <div className="hidden md:flex items-center md:min-w-fit">
           <CoinSelector />
-        </div>
+        </div> */}
       </div>
       <div
         className={`${
@@ -258,7 +267,11 @@ export default function SubHeader() {
       >
         <div className="flex items-center ">
           <div
-            className={`border-2 border-white/5 rounded-[5px] p-[0.563rem] cursor-pointer transition-all hover:bg-[#26282C]/50 hover:transition-all ${showLiveStats ? "bg-[#26282C] border-[#26282C] hover:bg-[#26282C]" : ""}`}
+            className={`border-2 border-white/5 rounded-[5px] p-[0.563rem] cursor-pointer transition-all hover:bg-[#26282C]/50 hover:transition-all ${
+              showLiveStats
+                ? "bg-[#26282C] border-[#26282C] hover:bg-[#26282C]"
+                : ""
+            }`}
             onClick={() => setShowLiveStats(!showLiveStats)}
           >
             <svg
@@ -283,7 +296,11 @@ export default function SubHeader() {
           </div>
 
           <div
-            className={`border-2 border-white/5 rounded-[5px] p-[0.563rem] cursor-pointer ml-2 transition-all hover:bg-[#26282C]/50 hover:transition-all ${enableSounds ? "bg-[#26282C] border-[#26282C] hover:bg-[#26282C]" : ""}`}
+            className={`border-2 border-white/5 rounded-[5px] p-[0.563rem] cursor-pointer ml-2 transition-all hover:bg-[#26282C]/50 hover:transition-all ${
+              enableSounds
+                ? "bg-[#26282C] border-[#26282C] hover:bg-[#26282C]"
+                : ""
+            }`}
             onClick={() => setEnableSounds(!enableSounds)}
           >
             {!enableSounds && (

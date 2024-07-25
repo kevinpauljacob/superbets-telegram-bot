@@ -62,6 +62,12 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           message: "User wallet not authenticated",
         });
 
+      if (tokenMint === "WEB2")
+        return res.status(405).json({
+          success: false,
+          message: "Deposit not allowed for this token!",
+        });
+
       await connectDatabase();
 
       if (
@@ -153,9 +159,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           console.log("unable to create campaign !");
         }
       }
-      const tokenName = SPL_TOKENS.find(
-        (t) => t.tokenMint === tokenMint,
-      )?.tokenName;
+      const tokenName = SPL_TOKENS.find((t) => t.tokenMint === tokenMint)
+        ?.tokenName;
 
       return res.json({
         success: true,

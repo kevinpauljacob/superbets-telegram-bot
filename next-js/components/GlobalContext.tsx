@@ -14,6 +14,8 @@ import { errorCustom } from "./toasts/ToastGroup";
 import SOL from "@/public/assets/coins/SOL";
 import { GameType } from "@/utils/provably-fair";
 import { SPL_TOKENS } from "@/context/config";
+import { useSession } from "next-auth/react";
+import { SessionUser } from "./ConnectWallet";
 
 export interface GameStat {
   game: GameType;
@@ -139,6 +141,9 @@ interface GlobalContextProps {
 
   openPFModal: boolean;
   setOpenPFModal: React.Dispatch<React.SetStateAction<boolean>>;
+
+  showConnectModal: boolean;
+  setShowConnectModal: React.Dispatch<React.SetStateAction<boolean>>;
   //configure auto
   showAutoModal: boolean;
   setShowAutoModal: React.Dispatch<React.SetStateAction<boolean>>;
@@ -212,6 +217,9 @@ interface GlobalContextProps {
     multiplier: number,
   ) => void;
   liveTokenPrice: LiveTokenPrice[];
+
+  session: SessionUser | null;
+  status: "loading" | "authenticated" | "unauthenticated";
 }
 
 const GlobalContext = createContext<GlobalContextProps | undefined>(undefined);
@@ -222,6 +230,10 @@ interface GlobalProviderProps {
 
 export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
   const wallet = useWallet();
+  const { data: session, status } = useSession() as {
+    data: SessionUser | null;
+    status: "loading" | "authenticated" | "unauthenticated";
+  };
 
   const [loading, setLoading] = useState(false);
   const [language, setLanguage] = useState<"en" | "ru" | "ko" | "ch">("en");
@@ -269,6 +281,8 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
   const [mobileSidebar, setMobileSidebar] = useState<boolean>(false);
 
   const [openPFModal, setOpenPFModal] = useState<boolean>(false);
+
+  const [showConnectModal, setShowConnectModal] = useState<boolean>(false);
 
   // configure auto
   const [showAutoModal, setShowAutoModal] = useState<boolean>(false);
@@ -415,20 +429,26 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
 
   const updateLivePrices = async () => {
     let prices = [];
-    let data = await (
-      await fetch(
-        `https://price.jup.ag/v6/price?ids=${SPL_TOKENS.map(
-          (x) => x.tokenMint,
-        ).join(",")}&vsToken=USDC`,
-      )
-    ).json();
+    try {
+      let data = await (
+        await fetch(
+          `https://price.jup.ag/v6/price?ids=${SPL_TOKENS.map(
+            (x) => x.tokenMint,
+          ).join(",")}&vsToken=USDC`,
+        )
+      ).json();
 
-    for (let token of SPL_TOKENS) {
-      let price = data?.data[token.tokenMint]?.price ?? 0;
-      prices.push({ mintAddress: token.tokenMint, price: price });
+      for (let token of SPL_TOKENS) {
+        let price =
+          data?.data[token.tokenMint]?.price ?? token?.tokenMint === "WEB2"
+            ? 1
+            : 0;
+        prices.push({ mintAddress: token.tokenMint, price: price });
+      }
+      setLiveTokenPrice(prices);
+    } catch (e) {
+      console.error("Could not fetch prices!");
     }
-
-    setLiveTokenPrice(prices);
     return prices;
   };
 
@@ -456,9 +476,13 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
 
   const getBalance = async () => {
     setLoading(true);
+    console.log("User", session?.user);
     try {
-      if (wallet?.publicKey)
-        fetch(`/api/games/user/getUser?wallet=${wallet.publicKey?.toBase58()}`)
+      if (wallet?.publicKey || session?.user.email) {
+        let query = session?.user?.wallet
+          ? `wallet=${wallet.publicKey?.toBase58()}`
+          : `email=${session?.user?.email}`;
+        fetch(`/api/games/user/getUser?${query}`)
           .then((res) => res.json())
           .then((balance) => {
             if (
@@ -478,6 +502,7 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
             }
             setLoading(false);
           });
+      }
     } catch (e) {
       // console.log("Could not fetch balance.");
       setLoading(false);
@@ -487,33 +512,34 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
   };
 
   const getProvablyFairData = async () => {
-    if (wallet?.publicKey)
-      try {
-        const res = await fetch(`/api/games/gameSeed`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            wallet: wallet.publicKey.toBase58(),
-          }),
-        });
+    let query = {};
+    if (session?.user?.wallet && wallet?.publicKey)
+      query = { wallet: wallet.publicKey.toBase58() };
+    else if (session?.user?.email) query = { email: session?.user?.email };
+    try {
+      const res = await fetch(`/api/games/gameSeed`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(query),
+      });
 
-        let data = await res.json();
-        if (data.success) return data;
-        else return null;
-      } catch (e) {
-        errorCustom(
-          translator("Unable to fetch provably fair data.", language),
-        );
-        return null;
-      }
+      let data = await res.json();
+      if (data.success) return data;
+      else return null;
+    } catch (e) {
+      errorCustom(translator("Unable to fetch provably fair data.", language));
+      return null;
+    }
   };
   console.log(openPFModal);
 
   return (
     <GlobalContext.Provider
       value={{
+        session,
+        status,
         loading,
         setLoading,
         language,
@@ -547,6 +573,8 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
         setSidebar,
         mobileSidebar,
         setMobileSidebar,
+        showConnectModal,
+        setShowConnectModal,
         openPFModal,
         setOpenPFModal,
         showAutoModal,
@@ -740,9 +768,9 @@ export const translationsMap = {
     ko: "영어",
     ch: "英语",
   },
-  "Connect Wallet": {
-    ru: "Подключить кошелек",
-    ko: "지갑 연결",
+  Connect: {
+    ru: "Подключить",
+    ko: "지갑",
     ch: "连接钱包",
   },
   Back: {
@@ -2040,11 +2068,7 @@ export const translationsMap = {
     ko: "베팅 금액이 허용된 최대 베팅을 초과합니다.",
     ch: "投注金额超过了允许的最高投注。",
   },
-  "Please select a token before placing a bet.": {
-    ru: "Пожалуйста, выберите токен перед размещением ставки.",
-    ko: "베팅을 배치하기 전에 토큰을 선택하��시오.",
-    ch: "请在放置投注之前选择一个令牌。",
-  },
+
   "Chip Value": {
     ru: "Значение фишки",
     ko: "칩 가치",
@@ -2084,5 +2108,10 @@ export const translationsMap = {
     ru: "Ставьте выше минимальной суммы.",
     ko: "최소 금액 이상 베팅하세요",
     ch: "投注超过最低金额",
-  }
+  },
+  "Please select a token before placing a bet.": {
+    ru: "Пожалуйста, выберите токен перед размещением ставки.",
+    ko: "베팅을 배치하기 전에 토큰을 선택하��시오.",
+    ch: "请在放置投注之前选择一个令牌。",
+  },
 };

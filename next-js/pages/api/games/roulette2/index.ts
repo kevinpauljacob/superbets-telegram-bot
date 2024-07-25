@@ -10,11 +10,16 @@ import {
   decryptServerSeed,
 } from "@/utils/provably-fair";
 import StakingUser from "@/models/staking/user";
-import { houseEdgeTiers, maintainance, pointTiers, stakingTiers } from "@/context/config";
+import {
+  houseEdgeTiers,
+  maintainance,
+  pointTiers,
+  stakingTiers,
+} from "@/context/config";
 import { launchPromoEdge } from "@/context/config";
 import { wsEndpoint } from "@/context/config";
 
-import { SPL_TOKENS, minGameAmount} from "@/context/config";
+import { SPL_TOKENS, minGameAmount } from "@/context/config";
 import { Decimal } from "decimal.js";
 import updateGameStats from "../../../../utils/updateGameStats";
 Decimal.set({ precision: 9 });
@@ -46,7 +51,7 @@ const WagerMapping: Record<WagerType, Array<number> | Record<string, number>> =
   {
     red: [1, 3, 5, 7, 12, 14, 16, 18, 19, 21, 23, 25, 27, 30, 32, 34, 36],
     black: [2, 4, 6, 8, 10, 11, 13, 15, 17, 20, 22, 24, 26, 28, 29, 31, 33, 35],
-    green: [0,99],
+    green: [0, 99],
     odd: [1, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23, 25, 27, 29, 31, 33, 35],
     even: [2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 34, 36],
     low: [...Array(18).keys()].map((x) => x + 1),
@@ -120,6 +125,7 @@ type Wager = Record<WagerType, number | Record<string, number>>;
 
 type InputType = {
   wallet: string;
+  email: string;
   tokenMint: GameTokens;
   wager: Wager;
 };
@@ -127,7 +133,7 @@ type InputType = {
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === "POST") {
     try {
-      let { wallet, tokenMint, wager }: InputType = req.body;
+      let { wallet, email, tokenMint, wager }: InputType = req.body;
 
       if (maintainance)
         return res.status(400).json({
@@ -137,13 +143,18 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
       const token = await getToken({ req, secret });
 
-      if (!token || !token.sub || token.sub != wallet)
+      if (
+        !token ||
+        !token.sub ||
+        (wallet && token.sub != wallet) ||
+        (email && token.email !== email)
+      )
         return res.status(400).json({
           success: false,
           message: "User wallet not authenticated",
         });
 
-      if (!wallet || !tokenMint || !wager)
+      if ((!wallet && !email) || !tokenMint || !wager)
         return res
           .status(400)
           .json({ success: false, message: "Missing parameters" });
@@ -189,14 +200,16 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       //     .status(400)
       //     .json({ success: false, message: "Max payout exceeded" });
 
-      let user = await User.findOne({ wallet });
+      let user = await User.findOne({
+        $or: [{ wallet: wallet }, { email: email }],
+      });
 
       if (!user)
         return res
           .status(400)
           .json({ success: false, message: "User does not exist !" });
 
-    /*   if (
+      /*   if (
         user.deposit.find((d: any) => d.tokenMint === tokenMint)?.amount <
         amount
       )
@@ -204,28 +217,32 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           .status(400)
           .json({ success: false, message: "Insufficient balance !" }); */
 
-      const userData = await StakingUser.findOneAndUpdate(
-        { wallet },
-        {},
-        { upsert: true, new: true },
-      );
+      if (!user.isWeb2User && tokenMint === "WEB2")
+        return res
+          .status(400)
+          .json({ success: false, message: "You cannot bet with this token!" });
+
+      const account = user._id;
+
+      let userData;
+      if (wallet)
+        userData = await StakingUser.findOneAndUpdate(
+          { wallet },
+          {},
+          { upsert: true, new: true },
+        );
 
       const stakeAmount = userData?.stakedAmount ?? 0;
       const stakingTier = Object.entries(stakingTiers).reduce((prev, next) => {
         return stakeAmount >= next[1]?.limit ? next : prev;
       })[0];
-      const isFomoToken =
-        tokenMint === SPL_TOKENS.find((t) => t.tokenName === "FOMO")?.tokenMint
-          ? true
-          : false;
-      const houseEdge =
-        launchPromoEdge || isFomoToken
-          ? 0
-          : houseEdgeTiers[parseInt(stakingTier)];
+      const houseEdge = launchPromoEdge
+        ? 0
+        : houseEdgeTiers[parseInt(stakingTier)];
 
       const activeGameSeed = await GameSeed.findOneAndUpdate(
         {
-          wallet,
+          account,
           status: seedStatus.ACTIVE,
         },
         {
@@ -307,7 +324,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
       const userUpdate = await User.findOneAndUpdate(
         {
-          wallet,
+          _id: account,
           deposit: {
             $elemMatch: {
               tokenMint,
@@ -323,6 +340,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           ...(addGame
             ? { $addToSet: { gamesPlayed: GameType.roulette2 } }
             : {}),
+          $set: {
+            isWeb2User: tokenMint === "WEB2",
+          },
         },
         {
           new: true,
@@ -334,7 +354,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       }
 
       const roulette2 = new Roulette2({
-        wallet,
+        account,
         amount,
         wager,
         strikeNumber,
@@ -348,39 +368,39 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         gameSeed: activeGameSeed._id,
       });
       await roulette2.save();
-      
+
       await updateGameStats(
         wallet,
         GameType.roulette2,
         tokenMint,
         amount,
         addGame,
-        feeGenerated
+        feeGenerated,
       );
 
-      const pointsGained =
-        0 * user.numOfGamesPlayed + 1.4 * amount * userData.multiplier;
+      // const pointsGained =
+      //   0 * user.numOfGamesPlayed + 1.4 * amount * userData.multiplier;
 
-      const points = userData.points + pointsGained;
-      const newTier = Object.entries(pointTiers).reduce((prev, next) => {
-        return points >= next[1]?.limit ? next : prev;
-      })[0];
+      // const points = userData.points + pointsGained;
+      // const newTier = Object.entries(pointTiers).reduce((prev, next) => {
+      //   return points >= next[1]?.limit ? next : prev;
+      // })[0];
 
-      await StakingUser.findOneAndUpdate(
-        {
-          wallet,
-        },
-        {
-          $inc: {
-            points: pointsGained,
-          },
-        },
-      );
+      // await StakingUser.findOneAndUpdate(
+      //   {
+      //     wallet,
+      //   },
+      //   {
+      //     $inc: {
+      //       points: pointsGained,
+      //     },
+      //   },
+      // );
 
       const record = await Roulette2.populate(roulette2, "gameSeed");
       const { gameSeed, ...rest } = record.toObject();
       rest.game = GameType.roulette2;
-      rest.userTier = parseInt(newTier);
+      rest.userTier = 0;
       rest.gameSeed = { ...gameSeed, serverSeed: undefined };
 
       const payload = rest;
@@ -412,7 +432,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         amountWon: amountWon.toNumber(),
         amountLost,
       });
-      
     } catch (e: any) {
       console.log(e);
       return res.status(500).json({ success: false, message: e.message });

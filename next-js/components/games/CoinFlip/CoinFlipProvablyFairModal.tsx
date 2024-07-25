@@ -158,7 +158,7 @@ export default function CoinFlipProvablyFairModal({
                     className={`w-full border-2 hover:duration-75 rounded-md py-2 mr-1 text-white font-semibold text-sm transition duration-300 ease-in-out ${
                       state === "seeds"
                         ? "bg-[#d9d9d90d] border-transparent text-opacity-90"
-                        : "border-[#d9d9d90d] hover:bg-[#9361d1] focus:bg-[#602E9E] text-opacity-50 hover:text-opacity-90"
+                        : "border-[#d9d9d90d] hover:bg-[#7F71FF] focus:bg-[#4C3ECC] text-opacity-50 hover:text-opacity-90"
                     }`}
                     onClick={() => handleToggleState("seeds")}
                   >
@@ -168,7 +168,7 @@ export default function CoinFlipProvablyFairModal({
                     className={`w-full border-2 hover:duration-75 rounded-md py-2 ml-1 text-white font-semibold text-sm transition-all duration-300 ease-in-out ${
                       state === "verify"
                         ? "bg-[#d9d9d90d] border-transparent text-opacity-90"
-                        : "border-[#d9d9d90d] hover:bg-[#9361d1] focus:bg-[#602E9E] text-opacity-50 hover:text-opacity-90"
+                        : "border-[#d9d9d90d] hover:bg-[#7F71FF] focus:bg-[#4C3ECC] text-opacity-50 hover:text-opacity-90"
                     }`}
                     onClick={() => handleToggleState("verify")}
                   >
@@ -244,7 +244,7 @@ export default function CoinFlipProvablyFairModal({
                               className="bg-[#202329] text-[#B9B9BA] text-xs font-semibold rounded-md px-5 py-4 w-full relative flex items-center justify-between focus:outline-none focus:ring-0"
                             />
                             <button
-                              className="flex items-center justify-center h-full mx-2 px-5 py-1 my-auto bg-[#7839C5] text-white rounded-md font-bold text-sm"
+                              className="flex items-center justify-center h-full mx-2 px-5 py-1 my-auto bg-[#5F4DFF] text-white rounded-md font-bold text-sm"
                               onClick={handleSetClientSeed}
                             >
                               {translator("Change", language)}

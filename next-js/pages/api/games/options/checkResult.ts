@@ -22,7 +22,7 @@ export const config = {
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === "POST") {
     try {
-      let { wallet } = req.body;
+      let { wallet, email } = req.body;
 
       if (maintainance)
         return res.status(400).json({
@@ -32,19 +32,25 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
       const token = await getToken({ req, secret });
 
-      if (!token || !token.sub || token.sub != wallet)
-        return res.send({
-          error: "User wallet not authenticated",
+      if (
+        !token ||
+        !token.sub ||
+        (wallet && token.sub != wallet) ||
+        (email && token.email !== email)
+      )
+        return res.status(400).json({
+          success: false,
+          message: "User not authenticated",
         });
 
-      if (!wallet)
+      if (!wallet && !email)
         return res
           .status(400)
           .json({ success: false, message: "Missing parameters" });
 
       await connectDatabase();
 
-      let user = await User.findOne({ wallet });
+      let user = await User.findOne({ $or: [{ wallet: wallet }, { email: email }] })
       if (!user)
         return res
           .status(400)
@@ -59,25 +65,22 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
       const { tokenMint, betEndTime, amount, betType, strikePrice } = bet;
 
-      const userData = await StakingUser.findOneAndUpdate(
-        { wallet },
-        {},
-        { upsert: true, new: true },
-      );
+      let userData;
+      if (wallet)
+        userData = await StakingUser.findOneAndUpdate(
+          { wallet },
+          {},
+          { upsert: true, new: true },
+        );
 
       const stakeAmount = userData?.stakedAmount ?? 0;
       const stakingTier = Object.entries(stakingTiers).reduce((prev, next) => {
         return stakeAmount >= next[1]?.limit ? next : prev;
       })[0];
-      const isFomoToken =
-        tokenMint === SPL_TOKENS.find((t) => t.tokenName === "FOMO")?.tokenMint
-          ? true
-          : false;
       const houseEdge =
-        optionsEdge +
-        (launchPromoEdge || isFomoToken
+        launchPromoEdge
           ? 0
-          : houseEdgeTiers[parseInt(stakingTier)]);
+          : houseEdgeTiers[parseInt(stakingTier)];
 
       await new Promise((r) => setTimeout(r, 2000));
 
@@ -152,28 +155,30 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         feeGenerated,
       );
 
-      const pointsGained =
-        0 * user.numOfGamesPlayed + 1.4 * amount * userData.multiplier;
+      // const pointsGained =
+      //   0 * user.numOfGamesPlayed + 1.4 * amount * userData.multiplier;
 
-      const points = userData.points + pointsGained;
-      const newTier = Object.entries(pointTiers).reduce((prev, next) => {
-        return points >= next[1]?.limit ? next : prev;
-      })[0];
+      // const points = userData.points + pointsGained;
+      // const newTier = Object.entries(pointTiers).reduce((prev, next) => {
+      //   return points >= next[1]?.limit ? next : prev;
+      // })[0];
 
-      await StakingUser.findOneAndUpdate(
-        {
-          wallet,
-        },
-        {
-          $inc: {
-            points: pointsGained,
-          },
-        },
-      );
+      // if (wallet) {
+      //   await StakingUser.findOneAndUpdate(
+      //     {
+      //       wallet,
+      //     },
+      //     {
+      //       $inc: {
+      //         points: pointsGained,
+      //       },
+      //     },
+      //   );
+      // }
 
       const rest = record.toObject();
       rest.game = GameType.options;
-      rest.userTier = parseInt(newTier);
+      rest.userTier = 0;
 
       const payload = rest;
 
@@ -195,9 +200,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       return res.json({
         success: true,
         data: { amountWon, amountLost, result },
-        message: `${result} ${
-          result == "Won" ? amountWon.toFixed(4) : amountLost.toFixed(4)
-        } ${SPL_TOKENS.find((token) => token.tokenMint === tokenMint)?.tokenName ?? ""}!`,
+        message: `${result} ${result == "Won" ? amountWon.toFixed(4) : amountLost.toFixed(4)
+          } ${SPL_TOKENS.find((token) => token.tokenMint === tokenMint)?.tokenName ?? ""}!`,
       });
     } catch (e: any) {
       console.log(e);

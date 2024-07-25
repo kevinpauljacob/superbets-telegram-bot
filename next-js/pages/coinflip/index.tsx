@@ -38,7 +38,6 @@ const Progress = dynamic(() => import("../../components/games/Progressbar"), {
 export default function Flip() {
   const wallet = useWallet();
   const methods = useForm();
-  const { data: session, status } = useSession();
 
   const {
     getBalance,
@@ -63,6 +62,8 @@ export default function Flip() {
     language,
     updatePNL,
     enableSounds,
+    session,
+    status,
   } = useGlobalContext();
 
   const [betAmt, setBetAmt] = useState<number | undefined>();
@@ -81,7 +82,12 @@ export default function Flip() {
 
   const bet = async () => {
     try {
-      if (!wallet.connected || !wallet.publicKey) {
+      if (!session?.user?.isWeb2User && selectedCoin.tokenMint === "WEB2") {
+        throw new Error(
+          translator("You cannot bet with this token!", language),
+        );
+      }
+      if (session?.user?.wallet && (!wallet.connected || !wallet.publicKey)) {
         throw new Error(translator("Wallet not connected", language));
       }
       if (!betAmt || betAmt === 0) {
@@ -94,6 +100,7 @@ export default function Flip() {
       // console.log("Placing Flip");
       let response = await placeFlip(
         wallet,
+        session,
         betAmt,
         selectedCoin.tokenMint,
         betType === "Heads" ? "heads" : "tails",
@@ -109,7 +116,10 @@ export default function Flip() {
         () => {
           if (response.success) {
             response?.data?.result == "Won"
-              ? successCustom(translator(response?.message, language) + ` ${response?.data?.amountWon} ${selectedCoin?.tokenName}`)
+              ? successCustom(
+                  translator(response?.message, language) +
+                    ` ${response?.data?.amountWon} ${selectedCoin?.tokenName}`,
+                )
               : errorCustom(translator(response?.message, language));
 
             const win = response?.data?.result === "Won";
@@ -276,10 +286,6 @@ export default function Flip() {
   }, [startAuto, autoBetCount]);
 
   const onSubmit = async (data: any) => {
-    if (!wallet.publicKey) {
-      errorCustom(translator("Wallet not connected", language));
-      return;
-    }
     if (!betAmt || betAmt === 0) {
       errorCustom(translator("Set Amount.", language));
       return;
@@ -404,7 +410,7 @@ export default function Flip() {
                     disabled={disableInput}
                     className={`${
                       betType === "Heads"
-                        ? "border-[#7839C5] text-opacity-100"
+                        ? "border-[#5F4DFF] text-opacity-100"
                         : "border-transparent hover:border-[#7839C580] text-opacity-80"
                     } w-full flex items-center disabled:opacity-50 disabled:cursor-not-allowed justify-center gap-2 rounded-lg text-center cursor-pointer border-2 bg-[#202329] py-2.5 font-changa text-xl text-white font-semibold`}
                   >
@@ -427,7 +433,7 @@ export default function Flip() {
                     disabled={disableInput}
                     className={`${
                       betType === "Tails"
-                        ? "border-[#7839C5] text-opacity-100"
+                        ? "border-[#5F4DFF] text-opacity-100"
                         : "border-transparent hover:border-[#7839C580] text-opacity-80"
                     } w-full flex items-center disabled:opacity-50 disabled:cursor-not-allowed justify-center gap-2 rounded-lg text-center cursor-pointer border-2 bg-[#202329] py-2.5 font-changa text-xl text-white font-semibold`}
                   >

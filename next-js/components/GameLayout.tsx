@@ -38,17 +38,19 @@ export const GameFooterInfo: React.FC<GameFooterProps> = ({
   amount,
   chance,
 }) => {
-  const { data: session, status } = useSession();
   const wallet = useWallet();
   const walletModal = useWalletModal();
   const {
     coinData,
     setShowWalletModal,
+    setShowConnectModal,
     currentGame,
     houseEdge,
     language,
     selectedCoin,
     minGameAmount,
+    session,
+    status,
   } = useGlobalContext();
 
   return (
@@ -101,7 +103,7 @@ export const GameFooterInfo: React.FC<GameFooterProps> = ({
 
       {(!selectedCoin ||
         selectedCoin.amount < minGameAmount ||
-        !wallet.connected ||
+        (session?.user?.wallet && !wallet.connected) ||
         !(status === "authenticated")) && (
         <div className="w-full rounded-lg bg-[#d9d9d90d] bg-opacity-10 flex items-center px-3 py-3 text-white md:px-6">
           <div className="w-full text-center font-changa font-medium text-sm md:text-base text-[#F0F0F0] text-opacity-75">
@@ -113,7 +115,7 @@ export const GameFooterInfo: React.FC<GameFooterProps> = ({
               onClick={() => {
                 wallet.connected && status === "authenticated"
                   ? setShowWalletModal(true)
-                  : handleSignIn(wallet, walletModal);
+                  : setShowConnectModal(true);
               }}
               className="cursor-pointer"
             >

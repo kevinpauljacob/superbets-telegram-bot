@@ -21,7 +21,7 @@ export default function Home() {
   const router = useRouter();
   const { referralCode } = router.query;
 
-  const { setLanguage } = useGlobalContext();
+  const { setLanguage, setShowConnectModal } = useGlobalContext();
   useEffect(() => {
     //@ts-ignore
     setLanguage(localStorage.getItem("language") ?? "en");
@@ -34,7 +34,7 @@ export default function Home() {
 
   useEffect(() => {
     if (referralCode && wallet.connected === false) {
-      handleSignIn(wallet, walletModal);
+      setShowConnectModal(true)
     }
   }, [referralCode, wallet.connected]);
 

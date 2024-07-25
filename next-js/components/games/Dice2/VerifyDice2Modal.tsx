@@ -323,7 +323,7 @@ export default function VerifyDice2Modal({
                               )}
                             </div>
                             <button
-                              className="bg-[#7839C5] rounded-md w-full text-sm text-white text-opacity-90 text-semibold py-3 disabled:opacity-70"
+                              className="bg-[#5F4DFF] rounded-md w-full text-sm text-white text-opacity-90 text-semibold py-3 disabled:opacity-70"
                               disabled
                             >
                               {translator("Rotate", language)}
@@ -338,7 +338,7 @@ export default function VerifyDice2Modal({
                               )}
                             </div>
                             <button
-                              className="bg-[#7839C5] rounded-md w-full text-sm text-white text-opacity-90 text-semibold py-3"
+                              className="bg-[#5F4DFF] rounded-md w-full text-sm text-white text-opacity-90 text-semibold py-3"
                               onClick={handleSeedClick}
                             >
                               {isLoading ? (
@@ -350,7 +350,7 @@ export default function VerifyDice2Modal({
                           </>
                         ) : (
                           <button
-                            className="bg-[#7839C5] rounded-md w-full text-sm text-white text-opacity-90 text-semibold py-3"
+                            className="bg-[#5F4DFF] rounded-md w-full text-sm text-white text-opacity-90 text-semibold py-3"
                             onClick={handleVerifyClick}
                           >
                             {isLoading ? (

@@ -33,6 +33,7 @@ export const config = {
 
 type InputType = {
   wallet: string;
+  email: string;
   amount: number;
   tokenMint: string;
   minesCount: number;
@@ -42,8 +43,14 @@ type InputType = {
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === "POST") {
     try {
-      let { wallet, amount, tokenMint, minesCount, userBets }: InputType =
-        req.body;
+      let {
+        wallet,
+        email,
+        amount,
+        tokenMint,
+        minesCount,
+        userBets,
+      }: InputType = req.body;
 
       if (maintainance)
         return res.status(400).json({
@@ -56,13 +63,18 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
       const token = await getToken({ req, secret });
 
-      if (!token || !token.sub || token.sub != wallet)
+      if (
+        !token ||
+        !token.sub ||
+        (wallet && token.sub != wallet) ||
+        (email && token.email !== email)
+      )
         return res.status(400).json({
           success: false,
           message: "User wallet not authenticated",
         });
 
-      if (!wallet || !amount || !tokenMint || !minesCount || !userBets)
+      if ((!wallet && !email) || !amount || !tokenMint || !minesCount || !userBets)
         return res
           .status(400)
           .json({ success: false, message: "Missing parameters" });
@@ -187,14 +199,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       const stakingTier = Object.entries(stakingTiers).reduce((prev, next) => {
         return stakeAmount >= next[1]?.limit ? next : prev;
       })[0];
-      const isFomoToken =
-        tokenMint === SPL_TOKENS.find((t) => t.tokenName === "FOMO")?.tokenMint
-          ? true
-          : false;
-      const houseEdge =
-        launchPromoEdge || isFomoToken
-          ? 0
-          : houseEdgeTiers[parseInt(stakingTier)];
+      const houseEdge = launchPromoEdge
+        ? 0
+        : houseEdgeTiers[parseInt(stakingTier)];
 
       let strikeMultiplier = 0,
         amountWon = 0,

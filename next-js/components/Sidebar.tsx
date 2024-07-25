@@ -17,6 +17,10 @@ import Birdeye from "@/public/assets/Birdeye";
 import Telegram from "@/public/assets/Telegram";
 import FomoExitSidebar from "./FomoExitSidebar";
 import { SPL_TOKENS } from "@/context/config";
+import { MdOutlineLanguage } from "react-icons/md";
+import { FaChevronDown } from "react-icons/fa6";
+import Trophy from "@/public/assets/Trophy";
+import Thunder from "@/public/assets/Thunder";
 
 export type Game = {
   src: string;
@@ -28,13 +32,13 @@ export type Game = {
 export type ToggleGameToken = (index: number) => void;
 
 const topIconCss =
-  "group cursor-pointer mb-2.5 transition-all flex items-center justify-center rounded-md w-12 h-9 bg-transparent hover:bg-[#1E2024] focus:bg-[#1E2024] text-[#ababac] hover:text-[#9945FF] focus:text-[#9945FF]";
+  "group cursor-pointer mb-2.5 transition-all flex items-center justify-center rounded-md w-12 h-9 bg-transparent hover:bg-[#1E2024] focus:bg-[#1E2024] text-[#ababac] hover:text-[#5F4DFF] focus:text-[#5F4DFF]";
 const bottomIconCss =
-  "cursor-pointer mb-2.5 transition-all flex items-center justify-center rounded-md w-12 h-9 bg-[#181A1D] hover:bg-[#1E2024] focus:bg-[#1E2024] text-[#ababac] hover:text-[#9945FF] focus:text-[#9945FF]";
+  "cursor-pointer mb-2.5 transition-all flex items-center justify-center rounded-md w-12 h-9 bg-[#181A1D] hover:bg-[#1E2024] focus:bg-[#1E2024] text-[#ababac] hover:text-[#5F4DFF] focus:text-[#5F4DFF]";
 
 const closedIconCss =
-  "w-5 h-5 text-white group-hover:text-[#9945FF] group-focus:text-[#9945FF] transition-all opacity-50";
-const activeIconCss = "w-5 h-5 text-[#9945FF] transition-all";
+  "w-5 h-5 text-white group-hover:text-[#5F4DFF] group-focus:text-[#5F4DFF] transition-all opacity-50";
+const activeIconCss = "w-5 h-5 text-[#5F4DFF] transition-all";
 
 export default function Sidebar({
   sidebar,
@@ -56,7 +60,7 @@ export default function Sidebar({
     <div
       className={`${
         sidebar ? "min-w-[15rem] justify-between" : "w-[4.15rem]"
-      } z-50 relative transition-width hidden bg-[#121418] text-white md:flex flex-col items-center pb-3.5 no-scrollbar overflow-y-auto h-[calc(100dvh-6.25rem)]`}
+      } z-50 relative transition-width hidden bg-[#121418] text-white md:flex flex-col items-center pb-3.5 no-scrollbar overflow-y-auto h-[calc(100dvh-4.7rem)]`}
     >
       {sidebar ? (
         <OpenSidebar
@@ -68,25 +72,25 @@ export default function Sidebar({
         <div
           className={`${
             sidebar ? "fadeOutDown" : "fadeIn"
-          } flex flex-col items-center justify-between w-full h-full`}
+          } flex flex-col items-center justify-between w-full h-full pt-4`}
         >
           <div className="w-full flex flex-col items-center">
-            <div
+            {/* <div
               onClick={() => {
                 setSidebar(true);
               }}
               className="h-[4.4rem] w-full flex items-center justify-center"
             >
-              <div className="cursor-pointer transition-all flex items-center justify-center rounded-md w-12 h-12 bg-[#212121] hover:bg-[#1E2024] focus:bg-[#1E2024] text-[#ababac] hover:text-[#9945FF] focus:text-[#9945FF]">
+              <div className="cursor-pointer transition-all flex items-center justify-center rounded-md w-12 h-12 bg-[#212121] hover:bg-[#1E2024] focus:bg-[#1E2024] text-[#ababac] hover:text-[#5F4DFF] focus:text-[#5F4DFF]">
                 <Image
                   src={"/assets/logowhite.svg"}
                   width={35}
                   height={35}
-                  alt={"FOMO"}
+                  alt={"SUPERBETS"}
                   className=""
                 />
               </div>
-            </div>
+            </div> */}
             <div
               onClick={() => {
                 if (router.pathname === "/") {
@@ -104,7 +108,7 @@ export default function Sidebar({
                 }
               />
             </div>
-            <Link href="https://exitscam.live" target="_blank">
+            {/* <Link href="https://exitscam.live" target="_blank">
               <div
                 onClick={() => {
                   setSidebar(true);
@@ -117,7 +121,7 @@ export default function Sidebar({
                   }
                 />
               </div>
-            </Link>
+            </Link> */}
             <div
               onClick={() => {
                 setSidebar(true);
@@ -125,7 +129,7 @@ export default function Sidebar({
               }}
               className={`${topIconCss}`}
             >
-              <FomoPlayIcon className={`${closedIconCss}`} />
+              <Store className={`${closedIconCss}`} />
             </div>
             <div
               onClick={() => {
@@ -134,7 +138,7 @@ export default function Sidebar({
               }}
               className={`${topIconCss}`}
             >
-              <Store
+              <Thunder
                 className={
                   router.pathname === "/store" ? activeIconCss : closedIconCss
                 }
@@ -147,7 +151,7 @@ export default function Sidebar({
               }}
               className={`${topIconCss}`}
             >
-              <Leaderboard
+              <Trophy
                 className={
                   router.pathname === "/leaderboard"
                     ? activeIconCss
@@ -156,6 +160,14 @@ export default function Sidebar({
               />
             </div>
             <div
+              onClick={() => {
+                setSidebar(true);
+              }}
+              className={`${topIconCss}`}
+            >
+              <MdOutlineLanguage className={closedIconCss} />
+            </div>
+            {/* <div
               onClick={() => {
                 router.push("/stake");
                 setSidebar(true);
@@ -167,8 +179,8 @@ export default function Sidebar({
                   router.pathname === "/stake" ? activeIconCss : closedIconCss
                 }
               />
-            </div>
-            <Link href="https://dca.fomosolana.com/" target="_blank">
+            </div> */}
+            {/* <Link href="https://dca.fomosolana.com/" target="_blank">
               <div
                 onClick={() => {
                   setSidebar(true);
@@ -177,7 +189,7 @@ export default function Sidebar({
               >
                 <Dollar className={closedIconCss} />
               </div>
-            </Link>
+            </Link> */}
           </div>
           <div className="w-full flex flex-col items-center mb-2">
             <Link
@@ -187,15 +199,15 @@ export default function Sidebar({
             >
               <Twitter className={`${closedIconCss}`} />
             </Link>
-            <Link
+            {/* <Link
               href={
                 "https://birdeye.so/token/Cx9oLynYgC3RrgXzin7U417hNY9D6YB1eMGw4ZMbWJgw?chain=solana"
               }
               target="_blank"
               className={`${bottomIconCss}`}
             >
-              <Birdeye className="w-5 h-5 text-white group-hover:text-[#9945FF] group-focus:text-[#9945FF] transition-all " />
-            </Link>
+              <Birdeye className="w-5 h-5 text-white group-hover:text-[#5F4DFF] group-focus:text-[#5F4DFF] transition-all " />
+            </Link> */}
             <Link
               href={"https://t.me/FOMO_wtf"}
               target="_blank"
@@ -249,7 +261,12 @@ export const OpenSidebar = ({
 }) => {
   const wallet = useWallet();
   const router = useRouter();
-  const { fomoPrice, setSidebar, setMobileSidebar } = useGlobalContext();
+  const { fomoPrice, setSidebar, setMobileSidebar, language, setLanguage } =
+    useGlobalContext();
+
+  useEffect(() => {
+    localStorage.setItem("language", language);
+  }, [language]);
 
   const [casinoGames, setCasinoGames] = useState<Game[]>([
     {
@@ -313,7 +330,7 @@ export const OpenSidebar = ({
       active: false,
     },
   ]);
-
+  const [langSelect, setLangSelect] = useState(false);
   const toggleCasinoToken: ToggleGameToken = (index) => {
     const updatedCasinoGames = casinoGames.map((token, i) => ({
       ...token,
@@ -322,11 +339,10 @@ export const OpenSidebar = ({
     setCasinoGames(updatedCasinoGames);
   };
   const [priceChange24h, setPriceChange24h] = useState(0);
-  const { language, setFomoPrice } = useGlobalContext();
+  const { setFomoPrice } = useGlobalContext();
 
-  const fomoToken = SPL_TOKENS.find(
-    (token) => token.tokenName === "FOMO",
-  )?.tokenMint!;
+  const fomoToken = SPL_TOKENS.find((token) => token.tokenName === "FOMO")
+    ?.tokenMint!;
   const url = `https://api.dexscreener.com/latest/dex/tokens/${fomoToken}`;
   useEffect(() => {
     /// code added to fetch fomo price
@@ -366,7 +382,7 @@ export const OpenSidebar = ({
   return (
     <>
       <div className="w-full">
-        <div
+        {/* <div
           className={`${
             sidebar ? "fadeInUp" : "fadeOutDown"
           } w-full flex flex-row items-center pl-5 gap-2 h-[4.4rem] border-r border-b border-[#1E2220]`}
@@ -376,7 +392,7 @@ export const OpenSidebar = ({
               src={"/assets/logowhite.svg"}
               width={35}
               height={35}
-              alt={"FOMO"}
+              alt={"SUPERBETS"}
               className=""
             />
           </div>
@@ -395,7 +411,7 @@ export const OpenSidebar = ({
               </span>
             </div>
           </div>
-        </div>
+        </div> */}
         <div
           className={`${
             sidebar ? "fadeInUp" : "fadeOutDown"
@@ -418,16 +434,16 @@ export const OpenSidebar = ({
               }
             />
           </div>
-          <FomoExitSidebar />
+          {/* <FomoExitSidebar /> */}
           <div className={`mt-0`}>
             <div
               onClick={() => setShowPlayTokens(!showPlayTokens)}
               className="w-full transition-all cursor-pointer rounded-md flex items-center justify-between gap-2 pl-4 pr-2 py-2 bg-transparent hover:bg-[#1f2024] focus:bg-[#1f2024] group"
             >
               <div className="flex items-center gap-3">
-                <FomoPlayIcon className="min-w-[1.25rem] min-h-[1.25rem] transition-all text-white group-hover:text-[#9945FF] group-focus:text-[#9945FF] opacity-50 hover:opacity-100" />
+                <Store className="min-w-[1.25rem] min-h-[1.25rem] transition-all text-white group-hover:text-[#5F4DFF] group-focus:text-[#5F4DFF] opacity-50 hover:opacity-100" />
                 <span className="mt-0.5 transition-all text-sm font-changa font-medium text-white text-opacity-90 group-hover:text-opacity-100 group-focus:text-opacity-100">
-                  FOMO: {translator("Play", language)}
+                  SuperBet Games
                 </span>
               </div>
               <button
@@ -480,8 +496,8 @@ export const OpenSidebar = ({
             )}
           </div>
           <SidebarOpenElement
-            text={"Store"}
-            Icon={Store}
+            text={"Challenges"}
+            Icon={Thunder}
             link="/store"
             className={
               router.pathname === "/store" ? activeIconCss : closedIconCss
@@ -489,13 +505,13 @@ export const OpenSidebar = ({
           />
           <SidebarOpenElement
             text={"Leaderboard"}
-            Icon={Leaderboard}
+            Icon={Trophy}
             link="/leaderboard"
             className={
               router.pathname === "/leaderboard" ? activeIconCss : closedIconCss
             }
           />
-          <SidebarOpenElement
+          {/* <SidebarOpenElement
             text={"Staking"}
             Icon={Staking}
             link="/stake"
@@ -510,7 +526,102 @@ export const OpenSidebar = ({
               // link="https://dca.fomosolana.com/"
               className={closedIconCss}
             />
-          </Link>
+          </Link> */}
+          <div className={`mt-0 relative`}>
+            <div
+              onClick={() => setLangSelect(!langSelect)}
+              className="w-full transition-all cursor-pointer rounded-md flex items-center justify-between gap-2 pl-4 pr-2 py-2 bg-transparent hover:bg-[#1f2024] focus:bg-[#1f2024] group"
+            >
+              <div className="flex items-center gap-3">
+                <MdOutlineLanguage className="min-w-[1.25rem] min-h-[1.25rem] transition-all text-white group-hover:text-[#5F4DFF] group-focus:text-[#5F4DFF] opacity-50 hover:opacity-100" />
+                <span className="mt-0.5 transition-all text-sm font-changa font-medium text-white text-opacity-90 group-hover:text-opacity-100 group-focus:text-opacity-100">
+                  {language === "en"
+                    ? "English"
+                    : language === "ru"
+                    ? "Русский"
+                    : language === "ko"
+                    ? "한국인"
+                    : language === "ch"
+                    ? "中国人"
+                    : ""}
+                </span>
+              </div>
+              <button
+                className={`${
+                  showPlayTokens ? "bg-[#47484A]" : "bg-white bg-opacity-5"
+                } hover:bg-[#47484A]transition text-sm duration-300 ease-in-out hover:transition hover:duration-300 hover:ease-in-out rounded-md w-8 h-6 flex justify-center items-center`}
+              >
+                <Image
+                  src={
+                    langSelect ? "/assets/upArrow.png" : "/assets/downArrow.png"
+                  }
+                  alt=""
+                  width={9}
+                  height={9}
+                  className=""
+                />
+              </button>
+            </div>
+            {langSelect && (
+              <ul className="mt-1">
+                <div
+                  onClick={() => {
+                    setLanguage("en");
+                    setLangSelect(false);
+                  }}
+                  className={`hover:bg-[#191a1d] cursor-pointer group flex transition-all items-center rounded-md p-2 pl-12 gap-2`}
+                >
+                  {/* <Image src={token.src} alt="" width={15} height={15} /> */}
+                  <span
+                    className={`text-sm font-changa font-medium transition-all text-white/50 group-hover:text-white/90`}
+                  >
+                    English
+                  </span>
+                </div>
+                <div
+                  onClick={() => {
+                    setLanguage("ru");
+                    setLangSelect(false);
+                  }}
+                  className={`hover:bg-[#191a1d] cursor-pointer group flex transition-all items-center rounded-md p-2 pl-12 gap-2`}
+                >
+                  {/* <Image src={token.src} alt="" width={15} height={15} /> */}
+                  <span
+                    className={`text-sm font-changa font-medium transition-all text-white/50 group-hover:text-white/90`}
+                  >
+                    Русский
+                  </span>
+                </div>
+                <div
+                  onClick={() => {
+                    setLanguage("ko");
+                    setLangSelect(false);
+                  }}
+                  className={`hover:bg-[#191a1d] cursor-pointer group flex transition-all items-center rounded-md p-2 pl-12 gap-2`}
+                >
+                  {/* <Image src={token.src} alt="" width={15} height={15} /> */}
+                  <span
+                    className={`text-sm font-changa font-medium transition-all text-white/50 group-hover:text-white/90`}
+                  >
+                    한국인
+                  </span>
+                </div>
+                <div
+                  onClick={() => {
+                    setLanguage("ch");
+                    setLangSelect(false);
+                  }}
+                  className={`hover:bg-[#191a1d] cursor-pointer group flex transition-all items-center rounded-md p-2 pl-12 gap-2`}
+                >
+                  <span
+                    className={`text-sm font-changa font-medium transition-all text-white/50 group-hover:text-white/90`}
+                  >
+                    中国人
+                  </span>
+                </div>
+              </ul>
+            )}
+          </div>
         </div>
       </div>
 
@@ -527,14 +638,14 @@ export const OpenSidebar = ({
           <Twitter className="w-5 h-5" />
           {translator("Twitter", language)}
         </Link>
-        <Link
+        {/* <Link
           href="https://birdeye.so/token/Cx9oLynYgC3RrgXzin7U417hNY9D6YB1eMGw4ZMbWJgw?chain=solana"
           className={`${openLinkCss}`}
           target="_blank"
         >
           <Birdeye className="w-5 h-5 text-white" />
           Birdeye
-        </Link>
+        </Link> */}
         <Link href="t.me/FOMO_wtf" className={`${openLinkCss}`} target="_blank">
           <Telegram className="w-5 h-5" />
           {translator("Telegram", language)}

@@ -1,5 +1,6 @@
 import connectDatabase from "@/utils/database";
 import user from "@/models/staking/user";
+import GameUser from "@/models/games/gameUser";
 import { User } from "@/context/transactions";
 import { NextApiRequest, NextApiResponse } from "next";
 
@@ -73,6 +74,24 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
             success: true,
             data: globalInfo[0],
           });
+        }
+        // get web2 user leaderboard
+        case 4: {
+          let usersInfo = await GameUser.aggregate([
+            { $match: { isWeb2User: true } },
+            { $unwind: "$deposit" },
+            { $match: { "deposit.tokenMint": "WEB2" } },
+            { $sort: { "deposit.amount": -1 } },
+          ]);
+
+          if (!usersInfo || usersInfo.length === 0) {
+            return res.status(400).json({
+              success: false,
+              message: "Unable to fetch data.",
+            });
+          }
+
+          return res.json({ success: true, users: usersInfo });
         }
         default:
           return res

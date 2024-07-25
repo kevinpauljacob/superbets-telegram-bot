@@ -47,6 +47,7 @@ import Roulette2ProvablyFairModal from "./games/roulette2/Roulette2ProvablyFairM
 import { maxPayouts, minAmtFactor } from "@/context/config";
 import VerifyPlinkoModal, { Plinko } from "./games/Plinko/VerifyPlinkoModal";
 import PlinkoProvablyFairModal from "./games/Plinko/PlinkoProvablyFairModal";
+import ConnectModal from "./games/ConnectModal";
 
 interface Props {
   children: ReactNode;
@@ -56,10 +57,10 @@ export default function ({ children }: Props) {
   const router = useRouter();
   const wallet = useWallet();
   const game = router.pathname.split("/")[1];
-  const { data: session } = useSession();
 
   const {
     showWalletModal,
+    showConnectModal,
     showCreateCampaignModal,
     setShowCreateCampaignModal,
     getBalance,
@@ -89,6 +90,9 @@ export default function ({ children }: Props) {
     selectedCoin,
     minGameAmount,
     setMinGameAmount,
+    session,
+    status,
+    getGlobalInfo,
   } = useGlobalContext();
 
   const [modalData, setModalData] = useState({
@@ -148,7 +152,10 @@ export default function ({ children }: Props) {
 
   useEffect(() => {
     (async () => {
-      if (wallet?.publicKey && session?.user) {
+      if (
+        (wallet?.publicKey && session?.user?.wallet) ||
+        session?.user?.email
+      ) {
         const pfData = await getProvablyFairData();
         if (pfData) setModalData(pfData);
       }
@@ -228,31 +235,26 @@ export default function ({ children }: Props) {
       getWalletBalance();
       getUserDetails();
     }
+    getGlobalInfo();
     setCurrentGame(game);
-  }, [wallet?.publicKey, session?.user, showWalletModal, game]);
-
-  useEffect(() => {
-    if (session?.user) {
-      getUserDetails();
-    }
     setMinGameAmount(
       maxPayouts[selectedCoin.tokenMint as GameTokens][game as GameType] *
         minAmtFactor,
     );
-  }, [wallet?.publicKey, session?.user, game, selectedCoin]);
+  }, [wallet?.publicKey, session?.user, game, showWalletModal, selectedCoin]);
 
   return (
     <>
-      <InfoBar />
+      {/* <InfoBar /> */}
       <Header sidebar={sidebar} toggleSidebar={toggleSidebar} />
-      <section className="relative flex flex-1 max-h-[calc(100%-6.25rem)]">
+      <section className="relative flex flex-1 max-h-[calc(100%-5rem)]">
         <Sidebar sidebar={sidebar} setSidebar={setSidebar} />
         <section className="w-full relative overflow-hidden">
           <MobileSidebar />
           <section className="relative w-full h-full pt-[4.4rem]">
             <SubHeader />
             <main
-              className={`marker:w-full h-full max-h-[calc(100%-1rem)] pt-6`}
+              className={`marker:w-full h-full max-h-[calc(100%-0rem)] pt-6`}
             >
               <section className="w-full h-full overflow-y-auto no-scrollbar">
                 <div
@@ -272,6 +274,7 @@ export default function ({ children }: Props) {
         <MobileNavbar sidebar={mobileSidebar} toggleSidebar={toggleSidebar} />
       </div>
       {showWalletModal && <BalanceModal />}
+      {showConnectModal && <ConnectModal />}
       {showCreateCampaignModal && <CreateCampaignModal />}
       {/* verify modals  */}
       {verifyModalData.game === GameType.coin ? (
