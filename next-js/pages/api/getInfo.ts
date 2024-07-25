@@ -18,13 +18,15 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       switch (option) {
         // 1 - get User details
         case 1: {
-          const { wallet } = req.body;
+          const { wallet, email } = req.body;
           if (!wallet)
             return res
               .status(400)
               .json({ success: false, message: "Missing paramters" });
 
-          const userInfo = await user.findOne({ wallet: wallet });
+          const userInfo = await user.findOne({
+            $or: [{ wallet: wallet }, { email: email }],
+          });
 
           if (!userInfo)
             return res.json({

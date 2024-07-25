@@ -14,7 +14,7 @@ export default async function handler(
       .json({ success: false, message: "Method not allowed" });
   }
   try {
-    const { email, name, image, wallet, emailSub } = req.body;
+    const { email, name, image, wallet } = req.body;
 
     await authenticateUser(req, res);
 
@@ -80,6 +80,7 @@ export default async function handler(
     return res.status(201).json({
       success: true,
       user: {
+        id: user?._id ?? null,
         wallet: user?.wallet ?? null,
         email: user?.email ?? null,
         image: user?.image ?? null,

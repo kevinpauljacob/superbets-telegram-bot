@@ -25,19 +25,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     try {
       let { wallet, email }: InputType = req.body;
 
-      const token = await getToken({ req, secret });
-
-      if (
-        !token ||
-        !token.sub ||
-        (wallet && token.sub != wallet) ||
-        (email && token.email !== email)
-      )
-        return res.status(400).json({
-          success: false,
-          message: "User wallet not authenticated",
-        });
-
       await connectDatabase();
 
       if (!wallet && !email)

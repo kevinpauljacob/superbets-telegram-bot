@@ -6,6 +6,7 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider, { GoogleProfile } from "next-auth/providers/google";
 import { getCsrfToken } from "next-auth/react";
 import { encode, getToken } from "next-auth/jwt";
+import { User } from "@/models/games";
 
 export default async function auth(req: NextApiRequest, res: NextApiResponse) {
   const baseUrl = process.env.NEXTAUTH_URL || "http://localhost:3000";
@@ -51,7 +52,9 @@ export default async function auth(req: NextApiRequest, res: NextApiResponse) {
             Buffer.from(credentials?.txn as any, "base64"),
           );
 
-          const csrfToken = await getCsrfToken({ req: { ...authReq, body: null } });
+          const csrfToken = await getCsrfToken({
+            req: { ...authReq, body: null },
+          });
 
           if (credentials?.nonce !== csrfToken) {
             return null;
@@ -106,11 +109,7 @@ export default async function auth(req: NextApiRequest, res: NextApiResponse) {
     callbacks: {
       jwt: async ({ token, user }) => {
         user && (token.user = user);
-        return token;
-      },
-      async session({ session, token }) {
         const rawToken = await encode({ token, secret });
-        console.log(token)
         const response = await fetch(`${baseUrl}/api/games/user`, {
           method: "POST",
           headers: {
@@ -126,20 +125,24 @@ export default async function auth(req: NextApiRequest, res: NextApiResponse) {
             name: token?.user?.name,
             //@ts-ignore
             image: token?.user?.image,
-            //@ts-ignore
-            emailSub: token?.sub
           }),
         });
 
         const data = await response.json();
         if (data?.success && data?.user) {
           console.log("db", data?.user);
-          session.user = data?.user;
-          console.log("session", session.user)
-          return session;
+          token.user = data?.user;
+          console.log("token", token.user);
+          return token;
         } else {
           throw new Error("Failed to create or update user");
         }
+      },
+      async session({ session, token }) {
+        console.log(token);
+        //@ts-ignore
+        session.user = { ...token?.user, id: null };
+        return session;
       },
     },
   });

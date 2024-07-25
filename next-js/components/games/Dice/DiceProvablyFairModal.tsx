@@ -45,7 +45,7 @@ export default function RollDiceProvablyFairModal({
   const [newClientSeed, setNewClientSeed] =
     useState<string>(generateClientSeed());
 
-  const { language } = useGlobalContext();
+  const { language, session } = useGlobalContext();
 
   const [verificationState, setVerificationState] = useState<{
     clientSeed: string;
@@ -94,7 +94,7 @@ export default function RollDiceProvablyFairModal({
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        wallet: modalData.activeGameSeed.account,
+        account: modalData.activeGameSeed.account,
         clientSeed: newClientSeed,
       }),
     }).then((res) => res.json());

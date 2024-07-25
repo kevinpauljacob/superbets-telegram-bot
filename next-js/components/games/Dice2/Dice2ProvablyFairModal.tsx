@@ -45,7 +45,7 @@ export default function Dice2ProvablyFairModal({
     GameType.dice2,
   );
 
-  const { language } = useGlobalContext();
+  const { language, session } = useGlobalContext();
   const [verificationState, setVerificationState] = useState<{
     clientSeed: string;
     serverSeed: string;
@@ -93,7 +93,7 @@ export default function Dice2ProvablyFairModal({
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        wallet: modalData.activeGameSeed.account,
+        account: modalData.activeGameSeed.account,
         clientSeed: newClientSeed,
       }),
     }).then((res) => res.json());

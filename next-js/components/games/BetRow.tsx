@@ -37,7 +37,7 @@ const BetRow: React.FC<BetRowProps> = ({
     >
       {all && (
         <div className="w-full hidden md:block text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
-          <div className="flex items-center justify-center gap-5 mr-8">
+          <div className="flex items-center justify-center gap-0 mr-0.5">
             {/* <div className="relative w-6 h-6">
               <Image
                 src={`/assets/badges/T-${bet.userTier}.png`}
@@ -47,7 +47,7 @@ const BetRow: React.FC<BetRowProps> = ({
                 objectPosition="center"
               />
             </div> */}
-            <span className="w-[10%]">{bet?.wallet ? obfuscatePubKey(bet.wallet) : bet?.account}</span>
+            <span className="">{obfuscatePubKey(bet?.account ?? "")}</span>
           </div>
         </div>
       )}

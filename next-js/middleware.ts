@@ -3,6 +3,7 @@ import type { NextRequest } from "next/server";
 import { Ratelimit } from "@upstash/ratelimit";
 import { Redis } from "@upstash/redis";
 import { getToken } from "next-auth/jwt";
+// import { User } from "./models/games";
 
 const rateLimit = new Ratelimit({
   redis: Redis.fromEnv(),
@@ -19,7 +20,7 @@ const validateApiKey = async (apiKey: string): Promise<boolean> => {
   return validApiKeys.includes(apiKey);
 };
 
-const whiteListRoutes = ["/api/auth", "/api/games/global", "/api/games/user"];
+const whiteListRoutes = ["/api/auth", "/api/games/global", "/api/games/user", "/api/getInfo"];
 
 export async function middleware(request: NextRequest) {
   const ip = request.ip ?? "127.0.0.1";
@@ -43,7 +44,11 @@ export async function middleware(request: NextRequest) {
       if (isValidApiKey) {
         if (success) res = NextResponse.next();
         else res = NextResponse.rewrite(new URL("/api/blocked", request.url));
-      } else res = new NextResponse("Unauthorized", { status: 401 });
+      } else
+        return NextResponse.json(
+          { success: false, message: "Unauthorized" },
+          { status: 401 },
+        );
     }
 
     const token = await getToken({ req: request, secret });
@@ -51,17 +56,29 @@ export async function middleware(request: NextRequest) {
       let body = await request.json();
       const wallet = body?.wallet;
       const email = body?.email;
+      const account = body?.account;
       if (
-        (!wallet && !email) ||
-        (wallet && token.sub != wallet) ||
-        (email && token.email !== email)
+        (!wallet && !email && !account) ||
+        //@ts-ignore
+        (wallet && token?.user?.wallet != wallet) ||
+        //@ts-ignore
+        (email && token?.user?.email !== email) ||
+        //@ts-ignore
+        (account && token?.user?.id !== account)
       )
-        res = new NextResponse("Unauthorized", { status: 401 });
+        return NextResponse.json(
+          { success: false, message: "Unauthorized" },
+          { status: 401 },
+        );
       else {
         if (success) res = NextResponse.next();
         else res = NextResponse.rewrite(new URL("/api/blocked", request.url));
       }
-    } else res = new NextResponse("Unauthorized", { status: 401 });
+    } else
+      return NextResponse.json(
+        { success: false, message: "Unauthorized" },
+        { status: 401 },
+      );
   }
   res.headers.set("X-RateLimit-Limit", limit.toString());
   res.headers.set("X-RateLimit-Remaining", remaining.toString());

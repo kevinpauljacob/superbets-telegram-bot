@@ -21,7 +21,7 @@ function Leaderboard() {
 
   const getLeaderBoard = async () => {
     try {
-      const res = await fetch("/api/staking/getInfo", {
+      const res = await fetch("/api/getInfo", {
         method: "POST",
         body: JSON.stringify({
           option: 4,
@@ -44,7 +44,9 @@ function Leaderboard() {
 
         if (session?.user?.email) {
           let userInfo = users.find(
-            (info: any) => info.email == session?.user?.email,
+            (info: any) =>
+              info?.email == session?.user?.email ||
+              info?.wallet === session?.user?.wallet,
           );
 
           setMyData(userInfo);
@@ -93,7 +95,7 @@ function Leaderboard() {
                 <span className="w-[10%] text-center ml-10 font-changa text-sm font-light text-[#F0F0F0] text-opacity-75">
                   {myData?.rank}
                 </span>
-                <span className="w-[70%] flex items-center gap-2 text-left font-changa text-sm font-light text-[#F0F0F0] text-opacity-75 pl-[15%]">
+                <span className="w-[70%] flex items-center gap-2 text-left font-changa text-sm font-light text-[#F0F0F0] text-opacity-75 pl-[16.5%]">
                   {/* <div className="relative w-8 h-8">
                     <Image
                       src={pointTier?.image}
@@ -104,16 +106,14 @@ function Leaderboard() {
                     />
                   </div> */}
                   {/* {obfuscatePubKey(myData.wallet ?? "")} */}
-                  {myData?.name}
+                  {myData?.name ?? obfuscatePubKey(myData.wallet)}
                 </span>
                 <span className="w-[15%] text-right font-chakra text-sm font-bold text-[#FFFFFF]">
                   {/* {myData.points.toLocaleString("en-US", {
                     maximumFractionDigits: 2,
                     minimumFractionDigits: 0,
                   })} */}
-                  {parseInt(
-                    myData?.deposit?.amount ?? 0
-                  )}
+                  {parseInt(myData?.deposit?.amount ?? 0)}
                 </span>
               </div>
             )}
@@ -125,7 +125,9 @@ function Leaderboard() {
                   page * transactionsPerPage,
                 )
                 .filter(
-                  (data) => data.email !== session?.user?.email,
+                  (data) =>
+                    data?.email !== session?.user?.email ||
+                    data?.wallet !== session?.user?.wallet,
                 )
                 .map((data, index) => (
                   <div
@@ -135,7 +137,7 @@ function Leaderboard() {
                     <span className="w-[10%] text-center ml-10 font-changa text-sm font-light text-[#F0F0F0] text-opacity-75">
                       {data?.rank}
                     </span>
-                    <span className="w-[70%] flex items-center gap-2 text-left font-changa text-sm font-light text-[#FFFFFF] text-opacity-[0.78] pl-[15%]">
+                    <span className="w-[70%] flex items-center gap-2 text-left font-changa text-sm font-light text-[#FFFFFF] text-opacity-[0.78] pl-[16.5%]">
                       {/* <div className="relative w-8 h-8">
                         <Image
                           src={`/assets/badges/T-${Object.entries(
@@ -152,10 +154,10 @@ function Leaderboard() {
                         />
                       </div> */}
                       {/* {obfuscatePubKey(data.wallet ?? "")} */}
-                      {data?.name}
+                      {data?.name ?? obfuscatePubKey(data?.wallet)}
                     </span>
                     <span className="w-[15%] text-right font-chakra text-sm font-bold text-[#ffffff]">
-                      {parseInt(myData?.deposit?.amount ?? 0)}
+                      {parseInt(data?.deposit?.amount ?? 0)}
                     </span>
                   </div>
                 ))

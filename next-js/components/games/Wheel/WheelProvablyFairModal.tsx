@@ -41,7 +41,7 @@ export default function WheelProvablyFairModal({
   );
   const [newClientSeed, setNewClientSeed] =
     useState<string>(generateClientSeed());
-  const { language } = useGlobalContext();
+  const { language, session } = useGlobalContext();
   const [strikeNumber, setStrikeNumber] = useState<number>(0);
   const [strikeMultiplier, setStrikeMultiplier] = useState<number>();
   const wheelRef = useRef<HTMLDivElement>(null);
@@ -137,7 +137,7 @@ export default function WheelProvablyFairModal({
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        wallet: modalData.activeGameSeed.account,
+        account: modalData.activeGameSeed.account,
         clientSeed: newClientSeed,
       }),
     }).then((res) => res.json());
@@ -232,7 +232,7 @@ export default function WheelProvablyFairModal({
                       type="text"
                       name="totalBets"
                       placeholder={modalData.activeGameSeed.nonce.toString()}
-                      className="bg-[#202329] text-[#B9B9BA] text-xs font-semibold mt-1 rounded-md px-5 py-4 w-full relative flex items-center justify-between focus:ring-0 focus:outline-none focus:ring-0 focus:outline-none"
+                      className="bg-[#202329] text-[#B9B9BA] text-xs font-semibold mt-1 rounded-md px-5 py-4 w-full relative flex items-center justify-between focus:ring-0 focus:outline-none"
                       readOnly
                     />
                   </div>

@@ -41,7 +41,7 @@ export default function PlinkoProvablyFairModal({
   );
   const [newClientSeed, setNewClientSeed] =
     useState<string>(generateClientSeed());
-  const { language } = useGlobalContext();
+  const { language, session } = useGlobalContext();
   const [strikeNumber, setStrikeNumber] = useState<number>(0);
   const [strikeMultiplier, setStrikeMultiplier] = useState<number>();
   const wheelRef = useRef<HTMLDivElement>(null);
@@ -134,7 +134,7 @@ export default function PlinkoProvablyFairModal({
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        wallet: modalData.activeGameSeed.account,
+        account: modalData.activeGameSeed.account,
         clientSeed: newClientSeed,
       }),
     }).then((res) => res.json());

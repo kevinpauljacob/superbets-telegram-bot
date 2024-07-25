@@ -2,7 +2,7 @@ import connectDatabase from "../../../../utils/database";
 import { NextApiRequest, NextApiResponse } from "next";
 import { GameType, decryptServerSeed, seedStatus } from "@/utils/provably-fair";
 import StakingUser from "@/models/staking/user";
-import { gameModelMap } from "@/models/games";
+import { User, gameModelMap } from "@/models/games";
 
 const encryptionKey = Buffer.from(process.env.ENCRYPTION_KEY!, "hex");
 
@@ -20,13 +20,16 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         if (game === GameType.options) {
           const records = await model.find().sort({ createdAt: -1 }).limit(20);
 
-          const resultsWithGame = records.map((record) => {
-            const { ...rest } = record.toObject();
+          const resultsWithGame = await Promise.all(
+            records.map(async (record) => {
+              const { ...rest } = record.toObject();
+              let user = await User.findById(rest.account);
+              if (user) rest.account = user?.name ?? user?.wallet;
+              rest.game = game;
 
-            rest.game = game;
-
-            return rest;
-          });
+              return rest;
+            }),
+          );
 
           data.push(...resultsWithGame);
         } else {
@@ -38,24 +41,28 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
             .sort({ createdAt: -1 })
             .limit(20);
 
-          const resultsWithGame = records.map((record) => {
-            const { gameSeed, ...rest } = record.toObject();
+          const resultsWithGame = await Promise.all(
+            records.map(async (record) => {
+              const { gameSeed, ...rest } = record.toObject();
+              let user = await User.findById(rest.account);
+              if (user) rest.account = user?.name ?? user?.wallet;
 
-            rest.game = game;
+              rest.game = game;
 
-            if (gameSeed.status !== seedStatus.EXPIRED) {
-              rest.gameSeed = { ...gameSeed, serverSeed: undefined };
-            } else {
-              const serverSeed = decryptServerSeed(
-                gameSeed.serverSeed,
-                encryptionKey,
-                Buffer.from(gameSeed.iv, "hex"),
-              );
-              rest.gameSeed = { ...gameSeed, serverSeed };
-            }
+              if (gameSeed.status !== seedStatus.EXPIRED) {
+                rest.gameSeed = { ...gameSeed, serverSeed: undefined };
+              } else {
+                const serverSeed = decryptServerSeed(
+                  gameSeed.serverSeed,
+                  encryptionKey,
+                  Buffer.from(gameSeed.iv, "hex"),
+                );
+                rest.gameSeed = { ...gameSeed, serverSeed };
+              }
 
-            return rest;
-          });
+              return rest;
+            }),
+          );
 
           data.push(...resultsWithGame);
         }

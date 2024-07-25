@@ -46,7 +46,7 @@ export default function LimboProvablyFairModal({
     GameType.limbo,
   );
 
-  const { language } = useGlobalContext();
+  const { language, session } = useGlobalContext();
 
   const [verificationState, setVerificationState] = useState<{
     clientSeed: string;
@@ -119,7 +119,7 @@ export default function LimboProvablyFairModal({
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        wallet: modalData.activeGameSeed.account,
+        account: modalData.activeGameSeed.account,
         clientSeed: newClientSeed,
       }),
     }).then((res) => res.json());

@@ -62,7 +62,7 @@ export default function CoinFlipProvablyFairModal({
   const [selectedGameType, setSelectedGameType] = useState<GameType>(
     GameType.coin,
   );
-  const { language } = useGlobalContext();
+  const { language, session } = useGlobalContext();
   const [verificationState, setVerificationState] = useState<{
     clientSeed: string;
     serverSeed: string;

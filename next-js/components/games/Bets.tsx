@@ -6,7 +6,7 @@ import { useRouter } from "next/router";
 
 interface Bet {
   _id: string;
-  wallet: string;
+  account: string;
   game: string;
   amount: number;
   strikeMultiplier: number;
