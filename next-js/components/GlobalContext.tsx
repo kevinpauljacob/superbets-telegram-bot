@@ -45,7 +45,7 @@ interface CoinBalance {
 
 interface ProvablyFairData {
   activeGameSeed: {
-    wallet: string;
+    account: string;
     clientSeed: string;
     serverSeed: string;
     serverSeedHash: string;
@@ -53,7 +53,7 @@ interface ProvablyFairData {
     status: string;
   };
   nextGameSeed: {
-    wallet: string;
+    account: string;
     clientSeed: string;
     serverSeed: string;
     serverSeedHash: string;

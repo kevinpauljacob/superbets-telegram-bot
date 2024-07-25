@@ -85,18 +85,28 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
       await connectDatabase();
 
-      const pendingGame = await Mines.findOne({ wallet, result: "Pending" });
+      let user = await User.findOne({
+        $or: [{ wallet: wallet }, { email: email }],
+      });
+
+      if (!user)
+        return res
+          .status(400)
+          .json({ success: false, message: "User does not exist!" });
+
+      if (!user.isWeb2User && tokenMint === "WEB2")
+        return res
+          .status(400)
+          .json({ success: false, message: "You cannot bet with this token!" });
+
+      const account = user._id;
+
+      const pendingGame = await Mines.findOne({ account, result: "Pending" });
       if (pendingGame)
         return res.status(400).json({
           success: false,
           message: "You already have a pending game!",
         });
-
-      let user = await User.findOne({
-        $or: [{ wallet: wallet }, { email: email }],
-      });
-
-      const account = user._id;
 
       const addGame = !user.gamesPlayed.includes(GameType.mines);
 
@@ -185,7 +195,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       let userData;
       if (wallet)
         userData = await StakingUser.findOneAndUpdate(
-          { wallet },
+          { account },
           {},
           { upsert: true, new: true },
         );

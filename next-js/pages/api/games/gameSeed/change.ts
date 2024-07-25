@@ -12,7 +12,7 @@ export const config = {
 };
 
 type InputType = {
-  wallet: string;
+  account: string;
   clientSeed: string;
 };
 
@@ -24,19 +24,10 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
   }
 
   try {
-    const { wallet, clientSeed }: InputType = req.body;
-
-    const token = await getToken({ req, secret });
-
-    if (!token || !token.sub || token.sub !== wallet) {
-      return res.status(400).json({
-        success: false,
-        message: "User wallet not authenticated",
-      });
-    }
+    const { account, clientSeed }: InputType = req.body;
 
     if (
-      !wallet ||
+      !account ||
       !clientSeed ||
       clientSeed.trim() === "" ||
       !/^[\x00-\x7F]*$/.test(clientSeed)
@@ -50,7 +41,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     await connectDatabase();
 
     const pendingMines = await Mines.findOne({
-      wallet,
+      account,
       result: "Pending",
     });
 
@@ -71,7 +62,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
     const expiredGameSeed = await GameSeed.findOneAndUpdate(
       {
-        wallet,
+        account,
         status: seedStatus.ACTIVE,
         pendingMines: false,
       },
@@ -91,7 +82,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
     const activeGameSeed = await GameSeed.findOneAndUpdate(
       {
-        wallet,
+        account,
         status: seedStatus.NEXT,
         pendingMines: false,
       },
@@ -109,7 +100,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
     const nextGameSeed = await GameSeed.create([
       {
-        wallet,
+        account,
         serverSeed: encryptedServerSeed,
         serverSeedHash,
         iv: iv.toString("hex"),

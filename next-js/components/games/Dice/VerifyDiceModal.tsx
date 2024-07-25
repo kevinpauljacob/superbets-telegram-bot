@@ -2,9 +2,7 @@ import { seedStatus } from "@/utils/provably-fair";
 import Image from "next/image";
 import { useState } from "react";
 import { IoIosArrowDown } from "react-icons/io";
-import RollDiceProvablyFairModal, {
-  PFModalData,
-} from "./DiceProvablyFairModal";
+import RollDiceProvablyFairModal from "./DiceProvablyFairModal";
 import { useGlobalContext } from "@/components/GlobalContext";
 import { FaRegCopy } from "react-icons/fa6";
 import { MdClose } from "react-icons/md";
@@ -15,6 +13,7 @@ import {
   AdaptiveModal,
   AdaptiveModalContent,
 } from "@/components/AdaptiveModal";
+import { PFModalData } from "../CoinFlip/CoinFlipProvablyFairModal";
 
 export interface Dice {
   createdAt: string;
@@ -68,7 +67,7 @@ export default function VerifyDiceModal({
 
   const [PFModalData, setPFModalData] = useState<PFModalData>({
     activeGameSeed: {
-      wallet: "",
+      account: "",
       clientSeed: "",
       serverSeed: "",
       serverSeedHash: "",
@@ -76,7 +75,7 @@ export default function VerifyDiceModal({
       status: "",
     },
     nextGameSeed: {
-      wallet: "",
+      account: "",
       clientSeed: "",
       serverSeed: "",
       serverSeedHash: "",

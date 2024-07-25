@@ -56,7 +56,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           .status(400)
           .json({ success: false, message: "User does not exist!" });
 
-      const bet = await Option.findOne({ wallet, result: "Pending" });
+      const account = user._id
+
+      const bet = await Option.findOne({ account, result: "Pending" });
       if (!bet)
         return res.status(400).json({
           success: false,
@@ -68,7 +70,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       let userData;
       if (wallet)
         userData = await StakingUser.findOneAndUpdate(
-          { wallet },
+          { account },
           {},
           { upsert: true, new: true },
         );
@@ -106,7 +108,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
       const status = await User.findOneAndUpdate(
         {
-          wallet,
+          account,
           deposit: {
             $elemMatch: {
               tokenMint,
@@ -130,7 +132,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       }
 
       const record = await Option.findOneAndUpdate(
-        { wallet, result: "Pending" },
+        { account, result: "Pending" },
         {
           result,
           betEndPrice,

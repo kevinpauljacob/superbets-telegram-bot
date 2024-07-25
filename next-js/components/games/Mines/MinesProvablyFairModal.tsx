@@ -23,26 +23,7 @@ import {
   AdaptiveModal,
   AdaptiveModalContent,
 } from "@/components/AdaptiveModal";
-
-export interface PFModalData {
-  activeGameSeed: {
-    wallet: string;
-    clientSeed: string;
-    serverSeed: string;
-    serverSeedHash: string;
-    nonce: number;
-    status: string;
-  };
-  nextGameSeed: {
-    wallet: string;
-    clientSeed: string;
-    serverSeed: string;
-    serverSeedHash: string;
-    nonce: number;
-    status: string;
-  };
-  tab?: "seeds" | "verify";
-}
+import { PFModalData } from "../CoinFlip/CoinFlipProvablyFairModal";
 
 interface Props {
   isOpen: boolean;
@@ -130,7 +111,7 @@ export default function MinesProvablyFairModal({
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        wallet: modalData.activeGameSeed.wallet,
+        wallet: modalData.activeGameSeed.account,
         clientSeed: newClientSeed,
       }),
     }).then((res) => res.json());

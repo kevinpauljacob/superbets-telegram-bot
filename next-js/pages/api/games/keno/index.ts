@@ -141,7 +141,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       let userData;
       if (wallet)
         userData = await StakingUser.findOneAndUpdate(
-          { wallet },
+          { account },
           {},
           { upsert: true, new: true },
         );

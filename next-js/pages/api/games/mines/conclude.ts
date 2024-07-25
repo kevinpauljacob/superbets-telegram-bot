@@ -52,19 +52,26 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
       await connectDatabase();
 
-      let isUser = await User.findOne({
-        $or: [{ wallet: wallet }, { email: email }],
-      });
-
       if ((!wallet && !email) || !gameId)
         return res
           .status(400)
           .json({ success: false, message: "Missing parameters" });
 
+      let user = await User.findOne({
+        $or: [{ wallet: wallet }, { email: email }],
+      });
+
+      if (!user)
+        return res
+          .status(400)
+          .json({ success: false, message: "User does not exist!" });
+
+      const account = user._id;
+      
       let gameInfo = await Mines.findOne({
         _id: gameId,
         result: "Pending",
-        wallet,
+        account,
       }).populate("gameSeed");
 
       if (!gameInfo)
@@ -89,12 +96,10 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           .status(400)
           .json({ success: false, message: "No bets placed" });
 
-      const account = isUser._id;
-
       let userData;
       if (wallet)
         userData = await StakingUser.findOneAndUpdate(
-          { wallet },
+          { account },
           {},
           { upsert: true, new: true },
         );
@@ -161,7 +166,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         feeGenerated,
       );
 
-      const user = await User.findOneAndUpdate(
+      const userUpdate = await User.findOneAndUpdate(
         {
           _id: account,
           deposit: {

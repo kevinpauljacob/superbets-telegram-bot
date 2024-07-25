@@ -2,9 +2,7 @@ import { seedStatus } from "@/utils/provably-fair";
 import { useState, useEffect, useRef } from "react";
 import { IoIosArrowDown } from "react-icons/io";
 import Image from "next/image";
-import WheelProvablyFairModal, {
-  PFModalData,
-} from "../Wheel/WheelProvablyFairModal";
+import WheelProvablyFairModal from "../Wheel/WheelProvablyFairModal";
 import { useGlobalContext } from "@/components/GlobalContext";
 import { FaRegCopy } from "react-icons/fa6";
 import Arc from "@/components/games/Wheel/Arc";
@@ -13,6 +11,7 @@ import { translator, truncateNumber } from "@/context/transactions";
 import Loader from "../Loader";
 import { SPL_TOKENS } from "@/context/config";
 import Roulette2ProvablyFairModal from "./Roulette2ProvablyFairModal";
+import { PFModalData } from "../CoinFlip/CoinFlipProvablyFairModal";
 
 export interface Roulette2 {
   createdAt: string;
@@ -74,7 +73,7 @@ export default function VerifyRoulette2Modal({
 
   const [PFModalData, setPFModalData] = useState<PFModalData>({
     activeGameSeed: {
-      wallet: "",
+      account: "",
       clientSeed: "",
       serverSeed: "",
       serverSeedHash: "",
@@ -82,7 +81,7 @@ export default function VerifyRoulette2Modal({
       status: "",
     },
     nextGameSeed: {
-      wallet: "",
+      account: "",
       clientSeed: "",
       serverSeed: "",
       serverSeedHash: "",
@@ -246,14 +245,18 @@ export default function VerifyRoulette2Modal({
                     <div className="h-[130px] w-[27.3px] sm:w-[30.6px] sm:h-[213px] flex items-center justify-center flex-col ">
                       <div
                         className={` h-1/2 w-[27.3px] sm:w-[30.6px]  flex flex-col justify-center text-center cursor-pointer bg-[#149200] rounded-[5px]
-            text-white relative  ${bet.strikeNumber === 0 ? "border-[#3DD179] border-2" : ""}
+            text-white relative  ${
+              bet.strikeNumber === 0 ? "border-[#3DD179] border-2" : ""
+            }
             mb-1`}
                       >
                         <p className="-rotate-90">0</p>
                       </div>
                       <div
                         className={`h-1/2 w-[27.3px] sm:w-[30.6px] flex flex-col justify-center text-center cursor-pointer bg-[#149200] rounded-[5px]
-            text-white relative  ${bet.strikeNumber === 99 ? "border-[#3DD179] border-2" : ""}
+            text-white relative  ${
+              bet.strikeNumber === 99 ? "border-[#3DD179] border-2" : ""
+            }
             mb-1`}
                       >
                         <p className="-rotate-90">00</p>
@@ -274,7 +277,11 @@ export default function VerifyRoulette2Modal({
                                     predefinedBets.red.includes(number)
                                       ? "bg-[#F1323E]  "
                                       : "bg-[#2A2E38]  "
-                                  }${bet.strikeNumber === number ? "border-[#3DD179] border-2" : ""} text-white rounded-[5px]  `}
+                                  }${
+                                    bet.strikeNumber === number
+                                      ? "border-[#3DD179] border-2"
+                                      : ""
+                                  } text-white rounded-[5px]  `}
                                 >
                                   <p className="-rotate-90">{number}</p>
                                 </button>

@@ -69,7 +69,7 @@ export default function VerifyFlipModal({
 
   const [PFModalData, setPFModalData] = useState<PFModalData>({
     activeGameSeed: {
-      wallet: "",
+      account: "",
       clientSeed: "",
       serverSeed: "",
       serverSeedHash: "",
@@ -77,7 +77,7 @@ export default function VerifyFlipModal({
       status: "",
     },
     nextGameSeed: {
-      wallet: "",
+      account: "",
       clientSeed: "",
       serverSeed: "",
       serverSeedHash: "",

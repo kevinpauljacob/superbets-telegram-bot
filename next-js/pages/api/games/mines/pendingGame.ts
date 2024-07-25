@@ -1,7 +1,7 @@
 import connectDatabase from "@/utils/database";
 import { getToken } from "next-auth/jwt";
 import { NextApiRequest, NextApiResponse } from "next";
-import { Mines } from "@/models/games";
+import { Mines, User } from "@/models/games";
 import { maintainance } from "@/context/config";
 
 const secret = process.env.NEXTAUTH_SECRET;
@@ -46,8 +46,19 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
       await connectDatabase();
 
-      const pendingGame = await Mines.findOne({
+      let user = await User.findOne({
         $or: [{ wallet: wallet }, { email: email }],
+      });
+
+      if (!user)
+        return res
+          .status(400)
+          .json({ success: false, message: "User does not exist!" });
+
+      const account = user._id;
+
+      const pendingGame = await Mines.findOne({
+        account, 
         result: "Pending",
       });
       const result = pendingGame !== null ? true : false;

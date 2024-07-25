@@ -45,10 +45,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           .status(400)
           .json({ success: false, message: "Missing parameters" });
 
-      let user: any;
-
-      if (email) user = await User.findOne({ email });
-      else if (wallet) user = await User.findOne({ wallet });
+      let user = await User.findOne({
+        $or: [{ wallet: wallet }, { email: email }],
+      });
 
       const account = user._id;
 

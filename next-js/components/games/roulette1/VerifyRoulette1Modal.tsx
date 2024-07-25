@@ -2,9 +2,7 @@ import { seedStatus } from "@/utils/provably-fair";
 import { useState, useEffect, useRef } from "react";
 import { IoIosArrowDown } from "react-icons/io";
 import Image from "next/image";
-import WheelProvablyFairModal, {
-  PFModalData,
-} from "../Wheel/WheelProvablyFairModal";
+import WheelProvablyFairModal from "../Wheel/WheelProvablyFairModal";
 import { useGlobalContext } from "@/components/GlobalContext";
 import { FaRegCopy } from "react-icons/fa6";
 import Arc from "@/components/games/Wheel/Arc";
@@ -13,6 +11,7 @@ import { translator, truncateNumber } from "@/context/transactions";
 import Loader from "../Loader";
 import { SPL_TOKENS } from "@/context/config";
 import Roulette1ProvablyFairModal from "./Roulette1ProvablyFairModal";
+import { PFModalData } from "../CoinFlip/CoinFlipProvablyFairModal";
 
 export interface Roulette1 {
   createdAt: string;
@@ -73,7 +72,7 @@ export default function VerifyRoulette1Modal({
 
   const [PFModalData, setPFModalData] = useState<PFModalData>({
     activeGameSeed: {
-      wallet: "",
+      account: "",
       clientSeed: "",
       serverSeed: "",
       serverSeedHash: "",
@@ -81,7 +80,7 @@ export default function VerifyRoulette1Modal({
       status: "",
     },
     nextGameSeed: {
-      wallet: "",
+      account: "",
       clientSeed: "",
       serverSeed: "",
       serverSeedHash: "",

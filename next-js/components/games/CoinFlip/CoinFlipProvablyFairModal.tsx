@@ -21,7 +21,7 @@ import {
 } from "@/components/AdaptiveModal";
 export interface PFModalData {
   activeGameSeed: {
-    wallet: string;
+    account: string;
     clientSeed: string;
     serverSeed: string;
     serverSeedHash: string;
@@ -29,7 +29,7 @@ export interface PFModalData {
     status: string;
   };
   nextGameSeed: {
-    wallet: string;
+    account: string;
     clientSeed: string;
     serverSeed: string;
     serverSeedHash: string;
@@ -122,7 +122,7 @@ export default function CoinFlipProvablyFairModal({
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        wallet: modalData.activeGameSeed.wallet,
+        account: modalData.activeGameSeed.account,
         clientSeed: newClientSeed,
       }),
     }).then((res) => res.json());

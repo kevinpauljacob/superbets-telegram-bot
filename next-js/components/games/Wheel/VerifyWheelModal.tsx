@@ -2,7 +2,7 @@ import { seedStatus } from "@/utils/provably-fair";
 import { useState, useEffect, useRef } from "react";
 import { IoIosArrowDown } from "react-icons/io";
 import Image from "next/image";
-import WheelProvablyFairModal, { PFModalData } from "./WheelProvablyFairModal";
+import WheelProvablyFairModal from "./WheelProvablyFairModal";
 import { useGlobalContext } from "@/components/GlobalContext";
 import { FaRegCopy } from "react-icons/fa6";
 import Arc from "@/components/games/Wheel/Arc";
@@ -14,6 +14,7 @@ import {
   AdaptiveModalContent,
 } from "@/components/AdaptiveModal";
 import { SPL_TOKENS } from "@/context/config";
+import { PFModalData } from "../CoinFlip/CoinFlipProvablyFairModal";
 
 export interface Wheel {
   createdAt: string;
@@ -73,7 +74,7 @@ export default function VerifyWheelModal({
 
   const [PFModalData, setPFModalData] = useState<PFModalData>({
     activeGameSeed: {
-      wallet: "",
+      account: "",
       clientSeed: "",
       serverSeed: "",
       serverSeedHash: "",
@@ -81,7 +82,7 @@ export default function VerifyWheelModal({
       status: "",
     },
     nextGameSeed: {
-      wallet: "",
+      account: "",
       clientSeed: "",
       serverSeed: "",
       serverSeedHash: "",

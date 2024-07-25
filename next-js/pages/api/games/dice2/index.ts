@@ -55,19 +55,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           message: "Under maintenance",
         });
 
-      const token = await getToken({ req, secret });
-
-      if (
-        !token ||
-        !token.sub ||
-        (wallet && token.sub != wallet) ||
-        (email && token.email !== email)
-      )
-        return res.status(400).json({
-          success: false,
-          message: "User not authenticated",
-        });
-
       if ((!wallet && !email) || !amount || !tokenMint || !chance || !direction)
         return res
           .status(400)
@@ -128,7 +115,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       let userData;
       if (wallet)
         userData = await StakingUser.findOneAndUpdate(
-          { wallet },
+          { account },
           {},
           { upsert: true, new: true },
         );
