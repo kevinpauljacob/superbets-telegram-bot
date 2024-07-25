@@ -56,7 +56,7 @@ export default function GameHeader() {
 
     const interval = setInterval(() => {
       fetchGameData(game as GameType);
-    }, 10000);
+    }, 20000);
 
     return () => clearInterval(interval);
   }, [game]);

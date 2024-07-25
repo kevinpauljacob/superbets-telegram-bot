@@ -17,13 +17,13 @@ export default function Store() {
   } = useGlobalContext();
 
 
-  useEffect(() => {
-    if (session?.user && wallet && wallet.publicKey) {
-      getFOMOBalance(wallet, setFomoBalance);
-      getUserDetails();
-    }
-    getGlobalInfo();
-  }, [session?.user, wallet.publicKey]);
+  // useEffect(() => {
+  //   if (session?.user && wallet && wallet.publicKey) {
+  //     getFOMOBalance(wallet, setFomoBalance);
+  //     getUserDetails();
+  //   }
+  //   getGlobalInfo();
+  // }, [session?.user, wallet.publicKey]);
 
   const cardDetails = [
     { src: "image1.jpg", name: "Product 1", points: "500,000" },

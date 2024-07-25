@@ -158,7 +158,7 @@ export default function StakeStats() {
                   src={stat.icon}
                   width={27}
                   height={27}
-                  alt={"FOMO"}
+                  alt={"SUPERBETS"}
                   className=""
                 />
               )} */}

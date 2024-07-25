@@ -27,7 +27,7 @@ export default function SubHeader() {
 
   type Card = {
     game: GameType;
-    wallet: string;
+    account: string;
     amountWon: number;
     result: "Won" | "Lost";
     userTier: number;
@@ -106,8 +106,8 @@ export default function SubHeader() {
     <div className="flex flex-col w-full z-[80] absolute top-0 right-0">
       <div
         className={`${
-          router.pathname === "/" ? "hidden" : "hidden md:hidden"
-        } w-full text-white h-[4.4rem] flex items-center border-b border-[#1E2220] px-4 lg:px-6 bg-[#121418]`}
+          router.pathname === "/" ? "flex" : "hidden md:flex"
+        } w-full text-white h-[4.4rem] flex items-center border-l border-b border-[#1E2220] px-4 lg:px-6 bg-[#121418]`}
       >
         <div className="flex w-full items-center overflow-x-auto no-scrollbar">
           <div ref={endOfListRef} />
@@ -126,14 +126,14 @@ export default function SubHeader() {
               />
               <div className="pl-2 pr-2">
                 <div className="flex items-center gap-1">
-                  <Image
+                  {/* <Image
                     src={`/assets/badges/T-${card.userTier}.png`}
                     alt="userBadge"
                     width={13}
                     height={13}
-                  />
+                  /> */}
                   <span className="text-xs font-changa font-medium text-white">
-                    {trimStringToLength(card.wallet ? card.wallet : "", 3)}
+                    {trimStringToLength(card?.account ?? "Player", 3)}
                   </span>
                 </div>
                 <p className="text-[#72F238] font-changa text-sm mt-1">
@@ -250,15 +250,15 @@ export default function SubHeader() {
           )}
         </div>
 
-        <div
+        {/* <div
           className={`${
             router.pathname === "/" ? "hidden md:flex" : "hidden md:flex"
           } h-10 border border-white border-opacity-5 rounded-[5px] mx-4`}
-        />
+        /> */}
 
-        <div className="hidden md:flex items-center md:min-w-fit">
+        {/* <div className="hidden md:flex items-center md:min-w-fit">
           <CoinSelector />
-        </div>
+        </div> */}
       </div>
       <div
         className={`${

@@ -22,74 +22,61 @@ export default async function handler(
 
     let user: any;
 
-    if (email) user = await User.findOne({ email });
-    else if (wallet) user = await User.findOne({ wallet });
-
-    if (user && user.twitterId && user.wallet)
-      return res.status(200).json({
-        success: true,
-        user: {
-          wallet: user?.wallet ?? null,
-          email: user?.email ?? null,
-          image: user?.image ?? null,
-          name: user?.name ?? null,
-          isWeb2User: user?.isWeb2User ?? false,
+    if (email && wallet) {
+      user = await User.findOneAndUpdate(
+        {
+          $or: [{ email }, { wallet }],
         },
-        message: "User found.",
-      });
-
-    if (user) {
-      if (email && !user.email) {
-        user.email = email;
-        user.name = name;
-        user.image = image;
-        await user.save();
-
-        return res.status(200).json({
-          success: true,
-          user: {
-            wallet: user?.wallet ?? null,
-            email: user?.email ?? null,
-            image: user?.image ?? null,
-            name: user?.name ?? null,
-            isWeb2User: user?.isWeb2User ?? false,
-          },
-          message: "Google connected successfully!",
-        });
-      } else if (wallet && !user.wallet) {
-        user.wallet = wallet;
-        await user.save();
-
-        return res.status(200).json({
-          success: true,
-          user: {
-            wallet: user?.wallet ?? null,
-            email: user?.email ?? null,
-            image: user?.image ?? null,
-            name: user?.name ?? null,
-            isWeb2User: user?.isWeb2User ?? false,
-          },
-          message: "Wallet connected successfully!",
-        });
-      }
-    } else {
-      // Create new user if not found
-      if (email) {
-        try {
-          user = await User.create({
+        {
+          $set: {
             email,
             name,
             image,
-          });
-        } catch (e) {
-          console.error(e);
-        }
+            wallet,
+          },
+        },
+        {
+          new: true,
+        },
+      );
+    } else {
+      if (email) {
+        user = await User.findOneAndUpdate(
+          {
+            email,
+          },
+          {
+            $setOnInsert: {
+              email,
+              name,
+              image,
+              isWeb2User: true,
+            },
+          },
+          {
+            new: true,
+            upsert: true,
+          },
+        );
       } else {
-        user = await User.create({
-          wallet,
-        });
+        user = await User.findOneAndUpdate(
+          {
+            wallet,
+          },
+          {
+            $setOnInsert: {
+              wallet,
+              isWeb2User: true,
+            },
+          },
+          {
+            new: true,
+            upsert: true,
+          },
+        );
       }
     }
+
     return res.status(201).json({
       success: true,
       user: {

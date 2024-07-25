@@ -5,7 +5,7 @@ import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider, { GoogleProfile } from "next-auth/providers/google";
 import { getCsrfToken } from "next-auth/react";
-import { encode } from "next-auth/jwt";
+import { encode, getToken } from "next-auth/jwt";
 
 export default async function auth(req: NextApiRequest, res: NextApiResponse) {
   const baseUrl = process.env.NEXTAUTH_URL || "http://localhost:3000";
@@ -19,8 +19,10 @@ export default async function auth(req: NextApiRequest, res: NextApiResponse) {
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
       profile: async (profile: GoogleProfile) => {
         console.log("Profile: ", profile);
+        const token = await getToken({ req, secret });
 
         return {
+          ...(token?.user || {}),
           id: profile.sub,
           email: profile.email,
           name: profile.name,
@@ -41,13 +43,15 @@ export default async function auth(req: NextApiRequest, res: NextApiResponse) {
           type: "text",
         },
       },
-      async authorize(credentials, req) {
+      async authorize(credentials, authReq) {
         try {
+          const token = await getToken({ req, secret });
+
           const signedTx = Transaction.from(
             Buffer.from(credentials?.txn as any, "base64"),
           );
 
-          const csrfToken = await getCsrfToken({ req: { ...req, body: null } });
+          const csrfToken = await getCsrfToken({ req: { ...authReq, body: null } });
 
           if (credentials?.nonce !== csrfToken) {
             return null;
@@ -66,12 +70,14 @@ export default async function auth(req: NextApiRequest, res: NextApiResponse) {
           if (!wallet) throw new Error("No fee payer found in transaction");
 
           console.log("returning", {
+            ...(token?.user || {}),
             id: wallet,
             wallet,
             auth: "wallet",
           });
 
           return {
+            ...(token?.user || {}),
             id: wallet,
             wallet,
             auth: "wallet",
@@ -83,13 +89,13 @@ export default async function auth(req: NextApiRequest, res: NextApiResponse) {
     }),
   ];
 
-  const isDefaultSigninPage =
-    req.method === "GET" && req.query.nextauth?.includes("signin");
+  // const isDefaultSigninPage =
+  //   req.method === "GET" && req.query.nextauth?.includes("signin");
 
-  // Hides Sign-In with Solana from the default sign page
-  if (isDefaultSigninPage) {
-    providers.pop();
-  }
+  // // Hides Sign-In with Solana from the default sign page
+  // if (isDefaultSigninPage) {
+  //   providers.pop();
+  // }
 
   return await NextAuth(req, res, {
     providers,
@@ -104,7 +110,7 @@ export default async function auth(req: NextApiRequest, res: NextApiResponse) {
       },
       async session({ session, token }) {
         const rawToken = await encode({ token, secret });
-
+        console.log(token)
         const response = await fetch(`${baseUrl}/api/games/user`, {
           method: "POST",
           headers: {

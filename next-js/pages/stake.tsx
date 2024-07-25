@@ -68,13 +68,13 @@ export default function Stake() {
     return () => clearInterval(intervalId);
   }, []);
 
-  useEffect(() => {
-    if (session?.user && wallet && wallet.publicKey) {
-      getFOMOBalance(wallet, setFomoBalance);
-      getUserDetails();
-    }
-    getGlobalInfo();
-  }, [session?.user, wallet.publicKey]);
+  // useEffect(() => {
+  //   if (session?.user && wallet && wallet.publicKey) {
+  //     getFOMOBalance(wallet, setFomoBalance);
+  //     getUserDetails();
+  //   }
+  //   getGlobalInfo();
+  // }, [session?.user, wallet.publicKey]);
 
   return (
     <>

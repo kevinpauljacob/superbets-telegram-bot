@@ -92,6 +92,7 @@ export default function ({ children }: Props) {
     setMinGameAmount,
     session,
     status,
+    getGlobalInfo,
   } = useGlobalContext();
 
   const [modalData, setModalData] = useState({
@@ -234,28 +235,23 @@ export default function ({ children }: Props) {
       getWalletBalance();
       getUserDetails();
     }
+    getGlobalInfo();
     setCurrentGame(game);
-  }, [wallet?.publicKey, session?.user, showWalletModal, game]);
-
-  useEffect(() => {
-    if (session?.user) {
-      getUserDetails();
-    }
     setMinGameAmount(
       maxPayouts[selectedCoin.tokenMint as GameTokens][game as GameType] *
         minAmtFactor,
     );
-  }, [wallet?.publicKey, session?.user, game, selectedCoin]);
+  }, [wallet?.publicKey, session?.user, game, showWalletModal, selectedCoin]);
 
   return (
     <>
       {/* <InfoBar /> */}
       <Header sidebar={sidebar} toggleSidebar={toggleSidebar} />
-      <section className="relative flex flex-1 max-h-[calc(100%-4.7rem)]">
+      <section className="relative flex flex-1 max-h-[calc(100%-5rem)]">
         <Sidebar sidebar={sidebar} setSidebar={setSidebar} />
         <section className="w-full relative overflow-hidden">
           <MobileSidebar />
-          <section className="relative w-full h-full pt-[4.4rem] md:pt-0">
+          <section className="relative w-full h-full pt-[4.4rem]">
             <SubHeader />
             <main
               className={`marker:w-full h-full max-h-[calc(100%-0rem)] pt-6`}

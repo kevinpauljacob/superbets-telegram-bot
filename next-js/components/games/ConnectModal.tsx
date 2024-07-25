@@ -22,6 +22,8 @@ import { TOKEN_PROGRAM_ID } from "@solana/spl-token";
 import { errorCustom } from "../toasts/ToastGroup";
 import { useWalletModal } from "@solana/wallet-adapter-react-ui";
 import { handleGoogle, handleSignIn } from "../ConnectWallet";
+import { Google, Wallet } from "iconsax-react";
+import { signOut } from "next-auth/react";
 
 export default function ConnectModal() {
   const methods = useForm();
@@ -41,6 +43,8 @@ export default function ConnectModal() {
     setUserTokens,
     getBalance,
     coinData,
+    session,
+    status,
   } = useGlobalContext();
 
   const [loading, setLoading] = useState<boolean>(false);
@@ -50,7 +54,7 @@ export default function ConnectModal() {
       open={showConnectModal}
       onOpenChange={() => setShowConnectModal(false)}
     >
-      <AdaptiveModalContent className="bg-[#121418] sm:overflow-y-auto min-h-[50dvh] max-h-[80dvh] w-full pb-6">
+      <AdaptiveModalContent className="bg-[#121418] sm:overflow-y-auto min-h-[0dvh] max-h-[80dvh] w-full pb-6">
         <div className="flex flex-1 px-6 sm:p-0 justify-center overflow-y-auto nobar">
           <div className="flex flex-col w-full">
             {/* header and logo  */}
@@ -67,24 +71,64 @@ export default function ConnectModal() {
             </div>
 
             <button
-              className={`w-full border-2 rounded-md py-2 text-white font-semibold text-xs sm:text-sm transition hover:duration-75 ease-in-out border-[#d9d9d90d] hover:bg-[#7F71FF] focus:bg-[#4C3ECC] text-opacity-50 hover:text-opacity-90`}
-              onClick={handleGoogle}
+              onClick={async (e) => {
+                try {
+                  if (session?.user?.email) {
+                    e.preventDefault();
+                    await wallet.disconnect();
+                    await signOut();
+                  } else handleGoogle();
+                } catch (e) {
+                  console.log(e);
+                }
+              }}
+              className={`hidden xl:flex items-center justify-center text-white text-opacity-50 hover:text-opacity-90 focus:text-opacity-90 bg-white/5 hover:bg-[#555555] focus:bg-[#5F4DFF] transition-all font-medium text-sm p-3 rounded-[0.625rem] gap-1`}
             >
-              {translator("Google", language)}
+              {session?.user?.email ? (
+                `Connected as ${session?.user?.name}`
+              ) : (
+                <>
+                  <Google />
+                  <span className="text-sm font-medium tracking-wider font-sans">
+                    {translator("Connect with Google", language)}
+                  </span>
+                </>
+              )}
             </button>
 
-            <span className="text-lg font-medium text-staking-secondary">
-              OR
-            </span>
+            {!session?.user && (
+              <span className="w-full mt-4 text-center text-lg font-semibold text-staking-secondary">
+                OR
+              </span>
+            )}
 
             <button
-              className={`w-full border-2 rounded-md py-2 text-white font-semibold text-xs sm:text-sm transition hover:duration-75 ease-in-out border-[#d9d9d90d] hover:bg-[#7F71FF] focus:bg-[#4C3ECC] text-opacity-50 hover:text-opacity-90`}
-              onClick={() => {
-                setShowConnectModal(false);
-                handleSignIn(wallet, walletModal);
+              onClick={async (e) => {
+                try {
+                  if (session?.user?.wallet) {
+                    e.preventDefault();
+                    await wallet.disconnect();
+                    await signOut();
+                  } else {
+                    setShowConnectModal(false);
+                    handleSignIn(wallet, walletModal);
+                  }
+                } catch (e) {
+                  console.log(e);
+                }
               }}
+              className={`mt-4 hidden xl:flex items-center justify-center text-white text-opacity-50 hover:text-opacity-90 focus:text-opacity-90 bg-white/5 hover:bg-[#555555] focus:bg-[#5F4DFF] transition-all font-medium text-sm p-3 rounded-[0.625rem] gap-1`}
             >
-              {translator("Wallet", language)}
+              {session?.user?.wallet ? (
+                `Connected with ${obfuscatePubKey(session?.user?.wallet)}`
+              ) : (
+                <>
+                  <Wallet />
+                  <span className="text-sm font-medium tracking-wider font-sans">
+                    {translator("Connect Wallet", language)}
+                  </span>
+                </>
+              )}
             </button>
           </div>
         </div>

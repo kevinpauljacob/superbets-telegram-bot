@@ -31,13 +31,13 @@ export function Header({
     getUserDetails,
     mobileSidebar,
     setMobileSidebar,
-    setShowConnectModal
+    setShowConnectModal,
   } = useGlobalContext();
   const [langSelect, setLangSelect] = useState(false);
 
-  useEffect(() => {
-    if (!userData && wallet && wallet.publicKey) getUserDetails();
-  }, [wallet.publicKey]);
+  // useEffect(() => {
+  //   if (!userData && wallet && wallet.publicKey) getUserDetails();
+  // }, [wallet.publicKey]);
 
   return (
     <div
@@ -61,10 +61,10 @@ export function Header({
               className="flex sm:hidden relative"
             >
               <Image
-                src={"/assets/logowhite.svg"}
-                width={40}
+                src={"/logo/superbets.svg"}
+                width={150}
                 height={30}
-                alt={"FOMO"}
+                alt={"SUPERBETS"}
                 className=""
               />
             </div>
@@ -74,19 +74,24 @@ export function Header({
                 sidebar ? "text-[#8033d7]" : "text-white"
               }`}
             />
-            <span
+            <div
               onClick={() => {
                 router.push("/");
               }}
               className="hidden sm:flex items-center font-medium text-[1.6rem] text-white"
             >
-              FOMO
-            </span>
+              <Image
+                src={"/logo/superbets.svg"}
+                width={150}
+                height={30}
+                alt={"SUPERBETS"}
+                className=""
+              />
+            </div>
           </div>
           <div className="w-full justify-center absolute hidden md:flex">
             <CoinSelector />
           </div>
-          <div className="w-5 h-5 bg-red-200 z-10" onClick={() => {setShowConnectModal(true)}}/>
           {/* left  */}
           <div className="flex ml-2 lg:mr-2 sm:items-center items-end sm:flex-row z-10">
             <div className="flex gap-8 mr-6 items-end">

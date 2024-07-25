@@ -19,7 +19,8 @@ function Footer() {
   const wallet = useWallet();
   const walletModal = useWalletModal();
 
-  const { language, setLanguage, setShowWalletModal, setShowConnectModal } = useGlobalContext();
+  const { language, setLanguage, setShowWalletModal, setShowConnectModal } =
+    useGlobalContext();
   const [langSelect, setLangSelect] = useState(false);
   const router = useRouter();
 
@@ -28,19 +29,22 @@ function Footer() {
       <div className="w-full h-full flex flex-col items-center justify-center px-5 lg2:px-[4rem] md:px-[3rem] pt-5">
         <div className="w-full h-full flex lg2:flex-row flex-col lg2:items-center items-start lg2:pt-10 lg2:pb-16 pt-5 pb-5 gap-5">
           <div className="lg2:w-[30%] md:w-[60%] w-[90%]">
-            <h3 className="flex items-center font-medium text-[1.6rem] text-white">
-              <Image src={logo} width={40} alt={"FOMO"} />
-              FOMO
-            </h3>
+            <Image
+              src={"/logo/superbets.svg"}
+              width={150}
+              height={30}
+              alt={"SUPERBETS"}
+              className="ml-2"
+            />
             <p className="flex flex-col text-[#94A3B8] font-medium font-chakra text-sm leading-6 text-opacity-80 md:mx-0 md:mt-2 mb-2">
               <span className="md:mt-2 mx-2">
                 {translator(
-                  "FOMO wtf casino games are currently in beta and will be undergoing audit shortly. FOMO wtf EXIT games has gone through audit performed by OtterSec in December 2023.",
+                  "SUPERBETS casino games are currently in beta and will be undergoing audit shortly.",
                   language,
                 )}
                 <br />
                 <br />
-                {translator("Contact", language)} : hi@fomowtf.com
+                {translator("Contact", language)} : hi@superbets.com
               </span>
             </p>
           </div>
@@ -69,7 +73,7 @@ function Footer() {
                   onClick={() => {
                     wallet.connected && status === "authenticated"
                       ? setShowWalletModal(true)
-                      : setShowConnectModal(true)
+                      : setShowConnectModal(true);
                   }}
                 >
                   {translator("Wallet", language)}
@@ -125,7 +129,7 @@ function Footer() {
         <div className="w-full h-[1px] bg-[#94A3B8] bg-opacity-20 rounded-full mt-5 md:px-2 mx-2" />
         <div className="w-full font-inter flex lg2:flex-row flex-col lg2:items-center lg2:justify-between lg2:pb-10 pb-[150px] pt-5 md:px-2 mx-2">
           <p className="flex text-sm font-normal text-[#FFFFFF] text-opacity-50 font-sans gap-2">
-            <span>&copy;2024 fomowtf.com</span>
+            <span>&copy;2024 superbets.com</span>
             <span>{translator("All rights reserved", language)}</span>
           </p>
           <div className="flex items-center lg2:justify-center gap-5">
@@ -143,12 +147,12 @@ function Footer() {
                 {language === "en"
                   ? "English"
                   : language === "ru"
-                    ? "Русский"
-                    : language === "ko"
-                      ? "한국인"
-                      : language === "ch"
-                        ? "中国人"
-                        : ""}
+                  ? "Русский"
+                  : language === "ko"
+                  ? "한국인"
+                  : language === "ch"
+                  ? "中国人"
+                  : ""}
               </span>
               <FaChevronUp className="w-3 h-3 text-white" />
               {langSelect && (
