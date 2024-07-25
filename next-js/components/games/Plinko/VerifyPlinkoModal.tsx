@@ -2,7 +2,6 @@ import { seedStatus } from "@/utils/provably-fair";
 import { useState, useEffect, useRef } from "react";
 import { IoIosArrowDown } from "react-icons/io";
 import Image from "next/image";
-import { PFModalData } from "./PlinkoProvablyFairModal";
 import { useGlobalContext } from "@/components/GlobalContext";
 import { FaRegCopy } from "react-icons/fa6";
 import Arc from "@/components/games/Wheel/Arc";
@@ -17,6 +16,7 @@ import { SPL_TOKENS } from "@/context/config";
 import PlinkoProvablyFairModal from "./PlinkoProvablyFairModal";
 import { multiplierColorMap } from "./constants";
 import { riskToChance } from "./RiskToChance";
+import { PFModalData } from "../CoinFlip/CoinFlipProvablyFairModal";
 
 export interface Plinko {
   createdAt: string;
@@ -77,7 +77,7 @@ export default function VerifyPlinkoModal({
 
   const [PFModalData, setPFModalData] = useState<PFModalData>({
     activeGameSeed: {
-      wallet: "",
+      account: "",
       clientSeed: "",
       serverSeed: "",
       serverSeedHash: "",
@@ -85,7 +85,7 @@ export default function VerifyPlinkoModal({
       status: "",
     },
     nextGameSeed: {
-      wallet: "",
+      account: "",
       clientSeed: "",
       serverSeed: "",
       serverSeedHash: "",

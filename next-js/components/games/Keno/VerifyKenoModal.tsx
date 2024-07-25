@@ -1,7 +1,7 @@
 import { seedStatus } from "@/utils/provably-fair";
 import { useState } from "react";
 import { IoIosArrowDown } from "react-icons/io";
-import KenoProvablyFairModal, { PFModalData } from "./KenoProvablyFairModal";
+import KenoProvablyFairModal from "./KenoProvablyFairModal";
 import { useGlobalContext } from "@/components/GlobalContext";
 import { FaRegCopy } from "react-icons/fa6";
 import { MdClose } from "react-icons/md";
@@ -12,6 +12,7 @@ import {
   AdaptiveModalContent,
 } from "@/components/AdaptiveModal";
 import { SPL_TOKENS } from "@/context/config";
+import { PFModalData } from "../CoinFlip/CoinFlipProvablyFairModal";
 
 export interface Keno {
   createdAt: string;
@@ -70,7 +71,7 @@ export default function VerifyDice2Modal({
   console.log("Kenobet", bet);
   const [PFModalData, setPFModalData] = useState<PFModalData>({
     activeGameSeed: {
-      wallet: "",
+      account: "",
       clientSeed: "",
       serverSeed: "",
       serverSeedHash: "",
@@ -78,7 +79,7 @@ export default function VerifyDice2Modal({
       status: "",
     },
     nextGameSeed: {
-      wallet: "",
+      account: "",
       clientSeed: "",
       serverSeed: "",
       serverSeedHash: "",

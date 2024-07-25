@@ -57,16 +57,16 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           .status(400)
           .json({ success: false, message: "Missing parameters" });
 
-      let users = await User.findOne({
+      let user = await User.findOne({
         $or: [{ wallet: wallet }, { email: email }],
       });
 
-      if (!users)
+      if (!user)
         return res
           .status(400)
           .json({ success: false, message: "User does not exist!" });
 
-      const account = users._id;
+      const account = user._id;
       
       let gameInfo = await Mines.findOne({
         _id: gameId,
@@ -166,7 +166,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         feeGenerated,
       );
 
-      const user = await User.findOneAndUpdate(
+      const userUpdate = await User.findOneAndUpdate(
         {
           _id: account,
           deposit: {

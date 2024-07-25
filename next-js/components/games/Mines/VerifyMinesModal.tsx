@@ -1,7 +1,7 @@
 import { seedStatus } from "@/utils/provably-fair";
 import { useState } from "react";
 import { IoIosArrowDown } from "react-icons/io";
-import KenoProvablyFairModal, { PFModalData } from "./MinesProvablyFairModal";
+import KenoProvablyFairModal from "./MinesProvablyFairModal";
 import { useGlobalContext } from "@/components/GlobalContext";
 import { FaRegCopy } from "react-icons/fa6";
 import { MdClose } from "react-icons/md";
@@ -14,6 +14,7 @@ import {
   AdaptiveModalContent,
 } from "@/components/AdaptiveModal";
 import { SPL_TOKENS } from "@/context/config";
+import { PFModalData } from "../CoinFlip/CoinFlipProvablyFairModal";
 
 export interface Mines {
   createdAt: string;
@@ -73,7 +74,7 @@ export default function VerifyDice2Modal({
 
   const [PFModalData, setPFModalData] = useState<PFModalData>({
     activeGameSeed: {
-      wallet: "",
+      account: "",
       clientSeed: "",
       serverSeed: "",
       serverSeedHash: "",
@@ -81,7 +82,7 @@ export default function VerifyDice2Modal({
       status: "",
     },
     nextGameSeed: {
-      wallet: "",
+      account: "",
       clientSeed: "",
       serverSeed: "",
       serverSeedHash: "",

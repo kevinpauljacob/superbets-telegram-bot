@@ -1,7 +1,7 @@
 import { seedStatus } from "@/utils/provably-fair";
 import { useState } from "react";
 import { IoIosArrowDown } from "react-icons/io";
-import LimboProvablyFairModal, { PFModalData } from "./LimboProvablyFairModal";
+import LimboProvablyFairModal from "./LimboProvablyFairModal";
 import { useGlobalContext } from "@/components/GlobalContext";
 import { FaRegCopy } from "react-icons/fa6";
 import { MdClose } from "react-icons/md";
@@ -12,6 +12,7 @@ import {
   AdaptiveModalContent,
 } from "@/components/AdaptiveModal";
 import { SPL_TOKENS } from "@/context/config";
+import { PFModalData } from "../CoinFlip/CoinFlipProvablyFairModal";
 
 export interface Limbo {
   chance: number;
@@ -67,7 +68,7 @@ export default function VerifyLimboModal({
 
   const [PFModalData, setPFModalData] = useState<PFModalData>({
     activeGameSeed: {
-      wallet: "",
+      account: "",
       clientSeed: "",
       serverSeed: "",
       serverSeedHash: "",
@@ -75,7 +76,7 @@ export default function VerifyLimboModal({
       status: "",
     },
     nextGameSeed: {
-      wallet: "",
+      account: "",
       clientSeed: "",
       serverSeed: "",
       serverSeedHash: "",

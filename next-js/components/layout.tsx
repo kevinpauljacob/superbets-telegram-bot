@@ -96,7 +96,7 @@ export default function ({ children }: Props) {
 
   const [modalData, setModalData] = useState({
     activeGameSeed: {
-      wallet: "",
+      account: "",
       clientSeed: "",
       serverSeed: "",
       serverSeedHash: "",
@@ -104,7 +104,7 @@ export default function ({ children }: Props) {
       status: "",
     },
     nextGameSeed: {
-      wallet: "",
+      account: "",
       clientSeed: "",
       serverSeed: "",
       serverSeedHash: "",

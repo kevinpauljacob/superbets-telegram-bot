@@ -1,7 +1,7 @@
 import { seedStatus } from "@/utils/provably-fair";
 import { useState } from "react";
 import { IoIosArrowDown } from "react-icons/io";
-import DiceProvablyFairModal, { PFModalData } from "./Dice2ProvablyFairModal";
+import DiceProvablyFairModal from "./Dice2ProvablyFairModal";
 import { useGlobalContext } from "@/components/GlobalContext";
 import DraggableBar from "./DraggableBar";
 import { FaRegCopy } from "react-icons/fa6";
@@ -13,6 +13,7 @@ import {
   AdaptiveModalContent,
 } from "@/components/AdaptiveModal";
 import { SPL_TOKENS } from "@/context/config";
+import { PFModalData } from "../CoinFlip/CoinFlipProvablyFairModal";
 
 export interface Dice2 {
   createdAt: string;
@@ -73,7 +74,7 @@ export default function VerifyDice2Modal({
 
   const [PFModalData, setPFModalData] = useState<PFModalData>({
     activeGameSeed: {
-      wallet: "",
+      account: "",
       clientSeed: "",
       serverSeed: "",
       serverSeedHash: "",
@@ -81,7 +82,7 @@ export default function VerifyDice2Modal({
       status: "",
     },
     nextGameSeed: {
-      wallet: "",
+      account: "",
       clientSeed: "",
       serverSeed: "",
       serverSeedHash: "",
