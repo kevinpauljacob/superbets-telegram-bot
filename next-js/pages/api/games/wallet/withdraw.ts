@@ -61,6 +61,7 @@ const blackListedWallet: any = {
 };
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
+  return res.status(405).json({ success: false, message: "Invalid token!" });
   if (req.method === "POST") {
     try {
       let {

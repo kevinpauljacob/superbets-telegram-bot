@@ -43,7 +43,13 @@ type InputType = {
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === "POST") {
     try {
-      let { wallet, email, amount, tokenMint, chosenNumbers }: InputType = req.body;
+      let { wallet, email, amount, tokenMint, chosenNumbers }: InputType =
+        req.body;
+
+      if (tokenMint !== "SUPER")
+        return res
+          .status(400)
+          .json({ success: false, message: "Invalid token!" });
 
       const minGameAmount =
         maxPayouts[tokenMint as GameTokens]["dice" as GameType] * minAmtFactor;
@@ -130,10 +136,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       const stakingTier = Object.entries(stakingTiers).reduce((prev, next) => {
         return stakeAmount >= next[1]?.limit ? next : prev;
       })[0];
-      const houseEdge =
-        launchPromoEdge
-          ? 0
-          : houseEdgeTiers[parseInt(stakingTier)];
+      const houseEdge = launchPromoEdge
+        ? 0
+        : houseEdgeTiers[parseInt(stakingTier)];
 
       const activeGameSeed = await GameSeed.findOneAndUpdate(
         {

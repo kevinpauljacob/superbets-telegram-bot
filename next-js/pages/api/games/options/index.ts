@@ -33,6 +33,11 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       let { wallet, email, amount, tokenMint, betType, timeFrame }: InputType =
         req.body;
 
+      if (tokenMint !== "SUPER")
+        return res
+          .status(400)
+          .json({ success: false, message: "Invalid token!" });
+
       const minGameAmount =
         maxPayouts[tokenMint as GameTokens]["options" as GameType] *
         minAmtFactor;

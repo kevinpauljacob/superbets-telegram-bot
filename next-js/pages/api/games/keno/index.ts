@@ -48,6 +48,11 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       let { wallet, email, amount, tokenMint, chosenNumbers, risk }: InputType =
         req.body;
 
+      if (tokenMint !== "SUPER")
+        return res
+          .status(400)
+          .json({ success: false, message: "Invalid token!" });
+
       const minGameAmount =
         maxPayouts[tokenMint as GameTokens]["keno" as GameType] * minAmtFactor;
 
@@ -57,7 +62,13 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           message: "Under maintenance",
         });
 
-      if ((!wallet && !email) || !amount || !tokenMint || !chosenNumbers || !risk)
+      if (
+        (!wallet && !email) ||
+        !amount ||
+        !tokenMint ||
+        !chosenNumbers ||
+        !risk
+      )
         return res
           .status(400)
           .json({ success: false, message: "Missing parameters" });
@@ -137,10 +148,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       const stakingTier = Object.entries(stakingTiers).reduce((prev, next) => {
         return stakeAmount >= next[1]?.limit ? next : prev;
       })[0];
-      const houseEdge =
-        launchPromoEdge
-          ? 0
-          : houseEdgeTiers[parseInt(stakingTier)];
+      const houseEdge = launchPromoEdge
+        ? 0
+        : houseEdgeTiers[parseInt(stakingTier)];
 
       const activeGameSeed = await GameSeed.findOneAndUpdate(
         {

@@ -44,6 +44,11 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     try {
       let { wallet, email, amount, tokenMint, flipType }: InputType = req.body;
 
+      if (tokenMint !== "SUPER")
+        return res
+          .status(400)
+          .json({ success: false, message: "Invalid token!" });
+
       const minGameAmount =
         maxPayouts[tokenMint as GameTokens]["coinflip" as GameType] *
         minAmtFactor;
@@ -111,7 +116,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           .json({ success: false, message: "Insufficient balance for bet!" });
 
       const account = user._id;
-      
+
       let userData;
       if (wallet)
         userData = await StakingUser.findOneAndUpdate(

@@ -48,6 +48,11 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       let { wallet, email, amount, tokenMint, rows, risk }: InputType =
         req.body;
 
+      if (tokenMint !== "SUPER")
+        return res
+          .status(400)
+          .json({ success: false, message: "Invalid token!" });
+
       if (maintainance)
         return res.status(400).json({
           success: false,

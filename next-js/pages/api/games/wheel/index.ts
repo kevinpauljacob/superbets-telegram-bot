@@ -47,6 +47,11 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       let { wallet, email, amount, tokenMint, segments, risk }: InputType =
         req.body;
 
+      if (tokenMint !== "SUPER")
+        return res
+          .status(400)
+          .json({ success: false, message: "Invalid token!" });
+
       const minGameAmount =
         maxPayouts[tokenMint as GameTokens]["wheel" as GameType] * minAmtFactor;
 
@@ -55,7 +60,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           success: false,
           message: "Under maintenance",
         });
-        
+
       if ((!wallet && !email) || !amount || !tokenMint || !segments || !risk)
         return res
           .status(400)
