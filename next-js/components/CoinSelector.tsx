@@ -10,7 +10,6 @@ import { useWalletModal } from "@solana/wallet-adapter-react-ui";
 import { handleSignIn } from "./ConnectWallet";
 
 export default function CoinSelector() {
-  const { data: session, status } = useSession();
   const wallet = useWallet();
   const walletModal = useWalletModal();
 
@@ -23,6 +22,8 @@ export default function CoinSelector() {
     selectedCoin,
     coinData,
     startAuto,
+    session,
+    status,
   } = useGlobalContext();
   const [showSelectCoinModal, setShowSelectCoinModal] = useState(false);
   const [fiat, setFiat] = useState(false);
@@ -141,9 +142,11 @@ export default function CoinSelector() {
 
       <div
         onClick={() => {
-          wallet.connected && status === "authenticated"
+          wallet.connected && wallet.publicKey && status === "authenticated"
             ? setShowWalletModal(true)
-            : setShowConnectModal(true)
+            : session?.user?.wallet
+            ? handleSignIn(wallet, walletModal)
+            : setShowConnectModal(true);
         }}
         className="flex items-center h-[2.3rem] md:h-10 px-5 md:px-4 py-0 md:py-2 gap-1 md:gap-1.5 bg-[#5F4DFF] hover:bg-[#7F71FF] focus:bg-[#4C3ECC] transition-all cursor-pointer rounded-[5px]"
       >
