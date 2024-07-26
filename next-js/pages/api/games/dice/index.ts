@@ -43,10 +43,12 @@ type InputType = {
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === "POST") {
     try {
-      let { wallet, email, amount, tokenMint, chosenNumbers }: InputType = req.body;
+      let { wallet, email, amount, tokenMint, chosenNumbers }: InputType =
+        req.body;
 
       const minGameAmount =
         maxPayouts[tokenMint as GameTokens]["dice" as GameType] * minAmtFactor;
+      console.log("minGameAmount", minGameAmount);
 
       if (maintainance)
         return res.status(400).json({
@@ -130,10 +132,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       const stakingTier = Object.entries(stakingTiers).reduce((prev, next) => {
         return stakeAmount >= next[1]?.limit ? next : prev;
       })[0];
-      const houseEdge =
-        launchPromoEdge
-          ? 0
-          : houseEdgeTiers[parseInt(stakingTier)];
+      const houseEdge = launchPromoEdge
+        ? 0
+        : houseEdgeTiers[parseInt(stakingTier)];
 
       const activeGameSeed = await GameSeed.findOneAndUpdate(
         {
@@ -190,33 +191,33 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
       const addGame = !user.gamesPlayed.includes(GameType.dice);
 
-      const userUpdate = await User.findOneAndUpdate(
-        {
-          _id: account,
-          deposit: {
-            $elemMatch: {
-              tokenMint,
-              amount: { $gte: amount },
+      try {
+        const userUpdate = await User.findOneAndUpdate(
+          {
+            _id: account,
+            "deposit.tokenMint": tokenMint,
+            "deposit.amount": { $gte: amount },
+          },
+          {
+            $inc: {
+              "deposit.$.amount": amountWon.minus(amount).toNumber(),
+              numOfGamesPlayed: 1,
             },
+            ...(addGame ? { $addToSet: { gamesPlayed: GameType.dice } } : {}),
+            $set: {},
           },
-        },
-        {
-          $inc: {
-            "deposit.$.amount": amountWon.minus(amount).toNumber(),
-            numOfGamesPlayed: 1,
-          },
-          ...(addGame ? { $addToSet: { gamesPlayed: GameType.dice } } : {}),
-          $set: {
-            isWeb2User: tokenMint === "WEB2",
-          },
-        },
-        {
-          new: true,
-        },
-      );
+          { new: true },
+        );
 
-      if (!userUpdate) {
-        throw new Error("Insufficient balance for bet!");
+        if (!userUpdate) {
+          return res
+            .status(400)
+            .json({ success: false, message: "Insufficient balance for bet!" });
+        }
+      } catch (error) {
+        return res
+          .status(500)
+          .json({ success: false, message: "Error updating user balance" });
       }
 
       const dice = new Dice({
