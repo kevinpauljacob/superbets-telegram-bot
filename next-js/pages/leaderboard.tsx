@@ -8,12 +8,13 @@ import {
 import { pointTiers } from "@/context/config";
 import { useWallet } from "@solana/wallet-adapter-react";
 import Image from "next/image";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import FOMOHead from "@/components/HeadElement";
+import Countdown from "react-countdown-now";
 
 export default function Leaderboard() {
   const wallet = useWallet();
-  const { language, userData, pointTier, setPointTier, session } =
+  const { language, userData, pointTier, setPointTier, session, coinData } =
     useGlobalContext();
 
   useEffect(() => {
@@ -32,6 +33,69 @@ export default function Leaderboard() {
   }, [userData]);
 
   const threshold = 200;
+  const currentDate = new Date();
+  const targetDate = new Date(
+    Date.UTC(
+      currentDate.getUTCFullYear(),
+      currentDate.getUTCMonth(),
+      currentDate.getUTCDate() + 1,
+      0,
+      0,
+      0,
+    ),
+  );
+  const tokenAmount = useMemo(
+    () =>
+      Math.max(
+        0,
+        (coinData?.find((c) => c.tokenMint === "WEB2")?.amount ?? 0) - 100,
+      ),
+    [coinData],
+  );
+
+  const renderer = ({
+    days,
+    hours,
+    minutes,
+    seconds,
+    completed,
+  }: {
+    days: number;
+    hours: number;
+    minutes: number;
+    seconds: number;
+    completed: boolean;
+  }) => {
+    const formatValue = (value: number) => value.toString().padStart(2, "0");
+    if (completed) {
+      // Countdown completed
+      return (
+        <>
+          <TimeBox val={"00"} dimension="Hour" />
+          <TimeBox val={"00"} dimension="Min" />
+          <TimeBox val={"00"} dimension="Sec" />
+        </>
+      );
+    } else {
+      // Render the countdown
+      return (
+        <>
+          <TimeBox val={formatValue(hours)} dimension="Hour" />
+          <TimeBox val={formatValue(minutes)} dimension="Min" />
+          <TimeBox val={formatValue(seconds)} dimension="Sec" />
+        </>
+      );
+    }
+  };
+
+  const TimeBox = ({ val, dimension }: { val: string; dimension: string }) => {
+    return (
+      <div className="bg-black bg-opacity-25 flex flex-col items-center justify-center w-24 h-24">
+        <span className="text-white text-opacity-75 text-[2rem]">{val}</span>
+        <span className="text-white text-opacity-50 text-sm">{dimension}</span>
+      </div>
+    );
+  };
 
   return (
     <>
@@ -43,7 +107,7 @@ export default function Leaderboard() {
         </span> */}
 
         <div className="w-full flex flex-col lg:flex-row items-center lg:items-stretch gap-4">
-          <div className="w-full h-auto lg:w-[75%] max-w-[80rem] flex items-center justify-between relative">
+          <div className="w-full h-auto lg:w-[70%] max-w-[80rem] flex items-center justify-between relative">
             <div className="w-full h-full min-w-[18.5rem]">
               <Image
                 src={"/assets/leaderboard-bg.svg"}
@@ -53,6 +117,23 @@ export default function Leaderboard() {
                 unoptimized
                 className="w-[100%]"
               />
+            </div>
+            <div className="absolute flex items-center justify-between gap-4 pl-6 pr-10 top-0 left-0 w-full h-full">
+              <Image
+                src={"/assets/leaderboardTrophy.svg"}
+                width={80}
+                height={80}
+                alt={"User"}
+                className="rounded-full overflow-hidden"
+              />
+              <div className="flex flex-col items-start gap-4">
+                <span className="text-xl text-white text-opacity-50">
+                  Leaderboard Resets in
+                </span>
+                <div className="flex items-center gap-1 rounded-[0.625rem] overflow-hidden">
+                  <Countdown date={targetDate} renderer={renderer} />
+                </div>
+              </div>
             </div>
           </div>
           {/* user box */}
@@ -80,10 +161,10 @@ export default function Leaderboard() {
               <div className="flex items-center justify-between gap-8">
                 <div className="flex items-baseline gap-1">
                   <span className="text-white text-xs font-medium text-opacity-50">
-                    Claim $1 progress
+                    Claim $100 progress
                   </span>
                   <span className="text-white text-sm font-semibold text-opacity-75">
-                    60%
+                    {(tokenAmount * 100) / threshold}%
                   </span>
                 </div>
                 <div className="flex items-center gap-1">
@@ -95,7 +176,11 @@ export default function Leaderboard() {
                     className="rounded-full overflow-hidden"
                   />
                   <span className="text-white text-sm font-semibold text-opacity-75">
-                    23/100
+                    {tokenAmount.toLocaleString("en-US", {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2,
+                    })}
+                    /100
                   </span>
                 </div>
               </div>
@@ -111,7 +196,7 @@ export default function Leaderboard() {
                 </div>
                 <div
                   style={{
-                    width: `10%`,
+                    width: `${(tokenAmount * 100) / threshold}%`,
                   }}
                   // className="h-full bg-[linear-gradient(91.179deg,#C867F0_0%,#1FCDF0_50.501%,#19EF99_100%)]"
                   className="h-full bg-[#5F4DFF]"
