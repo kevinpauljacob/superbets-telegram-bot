@@ -48,6 +48,8 @@ import { maxPayouts, minAmtFactor } from "@/context/config";
 import VerifyPlinkoModal, { Plinko } from "./games/Plinko/VerifyPlinkoModal";
 import PlinkoProvablyFairModal from "./games/Plinko/PlinkoProvablyFairModal";
 import ConnectModal from "./games/ConnectModal";
+import { handleSignIn } from "./ConnectWallet";
+import { useWalletModal } from "@solana/wallet-adapter-react-ui";
 
 interface Props {
   children: ReactNode;
@@ -56,6 +58,7 @@ interface Props {
 export default function ({ children }: Props) {
   const router = useRouter();
   const wallet = useWallet();
+  const walletModal = useWalletModal()
   const game = router.pathname.split("/")[1];
 
   const {
@@ -163,6 +166,9 @@ export default function ({ children }: Props) {
 
     if (wallet?.publicKey && session?.user)
       localStorage.setItem("connectedAccountKey", wallet.publicKey.toBase58());
+
+    if (session?.user?.wallet && (!wallet.connected || !wallet.publicKey))
+      handleSignIn(wallet, walletModal);
   }, [wallet.publicKey, session?.user]);
 
   // useEffect(() => {
