@@ -78,7 +78,7 @@ export default function Home() {
     <>
       <FOMOHead title={"Home | FOMO.wtf - 0% House Edge, Pure Wins"} />
       <div className="flex flex-col lg:flex-row text-white w-full overflow-hidden relative overflow-x-hidden px-4 xl:px-6">
-        <div className="flex flex-1 flex-col md:px-[2.5%]">
+        <div className="flex flex-1 flex-col pt-12 md:pt-0 md:px-[2.5%]">
           <div className="">
             <StoreBanner />
           </div>

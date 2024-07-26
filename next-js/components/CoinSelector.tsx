@@ -58,7 +58,7 @@ export default function CoinSelector() {
           }}
         >
           {selectedCoin.icon && (
-            <selectedCoin.icon className="w-6 h-6 -mt-[1px]" />
+            <selectedCoin.icon className="w-4 h-4 -mt-[1px]" />
           )}
           <span className="font-chakra font-medium text-base text-[#94A3B8]">
             {formatAmount(selectedCoin.amount ?? 0)}
@@ -97,7 +97,7 @@ export default function CoinSelector() {
               }}
             >
               <div className="flex items-center gap-1.5">
-                <coin.icon className="" />
+                <coin.icon className="w-4 h-4" />
                 <span className="text-sm font-chakra font-semibold leading-3 mt-0.5">
                   {coin.tokenName}
                 </span>

@@ -54,7 +54,7 @@ export default function MobileNavbar({
             </p>
           </li>
         </button>
-        <Link
+        {/* <Link
           href="/stake"
           className="flex flex-col items-center justify-center border-r border-white/10 w-full"
         >
@@ -80,7 +80,7 @@ export default function MobileNavbar({
               {translator("Staking", language)}
             </p>
           </li>
-        </Link>
+        </Link> */}
         <Link
           href="/leaderboard"
           className="flex flex-col items-center justify-center border-r border-white/10 w-full"
@@ -111,7 +111,7 @@ export default function MobileNavbar({
             </p>
           </li>
         </Link>
-        <Link
+        {/* <Link
           href="/store"
           className="flex flex-col items-center justify-center border-r border-white/10 w-full"
         >
@@ -136,7 +136,7 @@ export default function MobileNavbar({
               {translator("Store", language)}
             </p>
           </li>
-        </Link>
+        </Link> */}
         <Link
           href="/"
           className="flex flex-col items-center justify-center w-full"

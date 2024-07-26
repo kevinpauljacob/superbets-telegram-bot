@@ -193,7 +193,7 @@ export default function Sidebar({
           </div>
           <div className="w-full flex flex-col items-center mb-2">
             <Link
-              href={"https://x.com/FOMO_wtf"}
+              href={"https://x.com/superbetgames"}
               target="_blank"
               className={`${bottomIconCss}`}
             >
@@ -209,7 +209,7 @@ export default function Sidebar({
               <Birdeye className="w-5 h-5 text-white group-hover:text-[#5F4DFF] group-focus:text-[#5F4DFF] transition-all " />
             </Link> */}
             <Link
-              href={"https://t.me/FOMO_wtf"}
+              href={"https://t.me/superbetgames "}
               target="_blank"
               className={`${bottomIconCss}`}
             >
@@ -631,7 +631,7 @@ export const OpenSidebar = ({
         } w-full flex flex-col p-4 mb-0`}
       >
         <Link
-          href="https://x.com/FOMO_wtf"
+          href="https://x.com/superbetgames"
           className={`${openLinkCss}`}
           target="_blank"
         >
@@ -646,7 +646,7 @@ export const OpenSidebar = ({
           <Birdeye className="w-5 h-5 text-white" />
           Birdeye
         </Link> */}
-        <Link href="t.me/FOMO_wtf" className={`${openLinkCss}`} target="_blank">
+        <Link href="https://t.me/superbetgames " className={`${openLinkCss}`} target="_blank">
           <Telegram className="w-5 h-5" />
           {translator("Telegram", language)}
         </Link>

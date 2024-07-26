@@ -291,7 +291,7 @@ export default function BalanceModal() {
 
                     {isSelectModalOpen && (
                       <div className="absolute z-[100] top-[calc(100%+10px)] left-0 w-full bg-[#202329] rounded-[5px] border-2 border-white border-opacity-10">
-                        {SPL_TOKENS.filter((t) => t.tokenMint !== "WEB2").map(
+                        {SPL_TOKENS.filter((t) => t.tokenMint !== "SUPER").map(
                           (token, index) => (
                             <div
                               key={index}

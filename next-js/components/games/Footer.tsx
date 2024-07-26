@@ -24,7 +24,7 @@ const Footer = () => {
         <a
           target="_blank"
           className="hover:text-v2-primary h-6 w-6 px-1 py-1.5 text-white/50"
-          href="https://twitter.com/FOMOSolana"
+          href="https://x.com/superbetgames"
           rel="noopener noreferrer"
         >
           <Image src={twitter} width={20} alt="" />
@@ -34,7 +34,7 @@ const Footer = () => {
         <a
           target="_blank"
           className="hover:text-v2-primary h-6 w-6 px-1 py-1.5 text-white/50"
-          href="https://t.me/FOMOSolana"
+          href="https://t.me/superbetgames "
           rel=""
         >
           <Image src={telegram} width={20} alt="" />

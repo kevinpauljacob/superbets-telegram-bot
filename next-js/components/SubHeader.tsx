@@ -262,7 +262,7 @@ export default function SubHeader() {
       </div>
       <div
         className={`${
-          router.pathname === "/" ? "hidden" : "flex"
+          router.pathname === "/" ? "flex" : "flex"
         } md:hidden items-center justify-between my-4 mx-2 rounded-[5px] bg-[#121418] py-3 px-4 md:min-w-fit`}
       >
         <div className="flex items-center ">

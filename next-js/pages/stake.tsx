@@ -76,6 +76,8 @@ export default function Stake() {
   //   getGlobalInfo();
   // }, [session?.user, wallet.publicKey]);
 
+  return <></>
+
   return (
     <>
       <FOMOHead title={"Stake | FOMO.wtf - 0% House Edge, Pure Wins"} />

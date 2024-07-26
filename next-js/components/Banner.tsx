@@ -3,18 +3,26 @@ import Link from "next/link";
 
 export default function StoreBanner() {
   const games = [
+    // {
+    //   href: "/store",
+    //   src: "/assets/banners/raffle.png",
+    // },
     {
-      href: "/store",
-      src: "/assets/banners/raffle.png",
+      href: "/leaderboard",
+      src: "/assets/banners/leaderboard.png",
     },
     {
       href: "/leaderboard",
       src: "/assets/banners/leaderboard.png",
     },
     {
-      href: "/stake",
-      src: "/assets/banners/staking.png",
-    },
+      href: "/leaderboard",
+      src: "/assets/banners/leaderboard.png",
+    }
+    // {
+    //   href: "/stake",
+    //   src: "/assets/banners/staking.png",
+    // },
   ];
   return (
     <div className="relative w-full flex flex-row overflow-x-auto no-scrollbar overflow-hidden max-h-52 sm:max-h-full ">

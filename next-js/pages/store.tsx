@@ -31,6 +31,8 @@ export default function Store() {
     { src: "image3.jpg", name: "Product 3", points: "1,000,000" },
   ];
 
+  return <></>
+
   return (
     <>
       <FOMOHead title={"Store | FOMO.wtf - 0% House Edge, Pure Wins"} />
