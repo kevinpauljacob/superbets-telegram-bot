@@ -82,7 +82,7 @@ export default function ConnectModal() {
                   console.log(e);
                 }
               }}
-              className={`hidden xl:flex items-center justify-center text-white text-opacity-50 hover:text-opacity-90 focus:text-opacity-90 bg-white/5 hover:bg-[#555555] focus:bg-[#5F4DFF] transition-all font-medium text-sm p-3 rounded-[0.625rem] gap-1`}
+              className={`flex items-center justify-center text-white text-opacity-50 hover:text-opacity-90 focus:text-opacity-90 bg-white/5 hover:bg-[#555555] focus:bg-[#5F4DFF] transition-all font-medium text-sm p-3 rounded-[0.625rem] gap-1`}
             >
               {session?.user?.email ? (
                 `Connected as ${session?.user?.name}`
@@ -117,7 +117,7 @@ export default function ConnectModal() {
                   console.log(e);
                 }
               }}
-              className={`mt-4 hidden xl:flex items-center justify-center text-white text-opacity-50 hover:text-opacity-90 focus:text-opacity-90 bg-white/5 hover:bg-[#555555] focus:bg-[#5F4DFF] transition-all font-medium text-sm p-3 rounded-[0.625rem] gap-1`}
+              className={`mt-4 flex items-center justify-center text-white text-opacity-50 hover:text-opacity-90 focus:text-opacity-90 bg-white/5 hover:bg-[#555555] focus:bg-[#5F4DFF] transition-all font-medium text-sm p-3 rounded-[0.625rem] gap-1`}
             >
               {session?.user?.wallet ? (
                 `Connected with ${obfuscatePubKey(session?.user?.wallet)}`
