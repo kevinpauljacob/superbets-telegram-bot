@@ -81,8 +81,7 @@ export default function Leaderboard() {
 
   useEffect(() => {
     getLeaderBoard();
-    // if (wallet.publicKey) getUserDetails();
-  }, [session?.user]);
+  }, []);
 
   useEffect(() => {
     let points = userData?.points ?? 0;
