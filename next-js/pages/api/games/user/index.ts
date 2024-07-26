@@ -20,7 +20,14 @@ export default async function handler(
 
     await connectDatabase();
 
-    let user: any;
+    let user: any = null;
+
+    console.log(email, wallet);
+
+    if (!email && !wallet)
+      return res
+        .status(400)
+        .json({ success: false, message: "Missing parameters" });
 
     if (email && wallet) {
       user = await User.findOneAndUpdate(
@@ -58,7 +65,7 @@ export default async function handler(
             upsert: true,
           },
         );
-      } else {
+      } else if (wallet) {
         user = await User.findOneAndUpdate(
           {
             wallet,
@@ -74,7 +81,10 @@ export default async function handler(
             upsert: true,
           },
         );
-      }
+      } else
+        return res
+          .status(400)
+          .json({ success: false, message: "Missing parameters" });
     }
 
     return res.status(201).json({

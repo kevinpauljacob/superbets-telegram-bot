@@ -10,7 +10,11 @@ import { useWallet } from "@solana/wallet-adapter-react";
 import Image from "next/image";
 import { useEffect, useMemo } from "react";
 import FOMOHead from "@/components/HeadElement";
-import Countdown from "react-countdown-now";
+import dynamic from "next/dynamic";
+
+const Countdown = dynamic(() => import("react-countdown-now"), {
+  ssr: false,
+});
 
 export default function Leaderboard() {
   const wallet = useWallet();

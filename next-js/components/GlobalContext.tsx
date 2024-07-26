@@ -513,9 +513,8 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
 
   const getProvablyFairData = async () => {
     let query = {};
-    if (session?.user?.wallet && wallet?.publicKey)
-      query = { wallet: wallet.publicKey.toBase58() };
-    else if (session?.user?.email) query = { email: session?.user?.email };
+    if (session?.user)
+      query = { wallet: session?.user?.wallet, email: session?.user?.email  };
     try {
       const res = await fetch(`/api/games/gameSeed`, {
         method: "POST",

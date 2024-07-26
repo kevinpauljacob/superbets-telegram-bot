@@ -118,21 +118,19 @@ export default async function auth(req: NextApiRequest, res: NextApiResponse) {
           },
           body: JSON.stringify({
             //@ts-ignore
-            wallet: token?.user?.wallet,
+            wallet: token?.user?.wallet ?? null,
             //@ts-ignore
-            email: token?.user?.email,
+            email: token?.user?.email ?? null,
             //@ts-ignore
-            name: token?.user?.name,
+            name: token?.user?.name ?? null,
             //@ts-ignore
-            image: token?.user?.image,
+            image: token?.user?.image ?? null,
           }),
         });
 
         const data = await response.json();
         if (data?.success && data?.user) {
-          console.log("db", data?.user);
           token.user = data?.user;
-          console.log("token", token.user);
           return token;
         } else {
           throw new Error("Failed to create or update user");
