@@ -129,6 +129,125 @@ export default function Leaderboard() {
           </div>
         </div>
 
+        <div className="flex flex-col md:flex-row gap-2.5 w-full mt-16 mb-8">
+          <div className="p-[2.5px] w-full rounded-[10px] bg-gradient-to-b from-[#FFC5331A] from-56.4% to-[#121418] to-100%">
+            <div className="relative bg-[#121418] text-white rounded-[8px] p-8">
+              <div className="flex items-center justify-center gap-2">
+                <Image
+                  src="/assets/user.svg"
+                  alt="user"
+                  width={26}
+                  height={26}
+                />
+                <div className="font-semibold text-lg">zhanghong</div>
+              </div>
+              <div className="bg-[#181E29] h-[2px] my-5"></div>
+              <div>
+                <div className="flex items-center justify-between text-xs text-white/50">
+                  <div>Activity</div>
+                  <div>Coins</div>
+                </div>
+                <div className="flex items-center justify-between text-white/75">
+                  <div>2s ago</div>
+                  <div className="flex items-center gap-2">
+                    <Image
+                      src="/assets/leaderboardCoin.svg"
+                      alt="coin"
+                      width={15}
+                      height={15}
+                    />
+                    <div>4,567,786.09</div>
+                  </div>
+                </div>
+              </div>
+              <Image
+                className="absolute -top-5 left-1/2 transform -translate-x-1/2"
+                src="/assets/first.svg"
+                alt="first"
+                width={40}
+                height={40}
+              />
+            </div>
+          </div>
+          <div className="p-[2.5px] w-full rounded-[10px] bg-gradient-to-b from-[#37475F] from-56.4% to-[#121418] to-100%">
+            <div className="relative bg-[#121418] text-white rounded-[8px] p-8">
+              <div className="flex items-center justify-center gap-2">
+                <Image
+                  src="/assets/user.svg"
+                  alt="user"
+                  width={26}
+                  height={26}
+                />
+                <div className="font-semibold text-lg">zhanghong</div>
+              </div>
+              <div className="bg-[#181E29] h-[2px] my-5"></div>
+              <div>
+                <div className="flex items-center justify-between text-xs text-white/50">
+                  <div>Activity</div>
+                  <div>Coins</div>
+                </div>
+                <div className="flex items-center justify-between text-white/75">
+                  <div>2s ago</div>
+                  <div className="flex items-center gap-2">
+                    <Image
+                      src="/assets/leaderboardCoin.svg"
+                      alt="coin"
+                      width={15}
+                      height={15}
+                    />
+                    <div>4,567,786.09</div>
+                  </div>
+                </div>
+              </div>
+              <Image
+                className="absolute -top-5 left-1/2 transform -translate-x-1/2"
+                src="/assets/first.svg"
+                alt="first"
+                width={40}
+                height={40}
+              />
+            </div>
+          </div>
+          <div className="p-[2.5px] w-full rounded-[10px] bg-gradient-to-b from-[#FFC5331A] from-56.4% to-[#121418] to-100%">
+            <div className="relative bg-[#121418] text-white rounded-[8px] p-8">
+              <div className="flex items-center justify-center gap-2">
+                <Image
+                  src="/assets/user.svg"
+                  alt="user"
+                  width={26}
+                  height={26}
+                />
+                <div className="font-semibold text-lg">zhanghong</div>
+              </div>
+              <div className="bg-[#181E29] h-[2px] my-5"></div>
+              <div>
+                <div className="flex items-center justify-between text-xs text-white/50">
+                  <div>Activity</div>
+                  <div>Coins</div>
+                </div>
+                <div className="flex items-center justify-between text-white/75">
+                  <div>2s ago</div>
+                  <div className="flex items-center gap-2">
+                    <Image
+                      src="/assets/leaderboardCoin.svg"
+                      alt="coin"
+                      width={15}
+                      height={15}
+                    />
+                    <div>4,567,786.09</div>
+                  </div>
+                </div>
+              </div>
+              <Image
+                className="absolute -top-5 left-1/2 transform -translate-x-1/2"
+                src="/assets/first.svg"
+                alt="first"
+                width={40}
+                height={40}
+              />
+            </div>
+          </div>
+        </div>
         {/* <div className="flex gap-[12px] px-5 sm:px-10 2xl:px-[5%] mt-6 w-full h-full ">
           <div className="flex flex-col lg:flex-row items-center w-full md:w-[55%] lg:w-[60%] h-full p-8 rounded-md gap-[3.4rem] bg-staking-bg">
             <div className="flex flex-col w-full rounded-[5px] h-full ">
