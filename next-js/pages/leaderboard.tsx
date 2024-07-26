@@ -25,6 +25,7 @@ export default function Leaderboard() {
   const [page, setPage] = useState(1);
   const [data, setData] = useState<any[]>([]);
   const [myData, setMyData] = useState<any>();
+  const [activity, setActivity] = useState();
   const { language, userData, pointTier, setPointTier, session, coinData } =
     useGlobalContext();
   const transactionsPerPage = 10;
@@ -45,7 +46,11 @@ export default function Leaderboard() {
 
       if (success && Array.isArray(users)) {
         users = users.map((user, index) => {
-          return { ...user, rank: index + 1 };
+          return {
+            ...user,
+            rank: index + 1,
+            activity: timeSince(user.updatedAt),
+          };
         });
 
         setMaxPages(Math.ceil(users.length / transactionsPerPage));
@@ -76,8 +81,7 @@ export default function Leaderboard() {
 
   useEffect(() => {
     getLeaderBoard();
-    // if (wallet.publicKey) getUserDetails();
-  }, [session?.user]);
+  }, []);
 
   useEffect(() => {
     let points = userData?.points ?? 0;
@@ -114,6 +118,34 @@ export default function Leaderboard() {
       ),
     [coinData],
   );
+
+  const timeSince = (date: string | Date): string => {
+    const now = new Date();
+    const past = new Date(date);
+    const seconds = Math.floor((now.getTime() - past.getTime()) / 1000);
+
+    let interval = Math.floor(seconds / 31536000);
+    if (interval >= 1)
+      return interval + " yr" + (interval > 1 ? "s" : "") + " ago";
+
+    interval = Math.floor(seconds / 2592000);
+    if (interval >= 1)
+      return interval + " mo" + (interval > 1 ? "s" : "") + " ago";
+
+    interval = Math.floor(seconds / 86400);
+    if (interval >= 1)
+      return interval + " d" + (interval > 1 ? "s" : "") + " ago";
+
+    interval = Math.floor(seconds / 3600);
+    if (interval >= 1)
+      return interval + " hr" + (interval > 1 ? "s" : "") + " ago";
+
+    interval = Math.floor(seconds / 60);
+    if (interval >= 1)
+      return interval + " min" + (interval > 1 ? "s" : "") + " ago";
+
+    return Math.floor(seconds) + " s ago";
+  };
 
   const renderer = ({
     days,
@@ -170,7 +202,7 @@ export default function Leaderboard() {
 
         <div className="w-full flex flex-col lg:flex-row items-center lg:items-stretch gap-4">
           <div className="w-full h-auto lg:w-[70%] max-w-[80rem] flex items-center justify-between relative">
-            <div className="w-full h-full min-w-[18.5rem]">
+            <div className="hidden sm:block w-full h-full min-w-[18.5rem]">
               <Image
                 src={"/assets/leaderboard-bg.svg"}
                 alt="banners"
@@ -180,15 +212,41 @@ export default function Leaderboard() {
                 className="w-[100%]"
               />
             </div>
-            <div className="absolute flex items-center justify-between gap-4 pl-6 pr-10 top-0 left-0 w-full h-full">
+            <div className="sm:hidden w-full h-full min-w-[18.5rem]">
               <Image
-                src={"/assets/leaderboardTrophy.svg"}
-                width={80}
-                height={80}
-                alt={"User"}
-                className="rounded-full overflow-hidden"
+                src={"/assets/leaderboard-bg-mobile.svg"}
+                alt="banners"
+                width="100"
+                height="100"
+                unoptimized
+                className="w-[100%]"
               />
-              <div className="flex flex-col items-start gap-4">
+            </div>
+            <div className="absolute flex items-center justify-between gap-4 pl-6 pr-10 top-0 left-0 w-full h-full">
+              <div className="flex flex-col gap-8">
+                <div className="flex flex-col sm:flex-row sm:items-end gap-2">
+                  <Image
+                    src={"/assets/leaderboardTrophy.svg"}
+                    width={80}
+                    height={80}
+                    alt={"User"}
+                    className="rounded-full overflow-hidden"
+                  />
+                  <div>
+                    <h2 className="font-bold text-white text-3xl sm:text-5xl mb-1">
+                      Win $1 campaign
+                    </h2>
+                    <p className="text-[#94A3B8] font-medium text-sm sm:text-base">
+                      Get Rewarded 1 $USDC once you reach 500 Coins!
+                    </p>
+                  </div>
+                </div>
+                <div className="hidden sm:block font-semibold text-sm text-white/90 bg-[#5F4DFF]/50 rounded-[10px] border-2 border-[#FFFFFF0D] p-2.5 w-max">
+                  How it Works
+                </div>
+              </div>
+
+              <div className="hidden sm:flex flex-col items-start gap-4">
                 <span className="text-xl text-white text-opacity-50">
                   Leaderboard Resets in
                 </span>
@@ -223,7 +281,7 @@ export default function Leaderboard() {
               <div className="flex items-center justify-between gap-8">
                 <div className="flex items-baseline gap-1">
                   <span className="text-white text-xs font-medium text-opacity-50">
-                    Claim $100 progress
+                    Claim $1 progress
                   </span>
                   <span className="text-white text-sm font-semibold text-opacity-75">
                     {(tokenAmount * 100) / threshold}%
@@ -266,13 +324,29 @@ export default function Leaderboard() {
               </div>
             </div>
             {/* claim button  */}
-            <button
+            {/* <button
               type="submit"
               disabled={false}
               className={`disabled:cursor-default disabled:opacity-70 hover:duration-75 hover:opacity-90 w-full p-2 rounded-lg transition-all bg-[#5F4DFF] disabled:bg-[#555555] hover:bg-[#7F71FF] focus:bg-[#4C3ECC] flex items-center justify-center font-chakra font-semibold text-sm text-opacity-90 tracking-wider text-white`}
             >
               {translator("Claim Now", language)}
-            </button>
+            </button> */}
+            <div className="flex gap-4 text-white">
+              <div className="flex flex-col items-center bg-[#252740] bg-opacity-50 rounded-[0.625rem] p-4 w-full">
+                <div className="text-white/50 text-xs font-medium">
+                  Activity
+                </div>
+                <div className="text-white/75 font-semibold">
+                  {myData?.activity}
+                </div>
+              </div>
+              <div className="flex flex-col items-center bg-[#252740] bg-opacity-50 rounded-[0.625rem] p-4 w-full">
+                <div className="text-white/50 text-xs font-medium">
+                  Biggest Gain
+                </div>
+                <div className="text-white/75 font-semibold">+</div>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -515,7 +589,7 @@ export default function Leaderboard() {
           </div>
         </div> */}
 
-        <div className="w-full flex flex-1 flex-col items-start px-5 sm:px-10 2xl:px-[5%] gap-5 pb-10">
+        <div className="w-full flex flex-1 flex-col items-start gap-5 pb-10">
           <LeaderboardTable
             data={data}
             page={page}
