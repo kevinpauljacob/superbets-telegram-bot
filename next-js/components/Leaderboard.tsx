@@ -11,7 +11,7 @@ function Leaderboard({ data, page, setPage, maxPages, myData }: any) {
 
   const { getUserDetails, language, session } = useGlobalContext();
   const transactionsPerPage = 10;
-  const headers = ["Rank", "User", "Token Balance"];
+  const headers = ["Rank", "Player", "Coins"];
 
   return (
     <div className="relative mt-8 mb-10 flex h-full w-full flex-col flex-wrap items-center justify-center">
@@ -21,11 +21,11 @@ function Leaderboard({ data, page, setPage, maxPages, myData }: any) {
           <div className="flex w-full flex-col items-center">
             {/* header  */}
             {data.length > 0 && (
-              <div className="mb-[1.4rem] flex w-full flex-row items-center gap-2 pr-10 bg-staking-bg py-1 text-sm font-light font-changa">
+              <div className="mb-[0.5rem] flex w-full flex-row items-center gap-2 pr-10  text-sm font-light font-changa">
                 <span className="w-[10%] text-center ml-10 text-[#F0F0F080]">
                   {translator(headers[0], language)}
                 </span>
-                <span className="w-[70%] text-left text-[#F0F0F080] pl-[18%]">
+                <span className="w-[70%] text-left text-[#F0F0F080] pl-[16.5%]">
                   {translator(headers[1], language)}
                 </span>
                 <span className="w-[15%] text-right text-[#F0F0F080]">
@@ -35,7 +35,7 @@ function Leaderboard({ data, page, setPage, maxPages, myData }: any) {
             )}
 
             {myData && (
-              <div className="mb-2.5 flex w-full flex-row items-center gap-2 rounded-[5px] border-2 border-[#9945ff] border-opacity-50 bg-[#5F4DFF] bg-opacity-[0.075] py-3 pr-10">
+              <div className="mb-2.5 flex w-full flex-row items-center gap-2 rounded-[5px] border-2 border-[#5F4DFF] border-opacity-50 bg-[#121418] py-3 pr-10">
                 <span className="w-[10%] text-center ml-10 font-changa text-sm font-light text-[#F0F0F0] text-opacity-75">
                   {myData?.rank}
                 </span>
@@ -52,11 +52,12 @@ function Leaderboard({ data, page, setPage, maxPages, myData }: any) {
                   {/* {obfuscatePubKey(myData.wallet ?? "")} */}
                   {myData?.name ?? obfuscatePubKey(myData.wallet)}
                 </span>
-                <span className="w-[15%] text-right font-chakra text-sm font-bold text-[#FFFFFF]">
+                <span className="flex gap-2 items-center justify-end w-[15%] text-right font-chakra text-sm font-bold text-[#FFFFFF]">
                   {/* {myData.points.toLocaleString("en-US", {
                     maximumFractionDigits: 2,
                     minimumFractionDigits: 0,
                   })} */}
+                  <Image src="/assets/coin.svg" width={13} height={13} />
                   {parseInt(myData?.deposit?.amount ?? 0)}
                 </span>
               </div>
@@ -76,7 +77,7 @@ function Leaderboard({ data, page, setPage, maxPages, myData }: any) {
                 .map((data: any, index: number) => (
                   <div
                     key={index}
-                    className={`mb-2.5 flex w-full flex-row items-center gap-2 rounded-[5px] bg-staking-bg  py-3 pr-10`}
+                    className={`mb-2.5 flex w-full flex-row items-center gap-2 rounded-[5px] ${index % 2 === 0 ? "bg-opacity-50" : ""} bg-[#121418]  py-3 pr-10`}
                   >
                     <span className="w-[10%] text-center ml-10 font-changa text-sm font-light text-[#F0F0F0] text-opacity-75">
                       {data?.rank}
@@ -100,7 +101,8 @@ function Leaderboard({ data, page, setPage, maxPages, myData }: any) {
                       {/* {obfuscatePubKey(data.wallet ?? "")} */}
                       {data?.name ?? obfuscatePubKey(data?.wallet)}
                     </span>
-                    <span className="w-[15%] text-right font-chakra text-sm font-bold text-[#ffffff]">
+                    <span className="flex gap-2 items-center justify-end w-[15%] text-right font-chakra text-sm font-bold text-[#ffffff]">
+                      <Image src="/assets/coin.svg" width={13} height={13} />
                       {parseInt(data?.deposit?.amount ?? 0)}
                     </span>
                   </div>
