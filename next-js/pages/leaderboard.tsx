@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useGlobalContext } from "@/components/GlobalContext";
 import LeaderboardTable from "@/components/Leaderboard";
 import {
@@ -11,6 +12,7 @@ import Image from "next/image";
 import { useEffect, useMemo } from "react";
 import FOMOHead from "@/components/HeadElement";
 import dynamic from "next/dynamic";
+import { errorCustom } from "@/components/toasts/ToastGroup";
 
 const Countdown = dynamic(() => import("react-countdown-now"), {
   ssr: false,
@@ -18,8 +20,64 @@ const Countdown = dynamic(() => import("react-countdown-now"), {
 
 export default function Leaderboard() {
   const wallet = useWallet();
+  const [topThreeUsers, setTopThreeUsers] = useState<any[]>([]);
+  const [maxPages, setMaxPages] = useState<number>(0);
+  const [page, setPage] = useState(1);
+  const [data, setData] = useState<any[]>([]);
+  const [myData, setMyData] = useState<any>();
   const { language, userData, pointTier, setPointTier, session, coinData } =
     useGlobalContext();
+  const transactionsPerPage = 10;
+
+  const getLeaderBoard = async () => {
+    try {
+      const res = await fetch("/api/getInfo", {
+        method: "POST",
+        body: JSON.stringify({
+          option: 4,
+        }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      let { success, message, users } = await res.json();
+
+      if (success && Array.isArray(users)) {
+        users = users.map((user, index) => {
+          return { ...user, rank: index + 1 };
+        });
+
+        setMaxPages(Math.ceil(users.length / transactionsPerPage));
+
+        setData(users);
+
+        setTopThreeUsers(users.slice(0, 3));
+
+        if (session?.user?.email) {
+          let userInfo = users.find(
+            (info: any) =>
+              info?.email == session?.user?.email ||
+              info?.wallet === session?.user?.wallet,
+          );
+
+          setMyData(userInfo);
+        }
+      } else {
+        setData([]);
+        errorCustom(translator("Could not fetch leaderboard.", language));
+      }
+    } catch (e) {
+      setData([]);
+      errorCustom(translator("Could not fetch leaderboard.", language));
+      console.error(e);
+    }
+  };
+
+  useEffect(() => {
+    getLeaderBoard();
+    // if (wallet.publicKey) getUserDetails();
+  }, [session?.user]);
 
   useEffect(() => {
     let points = userData?.points ?? 0;
@@ -218,125 +276,66 @@ export default function Leaderboard() {
           </div>
         </div>
 
-        <div className="flex flex-col md:flex-row gap-2.5 w-full mt-16 mb-8">
-          <div className="p-[2.5px] w-full rounded-[10px] bg-gradient-to-b from-[#FFC5331A] from-56.4% to-[#121418] to-100%">
-            <div className="relative bg-[#121418] text-white rounded-[8px] p-8">
-              <div className="flex items-center justify-center gap-2">
-                <Image
-                  src="/assets/user.svg"
-                  alt="user"
-                  width={26}
-                  height={26}
-                />
-                <div className="font-semibold text-lg">zhanghong</div>
-              </div>
-              <div className="bg-[#181E29] h-[2px] my-5"></div>
-              <div>
-                <div className="flex items-center justify-between text-xs text-white/50">
-                  <div>Activity</div>
-                  <div>Coins</div>
-                </div>
-                <div className="flex items-center justify-between text-white/75">
-                  <div>2s ago</div>
-                  <div className="flex items-center gap-2">
-                    <Image
-                      src="/assets/leaderboardCoin.svg"
-                      alt="coin"
-                      width={15}
-                      height={15}
-                    />
-                    <div>4,567,786.09</div>
+        {/* {topThreeUsers.length > 0 && 
+          <div className="flex flex-col md:flex-row gap-2.5 w-full mt-16 mb-8">
+            {[topThreeUsers[1], topThreeUsers[0], topThreeUsers[2]].map(
+              (user, index) => {
+                const actualRank = index === 0 ? 2 : index === 1 ? 1 : 3;
+                return (
+                  <div
+                    key={index}
+                    className={`p-[2.5px] w-full rounded-[10px] bg-gradient-to-b ${index === 1 ? "from-[#37475F]" : "from-[#FFC5331A]"} from-56.4% to-[#121418] to-100%`}
+                  >
+                    <div className="relative bg-[#121418] text-white rounded-[8px] p-8">
+                      <div className="flex items-center justify-center gap-2">
+                        <Image
+                          src={user?.image ?? "/assets/user.svg"}
+                          alt="user"
+                          width={26}
+                          height={26}
+                          className="rounded-full overflow-hidden"
+                        />
+                        <div className="font-semibold text-lg">
+                          {user?.name ?? obfuscatePubKey(user?.wallet)}
+                        </div>
+                      </div>
+                      <div className="bg-[#181E29] h-[2px] my-5"></div>
+                      <div>
+                        <div className="flex items-center justify-between text-xs text-white/50">
+                          <div>Activity</div>
+                          <div>Coins</div>
+                        </div>
+                        <div className="flex items-center justify-between text-white/75">
+                          <div>2s ago</div>
+                          <div className="flex items-center gap-2">
+                            <Image
+                              src="/assets/leaderboardCoin.svg"
+                              alt="coin"
+                              width={15}
+                              height={15}
+                            />
+                            <div>
+                              {parseInt(
+                                user?.deposit?.amount ?? 0,
+                              ).toLocaleString()}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <Image
+                        className="absolute -top-5 left-1/2 transform -translate-x-1/2"
+                        src={`/assets/${index === 0 ? "first" : index === 1 ? "second" : "third"}.svg`}
+                        alt={`${index + 1}st`}
+                        width={40}
+                        height={40}
+                      />
+                    </div>
                   </div>
-                </div>
-              </div>
-              <Image
-                className="absolute -top-5 left-1/2 transform -translate-x-1/2"
-                src="/assets/first.svg"
-                alt="first"
-                width={40}
-                height={40}
-              />
-            </div>
-          </div>
-          <div className="p-[2.5px] w-full rounded-[10px] bg-gradient-to-b from-[#37475F] from-56.4% to-[#121418] to-100%">
-            <div className="relative bg-[#121418] text-white rounded-[8px] p-8">
-              <div className="flex items-center justify-center gap-2">
-                <Image
-                  src="/assets/user.svg"
-                  alt="user"
-                  width={26}
-                  height={26}
-                />
-                <div className="font-semibold text-lg">zhanghong</div>
-              </div>
-              <div className="bg-[#181E29] h-[2px] my-5"></div>
-              <div>
-                <div className="flex items-center justify-between text-xs text-white/50">
-                  <div>Activity</div>
-                  <div>Coins</div>
-                </div>
-                <div className="flex items-center justify-between text-white/75">
-                  <div>2s ago</div>
-                  <div className="flex items-center gap-2">
-                    <Image
-                      src="/assets/leaderboardCoin.svg"
-                      alt="coin"
-                      width={15}
-                      height={15}
-                    />
-                    <div>4,567,786.09</div>
-                  </div>
-                </div>
-              </div>
-              <Image
-                className="absolute -top-5 left-1/2 transform -translate-x-1/2"
-                src="/assets/first.svg"
-                alt="first"
-                width={40}
-                height={40}
-              />
-            </div>
-          </div>
-          <div className="p-[2.5px] w-full rounded-[10px] bg-gradient-to-b from-[#FFC5331A] from-56.4% to-[#121418] to-100%">
-            <div className="relative bg-[#121418] text-white rounded-[8px] p-8">
-              <div className="flex items-center justify-center gap-2">
-                <Image
-                  src="/assets/user.svg"
-                  alt="user"
-                  width={26}
-                  height={26}
-                />
-                <div className="font-semibold text-lg">zhanghong</div>
-              </div>
-              <div className="bg-[#181E29] h-[2px] my-5"></div>
-              <div>
-                <div className="flex items-center justify-between text-xs text-white/50">
-                  <div>Activity</div>
-                  <div>Coins</div>
-                </div>
-                <div className="flex items-center justify-between text-white/75">
-                  <div>2s ago</div>
-                  <div className="flex items-center gap-2">
-                    <Image
-                      src="/assets/leaderboardCoin.svg"
-                      alt="coin"
-                      width={15}
-                      height={15}
-                    />
-                    <div>4,567,786.09</div>
-                  </div>
-                </div>
-              </div>
-              <Image
-                className="absolute -top-5 left-1/2 transform -translate-x-1/2"
-                src="/assets/first.svg"
-                alt="first"
-                width={40}
-                height={40}
-              />
-            </div>
-          </div>
-        </div>
+                );
+              },
+            )}
+          </div> */}
+
         {/* <div className="flex gap-[12px] px-5 sm:px-10 2xl:px-[5%] mt-6 w-full h-full ">
           <div className="flex flex-col lg:flex-row items-center w-full md:w-[55%] lg:w-[60%] h-full p-8 rounded-md gap-[3.4rem] bg-staking-bg">
             <div className="flex flex-col w-full rounded-[5px] h-full ">
@@ -517,7 +516,13 @@ export default function Leaderboard() {
         </div> */}
 
         <div className="w-full flex flex-1 flex-col items-start px-5 sm:px-10 2xl:px-[5%] gap-5 pb-10">
-          <LeaderboardTable />
+          <LeaderboardTable
+            data={data}
+            page={page}
+            setPage={setPage}
+            maxPages={maxPages}
+            myData={myData}
+          />
         </div>
       </div>
     </>
