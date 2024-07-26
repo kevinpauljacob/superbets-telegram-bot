@@ -7,13 +7,14 @@ import {
 } from "@/context/transactions";
 import { pointTiers } from "@/context/config";
 import { useWallet } from "@solana/wallet-adapter-react";
-import Image from "next/legacy/image";
+import Image from "next/image";
 import { useEffect } from "react";
 import FOMOHead from "@/components/HeadElement";
 
 export default function Leaderboard() {
   const wallet = useWallet();
-  const { language, userData, pointTier, setPointTier } = useGlobalContext();
+  const { language, userData, pointTier, setPointTier, session } =
+    useGlobalContext();
 
   useEffect(() => {
     let points = userData?.points ?? 0;
@@ -30,202 +31,282 @@ export default function Leaderboard() {
     });
   }, [userData]);
 
+  const threshold = 200;
+
   return (
     <>
       <FOMOHead title={"Leaderboard | FOMO.wtf - 0% House Edge, Pure Wins"} />
-      <div className="flex flex-col items-start w-full overflow-hidden min-h-screen flex-1 relative">
+      <div className="flex flex-col items-start w-full overflow-hidden min-h-screen flex-1 relative p-2 md:pt-[2rem] md:px-[3rem]">
         {/* Navbar  */}
-        <span className="text-white text-opacity-90 font-semibold text-[1.5rem] sm:text-[2rem] mt-[1rem] font-chakra tracking-[.02em] flex items-center justify-center gap-x-2 px-5 sm:px-10 2xl:px-[5%]">
+        {/* <span className="text-white text-opacity-90 font-semibold text-[1.5rem] sm:text-[2rem] mt-[1rem] font-chakra tracking-[.02em] flex items-center justify-center gap-x-2 px-5 sm:px-10 2xl:px-[5%]">
           {translator("Leaderboard", language).toUpperCase()}
-        </span>
+        </span> */}
 
-        {/* <div className="flex gap-[12px] px-5 sm:px-10 2xl:px-[5%] mt-6 w-full h-full ">
-            <div className="flex flex-col lg:flex-row items-center w-full md:w-[55%] lg:w-[60%] h-full p-8 rounded-md gap-[3.4rem] bg-staking-bg">
-        
-              <div className="flex flex-col w-full rounded-[5px] h-full ">
-                <div className="flex flex-row items-end justify-between">
-                  <div className="flex flex-col justify-center sm:flex-row sm:items-center sm:justify-start gap-2 w-full">
-                    <div className="flex relative min-w-[4.5rem] h-[4.5rem]">
-                      <Image
-                        src={pointTier.image}
-                        alt={pointTier.label}
-                        layout="fill"
-                        objectFit="contain"
-                        objectPosition="center"
-                      />
-                    </div>
-                    <div className="flex flex-col gap-0.5 items-center sm:items-start font-chakra">
-                      <span className="text-white text-xl tracking-wider font-bold">
-                        {wallet.publicKey
-                          ? obfuscatePubKey(wallet.publicKey.toBase58())
-                          : "...."}
-                      </span>
-                      <span className="text-staking-secondary text-sm font-medium">
-                        {pointTier?.label
-                          ? translator(
-                              pointTier?.label.split(" ")?.[0],
-                              language,
-                            ) +
-                            " " +
-                            pointTier?.label.split(" ")?.[1]
-                          : ""}
-                      </span>
-                    </div>
-                  </div>
-                  {(pointTier?.index ?? 0) < 7 && (
-              <div className="hidden sm:flex sm:flex-col sm:items-end">
-                <span className="text-white text-base text-opacity-50">
-                  {translator("Next Tier", language)}
+        <div className="w-full flex flex-col lg:flex-row items-center lg:items-stretch gap-4">
+          <div className="w-full h-auto lg:w-[75%] max-w-[80rem] flex items-center justify-between relative">
+            <div className="w-full h-full min-w-[18.5rem]">
+              <Image
+                src={"/assets/leaderboard-bg.svg"}
+                alt="banners"
+                width="100"
+                height="100"
+                unoptimized
+                className="w-[100%]"
+              />
+            </div>
+          </div>
+          {/* user box */}
+          <div className="w-full flex-1 h-auto flex flex-col justify-start bg-[#1B1C30] rounded-[0.625rem] p-4 gap-4">
+            {/* user info  */}
+            <div className="flex items-center gap-2">
+              <Image
+                src={session?.user?.image ?? ""}
+                width={45}
+                height={45}
+                alt={"User"}
+                className="rounded-full overflow-hidden"
+              />
+              <div className="flex flex-col items-start">
+                <span className="text-white font-semibold text-sm text-opacity-75">
+                  {session?.user?.name ?? "Player"}
                 </span>
-                <span className="text-base font-semibold text-opacity-75 text-[#5F4DFF]">
-                  {pointTiers[pointTier?.index + 1]?.label ?? ""}
+                <span className="text-white text-xs font-medium text-opacity-50">
+                  {session?.user?.email ?? "player@superbets.com"}
                 </span>
               </div>
-            )}
-                </div>
-
-                next tier data - mob view 
-            {(pointTier?.index ?? 0) < 7 && (
-              <div className="flex sm:hidden mt-5 items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <span className="flex text-white text-xs text-opacity-50">
-                    {translator("Next Tier", language)}
+            </div>
+            {/* progress  */}
+            <div className="bg-[#252740] bg-opacity-50 rounded-[0.625rem] p-4">
+              <div className="flex items-center justify-between gap-8">
+                <div className="flex items-baseline gap-1">
+                  <span className="text-white text-xs font-medium text-opacity-50">
+                    Claim $1 progress
                   </span>
-                  <span className="text-base font-semibold text-opacity-75 text-[#5F4DFF]">
-                    {pointTiers[pointTier?.index + 1]?.label ?? ""}
+                  <span className="text-white text-sm font-semibold text-opacity-75">
+                    60%
                   </span>
                 </div>
-
-                <span className="flex items-center justify-start text-base -mt-1 text-white text-right text-opacity-50 font-semibold">
-                  {formatNumber(pointTiers[pointTier?.index + 1]?.limit ?? 0) +
-                    " Points"}
-                </span>
+                <div className="flex items-center gap-1">
+                  <Image
+                    src={"/assets/headCoin.png"}
+                    width={13}
+                    height={13}
+                    alt={"User"}
+                    className="rounded-full overflow-hidden"
+                  />
+                  <span className="text-white text-sm font-semibold text-opacity-75">
+                    23/100
+                  </span>
+                </div>
               </div>
-            )}
-
-                <div className="flex flex-row justify-between font-chakra mt-4">
-                  <span className="text-sm text-white text-right text-opacity-75">
-                    {translator("Your level progress", language)}
-                  </span>
-                  {(pointTier?.index ?? 0) < 7 && (
-                    <div className="flex flex-col items-end">
-                      <span className="text-sm text-white text-right text-opacity-75">
-                        {truncateNumber(
-                          pointTiers[pointTier?.index + 1]?.limit ?? 0,
-                          0,
-                        ) + ` ${translator("Points", language)}`}
-                      </span>
-                    </div>
+              <div
+                className={`relative flex transition-width duration-1000 w-full rounded-full overflow-hidden h-1 bg-[#282E3D] mt-2 mb-2`}
+              >
+                <div className="absolute h-full w-full bg-transparent flex items-center justify-evenly">
+                  {Array.from({ length: 4 }, (_, index) => index + 1).map(
+                    (_, index) => (
+                      <div key={index} className="bg-[#202138] w-1 h-1" />
+                    ),
                   )}
                 </div>
-
                 <div
-                  className={`${
-                    (Math.min(userData?.points ?? 0, 1_000_000) * 100) /
-                      pointTiers[pointTier?.index + 1]?.limit ?? 1
-                      ? "opacity-90"
-                      : ""
-                  } relative flex transition-width duration-1000 w-full rounded-full overflow-hidden h-6 bg-[#282E3D] mt-2 mb-2`}
-                >
-                  <div
-                    style={{
-                      width: `${
-                        (Math.min(userData?.points ?? 0, 1_000_000) * 100) /
-                          pointTiers[pointTier?.index + 1]?.limit ?? 1
-                      }%`,
-                    }}
-                    className="h-full bg-[linear-gradient(91.179deg,#C867F0_0%,#1FCDF0_50.501%,#19EF99_100%)]"
-                  />
-                  <span className="w-full h-full absolute top-0 left-0 flex items-center justify-center z-10 text-white font-semibold font-chakra text-xs">
-                    {truncateNumber(
-                      (Math.min(userData?.points ?? 0, 1_000_000) * 100) /
-                        (pointTiers[pointTier?.index + 1]?.limit ?? 1_000_000),
-                      2,
-                    )}{" "}
-                    %
-                  </span>
-                </div>
-                <div className="flex flex-row justify-between font-chakra capitalize">
-                  <span className="text-staking-secondary text-opacity-75 text-sm font-medium">
-                    {pointTier?.label
-                      ? pointTier?.label.includes(" ")
-                        ? translator(pointTier?.label.split(" ")[0], language) +
-                          " " +
-                          pointTier?.label.split(" ")[1]
-                        : translator(pointTier?.label, language)
-                      : ""}
-                  </span>
-                  <span className="flex items-center gap-1 text-staking-secondary text-opacity-75 text-sm font-medium">
-                    <div className="flex relative min-w-[1rem] h-[1rem]">
-                      <Image
-                        src={`/assets/badges/T-${pointTier?.index + 1}.png`}
-                        alt={pointTier.label}
-                        layout="fill"
-                        objectFit="contain"
-                        objectPosition="center"
-                      />
-                    </div>
-                    {pointTiers[pointTier?.index + 1]?.label
-                      ? pointTiers[pointTier?.index + 1]?.label.includes(" ")
+                  style={{
+                    width: `10%`,
+                  }}
+                  // className="h-full bg-[linear-gradient(91.179deg,#C867F0_0%,#1FCDF0_50.501%,#19EF99_100%)]"
+                  className="h-full bg-[#5F4DFF]"
+                />
+              </div>
+            </div>
+            {/* claim button  */}
+            <button
+              type="submit"
+              disabled={false}
+              className={`disabled:cursor-default disabled:opacity-70 hover:duration-75 hover:opacity-90 w-full p-2 rounded-lg transition-all bg-[#5F4DFF] disabled:bg-[#555555] hover:bg-[#7F71FF] focus:bg-[#4C3ECC] flex items-center justify-center font-chakra font-semibold text-sm text-opacity-90 tracking-wider text-white`}
+            >
+              {translator("Claim Now", language)}
+            </button>
+          </div>
+        </div>
+
+        {/* <div className="flex gap-[12px] px-5 sm:px-10 2xl:px-[5%] mt-6 w-full h-full ">
+          <div className="flex flex-col lg:flex-row items-center w-full md:w-[55%] lg:w-[60%] h-full p-8 rounded-md gap-[3.4rem] bg-staking-bg">
+            <div className="flex flex-col w-full rounded-[5px] h-full ">
+              <div className="flex flex-row items-end justify-between">
+                <div className="flex flex-col justify-center sm:flex-row sm:items-center sm:justify-start gap-2 w-full">
+                  <div className="flex relative min-w-[4.5rem] h-[4.5rem]">
+                    <Image
+                      src={pointTier.image}
+                      alt={pointTier.label}
+                      layout="fill"
+                      objectFit="contain"
+                      objectPosition="center"
+                    />
+                  </div>
+                  <div className="flex flex-col gap-0.5 items-center sm:items-start font-chakra">
+                    <span className="text-white text-xl tracking-wider font-bold">
+                      {wallet.publicKey
+                        ? obfuscatePubKey(wallet.publicKey.toBase58())
+                        : "...."}
+                    </span>
+                    <span className="text-staking-secondary text-sm font-medium">
+                      {pointTier?.label
                         ? translator(
-                            pointTiers[pointTier?.index + 1]?.label.split(
-                              " ",
-                            )[0],
+                            pointTier?.label.split(" ")?.[0],
                             language,
                           ) +
                           " " +
-                          pointTiers[pointTier?.index + 1]?.label.split(" ")[1]
-                        : translator(
-                            pointTiers[pointTier?.index + 1]?.label,
-                            language,
-                          )
-                      : ""}
+                          pointTier?.label.split(" ")?.[1]
+                        : ""}
+                    </span>
+                  </div>
+                </div>
+                {(pointTier?.index ?? 0) < 7 && (
+                  <div className="hidden sm:flex sm:flex-col sm:items-end">
+                    <span className="text-white text-base text-opacity-50">
+                      {translator("Next Tier", language)}
+                    </span>
+                    <span className="text-base font-semibold text-opacity-75 text-[#5F4DFF]">
+                      {pointTiers[pointTier?.index + 1]?.label ?? ""}
+                    </span>
+                  </div>
+                )}
+              </div>
+              next tier data - mob view
+              {(pointTier?.index ?? 0) < 7 && (
+                <div className="flex sm:hidden mt-5 items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span className="flex text-white text-xs text-opacity-50">
+                      {translator("Next Tier", language)}
+                    </span>
+                    <span className="text-base font-semibold text-opacity-75 text-[#5F4DFF]">
+                      {pointTiers[pointTier?.index + 1]?.label ?? ""}
+                    </span>
+                  </div>
+
+                  <span className="flex items-center justify-start text-base -mt-1 text-white text-right text-opacity-50 font-semibold">
+                    {formatNumber(pointTiers[pointTier?.index + 1]?.limit ?? 0) +
+                    " Points"}
                   </span>
                 </div>
+              )}
+              <div className="flex flex-row justify-between font-chakra mt-4">
+                <span className="text-sm text-white text-right text-opacity-75">
+                  {translator("Your level progress", language)}
+                </span>
+                {(pointTier?.index ?? 0) < 7 && (
+                  <div className="flex flex-col items-end">
+                    <span className="text-sm text-white text-right text-opacity-75">
+                      {truncateNumber(
+                        pointTiers[pointTier?.index + 1]?.limit ?? 0,
+                        0,
+                      ) + ` ${translator("Points", language)}`}
+                    </span>
+                  </div>
+                )}
+              </div>
+              <div
+                className={`${
+                  (Math.min(userData?.points ?? 0, 1_000_000) * 100) /
+                    pointTiers[pointTier?.index + 1]?.limit ?? 1
+                    ? "opacity-90"
+                    : ""
+                } relative flex transition-width duration-1000 w-full rounded-full overflow-hidden h-6 bg-[#282E3D] mt-2 mb-2`}
+              >
+                <div
+                  style={{
+                    width: `10%`,
+                  }}
+                  className="h-full bg-[linear-gradient(91.179deg,#C867F0_0%,#1FCDF0_50.501%,#19EF99_100%)]"
+                />
+                <span className="w-full h-full absolute top-0 left-0 flex items-center justify-center z-10 text-white font-semibold font-chakra text-xs">
+                  {truncateNumber(
+                    (Math.min(userData?.points ?? 0, 1_000_000) * 100) /
+                      (pointTiers[pointTier?.index + 1]?.limit ?? 1_000_000),
+                    2,
+                  )}{" "}
+                  %
+                </span>
+              </div>
+              <div className="flex flex-row justify-between font-chakra capitalize">
+                <span className="text-staking-secondary text-opacity-75 text-sm font-medium">
+                  {pointTier?.label
+                    ? pointTier?.label.includes(" ")
+                      ? translator(pointTier?.label.split(" ")[0], language) +
+                        " " +
+                        pointTier?.label.split(" ")[1]
+                      : translator(pointTier?.label, language)
+                    : ""}
+                </span>
+                <span className="flex items-center gap-1 text-staking-secondary text-opacity-75 text-sm font-medium">
+                  <div className="flex relative min-w-[1rem] h-[1rem]">
+                    <Image
+                      src={`/assets/badges/T-${pointTier?.index + 1}.png`}
+                      alt={pointTier.label}
+                      layout="fill"
+                      objectFit="contain"
+                      objectPosition="center"
+                    />
+                  </div>
+                  {pointTiers[pointTier?.index + 1]?.label
+                    ? pointTiers[pointTier?.index + 1]?.label.includes(" ")
+                      ? translator(
+                          pointTiers[pointTier?.index + 1]?.label.split(" ")[0],
+                          language,
+                        ) +
+                        " " +
+                        pointTiers[pointTier?.index + 1]?.label.split(" ")[1]
+                      : translator(
+                          pointTiers[pointTier?.index + 1]?.label,
+                          language,
+                        )
+                    : ""}
+                </span>
               </div>
             </div>
-            <div className="hidden md:flex flex-col justify-between gap-[12px] md:w-[45%] lg-w-[40%] h-[232px]">
-              <div className="flex items-center gap-[12px] bg-staking-bg rounded-[5px] p-4 h-[50%]">
-                <div className="flex justify-center items-center bg-[#202329] rounded-lg w-[73px] h-[68px]">
-                  <Image
-                    src="/assets/boost.svg"
-                    alt="boost logo"
-                    height={36}
-                    width={36}
-                  />
-                </div>
-                <div>
-                  <p className="text-white font-semibold text-base text-opacity-75">
-                    {translator("Boost Your Tier by Staking!", language)}
-                  </p>
-                  <p className="text-[#94A3B8] font-semibold text-[11px] text-opacity-50 max-w-[290px]">
-                    {translator(
-                      "You can stake your $FOMO to obtain higher multiplier for your points!",
-                      language,
-                    )}
-                  </p>
-                </div>
+          </div>
+          <div className="hidden md:flex flex-col justify-between gap-[12px] md:w-[45%] lg-w-[40%] h-[232px]">
+            <div className="flex items-center gap-[12px] bg-staking-bg rounded-[5px] p-4 h-[50%]">
+              <div className="flex justify-center items-center bg-[#202329] rounded-lg w-[73px] h-[68px]">
+                <Image
+                  src="/assets/boost.svg"
+                  alt="boost logo"
+                  height={36}
+                  width={36}
+                />
               </div>
-              <div className="flex gap-[12px] w-full h-[50%]">
-                <div className="flex flex-col justify-between gap-[12px] bg-staking-bg rounded-[5px] p-4 w-full h-full">
-                  <p className="text-xs font-medium text-opacity-50 text-white">
-                    {translator("Current Tier", language)}
-                  </p>
-                  <p className="font-chakra text-2xl font-semibold text-[#94A3B8] text-right">
-                    T{userData?.tier ?? 0}
-                  </p>
-                </div>
-                <div className="flex flex-col justify-between gap-[12px] bg-staking-bg rounded-[5px] p-4 w-full h-full">
-                  <p className="text-xs font-medium text-opacity-50 text-white">
-                    {translator("Current Multiplier", language)}
-                  </p>
-                  <p className="font-chakra text-2xl font-semibold text-[#94A3B8] text-right">
-                    {`${userData?.multiplier ?? 0.5}x`}
-                  </p>
-                </div>
+              <div>
+                <p className="text-white font-semibold text-base text-opacity-75">
+                  {translator("Boost Your Tier by Staking!", language)}
+                </p>
+                <p className="text-[#94A3B8] font-semibold text-[11px] text-opacity-50 max-w-[290px]">
+                  {translator(
+                    "You can stake your $FOMO to obtain higher multiplier for your points!",
+                    language,
+                  )}
+                </p>
               </div>
             </div>
-          </div> */}
+            <div className="flex gap-[12px] w-full h-[50%]">
+              <div className="flex flex-col justify-between gap-[12px] bg-staking-bg rounded-[5px] p-4 w-full h-full">
+                <p className="text-xs font-medium text-opacity-50 text-white">
+                  {translator("Current Tier", language)}
+                </p>
+                <p className="font-chakra text-2xl font-semibold text-[#94A3B8] text-right">
+                  T{userData?.tier ?? 0}
+                </p>
+              </div>
+              <div className="flex flex-col justify-between gap-[12px] bg-staking-bg rounded-[5px] p-4 w-full h-full">
+                <p className="text-xs font-medium text-opacity-50 text-white">
+                  {translator("Current Multiplier", language)}
+                </p>
+                <p className="font-chakra text-2xl font-semibold text-[#94A3B8] text-right">
+                  {`${userData?.multiplier ?? 0.5}x`}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div> */}
 
         <div className="w-full flex flex-1 flex-col items-start px-5 sm:px-10 2xl:px-[5%] gap-5 pb-10">
           <LeaderboardTable />
