@@ -6,67 +6,11 @@ import { useGlobalContext } from "./GlobalContext";
 import Image from "next/legacy/image";
 import { errorCustom } from "./toasts/ToastGroup";
 
-function Leaderboard() {
+function Leaderboard({ data, page, setPage, maxPages, myData }: any) {
   const wallet = useWallet();
 
   const { getUserDetails, language, session } = useGlobalContext();
-
-  const [maxPages, setMaxPages] = useState<number>(0);
-
-  const [page, setPage] = useState(1);
-  const [data, setData] = useState<any[]>([]);
-  const [myData, setMyData] = useState<any>();
-
   const transactionsPerPage = 10;
-
-  const getLeaderBoard = async () => {
-    try {
-      const res = await fetch("/api/getInfo", {
-        method: "POST",
-        body: JSON.stringify({
-          option: 4,
-        }),
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-
-      let { success, message, users } = await res.json();
-
-      if (success && Array.isArray(users)) {
-        users = users.map((user, index) => {
-          return { ...user, rank: index + 1 };
-        });
-
-        setMaxPages(Math.ceil(users.length / transactionsPerPage));
-
-        setData(users);
-
-        if (session?.user?.email) {
-          let userInfo = users.find(
-            (info: any) =>
-              info?.email == session?.user?.email ||
-              info?.wallet === session?.user?.wallet,
-          );
-
-          setMyData(userInfo);
-        }
-      } else {
-        setData([]);
-        errorCustom(translator("Could not fetch leaderboard.", language));
-      }
-    } catch (e) {
-      setData([]);
-      errorCustom(translator("Could not fetch leaderboard.", language));
-      console.error(e);
-    }
-  };
-
-  useEffect(() => {
-    getLeaderBoard();
-    // if (wallet.publicKey) getUserDetails();
-  }, [session?.user]);
-
   const headers = ["Rank", "User", "Token Balance"];
 
   return (
@@ -125,11 +69,11 @@ function Leaderboard() {
                   page * transactionsPerPage,
                 )
                 .filter(
-                  (data) =>
+                  (data: any) =>
                     data?.email !== session?.user?.email ||
                     data?.wallet !== session?.user?.wallet,
                 )
-                .map((data, index) => (
+                .map((data: any, index: number) => (
                   <div
                     key={index}
                     className={`mb-2.5 flex w-full flex-row items-center gap-2 rounded-[5px] bg-staking-bg  py-3 pr-10`}
