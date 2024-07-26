@@ -29,6 +29,11 @@ export default async function handler(
         .status(400)
         .json({ success: false, message: "Missing parameters" });
 
+    const defaultDeposit = {
+      amount: 100,
+      tokenMint: "WEB2",
+    };
+
     if (email && wallet) {
       user = await User.findOneAndUpdate(
         {
@@ -41,9 +46,13 @@ export default async function handler(
             image,
             wallet,
           },
+          $setOnInsert: {
+            deposit: [defaultDeposit],
+          },
         },
         {
           new: true,
+          upsert: true,
         },
       );
     } else {
@@ -58,6 +67,7 @@ export default async function handler(
               name,
               image,
               isWeb2User: true,
+              deposit: [defaultDeposit],
             },
           },
           {
@@ -74,6 +84,7 @@ export default async function handler(
             $setOnInsert: {
               wallet,
               isWeb2User: true,
+              deposit: [defaultDeposit],
             },
           },
           {
@@ -96,6 +107,7 @@ export default async function handler(
         image: user?.image ?? null,
         name: user?.name ?? null,
         isWeb2User: user?.isWeb2User ?? false,
+        deposit: user?.deposit ?? [],
       },
       message: "User created successfully!",
     });
