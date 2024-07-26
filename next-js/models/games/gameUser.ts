@@ -6,16 +6,20 @@ const gameUserSchema = new Schema(
     wallet: {
       type: String,
       unique: true,
+      sparse: true,
     },
     name: {
       type: String,
+      sparse: true,
     },
     email: {
       type: String,
       unique: true,
+      sparse: true,
     },
     image: {
       type: String,
+      sparse: true,
     },
     deposit: [
       {
@@ -56,13 +60,6 @@ const gameUserSchema = new Schema(
   { timestamps: true },
 );
 
-// gameUserSchema.pre("validate", function (next) {
-//   if (!this.wallet && !this.email) {
-//     this.invalidate("wallet", "Either wallet or email must be provided");
-//     this.invalidate("email", "Either wallet or email must be provided");
-//   }
-//   next();
-// });
 
 let GameUser =
   mongoose.models?.GameUser || mongoose.model("GameUser", gameUserSchema);

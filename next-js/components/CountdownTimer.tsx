@@ -23,7 +23,8 @@ const CountdownTimer = ({ targetDate }: { targetDate: Date }) => {
       // Render the countdown
       return (
         <>
-          {formatValue(days)}d {formatValue(hours)}h {formatValue(minutes)}m {formatValue(seconds)}s
+          {formatValue(days)}d {formatValue(hours)}h {formatValue(minutes)}m{" "}
+          {formatValue(seconds)}s
         </>
       );
     }
