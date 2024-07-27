@@ -134,9 +134,6 @@ function Leaderboard({ data, page, setPage, maxPages, myData }: any) {
                       </div> */}
                       {/* {obfuscatePubKey(data.wallet ?? "")} */}
                       {data?.name ?? obfuscatePubKey(data?.wallet)}
-                      {data?.email}
-                      {data?.wallet}
-                      {session?.user?.email}
                     </span>
                     <span className="flex gap-2 items-center justify-end w-[15%] text-right font-chakra text-sm font-bold text-[#ffffff]">
                       <Image src="/assets/coin.svg" width={13} height={13} />
