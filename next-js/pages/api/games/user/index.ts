@@ -30,7 +30,7 @@ export default async function handler(
         .json({ success: false, message: "Missing parameters" });
 
     const defaultDeposit = {
-      amount: 100,
+      amount: 100.0,
       tokenMint: "SUPER",
     };
 
@@ -45,9 +45,6 @@ export default async function handler(
             name,
             image,
             wallet,
-          },
-          $setOnInsert: {
-            deposit: [defaultDeposit],
           },
         },
         {

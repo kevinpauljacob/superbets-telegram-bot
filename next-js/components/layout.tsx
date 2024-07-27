@@ -58,7 +58,7 @@ interface Props {
 export default function ({ children }: Props) {
   const router = useRouter();
   const wallet = useWallet();
-  const walletModal = useWalletModal()
+  const walletModal = useWalletModal();
   const game = router.pathname.split("/")[1];
 
   const {
@@ -237,17 +237,22 @@ export default function ({ children }: Props) {
 
   useEffect(() => {
     if (session?.user && !showWalletModal) {
-      getBalance();
       getWalletBalance();
       getUserDetails();
     }
-    getGlobalInfo();
     setCurrentGame(game);
     setMinGameAmount(
       maxPayouts[selectedCoin.tokenMint as GameTokens][game as GameType] *
         minAmtFactor,
     );
   }, [wallet?.publicKey, session?.user, game, showWalletModal, selectedCoin]);
+
+  useEffect(() => {
+    if (session?.user && !showWalletModal) {
+      getBalance();
+    }
+    getGlobalInfo();
+  }, [wallet?.publicKey, session?.user, game, showWalletModal]);
 
   return (
     <>
