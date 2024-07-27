@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { use, useState } from "react";
 import { useGlobalContext } from "@/components/GlobalContext";
 import LeaderboardTable from "@/components/Leaderboard";
 import {
@@ -20,12 +20,15 @@ const Countdown = dynamic(() => import("react-countdown-now"), {
 
 export default function Leaderboard() {
   const wallet = useWallet();
+  const { liveBets } = useGlobalContext();
   const [topThreeUsers, setTopThreeUsers] = useState<any[]>([]);
   const [maxPages, setMaxPages] = useState<number>(0);
   const [page, setPage] = useState(1);
   const [data, setData] = useState<any[]>([]);
   const [myData, setMyData] = useState<any>();
   const [activity, setActivity] = useState();
+  const [highestWin, setHighestWin] = useState<number | null>(null);
+
   const { language, userData, pointTier, setPointTier, session, coinData } =
     useGlobalContext();
   const transactionsPerPage = 10;
@@ -79,9 +82,24 @@ export default function Leaderboard() {
     }
   };
 
+  console.log("liveBets", liveBets);
   useEffect(() => {
     getLeaderBoard();
   }, []);
+
+  // useEffect(() => {
+  //   let maxWin: number | null = null;
+
+  //   liveBets.forEach((bet) => {
+  //     if (bet.gameSeed.account === session?.user?._id) {
+  //       if (maxWin === null || bet.amountWon > maxWin) {
+  //         maxWin = bet.amountWon;
+  //       }
+  //     }
+  //   });
+
+  //   setHighestWin(maxWin);
+  // }, [liveBets, userId]);
 
   useEffect(() => {
     let points = userData?.points ?? 0;
@@ -98,7 +116,7 @@ export default function Leaderboard() {
     });
   }, [userData]);
 
-  const threshold = 200;
+  const threshold = 500;
   const currentDate = new Date();
   const targetDate = new Date(
     Date.UTC(
@@ -112,10 +130,7 @@ export default function Leaderboard() {
   );
   const tokenAmount = useMemo(
     () =>
-      Math.max(
-        0,
-        (coinData?.find((c) => c.tokenMint === "SUPER")?.amount ?? 0) - 100,
-      ),
+      Math.max(0, coinData?.find((c) => c.tokenMint === "SUPER")?.amount ?? 0),
     [coinData],
   );
 
@@ -300,7 +315,7 @@ export default function Leaderboard() {
                       minimumFractionDigits: 2,
                       maximumFractionDigits: 2,
                     })}
-                    /100
+                    /500
                   </span>
                 </div>
               </div>
