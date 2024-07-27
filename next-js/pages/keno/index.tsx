@@ -313,12 +313,12 @@ export default function Keno() {
   }, [betType, startAuto, isRolling]);
 
   useEffect(() => {
-    if (refresh && wallet?.publicKey) {
+    if (refresh && session?.user) {
       getBalance();
       getWalletBalance();
       setRefresh(false);
     }
-  }, [wallet?.publicKey, refresh]);
+  }, [wallet?.publicKey, session?.user, refresh]);
 
   useEffect(() => {
     setBetAmt(userInput);

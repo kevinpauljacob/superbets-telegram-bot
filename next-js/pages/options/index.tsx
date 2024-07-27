@@ -270,12 +270,12 @@ export default function Options() {
   };
 
   useEffect(() => {
-    if (refresh && wallet?.publicKey) {
+    if (refresh && session?.user) {
       getBalance();
       getWalletBalance();
       setRefresh(false);
     }
-  }, [wallet?.publicKey, refresh]);
+  }, [wallet?.publicKey, session?.user, refresh]);
 
   useEffect(() => {
     if (wallet?.publicKey && status === "authenticated") {

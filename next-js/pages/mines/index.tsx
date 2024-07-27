@@ -719,12 +719,12 @@ export default function Mines() {
   }, [betType, startAuto, isRolling, betActive]);
 
   useEffect(() => {
-    if (refresh && wallet?.publicKey) {
+    if (refresh && session?.user) {
       getBalance();
       getWalletBalance();
       setRefresh(false);
     }
-  }, [wallet?.publicKey, refresh]);
+  }, [wallet?.publicKey, session?.user, refresh]);
 
   useEffect(() => {
     setBetAmt(userInput);

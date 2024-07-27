@@ -273,12 +273,12 @@ export default function Dice() {
   };
 
   useEffect(() => {
-    if (refresh && wallet?.publicKey) {
+    if (refresh && session?.user) {
       getBalance();
       getWalletBalance();
       setRefresh(false);
     }
-  }, [wallet?.publicKey, refresh]);
+  }, [wallet?.publicKey, session?.user, refresh]);
 
   const topWinPointerRef = useRef<HTMLDivElement | null>(null);
   const ghostWinPointerRefs = useRef<(HTMLDivElement | null)[]>([]);
