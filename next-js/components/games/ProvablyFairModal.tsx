@@ -666,7 +666,7 @@ export default function ProvablyFairModal({
             name="risk"
             value={verificationState.risk}
             onChange={handleChange}
-            className="bg-[#202329] text-white font-chakra text-xs font-medium mt-1 rounded-md px-5 py-4 w-full relative appearance-none"
+            className="bg-[#202329] text-white font-chakra text-xs font-medium mt-1 rounded-md px-5 py-4 w-full relative appearance-none focus:ring-0 focus:outline-none"
           >
             <option value={"low"}>{translator("Low", language)}</option>
             <option value={"medium"}>{translator("Medium", language)}</option>
@@ -683,7 +683,7 @@ export default function ProvablyFairModal({
             name="segments"
             value={verificationState.segments}
             onChange={handleChange}
-            className="bg-[#202329] text-white font-chakra text-xs font-medium mt-1 rounded-md px-5 py-4 w-full relative appearance-none"
+            className="bg-[#202329] text-white font-chakra text-xs font-medium mt-1 rounded-md px-5 py-4 w-full relative appearance-none focus:ring-0 focus:outline-none"
           >
             <option value={10}>10</option>
             <option value={20}>20</option>
@@ -886,10 +886,10 @@ export default function ProvablyFairModal({
         return renderRoulette2();
       case GameType.wheel:
         return (
-          <>
+          <div className="flex flex-col w-full">
             {renderWheel()}
             {renderRiskAndSegments()}
-          </>
+          </div>
         );
       case GameType.mines:
         return (
