@@ -420,10 +420,10 @@ export default function Dice2() {
                 !session?.user ||
                   isRolling ||
                   autoBetCount === 0 ||
-                  Number.isNaN(autoBetCount) ||
-                  (betAmt !== undefined &&
-                    maxBetAmt !== undefined &&
-                    betAmt > maxBetAmt)
+                  Number.isNaN(autoBetCount) 
+                  // (betAmt !== undefined &&
+                  //   maxBetAmt !== undefined &&
+                  //   betAmt > maxBetAmt)
                   ? true
                   : false
               }
@@ -496,10 +496,10 @@ export default function Dice2() {
                       !session?.user ||
                         isRolling ||
                         autoBetCount === 0 ||
-                        Number.isNaN(autoBetCount) ||
-                        (betAmt !== undefined &&
-                          maxBetAmt !== undefined &&
-                          betAmt > maxBetAmt)
+                        Number.isNaN(autoBetCount) 
+                        // (betAmt !== undefined &&
+                        //   maxBetAmt !== undefined &&
+                        //   betAmt > maxBetAmt)
                         ? true
                         : false
                     }

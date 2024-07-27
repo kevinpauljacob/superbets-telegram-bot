@@ -1145,10 +1145,10 @@ export default function Roulette1() {
               disabled={
                 !selectedToken ||
                 loading ||
-                !session?.user ||
-                (betAmt !== undefined &&
-                  maxBetAmt !== undefined &&
-                  betAmt > maxBetAmt)
+                !session?.user 
+                // (betAmt !== undefined &&
+                //   maxBetAmt !== undefined &&
+                //   betAmt > maxBetAmt)
                   ? true
                   : false
               }
@@ -1232,10 +1232,10 @@ export default function Roulette1() {
                     disabled={
                       !betSetting ||
                       loading ||
-                      !session?.user ||
-                      (betAmt !== undefined &&
-                        maxBetAmt !== undefined &&
-                        betAmt > maxBetAmt)
+                      !session?.user 
+                      // (betAmt !== undefined &&
+                      //   maxBetAmt !== undefined &&
+                      //   betAmt > maxBetAmt)
                         ? true
                         : false
                     }

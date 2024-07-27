@@ -106,10 +106,10 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
       const maxPayout = Decimal.mul(amount, maxStrikeMultiplier);
 
-      if (!(maxPayout.toNumber() <= maxPayouts[tokenMint as GameTokens].keno))
-        return res
-          .status(400)
-          .json({ success: false, message: "Max payout exceeded" });
+      // if (!(maxPayout.toNumber() <= maxPayouts[tokenMint as GameTokens].keno))
+      //   return res
+      //     .status(400)
+      //     .json({ success: false, message: "Max payout exceeded" });
       await connectDatabase();
 
       let user = null;

@@ -459,10 +459,10 @@ export default function Dice() {
                   selectedFace.length === 0 ||
                   isRolling ||
                   autoBetCount === 0 ||
-                  Number.isNaN(autoBetCount) ||
-                  (betAmt !== undefined &&
-                    maxBetAmt !== undefined &&
-                    betAmt > maxBetAmt)
+                  Number.isNaN(autoBetCount) 
+                  // (betAmt !== undefined &&
+                  //   maxBetAmt !== undefined &&
+                  //   betAmt > maxBetAmt)
                   ? true
                   : false
               }
@@ -538,10 +538,10 @@ export default function Dice() {
                         selectedFace.length === 0 ||
                         isRolling ||
                         autoBetCount === 0 ||
-                        Number.isNaN(autoBetCount) ||
-                        (betAmt !== undefined &&
-                          maxBetAmt !== undefined &&
-                          betAmt > maxBetAmt)
+                        Number.isNaN(autoBetCount) 
+                        // (betAmt !== undefined &&
+                        //   maxBetAmt !== undefined &&
+                        //   betAmt > maxBetAmt)
                         ? true
                         : false
                     }

@@ -731,10 +731,10 @@ export default function Plinko() {
                 !wallet ||
                 !session?.user ||
                 loading ||
-                (betSetting === "auto" && startAuto) ||
-                (betAmt !== undefined &&
-                  maxBetAmt !== undefined &&
-                  betAmt > maxBetAmt)
+                (betSetting === "auto" && startAuto) 
+                // (betAmt !== undefined &&
+                //   maxBetAmt !== undefined &&
+                //   betAmt > maxBetAmt)
                   ? true
                   : false
               }
@@ -885,10 +885,10 @@ export default function Plinko() {
                       !wallet ||
                       !session?.user ||
                       loading ||
-                      (betSetting === "auto" && startAuto) ||
-                      (betAmt !== undefined &&
-                        maxBetAmt !== undefined &&
-                        betAmt > maxBetAmt)
+                      (betSetting === "auto" && startAuto) 
+                      // (betAmt !== undefined &&
+                      //   maxBetAmt !== undefined &&
+                      //   betAmt > maxBetAmt)
                         ? true
                         : false
                     }

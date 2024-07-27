@@ -86,12 +86,12 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       const strikeMultiplier = 2;
       const maxPayout = Decimal.mul(amount, strikeMultiplier);
 
-      if (
-        !(maxPayout.toNumber() <= maxPayouts[tokenMint as GameTokens].coinflip)
-      )
-        return res
-          .status(400)
-          .json({ success: false, message: "Max payout exceeded" });
+      // if (
+      //   !(maxPayout.toNumber() <= maxPayouts[tokenMint as GameTokens].coinflip)
+      // )
+      //   return res
+      //     .status(400)
+      //     .json({ success: false, message: "Max payout exceeded" });
 
       let user = null;
       if (wallet) {
