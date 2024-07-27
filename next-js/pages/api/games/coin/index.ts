@@ -208,7 +208,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           },
           ...(addGame ? { $addToSet: { gamesPlayed: GameType.coin } } : {}),
           $set: {
-            isWeb2User: tokenMint === "SUPER",
+            // isWeb2User: tokenMint === "SUPER",
           },
         },
         {
