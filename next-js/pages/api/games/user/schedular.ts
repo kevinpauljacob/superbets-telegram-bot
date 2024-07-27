@@ -7,9 +7,9 @@
 //     async () => {
 //       try {
 //         await depositWeb2Funds();
-//         console.log("WEB2 funds deposit completed successfully.");
+//         console.log("SUPER funds deposit completed successfully.");
 //       } catch (error) {
-//         console.error("Error during WEB2 funds deposit:", error);
+//         console.error("Error during SUPER funds deposit:", error);
 //       }
 //     },
 //     null,

@@ -31,7 +31,7 @@ export default async function handler(
 
     const defaultDeposit = {
       amount: 100,
-      tokenMint: "WEB2",
+      tokenMint: "SUPER",
     };
 
     if (email && wallet) {

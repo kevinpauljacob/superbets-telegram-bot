@@ -9,13 +9,13 @@ export const depositWeb2Funds = async () => {
 
     for (const user of users) {
       const depositIndex = user.deposit.findIndex(
-        (d: any) => d.tokenMint === "WEB2",
+        (d: any) => d.tokenMint === "SUPER",
       );
       if (depositIndex !== -1) {
         // Update the existing deposit entry
         user.deposit[depositIndex].amount += airdrop;
       } else {
-        user.deposit.push({ amount: airdrop, tokenMint: "WEB2" });
+        user.deposit.push({ amount: airdrop, tokenMint: "SUPER" });
       }
       await user.save();
       console.log(`Deposited ${airdrop} web2 funds to ${user.wallet}`);

@@ -58,7 +58,7 @@ export default function CoinSelector() {
           }}
         >
           {selectedCoin.icon && (
-            <selectedCoin.icon className="w-6 h-6 -mt-[1px]" />
+            <selectedCoin.icon className="w-4 h-4 -mt-[1px]" />
           )}
           <span className="font-chakra font-medium text-base text-[#94A3B8]">
             {formatAmount(selectedCoin.amount ?? 0)}
@@ -75,7 +75,7 @@ export default function CoinSelector() {
       </div>
 
       {!startAuto && showSelectCoinModal && (
-        <div className="absolute top-full mt-3 bg-[#202329] w-full rounded-[5px] border-2 border-white border-opacity-10">
+        <div className="absolute top-full left-1/2 -translate-x-1/2 mt-3 bg-[#202329] w-full min-w-fit rounded-[5px] border-2 border-white border-opacity-10">
           {SPL_TOKENS.map((coin, index) => (
             <div
               key={index}
@@ -97,7 +97,7 @@ export default function CoinSelector() {
               }}
             >
               <div className="flex items-center gap-1.5">
-                <coin.icon className="" />
+                <coin.icon className="w-4 h-4" />
                 <span className="text-sm font-chakra font-semibold leading-3 mt-0.5">
                   {coin.tokenName}
                 </span>
@@ -140,7 +140,7 @@ export default function CoinSelector() {
         </div>
       )}
 
-      <div
+      {/* <div
         onClick={() => {
           wallet.connected && wallet.publicKey && status === "authenticated"
             ? setShowWalletModal(true)
@@ -154,7 +154,7 @@ export default function CoinSelector() {
         <span className="text-xs md:text-sm leading-3 mt-0.5 text-white text-opacity-90">
           {translator("Wallet", language)}
         </span>
-      </div>
+      </div> */}
     </div>
   );
 }

@@ -1,5 +1,6 @@
 import FOMO from "@/public/assets/coins/FOMO";
 import SOL from "@/public/assets/coins/SOL";
+import SUPER from "@/public/assets/coins/SUPER";
 import USDC from "@/public/assets/coins/USDC";
 import { GameTokens, GameType } from "@/utils/provably-fair";
 
@@ -13,18 +14,18 @@ export type spl_token = {
 };
 
 const SPL_TOKENS: Array<spl_token> = [
-  {
-    tokenName: "SOL",
-    tokenMint: "SOL", //So11111111111111111111111111111111111111112
-    decimal: 9,
-    icon: SOL,
-  },
-  {
-    tokenName: "USDC",
-    tokenMint: "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
-    decimal: 6,
-    icon: USDC,
-  },
+  // {
+  //   tokenName: "SOL",
+  //   tokenMint: "SOL", //So11111111111111111111111111111111111111112
+  //   decimal: 9,
+  //   icon: SOL,
+  // },
+  // {
+  //   tokenName: "USDC",
+  //   tokenMint: "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+  //   decimal: 6,
+  //   icon: USDC,
+  // },
   // {
   //   tokenName: "FOMO",
   //   tokenMint: "Cx9oLynYgC3RrgXzin7U417hNY9D6YB1eMGw4ZMbWJgw",
@@ -32,10 +33,10 @@ const SPL_TOKENS: Array<spl_token> = [
   //   icon: FOMO,
   // },
   {
-    tokenName: "WEB2",
-    tokenMint: "WEB2",
+    tokenName: "SUPER",
+    tokenMint: "SUPER",
     decimal: 6,
-    icon: FOMO,
+    icon: SUPER,
   },
 ];
 
@@ -276,7 +277,7 @@ if (environment === "development") {
       [GameType.mines]: 1,
       [GameType.hilo]: 1,
     },
-    [GameTokens.WEB2]: {
+    [GameTokens.SUPER]: {
       [GameType.dice]: 1,
       [GameType.coin]: 1,
       [GameType.options]: 1,
@@ -352,7 +353,7 @@ if (environment === "development") {
       [GameType.mines]: 125,
       [GameType.hilo]: 125,
     },
-    [GameTokens.WEB2]: {
+    [GameTokens.SUPER]: {
       [GameType.dice]: 1,
       [GameType.coin]: 1,
       [GameType.options]: 1,

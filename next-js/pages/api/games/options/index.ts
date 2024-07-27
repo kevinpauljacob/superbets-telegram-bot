@@ -33,6 +33,11 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       let { wallet, email, amount, tokenMint, betType, timeFrame }: InputType =
         req.body;
 
+      if (tokenMint !== "SUPER")
+        return res
+          .status(400)
+          .json({ success: false, message: "Invalid token!" });
+
       const minGameAmount =
         maxPayouts[tokenMint as GameTokens]["options" as GameType] *
         minAmtFactor;
@@ -100,7 +105,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           .status(400)
           .json({ success: false, message: "User does not exist !" });
 
-      if (!user.isWeb2User && tokenMint === "WEB2")
+      if (!user.isWeb2User && tokenMint === "SUPER")
         return res
           .status(400)
           .json({ success: false, message: "You cannot bet with this token!" });
@@ -147,7 +152,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           isOptionOngoing: true,
           ...(addGame ? { $addToSet: { gamesPlayed: GameType.options } } : {}),
           $set: {
-            isWeb2User: tokenMint === "WEB2",
+            isWeb2User: tokenMint === "SUPER",
           },
         },
         {

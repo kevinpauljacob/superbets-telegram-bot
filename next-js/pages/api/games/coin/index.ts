@@ -44,6 +44,11 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     try {
       let { wallet, email, amount, tokenMint, flipType }: InputType = req.body;
 
+      if (tokenMint !== "SUPER")
+        return res
+          .status(400)
+          .json({ success: false, message: "Invalid token!" });
+
       const minGameAmount =
         maxPayouts[tokenMint as GameTokens]["coinflip" as GameType] *
         minAmtFactor;
@@ -97,7 +102,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           .status(400)
           .json({ success: false, message: "User does not exist!" });
 
-      if (!user.isWeb2User && tokenMint === "WEB2")
+      if (!user.isWeb2User && tokenMint === "SUPER")
         return res
           .status(400)
           .json({ success: false, message: "You cannot bet with this token!" });
@@ -111,7 +116,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           .json({ success: false, message: "Insufficient balance for bet!" });
 
       const account = user._id;
-      
+
       let userData;
       if (wallet)
         userData = await StakingUser.findOneAndUpdate(
@@ -203,7 +208,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           },
           ...(addGame ? { $addToSet: { gamesPlayed: GameType.coin } } : {}),
           $set: {
-            isWeb2User: tokenMint === "WEB2",
+            isWeb2User: tokenMint === "SUPER",
           },
         },
         {

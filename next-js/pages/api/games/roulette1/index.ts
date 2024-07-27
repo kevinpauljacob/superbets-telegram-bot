@@ -134,6 +134,11 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     try {
       let { wallet, email, tokenMint, wager }: InputType = req.body;
 
+      if (tokenMint !== "SUPER")
+        return res
+          .status(400)
+          .json({ success: false, message: "Invalid token!" });
+
       if (maintainance)
         return res.status(400).json({
           success: false,
@@ -202,7 +207,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         return res
           .status(400)
           .json({ success: false, message: "Insufficient balance !" }); */
-      if (!user.isWeb2User && tokenMint === "WEB2")
+      if (!user.isWeb2User && tokenMint === "SUPER")
         return res
           .status(400)
           .json({ success: false, message: "You cannot bet with this token!" });
@@ -326,7 +331,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
             ? { $addToSet: { gamesPlayed: GameType.roulette1 } }
             : {}),
           $set: {
-            isWeb2User: tokenMint === "WEB2",
+            isWeb2User: tokenMint === "SUPER",
           },
         },
         {

@@ -114,7 +114,7 @@ export default function Leaderboard() {
     () =>
       Math.max(
         0,
-        (coinData?.find((c) => c.tokenMint === "WEB2")?.amount ?? 0) - 100,
+        (coinData?.find((c) => c.tokenMint === "SUPER")?.amount ?? 0) - 100,
       ),
     [coinData],
   );

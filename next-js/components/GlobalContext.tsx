@@ -16,6 +16,7 @@ import { GameType } from "@/utils/provably-fair";
 import { SPL_TOKENS } from "@/context/config";
 import { useSession } from "next-auth/react";
 import { SessionUser } from "./ConnectWallet";
+import SUPER from "@/public/assets/coins/SUPER";
 
 export interface GameStat {
   game: GameType;
@@ -259,16 +260,16 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
   const [coinData, setCoinData] = useState<CoinBalance[] | null>([
     {
       amount: 0,
-      tokenMint: "SOL",
-      tokenName: "SOL",
-      icon: SOL,
+      tokenMint: "SUPER",
+      tokenName: "SUPER",
+      icon: SUPER,
     },
   ]);
   const [selectedCoin, setSelectedCoin] = useState<CoinBalance>({
     amount: 0,
-    tokenMint: "SOL",
-    tokenName: "SOL",
-    icon: SOL,
+    tokenMint: "SUPER",
+    tokenName: "SUPER",
+    icon: SUPER,
   });
 
   const [showWalletModal, setShowWalletModal] = useState<boolean>(false);
@@ -440,7 +441,7 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
 
       for (let token of SPL_TOKENS) {
         let price =
-          data?.data[token.tokenMint]?.price ?? token?.tokenMint === "WEB2"
+          data?.data[token.tokenMint]?.price ?? token?.tokenMint === "SUPER"
             ? 1
             : 0;
         prices.push({ mintAddress: token.tokenMint, price: price });

@@ -347,6 +347,8 @@ export const deposit = async (
   tokenMint: string,
   campaignId: any = null,
 ) => {
+  return { success: false, message: "Not Allowed" };
+
   if (amount == 0) {
     errorCustom("Please enter an amount greater than 0");
     return { success: true, message: "Please enter an amount greater than 0" };
@@ -357,7 +359,7 @@ export const deposit = async (
     return { success: true, message: "Wallet not connected" };
   }
 
-  if (tokenMint === "WEB2") {
+  if (tokenMint === "SUPER") {
     errorCustom("Deposit not allowed for this token!");
     return { success: true, message: "Deposit not allowed for this token!" };
   }
@@ -365,7 +367,7 @@ export const deposit = async (
   try {
     let { transaction, blockhashWithExpiryBlockHeight } =
       await createDepositTxn(
-        wallet.publicKey,
+        wallet?.publicKey!,
         amount,
         tokenMint,
         casinoPublicKey,
@@ -417,6 +419,8 @@ export const withdraw = async (
   amount: number,
   tokenMint: string,
 ) => {
+  return { success: false, message: "Not Allowed" };
+  
   if (amount == 0) {
     errorCustom("Please enter an amount greater than 0");
     return { success: true, message: "Please enter an amount greater than 0" };
@@ -427,7 +431,7 @@ export const withdraw = async (
     return { success: true, message: "Wallet not connected" };
   }
 
-  if (tokenMint === "WEB2") {
+  if (tokenMint === "SUPER") {
     errorCustom("Withdraw not allowed for this token!");
     return { success: true, message: "Withdraw not allowed for this token!" };
   }
@@ -564,7 +568,7 @@ export const placeBet = async (
     if (session?.user?.wallet && !wallet.publicKey)
       throw new Error("Wallet not connected");
 
-    if (!session?.user?.isWeb2User && tokenMint === "WEB2")
+    if (!session?.user?.isWeb2User && tokenMint === "SUPER")
       throw new Error("You cannot bet with this token!");
 
     if (betType == null) throw new Error("Invalid bet type");
@@ -609,7 +613,7 @@ export const placeFlip = async (
     if (session?.user?.wallet && !wallet.publicKey)
       throw new Error("Wallet not connected");
 
-    if (!session?.user?.isWeb2User && tokenMint === "WEB2")
+    if (!session?.user?.isWeb2User && tokenMint === "SUPER")
       throw new Error("You cannot bet with this token!");
 
     if (flipType == null) throw new Error("Invalid flip type");
@@ -695,7 +699,7 @@ export const rollDice = async (
     if (session?.user?.wallet && !wallet.publicKey)
       throw new Error("Wallet not connected");
 
-    if (!session?.user?.isWeb2User && tokenMint === "WEB2")
+    if (!session?.user?.isWeb2User && tokenMint === "SUPER")
       throw new Error("You cannot bet with this token!");
 
     const res = await fetch(`/api/games/dice`, {
@@ -731,7 +735,7 @@ export const limboBet = async (
     if (session?.user?.wallet && !wallet.publicKey)
       throw new Error("Wallet not connected");
 
-    if (!session?.user?.isWeb2User && tokenMint === "WEB2")
+    if (!session?.user?.isWeb2User && tokenMint === "SUPER")
       throw new Error("You cannot bet with this token!");
 
     const res = await fetch(`/api/games/limbo`, {

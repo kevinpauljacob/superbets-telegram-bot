@@ -405,7 +405,7 @@ export default function Mines() {
 
   const handleAutoBet = async () => {
     try {
-      if (!session?.user?.isWeb2User && selectedCoin.tokenMint === "WEB2") {
+      if (!session?.user?.isWeb2User && selectedCoin.tokenMint === "SUPER") {
         throw new Error(
           translator("You cannot bet with this token!", language),
         );
@@ -548,7 +548,7 @@ export default function Mines() {
     setGameStatus("Not Started");
     // setSelectTile(true);
     try {
-      if (!session?.user?.isWeb2User && selectedCoin.tokenMint === "WEB2") {
+      if (!session?.user?.isWeb2User && selectedCoin.tokenMint === "SUPER") {
         throw new Error(
           translator("You cannot bet with this token!", language),
         );

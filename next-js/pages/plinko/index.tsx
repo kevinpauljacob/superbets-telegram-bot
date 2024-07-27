@@ -505,7 +505,7 @@ export default function Plinko() {
 
   const handleBet = async () => {
     try {
-      if (!session?.user?.isWeb2User && selectedCoin.tokenMint === "WEB2") {
+      if (!session?.user?.isWeb2User && selectedCoin.tokenMint === "SUPER") {
         throw new Error(
           translator("You cannot bet with this token!", language),
         );

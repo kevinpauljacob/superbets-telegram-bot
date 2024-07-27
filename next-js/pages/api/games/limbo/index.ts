@@ -42,7 +42,13 @@ type InputType = {
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === "POST") {
     try {
-      let { wallet, email, amount, tokenMint, multiplier }: InputType = req.body;
+      let { wallet, email, amount, tokenMint, multiplier }: InputType =
+        req.body;
+
+      if (tokenMint !== "SUPER")
+        return res
+          .status(400)
+          .json({ success: false, message: "Invalid token!" });
 
       if (maintainance)
         return res.status(400).json({
@@ -94,7 +100,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           .status(400)
           .json({ success: false, message: "User does not exist!" });
 
-      if (!user.isWeb2User && tokenMint === "WEB2")
+      if (!user.isWeb2User && tokenMint === "SUPER")
         return res
           .status(400)
           .json({ success: false, message: "You cannot bet with this token!" });
@@ -121,10 +127,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       const stakingTier = Object.entries(stakingTiers).reduce((prev, next) => {
         return stakeAmount >= next[1]?.limit ? next : prev;
       })[0];
-      const houseEdge =
-        launchPromoEdge
-          ? 0
-          : houseEdgeTiers[parseInt(stakingTier)];
+      const houseEdge = launchPromoEdge
+        ? 0
+        : houseEdgeTiers[parseInt(stakingTier)];
 
       const activeGameSeed = await GameSeed.findOneAndUpdate(
         {
@@ -202,7 +207,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           },
           ...(addGame ? { $addToSet: { gamesPlayed: GameType.limbo } } : {}),
           $set: {
-            isWeb2User: tokenMint === "WEB2",
+            isWeb2User: tokenMint === "SUPER",
           },
         },
         {
