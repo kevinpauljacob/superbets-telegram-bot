@@ -93,9 +93,16 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           .status(400)
           .json({ success: false, message: "Max payout exceeded" });
 
-      let user = await User.findOne({
-        $or: [{ wallet: wallet }, { email: email }],
-      });
+      let user = null;
+      if (wallet) {
+        user = await User.findOne({
+          wallet: wallet,
+        });
+      } else if (email) {
+        user = await User.findOne({
+          email: email,
+        });
+      }
 
       if (!user)
         return res
@@ -190,31 +197,37 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       }
 
       const addGame = !user.gamesPlayed.includes(GameType.coin);
-
-      const userUpdate = await User.findOneAndUpdate(
-        {
-          _id: account,
-          deposit: {
-            $elemMatch: {
-              tokenMint,
-              amount: { $gte: amount },
+      let userUpdate;
+      try {
+        userUpdate = await User.findOneAndUpdate(
+          {
+            _id: account,
+            deposit: {
+              $elemMatch: {
+                tokenMint,
+                amount: { $gte: amount },
+              },
             },
           },
-        },
-        {
-          $inc: {
-            "deposit.$.amount": amountWon.sub(amount),
-            numOfGamesPlayed: 1,
-          },
-          ...(addGame ? { $addToSet: { gamesPlayed: GameType.coin } } : {}),
-          $set: {
+          {
+            $inc: {
+              "deposit.$.amount": amountWon.sub(amount),
+              numOfGamesPlayed: 1,
+            },
+            ...(addGame ? { $addToSet: { gamesPlayed: GameType.coin } } : {}),
+            // $set: {
             // isWeb2User: tokenMint === "SUPER",
+            // },
           },
-        },
-        {
-          new: true,
-        },
-      );
+          {
+            new: true,
+          },
+        );
+      } catch (e) {
+        console.error(e);
+      }
+
+      console.log(userUpdate);
 
       if (!userUpdate) {
         throw new Error("Insufficient balance for bet!");

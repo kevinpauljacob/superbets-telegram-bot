@@ -93,9 +93,12 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
       await connectDatabase();
 
-      let user = await User.findOne({
-        $or: [{ wallet: wallet }, { email: email }],
-      });
+      let user = null;
+      if (email) {
+        user = await User.findOne({ email });
+      } else if (wallet) {
+        user = await User.findOne({ wallet });
+      }
 
       if (!user)
         return res

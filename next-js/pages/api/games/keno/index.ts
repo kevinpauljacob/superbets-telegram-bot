@@ -112,9 +112,16 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           .json({ success: false, message: "Max payout exceeded" });
       await connectDatabase();
 
-      let user = await User.findOne({
-        $or: [{ wallet: wallet }, { email: email }],
-      });
+      let user = null;
+      if (wallet) {
+        user = await User.findOne({
+          wallet: wallet,
+        });
+      } else if (email) {
+        user = await User.findOne({
+          email: email,
+        });
+      }
 
       if (!user)
         return res
