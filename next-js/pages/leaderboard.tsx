@@ -208,7 +208,7 @@ export default function Leaderboard() {
 
   return (
     <>
-      <FOMOHead title={"Leaderboard | FOMO.wtf - 0% House Edge, Pure Wins"} />
+      <FOMOHead title={"Leaderboard | SUPERBETS.GAMES - 0% House Edge, Pure Wins"} />
       <div className="flex flex-col items-start w-full overflow-hidden min-h-screen flex-1 relative p-2 md:pt-[2rem] md:px-[3rem]">
         {/* Navbar  */}
         {/* <span className="text-white text-opacity-90 font-semibold text-[1.5rem] sm:text-[2rem] mt-[1rem] font-chakra tracking-[.02em] flex items-center justify-center gap-x-2 px-5 sm:px-10 2xl:px-[5%]">

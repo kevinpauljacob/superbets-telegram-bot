@@ -136,7 +136,7 @@ const GameLayout: React.FC<LayoutProps> = ({ children, title }) => {
       <FOMOHead
         title={`${
           title ? title + " | " : ""
-        }FOMO.wtf - 0% House Edge, Pure Wins`}
+        }SUPERBETS.GAMES - 0% House Edge, Pure Wins`}
       />
 
       <div className="fadeInUp w-full min-h-fit lg:min-h-[calc(100vh-13.7rem)] items-stretch bg-[#121418] rounded-2xl flex flex-col-reverse lg:flex-row">

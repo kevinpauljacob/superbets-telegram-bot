@@ -35,7 +35,7 @@ export default function Store() {
 
   return (
     <>
-      <FOMOHead title={"Store | FOMO.wtf - 0% House Edge, Pure Wins"} />
+      <FOMOHead title={"Store | SUPERBETS.GAMES - 0% House Edge, Pure Wins"} />
       <div className="text-white w-full flex flex-col items-start justify-start px-5 lg:px-16 pb-10 overflow-hidden min-h-screen">
         <span className="font-bold text-white text-opacity-90 font-chakra text-[1.75rem] mb-6">
           FOMO STORE

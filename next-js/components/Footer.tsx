@@ -55,14 +55,14 @@ function Footer() {
               </h3>
               <div className="text-[#94A3B8] font-chakra flex flex-col items-start justify-start gap-5 text-sm leading-[14px] font-medium text-opacity-80">
                 <Link
-                  href="https://dca.fomosolana.com/"
+                  href="https://x.com/superbetgames"
                   target="_blank"
                   className="hover:cursor-pointer hover:underline decoration-1"
                 >
                   DCA
                 </Link>
                 <Link
-                  href="docs.fomowtf.com"
+                  href="https://x.com/superbetgames"
                   target="_blank"
                   className="hover:cursor-pointer hover:underline decoration-1"
                 >
@@ -129,7 +129,7 @@ function Footer() {
         <div className="w-full h-[1px] bg-[#94A3B8] bg-opacity-20 rounded-full mt-5 md:px-2 mx-2" />
         <div className="w-full font-inter flex lg2:flex-row flex-col lg2:items-center lg2:justify-between lg2:pb-10 pb-[150px] pt-5 md:px-2 mx-2">
           <p className="flex text-sm font-normal text-[#FFFFFF] text-opacity-50 font-sans gap-2">
-            <span>&copy;2024 superbets.com</span>
+            <span>&copy;2024 superbets.games</span>
             <span>{translator("All rights reserved", language)}</span>
           </p>
           <div className="flex items-center lg2:justify-center gap-5">

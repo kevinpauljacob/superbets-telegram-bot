@@ -80,7 +80,7 @@ export default function Stake() {
 
   return (
     <>
-      <FOMOHead title={"Stake | FOMO.wtf - 0% House Edge, Pure Wins"} />
+      <FOMOHead title={"Stake | SUPERBETS.GAMES - 0% House Edge, Pure Wins"} />
       <div
         className={`flex flex-col ${
           sidebar ? "items-start sm:pl-14" : "items-center"
