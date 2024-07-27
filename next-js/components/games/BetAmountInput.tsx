@@ -60,14 +60,13 @@ export default function BetAmount({
 
   useEffect(() => {
     if (betAmt !== undefined && betAmt > 0) {
-      // if (GameType.roulette1) {
-      //   setInputString(betAmt.toFixed(9));
-      // } else {
-      //   setInputString(betAmt.toString());
-      // }
-      const decimalPoint = game === "roulette1" ? 9 : 5;
 
-      setInputString(betAmt.toFixed(9));
+      if (game === GameType.roulette1) {
+        setInputString(betAmt.toFixed(9));
+      } else {
+        setInputString(betAmt.toString());
+      }
+
     } else {
       setInputString("");
     }
