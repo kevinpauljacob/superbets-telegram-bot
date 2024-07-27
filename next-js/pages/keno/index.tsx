@@ -66,7 +66,7 @@ export default function Keno() {
     updatePNL,
     minGameAmount,
     session,
-    status
+    status,
   } = useGlobalContext();
   const [betAmt, setBetAmt] = useState<number | undefined>();
   const [userInput, setUserInput] = useState<number | undefined>();
@@ -136,7 +136,7 @@ export default function Keno() {
       return randomNumber;
     };
 
-    for (let randomCount = 0; randomCount < count;) {
+    for (let randomCount = 0; randomCount < count; ) {
       let randomNumber = getRandomNumber(max, min);
       if (randomNumbers.includes(randomNumber)) continue;
 
@@ -254,7 +254,7 @@ export default function Keno() {
       if (result == "Won")
         successCustom(
           translator(message, language) +
-          ` ${formatNumber(amountWon)} ${selectedCoin.tokenName}`,
+            ` ${formatNumber(amountWon)} ${selectedCoin.tokenName}`,
         );
       else errorCustom(translator(message, language));
 
@@ -281,7 +281,7 @@ export default function Keno() {
         // update profit / loss
         setAutoBetProfit(
           autoBetProfit +
-          (win ? strikeMultiplier * (1 - houseEdge) - 1 : -1) * betAmt,
+            (win ? strikeMultiplier * (1 - houseEdge) - 1 : -1) * betAmt,
         );
         // update count
         if (typeof autoBetCount === "number") {
@@ -337,12 +337,12 @@ export default function Keno() {
         potentialLoss =
           autoBetProfit +
           -1 *
-          (autoWinChangeReset || autoLossChangeReset
-            ? betAmt
-            : autoBetCount === "inf"
+            (autoWinChangeReset || autoLossChangeReset
+              ? betAmt
+              : autoBetCount === "inf"
               ? Math.max(0, betAmt)
               : betAmt *
-              (autoLossChange !== null ? autoLossChange / 100.0 : 0));
+                (autoLossChange !== null ? autoLossChange / 100.0 : 0));
 
         // console.log("Current bet amount:", betAmt);
         // console.log("Auto loss change:", autoLossChange);
@@ -420,10 +420,11 @@ export default function Keno() {
             handleAutoPick();
           }}
           disabled={disableInput}
-          className={`${autoPick === true
-            ? "border-[#5F4DFF] text-opacity-100"
-            : "border-transparent hover:border-[#7839C580] text-opacity-80"
-            } w-full flex items-center justify-center disabled:opacity-50 gap-1 rounded-lg text-center cursor-pointer border-2 bg-[#202329] h-[3.75rem] lg:h-11 font-chakra text-base tracking-wider text-white font-semibold`}
+          className={`${
+            autoPick === true
+              ? "border-[#5F4DFF] text-opacity-100"
+              : "border-transparent hover:border-[#7839C580] text-opacity-80"
+          } w-full flex items-center justify-center disabled:opacity-50 gap-1 rounded-lg text-center cursor-pointer border-2 bg-[#202329] h-[3.75rem] lg:h-11 font-chakra text-base tracking-wider text-white font-semibold`}
         >
           {translator("AUTOPICK", language)}
         </button>
@@ -433,10 +434,11 @@ export default function Keno() {
             handleClear();
           }}
           disabled={disableInput}
-          className={`${autoPick === false
-            ? "border-transparent hover:border-[#7839C580] text-opacity-80"
-            : "border-transparent hover:border-[#7839C580] text-opacity-80"
-            } w-full flex items-center justify-center disabled:opacity-50 gap-1 rounded-lg text-center cursor-pointer border-2 bg-[#202329] h-[3.75rem] lg:h-11 font-chakra text-base tracking-wider text-white font-semibold`}
+          className={`${
+            autoPick === false
+              ? "border-transparent hover:border-[#7839C580] text-opacity-80"
+              : "border-transparent hover:border-[#7839C580] text-opacity-80"
+          } w-full flex items-center justify-center disabled:opacity-50 gap-1 rounded-lg text-center cursor-pointer border-2 bg-[#202329] h-[3.75rem] lg:h-11 font-chakra text-base tracking-wider text-white font-semibold`}
         >
           {translator("CLEAR", language)}
         </button>
@@ -468,13 +470,13 @@ export default function Keno() {
             <BetButton
               disabled={
                 !session?.user ||
-                  isRolling ||
-                  autoBetCount === 0 ||
-                  Number.isNaN(autoBetCount) 
-                  // (betAmt !== undefined &&
-                  //   maxBetAmt !== undefined &&
-                  //   betAmt > maxBetAmt)
-                  ? true
+                isRolling ||
+                autoBetCount === 0 ||
+                Number.isNaN(autoBetCount)
+                  ? // (betAmt !== undefined &&
+                    //   maxBetAmt !== undefined &&
+                    //   betAmt > maxBetAmt)
+                    true
                   : false
               }
               onClickFunction={onSubmit}
@@ -525,10 +527,11 @@ export default function Keno() {
                     <button
                       type="button"
                       onClick={() => setKenoRisk("classic")}
-                      className={`text-center w-full rounded-[5px] border-[2px] bg-[#202329] py-2 text-xs font-chakra disabled:opacity-50 text-white text-opacity-90 transition duration-200 ${kenoRisk === "classic"
-                        ? "border-[#5F4DFF]"
-                        : "border-transparent hover:border-[#7839C580]"
-                        }`}
+                      className={`text-center w-full rounded-[5px] border-[2px] bg-[#202329] py-2 text-xs font-chakra disabled:opacity-50 text-white text-opacity-90 transition duration-200 ${
+                        kenoRisk === "classic"
+                          ? "border-[#5F4DFF]"
+                          : "border-transparent hover:border-[#7839C580]"
+                      }`}
                       disabled={disableInput}
                     >
                       {translator("Classic", language)}
@@ -536,10 +539,11 @@ export default function Keno() {
                     <button
                       type="button"
                       onClick={() => setKenoRisk("low")}
-                      className={`text-center w-full rounded-[5px] border-[2px] bg-[#202329] py-2 text-xs font-chakra disabled:opacity-50 text-white text-opacity-90 transition duration-200 ${kenoRisk === "low"
-                        ? "border-[#5F4DFF]"
-                        : "border-transparent hover:border-[#7839C580]"
-                        }`}
+                      className={`text-center w-full rounded-[5px] border-[2px] bg-[#202329] py-2 text-xs font-chakra disabled:opacity-50 text-white text-opacity-90 transition duration-200 ${
+                        kenoRisk === "low"
+                          ? "border-[#5F4DFF]"
+                          : "border-transparent hover:border-[#7839C580]"
+                      }`}
                       disabled={disableInput}
                     >
                       {translator("Low", language)}
@@ -547,10 +551,11 @@ export default function Keno() {
                     <button
                       type="button"
                       onClick={() => setKenoRisk("medium")}
-                      className={`text-center w-full block m-auto rounded-[5px] border-[2px] bg-[#202329] py-2 text-xs font-chakra disabled:opacity-50 text-white text-opacity-90 transition duration-200 ${kenoRisk === "medium"
-                        ? "border-[#5F4DFF]"
-                        : "border-transparent hover:border-[#7839C580]"
-                        }`}
+                      className={`text-center w-full block m-auto rounded-[5px] border-[2px] bg-[#202329] py-2 text-xs font-chakra disabled:opacity-50 text-white text-opacity-90 transition duration-200 ${
+                        kenoRisk === "medium"
+                          ? "border-[#5F4DFF]"
+                          : "border-transparent hover:border-[#7839C580]"
+                      }`}
                       disabled={disableInput}
                     >
                       {translator("Medium", language)}
@@ -558,10 +563,11 @@ export default function Keno() {
                     <button
                       type="button"
                       onClick={() => setKenoRisk("high")}
-                      className={`text-center w-full rounded-[5px] border-[2px] bg-[#202329] py-2 text-xs font-chakra disabled:opacity-50 text-white text-opacity-90 transition duration-200 ${kenoRisk === "high"
-                        ? "border-[#5F4DFF]"
-                        : "border-transparent hover:border-[#7839C580]"
-                        }`}
+                      className={`text-center w-full rounded-[5px] border-[2px] bg-[#202329] py-2 text-xs font-chakra disabled:opacity-50 text-white text-opacity-90 transition duration-200 ${
+                        kenoRisk === "high"
+                          ? "border-[#5F4DFF]"
+                          : "border-transparent hover:border-[#7839C580]"
+                      }`}
                       disabled={disableInput}
                     >
                       {translator("High", language)}
@@ -603,13 +609,13 @@ export default function Keno() {
                   <BetButton
                     disabled={
                       !session?.user ||
-                        isRolling ||
-                        autoBetCount === 0 ||
-                        Number.isNaN(autoBetCount) 
-                        // (betAmt !== undefined &&
-                        //   maxBetAmt !== undefined &&
-                        //   betAmt > maxBetAmt)
-                        ? true
+                      isRolling ||
+                      autoBetCount === 0 ||
+                      Number.isNaN(autoBetCount)
+                        ? // (betAmt !== undefined &&
+                          //   maxBetAmt !== undefined &&
+                          //   betAmt > maxBetAmt)
+                          true
                         : false
                     }
                     onClickFunction={onSubmit}
@@ -645,23 +651,24 @@ export default function Keno() {
                     handleChosenNumber(number);
                     soundAlert("/sounds/betbutton.wav", !enableSounds);
                   }}
-                  className={`flex items-center justify-center cursor-pointer ${!isRolling &&
+                  className={`flex items-center justify-center cursor-pointer ${
+                    !isRolling &&
                     strikeNumbers.length === 0 &&
                     chosenNumbers.includes(number)
-                    ? "bg-[#5F4DFF] border-transparent"
-                    : strikeNumbers.includes(number)
+                      ? "bg-[#5F4DFF] border-transparent"
+                      : strikeNumbers.includes(number)
                       ? chosenNumbers.includes(number)
                         ? "bg-black border-fomo-green"
                         : chosenNumbers.length === 0
-                          ? "bg-[#202329] border-transparent"
-                          : "bg-black border-fomo-red text-fomo-red"
+                        ? "bg-[#202329] border-transparent"
+                        : "bg-black border-fomo-red text-fomo-red"
                       : chosenNumbers.includes(number)
-                        ? "bg-[#5F4DFF] border-transparent"
-                        : "bg-[#202329] border-transparent"
-                    } rounded-md text-center border-2 transition-all duration-300 ease-in-out w-[1.75rem] h-[1.75rem] sm:w-[3.4375rem] sm:h-[3.4375rem] md:w-[3.75rem] md:h-[3.75rem] xl:w-[3.8rem] xl:h-[3.8rem]`}
+                      ? "bg-[#5F4DFF] border-transparent"
+                      : "bg-[#202329] border-transparent"
+                  } rounded-md text-center border-2 transition-all duration-300 ease-in-out w-[1.75rem] h-[1.75rem] sm:w-[3.4375rem] sm:h-[3.4375rem] md:w-[3.75rem] md:h-[3.75rem] xl:w-[3.8rem] xl:h-[3.8rem]`}
                 >
                   {strikeNumbers.includes(number) &&
-                    chosenNumbers.includes(number) ? (
+                  chosenNumbers.includes(number) ? (
                     <div className="flex justify-center items-center bg-[#FFD100] text-black rounded-full w-[25px] h-[25px] md:w-[38px] md:h-[38px]">
                       {number}
                     </div>
@@ -676,7 +683,8 @@ export default function Keno() {
         <div className="relative flex w-full justify-between px-0 xl:px-4 mb-0 px:mb-6 gap-4">
           {selectedCoin &&
             selectedCoin.amount > minGameAmount &&
-            chosenNumbers.length > 0 && (
+            chosenNumbers.length > 0 &&
+            (session?.user?.wallet ? wallet.connected : true) && (
               <div className="w-full">
                 <div className="flex justify-between gap-[3px] sm:gap-3.5 lg:gap-2 2xl:gap-3.5 text-white w-full">
                   {multipliers.map((multiplier, index) => (
@@ -695,12 +703,13 @@ export default function Keno() {
                         key={index}
                         onMouseEnter={() => setHoveredIndex(index)}
                         onMouseLeave={() => setHoveredIndex(null)}
-                        className={`${!isRolling &&
+                        className={`${
+                          !isRolling &&
                           strikeNumbers.length > 0 &&
                           commonNumbers.length === index
-                          ? "bg-white/20"
-                          : ""
-                          } flex hover:bg-white/20 cursor-pointer justify-center items-center rounded-[5px] font-chakra text-[8px] sm:text-xs font-semibold transition-all duration-300 ease-in-out py-1 sm:py-3 w-full`}
+                            ? "bg-white/20"
+                            : ""
+                        } flex hover:bg-white/20 cursor-pointer justify-center items-center rounded-[5px] font-chakra text-[8px] sm:text-xs font-semibold transition-all duration-300 ease-in-out py-1 sm:py-3 w-full`}
                       >
                         <span className="mr-1">{index}x</span>
                         <svg
@@ -726,13 +735,13 @@ export default function Keno() {
                               <div className="border border-white/10 rounded-[5px] p-3 mt-2">
                                 {selectedCoin
                                   ? truncateNumber(
-                                    Math.max(
-                                      0,
-                                      (betAmt ?? 0) *
-                                      (multiplier * (1 - houseEdge) - 1),
-                                    ),
-                                    4,
-                                  )
+                                      Math.max(
+                                        0,
+                                        (betAmt ?? 0) *
+                                          (multiplier * (1 - houseEdge) - 1),
+                                      ),
+                                      4,
+                                    )
                                   : 0}{" "}
                                 {selectedCoin.tokenName}
                               </div>
@@ -755,34 +764,34 @@ export default function Keno() {
             )}
 
           {!selectedCoin ||
-            selectedCoin.amount < minGameAmount ||
-            !(wallet.connected || session?.user.isWeb2User)
-            ? (
-              <div className="w-full rounded-lg bg-[#d9d9d90d] bg-opacity-10 flex items-center px-3 py-3 text-white md:px-6">
-                <div className="w-full text-center font-changa font-medium text-sm md:text-base text-[#F0F0F0] text-opacity-75">
-                  {translator(
-                    "Please deposit funds to start playing. View",
-                    language,
-                  )}{" "}
-                  <u
-                    onClick={() => {
-                      wallet.connected && status === "authenticated"
-                        ? setShowWalletModal(true)
-                        : setShowConnectModal(true);
-                    }}
-                    className="cursor-pointer"
-                  >
-                    {translator("WALLET", language)}
-                  </u>
-                </div>
+          selectedCoin.amount < minGameAmount ||
+          (session?.user?.wallet && !wallet.connected) ||
+          !(status === "authenticated") ? (
+            <div className="w-full rounded-lg bg-[#d9d9d90d] bg-opacity-10 flex items-center px-3 py-3 text-white md:px-6">
+              <div className="w-full text-center font-changa font-medium text-sm md:text-base text-[#F0F0F0] text-opacity-75">
+                {translator(
+                  "Please deposit funds to start playing. View",
+                  language,
+                )}{" "}
+                <u
+                  onClick={() => {
+                    wallet.connected && status === "authenticated"
+                      ? setShowWalletModal(true)
+                      : setShowConnectModal(true);
+                  }}
+                  className="cursor-pointer"
+                >
+                  {translator("WALLET", language)}
+                </u>
               </div>
-            ) : selectedCoin && chosenNumbers.length === 0 ? (
-              <div className="w-full rounded-lg bg-[#d9d9d90d] bg-opacity-10 flex items-center px-3 py-3 text-white md:px-6">
-                <div className="w-full text-center font-changa font-medium text-sm md:text-base text-[#F0F0F0] text-opacity-75">
-                  {translator("Pick up to 10 numbers", language)}
-                </div>
+            </div>
+          ) : selectedCoin && chosenNumbers.length === 0 ? (
+            <div className="w-full rounded-lg bg-[#d9d9d90d] bg-opacity-10 flex items-center px-3 py-3 text-white md:px-6">
+              <div className="w-full text-center font-changa font-medium text-sm md:text-base text-[#F0F0F0] text-opacity-75">
+                {translator("Pick up to 10 numbers", language)}
               </div>
-            ) : null}
+            </div>
+          ) : null}
         </div>
       </GameDisplay>
       <GameTable>

@@ -55,51 +55,53 @@ export const GameFooterInfo: React.FC<GameFooterProps> = ({
 
   return (
     <div className="flex px-0 xl:px-4 mb-0 md:mb-[1.4rem] gap-4 flex-row w-full justify-between">
-      {selectedCoin && selectedCoin.amount > minGameAmount && (
-        <>
-          {multiplier !== undefined ? (
+      {selectedCoin &&
+        selectedCoin.amount > minGameAmount &&
+        (session?.user?.wallet ? wallet.connected : true) && (
+          <>
+            {multiplier !== undefined ? (
+              <div className="flex flex-col w-full">
+                <span className="text-[#F0F0F0] font-changa font-semibold text-xs mb-1">
+                  {translator("Multiplier", language)}
+                </span>
+                <span className="bg-[#202329] font-chakra text-xs text-white rounded-md px-2 md:px-5 py-3">
+                  {truncateNumber(multiplier ?? 0, 2)}x
+                </span>
+              </div>
+            ) : (
+              <></>
+            )}
+
             <div className="flex flex-col w-full">
               <span className="text-[#F0F0F0] font-changa font-semibold text-xs mb-1">
-                {translator("Multiplier", language)}
+                {translator("Profit", language)}
               </span>
               <span className="bg-[#202329] font-chakra text-xs text-white rounded-md px-2 md:px-5 py-3">
-                {truncateNumber(multiplier ?? 0, 2)}x
+                {truncateNumber(
+                  amount *
+                    (multiplier *
+                      (1 -
+                        (currentGame == "options" ? optionsEdge : 0) +
+                        houseEdge) -
+                      1),
+                  4,
+                )}{" "}
+                ${selectedCoin.tokenName}
               </span>
             </div>
-          ) : (
-            <></>
-          )}
 
-          <div className="flex flex-col w-full">
-            <span className="text-[#F0F0F0] font-changa font-semibold text-xs mb-1">
-              {translator("Profit", language)}
-            </span>
-            <span className="bg-[#202329] font-chakra text-xs text-white rounded-md px-2 md:px-5 py-3">
-              {truncateNumber(
-                amount *
-                  (multiplier *
-                    (1 -
-                      (currentGame == "options" ? optionsEdge : 0) +
-                      houseEdge) -
-                    1),
-                4,
-              )}{" "}
-              ${selectedCoin.tokenName}
-            </span>
-          </div>
-
-          {chance !== undefined && (
-            <div className="flex flex-col w-full">
-              <span className="text-[#F0F0F0] font-changa font-semibold text-xs mb-1">
-                {translator("Chance", language)}
-              </span>
-              <span className="bg-[#202329] font-chakra text-xs text-white rounded-md px-2 md:px-5 py-3">
-                {truncateNumber(chance, 2)}%
-              </span>
-            </div>
-          )}
-        </>
-      )}
+            {chance !== undefined && (
+              <div className="flex flex-col w-full">
+                <span className="text-[#F0F0F0] font-changa font-semibold text-xs mb-1">
+                  {translator("Chance", language)}
+                </span>
+                <span className="bg-[#202329] font-chakra text-xs text-white rounded-md px-2 md:px-5 py-3">
+                  {truncateNumber(chance, 2)}%
+                </span>
+              </div>
+            )}
+          </>
+        )}
 
       {(!selectedCoin ||
         selectedCoin.amount < minGameAmount ||

@@ -108,14 +108,14 @@ export default function Wheel() {
     segments === 10
       ? 0
       : segments === 20
-        ? 25
-        : segments === 30
-          ? 50
-          : segments === 40
-            ? 75
-            : segments === 50
-              ? 100
-              : null;
+      ? 25
+      : segments === 30
+      ? 50
+      : segments === 40
+      ? 75
+      : segments === 50
+      ? 100
+      : null;
 
   useEffect(() => {
     if (!wheelRef.current) return;
@@ -309,9 +309,9 @@ export default function Wheel() {
             (autoWinChangeReset || autoLossChangeReset
               ? betAmt
               : autoBetCount === "inf"
-                ? Math.max(0, betAmt)
-                : betAmt *
-                  (autoLossChange !== null ? autoLossChange / 100.0 : 0));
+              ? Math.max(0, betAmt)
+              : betAmt *
+                (autoLossChange !== null ? autoLossChange / 100.0 : 0));
 
         // console.log("Current bet amount:", betAmt);
         // console.log("Auto loss change:", autoLossChange);
@@ -377,7 +377,7 @@ export default function Wheel() {
         // console.log("Auto betting. config: ", useAutoConfig);
         setStartAuto(true);
       }
-    } else if(wallet.connected || session?.user?.email) handleBet();
+    } else if (wallet.connected || session?.user?.email) handleBet();
   };
 
   const disableInput = useMemo(() => {
@@ -411,11 +411,11 @@ export default function Wheel() {
                 !session?.user ||
                 isRolling ||
                 autoBetCount === 0 ||
-                Number.isNaN(autoBetCount) 
-                // (betAmt !== undefined &&
-                //   maxBetAmt !== undefined &&
-                //   betAmt > maxBetAmt)
-                  ? true
+                Number.isNaN(autoBetCount)
+                  ? // (betAmt !== undefined &&
+                    //   maxBetAmt !== undefined &&
+                    //   betAmt > maxBetAmt)
+                    true
                   : false
               }
               onClickFunction={onSubmit}
@@ -559,10 +559,10 @@ export default function Wheel() {
                       isRolling ||
                       autoBetCount === 0 ||
                       Number.isNaN(autoBetCount)
-                      // (betAmt !== undefined &&
-                      //   maxBetAmt !== undefined &&
-                      //   betAmt > maxBetAmt)
-                        ? true
+                        ? // (betAmt !== undefined &&
+                          //   maxBetAmt !== undefined &&
+                          //   betAmt > maxBetAmt)
+                          true
                         : false
                     }
                   >
@@ -634,73 +634,75 @@ export default function Wheel() {
           </div>
         </div>
         <div className="relative flex w-full justify-between px-0 xl:px-4 mb-0 px:mb-6 gap-4">
-          {selectedCoin && selectedCoin.amount > minGameAmount && (
-            <>
-              {uniqueSegments.map((segment, index) => {
-                const backgroundColor = segment.color; // Store segment.color in a separate variable
-                return (
-                  <div
-                    key={index}
-                    className="relative w-full"
-                    onMouseEnter={() =>
-                      setHoveredMultiplier(segment.multiplier)
-                    }
-                    onMouseLeave={() => setHoveredMultiplier(null)}
-                  >
+          {selectedCoin &&
+            selectedCoin.amount > minGameAmount &&
+            (session?.user?.wallet ? wallet.connected : true) && (
+              <>
+                {uniqueSegments.map((segment, index) => {
+                  const backgroundColor = segment.color; // Store segment.color in a separate variable
+                  return (
                     <div
-                      className="w-full border-t-[6px] text-center font-chakra font-semibold text-xs text-white rounded-md transition-all duration-300 ease-in-out px-1.5 md:px-5 py-2.5"
-                      style={{
-                        backgroundColor:
-                          strikeMultiplier === segment.multiplier
-                            ? `${backgroundColor}50`
-                            : "#202329",
-                        borderColor: segment.color,
-                      }}
+                      key={index}
+                      className="relative w-full"
+                      onMouseEnter={() =>
+                        setHoveredMultiplier(segment.multiplier)
+                      }
+                      onMouseLeave={() => setHoveredMultiplier(null)}
                     >
-                      {segment.multiplier}x
-                    </div>
-
-                    {hoveredMultiplier === segment.multiplier && (
-                      <div className="absolute top-[-120px] left-0 z-50 flex gap-4 text-white bg-[#202329] border border-white/10 rounded-lg w-full p-4 fadeInUp duration-100 min-w-[250px]">
-                        <div className="w-1/2">
-                          <div className="flex justify-between text-[13px] font-medium font-changa text-opacity-90 text-[#F0F0F0]">
-                            <span className="">
-                              {translator("Profit", language)}
-                            </span>
-                            <span>{selectedCoin.tokenName}</span>
-                          </div>
-                          <div className="border border-white/10 rounded-lg p-3 mt-2">
-                            {selectedCoin
-                              ? truncateNumber(
-                                  Math.max(
-                                    0,
-                                    (betAmt ?? 0) *
-                                      (segment.multiplier * (1 - houseEdge) -
-                                        1),
-                                  ),
-                                  4,
-                                )
-                              : 0}
-                          </div>
-                        </div>
-                        <div className="w-1/2">
-                          <div className="text-[13px] font-medium font-changa text-opacity-90 text-[#F0F0F0]">
-                            {translator("Chance", language)}
-                          </div>
-                          <div className="border border-white/10 rounded-lg p-3 mt-2">
-                            {segment.chance}%
-                          </div>
-                        </div>
+                      <div
+                        className="w-full border-t-[6px] text-center font-chakra font-semibold text-xs text-white rounded-md transition-all duration-300 ease-in-out px-1.5 md:px-5 py-2.5"
+                        style={{
+                          backgroundColor:
+                            strikeMultiplier === segment.multiplier
+                              ? `${backgroundColor}50`
+                              : "#202329",
+                          borderColor: segment.color,
+                        }}
+                      >
+                        {segment.multiplier}x
                       </div>
-                    )}
-                  </div>
-                );
-              })}
-            </>
-          )}
+
+                      {hoveredMultiplier === segment.multiplier && (
+                        <div className="absolute top-[-120px] left-0 z-50 flex gap-4 text-white bg-[#202329] border border-white/10 rounded-lg w-full p-4 fadeInUp duration-100 min-w-[250px]">
+                          <div className="w-1/2">
+                            <div className="flex justify-between text-[13px] font-medium font-changa text-opacity-90 text-[#F0F0F0]">
+                              <span className="">
+                                {translator("Profit", language)}
+                              </span>
+                              <span>{selectedCoin.tokenName}</span>
+                            </div>
+                            <div className="border border-white/10 rounded-lg p-3 mt-2">
+                              {selectedCoin
+                                ? truncateNumber(
+                                    Math.max(
+                                      0,
+                                      (betAmt ?? 0) *
+                                        (segment.multiplier * (1 - houseEdge) -
+                                          1),
+                                    ),
+                                    4,
+                                  )
+                                : 0}
+                            </div>
+                          </div>
+                          <div className="w-1/2">
+                            <div className="text-[13px] font-medium font-changa text-opacity-90 text-[#F0F0F0]">
+                              {translator("Chance", language)}
+                            </div>
+                            <div className="border border-white/10 rounded-lg p-3 mt-2">
+                              {segment.chance}%
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </>
+            )}
           {(!selectedCoin ||
             selectedCoin.amount < minGameAmount ||
-            !wallet.connected ||
+            (session?.user?.wallet && !wallet.connected) ||
             !(status === "authenticated")) && (
             <div className="w-full rounded-lg bg-[#d9d9d90d] bg-opacity-10 flex items-center px-3 py-3 text-white md:px-6">
               <div className="w-full text-center font-changa font-medium text-sm md:text-base text-[#F0F0F0] text-opacity-75">

@@ -62,7 +62,7 @@ export default function Dice2() {
     updatePNL,
     minGameAmount,
     session,
-    status
+    status,
   } = useGlobalContext();
   const [betAmt, setBetAmt] = useState<number | undefined>();
   const [userInput, setUserInput] = useState<number | undefined>();
@@ -196,7 +196,7 @@ export default function Dice2() {
       if (win) {
         successCustom(
           translator(message, language) +
-          ` ${formatNumber(amountWon)} ${selectedCoin?.tokenName}`,
+            ` ${formatNumber(amountWon)} ${selectedCoin?.tokenName}`,
         );
         soundAlert("/sounds/win.wav", !enableSounds);
       } else errorCustom(translator(message, language));
@@ -241,7 +241,7 @@ export default function Dice2() {
         // update profit / loss
         setAutoBetProfit(
           autoBetProfit +
-          (win ? multiplier * (1 - houseEdge) - 1 : -1) * betAmt,
+            (win ? multiplier * (1 - houseEdge) - 1 : -1) * betAmt,
         );
         // update count
         if (typeof autoBetCount === "number") {
@@ -322,12 +322,12 @@ export default function Dice2() {
         potentialLoss =
           autoBetProfit +
           -1 *
-          (autoWinChangeReset || autoLossChangeReset
-            ? betAmt
-            : autoBetCount === "inf"
+            (autoWinChangeReset || autoLossChangeReset
+              ? betAmt
+              : autoBetCount === "inf"
               ? Math.max(0, betAmt)
               : betAmt *
-              (autoLossChange !== null ? autoLossChange / 100.0 : 0));
+                (autoLossChange !== null ? autoLossChange / 100.0 : 0));
 
         // console.log("Current bet amount:", betAmt);
         // console.log("Auto loss change:", autoLossChange);
@@ -418,13 +418,13 @@ export default function Dice2() {
             <BetButton
               disabled={
                 !session?.user ||
-                  isRolling ||
-                  autoBetCount === 0 ||
-                  Number.isNaN(autoBetCount) 
-                  // (betAmt !== undefined &&
-                  //   maxBetAmt !== undefined &&
-                  //   betAmt > maxBetAmt)
-                  ? true
+                isRolling ||
+                autoBetCount === 0 ||
+                Number.isNaN(autoBetCount)
+                  ? // (betAmt !== undefined &&
+                    //   maxBetAmt !== undefined &&
+                    //   betAmt > maxBetAmt)
+                    true
                   : false
               }
               onClickFunction={onSubmit}
@@ -494,13 +494,13 @@ export default function Dice2() {
                   <BetButton
                     disabled={
                       !session?.user ||
-                        isRolling ||
-                        autoBetCount === 0 ||
-                        Number.isNaN(autoBetCount) 
-                        // (betAmt !== undefined &&
-                        //   maxBetAmt !== undefined &&
-                        //   betAmt > maxBetAmt)
-                        ? true
+                      isRolling ||
+                      autoBetCount === 0 ||
+                      Number.isNaN(autoBetCount)
+                        ? // (betAmt !== undefined &&
+                          //   maxBetAmt !== undefined &&
+                          //   betAmt > maxBetAmt)
+                          true
                         : false
                     }
                     onClickFunction={onSubmit}
@@ -538,96 +538,97 @@ export default function Dice2() {
           />
         </div>
         <div className="flex px-0 xl:px-4 mb-0 md:mb-[1.4rem] gap-4 flex-row w-full justify-between">
-          {selectedCoin && selectedCoin.amount > minGameAmount && (
-            <>
-              <div className="flex flex-col w-full">
-                <span className="text-[#F0F0F0] font-changa font-semibold text-xs mb-1">
-                  {translator("Multiplier", language)}
-                </span>
-                <input
-                  id={"amount-input"}
-                  className={`bg-[#202329] w-full min-w-0 font-chakra text-xs text-white rounded-md px-2 md:px-5 py-3 placeholder-[#94A3B8] placeholder-opacity-40 outline-none`}
-                  value={multiplier}
-                  type="number"
-                  maxLength={1}
-                  step={1}
-                  min={1.0}
-                  max={9900.0}
-                  disabled={startAuto || isRolling}
-                  onChange={(e) => handleMultiplierInput(e)}
-                />
-              </div>
-
-              <div
-                className="flex flex-col w-full"
-                onClick={() => {
-                  if (!startAuto && !isRolling)
-                    setRollType(rollType === "over" ? "under" : "over");
-                }}
-              >
-                {rollType === "over" ? (
-                  <span className="text-[#F0F0F0] text-xs font-changa font-semibold mb-1">
-                    {translator("Roll Over", language)}
-                  </span>
-                ) : (
-                  <span className="text-[#F0F0F0] text-xs font-chakra font-semibold mb-1">
-                    {translator("Roll Under", language)}
-                  </span>
-                )}
-                <span className="flex justify-between items-center bg-[#202329] text-xs font-chakra text-white rounded-md px-2 md:px-5 py-3">
-                  {choice.toFixed(0)}.00
-                  <Image
-                    src="/assets/sync.svg"
-                    alt="roll type"
-                    width={15}
-                    height={15}
-                  />
-                </span>
-              </div>
-
-              {choice && (
+          {selectedCoin &&
+            selectedCoin.amount > minGameAmount &&
+            (session?.user?.wallet ? wallet.connected : true) && (
+              <>
                 <div className="flex flex-col w-full">
                   <span className="text-[#F0F0F0] font-changa font-semibold text-xs mb-1">
-                    {translator("Chance", language)}
+                    {translator("Multiplier", language)}
                   </span>
                   <input
+                    id={"amount-input"}
                     className={`bg-[#202329] w-full min-w-0 font-chakra text-xs text-white rounded-md px-2 md:px-5 py-3 placeholder-[#94A3B8] placeholder-opacity-40 outline-none`}
-                    value={chance}
+                    value={multiplier}
                     type="number"
                     maxLength={1}
                     step={1}
-                    min={0}
-                    max={98.0}
+                    min={1.0}
+                    max={9900.0}
                     disabled={startAuto || isRolling}
-                    onChange={(e) => handleChanceInput(e)}
+                    onChange={(e) => handleMultiplierInput(e)}
                   />
                 </div>
-              )}
-            </>
-          )}
+
+                <div
+                  className="flex flex-col w-full"
+                  onClick={() => {
+                    if (!startAuto && !isRolling)
+                      setRollType(rollType === "over" ? "under" : "over");
+                  }}
+                >
+                  {rollType === "over" ? (
+                    <span className="text-[#F0F0F0] text-xs font-changa font-semibold mb-1">
+                      {translator("Roll Over", language)}
+                    </span>
+                  ) : (
+                    <span className="text-[#F0F0F0] text-xs font-chakra font-semibold mb-1">
+                      {translator("Roll Under", language)}
+                    </span>
+                  )}
+                  <span className="flex justify-between items-center bg-[#202329] text-xs font-chakra text-white rounded-md px-2 md:px-5 py-3">
+                    {choice.toFixed(0)}.00
+                    <Image
+                      src="/assets/sync.svg"
+                      alt="roll type"
+                      width={15}
+                      height={15}
+                    />
+                  </span>
+                </div>
+
+                {choice && (
+                  <div className="flex flex-col w-full">
+                    <span className="text-[#F0F0F0] font-changa font-semibold text-xs mb-1">
+                      {translator("Chance", language)}
+                    </span>
+                    <input
+                      className={`bg-[#202329] w-full min-w-0 font-chakra text-xs text-white rounded-md px-2 md:px-5 py-3 placeholder-[#94A3B8] placeholder-opacity-40 outline-none`}
+                      value={chance}
+                      type="number"
+                      maxLength={1}
+                      step={1}
+                      min={0}
+                      max={98.0}
+                      disabled={startAuto || isRolling}
+                      onChange={(e) => handleChanceInput(e)}
+                    />
+                  </div>
+                )}
+              </>
+            )}
           {(!selectedCoin ||
             selectedCoin.amount < minGameAmount ||
-            !(wallet.connected || session?.user.isWeb2User))
-            && (
-              <div className="w-full rounded-lg bg-[#d9d9d90d] bg-opacity-10 flex items-center px-3 py-3 text-white md:px-6">
-                <div className="w-full text-center font-changa font-medium text-sm md:text-base text-[#F0F0F0] text-opacity-75">
-                  {translator(
-                    "Please deposit funds to start playing. View",
-                    language,
-                  )}{" "}
-                  <u
-                    onClick={() => {
-                      wallet.connected && status === "authenticated"
-                        ? setShowWalletModal(true)
-                        : setShowConnectModal(true);
-                    }}
-                    className="cursor-pointer"
-                  >
-                    {translator("WALLET", language)}
-                  </u>
-                </div>
+            (session?.user?.wallet && !wallet.connected)) && (
+            <div className="w-full rounded-lg bg-[#d9d9d90d] bg-opacity-10 flex items-center px-3 py-3 text-white md:px-6">
+              <div className="w-full text-center font-changa font-medium text-sm md:text-base text-[#F0F0F0] text-opacity-75">
+                {translator(
+                  "Please deposit funds to start playing. View",
+                  language,
+                )}{" "}
+                <u
+                  onClick={() => {
+                    wallet.connected && status === "authenticated"
+                      ? setShowWalletModal(true)
+                      : setShowConnectModal(true);
+                  }}
+                  className="cursor-pointer"
+                >
+                  {translator("WALLET", language)}
+                </u>
               </div>
-            )}
+            </div>
+          )}
         </div>
       </GameDisplay>
       <GameTable>
