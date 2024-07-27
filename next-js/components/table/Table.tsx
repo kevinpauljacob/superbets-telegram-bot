@@ -207,7 +207,7 @@ export const TButton: React.FC<ButtonProps> = ({ active, onClick, label }) => {
 export const TableButtons: React.FC<TableButtonProps> = ({ all, setAll }) => {
   const wallet = useWallet();
   const router = useRouter();
-  const { language } = useGlobalContext();
+  const { language, session } = useGlobalContext();
   const [highRollers, setHighRollers] = useState(false);
 
   const home = router.pathname.split("/")[1] === "";
@@ -233,7 +233,7 @@ export const TableButtons: React.FC<TableButtonProps> = ({ all, setAll }) => {
               pathname: router.pathname,
               query: { ...rest },
             });
-            if (wallet.publicKey) {
+            if (session?.user?.wallet || session?.user?.email) {
               setAll(false);
               setHighRollers(false);
             } else {

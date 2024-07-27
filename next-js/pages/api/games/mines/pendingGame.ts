@@ -33,9 +33,16 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
       await connectDatabase();
 
-      let user = await User.findOne({
-        $or: [{ wallet: wallet }, { email: email }],
-      });
+      let user = null;
+      if (wallet) {
+        user = await User.findOne({
+          wallet: wallet,
+        });
+      } else if (email) {
+        user = await User.findOne({
+          email: email,
+        });
+      }
 
       if (!user)
         return res
@@ -45,7 +52,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       const account = user._id;
 
       const pendingGame = await Mines.findOne({
-        account, 
+        account,
         result: "Pending",
       });
       const result = pendingGame !== null ? true : false;

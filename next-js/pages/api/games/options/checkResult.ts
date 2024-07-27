@@ -37,13 +37,23 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
       await connectDatabase();
 
-      let user = await User.findOne({ $or: [{ wallet: wallet }, { email: email }] })
+      let user = null;
+      if (wallet) {
+        user = await User.findOne({
+          wallet: wallet,
+        });
+      } else if (email) {
+        user = await User.findOne({
+          email: email,
+        });
+      }
+
       if (!user)
         return res
           .status(400)
           .json({ success: false, message: "User does not exist!" });
 
-      const account = user._id
+      const account = user._id;
 
       const bet = await Option.findOne({ account, result: "Pending" });
       if (!bet)
@@ -66,10 +76,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       const stakingTier = Object.entries(stakingTiers).reduce((prev, next) => {
         return stakeAmount >= next[1]?.limit ? next : prev;
       })[0];
-      const houseEdge =
-        launchPromoEdge
-          ? 0
-          : houseEdgeTiers[parseInt(stakingTier)];
+      const houseEdge = launchPromoEdge
+        ? 0
+        : houseEdgeTiers[parseInt(stakingTier)];
 
       await new Promise((r) => setTimeout(r, 2000));
 
@@ -189,8 +198,12 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       return res.json({
         success: true,
         data: { amountWon, amountLost, result },
-        message: `${result} ${result == "Won" ? amountWon.toFixed(4) : amountLost.toFixed(4)
-          } ${SPL_TOKENS.find((token) => token.tokenMint === tokenMint)?.tokenName ?? ""}!`,
+        message: `${result} ${
+          result == "Won" ? amountWon.toFixed(4) : amountLost.toFixed(4)
+        } ${
+          SPL_TOKENS.find((token) => token.tokenMint === tokenMint)
+            ?.tokenName ?? ""
+        }!`,
       });
     } catch (e: any) {
       console.log(e);

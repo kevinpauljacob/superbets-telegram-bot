@@ -368,9 +368,9 @@ export default function Options() {
                 disabled={
                   !betType ||
                   !session?.user ||
-                  (betAmt !== undefined &&
-                    maxBetAmt !== undefined &&
-                    betAmt > maxBetAmt) ||
+                  // (betAmt !== undefined &&
+                  //   maxBetAmt !== undefined &&
+                  //   betAmt > maxBetAmt) ||
                   loading ||
                   (strikePrice > 0 && !result)
                     ? true
@@ -488,9 +488,9 @@ export default function Options() {
                 disabled={
                   !betType ||
                   !session?.user ||
-                  (betAmt !== undefined &&
-                    maxBetAmt !== undefined &&
-                    betAmt > maxBetAmt) ||
+                  // (betAmt !== undefined &&
+                  //   maxBetAmt !== undefined &&
+                  //   betAmt > maxBetAmt) ||
                   loading ||
                   (strikePrice > 0 && !result)
                     ? true

@@ -1202,758 +1202,761 @@ export default function Roulette2() {
   const handleNewResult = (resultNumber: number) => {
     setResultNumbers((prevNumbers) => [...prevNumbers, resultNumber]);
   };
-  return (
-    <GameLayout title="Roulette">
-      <GameOptions>
-        <>
-          <div className="relative w-full flex lg:hidden mb-[1.4rem]">
-            {startAuto && (
-              <div
-                onClick={() => {
-                  soundAlert("/sounds/betbutton.wav", !enableSounds);
-                  warningCustom(
-                    translator("Auto bet stopped", language),
-                    "top-left",
-                  );
-                  setAutoBetCount(0);
-                  setStartAuto(false);
-                }}
-                className="cursor-pointer rounded-lg absolute w-full h-full z-20 bg-[#442c62] hover:bg-[#7653A2] focus:bg-[#53307E] flex items-center justify-center font-chakra font-semibold text-2xl tracking-wider text-white"
-              >
-                {translator("STOP", language)}
-              </div>
-            )}
-            <BetButton
-              disabled={
-                !selectedToken ||
-                loading ||
-                !session?.user ||
-                (betAmt !== undefined &&
-                  maxBetAmt !== undefined &&
-                  betAmt > maxBetAmt)
-                  ? true
-                  : false
-              }
-              onClickFunction={onSubmit}
-            >
-              {loading ? <Loader /> : "BET"}
-            </BetButton>
-          </div>
-          {betSetting === "auto" && (
-            <div className="w-full flex  lg:hidden">
-              <ConfigureAutoButton disabled={disableInput} />
-            </div>
-          )}
 
-          <div className="w-full hidden lg:flex">
-            <BetSetting
-              betSetting={betSetting}
-              setBetSetting={setBetSetting}
-              disabled={disableInput}
-            />
-          </div>
-          <div className="w-full flex flex-col nobar">
-            <FormProvider {...methods}>
-              <form
-                className="w-full flex flex-col gap-0"
-                autoComplete="off"
-                onSubmit={methods.handleSubmit(onSubmit)}
-              >
-                <div className="mb-4">
-                  <h3 className="text-white/90 font-changa">Chip Value</h3>
-                  <div className="grid grid-cols-6 gap-2 mt-2">
-                    {tokens.map((chip) => (
-                      <div
-                        key={chip.id}
-                        className={`border rounded cursor-pointer bg-[#1e2024] flex justify-center items-center py-1 px-[-2px] ${selectedToken?.value === chip.value ? "border-gray-200" : "border-gray-600"}`}
-                        onClick={() => setSelectedToken(chip)}
-                      >
-                        <img src={chip.image} alt={chip.value} />
-                      </div>
-                    ))}
-                  </div>
-                </div>
-                <BetAmount
-                  betAmt={betAmt}
-                  setBetAmt={setUserInput}
-                  currentMultiplier={1}
-                  leastMultiplier={1}
-                  game="roulette"
-                  disabled={true}
-                />
-                {betSetting === "manual" ? (
-                  <></>
-                ) : (
-                  <div className="w-full flex flex-row items-end gap-3">
-                    <AutoCount loading={isRolling || startAuto} />
-                    <div className="w-full hidden lg:flex">
-                      <ConfigureAutoButton disabled={disableInput} />
-                    </div>
-                  </div>
-                )}
-                <div className="relative w-full hidden lg:flex mb-[1.4rem]">
-                  {startAuto && (
-                    <div
-                      onClick={() => {
-                        soundAlert("/sounds/betbutton.wav", !enableSounds);
-                        warningCustom(
-                          translator("Auto bet stopped", language),
-                          "top-left",
-                        );
-                        setAutoBetCount(0);
-                        setStartAuto(false);
-                      }}
-                      className="cursor-pointer rounded-lg absolute w-full h-full z-20 bg-[#442c62] hover:bg-[#7653A2] focus:bg-[#53307E] flex items-center justify-center font-chakra font-semibold text-2xl tracking-wider text-white"
-                    >
-                      {translator("STOP", language)}
-                    </div>
-                  )}
-                  <BetButton
-                    disabled={
-                      !betSetting ||
-                      loading ||
-                      !session?.user ||
-                      (betAmt !== undefined &&
-                        maxBetAmt !== undefined &&
-                        betAmt > maxBetAmt)
-                        ? true
-                        : false
-                    }
-                    // onClickFunction={onSubmit}
-                  >
-                    {loading ? <Loader /> : "BET"}
-                  </BetButton>
-                </div>
-              </form>
-            </FormProvider>
-          </div>
-        </>
-      </GameOptions>
-      <GameDisplay>
-        <div
-          className={`fadeInUp absolute inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50 ${overlay ? "" : "hidden fadeOutDown"}`}
-        >
-          <div className="roulette relative w-full h-full flex flex-col items-center justify-center rounded-full">
-            <img
-              className="absolute w-[30rem] h-[30rem]"
-              src="/bg.svg"
-              style={{
-                top: "50%",
-                left: "50%",
-                transform: "translate(-50%, -50%)",
-              }}
-            />
-            <img
-              className="wheel absolute w-[30rem] h-[30rem]"
-              src="/wheel2.svg"
-              style={{ transform: "translate(-50%, -50%)" }}
-            />
+  return <></>
 
-            <img
-              className="needle absolute w-[10rem] h-[10rem]"
-              src="/needle.svg"
-              style={{ transform: "translate(-50%, -50%)" }}
-            />
+  // return (
+  //   <GameLayout title="Roulette">
+  //     <GameOptions>
+  //       <>
+  //         <div className="relative w-full flex lg:hidden mb-[1.4rem]">
+  //           {startAuto && (
+  //             <div
+  //               onClick={() => {
+  //                 soundAlert("/sounds/betbutton.wav", !enableSounds);
+  //                 warningCustom(
+  //                   translator("Auto bet stopped", language),
+  //                   "top-left",
+  //                 );
+  //                 setAutoBetCount(0);
+  //                 setStartAuto(false);
+  //               }}
+  //               className="cursor-pointer rounded-lg absolute w-full h-full z-20 bg-[#442c62] hover:bg-[#7653A2] focus:bg-[#53307E] flex items-center justify-center font-chakra font-semibold text-2xl tracking-wider text-white"
+  //             >
+  //               {translator("STOP", language)}
+  //             </div>
+  //           )}
+  //           <BetButton
+  //             disabled={
+  //               !selectedToken ||
+  //               loading ||
+  //               !session?.user ||
+  //               (betAmt !== undefined &&
+  //                 maxBetAmt !== undefined &&
+  //                 betAmt > maxBetAmt)
+  //                 ? true
+  //                 : false
+  //             }
+  //             onClickFunction={onSubmit}
+  //           >
+  //             {loading ? <Loader /> : "BET"}
+  //           </BetButton>
+  //         </div>
+  //         {betSetting === "auto" && (
+  //           <div className="w-full flex  lg:hidden">
+  //             <ConfigureAutoButton disabled={disableInput} />
+  //           </div>
+  //         )}
 
-            <div
-              ref={overlayBallContainer}
-              className="ball_container absolute w-[30rem] h-[22px] px-[50px] flex items-center"
-              style={{ transform: "translate(-50%, -50%)" }}
-            >
-              <div
-                ref={overlayBall}
-                className="ball w-[13px] h-[13px] bg-white rounded-full"
-              />
-            </div>
-          </div>
-        </div>
-        <div className=" my-4 flex sm:flex-col items-center ">
-          <ResultDisplay numbers={resultNumbers} />
+  //         <div className="w-full hidden lg:flex">
+  //           <BetSetting
+  //             betSetting={betSetting}
+  //             setBetSetting={setBetSetting}
+  //             disabled={disableInput}
+  //           />
+  //         </div>
+  //         <div className="w-full flex flex-col nobar">
+  //           <FormProvider {...methods}>
+  //             <form
+  //               className="w-full flex flex-col gap-0"
+  //               autoComplete="off"
+  //               onSubmit={methods.handleSubmit(onSubmit)}
+  //             >
+  //               <div className="mb-4">
+  //                 <h3 className="text-white/90 font-changa">Chip Value</h3>
+  //                 <div className="grid grid-cols-6 gap-2 mt-2">
+  //                   {tokens.map((chip) => (
+  //                     <div
+  //                       key={chip.id}
+  //                       className={`border rounded cursor-pointer bg-[#1e2024] flex justify-center items-center py-1 px-[-2px] ${selectedToken?.value === chip.value ? "border-gray-200" : "border-gray-600"}`}
+  //                       onClick={() => setSelectedToken(chip)}
+  //                     >
+  //                       <img src={chip.image} alt={chip.value} />
+  //                     </div>
+  //                   ))}
+  //                 </div>
+  //               </div>
+  //               <BetAmount
+  //                 betAmt={betAmt}
+  //                 setBetAmt={setUserInput}
+  //                 currentMultiplier={1}
+  //                 leastMultiplier={1}
+  //                 game="roulette"
+  //                 disabled={true}
+  //               />
+  //               {betSetting === "manual" ? (
+  //                 <></>
+  //               ) : (
+  //                 <div className="w-full flex flex-row items-end gap-3">
+  //                   <AutoCount loading={isRolling || startAuto} />
+  //                   <div className="w-full hidden lg:flex">
+  //                     <ConfigureAutoButton disabled={disableInput} />
+  //                   </div>
+  //                 </div>
+  //               )}
+  //               <div className="relative w-full hidden lg:flex mb-[1.4rem]">
+  //                 {startAuto && (
+  //                   <div
+  //                     onClick={() => {
+  //                       soundAlert("/sounds/betbutton.wav", !enableSounds);
+  //                       warningCustom(
+  //                         translator("Auto bet stopped", language),
+  //                         "top-left",
+  //                       );
+  //                       setAutoBetCount(0);
+  //                       setStartAuto(false);
+  //                     }}
+  //                     className="cursor-pointer rounded-lg absolute w-full h-full z-20 bg-[#442c62] hover:bg-[#7653A2] focus:bg-[#53307E] flex items-center justify-center font-chakra font-semibold text-2xl tracking-wider text-white"
+  //                   >
+  //                     {translator("STOP", language)}
+  //                   </div>
+  //                 )}
+  //                 <BetButton
+  //                   disabled={
+  //                     !betSetting ||
+  //                     loading ||
+  //                     !session?.user ||
+  //                     (betAmt !== undefined &&
+  //                       maxBetAmt !== undefined &&
+  //                       betAmt > maxBetAmt)
+  //                       ? true
+  //                       : false
+  //                   }
+  //                   // onClickFunction={onSubmit}
+  //                 >
+  //                   {loading ? <Loader /> : "BET"}
+  //                 </BetButton>
+  //               </div>
+  //             </form>
+  //           </FormProvider>
+  //         </div>
+  //       </>
+  //     </GameOptions>
+  //     <GameDisplay>
+  //       <div
+  //         className={`fadeInUp absolute inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50 ${overlay ? "" : "hidden fadeOutDown"}`}
+  //       >
+  //         <div className="roulette relative w-full h-full flex flex-col items-center justify-center rounded-full">
+  //           <img
+  //             className="absolute w-[30rem] h-[30rem]"
+  //             src="/bg.svg"
+  //             style={{
+  //               top: "50%",
+  //               left: "50%",
+  //               transform: "translate(-50%, -50%)",
+  //             }}
+  //           />
+  //           <img
+  //             className="wheel absolute w-[30rem] h-[30rem]"
+  //             src="/wheel2.svg"
+  //             style={{ transform: "translate(-50%, -50%)" }}
+  //           />
 
-          <div
-            className={`hidden roulette relative min-w-[18rem] min-h-[18rem] sm:flex flex-col items-center justify-center ${overlay ? "hidden fadeOutDown" : ""}`}
-          >
-            <img className="absolute w-[90%] h-[90%]" src="/bg.svg " />
-            <img className="wheel absolute" src="/wheel2.svg" />
+  //           <img
+  //             className="needle absolute w-[10rem] h-[10rem]"
+  //             src="/needle.svg"
+  //             style={{ transform: "translate(-50%, -50%)" }}
+  //           />
 
-            <img className="needle absolute" src="/needle.svg" />
+  //           <div
+  //             ref={overlayBallContainer}
+  //             className="ball_container absolute w-[30rem] h-[22px] px-[50px] flex items-center"
+  //             style={{ transform: "translate(-50%, -50%)" }}
+  //           >
+  //             <div
+  //               ref={overlayBall}
+  //               className="ball w-[13px] h-[13px] bg-white rounded-full"
+  //             />
+  //           </div>
+  //         </div>
+  //       </div>
+  //       <div className=" my-4 flex sm:flex-col items-center ">
+  //         <ResultDisplay numbers={resultNumbers} />
 
-            <div
-              ref={ballContainer}
-              className="ball_container absolute w-full h-[10%] px-[10%] flex items-center"
-            >
-              <div
-                ref={ball}
-                className="ball w-[4%] h-[30%] bg-white rounded-full"
-              />
-            </div>
-          </div>
+  //         <div
+  //           className={`hidden roulette relative min-w-[18rem] min-h-[18rem] sm:flex flex-col items-center justify-center ${overlay ? "hidden fadeOutDown" : ""}`}
+  //         >
+  //           <img className="absolute w-[90%] h-[90%]" src="/bg.svg " />
+  //           <img className="wheel absolute" src="/wheel2.svg" />
 
-          <div className=" rounded-lg flex flex-col items-center font-chakra font-semibold text-base rotate-90 sm:rotate-0 right-4 sm:right-0 relative">
-            <div className="flex justify-between w-full  text-white mb-1">
-              <div
-                className="hidden sm:flex items-center cursor-pointer hover:opacity-90"
-                onClick={debouncedUndoLastBet}
-              >
-                <Image
-                  src="/assets/Undo.png"
-                  width={20}
-                  height={20}
-                  alt="undo"
-                />
-                <p className="font-sans text-[16px]">Undo</p>
-              </div>
-              <div
-                className="hidden sm:flex items-center cursor-pointer hover:opacity-90"
-                onClick={clearBets}
-              >
-                <Image
-                  src="/assets/clear.png"
-                  width={20}
-                  height={20}
-                  alt="clear"
-                />
-                <p className="font-sans text-[16px]">Clear</p>
-              </div>
-            </div>
-            <div className="flex flex-col    h-[415px] sm:h-[256px] w-full  text-[12px] sm:text-[16px]  itmes-start  gap-1 sm:gap-0 ">
-              {/* table ui flex-row-reverse w-[211px]  text-[12px] rotate-90 gap-2*/}
-              <div className="w-full flex items-start gap-1   ">
-                {/* flex-col */}
-                <div className=" flex flex-col items-center justify-center h-[132px] sm:h-[157px]">
-                  <div
-                    className={` h-1/2 w-[27.3px]   sm:w-12    flex flex-col justify-center text-center cursor-pointer bg-[#149200] rounded-[5px]
-               text-white relative border-4 border-transparent  hover:bg-[#55BA78]
-                hover:border-[2px] hover:border-slate-300 mb-1 ${
-                  hoveredCorner && hoveredCorner.includes(0)
-                    ? "overlay border-[2px] border-white"
-                    : ""
-                }
-                ${
-                  hoveredSplit && hoveredSplit.includes(0)
-                    ? "overlay border-[2px] border-white"
-                    : ""
-                }`}
-                    onClick={() => {
-                      if (selectedToken) {
-                        handlePlaceBet("num-0", selectedToken);
-                      }
-                      soundAlert(
-                        "/sounds/rouletteChipPlace.wav",
-                        !enableSounds,
-                      );
-                    }}
-                  >
-                    {/* h-[27.3px] w-[125px] */}
-                    <p className="-rotate-90 sm:rotate-0">0</p>
-                    {renderRegularToken("num-0")}
-                  </div>{" "}
-                  <div
-                    className={` h-1/2 w-[27.3px]   sm:w-12    flex flex-col justify-center text-center cursor-pointer bg-[#149200] rounded-[5px]
-               text-white relative border-4 border-transparent  hover:bg-[#55BA78]
-                hover:border-[2px] hover:border-slate-300 mb-1 ${
-                  hoveredCorner && hoveredCorner.includes(99)
-                    ? "overlay border-[2px] border-white"
-                    : ""
-                }
-                ${
-                  hoveredSplit && hoveredSplit.includes(99)
-                    ? "overlay border-[2px] border-white"
-                    : ""
-                }`}
-                    onClick={() => {
-                      if (selectedToken) {
-                        handlePlaceBet("num-99", selectedToken);
-                      }
-                      soundAlert(
-                        "/sounds/rouletteChipPlace.wav",
-                        !enableSounds,
-                      );
-                    }}
-                  >
-                    {/* h-[27.3px] w-[125px] */}
-                    <p className="-rotate-90 sm:rotate-0">00</p>
-                    {renderRegularToken("num-99")}
-                  </div>
-                </div>
-                <div className="grid grid-cols-12 grid-rows-3 gap-[4px] sm:gap-1 sm:w-full sm:mb-[7px] ">
-                  {/* grid-cols-3 grid-rows-12 */}
-                  {rows.map((row, rowIndex) => (
-                    <>
-                      {row.map((number, colIndex) => {
-                        return (
-                          <div
-                            key={colIndex}
-                            className="relative flex justify-center items-center"
-                          >
-                            <button
-                              data-testid={`roulette-tile-${number}`}
-                              className={` h-[40px] w-[27px] sm:w-[48px] sm:h-[48px] flex items-center justify-center  relative text-center  ${
-                                predefinedBets.red.includes(
-                                  number,
-                                ) /* h-[27px] w-[40px] */
-                                  ? "bg-[#F1323E] hover:border hover:border-slate-200 hover:bg-[#FF5C67]"
-                                  : "bg-[#2A2E38] hover:border hover:border-slate-200 hover:bg-[#4D5361]"
-                              } text-white rounded-[5px] border-4 border-transparent ${
-                                hoveredButton &&
-                                predefinedBets[
-                                  hoveredButton as PredefinedBetType
-                                ]?.includes(number)
-                                  ? "overlay border-[2px] border-white "
-                                  : ""
-                              } ${
-                                hoveredRow !== null &&
-                                rows[hoveredRow]?.includes(number)
-                                  ? "overlay border-[2px] border-white"
-                                  : ""
-                              } ${
-                                hoveredSplit && hoveredSplit.includes(number)
-                                  ? "overlay border-[2px] border-white"
-                                  : ""
-                              } ${
-                                hoveredCorner && hoveredCorner.includes(number)
-                                  ? "overlay border-[2px] border-white"
-                                  : ""
-                              } ${
-                                hoveredColumn && hoveredColumn.includes(number)
-                                  ? "overlay border-[2px] border-white"
-                                  : ""
-                              }`}
-                              onClick={() => {
-                                if (selectedToken) {
-                                  handlePlaceBet(
-                                    `num-${number}`,
-                                    selectedToken,
-                                  );
-                                }
-                                soundAlert(
-                                  "/sounds/rouletteChipPlace.wav",
-                                  !enableSounds,
-                                );
-                              }}
-                            >
-                              <p className="-rotate-90 sm:rotate-0 ">
-                                {number}
-                              </p>
+  //           <img className="needle absolute" src="/needle.svg" />
 
-                              {renderRegularToken(`num-${number}`)}
-                            </button>
+  //           <div
+  //             ref={ballContainer}
+  //             className="ball_container absolute w-full h-[10%] px-[10%] flex items-center"
+  //           >
+  //             <div
+  //               ref={ball}
+  //               className="ball w-[4%] h-[30%] bg-white rounded-full"
+  //             />
+  //           </div>
+  //         </div>
 
-                            {rowIndex === 0 ? (
-                              <button
-                                data-testid={`roulette-tile-${number}-top`}
-                                className="absolute w-full h-3 bg-transparent -top-2"
-                                onClick={() => {
-                                  if (colIndex < rows[0].length) {
-                                    handlePlaceColumnBet(
-                                      colIndex,
-                                      selectedToken,
-                                    );
-                                  }
-                                  soundAlert(
-                                    "/sounds/rouletteChipPlace.wav",
-                                    !enableSounds,
-                                  );
-                                }}
-                                onMouseEnter={() =>
-                                  setHoveredColumn(
-                                    rows.map((row) => row[colIndex]),
-                                  )
-                                }
-                                onMouseLeave={() => setHoveredColumn(null)}
-                              >
-                                {renderTopColumnToken(colIndex)}
-                              </button>
-                            ) : (
-                              <button
-                                data-testid={`roulette-tile-${number}-top`}
-                                className="absolute w-full h-3 bg-transparent -top-2"
-                                onClick={() => {
-                                  if (rowIndex > 0) {
-                                    handlePlaceSplitBet(
-                                      number,
-                                      rows[rowIndex - 1][colIndex],
-                                      selectedToken,
-                                    );
-                                  }
-                                  soundAlert(
-                                    "/sounds/rouletteChipPlace.wav",
-                                    !enableSounds,
-                                  );
-                                }}
-                                onMouseEnter={() =>
-                                  rowIndex > 0 &&
-                                  setHoveredSplit([
-                                    number,
-                                    rows[rowIndex - 1][colIndex],
-                                  ])
-                                }
-                                onMouseLeave={() => setHoveredSplit(null)}
-                              >
-                                {rowIndex > 0 &&
-                                  renderTopSplitToken(
-                                    number,
-                                    rowIndex,
-                                    colIndex,
-                                  )}
-                              </button>
-                            )}
+  //         <div className=" rounded-lg flex flex-col items-center font-chakra font-semibold text-base rotate-90 sm:rotate-0 right-4 sm:right-0 relative">
+  //           <div className="flex justify-between w-full  text-white mb-1">
+  //             <div
+  //               className="hidden sm:flex items-center cursor-pointer hover:opacity-90"
+  //               onClick={debouncedUndoLastBet}
+  //             >
+  //               <Image
+  //                 src="/assets/Undo.png"
+  //                 width={20}
+  //                 height={20}
+  //                 alt="undo"
+  //               />
+  //               <p className="font-sans text-[16px]">Undo</p>
+  //             </div>
+  //             <div
+  //               className="hidden sm:flex items-center cursor-pointer hover:opacity-90"
+  //               onClick={clearBets}
+  //             >
+  //               <Image
+  //                 src="/assets/clear.png"
+  //                 width={20}
+  //                 height={20}
+  //                 alt="clear"
+  //               />
+  //               <p className="font-sans text-[16px]">Clear</p>
+  //             </div>
+  //           </div>
+  //           <div className="flex flex-col    h-[415px] sm:h-[256px] w-full  text-[12px] sm:text-[16px]  itmes-start  gap-1 sm:gap-0 ">
+  //             {/* table ui flex-row-reverse w-[211px]  text-[12px] rotate-90 gap-2*/}
+  //             <div className="w-full flex items-start gap-1   ">
+  //               {/* flex-col */}
+  //               <div className=" flex flex-col items-center justify-center h-[132px] sm:h-[157px]">
+  //                 <div
+  //                   className={` h-1/2 w-[27.3px]   sm:w-12    flex flex-col justify-center text-center cursor-pointer bg-[#149200] rounded-[5px]
+  //              text-white relative border-4 border-transparent  hover:bg-[#55BA78]
+  //               hover:border-[2px] hover:border-slate-300 mb-1 ${
+  //                 hoveredCorner && hoveredCorner.includes(0)
+  //                   ? "overlay border-[2px] border-white"
+  //                   : ""
+  //               }
+  //               ${
+  //                 hoveredSplit && hoveredSplit.includes(0)
+  //                   ? "overlay border-[2px] border-white"
+  //                   : ""
+  //               }`}
+  //                   onClick={() => {
+  //                     if (selectedToken) {
+  //                       handlePlaceBet("num-0", selectedToken);
+  //                     }
+  //                     soundAlert(
+  //                       "/sounds/rouletteChipPlace.wav",
+  //                       !enableSounds,
+  //                     );
+  //                   }}
+  //                 >
+  //                   {/* h-[27.3px] w-[125px] */}
+  //                   <p className="-rotate-90 sm:rotate-0">0</p>
+  //                   {renderRegularToken("num-0")}
+  //                 </div>{" "}
+  //                 <div
+  //                   className={` h-1/2 w-[27.3px]   sm:w-12    flex flex-col justify-center text-center cursor-pointer bg-[#149200] rounded-[5px]
+  //              text-white relative border-4 border-transparent  hover:bg-[#55BA78]
+  //               hover:border-[2px] hover:border-slate-300 mb-1 ${
+  //                 hoveredCorner && hoveredCorner.includes(99)
+  //                   ? "overlay border-[2px] border-white"
+  //                   : ""
+  //               }
+  //               ${
+  //                 hoveredSplit && hoveredSplit.includes(99)
+  //                   ? "overlay border-[2px] border-white"
+  //                   : ""
+  //               }`}
+  //                   onClick={() => {
+  //                     if (selectedToken) {
+  //                       handlePlaceBet("num-99", selectedToken);
+  //                     }
+  //                     soundAlert(
+  //                       "/sounds/rouletteChipPlace.wav",
+  //                       !enableSounds,
+  //                     );
+  //                   }}
+  //                 >
+  //                   {/* h-[27.3px] w-[125px] */}
+  //                   <p className="-rotate-90 sm:rotate-0">00</p>
+  //                   {renderRegularToken("num-99")}
+  //                 </div>
+  //               </div>
+  //               <div className="grid grid-cols-12 grid-rows-3 gap-[4px] sm:gap-1 sm:w-full sm:mb-[7px] ">
+  //                 {/* grid-cols-3 grid-rows-12 */}
+  //                 {rows.map((row, rowIndex) => (
+  //                   <>
+  //                     {row.map((number, colIndex) => {
+  //                       return (
+  //                         <div
+  //                           key={colIndex}
+  //                           className="relative flex justify-center items-center"
+  //                         >
+  //                           <button
+  //                             data-testid={`roulette-tile-${number}`}
+  //                             className={` h-[40px] w-[27px] sm:w-[48px] sm:h-[48px] flex items-center justify-center  relative text-center  ${
+  //                               predefinedBets.red.includes(
+  //                                 number,
+  //                               ) /* h-[27px] w-[40px] */
+  //                                 ? "bg-[#F1323E] hover:border hover:border-slate-200 hover:bg-[#FF5C67]"
+  //                                 : "bg-[#2A2E38] hover:border hover:border-slate-200 hover:bg-[#4D5361]"
+  //                             } text-white rounded-[5px] border-4 border-transparent ${
+  //                               hoveredButton &&
+  //                               predefinedBets[
+  //                                 hoveredButton as PredefinedBetType
+  //                               ]?.includes(number)
+  //                                 ? "overlay border-[2px] border-white "
+  //                                 : ""
+  //                             } ${
+  //                               hoveredRow !== null &&
+  //                               rows[hoveredRow]?.includes(number)
+  //                                 ? "overlay border-[2px] border-white"
+  //                                 : ""
+  //                             } ${
+  //                               hoveredSplit && hoveredSplit.includes(number)
+  //                                 ? "overlay border-[2px] border-white"
+  //                                 : ""
+  //                             } ${
+  //                               hoveredCorner && hoveredCorner.includes(number)
+  //                                 ? "overlay border-[2px] border-white"
+  //                                 : ""
+  //                             } ${
+  //                               hoveredColumn && hoveredColumn.includes(number)
+  //                                 ? "overlay border-[2px] border-white"
+  //                                 : ""
+  //                             }`}
+  //                             onClick={() => {
+  //                               if (selectedToken) {
+  //                                 handlePlaceBet(
+  //                                   `num-${number}`,
+  //                                   selectedToken,
+  //                                 );
+  //                               }
+  //                               soundAlert(
+  //                                 "/sounds/rouletteChipPlace.wav",
+  //                                 !enableSounds,
+  //                               );
+  //                             }}
+  //                           >
+  //                             <p className="-rotate-90 sm:rotate-0 ">
+  //                               {number}
+  //                             </p>
 
-                            {
-                              <button
-                                data-testid={`roulette-tile-${number}-left`}
-                                className="absolute w-[12px] px-[6px] py-[1px] h-[42px] sm:w-3 sm:h-full bg-transparent -left-[7px] sm:-left-2 sm:px-2 top-0"
-                                onClick={() => {
-                                  if (number === 2) {
-                                    handlePlaceLeftBetWithThreeNumbers(
-                                      2,
-                                      selectedToken,
-                                    );
-                                  } else if (number === 1) {
-                                    handlePlaceSplitBet(
-                                      number,
-                                      99,
-                                      selectedToken,
-                                    );
-                                  } else if (number === 3) {
-                                    handlePlaceSplitBet(
-                                      number,
-                                      0,
-                                      selectedToken,
-                                    );
-                                  } else {
-                                    handlePlaceSplitBet(
-                                      number,
-                                      rows[rowIndex][colIndex - 1],
-                                      selectedToken,
-                                    );
-                                  }
-                                  soundAlert(
-                                    "/sounds/rouletteChipPlace.wav",
-                                    !enableSounds,
-                                  );
-                                }}
-                                onMouseEnter={() => {
-                                  if (number === 2) {
-                                    setHoveredSplit([2, 0, 99]);
-                                  } else if (number === 3) {
-                                    setHoveredSplit([number, 0]);
-                                  } else if (number === 1) {
-                                    setHoveredSplit([number, 99]);
-                                  } else {
-                                    setHoveredSplit([
-                                      number,
-                                      rows[rowIndex][colIndex - 1],
-                                    ]);
-                                  }
-                                }}
-                                onMouseLeave={() => setHoveredSplit(null)}
-                              >
-                                {renderLeftSplitToken(
-                                  number,
-                                  rowIndex,
-                                  colIndex,
-                                )}
-                              </button>
-                            }
-                            <button
-                              data-testid={`roulette-tile-${number}-corner`}
-                              className="absolute w-[15px] h-[24px] sm:w-6 sm:h-6 bg-transparent -left-2 -top-2"
-                              onClick={() => {
-                                if (rowIndex > 0) {
-                                  if (number === 2) {
-                                    handlePlaceCornerBetWithThreeNumbers(
-                                      number,
-                                      selectedToken,
-                                    );
-                                  } else if (number === 1) {
-                                    handlePlaceCornerBetWithThreeNumbers(
-                                      number,
-                                      selectedToken,
-                                    );
-                                  } else {
-                                    handlePlaceCornerBet(
-                                      number,
-                                      rows[rowIndex][colIndex - 1],
-                                      rows[rowIndex - 1][colIndex],
-                                      rows[rowIndex - 1][colIndex - 1],
-                                      selectedToken,
-                                    );
-                                  }
-                                }
-                                soundAlert(
-                                  "/sounds/rouletteChipPlace.wav",
-                                  !enableSounds,
-                                );
-                              }}
-                              onMouseEnter={() => {
-                                if (rowIndex > 0) {
-                                  if (number === 2) {
-                                    setHoveredCorner([2, 0, 3]);
-                                  } else if (number === 1) {
-                                    setHoveredCorner([1, 99, 2]);
-                                  } else {
-                                    setHoveredCorner([
-                                      number,
-                                      rows[rowIndex][colIndex - 1],
-                                      rows[rowIndex - 1][colIndex],
-                                      rows[rowIndex - 1][colIndex - 1],
-                                    ]);
-                                  }
-                                }
-                              }}
-                              onMouseLeave={() => setHoveredCorner(null)}
-                            >
-                              {rowIndex > 0 &&
-                                renderCornerToken(number, rowIndex, colIndex)}
-                              {renderCornerTokenWithThreeNumbers(
-                                number,
-                                rowIndex,
-                                colIndex,
-                              )}
-                            </button>
-                          </div>
-                        );
-                      })}
-                    </>
-                  ))}
-                </div>
-                <div className="flex flex-col justify-between items-center gap-[5px] sm:gap-1 mt-0">
-                  {rows.map((_, rowIndex) => (
-                    <div
-                      key={`row-${rowIndex}`}
-                      className="h-[40px] w-[27px] sm:w-[48px] sm:h-[48px] flex items-center justify-center text-center bg-transparent border-2 border-[#26272B] text-white cursor-pointer relative rounded-[5px] hover:border hover:border-slate-200 hover:bg-[#4D5361]"
-                      onMouseEnter={() => setHoveredRow(rowIndex)}
-                      onMouseLeave={() => setHoveredRow(null)}
-                      onClick={() => {
-                        handlePlaceBet(
-                          rowToColumnLabel(rowIndex),
-                          selectedToken,
-                        );
-                        soundAlert(
-                          "/sounds/rouletteChipPlace.wav",
-                          !enableSounds,
-                        );
-                      }}
-                    >
-                      <p className="-rotate-90 sm:rotate-0">2:1</p>
-                      {renderRegularToken(rowToColumnLabel(rowIndex))}
-                    </div>
-                  ))}
-                </div>
-              </div>
-              {/* options */}
-              <div className="flex  w-[430px] sm:w-full justify-between">
-                {/* w-[430px] rotate-90*/}
-                <div className="h-[27px] w-[27.3px]  sm:h-[153px] sm:w-12   bg-transparent" />
-                {/*h-[27.3px] w-[123px]  */}
-                <div className="flex flex-col w-full gap-1">
-                  <div className="flex w-full justify-center gap-1">
-                    <button
-                      className="relative  flex items-center justify-center bg-[#0E0F14] border border-[#26272B]
-                    text-white cursor-pointer rounded-[5px] w-[120px] h-[40px] sm:w-[213.19px] sm:h-12 hover:border
-                     hover:border-slate-200 hover:bg-[#4D5361]"
-                      onMouseEnter={() => setHoveredButton("1st-12")}
-                      onMouseLeave={() => setHoveredButton(null)}
-                      onClick={() => {
-                        handlePlaceBet("1st-12", selectedToken);
-                        soundAlert(
-                          "/sounds/rouletteChipPlace.wav",
-                          !enableSounds,
-                        );
-                      }}
-                    >
-                      {/* w-[117px] h-[40px] */}1 to 12
-                      {renderRegularToken("1st-12")}
-                    </button>
-                    <button
-                      className="relative col-span-1 flex items-center justify-center bg-[#0E0F14] border border-[#26272B]
-                   text-white cursor-pointer rounded-[5px]  w-[120px] h-[40px] sm:w-[213.19px] sm:h-12 hover:border hover:border-slate-200 hover:bg-[#4D5361]"
-                      onMouseEnter={() => setHoveredButton("2nd-12")}
-                      onMouseLeave={() => setHoveredButton(null)}
-                      onClick={() => {
-                        handlePlaceBet("2nd-12", selectedToken);
-                        soundAlert(
-                          "/sounds/rouletteChipPlace.wav",
-                          !enableSounds,
-                        );
-                      }}
-                    >
-                      {/* w-[117px] h-[40px] */}
-                      13 to 24
-                      {renderRegularToken("2nd-12")}
-                    </button>
-                    <button
-                      className="relative col-span-1 flex items-center justify-center bg-[#0E0F14] border border-[#26272B]
-                   text-white cursor-pointer rounded-[5px]   w-[120px] h-[40px] sm:w-[213.19px] sm:h-12 hover:border hover:border-slate-200
-                    hover:bg-[#4D5361]"
-                      onMouseEnter={() => setHoveredButton("3rd-12")}
-                      onMouseLeave={() => setHoveredButton(null)}
-                      onClick={() => {
-                        handlePlaceBet("3rd-12", selectedToken);
-                        soundAlert(
-                          "/sounds/rouletteChipPlace.wav",
-                          !enableSounds,
-                        );
-                      }}
-                    >
-                      {/*  w-[117px] h-[40px]*/}
-                      25 to 36
-                      {renderRegularToken("3rd-12")}
-                    </button>
-                  </div>
-                  <div className="flex w-full justify-center gap-1">
-                    <button
-                      className="relative  flex items-center justify-center bg-[#0E0F14] border border-[#26272B] text-white cursor-pointer rounded-md
-                   sm:h-[49.5px]  sm:w-[104px] w-[57px] h-[40px] hover:border hover:border-slate-200 hover:bg-[#4D5361]"
-                      onMouseEnter={() => setHoveredButton("low")}
-                      onMouseLeave={() => setHoveredButton(null)}
-                      onClick={() => {
-                        handlePlaceBet("low", selectedToken);
-                        soundAlert(
-                          "/sounds/rouletteChipPlace.wav",
-                          !enableSounds,
-                        );
-                      }}
-                    >
-                      {/* w-[57px] h-[40px] */}1 to 18
-                      {renderRegularToken("low")}
-                    </button>
-                    <button
-                      className="relative  flex items-center justify-center bg-[#0E0F14] border border-[#26272B] text-white cursor-pointer rounded-md 
-                  sm:h-[49.5px]  sm:w-[104px] w-[57px] h-[40px] hover:border hover:border-slate-200 hover:bg-[#4D5361]"
-                      onMouseEnter={() => setHoveredButton("even")}
-                      onMouseLeave={() => setHoveredButton(null)}
-                      onClick={() => {
-                        handlePlaceBet("even", selectedToken);
-                        soundAlert(
-                          "/sounds/rouletteChipPlace.wav",
-                          !enableSounds,
-                        );
-                      }}
-                    >
-                      {/*  w-[57px] h-[40px]*/}
-                      Even
-                      {renderRegularToken("even")}
-                    </button>
-                    <button
-                      className="relative  flex items-center justify-center bg-[#F1323E] cursor-pointer rounded-md  sm:h-[49.5px]  sm:w-[104px] w-[57px] h-[40px] hover:border
-                   hover:border-slate-200 hover:bg-[#FF5C67]"
-                      onMouseEnter={() => setHoveredButton("red")}
-                      onMouseLeave={() => setHoveredButton(null)}
-                      onClick={() => {
-                        handlePlaceBet("red", selectedToken);
-                        soundAlert(
-                          "/sounds/rouletteChipPlace.wav",
-                          !enableSounds,
-                        );
-                      }}
-                    >
-                      {/*w-[57px] h-[40px]  */}
-                      {renderRegularToken("red")}
-                    </button>
-                    <button
-                      className="relative  flex items-center justify-center bg-[#2A2E38] cursor-pointer rounded-md  sm:h-[49.5px]  sm:w-[104px] w-[57px] h-[40px] hover:border hover:border-slate-200 hover:bg-[#4D5361]"
-                      onMouseEnter={() => setHoveredButton("black")}
-                      onMouseLeave={() => setHoveredButton(null)}
-                      onClick={() => {
-                        handlePlaceBet("black", selectedToken);
-                        soundAlert(
-                          "/sounds/rouletteChipPlace.wav",
-                          !enableSounds,
-                        );
-                      }}
-                    >
-                      {/* w-[57px] h-[40px] */}
-                      {renderRegularToken("black")}
-                    </button>
-                    <button
-                      className="relative  flex items-center justify-center bg-[#0E0F14] border border-[#26272B] text-white cursor-pointer
-                   rounded-md  sm:h-[49.5px]  sm:w-[104px] w-[57px] h-[40px] hover:border hover:border-slate-200 hover:bg-[#4D5361]"
-                      onMouseEnter={() => setHoveredButton("odd")}
-                      onMouseLeave={() => setHoveredButton(null)}
-                      onClick={() => {
-                        handlePlaceBet("odd", selectedToken);
-                        soundAlert(
-                          "/sounds/rouletteChipPlace.wav",
-                          !enableSounds,
-                        );
-                      }}
-                    >
-                      {/*  w-[57px] h-[40px]*/}
-                      Odd
-                      {renderRegularToken("odd")}
-                    </button>
-                    <button
-                      className="relative  flex items-center justify-center bg-[#0E0F14] border border-[#26272B] text-white cursor-pointer rounded-md 
-                  sm:h-[49.5px]  sm:w-[104px] w-[57px] h-[40px] hover:border hover:border-slate-200 hover:bg-[#4D5361]"
-                      onMouseEnter={() => setHoveredButton("high")}
-                      onMouseLeave={() => setHoveredButton(null)}
-                      onClick={() => {
-                        handlePlaceBet("high", selectedToken);
-                        soundAlert(
-                          "/sounds/rouletteChipPlace.wav",
-                          !enableSounds,
-                        );
-                      }}
-                    >
-                      {/* w-[57px] h-[40px] */}
-                      19 to 36
-                      {renderRegularToken("high")}
-                    </button>
-                  </div>
-                </div>
-                <div className="sm:h-[153px] sm:w-12  bg-transparent hidden sm:block" />
-                <div className="flex flex-col   w-[27.3px] h-[123px] text-white  sm:hidden gap-1">
-                  <div
-                    className="flex items-center justify-center cursor-pointer hover:opacity-90  w-[27px] h-[40px] rounded-md bg-[#2A2E38]"
-                    onClick={undoLastBet}
-                  >
-                    <Image
-                      src="/assets/Undo.png"
-                      width={20}
-                      height={20}
-                      alt="undo"
-                    />
-                  </div>
-                  <div
-                    className="flex items-center justify-center cursor-pointer hover:opacity-90 w-[27px] h-[40px]  rounded-md bg-[#2A2E38]"
-                    onClick={clearBets}
-                  >
-                    <Image
-                      src="/assets/clear.png"
-                      width={18}
-                      height={18}
-                      alt="clear"
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-          {/*  <input
-            type="number"
-            value={num}
-            onChange={(e) => setNum(parseInt(e.target.value))}
-            className=" mt-8 px-4 py-2 bg-white text-black rounded-md"
-          />
-          <button
-            onClick={() => reset()}
-            className=" mt-4 px-4 py-2 bg-white text-black rounded-md"
-          >
-            Reset
-          </button>
-          <button
-            onClick={() => spin()}
-            className=" mt-4 px-4 py-2 bg-white text-black rounded-md"
-          >
-            Spin
-          </button> */}
-        </div>
-      </GameDisplay>
-      <GameTable>
-        <Bets refresh={refresh} />
-      </GameTable>
-    </GameLayout>
-  );
+  //                             {renderRegularToken(`num-${number}`)}
+  //                           </button>
+
+  //                           {rowIndex === 0 ? (
+  //                             <button
+  //                               data-testid={`roulette-tile-${number}-top`}
+  //                               className="absolute w-full h-3 bg-transparent -top-2"
+  //                               onClick={() => {
+  //                                 if (colIndex < rows[0].length) {
+  //                                   handlePlaceColumnBet(
+  //                                     colIndex,
+  //                                     selectedToken,
+  //                                   );
+  //                                 }
+  //                                 soundAlert(
+  //                                   "/sounds/rouletteChipPlace.wav",
+  //                                   !enableSounds,
+  //                                 );
+  //                               }}
+  //                               onMouseEnter={() =>
+  //                                 setHoveredColumn(
+  //                                   rows.map((row) => row[colIndex]),
+  //                                 )
+  //                               }
+  //                               onMouseLeave={() => setHoveredColumn(null)}
+  //                             >
+  //                               {renderTopColumnToken(colIndex)}
+  //                             </button>
+  //                           ) : (
+  //                             <button
+  //                               data-testid={`roulette-tile-${number}-top`}
+  //                               className="absolute w-full h-3 bg-transparent -top-2"
+  //                               onClick={() => {
+  //                                 if (rowIndex > 0) {
+  //                                   handlePlaceSplitBet(
+  //                                     number,
+  //                                     rows[rowIndex - 1][colIndex],
+  //                                     selectedToken,
+  //                                   );
+  //                                 }
+  //                                 soundAlert(
+  //                                   "/sounds/rouletteChipPlace.wav",
+  //                                   !enableSounds,
+  //                                 );
+  //                               }}
+  //                               onMouseEnter={() =>
+  //                                 rowIndex > 0 &&
+  //                                 setHoveredSplit([
+  //                                   number,
+  //                                   rows[rowIndex - 1][colIndex],
+  //                                 ])
+  //                               }
+  //                               onMouseLeave={() => setHoveredSplit(null)}
+  //                             >
+  //                               {rowIndex > 0 &&
+  //                                 renderTopSplitToken(
+  //                                   number,
+  //                                   rowIndex,
+  //                                   colIndex,
+  //                                 )}
+  //                             </button>
+  //                           )}
+
+  //                           {
+  //                             <button
+  //                               data-testid={`roulette-tile-${number}-left`}
+  //                               className="absolute w-[12px] px-[6px] py-[1px] h-[42px] sm:w-3 sm:h-full bg-transparent -left-[7px] sm:-left-2 sm:px-2 top-0"
+  //                               onClick={() => {
+  //                                 if (number === 2) {
+  //                                   handlePlaceLeftBetWithThreeNumbers(
+  //                                     2,
+  //                                     selectedToken,
+  //                                   );
+  //                                 } else if (number === 1) {
+  //                                   handlePlaceSplitBet(
+  //                                     number,
+  //                                     99,
+  //                                     selectedToken,
+  //                                   );
+  //                                 } else if (number === 3) {
+  //                                   handlePlaceSplitBet(
+  //                                     number,
+  //                                     0,
+  //                                     selectedToken,
+  //                                   );
+  //                                 } else {
+  //                                   handlePlaceSplitBet(
+  //                                     number,
+  //                                     rows[rowIndex][colIndex - 1],
+  //                                     selectedToken,
+  //                                   );
+  //                                 }
+  //                                 soundAlert(
+  //                                   "/sounds/rouletteChipPlace.wav",
+  //                                   !enableSounds,
+  //                                 );
+  //                               }}
+  //                               onMouseEnter={() => {
+  //                                 if (number === 2) {
+  //                                   setHoveredSplit([2, 0, 99]);
+  //                                 } else if (number === 3) {
+  //                                   setHoveredSplit([number, 0]);
+  //                                 } else if (number === 1) {
+  //                                   setHoveredSplit([number, 99]);
+  //                                 } else {
+  //                                   setHoveredSplit([
+  //                                     number,
+  //                                     rows[rowIndex][colIndex - 1],
+  //                                   ]);
+  //                                 }
+  //                               }}
+  //                               onMouseLeave={() => setHoveredSplit(null)}
+  //                             >
+  //                               {renderLeftSplitToken(
+  //                                 number,
+  //                                 rowIndex,
+  //                                 colIndex,
+  //                               )}
+  //                             </button>
+  //                           }
+  //                           <button
+  //                             data-testid={`roulette-tile-${number}-corner`}
+  //                             className="absolute w-[15px] h-[24px] sm:w-6 sm:h-6 bg-transparent -left-2 -top-2"
+  //                             onClick={() => {
+  //                               if (rowIndex > 0) {
+  //                                 if (number === 2) {
+  //                                   handlePlaceCornerBetWithThreeNumbers(
+  //                                     number,
+  //                                     selectedToken,
+  //                                   );
+  //                                 } else if (number === 1) {
+  //                                   handlePlaceCornerBetWithThreeNumbers(
+  //                                     number,
+  //                                     selectedToken,
+  //                                   );
+  //                                 } else {
+  //                                   handlePlaceCornerBet(
+  //                                     number,
+  //                                     rows[rowIndex][colIndex - 1],
+  //                                     rows[rowIndex - 1][colIndex],
+  //                                     rows[rowIndex - 1][colIndex - 1],
+  //                                     selectedToken,
+  //                                   );
+  //                                 }
+  //                               }
+  //                               soundAlert(
+  //                                 "/sounds/rouletteChipPlace.wav",
+  //                                 !enableSounds,
+  //                               );
+  //                             }}
+  //                             onMouseEnter={() => {
+  //                               if (rowIndex > 0) {
+  //                                 if (number === 2) {
+  //                                   setHoveredCorner([2, 0, 3]);
+  //                                 } else if (number === 1) {
+  //                                   setHoveredCorner([1, 99, 2]);
+  //                                 } else {
+  //                                   setHoveredCorner([
+  //                                     number,
+  //                                     rows[rowIndex][colIndex - 1],
+  //                                     rows[rowIndex - 1][colIndex],
+  //                                     rows[rowIndex - 1][colIndex - 1],
+  //                                   ]);
+  //                                 }
+  //                               }
+  //                             }}
+  //                             onMouseLeave={() => setHoveredCorner(null)}
+  //                           >
+  //                             {rowIndex > 0 &&
+  //                               renderCornerToken(number, rowIndex, colIndex)}
+  //                             {renderCornerTokenWithThreeNumbers(
+  //                               number,
+  //                               rowIndex,
+  //                               colIndex,
+  //                             )}
+  //                           </button>
+  //                         </div>
+  //                       );
+  //                     })}
+  //                   </>
+  //                 ))}
+  //               </div>
+  //               <div className="flex flex-col justify-between items-center gap-[5px] sm:gap-1 mt-0">
+  //                 {rows.map((_, rowIndex) => (
+  //                   <div
+  //                     key={`row-${rowIndex}`}
+  //                     className="h-[40px] w-[27px] sm:w-[48px] sm:h-[48px] flex items-center justify-center text-center bg-transparent border-2 border-[#26272B] text-white cursor-pointer relative rounded-[5px] hover:border hover:border-slate-200 hover:bg-[#4D5361]"
+  //                     onMouseEnter={() => setHoveredRow(rowIndex)}
+  //                     onMouseLeave={() => setHoveredRow(null)}
+  //                     onClick={() => {
+  //                       handlePlaceBet(
+  //                         rowToColumnLabel(rowIndex),
+  //                         selectedToken,
+  //                       );
+  //                       soundAlert(
+  //                         "/sounds/rouletteChipPlace.wav",
+  //                         !enableSounds,
+  //                       );
+  //                     }}
+  //                   >
+  //                     <p className="-rotate-90 sm:rotate-0">2:1</p>
+  //                     {renderRegularToken(rowToColumnLabel(rowIndex))}
+  //                   </div>
+  //                 ))}
+  //               </div>
+  //             </div>
+  //             {/* options */}
+  //             <div className="flex  w-[430px] sm:w-full justify-between">
+  //               {/* w-[430px] rotate-90*/}
+  //               <div className="h-[27px] w-[27.3px]  sm:h-[153px] sm:w-12   bg-transparent" />
+  //               {/*h-[27.3px] w-[123px]  */}
+  //               <div className="flex flex-col w-full gap-1">
+  //                 <div className="flex w-full justify-center gap-1">
+  //                   <button
+  //                     className="relative  flex items-center justify-center bg-[#0E0F14] border border-[#26272B]
+  //                   text-white cursor-pointer rounded-[5px] w-[120px] h-[40px] sm:w-[213.19px] sm:h-12 hover:border
+  //                    hover:border-slate-200 hover:bg-[#4D5361]"
+  //                     onMouseEnter={() => setHoveredButton("1st-12")}
+  //                     onMouseLeave={() => setHoveredButton(null)}
+  //                     onClick={() => {
+  //                       handlePlaceBet("1st-12", selectedToken);
+  //                       soundAlert(
+  //                         "/sounds/rouletteChipPlace.wav",
+  //                         !enableSounds,
+  //                       );
+  //                     }}
+  //                   >
+  //                     {/* w-[117px] h-[40px] */}1 to 12
+  //                     {renderRegularToken("1st-12")}
+  //                   </button>
+  //                   <button
+  //                     className="relative col-span-1 flex items-center justify-center bg-[#0E0F14] border border-[#26272B]
+  //                  text-white cursor-pointer rounded-[5px]  w-[120px] h-[40px] sm:w-[213.19px] sm:h-12 hover:border hover:border-slate-200 hover:bg-[#4D5361]"
+  //                     onMouseEnter={() => setHoveredButton("2nd-12")}
+  //                     onMouseLeave={() => setHoveredButton(null)}
+  //                     onClick={() => {
+  //                       handlePlaceBet("2nd-12", selectedToken);
+  //                       soundAlert(
+  //                         "/sounds/rouletteChipPlace.wav",
+  //                         !enableSounds,
+  //                       );
+  //                     }}
+  //                   >
+  //                     {/* w-[117px] h-[40px] */}
+  //                     13 to 24
+  //                     {renderRegularToken("2nd-12")}
+  //                   </button>
+  //                   <button
+  //                     className="relative col-span-1 flex items-center justify-center bg-[#0E0F14] border border-[#26272B]
+  //                  text-white cursor-pointer rounded-[5px]   w-[120px] h-[40px] sm:w-[213.19px] sm:h-12 hover:border hover:border-slate-200
+  //                   hover:bg-[#4D5361]"
+  //                     onMouseEnter={() => setHoveredButton("3rd-12")}
+  //                     onMouseLeave={() => setHoveredButton(null)}
+  //                     onClick={() => {
+  //                       handlePlaceBet("3rd-12", selectedToken);
+  //                       soundAlert(
+  //                         "/sounds/rouletteChipPlace.wav",
+  //                         !enableSounds,
+  //                       );
+  //                     }}
+  //                   >
+  //                     {/*  w-[117px] h-[40px]*/}
+  //                     25 to 36
+  //                     {renderRegularToken("3rd-12")}
+  //                   </button>
+  //                 </div>
+  //                 <div className="flex w-full justify-center gap-1">
+  //                   <button
+  //                     className="relative  flex items-center justify-center bg-[#0E0F14] border border-[#26272B] text-white cursor-pointer rounded-md
+  //                  sm:h-[49.5px]  sm:w-[104px] w-[57px] h-[40px] hover:border hover:border-slate-200 hover:bg-[#4D5361]"
+  //                     onMouseEnter={() => setHoveredButton("low")}
+  //                     onMouseLeave={() => setHoveredButton(null)}
+  //                     onClick={() => {
+  //                       handlePlaceBet("low", selectedToken);
+  //                       soundAlert(
+  //                         "/sounds/rouletteChipPlace.wav",
+  //                         !enableSounds,
+  //                       );
+  //                     }}
+  //                   >
+  //                     {/* w-[57px] h-[40px] */}1 to 18
+  //                     {renderRegularToken("low")}
+  //                   </button>
+  //                   <button
+  //                     className="relative  flex items-center justify-center bg-[#0E0F14] border border-[#26272B] text-white cursor-pointer rounded-md 
+  //                 sm:h-[49.5px]  sm:w-[104px] w-[57px] h-[40px] hover:border hover:border-slate-200 hover:bg-[#4D5361]"
+  //                     onMouseEnter={() => setHoveredButton("even")}
+  //                     onMouseLeave={() => setHoveredButton(null)}
+  //                     onClick={() => {
+  //                       handlePlaceBet("even", selectedToken);
+  //                       soundAlert(
+  //                         "/sounds/rouletteChipPlace.wav",
+  //                         !enableSounds,
+  //                       );
+  //                     }}
+  //                   >
+  //                     {/*  w-[57px] h-[40px]*/}
+  //                     Even
+  //                     {renderRegularToken("even")}
+  //                   </button>
+  //                   <button
+  //                     className="relative  flex items-center justify-center bg-[#F1323E] cursor-pointer rounded-md  sm:h-[49.5px]  sm:w-[104px] w-[57px] h-[40px] hover:border
+  //                  hover:border-slate-200 hover:bg-[#FF5C67]"
+  //                     onMouseEnter={() => setHoveredButton("red")}
+  //                     onMouseLeave={() => setHoveredButton(null)}
+  //                     onClick={() => {
+  //                       handlePlaceBet("red", selectedToken);
+  //                       soundAlert(
+  //                         "/sounds/rouletteChipPlace.wav",
+  //                         !enableSounds,
+  //                       );
+  //                     }}
+  //                   >
+  //                     {/*w-[57px] h-[40px]  */}
+  //                     {renderRegularToken("red")}
+  //                   </button>
+  //                   <button
+  //                     className="relative  flex items-center justify-center bg-[#2A2E38] cursor-pointer rounded-md  sm:h-[49.5px]  sm:w-[104px] w-[57px] h-[40px] hover:border hover:border-slate-200 hover:bg-[#4D5361]"
+  //                     onMouseEnter={() => setHoveredButton("black")}
+  //                     onMouseLeave={() => setHoveredButton(null)}
+  //                     onClick={() => {
+  //                       handlePlaceBet("black", selectedToken);
+  //                       soundAlert(
+  //                         "/sounds/rouletteChipPlace.wav",
+  //                         !enableSounds,
+  //                       );
+  //                     }}
+  //                   >
+  //                     {/* w-[57px] h-[40px] */}
+  //                     {renderRegularToken("black")}
+  //                   </button>
+  //                   <button
+  //                     className="relative  flex items-center justify-center bg-[#0E0F14] border border-[#26272B] text-white cursor-pointer
+  //                  rounded-md  sm:h-[49.5px]  sm:w-[104px] w-[57px] h-[40px] hover:border hover:border-slate-200 hover:bg-[#4D5361]"
+  //                     onMouseEnter={() => setHoveredButton("odd")}
+  //                     onMouseLeave={() => setHoveredButton(null)}
+  //                     onClick={() => {
+  //                       handlePlaceBet("odd", selectedToken);
+  //                       soundAlert(
+  //                         "/sounds/rouletteChipPlace.wav",
+  //                         !enableSounds,
+  //                       );
+  //                     }}
+  //                   >
+  //                     {/*  w-[57px] h-[40px]*/}
+  //                     Odd
+  //                     {renderRegularToken("odd")}
+  //                   </button>
+  //                   <button
+  //                     className="relative  flex items-center justify-center bg-[#0E0F14] border border-[#26272B] text-white cursor-pointer rounded-md 
+  //                 sm:h-[49.5px]  sm:w-[104px] w-[57px] h-[40px] hover:border hover:border-slate-200 hover:bg-[#4D5361]"
+  //                     onMouseEnter={() => setHoveredButton("high")}
+  //                     onMouseLeave={() => setHoveredButton(null)}
+  //                     onClick={() => {
+  //                       handlePlaceBet("high", selectedToken);
+  //                       soundAlert(
+  //                         "/sounds/rouletteChipPlace.wav",
+  //                         !enableSounds,
+  //                       );
+  //                     }}
+  //                   >
+  //                     {/* w-[57px] h-[40px] */}
+  //                     19 to 36
+  //                     {renderRegularToken("high")}
+  //                   </button>
+  //                 </div>
+  //               </div>
+  //               <div className="sm:h-[153px] sm:w-12  bg-transparent hidden sm:block" />
+  //               <div className="flex flex-col   w-[27.3px] h-[123px] text-white  sm:hidden gap-1">
+  //                 <div
+  //                   className="flex items-center justify-center cursor-pointer hover:opacity-90  w-[27px] h-[40px] rounded-md bg-[#2A2E38]"
+  //                   onClick={undoLastBet}
+  //                 >
+  //                   <Image
+  //                     src="/assets/Undo.png"
+  //                     width={20}
+  //                     height={20}
+  //                     alt="undo"
+  //                   />
+  //                 </div>
+  //                 <div
+  //                   className="flex items-center justify-center cursor-pointer hover:opacity-90 w-[27px] h-[40px]  rounded-md bg-[#2A2E38]"
+  //                   onClick={clearBets}
+  //                 >
+  //                   <Image
+  //                     src="/assets/clear.png"
+  //                     width={18}
+  //                     height={18}
+  //                     alt="clear"
+  //                   />
+  //                 </div>
+  //               </div>
+  //             </div>
+  //           </div>
+  //         </div>
+  //         {/*  <input
+  //           type="number"
+  //           value={num}
+  //           onChange={(e) => setNum(parseInt(e.target.value))}
+  //           className=" mt-8 px-4 py-2 bg-white text-black rounded-md"
+  //         />
+  //         <button
+  //           onClick={() => reset()}
+  //           className=" mt-4 px-4 py-2 bg-white text-black rounded-md"
+  //         >
+  //           Reset
+  //         </button>
+  //         <button
+  //           onClick={() => spin()}
+  //           className=" mt-4 px-4 py-2 bg-white text-black rounded-md"
+  //         >
+  //           Spin
+  //         </button> */}
+  //       </div>
+  //     </GameDisplay>
+  //     <GameTable>
+  //       <Bets refresh={refresh} />
+  //     </GameTable>
+  //   </GameLayout>
+  // );
 }

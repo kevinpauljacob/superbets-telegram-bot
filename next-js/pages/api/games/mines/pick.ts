@@ -53,9 +53,16 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           .status(400)
           .json({ success: false, message: "Invalid parameters" });
 
-      let user = await User.findOne({
-        $or: [{ wallet: wallet }, { email: email }],
-      });
+      let user = null;
+      if (wallet) {
+        user = await User.findOne({
+          wallet: wallet,
+        });
+      } else if (email) {
+        user = await User.findOne({
+          email: email,
+        });
+      }
 
       if (!user)
         return res
@@ -294,8 +301,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           result === "Won"
             ? "Congratulations! You won"
             : result === "Lost"
-              ? "Sorry, Better luck next time!"
-              : "Game in progress",
+            ? "Sorry, Better luck next time!"
+            : "Game in progress",
         result,
         ...(result === "Pending" ? {} : { strikeNumbers }),
         strikeMultiplier,

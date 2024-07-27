@@ -86,16 +86,19 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       const strikeMultiplier = new Decimal(100).dividedBy(chance).toDP(6);
       const maxPayout = Decimal.mul(amount, strikeMultiplier);
 
-      if (!(maxPayout.toNumber() <= maxPayouts[tokenMint as GameTokens].dice2))
-        return res
-          .status(400)
-          .json({ success: false, message: "Max payout exceeded" });
+      // if (!(maxPayout.toNumber() <= maxPayouts[tokenMint as GameTokens].dice2))
+      //   return res
+      //     .status(400)
+      //     .json({ success: false, message: "Max payout exceeded" });
 
       await connectDatabase();
 
-      let user = await User.findOne({
-        $or: [{ wallet: wallet }, { email: email }],
-      });
+      let user = null;
+      if (email) {
+        user = await User.findOne({ email });
+      } else if (wallet) {
+        user = await User.findOne({ wallet });
+      }
 
       if (!user)
         return res

@@ -28,7 +28,7 @@ export default function Bets({ refresh }: { refresh: boolean }) {
   const [allBetMaxPages, setAllBetMaxPages] = useState(0);
   const [allBets, setAllBets] = useState<Bet[]>([]);
 
-  const { liveBets } = useGlobalContext();
+  const { liveBets, session } = useGlobalContext();
 
   const router = useRouter();
   const home = router.pathname.split("/")[1] === "";
@@ -87,8 +87,11 @@ export default function Bets({ refresh }: { refresh: boolean }) {
           setAllBetMaxPages(1);
         })
         .finally(() => setLoading(false));
-    } else if (wallet?.publicKey) {
-      const route = `/api/games/global/getUserHistory?wallet=${wallet.publicKey?.toBase58()}`;
+    } else if (session?.user?.wallet || session?.user?.email) {
+      let query = session?.user?.email
+        ? `email=${session?.user?.email}`
+        : `wallet=${session?.user?.wallet}`;
+      const route = `/api/games/global/getUserHistory?${query}`;
 
       fetch(`${route}`)
         .then((res) => res.json())
@@ -113,7 +116,9 @@ export default function Bets({ refresh }: { refresh: boolean }) {
 
   return (
     <div
-      className={`relative w-full ${home ? "mt-[2rem] md:mt-[4rem] mb-5:" : ""}`}
+      className={`relative w-full ${
+        home ? "mt-[2rem] md:mt-[4rem] mb-5:" : ""
+      }`}
     >
       <Table
         all={all}

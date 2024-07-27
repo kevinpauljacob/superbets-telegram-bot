@@ -65,8 +65,8 @@ export default function Leaderboard() {
         if (session?.user?.email) {
           let userInfo = users.find(
             (info: any) =>
-              info?.email == session?.user?.email ||
-              info?.wallet === session?.user?.wallet,
+              (info?.email && info?.email === session?.user?.email) ||
+              (info?.wallet && info?.wallet === session?.user?.wallet),
           );
 
           setMyData(userInfo);

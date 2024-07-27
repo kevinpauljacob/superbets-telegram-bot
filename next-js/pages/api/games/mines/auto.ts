@@ -95,21 +95,28 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       const maxStrikeMultiplier = 25;
       const maxPayout = Decimal.mul(amount, maxStrikeMultiplier);
 
-      if (
-        !(
-          maxPayout.toNumber() <=
-          maxPayouts[splToken.tokenMint as GameTokens].mines
-        )
-      )
-        return res
-          .status(400)
-          .json({ success: false, message: "Max payout exceeded" });
+      // if (
+      //   !(
+      //     maxPayout.toNumber() <=
+      //     maxPayouts[splToken.tokenMint as GameTokens].mines
+      //   )
+      // )
+      //   return res
+      //     .status(400)
+      //     .json({ success: false, message: "Max payout exceeded" });
 
       await connectDatabase();
 
-      let users = await User.findOne({
-        $or: [{ wallet: wallet }, { email: email }],
-      });
+      let users = null;
+      if (wallet) {
+        users = await User.findOne({
+          wallet: wallet,
+        });
+      } else if (email) {
+        users = await User.findOne({
+          email: email,
+        });
+      }
 
       if (!users)
         return res

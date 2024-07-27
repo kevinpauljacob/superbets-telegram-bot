@@ -60,11 +60,13 @@ export default function BetAmount({
 
   useEffect(() => {
     if (betAmt !== undefined && betAmt > 0) {
+
       if (game === GameType.roulette1) {
         setInputString(betAmt.toFixed(9));
       } else {
         setInputString(betAmt.toString());
       }
+
     } else {
       setInputString("");
     }
@@ -83,14 +85,14 @@ export default function BetAmount({
         isFinite(calculatedMaxBetAmt) ? calculatedMaxBetAmt : 0,
       );
 
-      if (betAmt > (isFinite(calculatedMaxBetAmt) ? calculatedMaxBetAmt : 0)) {
-        methods.setError("amount", {
-          type: "manual",
-          message: "Bet amount cannot exceed the maximum bet!",
-        });
-      } else {
-        methods.clearErrors("amount");
-      }
+      // if (betAmt > (isFinite(calculatedMaxBetAmt) ? calculatedMaxBetAmt : 0)) {
+      //   methods.setError("amount", {
+      //     type: "manual",
+      //     message: "Bet amount cannot exceed the maximum bet!",
+      //   });
+      // } else {
+      //   methods.clearErrors("amount");
+      // }
     }
   }, [betAmt, currentMultiplier, game, selectedCoin]);
 
@@ -161,7 +163,7 @@ export default function BetAmount({
         <label className="text-white/90 font-changa">
           {translator("Bet Amount", language)}
         </label>
-        <span className="flex items-center text-[#94A3B8] text-opacity-90 font-changa text-xs gap-2">
+        {/* <span className="flex items-center text-[#94A3B8] text-opacity-90 font-changa text-xs gap-2">
           <span className="cursor-pointer" onClick={handleSetMaxBet}>
             {maxBetAmt} $
             {SPL_TOKENS.find(
@@ -181,9 +183,9 @@ export default function BetAmount({
           >
             {translator("Why", language)}?
           </span>
-        </span>
+        </span> */}
       </div>
-      {betAmountsModal &&
+      {/* {betAmountsModal &&
       game !== "mines" &&
       game !== "keno" &&
       game !== "wheel" &&
@@ -271,8 +273,8 @@ export default function BetAmount({
             </div>
           </div>
         </div>
-      ) : null}
-      {isHovered &&
+      ) : null} */}
+      {/* {isHovered &&
       (game === "mines" ||
         game === "keno" ||
         game === "wheel" ||
@@ -317,7 +319,7 @@ export default function BetAmount({
             </span>
           </div>
         </div>
-      ) : null}
+      ) : null} */}
       <div
         className={`relative group flex mt-1 h-11 w-full cursor-pointer items-center rounded-[8px] bg-[#202329] px-4`}
       >
@@ -331,14 +333,14 @@ export default function BetAmount({
           autoComplete="off"
           onChange={(e) => {
             let enteredAmount = parseFloat(e.target.value);
-            if (maxBetAmt !== undefined && enteredAmount > maxBetAmt) {
-              methods.setError("amount", {
-                type: "manual",
-                message: "Bet amount cannot exceed the maximum bet!",
-              });
-            } else {
-              methods.clearErrors("amount");
-            }
+            // if (maxBetAmt !== undefined && enteredAmount > maxBetAmt) {
+            //   methods.setError("amount", {
+            //     type: "manual",
+            //     message: "Bet amount cannot exceed the maximum bet!",
+            //   });
+            // } else {
+            //   methods.clearErrors("amount");
+            // }
             setBetAmt(enteredAmount);
             setInputString(e.target.value);
           }}

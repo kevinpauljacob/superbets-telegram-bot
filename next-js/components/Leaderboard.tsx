@@ -87,13 +87,15 @@ function Leaderboard({ data, page, setPage, maxPages, myData }: any) {
                 )
                 .filter(
                   (data: any) =>
-                    data?.email !== session?.user?.email ||
-                    data?.wallet !== session?.user?.wallet,
+                    (data?.email && data?.email !== session?.user?.email) ||
+                    (data?.wallet && data?.wallet !== session?.user?.wallet),
                 )
                 .map((data: any, index: number) => (
                   <div
                     key={index}
-                    className={`mb-2.5 flex w-full flex-row items-center gap-2 rounded-[5px] ${index % 2 === 0 ? "bg-opacity-50" : ""} bg-[#121418]  py-3 pr-10`}
+                    className={`mb-2.5 flex w-full flex-row items-center gap-2 rounded-[5px] ${
+                      index % 2 === 0 ? "bg-opacity-50" : ""
+                    } bg-[#121418]  py-3 pr-10`}
                   >
                     <span className="relative w-[10%] text-center ml-10 font-changa text-sm font-light text-[#F0F0F0] text-opacity-75">
                       <svg
@@ -132,6 +134,9 @@ function Leaderboard({ data, page, setPage, maxPages, myData }: any) {
                       </div> */}
                       {/* {obfuscatePubKey(data.wallet ?? "")} */}
                       {data?.name ?? obfuscatePubKey(data?.wallet)}
+                      {data?.email}
+                      {data?.wallet}
+                      {session?.user?.email}
                     </span>
                     <span className="flex gap-2 items-center justify-end w-[15%] text-right font-chakra text-sm font-bold text-[#ffffff]">
                       <Image src="/assets/coin.svg" width={13} height={13} />

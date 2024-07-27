@@ -884,10 +884,10 @@ export default function Mines() {
                   (coinData && coinData[0].amount < minGameAmount) ||
                   (betType === "auto" && !userBets.some((bet) => bet.pick)) ||
                   autoBetCount === 0 ||
-                  Number.isNaN(autoBetCount) ||
-                  (betAmt !== undefined &&
-                    maxBetAmt !== undefined &&
-                    betAmt > maxBetAmt)
+                  Number.isNaN(autoBetCount)
+                  // (betAmt !== undefined &&
+                  //   maxBetAmt !== undefined &&
+                  //   betAmt > maxBetAmt)
                     ? true
                     : false
                 }
@@ -1157,10 +1157,10 @@ export default function Mines() {
                         (betType === "auto" &&
                           !userBets.some((bet) => bet.pick)) ||
                         autoBetCount === 0 ||
-                        Number.isNaN(autoBetCount) ||
-                        (betAmt !== undefined &&
-                          maxBetAmt !== undefined &&
-                          betAmt > maxBetAmt)
+                        Number.isNaN(autoBetCount) 
+                        // (betAmt !== undefined &&
+                        //   maxBetAmt !== undefined &&
+                        //   betAmt > maxBetAmt)
                           ? true
                           : false
                       }
