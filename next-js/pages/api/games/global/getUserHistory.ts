@@ -8,19 +8,31 @@ const encryptionKey = Buffer.from(process.env.ENCRYPTION_KEY!, "hex");
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === "GET") {
     try {
-      const wallet = req.query.wallet;
+      const wallet = req?.query?.wallet;
+      const email = req?.query?.email;
 
-      if (!wallet)
+      if (!wallet && !email)
         return res
           .status(400)
           .json({ success: false, message: "Invalid wallet" });
 
       await connectDatabase();
 
-      const user = await User.findOne({ wallet });
+      let user: any = null;
+      if (wallet) {
+        user = await User.findOne({
+          wallet: wallet,
+        });
+      } else if (email) {
+        user = await User.findOne({
+          email: email,
+        });
+      }
+
       if (!user)
         return res.json({ success: true, data: [], message: "No data found" });
 
+      const account = user._id;
       const data: any[] = [];
 
       for (const [_, value] of Object.entries(GameType)) {
@@ -29,13 +41,13 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
         if (game === GameType.options) {
           const records = await model
-            .find({ wallet })
+            .find({ account })
             .sort({ createdAt: -1 })
             .limit(30);
 
           const resultsWithGame = records.map((record) => {
             const { ...rest } = record.toObject();
-
+            rest.account = user?.name ?? user?.wallet;
             rest.game = game;
             return rest;
           });
@@ -43,7 +55,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           data.push(...resultsWithGame);
         } else {
           const records = await model
-            .find({ wallet })
+            .find({ account })
             .populate({
               path: "gameSeed",
             })
@@ -52,7 +64,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
           const resultsWithGame = records.map((record) => {
             const { gameSeed, ...rest } = record.toObject();
-
+            rest.account = user?.name ?? user?.wallet;
             rest.game = game;
 
             if (gameSeed.status !== seedStatus.EXPIRED) {
