@@ -60,7 +60,7 @@ export default function BetAmount({
 
   useEffect(() => {
     if (betAmt !== undefined && betAmt > 0) {
-      if (GameType.roulette1) {
+      if (game === GameType.roulette1) {
         setInputString(betAmt.toFixed(9));
       } else {
         setInputString(betAmt.toString());
