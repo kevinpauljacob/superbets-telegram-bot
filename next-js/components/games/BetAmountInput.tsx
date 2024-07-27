@@ -109,8 +109,11 @@ export default function BetAmount({
   }, [currentMaxBetAmt, coinData, selectedCoin]);
 
   const handleSetMaxBet = () => {
-    setBetAmt(maxBetAmt);
-    setInputString((maxBetAmt ?? 0).toString());
+    // setBetAmt(maxBetAmt);
+    // setInputString((maxBetAmt ?? 0).toString());
+
+    setBetAmt(selectedCoin?.amount ?? 0);
+    setInputString((selectedCoin?.amount ?? 0).toString());
   };
 
   const handleHalfBet = () => {
@@ -142,11 +145,13 @@ export default function BetAmount({
             : 0
           : parseFloat(((betAmt ?? 0) * 2).toFixed(4));
 
-      const finalBetAmt = maxBetAmt
-        ? newBetAmt > maxBetAmt
-          ? maxBetAmt
-          : newBetAmt
-        : newBetAmt;
+      // const finalBetAmt = maxBetAmt
+      //   ? newBetAmt > maxBetAmt
+      //     ? maxBetAmt
+      //     : newBetAmt
+      //   : newBetAmt;
+
+      const finalBetAmt = newBetAmt
 
       setBetAmt(finalBetAmt);
       setInputString(finalBetAmt.toString());
