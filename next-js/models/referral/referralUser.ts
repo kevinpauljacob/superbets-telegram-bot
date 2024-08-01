@@ -4,7 +4,10 @@ const ReferralUserSchema = new Schema(
   {
     wallet: {
       type: String,
-      required: true,
+      unique: true,
+    },
+    email: {
+      type: String,
       unique: true,
     },
     campaigns: {

@@ -16,9 +16,11 @@ import {
   claimEarnings,
 } from "@/context/transactions";
 import { SPL_TOKENS, commissionLevels } from "@/context/config";
+
 interface Referral {
   _id: string;
   wallet: string;
+  email: string;
   __v: number;
   campaigns: Campaign[];
   createdAt: string;
@@ -81,6 +83,7 @@ export default function AffiliateProgram() {
     liveTokenPrice,
     showCreateCampaignModal,
     setShowCreateCampaignModal,
+    session,
   } = useGlobalContext();
   const transactionsPerPage = 10;
   const [page, setPage] = useState(1);
@@ -113,7 +116,7 @@ export default function AffiliateProgram() {
   const colors = ["4594FF", "E17AFF", "00C278", "4594FF", "00C278"];
 
   const referredTabHeaders = [
-    "Wallet",
+    "User",
     "Level",
     "Wagered",
     "Commission %",
@@ -300,36 +303,95 @@ export default function AffiliateProgram() {
     if (userCampaigns.length > 0) calculateEarnings();
   }, [userCampaigns]);
 
+  const fetchData = async () => {
+    try {
+      const url =
+        wallet && wallet.publicKey
+          ? `/api/referral/${wallet.publicKey}`
+          : `/api/referral/web2User?email=${session?.user?.email}`;
+
+      const response = await fetch(url, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        console.error("Error fetching data:", error);
+        throw new Error("Failed to fetch data");
+      }
+      const { success, user, referredUsers, message } = await response.json();
+
+      if (success) {
+        setUser(user);
+        setUserId(user._id);
+        setUserCampaigns(user.campaigns);
+        setReferredUsers(referredUsers);
+        // console.log("user", user);
+        // console.log("referredUsers", referredUsers);
+      }
+    } catch (error: any) {
+      console.error("Error fetching data:", error.message);
+    }
+  };
+
   // fetch user data
   useEffect(() => {
-    const fetchData = async () => {
+    if ((wallet && wallet.connected) || session?.user?.email) {
+      fetchData();
+    }
+  }, [wallet, session?.user?.email]);
+
+  useEffect(() => {
+    const claimEarnings = async (email: string, userCampaigns: Campaign[]) => {
+      console.log("Checking for claimable SUPER tokens");
       try {
-        const response = await fetch(`/api/referral/${wallet.publicKey}`, {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
+        const campaignsWithSuperTokens = userCampaigns.filter((campaign) => {
+          const unclaimedSuper = campaign.unclaimedEarnings["SUPER"];
+          return unclaimedSuper && unclaimedSuper > 0;
         });
 
-        const { success, user, referredUsers, message } = await response.json();
-
-        if (success) {
-          setUser(user);
-          setUserId(user._id);
-          setUserCampaigns(user.campaigns);
-          setReferredUsers(referredUsers);
-          // console.log("user", user);
-          // console.log("referredUsers", referredUsers);
+        if (campaignsWithSuperTokens.length === 0) {
+          console.log("No campaigns with claimable SUPER tokens found");
+          return;
         }
-      } catch (error: any) {
-        throw new Error(error.message);
+
+        for (const campaign of campaignsWithSuperTokens) {
+          const response = await fetch("/api/referral/web2User/claim", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              email: email,
+              campaignId: campaign._id,
+            }),
+          });
+
+          if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || "Failed to claim earnings");
+          }
+
+          const data = await response.json();
+          console.log(
+            `Claimed SUPER earnings for campaign ${campaign.campaignName}:`,
+            data,
+          );
+        }
+
+        await fetchData();
+      } catch (error) {
+        console.error("Error claiming earnings:", error);
       }
     };
 
-    if (wallet && wallet.connected) {
-      fetchData();
+    if (userCampaigns.length > 0 && session?.user?.email) {
+      claimEarnings(session.user.email, userCampaigns);
     }
-  }, [wallet]);
+  }, [session?.user?.email, userCampaigns]);
 
   // useEffect(() => {
   //   console.log("userData", user);
@@ -347,7 +409,7 @@ export default function AffiliateProgram() {
   return (
     <div className="px-5 lg2:px-[4rem] md:px-[3rem] pt-5">
       <h1 className="font-chakra font-bold text-[1.75rem] text-white mb-3.5">
-       {translator("AFFILIATE PROGRAM", language)}
+        {translator("AFFILIATE PROGRAM", language)}
       </h1>
 
       {/* mobile tabs */}
@@ -356,7 +418,7 @@ export default function AffiliateProgram() {
           <TButton
             active={referred}
             onClick={() => {
-              if (wallet.publicKey) {
+              if (wallet.publicKey || session?.user?.email) {
                 setReferred(true);
                 setCampaigns(false);
                 setEarnings(false);
@@ -405,7 +467,10 @@ export default function AffiliateProgram() {
                 {translator("Multi-Level Referral", language)}
               </p>
               <p className="text-[#94A3B8] font-semibold text-[11px] text-opacity-50 md:max-w-[340px]">
-                {translator("Our affiliate program includes a comprehensive retention program that keeps referred customers engaged and invested.", language)}
+                {translator(
+                  "Our affiliate program includes a comprehensive retention program that keeps referred customers engaged and invested.",
+                  language,
+                )}
               </p>
             </div>
             {userCampaigns.length > 0 && (
@@ -436,7 +501,9 @@ export default function AffiliateProgram() {
             )}
           </div>
           <div className="hidden lg:flex flex-col justify-between bg-staking-bg rounded-[5px] px-4 pt-4 pb-8">
-            <p className="text-white/75 font-semibold">{translator("How it Works?", language)}</p>
+            <p className="text-white/75 font-semibold">
+              {translator("How it Works?", language)}
+            </p>
             <Image
               src="/assets/banners/affiliate-program.png"
               alt="how it works image"
@@ -454,7 +521,7 @@ export default function AffiliateProgram() {
           <TButton
             active={referred}
             onClick={() => {
-              if (wallet.publicKey) {
+              if (wallet.publicKey || session?.user?.email) {
                 setReferred(true);
                 setCampaigns(false);
                 setEarnings(false);
@@ -611,7 +678,9 @@ export default function AffiliateProgram() {
                               >
                                 <div className="w-full flex items-center justify-between cursor-pointer">
                                   <span className="w-full text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
-                                    {obfuscatePubKey(user.wallet)}
+                                    {user.wallet !== null
+                                      ? obfuscatePubKey(user.wallet)
+                                      : user.email}
                                   </span>
                                   <span className="w-full text-center font-changa text-sm text-opacity-75">
                                     <span
@@ -621,7 +690,8 @@ export default function AffiliateProgram() {
                                         color: `#${colors[level]}`,
                                       }}
                                     >
-                                      {translator("Level", language)} {level + 1}
+                                      {translator("Level", language)}{" "}
+                                      {level + 1}
                                     </span>
                                   </span>
                                   <span className="w-full hidden md:block text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
@@ -655,7 +725,7 @@ export default function AffiliateProgram() {
                       </>
                     ) : (
                       <span className="font-changa text-[#F0F0F080]">
-                        {translator("No have not referred anyone.", language)}
+                        {translator("You have not referred anyone.", language)}
                       </span>
                     )}
                   </div>
@@ -741,7 +811,7 @@ export default function AffiliateProgram() {
                       </>
                     ) : (
                       <span className="font-changa text-[#F0F0F080]">
-                        {translator("No have not referred anyone.", language)}
+                        {translator("You have not referred anyone.", language)}
                       </span>
                     )}
                   </div>

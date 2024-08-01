@@ -4,7 +4,9 @@ const ReferralCampaignSchema = new Schema(
   {
     wallet: {
       type: String,
-      required: true,
+    },
+    email: {
+      type: String,
     },
     campaignName: {
       type: String,
@@ -34,7 +36,10 @@ const ReferralCampaignSchema = new Schema(
   { timestamps: true },
 );
 
-ReferralCampaignSchema.index({ wallet: 1, campaignName: 1 }, { unique: true });
+ReferralCampaignSchema.index(
+  { wallet: 1, email: 1, campaignName: 1 },
+  { unique: true },
+);
 
 const ReferralCampaign =
   mongoose.models.ReferralCampaign ||

@@ -8,8 +8,12 @@ import { AdaptiveModal, AdaptiveModalContent } from "../AdaptiveModal";
 
 export default function CreateCampaignModal() {
   const wallet = useWallet();
-  const { language, showCreateCampaignModal, setShowCreateCampaignModal } =
-    useGlobalContext();
+  const {
+    language,
+    showCreateCampaignModal,
+    setShowCreateCampaignModal,
+    session,
+  } = useGlobalContext();
   const [campaignName, setCampaignName] = useState("");
   const [campaignCode, setCampaignCode] = useState("");
 
@@ -32,6 +36,7 @@ export default function CreateCampaignModal() {
         },
         body: JSON.stringify({
           wallet: wallet.publicKey,
+          email: session?.user?.email,
           referralCode: campaignCode,
           campaignName: campaignName,
         }),

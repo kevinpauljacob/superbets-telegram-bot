@@ -13,9 +13,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         .status(405)
         .json({ success: false, message: "Method not allowed!" });
 
-    const { wallet, referralCode } = req.body;
+    const { wallet, email, referralCode } = req.body;
 
-    if (!wallet || !referralCode)
+    if ((!wallet && !email) || !referralCode)
       return res
         .status(400)
         .json({ success: false, message: "Missing parameters!" });
@@ -35,12 +35,19 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         .status(400)
         .json({ success: false, message: "Referral code not found!" });
 
-    if (campaign.wallet === wallet)
+    const isSelfReferral =
+      (campaign.wallet && campaign.wallet === wallet) ||
+      (campaign.email && campaign.email === email);
+
+    if (isSelfReferral) {
       return res
         .status(400)
         .json({ success: false, message: "You can't refer yourself!" });
+    }
 
-    const referrer = await User.findOne({ wallet: campaign.wallet });
+    const referrer = await User.findOne({
+      $or: [{ wallet: campaign.wallet }, { email: campaign.email }],
+    });
 
     if (!referrer)
       return res
@@ -55,6 +62,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     const user = await User.findOneAndUpdate(
       {
         wallet,
+        email,
         referredByChain: [],
       },
       {
@@ -78,6 +86,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       const campaign = await Campaign.findOneAndUpdate(
         {
           wallet,
+          email,
           campaignName: defaultCampaign,
         },
         {
@@ -94,6 +103,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       await User.findOneAndUpdate(
         {
           wallet,
+          email,
         },
         {
           $addToSet: { campaigns: campaign._id },

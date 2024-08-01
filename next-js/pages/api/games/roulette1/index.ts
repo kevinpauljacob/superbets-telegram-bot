@@ -367,6 +367,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
       await updateGameStats(
         wallet,
+        email,
         GameType.roulette1,
         tokenMint,
         amount,
