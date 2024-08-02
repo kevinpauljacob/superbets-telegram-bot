@@ -85,7 +85,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
       const multiplier = riskToChance[risk][rows];
       const maxStrikeMultiplier = multiplier.at(-1)!;
-      const maxPayout = Decimal.mul(amount, maxStrikeMultiplier);
+      const maxPayout = new Decimal(maxPayouts[tokenMint as GameTokens].plinko); 
 
       // if (!(maxPayout.toNumber() <= maxPayouts[tokenMint as GameTokens].plinko))
       //   return res
@@ -197,9 +197,10 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       chance = 56 * 5 / 4 = 70, totalChance = 163, i = 5
       */
 
-      const amountWon = Decimal.mul(amount, strikeMultiplier).mul(
-        Decimal.sub(1, houseEdge),
-      );
+      const amountWon = Decimal.min(
+        Decimal.mul(amount, strikeMultiplier),
+        maxPayout,
+      ).mul(Decimal.sub(1, houseEdge));
       const amountLost = Math.max(
         new Decimal(amount).sub(amountWon).toNumber(),
         0,

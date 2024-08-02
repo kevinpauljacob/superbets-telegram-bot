@@ -731,7 +731,9 @@ export default function Plinko() {
                 !wallet ||
                 !session?.user ||
                 loading ||
-                (betSetting === "auto" && startAuto)
+                (betSetting === "auto" &&
+                  startAuto &&
+                  (autoBetCount === 0 || Number.isNaN(autoBetCount)))
                   ? // (betAmt !== undefined &&
                     //   maxBetAmt !== undefined &&
                     //   betAmt > maxBetAmt)
@@ -885,7 +887,9 @@ export default function Plinko() {
                       !wallet ||
                       !session?.user ||
                       loading ||
-                      (betSetting === "auto" && startAuto)
+                      (betSetting === "auto" &&
+                        startAuto &&
+                        (autoBetCount === 0 || Number.isNaN(autoBetCount)))
                         ? // (betAmt !== undefined &&
                           //   maxBetAmt !== undefined &&
                           //   betAmt > maxBetAmt)

@@ -756,9 +756,9 @@ export default function Mines() {
             (autoWinChangeReset || autoLossChangeReset
               ? betAmt
               : autoBetCount === "inf"
-                ? Math.max(0, betAmt)
-                : betAmt *
-                  (autoLossChange !== null ? autoLossChange / 100.0 : 0));
+              ? Math.max(0, betAmt)
+              : betAmt *
+                (autoLossChange !== null ? autoLossChange / 100.0 : 0));
       }
       if (
         useAutoConfig &&
@@ -883,12 +883,12 @@ export default function Mines() {
                   isRolling ||
                   (coinData && coinData[0].amount < minGameAmount) ||
                   (betType === "auto" && !userBets.some((bet) => bet.pick)) ||
-                  autoBetCount === 0 ||
-                  Number.isNaN(autoBetCount)
-                  // (betAmt !== undefined &&
-                  //   maxBetAmt !== undefined &&
-                  //   betAmt > maxBetAmt)
-                    ? true
+                  (startAuto &&
+                    (autoBetCount === 0 || Number.isNaN(autoBetCount)))
+                    ? // (betAmt !== undefined &&
+                      //   maxBetAmt !== undefined &&
+                      //   betAmt > maxBetAmt)
+                      true
                     : false
                 }
                 onClickFunction={betType === "auto" ? onSubmit : handleBet}
@@ -1156,12 +1156,12 @@ export default function Mines() {
                         (coinData && coinData[0].amount < minGameAmount) ||
                         (betType === "auto" &&
                           !userBets.some((bet) => bet.pick)) ||
-                        autoBetCount === 0 ||
-                        Number.isNaN(autoBetCount) 
-                        // (betAmt !== undefined &&
-                        //   maxBetAmt !== undefined &&
-                        //   betAmt > maxBetAmt)
-                          ? true
+                        (startAuto &&
+                          (autoBetCount === 0 || Number.isNaN(autoBetCount)))
+                          ? // (betAmt !== undefined &&
+                            //   maxBetAmt !== undefined &&
+                            //   betAmt > maxBetAmt)
+                            true
                           : false
                       }
                       onClickFunction={
@@ -1255,26 +1255,26 @@ export default function Mines() {
                         userBets[index - 1].pick === true
                         ? "border-[#FCB10F] bg-[#FCB10F33]"
                         : userBets[index - 1].result === "Lost" &&
-                            userBets[index - 1].pick === true
-                          ? "border-[#FCB10F] bg-[#FCB10F33]"
-                          : userBets[index - 1].result === "Lost" &&
-                              userBets[index - 1].pick === true
-                            ? "border-[#F1323E] bg-[#F1323E33]"
-                            : gameStatus === "Completed"
-                              ? "bg-transparent border-white/10"
-                              : "bg-[#202329] border-[#202329] hover:border-white/30"
-                      : betType === "auto"
-                        ? userBets[index - 1].result === "" &&
                           userBets[index - 1].pick === true
-                          ? "border-[#FCB10F] bg-[#FCB10F33]"
-                          : userBets[index - 1].result === "Won" &&
-                              userBets[index - 1].pick === true
-                            ? "border-[#FCB10F] bg-[#FCB10F33]"
-                            : userBets[index - 1].result === "Lost" &&
-                                userBets[index - 1].pick === true
-                              ? "border-[#F1323E] bg-[#F1323E33]"
-                              : "bg-[#202329] border-[#202329] hover:border-white/30"
-                        : null
+                        ? "border-[#FCB10F] bg-[#FCB10F33]"
+                        : userBets[index - 1].result === "Lost" &&
+                          userBets[index - 1].pick === true
+                        ? "border-[#F1323E] bg-[#F1323E33]"
+                        : gameStatus === "Completed"
+                        ? "bg-transparent border-white/10"
+                        : "bg-[#202329] border-[#202329] hover:border-white/30"
+                      : betType === "auto"
+                      ? userBets[index - 1].result === "" &&
+                        userBets[index - 1].pick === true
+                        ? "border-[#FCB10F] bg-[#FCB10F33]"
+                        : userBets[index - 1].result === "Won" &&
+                          userBets[index - 1].pick === true
+                        ? "border-[#FCB10F] bg-[#FCB10F33]"
+                        : userBets[index - 1].result === "Lost" &&
+                          userBets[index - 1].pick === true
+                        ? "border-[#F1323E] bg-[#F1323E33]"
+                        : "bg-[#202329] border-[#202329] hover:border-white/30"
+                      : null
                   } ${
                     pendingRequests.includes(index) ? "blink_tile" : ""
                   } flex items-center active:scale-90 justify-center cursor-pointer rounded-md text-center transition duration-150 ease-in-out w-[50px] h-[50px] sm:w-[55px] sm:h-[55px] md:w-[80px] md:h-[80px] xl:w-[90px] xl:h-[90px]`}
@@ -1283,11 +1283,11 @@ export default function Mines() {
                     betType === "auto"
                       ? !startAuto && handleAutoPick(index)
                       : betActive && betType === "manual"
-                        ? setPendingRequests((prevRequests) => [
-                            ...prevRequests,
-                            index,
-                          ])
-                        : null
+                      ? setPendingRequests((prevRequests) => [
+                          ...prevRequests,
+                          index,
+                        ])
+                      : null
                   }
                 >
                   {betType === "manual" &&

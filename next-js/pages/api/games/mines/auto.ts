@@ -99,7 +99,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         });
 
       const maxStrikeMultiplier = 25;
-      const maxPayout = Decimal.mul(amount, maxStrikeMultiplier);
+      const maxPayout = new Decimal(maxPayouts[tokenMint as GameTokens].mines); 
 
       // if (
       //   !(
@@ -235,7 +235,10 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
             .toNumber();
         strikeMultiplier = Math.min(strikeMultiplier, maxStrikeMultiplier);
 
-        amountWon = Decimal.mul(amount, strikeMultiplier)
+        amountWon = Decimal.min(
+          Decimal.mul(amount, strikeMultiplier),
+          maxPayout,
+        )
           .mul(Decimal.sub(1, houseEdge))
           .toNumber();
         amountLost = Math.max(Decimal.sub(amount, amountWon).toNumber(), 0);

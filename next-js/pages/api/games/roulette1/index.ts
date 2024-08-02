@@ -13,6 +13,7 @@ import StakingUser from "@/models/staking/user";
 import {
   houseEdgeTiers,
   maintainance,
+  maxPayouts,
   pointTiers,
   stakingTiers,
 } from "@/context/config";
@@ -177,7 +178,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       await connectDatabase();
 
       //TODO: Amount type check and max payout check
-      // const maxPayout = Decimal.mul(amount, strikeMultiplier);
+      const maxPayout = new Decimal(maxPayouts[tokenMint as GameTokens].roulette); 
 
       // if (
       //   !(maxPayout.toNumber() <= maxPayouts[tokenMint].roulette1)
@@ -308,7 +309,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
       const feeGenerated = Decimal.mul(amountWon, houseEdge).toNumber();
 
-      amountWon = amountWon.mul(Decimal.sub(1, houseEdge));
+      amountWon = Decimal.min(amountWon, maxPayout).mul(Decimal.sub(1, houseEdge));
       const amountLost = Math.max(Decimal.sub(amount, amountWon).toNumber(), 0);
 
       const addGame = !user.gamesPlayed.includes(GameType.roulette1);

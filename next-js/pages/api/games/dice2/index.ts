@@ -79,7 +79,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         });
 
       const strikeMultiplier = new Decimal(100).dividedBy(chance).toDP(6);
-      const maxPayout = Decimal.mul(amount, strikeMultiplier);
+      const maxPayout = new Decimal(maxPayouts[tokenMint as GameTokens].dice2);
 
       // if (!(maxPayout.toNumber() <= maxPayouts[tokenMint as GameTokens].dice2))
       //   return res
@@ -179,7 +179,10 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         (direction === "under" && strikeNumber < chance)
       ) {
         result = "Won";
-        amountWon = strikeMultiplier.mul(amount).mul(Decimal.sub(1, houseEdge));
+        amountWon = Decimal.min(
+          Decimal.mul(amount, strikeMultiplier),
+          maxPayout,
+        ).mul(Decimal.sub(1, houseEdge));
         amountLost = Math.max(new Decimal(amount).sub(amountWon).toNumber(), 0);
 
         feeGenerated = Decimal.mul(amount, strikeMultiplier)

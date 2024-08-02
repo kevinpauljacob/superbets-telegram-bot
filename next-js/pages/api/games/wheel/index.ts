@@ -84,7 +84,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         (acc, next) => Math.max(acc, next.multiplier),
         0,
       );
-      const maxPayout = Decimal.mul(amount, maxStrikeMultiplier);
+      const maxPayout = new Decimal(maxPayouts[tokenMint as GameTokens].wheel); 
 
       // if (!(maxPayout.toNumber() <= maxPayouts[tokenMint as GameTokens].wheel))
       //   return res
@@ -191,9 +191,10 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           if (i >= strikeNumber) {
             strikeMultiplier = item[j].multiplier;
             if (item[j].multiplier !== 0) {
-              amountWon = Decimal.mul(amount, strikeMultiplier).mul(
-                Decimal.sub(1, houseEdge),
-              );
+              amountWon = Decimal.min(
+                Decimal.mul(amount, strikeMultiplier),
+                maxPayout,
+              ).mul(Decimal.sub(1, houseEdge));
               amountLost = Math.max(
                 Decimal.sub(amount, amountWon).toNumber(),
                 0,

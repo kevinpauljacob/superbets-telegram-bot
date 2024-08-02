@@ -60,13 +60,11 @@ export default function BetAmount({
 
   useEffect(() => {
     if (betAmt !== undefined && betAmt > 0) {
-
       if (game === GameType.roulette1) {
         setInputString(betAmt.toFixed(9));
       } else {
         setInputString(betAmt.toString());
       }
-
     } else {
       setInputString("");
     }
@@ -151,7 +149,7 @@ export default function BetAmount({
       //     : newBetAmt
       //   : newBetAmt;
 
-      const finalBetAmt = newBetAmt
+      const finalBetAmt = newBetAmt;
 
       setBetAmt(finalBetAmt);
       setInputString(finalBetAmt.toString());
@@ -392,6 +390,13 @@ export default function BetAmount({
           ? methods.formState.errors["amount"]!.message!.toString()
           : "NONE"}
       </span>
+      {betAmt && betAmt > 0 && betAmt > currentMaxBetAmt && (
+        <span
+          className={`opacity-100 mt-1.5 flex items-center gap-1 text-xs text-[#DCA815]`}
+        >
+          This bet can exceed the max payout for this game.
+        </span>
+      )}
     </div>
   );
 }

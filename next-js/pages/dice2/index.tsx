@@ -419,8 +419,8 @@ export default function Dice2() {
               disabled={
                 !session?.user ||
                 isRolling ||
-                autoBetCount === 0 ||
-                Number.isNaN(autoBetCount)
+                (startAuto &&
+                  (autoBetCount === 0 || Number.isNaN(autoBetCount)))
                   ? // (betAmt !== undefined &&
                     //   maxBetAmt !== undefined &&
                     //   betAmt > maxBetAmt)
@@ -495,8 +495,8 @@ export default function Dice2() {
                     disabled={
                       !session?.user ||
                       isRolling ||
-                      autoBetCount === 0 ||
-                      Number.isNaN(autoBetCount)
+                      (startAuto &&
+                        (autoBetCount === 0 || Number.isNaN(autoBetCount)))
                         ? // (betAmt !== undefined &&
                           //   maxBetAmt !== undefined &&
                           //   betAmt > maxBetAmt)

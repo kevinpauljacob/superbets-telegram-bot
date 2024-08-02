@@ -400,8 +400,8 @@ export default function Limbo() {
               disabled={
                 loading ||
                 !session?.user ||
-                autoBetCount === 0 ||
-                Number.isNaN(autoBetCount)
+                (startAuto &&
+                  (autoBetCount === 0 || Number.isNaN(autoBetCount)))
                   ? // (betAmt !== undefined &&
                     //   maxBetAmt !== undefined &&
                     //   betAmt > maxBetAmt)
@@ -486,8 +486,8 @@ export default function Limbo() {
                     disabled={
                       loading ||
                       !session?.user ||
-                      autoBetCount === 0 ||
-                      Number.isNaN(autoBetCount)
+                      (startAuto &&
+                        (autoBetCount === 0 || Number.isNaN(autoBetCount)))
                         ? // (betAmt !== undefined &&
                           //   maxBetAmt !== undefined &&
                           //   betAmt > maxBetAmt)

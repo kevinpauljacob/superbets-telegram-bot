@@ -99,7 +99,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       const multiplier = riskToChance[risk][chosenNumbers.length];
       const maxStrikeMultiplier = multiplier.at(-1)!;
 
-      const maxPayout = Decimal.mul(amount, maxStrikeMultiplier);
+      const maxPayout = new Decimal(maxPayouts[tokenMint as GameTokens].keno); 
 
       // if (!(maxPayout.toNumber() <= maxPayouts[tokenMint as GameTokens].keno))
       //   return res
@@ -200,9 +200,10 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         }
       });
       const strikeMultiplier = multiplier[matches];
-      const amountWon = Decimal.mul(amount, strikeMultiplier).mul(
-        Decimal.sub(1, houseEdge),
-      );
+      const amountWon = Decimal.min(
+        Decimal.mul(amount, strikeMultiplier),
+        maxPayout,
+      ).mul(Decimal.sub(1, houseEdge));
       const amountLost = Math.max(
         new Decimal(amount).sub(amountWon).toNumber(),
         0,

@@ -63,7 +63,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
       const maxStrikeMultiplier = 25;
 
-      const maxPayout = Decimal.mul(amount, maxStrikeMultiplier);
+      const maxPayout = new Decimal(maxPayouts[tokenMint as GameTokens].mines); 
 
       // if (!(maxPayout.toNumber() <= maxPayouts[tokenMint as GameTokens].mines))
       //   return res
