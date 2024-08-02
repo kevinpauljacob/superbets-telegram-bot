@@ -12,9 +12,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         .status(405)
         .json({ success: false, message: "Method not allowed!" });
 
-    const { wallet, referralCode, campaignName } = req.body;
+    const { wallet, email, referralCode, campaignName } = req.body;
 
-    if (!wallet || !referralCode || !campaignName)
+    if ((!wallet && !email) || !referralCode || !campaignName)
       return res
         .status(400)
         .json({ success: false, message: "Missing parameters!" });
@@ -27,8 +27,18 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
     await connectDatabase();
 
+    // const existingCampaign = await Campaign.findOne({ referralCode });
+    // if (existingCampaign) {
+    //   return res.status(400).json({
+    //     success: false,
+    //     message:
+    //       "This referral code is already in use. Please choose a different one.",
+    //   });
+    // }
+
     const campaign = new Campaign({
       wallet,
+      email,
       campaignName,
       referralCode,
     });
@@ -36,7 +46,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
     await User.findOneAndUpdate(
       {
-        wallet,
+        $or: [{ wallet }, { email }],
       },
       {
         $addToSet: { campaigns: campaign._id },

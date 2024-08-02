@@ -61,7 +61,13 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       const minGameAmount =
         maxPayouts[tokenMint as GameTokens]["mines" as GameType] * minAmtFactor;
 
-      if ((!wallet && !email) || !amount || !tokenMint || !minesCount || !userBets)
+      if (
+        (!wallet && !email) ||
+        !amount ||
+        !tokenMint ||
+        !minesCount ||
+        !userBets
+      )
         return res
           .status(400)
           .json({ success: false, message: "Missing parameters" });
@@ -288,6 +294,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
       await updateGameStats(
         wallet,
+        email,
         GameType.mines,
         tokenMint,
         amount,

@@ -214,6 +214,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
           await updateGameStats(
             wallet,
+            email,
             GameType.mines,
             tokenMint,
             0,
@@ -301,8 +302,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           result === "Won"
             ? "Congratulations! You won"
             : result === "Lost"
-            ? "Sorry, Better luck next time!"
-            : "Game in progress",
+              ? "Sorry, Better luck next time!"
+              : "Game in progress",
         result,
         ...(result === "Pending" ? {} : { strikeNumbers }),
         strikeMultiplier,

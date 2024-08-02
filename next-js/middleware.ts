@@ -26,6 +26,21 @@ const whiteListRoutes = [
   "/api/getInfo",
 ];
 
+const specificRoutes = [
+  "/api/referral/web2User",
+  "/api/referral/web2User/claim",
+  // Add any other specific routes here
+];
+
+const isDynamicOrSpecificRoute = (pathname: string): boolean => {
+  const segments = pathname.split("/");
+  return (
+    segments.some(
+      (segment) => segment.startsWith("[") && segment.endsWith("]"),
+    ) || specificRoutes.some((route) => pathname.startsWith(route))
+  );
+};
+
 export async function middleware(request: NextRequest) {
   const ip = request.ip ?? "127.0.0.1";
 
@@ -40,7 +55,8 @@ export async function middleware(request: NextRequest) {
 
   if (
     request.nextUrl.pathname === "/api/blocked" ||
-    whiteListRoutes.some((route) => request.nextUrl.pathname.includes(route))
+    whiteListRoutes.some((route) => request.nextUrl.pathname.includes(route)) ||
+    isDynamicOrSpecificRoute(request.nextUrl.pathname)
   ) {
     if (success) res = NextResponse.next();
     else res = NextResponse.rewrite(new URL("/api/blocked", request.url));
@@ -62,9 +78,11 @@ export async function middleware(request: NextRequest) {
       const token = await getToken({ req: request, secret });
       if (token && token.sub) {
         let body = await request.json();
-        const wallet = body?.wallet;
-        const email = body?.email;
-        const account = body?.account;
+        let query = request.nextUrl.searchParams;
+        const wallet = body?.wallet || query.get("wallet");
+        const email = body?.email || query.get("email");
+        const account = body?.account || query.get("account");
+        console.log("email", email);
         if (
           (!wallet && !email && !account) ||
           //@ts-ignore
