@@ -42,6 +42,18 @@ const ReferralUserSchema = new Schema(
   { timestamps: true },
 );
 
+ReferralUserSchema.pre("validate", function (next) {
+  if (!this.wallet && !this.email) {
+    next(new Error("Either wallet or email is required"));
+  } else {
+    next();
+  }
+});
+
+ReferralUserSchema.path("wallet").validate(function (value) {
+  return value || this.email;
+}, "Either wallet or email is required");
+
 const ReferralUser =
   mongoose.models.ReferralUser ||
   mongoose.model("ReferralUser", ReferralUserSchema);
