@@ -36,6 +36,18 @@ const ReferralCampaignSchema = new Schema(
   { timestamps: true },
 );
 
+ReferralCampaignSchema.pre("validate", function (next) {
+  if (!this.wallet && !this.email) {
+    next(new Error("Either wallet or email is required"));
+  } else {
+    next();
+  }
+});
+
+ReferralCampaignSchema.path("wallet").validate(function (value) {
+  return value || this.email;
+}, "Either wallet or email is required");
+
 ReferralCampaignSchema.index(
   { wallet: 1, email: 1, campaignName: 1 },
   { unique: true },
