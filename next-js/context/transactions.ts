@@ -347,8 +347,6 @@ export const deposit = async (
   tokenMint: string,
   campaignId: any = null,
 ) => {
-  return { success: false, message: "Not Allowed" };
-
   if (amount == 0) {
     errorCustom("Please enter an amount greater than 0");
     return { success: true, message: "Please enter an amount greater than 0" };
@@ -418,9 +416,7 @@ export const withdraw = async (
   wallet: WalletContextState,
   amount: number,
   tokenMint: string,
-) => {
-  return { success: false, message: "Not Allowed" };
-  
+) => {  
   if (amount == 0) {
     errorCustom("Please enter an amount greater than 0");
     return { success: true, message: "Please enter an amount greater than 0" };

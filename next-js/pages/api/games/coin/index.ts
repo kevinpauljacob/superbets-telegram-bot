@@ -44,11 +44,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     try {
       let { wallet, email, amount, tokenMint, flipType }: InputType = req.body;
 
-      if (tokenMint !== "SUPER")
-        return res
-          .status(400)
-          .json({ success: false, message: "Invalid token!" });
-
       const minGameAmount =
         maxPayouts[tokenMint as GameTokens]["coinflip" as GameType] *
         minAmtFactor;
@@ -215,9 +210,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
               numOfGamesPlayed: 1,
             },
             ...(addGame ? { $addToSet: { gamesPlayed: GameType.coin } } : {}),
-            // $set: {
-            // isWeb2User: tokenMint === "SUPER",
-            // },
+            $set: {
+            isWeb2User: tokenMint === "SUPER",
+            },
           },
           {
             new: true,

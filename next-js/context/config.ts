@@ -14,18 +14,18 @@ export type spl_token = {
 };
 
 const SPL_TOKENS: Array<spl_token> = [
-  // {
-  //   tokenName: "SOL",
-  //   tokenMint: "SOL", //So11111111111111111111111111111111111111112
-  //   decimal: 9,
-  //   icon: SOL,
-  // },
-  // {
-  //   tokenName: "USDC",
-  //   tokenMint: "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
-  //   decimal: 6,
-  //   icon: USDC,
-  // },
+  {
+    tokenName: "SOL",
+    tokenMint: "SOL", //So11111111111111111111111111111111111111112
+    decimal: 9,
+    icon: SOL,
+  },
+  {
+    tokenName: "USDC",
+    tokenMint: "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+    decimal: 6,
+    icon: USDC,
+  },
   // {
   //   tokenName: "FOMO",
   //   tokenMint: "Cx9oLynYgC3RrgXzin7U417hNY9D6YB1eMGw4ZMbWJgw",
