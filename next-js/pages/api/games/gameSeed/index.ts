@@ -8,6 +8,113 @@ import {
   seedStatus,
 } from "@/utils/provably-fair";
 
+/**
+ * @swagger
+ * tags:
+ *  name: Games/GameSeed
+ *  description: Game seed management
+ */
+/**
+ * @swagger
+ * /api/games/gameSeed:
+ *   post:
+ *     summary: Generate and retrieve game seeds for a user
+ *     description: Generates client and server seeds for a user based on their wallet or email, and returns the current and next game seed information.
+ *     tags: [Games/GameSeed]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               wallet:
+ *                 type: string
+ *                 description: User's wallet address
+ *                 example: "0x1234567890abcdef"
+ *               email:
+ *                 type: string
+ *                 description: User's email address
+ *                 example: "user@example.com"
+ *             anyOf:
+ *               - required: [wallet]
+ *               - required: [email]
+ *     responses:
+ *       201:
+ *         description: Successfully created game seeds
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 activeGameSeed:
+ *                   type: object
+ *                   properties:
+ *                     clientSeed:
+ *                       type: string
+ *                       example: "client-seed-example"
+ *                     serverSeedHash:
+ *                       type: string
+ *                       example: "server-seed-hash-example"
+ *                     iv:
+ *                       type: string
+ *                       example: "initialization-vector-example"
+ *                 nextGameSeed:
+ *                   type: object
+ *                   properties:
+ *                     clientSeed:
+ *                       type: string
+ *                       example: "client-seed-example"
+ *                     serverSeedHash:
+ *                       type: string
+ *                       example: "server-seed-hash-example"
+ *                     iv:
+ *                       type: string
+ *                       example: "initialization-vector-example"
+ *       400:
+ *         description: Bad Request due to missing parameters or user not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Missing parameters or User not found!"
+ *       500:
+ *         description: Internal Server Error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Error message details"
+ *       405:
+ *         description: Method Not Allowed
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Method not allowed"
+ */
+
 const secret = process.env.NEXTAUTH_SECRET;
 const encryptionKey = Buffer.from(process.env.ENCRYPTION_KEY!, "hex");
 

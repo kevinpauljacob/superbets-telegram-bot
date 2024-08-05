@@ -4,6 +4,49 @@ import { User, Campaign } from "@/models/referral";
 import { v4 as uuidv4 } from "uuid";
 import { getToken } from "next-auth/jwt";
 
+/**
+ * @swagger
+ * /api/referral/apply:
+ *   post:
+ *     summary: Apply a referral code
+ *     description: Apply a referral code to a user and update the referrer's signup count
+ *     tags:
+ *      - Referral
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - referralCode
+ *             properties:
+ *               wallet:
+ *                 type: string
+ *               email:
+ *                 type: string
+ *               referralCode:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Referral code applied successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *       400:
+ *         description: Bad request
+ *       405:
+ *         description: Method not allowed
+ *       500:
+ *         description: Internal server error
+ */
+
 const secret = process.env.NEXTAUTH_SECRET;
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {

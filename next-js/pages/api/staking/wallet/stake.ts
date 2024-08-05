@@ -13,6 +13,89 @@ import { NextApiRequest, NextApiResponse } from "next";
 import { bs58 } from "@project-serum/anchor/dist/cjs/utils/bytes";
 import { SPL_TOKENS } from "@/context/config";
 
+/**
+ * @swagger
+ * /api/staking/wallet/stake:
+ *   post:
+ *     summary: Stake FOMO tokens
+ *     description: Handles the staking of FOMO tokens into the user's wallet.
+ *     tags:
+ *       - Staking
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               transactionBase64:
+ *                 type: string
+ *                 description: The base64 encoded transaction.
+ *               wallet:
+ *                 type: string
+ *                 description: The wallet address.
+ *               amount:
+ *                 type: number
+ *                 description: The amount to stake.
+ *               tokenMint:
+ *                 type: string
+ *                 description: The mint address of the token.
+ *               blockhashWithExpiryBlockHeight:
+ *                 type: object
+ *                 properties:
+ *                   blockhash:
+ *                     type: string
+ *                     description: The blockhash for the transaction.
+ *                   lastValidBlockHeight:
+ *                     type: number
+ *                     description: The last valid block height for the transaction.
+ *     responses:
+ *       200:
+ *         description: Successfully staked FOMO tokens.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *       400:
+ *         description: Invalid request parameters.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *       500:
+ *         description: Internal server error.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *       405:
+ *         description: Method not allowed.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ */
+
 const secret = process.env.NEXTAUTH_SECRET;
 
 const connection = new Connection(process.env.BACKEND_RPC!);

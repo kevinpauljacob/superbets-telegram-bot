@@ -4,6 +4,86 @@ import { GameType, decryptServerSeed, seedStatus } from "@/utils/provably-fair";
 import StakingUser from "@/models/staking/user";
 import { User, gameModelMap } from "@/models/games";
 
+/**
+ * @swagger
+ * /api/games/global/getHistory:
+ *   get:
+ *     summary: Retrieves recent game history with user information
+ *     description: Fetches the latest 20 game records for each game type, populates user names and tiers, and includes decrypted game seed details if applicable. Sorts the records by creation date in descending order.
+ *     tags:
+ *      - Games/Global
+ *     responses:
+ *       200:
+ *         description: Successful data retrieval
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       account:
+ *                         type: string
+ *                         example: "user_wallet_address"
+ *                       game:
+ *                         type: string
+ *                         example: "game_type"
+ *                       gameSeed:
+ *                         type: object
+ *                         properties:
+ *                           serverSeed:
+ *                             type: string
+ *                             example: "decrypted_server_seed"
+ *                           iv:
+ *                             type: string
+ *                             example: "initialization_vector"
+ *                           status:
+ *                             type: string
+ *                             example: "ACTIVE"
+ *                       createdAt:
+ *                         type: string
+ *                         format: date-time
+ *                         example: "2024-08-04T12:34:56Z"
+ *                       userTier:
+ *                         type: number
+ *                         example: 1
+ *                 message:
+ *                   type: string
+ *                   example: "Data fetch successful!"
+ *       500:
+ *         description: Internal Server Error - Failed to fetch data
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Error message details"
+ *       405:
+ *         description: Method Not Allowed - GET method required
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Method not allowed"
+ */
+
 const encryptionKey = Buffer.from(process.env.ENCRYPTION_KEY!, "hex");
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {

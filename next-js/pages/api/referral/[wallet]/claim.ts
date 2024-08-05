@@ -19,6 +19,65 @@ import connectDatabase from "../../../../utils/database";
 import Deposit from "@/models/games/deposit";
 import mongoose from "mongoose";
 
+/**
+ * @swagger
+ * /api/referral/{wallet}/claim:
+ *   post:
+ *     summary: Claim referral earnings
+ *     description: Claim unclaimed referral earnings and create transaction
+ *     tags:
+ *      - Referral
+ *     parameters:
+ *       - in: query
+ *         name: wallet
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Wallet address of the user
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - transactionBase64
+ *               - blockhashWithExpiryBlockHeight
+ *             properties:
+ *               transactionBase64:
+ *                 type: string
+ *                 description: Base64 encoded transaction
+ *               blockhashWithExpiryBlockHeight:
+ *                 type: object
+ *                 properties:
+ *                   blockhash:
+ *                     type: string
+ *                   lastValidBlockHeight:
+ *                     type: number
+ *     responses:
+ *       200:
+ *         description: Earnings claimed successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 earnings:
+ *                   type: object
+ *                   additionalProperties:
+ *                     type: number
+ *                 message:
+ *                   type: string
+ *       400:
+ *         description: Bad request
+ *       405:
+ *         description: Method not allowed
+ *       500:
+ *         description: Internal server error
+ */
+
 const secret = process.env.NEXTAUTH_SECRET;
 
 const connection = new Connection(process.env.BACKEND_RPC!, "confirmed");

@@ -24,6 +24,75 @@ import { SPL_TOKENS } from "@/context/config";
 import updateGameStats from "../../../../utils/updateGameStats";
 Decimal.set({ precision: 9 });
 
+/**
+ * @swagger
+ * tags:
+ *  name: Games
+ *  description: Game related operations
+ */
+
+/**
+ * @swagger
+ * /api/games/coin:
+ *   post:
+ *     summary: Play a coin flip game
+ *     description: This endpoint allows a user to play a coin flip game by betting a certain amount of tokens. The game result is determined in a provably fair manner.
+ *     tags:
+ *      - Games
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               wallet:
+ *                 type: string
+ *                 description: The wallet address of the user.
+ *               email:
+ *                 type: string
+ *                 description: The email of the user.
+ *               amount:
+ *                 type: number
+ *                 description: The amount of tokens to bet.
+ *               tokenMint:
+ *                 type: string
+ *                 description: The token mint of the token being bet.
+ *               flipType:
+ *                 type: string
+ *                 enum: ["heads", "tails"]
+ *                 description: The side to bet on (heads or tails).
+ *     responses:
+ *       200:
+ *         description: Game played successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     strikeNumber:
+ *                       type: number
+ *                     result:
+ *                       type: string
+ *                     amountWon:
+ *                       type: number
+ *                     amountLost:
+ *                       type: number
+ *                 message:
+ *                   type: string
+ *       400:
+ *         description: Bad request
+ *       405:
+ *         description: Method not allowed
+ *       500:
+ *         description: Internal server error
+ */
+
 const secret = process.env.NEXTAUTH_SECRET;
 const encryptionKey = Buffer.from(process.env.ENCRYPTION_KEY!, "hex");
 
@@ -79,7 +148,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       await connectDatabase();
 
       const strikeMultiplier = 2;
-      const maxPayout = new Decimal(maxPayouts[tokenMint as GameTokens].coinflip); 
+      const maxPayout = new Decimal(
+        maxPayouts[tokenMint as GameTokens].coinflip,
+      );
 
       // if (
       //   !(maxPayout.toNumber() <= maxPayouts[tokenMint as GameTokens].coinflip)
@@ -183,7 +254,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         result = "Won";
         amountWon = Decimal.min(
           Decimal.mul(amount, strikeMultiplier),
-          maxPayout
+          maxPayout,
         ).mul(Decimal.sub(1, houseEdge));
         amountLost = 0;
 

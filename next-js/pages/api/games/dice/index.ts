@@ -25,6 +25,71 @@ import { SPL_TOKENS } from "@/context/config";
 import updateGameStats from "../../../../utils/updateGameStats";
 Decimal.set({ precision: 9 });
 
+/**
+ * @swagger
+ * /api/games/dice:
+ *   post:
+ *     summary: Play a dice game
+ *     description: This endpoint allows a user to play a dice game by betting a certain amount of tokens and choosing numbers. The game result is determined in a provably fair manner.
+ *     tags:
+ *      - Games
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               wallet:
+ *                 type: string
+ *                 description: The wallet address of the user.
+ *               email:
+ *                 type: string
+ *                 description: The email of the user.
+ *               amount:
+ *                 type: number
+ *                 description: The amount of tokens to bet.
+ *               tokenMint:
+ *                 type: string
+ *                 description: The token mint of the token being bet.
+ *               chosenNumbers:
+ *                 type: array
+ *                 items:
+ *                   type: number
+ *                 description: The numbers chosen by the user for the dice game.
+ *     responses:
+ *       200:
+ *         description: Game played successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     strikeNumber:
+ *                       type: number
+ *                     strikeMultiplier:
+ *                       type: number
+ *                     result:
+ *                       type: string
+ *                     amountWon:
+ *                       type: number
+ *                     amountLost:
+ *                       type: number
+ *                 message:
+ *                   type: string
+ *       400:
+ *         description: Bad request
+ *       405:
+ *         description: Method not allowed
+ *       500:
+ *         description: Internal server error
+ */
+
 const secret = process.env.NEXTAUTH_SECRET;
 const encryptionKey = Buffer.from(process.env.ENCRYPTION_KEY!, "hex");
 
@@ -87,7 +152,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         });
 
       const strikeMultiplier = new Decimal(6 / chosenNumbers.length);
-      const maxPayout = new Decimal(maxPayouts[tokenMint as GameTokens].dice); 
+      const maxPayout = new Decimal(maxPayouts[tokenMint as GameTokens].dice);
       // if (!(maxPayout.toNumber() <= maxPayouts[tokenMint as GameTokens].dice))
       //   return res
       //     .status(400)

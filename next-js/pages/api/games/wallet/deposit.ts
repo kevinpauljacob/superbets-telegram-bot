@@ -21,6 +21,91 @@ import {
 } from "@/context/transactions";
 import { bs58 } from "@project-serum/anchor/dist/cjs/utils/bytes";
 
+/**
+ * @swagger
+ * tags:
+ *  name: Game/Wallet
+ *  description: Game wallet related endpoints
+ */
+/**
+ * @swagger
+ * /api/games/wallet/deposit:
+ *   post:
+ *     summary: Deposit tokens into a user's wallet
+ *     description: Handles depositing tokens into a user's wallet. This endpoint is currently disabled.
+ *     tags:
+ *       - Game/Wallet
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               transactionBase64:
+ *                 type: string
+ *                 description: The base64 encoded transaction.
+ *               wallet:
+ *                 type: string
+ *                 description: The user's wallet address.
+ *               amount:
+ *                 type: number
+ *                 description: The deposit amount.
+ *               tokenMint:
+ *                 type: string
+ *                 description: The token mint.
+ *               blockhashWithExpiryBlockHeight:
+ *                 type: object
+ *                 properties:
+ *                   blockhash:
+ *                     type: string
+ *                   lastValidBlockHeight:
+ *                     type: number
+ *               campaignId:
+ *                 type: string
+ *                 description: The campaign ID (optional).
+ *             required:
+ *               - transactionBase64
+ *               - wallet
+ *               - amount
+ *               - tokenMint
+ *               - blockhashWithExpiryBlockHeight
+ *     responses:
+ *       405:
+ *         description: Method not allowed.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *       400:
+ *         description: Bad request.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *       500:
+ *         description: Internal server error.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ */
+
 const secret = process.env.NEXTAUTH_SECRET;
 
 const connection = new Connection(process.env.BACKEND_RPC!, "confirmed");
@@ -43,7 +128,9 @@ type InputType = {
 };
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
-  return res.status(405).json({ success: false, message: "Method not allowed!" });
+  return res
+    .status(405)
+    .json({ success: false, message: "Method not allowed!" });
   if (req.method === "POST") {
     try {
       let {
@@ -152,8 +239,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           console.log("unable to create campaign !");
         }
       }
-      const tokenName = SPL_TOKENS.find((t) => t.tokenMint === tokenMint)
-        ?.tokenName;
+      const tokenName = SPL_TOKENS.find(
+        (t) => t.tokenMint === tokenMint,
+      )?.tokenName;
 
       return res.json({
         success: true,

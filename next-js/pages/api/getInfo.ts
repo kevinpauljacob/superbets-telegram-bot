@@ -4,6 +4,63 @@ import GameUser from "@/models/games/gameUser";
 import { User } from "@/context/transactions";
 import { NextApiRequest, NextApiResponse } from "next";
 
+/**
+ * @swagger
+ * tags:
+ *  name: User
+ *  description: User related operations
+ */
+
+/**
+ * @swagger
+ * /api/getInfo:
+ *   post:
+ *     summary: User operations
+ *     description: Perform various user-related operations based on the provided option
+ *     tags:
+ *      - User
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - option
+ *             properties:
+ *               option:
+ *                 type: number
+ *                 enum: [1, 2, 3, 4]
+ *               wallet:
+ *                 type: string
+ *               email:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Successful operation
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *                 user:
+ *                   type: object
+ *                 users:
+ *                   type: array
+ *                 data:
+ *                   type: object
+ *       400:
+ *         description: Bad request
+ *       405:
+ *         description: Method not allowed
+ *       500:
+ *         description: Internal server error
+ */
+
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === "POST") {
     try {

@@ -25,6 +25,150 @@ import { Decimal } from "decimal.js";
 import updateGameStats from "../../../../utils/updateGameStats";
 Decimal.set({ precision: 9 });
 
+/**
+ * @swagger
+ * /api/games/roulette1:
+ *   post:
+ *     summary: Play a game of Roulette
+ *     description: Allows users to place a bet on the roulette game and receive the result.
+ *     tags:
+ *       - Games
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               wallet:
+ *                 type: string
+ *                 description: The user's wallet address (required if email is not provided).
+ *               email:
+ *                 type: string
+ *                 description: The user's email address (required if wallet is not provided).
+ *               tokenMint:
+ *                 type: string
+ *                 description: The token mint address for the game.
+ *               wager:
+ *                 type: object
+ *                 description: The wager details for the game.
+ *                 properties:
+ *                   red:
+ *                     type: number
+ *                     description: Amount wagered on red.
+ *                   black:
+ *                     type: number
+ *                     description: Amount wagered on black.
+ *                   green:
+ *                     type: number
+ *                     description: Amount wagered on green.
+ *                   odd:
+ *                     type: number
+ *                     description: Amount wagered on odd numbers.
+ *                   even:
+ *                     type: number
+ *                     description: Amount wagered on even numbers.
+ *                   low:
+ *                     type: number
+ *                     description: Amount wagered on low numbers (1-18).
+ *                   high:
+ *                     type: number
+ *                     description: Amount wagered on high numbers (19-36).
+ *                   1st-12:
+ *                     type: number
+ *                     description: Amount wagered on the first 12 numbers.
+ *                   2nd-12:
+ *                     type: number
+ *                     description: Amount wagered on the second 12 numbers.
+ *                   3rd-12:
+ *                     type: number
+ *                     description: Amount wagered on the third 12 numbers.
+ *                   1st-column:
+ *                     type: number
+ *                     description: Amount wagered on the first column.
+ *                   2nd-column:
+ *                     type: number
+ *                     description: Amount wagered on the second column.
+ *                   3rd-column:
+ *                     type: number
+ *                     description: Amount wagered on the third column.
+ *                   straight:
+ *                     type: object
+ *                     additionalProperties:
+ *                       type: number
+ *                     description: Wager amounts for each specific number (0-36).
+ *     responses:
+ *       201:
+ *         description: Successfully placed the bet and received the result.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: Congratulations! You won 100
+ *                 strikeNumber:
+ *                   type: integer
+ *                   example: 17
+ *                 result:
+ *                   type: string
+ *                   enum:
+ *                     - Won
+ *                     - Lost
+ *                 strikeMultiplier:
+ *                   type: number
+ *                   example: 2.5
+ *                 amountWon:
+ *                   type: number
+ *                   example: 100
+ *                 amountLost:
+ *                   type: number
+ *                   example: 50
+ *       400:
+ *         description: Bad Request. Missing or invalid parameters.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: Invalid parameters
+ *       405:
+ *         description: Method Not Allowed. Only POST method is allowed.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: Method not allowed
+ *       500:
+ *         description: Internal Server Error. An unexpected error occurred.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: Server hash not found!
+ */
+
 const secret = process.env.NEXTAUTH_SECRET;
 const encryptionKey = Buffer.from(process.env.ENCRYPTION_KEY!, "hex");
 
@@ -178,7 +322,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       await connectDatabase();
 
       //TODO: Amount type check and max payout check
-      const maxPayout = new Decimal(maxPayouts[tokenMint as GameTokens].roulette); 
+      const maxPayout = new Decimal(
+        maxPayouts[tokenMint as GameTokens].roulette,
+      );
 
       // if (
       //   !(maxPayout.toNumber() <= maxPayouts[tokenMint].roulette1)
@@ -309,7 +455,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
       const feeGenerated = Decimal.mul(amountWon, houseEdge).toNumber();
 
-      amountWon = Decimal.min(amountWon, maxPayout).mul(Decimal.sub(1, houseEdge));
+      amountWon = Decimal.min(amountWon, maxPayout).mul(
+        Decimal.sub(1, houseEdge),
+      );
       const amountLost = Math.max(Decimal.sub(amount, amountWon).toNumber(), 0);
 
       const addGame = !user.gamesPlayed.includes(GameType.roulette1);

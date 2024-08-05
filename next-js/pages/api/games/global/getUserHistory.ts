@@ -3,6 +3,100 @@ import { NextApiRequest, NextApiResponse } from "next";
 import { gameModelMap, User } from "@/models/games";
 import { GameType, decryptServerSeed, seedStatus } from "@/utils/provably-fair";
 
+/**
+ * @swagger
+ * /api/games/global/getUserHistory:
+ *   get:
+ *     summary: Retrieves historical game records for a specific user
+ *     description: Fetches game records for a user based on either their wallet address or email. Includes game data and decrypts server seeds if necessary.
+ *     tags:
+ *      - Games/Global
+ *     parameters:
+ *       - in: query
+ *         name: wallet
+ *         required: false
+ *         schema:
+ *           type: string
+ *           example: "wallet_address_example"
+ *         description: The wallet address of the user.
+ *       - in: query
+ *         name: email
+ *         required: false
+ *         schema:
+ *           type: string
+ *           example: "user@example.com"
+ *         description: The email address of the user.
+ *     responses:
+ *       200:
+ *         description: Successful data retrieval
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       game:
+ *                         type: string
+ *                       account:
+ *                         type: string
+ *                       amount:
+ *                         type: number
+ *                       amountWon:
+ *                         type: number
+ *                       result:
+ *                         type: string
+ *                       tokenMint:
+ *                         type: string
+ *                       createdAt:
+ *                         type: string
+ *                         format: date-time
+ *                       gameSeed:
+ *                         type: object
+ *                         properties:
+ *                           serverSeed:
+ *                             type: string
+ *                           iv:
+ *                             type: string
+ *                           status:
+ *                             type: string
+ *                 message:
+ *                   type: string
+ *                   example: "Data fetch successful!"
+ *       400:
+ *         description: Bad Request - Missing or invalid query parameters
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Invalid wallet or email"
+ *       500:
+ *         description: Internal Server Error - Failed to fetch or process data
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Error message details"
+ */
+
 const encryptionKey = Buffer.from(process.env.ENCRYPTION_KEY!, "hex");
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {

@@ -13,6 +13,82 @@ import { getToken } from "next-auth/jwt";
 import updateGameStats from "../../../../utils/updateGameStats";
 Decimal.set({ precision: 9 });
 
+/**
+ * @swagger
+ * /api/games/mines/conclude:
+ *   post:
+ *     summary: Conclude a Mines game
+ *     description: Concludes a Mines game by providing the wallet or email and the game ID.
+ *     tags:
+ *       - Games
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               wallet:
+ *                 type: string
+ *                 description: The user's wallet address.
+ *               email:
+ *                 type: string
+ *                 description: The user's email address.
+ *               gameId:
+ *                 type: string
+ *                 description: The game ID.
+ *             required:
+ *               - wallet
+ *               - email
+ *               - gameId
+ *     responses:
+ *       201:
+ *         description: Game concluded successfully.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *                 amountWon:
+ *                   type: number
+ *                 strikeNumbers:
+ *                   type: array
+ *                   items:
+ *                     type: number
+ *                 pointsGained:
+ *                   type: number
+ *                 strikeMultiplier:
+ *                   type: number
+ *                 result:
+ *                   type: string
+ *       400:
+ *         description: User does not exist, missing parameters, or other client errors.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *       500:
+ *         description: Internal server error.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ */
+
 const secret = process.env.NEXTAUTH_SECRET;
 const encryptionKey = Buffer.from(process.env.ENCRYPTION_KEY!, "hex");
 

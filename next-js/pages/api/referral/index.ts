@@ -3,6 +3,59 @@ import { NextApiRequest, NextApiResponse } from "next";
 import { User, Campaign } from "@/models/referral";
 import { getToken } from "next-auth/jwt";
 
+/**
+ * @swagger
+ * tags:
+ *    name: Referral
+ *    description: Referral related operations
+ */
+
+/**
+ * @swagger
+ * /api/referral:
+ *   post:
+ *     summary: Create a referral campaign
+ *     description: Creates a new referral campaign and associates it with a user
+ *     tags:
+ *      - Referral
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - referralCode
+ *               - campaignName
+ *             properties:
+ *               wallet:
+ *                 type: string
+ *               email:
+ *                 type: string
+ *               referralCode:
+ *                 type: string
+ *               campaignName:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Campaign created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *       400:
+ *         description: Bad request
+ *       405:
+ *         description: Method not allowed
+ *       500:
+ *         description: Internal server error
+ */
+
 const secret = process.env.NEXTAUTH_SECRET;
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {

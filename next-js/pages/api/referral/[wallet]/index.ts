@@ -4,6 +4,47 @@ import { v4 as uuidv4 } from "uuid";
 import { Campaign, User } from "@/models/referral";
 import { getToken } from "next-auth/jwt";
 
+/**
+ * @swagger
+ * /api/referral/{wallet}:
+ *   get:
+ *     summary: Get user and referred users by wallet
+ *     description: Fetch user data along with referred users based on the wallet address
+ *     tags:
+ *      - Referral
+ *     parameters:
+ *       - in: query
+ *         name: wallet
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Wallet address of the user
+ *     responses:
+ *       200:
+ *         description: Data fetch successful
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 user:
+ *                   type: object
+ *                 referredUsers:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                 message:
+ *                   type: string
+ *       400:
+ *         description: Bad request
+ *       405:
+ *         description: Method not allowed
+ *       500:
+ *         description: Internal server error
+ */
+
 const secret = process.env.NEXTAUTH_SECRET;
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {

@@ -18,12 +18,14 @@ import "@solana/wallet-adapter-react-ui/styles.css";
 import { SessionProvider } from "next-auth/react";
 import { useEffect } from "react";
 import LiveStats from "@/components/games/LiveStats";
+import { useRouter } from "next/router";
 
 export default function App({
   Component,
   pageProps: { session, ...pageProps },
 }: AppProps) {
   const endpoint = process.env.NEXT_PUBLIC_RPC!;
+  const router = useRouter();
 
   const wallets = [
     new PhantomWalletAdapter(),
@@ -31,7 +33,6 @@ export default function App({
     new LedgerWalletAdapter(),
   ];
 
-  // toast limitier
   const { toasts } = useToasterStore();
 
   const TOAST_LIMIT = 8;
@@ -43,22 +44,27 @@ export default function App({
       .forEach((t) => toast.dismiss(t.id));
   }, [toasts]);
 
+  const content = <Component {...pageProps} />;
+
+  const wrappedContent =
+    router.pathname === "/api-doc" ? (
+      content
+    ) : (
+      <div
+        id="main-parent"
+        className={`w-[100dvw] h-[100dvh] flex flex-1 flex-col bg-[#0F0F0F] overflow-hidden nobar unselectable`}
+      >
+        <LiveStats />
+        <Layout>{content}</Layout>
+      </div>
+    );
+
   return (
     <ConnectionProvider endpoint={endpoint}>
       <WalletProvider wallets={wallets} autoConnect>
         <WalletModalProvider>
           <SessionProvider session={pageProps.session} refetchInterval={0}>
-            <GlobalProvider>
-              <div
-                id="main-parent"
-                className={`w-[100dvw] h-[100dvh] flex flex-1 flex-col bg-[#0F0F0F] overflow-hidden nobar unselectable`}
-              >
-                <LiveStats />
-                <Layout>
-                  <Component {...pageProps} />
-                </Layout>
-              </div>
-            </GlobalProvider>
+            <GlobalProvider>{wrappedContent}</GlobalProvider>
 
             <Toaster
               position="top-right"

@@ -24,6 +24,68 @@ import { SPL_TOKENS } from "@/context/config";
 import updateGameStats from "../../../../utils/updateGameStats";
 Decimal.set({ precision: 9 });
 
+/**
+ * @swagger
+ * /api/games/dice2:
+ *   post:
+ *     summary: Play a dice2 game
+ *     description: This endpoint allows a user to play a dice2 game by betting a certain amount of tokens and choosing a chance and direction. The game result is determined in a provably fair manner.
+ *     tags:
+ *      - Games
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               wallet:
+ *                 type: string
+ *                 description: The wallet address of the user.
+ *               email:
+ *                 type: string
+ *                 description: The email of the user.
+ *               amount:
+ *                 type: number
+ *                 description: The amount of tokens to bet.
+ *               tokenMint:
+ *                 type: string
+ *                 description: The token mint of the token being bet.
+ *               chance:
+ *                 type: number
+ *                 description: The chance percentage chosen by the user.
+ *               direction:
+ *                 type: string
+ *                 enum: [over, under]
+ *                 description: The direction chosen by the user (either "over" or "under").
+ *     responses:
+ *       201:
+ *         description: Game played successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *                 result:
+ *                   type: string
+ *                 strikeNumber:
+ *                   type: number
+ *                 amountWon:
+ *                   type: number
+ *                 amountLost:
+ *                   type: number
+ *       400:
+ *         description: Bad request
+ *       405:
+ *         description: Method not allowed
+ *       500:
+ *         description: Internal server error
+ */
+
 const secret = process.env.NEXTAUTH_SECRET;
 const encryptionKey = Buffer.from(process.env.ENCRYPTION_KEY!, "hex");
 

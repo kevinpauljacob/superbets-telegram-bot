@@ -13,6 +13,75 @@ import updateGameStats from "../../../../utils/updateGameStats";
 import { getSolPrice } from "@/context/transactions";
 Decimal.set({ precision: 9 });
 
+/**
+ * @swagger
+ * /api/games/options/checkResult:
+ *   post:
+ *     summary: Check the result of an active bet
+ *     description: Checks the result of an active (pending) bet for a user based on their wallet or email and updates the result accordingly.
+ *     tags:
+ *       - Games
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               wallet:
+ *                 type: string
+ *                 description: The user's wallet address.
+ *               email:
+ *                 type: string
+ *                 description: The user's email address.
+ *             required:
+ *               - wallet
+ *               - email
+ *     responses:
+ *       200:
+ *         description: Bet result checked and updated successfully.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     amountWon:
+ *                       type: number
+ *                     amountLost:
+ *                       type: number
+ *                     result:
+ *                       type: string
+ *                 message:
+ *                   type: string
+ *       400:
+ *         description: User does not exist or no active bets found.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *       500:
+ *         description: Internal server error.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ */
+
 const secret = process.env.NEXTAUTH_SECRET;
 
 export const config = {
