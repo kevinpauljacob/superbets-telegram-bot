@@ -2,7 +2,63 @@ import { NextApiRequest, NextApiResponse } from "next";
 import User from "@/models/games/gameUser";
 import ReferralCampaign from "@/models/referral/referralCampaign";
 import connectDatabase from "@/utils/database";
-// import authenticateUser from "../../../../utils/authenticate";
+
+/**
+ * @swagger
+ * /api/referral/web2User/claim:
+ *   post:
+ *     summary: Claim SUPER earnings for a user from a referral campaign
+ *     description: This endpoint allows a user to claim their unclaimed SUPER earnings from a referral campaign. The earnings are added to the user's deposit.
+ *     tags:
+ *      - Referral
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 description: The email of the user.
+ *               wallet:
+ *                 type: string
+ *                 description: The wallet address of the user.
+ *               campaignId:
+ *                 type: string
+ *                 description: The ID of the referral campaign.
+ *     responses:
+ *       200:
+ *         description: SUPER earnings claimed successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *                 claimedAmount:
+ *                   type: number
+ *                 updatedDeposit:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       amount:
+ *                         type: number
+ *                       tokenMint:
+ *                         type: string
+ *       400:
+ *         description: Bad request
+ *       404:
+ *         description: User or campaign not found
+ *       405:
+ *         description: Method not allowed
+ *       500:
+ *         description: Internal server error
+ */
 
 export default async function handler(
   req: NextApiRequest,
@@ -15,7 +71,6 @@ export default async function handler(
   }
 
   try {
-    // await authenticateUser(req, res);
     await connectDatabase();
 
     const { email, wallet, campaignId } = req.body;

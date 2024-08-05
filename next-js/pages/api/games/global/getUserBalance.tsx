@@ -4,6 +4,77 @@ import { Decimal } from "decimal.js";
 import Deposit from "@/models/games/deposit";
 Decimal.set({ precision: 9 });
 
+/**
+ * @swagger
+ * /api/games/global/getUserBalance:
+ *   get:
+ *     summary: Retrieves the net and total balance for a specified wallet
+ *     description: Calculates the net balance by summing deposits and withdrawals. Fetches additional PnL data from another endpoint to compute the total balance.
+ *     tags:
+ *      - Games/Global
+ *     parameters:
+ *       - in: query
+ *         name: wallet
+ *         required: true
+ *         schema:
+ *           type: string
+ *           example: "wallet_address_example"
+ *         description: The wallet address for which the balance is to be calculated.
+ *     responses:
+ *       200:
+ *         description: Successful balance retrieval
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: "Data fetch successful!"
+ *       400:
+ *         description: Bad Request - Missing or invalid query parameter
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Invalid wallet address or missing parameter"
+ *       500:
+ *         description: Internal Server Error - Failed to fetch or calculate balance
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Error message details"
+ *       405:
+ *         description: Method Not Allowed - GET method required
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Method not allowed"
+ */
+
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === "GET") {
     try {

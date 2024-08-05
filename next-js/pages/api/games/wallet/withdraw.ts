@@ -28,6 +28,89 @@ import {
   verifyFrontendTransaction,
 } from "@/context/transactions";
 
+/**
+ * @swagger
+ * /api/games/wallet/withdraw:
+ *   post:
+ *     summary: Withdraw funds from a wallet
+ *     description: Handles the withdrawal of funds from a specified wallet.
+ *     tags:
+ *       - Game/Wallet
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               transactionBase64:
+ *                 type: string
+ *                 description: The base64 encoded transaction.
+ *               wallet:
+ *                 type: string
+ *                 description: The wallet address.
+ *               amount:
+ *                 type: number
+ *                 description: The amount to withdraw.
+ *               tokenMint:
+ *                 type: string
+ *                 description: The mint address of the token.
+ *               blockhashWithExpiryBlockHeight:
+ *                 type: object
+ *                 properties:
+ *                   blockhash:
+ *                     type: string
+ *                     description: The blockhash for the transaction.
+ *                   lastValidBlockHeight:
+ *                     type: number
+ *                     description: The last valid block height for the transaction.
+ *     responses:
+ *       200:
+ *         description: Successfully withdrawn funds.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *       400:
+ *         description: Invalid request parameters.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *       500:
+ *         description: Internal server error.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *       405:
+ *         description: Method not allowed.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ */
+
 const secret = process.env.NEXTAUTH_SECRET;
 
 const connection = new Connection(process.env.BACKEND_RPC!, "confirmed");
@@ -61,7 +144,9 @@ const blackListedWallet: any = {
 };
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
-  return res.status(405).json({ success: false, message: "Method not allowed!" });
+  return res
+    .status(405)
+    .json({ success: false, message: "Method not allowed!" });
   if (req.method === "POST") {
     try {
       let {
@@ -284,8 +369,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
       // netTransfer = 1000000000;
 
-      const tokenName = SPL_TOKENS.find((t) => t.tokenMint === tokenMint)
-        ?.tokenName!;
+      const tokenName = SPL_TOKENS.find(
+        (t) => t.tokenMint === tokenMint,
+      )?.tokenName!;
 
       if (netTransfer > timeWeightedAvgLimit[tokenName]) {
         await Deposit.create({

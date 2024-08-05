@@ -4,6 +4,83 @@ import { gameModelMap, User } from "@/models/games";
 import { GameType } from "@/utils/provably-fair";
 import StakingUser from "@/models/staking/user";
 
+/**
+ * @swagger
+ * /api/games/global/getRecentHistory:
+ *   get:
+ *     summary: Retrieves recent game history with "Won" results
+ *     description: Fetches the most recent 10 game records with a "Won" result for each game type, including user names, amounts, and other details. Returns the top 15 most recent records sorted by creation date.
+ *     tags:
+ *      - Games/Global
+ *     responses:
+ *       200:
+ *         description: Successful data retrieval
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       game:
+ *                         type: string
+ *                         example: "game_type"
+ *                       account:
+ *                         type: string
+ *                         example: "user_name_or_wallet"
+ *                       amount:
+ *                         type: number
+ *                         example: 100
+ *                       amountWon:
+ *                         type: number
+ *                         example: 50
+ *                       result:
+ *                         type: string
+ *                         example: "Won"
+ *                       tokenMint:
+ *                         type: string
+ *                         example: "token_mint_address"
+ *                       createdAt:
+ *                         type: string
+ *                         format: date-time
+ *                         example: "2024-08-04T12:34:56Z"
+ *                 message:
+ *                   type: string
+ *                   example: "Data fetch successful!"
+ *       500:
+ *         description: Internal Server Error - Failed to fetch data
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Error message details"
+ *       405:
+ *         description: Method Not Allowed - GET method required
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Method not allowed"
+ */
+
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === "GET") {
     try {

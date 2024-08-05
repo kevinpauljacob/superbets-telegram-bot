@@ -3,6 +3,68 @@ import { NextApiRequest, NextApiResponse } from "next";
 import { gameModelMap, User } from "@/models/games";
 import { GameType, decryptServerSeed, seedStatus } from "@/utils/provably-fair";
 
+/**
+ * @swagger
+ * /api/games/global/getUserPnl:
+ *   get:
+ *     summary: Calculates the profit and loss (PnL) for a specific user
+ *     description: Computes the total profit and loss for a user based on their historical game records. Aggregates data from different game types and handles server seed decryption if needed.
+ *     tags:
+ *      - Games/Global
+ *     parameters:
+ *       - in: query
+ *         name: wallet
+ *         required: true
+ *         schema:
+ *           type: string
+ *           example: "wallet_address_example"
+ *         description: The wallet address of the user.
+ *     responses:
+ *       200:
+ *         description: Successful PnL calculation
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   type: number
+ *                   example: 1234.56
+ *                   description: The total profit and loss for the user.
+ *                 message:
+ *                   type: string
+ *                   example: "Data fetch successful!"
+ *       400:
+ *         description: Bad Request - Missing or invalid wallet address
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Invalid wallet"
+ *       500:
+ *         description: Internal Server Error - Failed to fetch or process data
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Error message details"
+ */
+
 const encryptionKey = Buffer.from(process.env.ENCRYPTION_KEY!, "hex");
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {

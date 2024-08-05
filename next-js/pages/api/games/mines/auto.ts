@@ -24,6 +24,96 @@ import { launchPromoEdge } from "@/context/config";
 import { SPL_TOKENS } from "@/context/config";
 import updateGameStats from "../../../../utils/updateGameStats";
 
+/**
+ * @swagger
+ * /api/games/mines/auto:
+ *   post:
+ *     summary: Automatically conclude a Mines game
+ *     description: Concludes a Mines game automatically by providing wallet or email, bet amount, token mint, number of mines, and user bets.
+ *     tags:
+ *       - Games
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               wallet:
+ *                 type: string
+ *                 description: The user's wallet address.
+ *               email:
+ *                 type: string
+ *                 description: The user's email address.
+ *               amount:
+ *                 type: number
+ *                 description: The bet amount.
+ *               tokenMint:
+ *                 type: string
+ *                 description: The token mint.
+ *               minesCount:
+ *                 type: number
+ *                 description: The number of mines.
+ *               userBets:
+ *                 type: array
+ *                 items:
+ *                   type: number
+ *                 description: The user's bets.
+ *             required:
+ *               - wallet
+ *               - email
+ *               - amount
+ *               - tokenMint
+ *               - minesCount
+ *               - userBets
+ *     responses:
+ *       201:
+ *         description: Game concluded successfully.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 result:
+ *                   type: string
+ *                 amountWon:
+ *                   type: number
+ *                 strikeNumbers:
+ *                   type: array
+ *                   items:
+ *                     type: number
+ *                 strikeMultiplier:
+ *                   type: number
+ *                 pointsGained:
+ *                   type: number
+ *                 message:
+ *                   type: string
+ *       400:
+ *         description: User does not exist, missing parameters, invalid parameters, or other client errors.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *       500:
+ *         description: Internal server error.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ */
+
 const secret = process.env.NEXTAUTH_SECRET;
 const encryptionKey = Buffer.from(process.env.ENCRYPTION_KEY!, "hex");
 
@@ -99,7 +189,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         });
 
       const maxStrikeMultiplier = 25;
-      const maxPayout = new Decimal(maxPayouts[tokenMint as GameTokens].mines); 
+      const maxPayout = new Decimal(maxPayouts[tokenMint as GameTokens].mines);
 
       // if (
       //   !(

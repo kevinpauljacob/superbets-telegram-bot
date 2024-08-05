@@ -10,6 +10,80 @@ import StakingUser from "@/models/staking/user";
 import { SPL_TOKENS } from "@/context/config";
 import updateGameStats from "../../../../utils/updateGameStats";
 
+/**
+ * @swagger
+ * /api/games/mines:
+ *   post:
+ *     summary: Create a new Mines game
+ *     description: Creates a new Mines game for a user based on their wallet or email.
+ *     tags:
+ *       - Games
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               wallet:
+ *                 type: string
+ *                 description: The user's wallet address.
+ *               email:
+ *                 type: string
+ *                 description: The user's email address.
+ *               amount:
+ *                 type: number
+ *                 description: The amount to bet.
+ *               tokenMint:
+ *                 type: string
+ *                 description: The token mint address.
+ *               minesCount:
+ *                 type: number
+ *                 description: The number of mines in the game.
+ *             required:
+ *               - wallet
+ *               - email
+ *               - amount
+ *               - tokenMint
+ *               - minesCount
+ *     responses:
+ *       201:
+ *         description: Mines game created successfully.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 gameId:
+ *                   type: string
+ *                 message:
+ *                   type: string
+ *       400:
+ *         description: User does not exist, invalid parameters, or other client errors.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *       500:
+ *         description: Internal server error.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ */
+
 const secret = process.env.NEXTAUTH_SECRET;
 
 export const config = {
@@ -63,7 +137,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
       const maxStrikeMultiplier = 25;
 
-      const maxPayout = new Decimal(maxPayouts[tokenMint as GameTokens].mines); 
+      const maxPayout = new Decimal(maxPayouts[tokenMint as GameTokens].mines);
 
       // if (!(maxPayout.toNumber() <= maxPayouts[tokenMint as GameTokens].mines))
       //   return res

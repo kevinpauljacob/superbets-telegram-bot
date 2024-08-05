@@ -12,6 +12,103 @@ import updateGameStats from "../../../../utils/updateGameStats";
 import { getSolPrice } from "@/context/transactions";
 Decimal.set({ precision: 9 });
 
+/**
+ * @swagger
+ * /api/games/options:
+ *   post:
+ *     summary: Create a new bet on options game
+ *     description: Create a new bet on the options game where users can bet up or down on the price within a given time frame.
+ *     tags:
+ *       - Games
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - wallet
+ *               - email
+ *               - amount
+ *               - tokenMint
+ *               - betType
+ *               - timeFrame
+ *             properties:
+ *               wallet:
+ *                 type: string
+ *                 description: The user's wallet address.
+ *               email:
+ *                 type: string
+ *                 description: The user's email address.
+ *               amount:
+ *                 type: number
+ *                 description: The amount to bet.
+ *               tokenMint:
+ *                 type: string
+ *                 description: The mint address of the token being bet.
+ *               betType:
+ *                 type: string
+ *                 enum: [betUp, betDown]
+ *                 description: The type of bet, either 'betUp' or 'betDown'.
+ *               timeFrame:
+ *                 type: number
+ *                 enum: [3, 4, 5]
+ *                 description: The timeframe for the bet in minutes.
+ *     responses:
+ *       200:
+ *         description: Bet successfully created.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     betTime:
+ *                       type: string
+ *                       format: date-time
+ *                     strikePrice:
+ *                       type: number
+ *                 message:
+ *                   type: string
+ *       400:
+ *         description: Invalid request parameters or user-related errors.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *       405:
+ *         description: Method not allowed.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *       500:
+ *         description: Internal server error.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ */
+
 const secret = process.env.NEXTAUTH_SECRET;
 
 export const config = {
@@ -72,7 +169,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         });
 
       const strikeMultiplier = new Decimal(2);
-      const maxPayout = new Decimal(maxPayouts[tokenMint as GameTokens].options); 
+      const maxPayout = new Decimal(
+        maxPayouts[tokenMint as GameTokens].options,
+      );
 
       // if (
       //   !(maxPayout.toNumber() <= maxPayouts[tokenMint as GameTokens].options)

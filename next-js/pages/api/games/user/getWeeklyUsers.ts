@@ -2,6 +2,72 @@ import { Option, Coin, Dice, User } from "../../../../models/games";
 import connectDatabase from "../../../../utils/database";
 import { NextApiRequest, NextApiResponse } from "next";
 
+/**
+ * @swagger
+ * /api/games/user/getWeeklyUsers:
+ *   get:
+ *     summary: Get weekly user activity data
+ *     description: Retrieve aggregated data on user activity for the past week.
+ *     tags:
+ *       - Games/User
+ *     responses:
+ *       200:
+ *         description: Data fetch successful.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       wallet:
+ *                         type: string
+ *                         example: ABC1234XYZ5678
+ *                       bets:
+ *                         type: number
+ *                         example: 10
+ *                       flips:
+ *                         type: number
+ *                         example: 5
+ *                       rolls:
+ *                         type: number
+ *                         example: 7
+ *                       total:
+ *                         type: number
+ *                         example: 200.0
+ *                       won:
+ *                         type: number
+ *                         example: 150.0
+ *                       lost:
+ *                         type: number
+ *                         example: 50.0
+ *                       sns:
+ *                         type: string
+ *                         example: user_sns_handle
+ *                 message:
+ *                   type: string
+ *                   example: Data fetch successful !
+ *       500:
+ *         description: Internal server error.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: An error occurred while fetching data.
+ */
+
 async function binaryAggregateData(
   model: any,
   betAmountField: string,

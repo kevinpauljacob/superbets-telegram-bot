@@ -26,6 +26,74 @@ import { SPL_TOKENS } from "@/context/config";
 import updateGameStats from "../../../../utils/updateGameStats";
 Decimal.set({ precision: 9 });
 
+/**
+ * @swagger
+ * /api/games/keno:
+ *   post:
+ *     summary: Play a keno game
+ *     description: This endpoint allows a user to play a keno game by betting a certain amount of tokens, choosing numbers, and selecting a risk level. The game result is determined in a provably fair manner.
+ *     tags:
+ *      - Games
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               wallet:
+ *                 type: string
+ *                 description: The wallet address of the user.
+ *               email:
+ *                 type: string
+ *                 description: The email of the user.
+ *               amount:
+ *                 type: number
+ *                 description: The amount of tokens to bet.
+ *               tokenMint:
+ *                 type: string
+ *                 description: The token mint of the token being bet.
+ *               chosenNumbers:
+ *                 type: array
+ *                 items:
+ *                   type: number
+ *                 description: An array of chosen numbers between 1 and 40.
+ *               risk:
+ *                 type: string
+ *                 enum: [classic, low, medium, high]
+ *                 description: The risk level chosen by the user.
+ *     responses:
+ *       201:
+ *         description: Game played successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *                 result:
+ *                   type: string
+ *                 strikeNumbers:
+ *                   type: array
+ *                   items:
+ *                     type: number
+ *                 strikeMultiplier:
+ *                   type: number
+ *                 amountWon:
+ *                   type: number
+ *                 amountLost:
+ *                   type: number
+ *       400:
+ *         description: Bad request
+ *       405:
+ *         description: Method not allowed
+ *       500:
+ *         description: Internal server error
+ */
+
 const secret = process.env.NEXTAUTH_SECRET;
 const encryptionKey = Buffer.from(process.env.ENCRYPTION_KEY!, "hex");
 
@@ -99,7 +167,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       const multiplier = riskToChance[risk][chosenNumbers.length];
       const maxStrikeMultiplier = multiplier.at(-1)!;
 
-      const maxPayout = new Decimal(maxPayouts[tokenMint as GameTokens].keno); 
+      const maxPayout = new Decimal(maxPayouts[tokenMint as GameTokens].keno);
 
       // if (!(maxPayout.toNumber() <= maxPayouts[tokenMint as GameTokens].keno))
       //   return res

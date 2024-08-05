@@ -26,6 +26,73 @@ import { NextApiRequest, NextApiResponse } from "next";
 import { getToken } from "next-auth/jwt";
 Decimal.set({ precision: 9 });
 
+/**
+ * @swagger
+ * /api/games/plinko:
+ *   post:
+ *     summary: Play a Plinko game
+ *     description: This endpoint allows a user to play a Plinko game by betting a certain amount of tokens and selecting the number of rows and risk level. The game result is determined in a provably fair manner.
+ *     tags:
+ *      - Games
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               wallet:
+ *                 type: string
+ *                 description: The wallet address of the user.
+ *               email:
+ *                 type: string
+ *                 description: The email of the user.
+ *               amount:
+ *                 type: number
+ *                 description: The amount of tokens to bet.
+ *               tokenMint:
+ *                 type: string
+ *                 description: The token mint of the token being bet.
+ *               rows:
+ *                 type: number
+ *                 description: The number of rows in the Plinko game. Should be between 8 and 16.
+ *               risk:
+ *                 type: string
+ *                 enum: [low, medium, high]
+ *                 description: The risk level for the game. Determines the chances of winning.
+ *     responses:
+ *       201:
+ *         description: Game played successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *                 result:
+ *                   type: string
+ *                   enum: [Won, Lost]
+ *                 strikeMultiplier:
+ *                   type: number
+ *                 strikeNumber:
+ *                   type: number
+ *                 amountWon:
+ *                   type: number
+ *                 amountLost:
+ *                   type: number
+ *                 rows:
+ *                   type: number
+ *       400:
+ *         description: Bad request
+ *       405:
+ *         description: Method not allowed
+ *       500:
+ *         description: Internal server error
+ */
+
 const secret = process.env.NEXTAUTH_SECRET;
 const encryptionKey = Buffer.from(process.env.ENCRYPTION_KEY!, "hex");
 
@@ -85,7 +152,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
       const multiplier = riskToChance[risk][rows];
       const maxStrikeMultiplier = multiplier.at(-1)!;
-      const maxPayout = new Decimal(maxPayouts[tokenMint as GameTokens].plinko); 
+      const maxPayout = new Decimal(maxPayouts[tokenMint as GameTokens].plinko);
 
       // if (!(maxPayout.toNumber() <= maxPayouts[tokenMint as GameTokens].plinko))
       //   return res

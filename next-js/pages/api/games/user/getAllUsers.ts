@@ -2,6 +2,72 @@ import connectDatabase from "../../../../utils/database";
 import { NextApiRequest, NextApiResponse } from "next";
 import { Option, Coin, Dice, User } from "../../../../models/games";
 
+/**
+ * @swagger
+ * /api/games/user/getAllUsers:
+ *   get:
+ *     summary: Get aggregated data for all users
+ *     description: Retrieves aggregated data for users including bets, flips, and rolls with their respective totals, won amounts, lost amounts, and counts. Also includes user-specific information like SNS.
+ *     tags:
+ *       - Games/User
+ *     responses:
+ *       200:
+ *         description: Data fetch successful
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       wallet:
+ *                         type: string
+ *                         example: "0x1234567890abcdef"
+ *                       bets:
+ *                         type: number
+ *                         example: 10
+ *                       flips:
+ *                         type: number
+ *                         example: 5
+ *                       rolls:
+ *                         type: number
+ *                         example: 8
+ *                       total:
+ *                         type: number
+ *                         example: 1000
+ *                       won:
+ *                         type: number
+ *                         example: 700
+ *                       lost:
+ *                         type: number
+ *                         example: 300
+ *                       sns:
+ *                         type: string
+ *                         example: "SomeSNS"
+ *                 message:
+ *                   type: string
+ *                   example: "Data fetch successful!"
+ *       500:
+ *         description: Internal Server Error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Error message details"
+ */
+
 async function binaryAggregateData(
   model: any,
   betAmountField: string,

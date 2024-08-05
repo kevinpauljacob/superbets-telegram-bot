@@ -16,6 +16,84 @@ import { SPL_TOKENS, maintainance } from "@/context/config";
 import updateGameStats from "../../../../utils/updateGameStats";
 Decimal.set({ precision: 9 });
 
+/**
+ * @swagger
+ * /api/games/mines/pick:
+ *   post:
+ *     summary: Make a pick in an ongoing Mines game
+ *     description: Allows a user to make a pick in an ongoing Mines game by providing their wallet/email, game ID, and the chosen bet.
+ *     tags:
+ *       - Games
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               wallet:
+ *                 type: string
+ *                 description: The user's wallet address.
+ *               email:
+ *                 type: string
+ *                 description: The user's email address.
+ *               gameId:
+ *                 type: string
+ *                 description: The ID of the ongoing game.
+ *               userBet:
+ *                 type: number
+ *                 description: The user's chosen bet (a number between 0 and 24).
+ *             required:
+ *               - wallet
+ *               - email
+ *               - gameId
+ *               - userBet
+ *     responses:
+ *       201:
+ *         description: Pick made successfully.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *                 result:
+ *                   type: string
+ *                 strikeNumbers:
+ *                   type: array
+ *                   items:
+ *                     type: number
+ *                 strikeMultiplier:
+ *                   type: number
+ *                 amountWon:
+ *                   type: number
+ *       400:
+ *         description: User does not exist, invalid parameters, or other client errors.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *       500:
+ *         description: Internal server error.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ */
+
 const secret = process.env.NEXTAUTH_SECRET;
 const encryptionKey = Buffer.from(process.env.ENCRYPTION_KEY!, "hex");
 
