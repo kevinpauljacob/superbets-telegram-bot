@@ -212,7 +212,7 @@ const WagerMapping: Record<WagerType, Array<number> | Record<string, number>> =
   {
     red: [1, 3, 5, 7, 12, 14, 16, 18, 19, 21, 23, 25, 27, 30, 32, 34, 36],
     black: [2, 4, 6, 8, 10, 11, 13, 15, 17, 20, 22, 24, 26, 28, 29, 31, 33, 35],
-    green: [0, 99],
+    green: [0, 37],
     odd: [1, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23, 25, 27, 29, 31, 33, 35],
     even: [2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 34, 36],
     low: [...Array(18).keys()].map((x) => x + 1),
@@ -225,7 +225,6 @@ const WagerMapping: Record<WagerType, Array<number> | Record<string, number>> =
     "3rd-column": [3, 6, 9, 12, 15, 18, 21, 24, 27, 30, 33, 36],
     straight: {
       "0": 0,
-      "99": 99,
       "1": 1,
       "2": 2,
       "3": 3,
@@ -262,6 +261,7 @@ const WagerMapping: Record<WagerType, Array<number> | Record<string, number>> =
       "34": 34,
       "35": 35,
       "36": 36,
+      "37": 37,
     },
   };
 

@@ -265,7 +265,7 @@ export const generateGameResult = <T extends GameType>(
         nonce,
         cursor: 0,
         count: 1,
-      }).map((e) => Math.floor(37 * e) - 1);
+      }).map((e) => Math.floor(38 * e));
 
       return n[0] as GameResult<T>;
     }
