@@ -322,9 +322,31 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         );
       }
 
-      const route = `https://fomowtf.com/api/games/global/getUserVol?wallet=${wallet}&tokenMint=${tokenMint}`;
+      let totalVolume = 0;
 
-      let totalVolume = (await (await fetch(route)).json())?.data ?? 0;
+      for (const [_, value] of Object.entries(GameType)) {
+        const game = value;
+        const model = gameModelMap[game as keyof typeof gameModelMap];
+
+        const res = await model.aggregate([
+          {
+            $match: {
+              wallet,
+              tokenMint,
+            },
+          },
+          {
+            $group: {
+              _id: null,
+              amount: { $sum: "$amount" },
+            },
+          },
+        ]);
+
+        if (res.length > 0) {
+          totalVolume += res[0].amount;
+        }
+      }
 
       let userTransferAgg = userAgg.find((data) => data._id == wallet) ?? {
         wallet: wallet,

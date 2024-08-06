@@ -1,4 +1,3 @@
-import FOMO from "@/public/assets/coins/FOMO";
 import SOL from "@/public/assets/coins/SOL";
 import SUPER from "@/public/assets/coins/SUPER";
 import USDC from "@/public/assets/coins/USDC";
