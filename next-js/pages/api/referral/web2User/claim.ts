@@ -21,9 +21,6 @@ import connectDatabase from "@/utils/database";
  *               email:
  *                 type: string
  *                 description: The email of the user.
- *               wallet:
- *                 type: string
- *                 description: The wallet address of the user.
  *               campaignId:
  *                 type: string
  *                 description: The ID of the referral campaign.
@@ -73,12 +70,12 @@ export default async function handler(
   try {
     await connectDatabase();
 
-    const { email, wallet, campaignId } = req.body;
+    const { email, campaignId } = req.body;
 
-    if (!email && !wallet) {
+    if (!email) {
       return res
         .status(400)
-        .json({ success: false, message: "Email or wallet is required" });
+        .json({ success: false, message: "Email is required" });
     }
 
     if (!campaignId) {
@@ -89,7 +86,7 @@ export default async function handler(
 
     // Find the user
     const user = await User.findOne({
-      $or: [{ email }, { wallet }],
+      email,
     });
 
     if (!user) {
@@ -111,6 +108,7 @@ export default async function handler(
     const unclaimedSuperEarnings = campaign.unclaimedEarnings.get("SUPER") || 0;
     console.log("unclaimed ", unclaimedSuperEarnings);
     console.log("campaign", campaign);
+
     if (unclaimedSuperEarnings <= 0) {
       return res
         .status(400)
@@ -121,11 +119,19 @@ export default async function handler(
     const superDepositIndex = user.deposit.findIndex(
       (d: any) => d.tokenMint === "SUPER",
     );
+
     if (superDepositIndex !== -1) {
-      user.deposit[superDepositIndex].amount += unclaimedSuperEarnings;
+      // Convert to string, then to number to avoid precision issues
+      const currentAmount = Number(
+        user.deposit[superDepositIndex].amount.toString(),
+      );
+      const newAmount = Number(
+        (currentAmount + unclaimedSuperEarnings).toFixed(8),
+      );
+      user.deposit[superDepositIndex].amount = newAmount;
     } else {
       user.deposit.push({
-        amount: unclaimedSuperEarnings,
+        amount: Number(unclaimedSuperEarnings.toFixed(8)),
         tokenMint: "SUPER",
       });
     }
@@ -137,14 +143,20 @@ export default async function handler(
     await user.save();
     await campaign.save();
 
+    // Fetch the updated user to ensure we're returning the latest data
+    const updatedUser = await User.findById(user._id);
+
     return res.status(200).json({
       success: true,
       message: "SUPER earnings claimed successfully",
       claimedAmount: unclaimedSuperEarnings,
-      updatedDeposit: user.deposit,
+      updatedDeposit: updatedUser.deposit,
     });
-  } catch (error: any) {
-    console.error(error);
-    return res.status(500).json({ success: false, message: error.message });
+  } catch (e: any) {
+    console.log(e);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
   }
 }

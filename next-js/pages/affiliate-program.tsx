@@ -83,6 +83,7 @@ export default function AffiliateProgram() {
     liveTokenPrice,
     showCreateCampaignModal,
     setShowCreateCampaignModal,
+    getBalance,
     session,
   } = useGlobalContext();
   const transactionsPerPage = 10;
@@ -310,6 +311,7 @@ export default function AffiliateProgram() {
     setReferralLevelData(initialReferralLevelData);
   };
 
+  console.log("session", session);
   useEffect(() => {
     if (referredUsers.length > 0) referralData();
   }, [referredUsers, referralLevels]);
@@ -327,31 +329,33 @@ export default function AffiliateProgram() {
 
       // Helper function to process earnings
       const processEarnings = (
-        earnings: Record<string, number>,
+        earnings: Record<string, number> | undefined,
         key: "totalEarnings" | "unclaimedEarnings",
       ) => {
-        Object.entries(earnings).forEach(([tokenMint, amount]) => {
-          const tokenPriceObj = liveTokenPrice.find(
-            (priceObj) => priceObj.mintAddress === tokenMint,
-          );
+        if (earnings && typeof earnings === "object") {
+          Object.entries(earnings).forEach(([tokenMint, amount]) => {
+            const tokenPriceObj = liveTokenPrice.find(
+              (priceObj) => priceObj.mintAddress === tokenMint,
+            );
 
-          if (tokenPriceObj) {
-            const { price } = tokenPriceObj;
-            const dollars = amount * price;
-            const tokenName = SPL_TOKENS.find(
-              (token) => token.tokenMint === tokenMint,
-            )?.tokenName;
+            if (tokenPriceObj) {
+              const { price } = tokenPriceObj;
+              const dollars = amount * price;
+              const tokenName = SPL_TOKENS.find(
+                (token) => token.tokenMint === tokenMint,
+              )?.tokenName;
 
-            if (tokenName) {
-              tempEarningsData[tokenName] = tempEarningsData[tokenName] || {
-                totalEarnings: 0,
-                unclaimedEarnings: 0,
-              };
-              tempEarningsData[tokenName][key] =
-                (tempEarningsData[tokenName][key] || 0) + dollars;
+              if (tokenName) {
+                tempEarningsData[tokenName] = tempEarningsData[tokenName] || {
+                  totalEarnings: 0,
+                  unclaimedEarnings: 0,
+                };
+                tempEarningsData[tokenName][key] =
+                  (tempEarningsData[tokenName][key] || 0) + dollars;
+              }
             }
-          }
-        });
+          });
+        }
       };
 
       // Process totalEarnings and unclaimedEarnings
@@ -397,16 +401,22 @@ export default function AffiliateProgram() {
 
   const fetchData = async () => {
     try {
-      const url =
-        wallet && wallet.publicKey
-          ? `/api/referral/${wallet.publicKey}`
-          : `/api/referral/web2User?email=${session?.user?.email}`;
+      const url = "/api/referral";
+
+      const payload: { email?: string } = {};
+
+      if (session?.user) {
+        if (session.user.email) {
+          payload.email = session.user.email;
+        }
+      }
 
       const response = await fetch(url, {
-        method: "GET",
+        method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
+        body: JSON.stringify(payload),
       });
 
       if (!response.ok) {
@@ -432,7 +442,7 @@ export default function AffiliateProgram() {
 
   // fetch user data
   useEffect(() => {
-    if ((wallet && wallet.connected) || session?.user?.email) {
+    if ((wallet && wallet.connected && session?.user) || session?.user?.email) {
       fetchData();
     }
   }, [wallet, session?.user?.email]);
@@ -476,6 +486,7 @@ export default function AffiliateProgram() {
         }
 
         await fetchData();
+        await getBalance();
       } catch (error) {
         console.error("Error claiming earnings:", error);
       }
@@ -489,6 +500,7 @@ export default function AffiliateProgram() {
   useEffect(() => {
     const users = sortUsersByEarnings(referredUsers);
     setSortedUsers(users);
+    console.log("sorted users", users);
   }, [referredUsers]);
 
   // useEffect(() => {
@@ -583,7 +595,7 @@ export default function AffiliateProgram() {
                   <button
                     onClick={() => {
                       copyToClipboard(
-                        `https://fomo-test.onrender.com?referralCode=${userCampaigns[userCampaigns.length - 1]?.referralCode}`,
+                        `https://superbets.games?referralCode=${userCampaigns[userCampaigns.length - 1]?.referralCode}`,
                       );
                       setButtonText("Copied!");
                       setTimeout(() => {
@@ -776,9 +788,9 @@ export default function AffiliateProgram() {
                               >
                                 <div className="w-full flex items-center justify-between cursor-pointer">
                                   <span className="w-full text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
-                                    {user.wallet !== null
-                                      ? obfuscatePubKey(user.wallet)
-                                      : user.email}
+                                    {!user.wallet || user.wallet === null
+                                      ? user.email
+                                      : obfuscatePubKey(user.wallet)}
                                   </span>
                                   <span className="w-full text-center font-changa text-sm text-opacity-75">
                                     <span

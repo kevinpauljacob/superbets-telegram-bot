@@ -29,7 +29,7 @@ export default function CreateCampaignModal() {
   const createCampaign = async (event: any) => {
     event.preventDefault();
     try {
-      const response = await fetch(`/api/referral`, {
+      const response = await fetch(`/api/referral/create`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

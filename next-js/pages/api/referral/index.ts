@@ -1,23 +1,16 @@
-import connectDatabase from "../../../utils/database";
 import { NextApiRequest, NextApiResponse } from "next";
-import { User, Campaign } from "@/models/referral";
-import { getToken } from "next-auth/jwt";
-
-/**
- * @swagger
- * tags:
- *    name: Referral
- *    description: Referral related operations
- */
+import connectDatabase from "@/utils/database";
+import { Campaign, User } from "@/models/referral/index";
+import { v4 as uuidv4 } from "uuid";
 
 /**
  * @swagger
  * /api/referral:
  *   post:
- *     summary: Create a referral campaign
- *     description: Creates a new referral campaign and associates it with a user
+ *     summary: Create a new user and default campaign or find an existing user
+ *     description: Creates a new user with the provided email and a default campaign if the user does not exist. If the user already exists, it checks for a default campaign and creates it if not present.
  *     tags:
- *      - Referral
+ *       - Referral
  *     requestBody:
  *       required: true
  *       content:
@@ -25,20 +18,14 @@ import { getToken } from "next-auth/jwt";
  *           schema:
  *             type: object
  *             required:
- *               - referralCode
- *               - campaignName
+ *               - email
  *             properties:
- *               wallet:
- *                 type: string
  *               email:
  *                 type: string
- *               referralCode:
- *                 type: string
- *               campaignName:
- *                 type: string
+ *                 example: "user@example.com"
  *     responses:
  *       200:
- *         description: Campaign created successfully
+ *         description: Success response with user and referred users information.
  *         content:
  *           application/json:
  *             schema:
@@ -46,74 +33,170 @@ import { getToken } from "next-auth/jwt";
  *               properties:
  *                 success:
  *                   type: boolean
+ *                   example: true
+ *                 user:
+ *                   type: object
+ *                   properties:
+ *                     _id:
+ *                       type: string
+ *                     email:
+ *                       type: string
+ *                     campaigns:
+ *                       type: array
+ *                       items:
+ *                         type: object
+ *                         properties:
+ *                           _id:
+ *                             type: string
+ *                           email:
+ *                             type: string
+ *                           campaignName:
+ *                             type: string
+ *                           referralCode:
+ *                             type: string
+ *                 referredUsers:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       _id:
+ *                         type: string
+ *                       email:
+ *                         type: string
+ *                       campaigns:
+ *                         type: array
+ *                         items:
+ *                           type: string
  *                 message:
  *                   type: string
+ *                   example: "User already exists. No changes made."
  *       400:
- *         description: Bad request
+ *         description: Bad request response when email is not provided.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Email is required"
  *       405:
- *         description: Method not allowed
+ *         description: Method not allowed response when using a method other than POST.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Method not allowed!"
  *       500:
- *         description: Internal server error
+ *         description: Internal server error response.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Internal server error"
  */
 
-const secret = process.env.NEXTAUTH_SECRET;
-
 async function handler(req: NextApiRequest, res: NextApiResponse) {
+  if (req.method !== "POST") {
+    return res
+      .status(405)
+      .json({ success: false, message: "Method not allowed!" });
+  }
+
   try {
-    if (req.method !== "POST")
-      return res
-        .status(405)
-        .json({ success: false, message: "Method not allowed!" });
-
-    const { wallet, email, referralCode, campaignName } = req.body;
-
-    if ((!wallet && !email) || !referralCode || !campaignName)
-      return res
-        .status(400)
-        .json({ success: false, message: "Missing parameters!" });
-
-    //check if referralCode consists of only alphanumeric characters
-    if (!/^[a-zA-Z0-9]*$/.test(referralCode))
-      return res
-        .status(400)
-        .json({ success: false, message: "Invalid referral code!" });
-
     await connectDatabase();
 
-    // const existingCampaign = await Campaign.findOne({ referralCode });
-    // if (existingCampaign) {
-    //   return res.status(400).json({
-    //     success: false,
-    //     message:
-    //       "This referral code is already in use. Please choose a different one.",
-    //   });
-    // }
+    const { email } = req.body;
 
-    const campaign = new Campaign({
-      wallet,
-      email,
-      campaignName,
-      referralCode,
-    });
-    await campaign.save();
+    if (!email) {
+      return res.status(400).json({
+        success: false,
+        message: "Email is required",
+      });
+    }
 
-    await User.findOneAndUpdate(
-      {
-        $or: [{ wallet }, { email }],
-      },
-      {
-        $addToSet: { campaigns: campaign._id },
-      },
-      { upsert: true },
-    );
+    let user = null;
+    let campaign = null;
+    let message = "";
 
-    return res.json({
+    // Check if user exists with email
+    user = await User.findOne({ email });
+
+    if (!user) {
+      // Create new user if doesn't exist
+      user = new User({ email });
+      await user.save();
+      message = "New user created. ";
+
+      // Create default campaign
+      campaign = new Campaign({
+        email: user.email,
+        campaignName: "Default Campaign",
+        referralCode: uuidv4().slice(0, 8),
+      });
+      await campaign.save();
+
+      user.campaigns = [campaign._id];
+      await user.save();
+      message += "Default campaign created.";
+    } else {
+      message = "User already exists. ";
+
+      // Check if default campaign exists
+      const defaultCampaign = await Campaign.findOne({
+        email: user.email,
+        campaignName: "Default Campaign",
+      });
+
+      if (!defaultCampaign) {
+        const newDefaultCampaign = new Campaign({
+          email: user.email,
+          campaignName: "Default Campaign",
+          referralCode: uuidv4().slice(0, 8),
+        });
+        await newDefaultCampaign.save();
+
+        user.campaigns.push(newDefaultCampaign._id);
+        await user.save();
+        message += "Default campaign created.";
+      } else {
+        message += "No changes made.";
+      }
+    }
+
+    user = await User.findById(user._id).populate("campaigns").lean();
+
+    //@ts-ignore
+    const campaignIds = user?.campaigns?.map((c: any) => c._id) || [];
+
+    const referredUsers = await User.find({
+      referredByChain: { $in: campaignIds },
+    }).lean();
+
+    return res.status(200).json({
       success: true,
-      message: `Campaign created successfully!`,
+      user,
+      referredUsers,
+      message,
     });
-  } catch (e: any) {
-    console.log(e);
-    return res.status(500).json({ success: false, message: e.message });
+  } catch (error: any) {
+    console.error("Error in /api/referral:", error);
+    return res.status(500).json({ success: false, message: error.message });
   }
 }
 

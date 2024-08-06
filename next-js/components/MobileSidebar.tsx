@@ -10,8 +10,8 @@ export default function Sidebar() {
   return (
     <div
       className={`${
-        mobileSidebar ? "top-[6.3rem]" : "fadeOutDown top-[100dvh]"
-      } fixed transition-all duration-500 ease-in-out z-[1000] md:hidden bg-[#121418] no-scrollbar overflow-y-auto text-white flex flex-col justify-between w-full h-[calc(100dvh-10rem)]`}
+        mobileSidebar ? "top-[4.59rem]" : "fadeOutDown top-[100dvh]"
+      } fixed transition-all duration-500 ease-in-out z-[1000] md:hidden bg-[#121418] no-scrollbar overflow-y-auto text-white flex flex-col justify-between w-full h-[calc(100dvh-6rem)]`}
     >
       {mobileSidebar && (
         <OpenSidebar
