@@ -79,6 +79,9 @@ interface LiveTokenPrice {
 }
 
 interface GlobalContextProps {
+  isFirstSignUp: boolean;
+  setIsFirstSignUp: (isFirstSignUp: boolean) => void;
+
   loading: boolean;
   setLoading: (stake: boolean) => void;
 
@@ -321,6 +324,8 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
   const [kenoRisk, setKenoRisk] = useState<
     "classic" | "low" | "medium" | "high"
   >("classic");
+
+  const [isFirstSignUp, setIsFirstSignUp] = useState<boolean>(false);
 
   const openVerifyModal = () => {
     setIsVerifyModalOpen(true);
@@ -637,6 +642,8 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
         setLiveCurrentStat,
         updatePNL,
         liveTokenPrice,
+        isFirstSignUp,
+        setIsFirstSignUp,
       }}
     >
       {children}

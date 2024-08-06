@@ -1,17 +1,68 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { obfuscatePubKey, translator } from "@/context/transactions";
 import { pointTiers } from "@/context/config";
 import { useGlobalContext } from "./GlobalContext";
 import Image from "next/legacy/image";
 import { errorCustom } from "./toasts/ToastGroup";
+import ModalCoin from "@/public/assets/ModelCoin";
+import Coin from "@/public/Coin.svg";
 
-function Leaderboard({ data, page, setPage, maxPages, myData }: any) {
+import { AdaptiveModal, AdaptiveModalContent } from "./AdaptiveModal";
+import { useRouter } from "next/navigation";
+
+interface LeaderboardProps {
+  isOpen: boolean;
+  onClose: () => void;
+  data: any;
+  page: any;
+  setPage: any;
+  maxPages: any;
+  myData: any;
+}
+
+function Leaderboard({
+  data,
+  page,
+  setPage,
+  maxPages,
+  myData,
+  isOpen,
+  onClose,
+}: LeaderboardProps) {
+  const router = useRouter();
   const wallet = useWallet();
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const { getUserDetails, language, session } = useGlobalContext();
+  const {
+    getUserDetails,
+    language,
+    session,
+    coinData,
+    isFirstSignUp,
+    setIsFirstSignUp,
+  } = useGlobalContext();
   const transactionsPerPage = 10;
   const headers = ["Rank", "Player", "Coins"];
+
+  const threshold = 500;
+
+  const tokenAmount = useMemo(
+    () =>
+      Math.max(0, coinData?.find((c) => c.tokenMint === "SUPER")?.amount ?? 0),
+    [coinData],
+  );
+
+  useEffect(() => {
+    if (isFirstSignUp) {
+      setIsModalOpen(true);
+    }
+  }, [isFirstSignUp]);
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setIsFirstSignUp(false);
+  };
 
   return (
     <div className="relative mt-8 mb-10 flex h-full w-full flex-col flex-wrap items-center justify-center">
@@ -21,22 +72,22 @@ function Leaderboard({ data, page, setPage, maxPages, myData }: any) {
           <div className="flex w-full flex-col items-center">
             {/* header  */}
             {data.length > 0 && (
-              <div className="mb-[0.5rem] flex w-full flex-row items-center gap-2 text-sm font-light font-changa px-5 sm:px-20">
-                <span className="w-[10%] text-left text-[#F0F0F080]">
+              <div className="mb-[0.5rem] flex w-full flex-row items-center gap-2 pr-10 text-sm font-light font-changa">
+                <span className="w-[10%] text-left ml-10 text-[#F0F0F080]">
                   {translator(headers[0], language)}
                 </span>
-                <span className="w-[70%] text-left pl-5 sm:pl-20 text-[#F0F0F080]">
+                <span className="w-[70%] text-left text-[#F0F0F080] pl-[16.5%]">
                   {translator(headers[1], language)}
                 </span>
-                <span className="w-[20%] text-right text-[#F0F0F080]">
+                <span className="w-[15%] text-right text-[#F0F0F080]">
                   {translator(headers[2], language)}
                 </span>
               </div>
             )}
 
             {myData && (
-              <div className="mb-2.5 flex w-full flex-row items-center gap-2 rounded-[5px] border-2 border-[#5F4DFF] border-opacity-50 bg-[#121418] py-3 px-5 sm:px-20">
-                <span className="relative w-[10%] text-center  font-changa text-sm font-light text-[#F0F0F0] text-opacity-75">
+              <div className="mb-2.5 flex w-full flex-row items-center gap-2 rounded-[5px] border-2 border-[#5F4DFF] border-opacity-50 bg-[#121418] py-3 pr-10">
+                <span className="relative w-[10%] text-center ml-10 font-changa text-sm font-light text-[#F0F0F0] text-opacity-75">
                   <svg
                     width="30"
                     height="30"
@@ -55,7 +106,7 @@ function Leaderboard({ data, page, setPage, maxPages, myData }: any) {
                     {myData?.rank}
                   </p>
                 </span>
-                <span className="w-[70%] flex items-center text-left font-changa text-sm font-light text-[#F0F0F0] text-opacity-75 pl-5 sm:pl-20">
+                <span className="w-[70%] flex items-center gap-2 text-left font-changa text-sm font-light text-[#F0F0F0] text-opacity-75 pl-[16.5%]">
                   {/* <div className="relative w-8 h-8">
                     <Image
                       src={pointTier?.image}
@@ -68,7 +119,7 @@ function Leaderboard({ data, page, setPage, maxPages, myData }: any) {
                   {/* {obfuscatePubKey(myData.wallet ?? "")} */}
                   {myData?.name ?? obfuscatePubKey(myData.wallet)}
                 </span>
-                <span className="flex gap-2 items-center justify-end w-[20%] text-right font-chakra text-sm font-bold text-[#FFFFFF]">
+                <span className="flex gap-2 items-center justify-end w-[15%] text-right font-chakra text-sm font-bold text-[#FFFFFF]">
                   {/* {myData.points.toLocaleString("en-US", {
                     maximumFractionDigits: 2,
                     minimumFractionDigits: 0,
@@ -93,11 +144,11 @@ function Leaderboard({ data, page, setPage, maxPages, myData }: any) {
                 .map((data: any, index: number) => (
                   <div
                     key={index}
-                    className={`mb-2.5 flex w-full flex-row items-center gap-2 rounded-[5px] px-5 sm:px-20 ${
+                    className={`mb-2.5 flex w-full flex-row items-center gap-2 rounded-[5px] ${
                       index % 2 === 0 ? "bg-opacity-50" : ""
-                    } bg-[#121418]  py-3`}
+                    } bg-[#121418]  py-3 pr-10`}
                   >
-                    <span className="relative w-[10%] text-center font-changa text-sm font-light text-[#F0F0F0] text-opacity-75">
+                    <span className="relative w-[10%] text-center ml-10 font-changa text-sm font-light text-[#F0F0F0] text-opacity-75">
                       <svg
                         width="30"
                         height="30"
@@ -116,7 +167,7 @@ function Leaderboard({ data, page, setPage, maxPages, myData }: any) {
                         {data?.rank}
                       </p>
                     </span>
-                    <span className="w-[70%] flex items-center gap-2 text-left font-changa text-sm font-light text-[#FFFFFF] text-opacity-[0.78] pl-5 sm:pl-20">
+                    <span className="w-[70%] flex items-center gap-2 text-left font-changa text-sm font-light text-[#FFFFFF] text-opacity-[0.78] pl-[16.5%]">
                       {/* <div className="relative w-8 h-8">
                         <Image
                           src={`/assets/badges/T-${Object.entries(
@@ -135,7 +186,7 @@ function Leaderboard({ data, page, setPage, maxPages, myData }: any) {
                       {/* {obfuscatePubKey(data.wallet ?? "")} */}
                       {data?.name ?? obfuscatePubKey(data?.wallet)}
                     </span>
-                    <span className="flex gap-2 items-center justify-end w-[20%] text-right font-chakra text-sm font-bold text-[#ffffff]">
+                    <span className="flex gap-2 items-center justify-end w-[15%] text-right font-chakra text-sm font-bold text-[#ffffff]">
                       <Image src="/assets/coin.svg" width={13} height={13} />
                       {parseInt(data?.deposit?.amount ?? 0)}
                     </span>
@@ -206,6 +257,140 @@ function Leaderboard({ data, page, setPage, maxPages, myData }: any) {
           &gt;
         </span>
       </div>
+
+      {/* Modal */}
+      {isModalOpen && (
+        <AdaptiveModal open={isModalOpen} onOpenChange={handleCloseModal}>
+          <AdaptiveModalContent
+            className={`bg-[#121418] sm:overflow-y-auto ${isFirstSignUp ? "min-h-[60dvh] max-h-[800dvh]" : "min-h-[40dvh] max-h-[50dvh]"}  w-full pb-6`}
+          >
+            <div className="flex flex-1 px-8 sm:p-0 justify-center overflow-y-auto">
+              <div className="flex flex-col w-full">
+                {isFirstSignUp && (
+                  <>
+                    <div className="flex justify-center items-center mt-2 mb-2">
+                      <ModalCoin className="" />
+                    </div>
+
+                    <div className="flex flex-col bg-white bg-opacity-20 font-semibold text-lg text-white text-opacity-75 text-center p-2 rounded-md mx-2 mt-2">
+                      <p className="">Congrats! you've received</p>
+                      <div className="flex items-center justify-center gap-1">
+                      <p className="text-white font-bold text-4xl">
+                        <Image src={Coin} width={25} alt="Coin" />
+                        <span className="pb-2">100</span>
+                      </p>
+                      </div>
+                    </div>
+                  </>
+                )}
+
+                {tokenAmount >= 500 && (
+                  <>
+                    <div className="flex flex-col bg-white bg-opacity-20 font-semibold text-lg text-white text-opacity-75 text-center p-2 rounded-md mx-2 md:mt-8 font-changa">
+                      <p className="">Congrats! you've won</p>
+                      <p className="text-white font-bold text-4xl">
+                        <span>$1 USDC</span>
+                      </p>
+                    </div>
+                  </>
+                )}
+
+                {(isFirstSignUp || tokenAmount >= 500) && (
+                  <div className="flex flex-col gap-1 bg-[#1b1d2c] rounded-md mx-2 p-4 mt-2">
+                    <div className="flex justify-between items-center">
+                      <div className="font-semibold text-lg text-white text-opacity-75">
+                        <span>
+                          Claim $1 progress{" "}
+                          <span className="text-white"> 10%</span>
+                        </span>
+                      </div>
+                      <div className="flex gap-1 justify-center items-center">
+                        <Image
+                          src={"/assets/headCoin.png"}
+                          width={13}
+                          height={13}
+                          alt={"User"}
+                          className="rounded-full overflow-hidden"
+                        />
+                        <span className="text-white text-sm font-semibold text-opacity-75">
+                          {tokenAmount.toLocaleString("en-US", {
+                            minimumFractionDigits: 2,
+                            maximumFractionDigits: 2,
+                          })}
+                          /500
+                        </span>
+                      </div>
+                    </div>
+                    <div
+                      className={`relative flex transition-width duration-1000 w-full rounded-full overflow-hidden h-1 bg-[#282E3D] mt-2 mb-2`}
+                    >
+                      <div className="absolute w-full bg-transparent flex items-center justify-evenly">
+                        {Array.from({ length: 4 }, (_, index) => index + 1).map(
+                          (_, index) => (
+                            <div key={index} className="bg-[#202138] w-1 h-1" />
+                          ),
+                        )}
+                      </div>
+                      <div
+                        style={{
+                          width: `${(tokenAmount * 100) / threshold}%`,
+                        }}
+                        className="h-full bg-[#5F4DFF]"
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {isFirstSignUp && (
+                  <div className="relative w-[97%] h-full bg-[#1b1d2c] rounded-md mt-2 mb-2 mx-2">
+                    <Image
+                      src="/assets/ModalBanner.png"
+                      alt="banners"
+                      width="100"
+                      height="100"
+                      layout="fill"
+                      className="rounded-md"
+                    />
+
+                    <div className="absolute inset-0 flex items-center justify-start text-white p-4">
+                      <div className="flex flex-col gap-8">
+                        <div className="flex flex-col sm:flex-row sm:items-end gap-2">
+                          <div>
+                            <h2 className="font-bold text-white text-2xl sm:text-xl mb-1">
+                              Win $1 campaign
+                            </h2>
+                            <p className="text-[#94A3B8] font-medium text-sm sm:text-base">
+                              Get Rewarded 1 $USDC once you
+                            </p>
+                            <p className="text-[#94A3B8] font-medium text-sm sm:text-base">
+                              reach 500 Coins!
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {tokenAmount >= 500 && (
+                  <>
+                    <div className="flex flex-col justify-center items-center font-changa mt-4">
+                      <div className="flex flex-col items-center justify-center">
+                        <p className="text-[#94A3B8] font-medium text-base sm:text-lg">
+                          Go to SuperBets booth to claim
+                        </p>
+                        <p className="text-[#94A3B8] font-medium text-base sm:text-lg">
+                          your 1 $USDC
+                        </p>
+                      </div>
+                    </div>
+                  </>
+                )}
+              </div>
+            </div>
+          </AdaptiveModalContent>
+        </AdaptiveModal>
+      )}
     </div>
   );
 }
