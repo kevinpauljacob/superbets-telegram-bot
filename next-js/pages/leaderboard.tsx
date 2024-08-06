@@ -15,6 +15,10 @@ import FOMOHead from "@/components/HeadElement";
 import dynamic from "next/dynamic";
 import { errorCustom } from "@/components/toasts/ToastGroup";
 import user from "@/models/staking/user";
+import {
+  AdaptiveModal,
+  AdaptiveModalContent,
+} from "@/components/AdaptiveModal";
 
 const Countdown = dynamic(() => import("react-countdown-now"), {
   ssr: false,
@@ -48,6 +52,8 @@ export default function Leaderboard() {
   const [highestProfit, setHighestProfit] = useState<number | null>(null);
   const [lastGameTime, setLastGameTime] = useState<string | null>(null);
   const [myBets, setMyBets] = useState<any[]>([]);
+  const [isModalOpen, setIsModalOpen] = useState(true);
+  const [reached500, setReached500] = useState(false);
 
   const { language, userData, pointTier, setPointTier, session, coinData } =
     useGlobalContext();
@@ -66,7 +72,7 @@ export default function Leaderboard() {
       });
 
       let { success, message, users } = await res.json();
-
+      console.log("users", users);
       if (success && Array.isArray(users)) {
         users = users.map((user, index) => {
           return {
@@ -88,7 +94,10 @@ export default function Leaderboard() {
               (info?.wallet && info?.wallet === session?.user?.wallet),
           );
 
+          if (userInfo.numOfGamesPlayed === 0) setIsModalOpen(true);
+
           setMyData(userInfo);
+          console.log("userInfo", userInfo);
         }
       } else {
         setData([]);
@@ -104,7 +113,7 @@ export default function Leaderboard() {
   console.log("liveBets", liveBets);
   useEffect(() => {
     getLeaderBoard();
-  }, []);
+  }, [session?.user]);
 
   useEffect(() => {
     let points = userData?.points ?? 0;
@@ -132,7 +141,7 @@ export default function Leaderboard() {
   };
 
   const calculateLastGameTime = (bets: Bet[]): string => {
-    if (bets.length === 0) return "No games played";
+    if (bets.length === 0) return "N/A";
 
     const lastGame = bets.reduce((latest, bet) => {
       return new Date(bet.createdAt) > new Date(latest.createdAt)
@@ -189,7 +198,7 @@ export default function Leaderboard() {
 
   useEffect(() => {
     userHistory();
-  }, []);
+  }, [session?.user]);
 
   const threshold = 500;
   const currentDate = new Date();
@@ -208,6 +217,13 @@ export default function Leaderboard() {
       Math.max(0, coinData?.find((c) => c.tokenMint === "SUPER")?.amount ?? 0),
     [coinData],
   );
+
+  useEffect(() => {
+    if (tokenAmount >= 500) {
+      setReached500(true);
+      setIsModalOpen(true);
+    }
+  }, [tokenAmount]);
 
   const renderer = ({
     days,
@@ -255,12 +271,16 @@ export default function Leaderboard() {
     );
   };
 
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+  };
+
   return (
     <>
       <FOMOHead
         title={"Leaderboard | SUPERBETS.GAMES - 0% House Edge, Pure Wins"}
       />
-      <div className="flex flex-col items-start w-full overflow-hidden min-h-screen flex-1 relative p-2 md:pt-[2rem] md:px-[3rem]">
+      <div className="flex flex-col items-start w-full overflow-hidden min-h-screen flex-1 relative p-2 md:pt-[2rem] md:px-[3rem] relative">
         {/* Navbar  */}
         {/* <span className="text-white text-opacity-90 font-semibold text-[1.5rem] sm:text-[2rem] mt-[1rem] font-chakra tracking-[.02em] flex items-center justify-center gap-x-2 px-5 sm:px-10 2xl:px-[5%]">
           {translator("Leaderboard", language).toUpperCase()}
@@ -430,16 +450,17 @@ export default function Leaderboard() {
             >
               {translator("Claim Now", language)}
             </button> */}
-            <div className="flex gap-4 text-white">
-              <div className="flex flex-col items-center bg-[#252740] bg-opacity-50 rounded-[0.625rem] p-4 w-full">
-                <div className="text-white/50 text-xs font-medium">
-                  Activity
+
+            {!reached500 ? (
+              <div className="flex gap-4 text-white">
+                <div className="flex flex-col items-center bg-[#252740] bg-opacity-50 rounded-[0.625rem] p-4 w-full">
+                  <div className="text-white/50 text-xs font-medium">
+                    Activity
+                  </div>
+                  <div className="text-white/75 text-center text-sm xl:text-base font-semibold">
+                    {lastGameTime ?? "N/A"}
+                  </div>
                 </div>
-                <div className="text-white/75 text-center text-sm xl:text-base font-semibold">
-                  {lastGameTime ?? "N/A"}
-                </div>
-              </div>
-              {tokenAmount <= 500 ? (
                 <div className="flex flex-col items-center bg-[#252740] bg-opacity-50 rounded-[0.625rem] p-4 w-full">
                   <div className="text-white/50 text-xs text-center font-medium">
                     Biggest Gain
@@ -448,12 +469,17 @@ export default function Leaderboard() {
                     +{highestProfit?.toFixed(2)}
                   </div>
                 </div>
-              ) : (
-                <div className="bg-[#5F4DFF] bg-opacity-50 rounded-[10px] text-center text-sm text-opacity-90 font-semibold w-full py-3">
-                  Claim your 1 USDC!
-                </div>
-              )}
-            </div>
+              </div>
+            ) : (
+              <div
+                className="bg-[#5F4DFF] text-white bg-opacity-50 rounded-[10px] text-center text-sm text-opacity-90 font-semibold w-full py-3"
+                onClick={() => {
+                  setIsModalOpen(!isModalOpen);
+                }}
+              >
+                Claim your 1 USDC!
+              </div>
+            )}
           </div>
         </div>
 
@@ -467,6 +493,114 @@ export default function Leaderboard() {
           />
         </div>
       </div>
+
+      {/* Modal */}
+      {isModalOpen && (
+        <AdaptiveModal open={isModalOpen} onOpenChange={handleCloseModal}>
+          <AdaptiveModalContent
+            className={`bg-[#121418] sm:overflow-y-auto min-h-[40dvh] max-h-[85dvh] w-full pb-6`}
+          >
+            <div className="flex flex-col w-full gap-3.5 px-4 sm:p-0 pt-6 justify-center overflow-y-auto">
+              {!reached500 && (
+                <div className="mx-auto mb-4">
+                  <Image
+                    src={"/assets/supertoken.png"}
+                    width={180}
+                    height={150}
+                    alt={"Coin"}
+                  />
+                </div>
+              )}
+              {!reached500 ? (
+                <div className="flex flex-col bg-[#FFFFFF05] font-semibold text-lg text-white text-opacity-75 text-center p-3.5 rounded-md md:mt-8 font-changa">
+                  <p className="pb-3">Congrats! you’ve received</p>
+                  <p className="flex items-center justify-center gap-2 text-white font-bold text-[2.5rem]">
+                    <Image
+                      src={"/assets/headCoin.png"}
+                      width={30}
+                      height={30}
+                      alt={"User"}
+                      className="rounded-full overflow-hidden"
+                    />
+                    <span>100</span>
+                  </p>
+                </div>
+              ) : (
+                <div className="flex flex-col bg-[#FFFFFF05] font-semibold text-lg text-white text-opacity-75 text-center p-3.5 rounded-md md:mt-8 font-changa">
+                  <p className="pb-3">Congrats! you've won</p>
+                  <p className="text-white font-bold text-[2.5rem]">
+                    <span>$1 USDC</span>
+                  </p>
+                </div>
+              )}
+
+              <div className="bg-[#252740] bg-opacity-50 rounded-[0.625rem] p-4">
+                <div className="text-white text-xs font-medium text-opacity-50 mb-1">
+                  Claim $1 progress
+                </div>
+                <div className="flex items-center justify-between gap-8">
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-white text-sm font-semibold text-opacity-75">
+                      {formatNumber((tokenAmount * 100) / threshold, 2)}%
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <Image
+                      src={"/assets/headCoin.png"}
+                      width={13}
+                      height={13}
+                      alt={"User"}
+                      className="rounded-full overflow-hidden"
+                    />
+                    <span className="text-white text-sm font-semibold text-opacity-75">
+                      {tokenAmount.toLocaleString("en-US", {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2,
+                      })}
+                      /500
+                    </span>
+                  </div>
+                </div>
+                <div
+                  className={`relative flex transition-width duration-1000 w-full rounded-full overflow-hidden h-1 bg-[#282E3D] mt-2 mb-2`}
+                >
+                  <div className="absolute h-full w-full bg-transparent flex items-center justify-evenly">
+                    {Array.from({ length: 4 }, (_, index) => index + 1).map(
+                      (_, index) => (
+                        <div key={index} className="bg-[#202138] w-1 h-1" />
+                      ),
+                    )}
+                  </div>
+                  <div
+                    style={{
+                      width: `${(tokenAmount * 100) / threshold}%`,
+                    }}
+                    // className="h-full bg-[linear-gradient(91.179deg,#C867F0_0%,#1FCDF0_50.501%,#19EF99_100%)]"
+                    className="h-full bg-[#5F4DFF]"
+                  />
+                </div>
+              </div>
+
+              {!reached500 && (
+                <div className="mx-auto mb-4">
+                  <Image
+                    src={"/assets/campaign-banner.png"}
+                    width={350}
+                    height={300}
+                    alt={"Banner"}
+                  />
+                </div>
+              )}
+
+              {reached500 && (
+                <div className="bg-[#5F4DFF] text-white bg-opacity-50 rounded-[10px] text-center text-sm text-opacity-90 font-semibold w-full py-3">
+                  Claim your 1 USDC!
+                </div>
+              )}
+            </div>
+          </AdaptiveModalContent>
+        </AdaptiveModal>
+      )}
     </>
   );
 }

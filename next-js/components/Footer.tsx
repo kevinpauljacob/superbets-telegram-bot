@@ -37,7 +37,7 @@ function Footer() {
               className="ml-2"
             />
             <p className="flex flex-col text-[#94A3B8] font-medium font-chakra text-sm leading-6 text-opacity-80 md:mx-0 md:mt-2 mb-2">
-              <span className="md:mt-2 mx-2">
+              <span className="mt-2 mx-2">
                 {translator(
                   "SUPERBETS casino games are currently in beta and will be undergoing audit shortly.",
                   language,
@@ -147,12 +147,12 @@ function Footer() {
                 {language === "en"
                   ? "English"
                   : language === "ru"
-                  ? "Русский"
-                  : language === "ko"
-                  ? "한국인"
-                  : language === "ch"
-                  ? "中国人"
-                  : ""}
+                    ? "Русский"
+                    : language === "ko"
+                      ? "한국인"
+                      : language === "ch"
+                        ? "中国人"
+                        : ""}
               </span>
               <FaChevronUp className="w-3 h-3 text-white" />
               {langSelect && (

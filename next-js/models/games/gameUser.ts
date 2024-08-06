@@ -60,7 +60,6 @@ const gameUserSchema = new Schema(
   { timestamps: true },
 );
 
-
 let GameUser =
   mongoose.models?.GameUser || mongoose.model("GameUser", gameUserSchema);
 export default GameUser;

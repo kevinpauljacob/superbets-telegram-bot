@@ -45,6 +45,7 @@ export default function ConnectModal() {
     coinData,
     session,
     status,
+    setIsFirstSignUp,
   } = useGlobalContext();
 
   const [loading, setLoading] = useState<boolean>(false);
@@ -77,7 +78,9 @@ export default function ConnectModal() {
                     e.preventDefault();
                     await wallet.disconnect();
                     await signOut();
-                  } else handleGoogle();
+                  } else {
+                    handleGoogle(setIsFirstSignUp);
+                  }
                 } catch (e) {
                   console.log(e);
                 }
@@ -111,7 +114,7 @@ export default function ConnectModal() {
                     await signOut();
                   } else {
                     setShowConnectModal(false);
-                    handleSignIn(wallet, walletModal);
+                    handleSignIn(wallet, walletModal, setIsFirstSignUp);
                   }
                 } catch (e) {
                   console.log(e);

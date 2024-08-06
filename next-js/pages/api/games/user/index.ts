@@ -133,8 +133,6 @@ export default async function handler(
 
     let user: any = null;
 
-    console.log(email, wallet);
-
     if (!email && !wallet)
       return res
         .status(400)
