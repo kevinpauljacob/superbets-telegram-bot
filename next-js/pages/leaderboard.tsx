@@ -52,7 +52,7 @@ export default function Leaderboard() {
   const [highestProfit, setHighestProfit] = useState<number | null>(null);
   const [lastGameTime, setLastGameTime] = useState<string | null>(null);
   const [myBets, setMyBets] = useState<any[]>([]);
-  const [isModalOpen, setIsModalOpen] = useState(true);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [reached500, setReached500] = useState(false);
 
   const { language, userData, pointTier, setPointTier, session, coinData } =
