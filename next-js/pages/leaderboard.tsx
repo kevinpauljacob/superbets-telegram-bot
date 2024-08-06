@@ -15,6 +15,10 @@ import FOMOHead from "@/components/HeadElement";
 import dynamic from "next/dynamic";
 import { errorCustom } from "@/components/toasts/ToastGroup";
 import user from "@/models/staking/user";
+import {
+  AdaptiveModal,
+  AdaptiveModalContent,
+} from "@/components/AdaptiveModal";
 
 const Countdown = dynamic(() => import("react-countdown-now"), {
   ssr: false,
@@ -48,6 +52,7 @@ export default function Leaderboard() {
   const [highestProfit, setHighestProfit] = useState<number | null>(null);
   const [lastGameTime, setLastGameTime] = useState<string | null>(null);
   const [myBets, setMyBets] = useState<any[]>([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const { language, userData, pointTier, setPointTier, session, coinData } =
     useGlobalContext();
@@ -255,12 +260,16 @@ export default function Leaderboard() {
     );
   };
 
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+  };
+
   return (
     <>
       <FOMOHead
         title={"Leaderboard | SUPERBETS.GAMES - 0% House Edge, Pure Wins"}
       />
-      <div className="flex flex-col items-start w-full overflow-hidden min-h-screen flex-1 relative p-2 md:pt-[2rem] md:px-[3rem]">
+      <div className="flex flex-col items-start w-full overflow-hidden min-h-screen flex-1 relative p-2 md:pt-[2rem] md:px-[3rem] relative">
         {/* Navbar  */}
         {/* <span className="text-white text-opacity-90 font-semibold text-[1.5rem] sm:text-[2rem] mt-[1rem] font-chakra tracking-[.02em] flex items-center justify-center gap-x-2 px-5 sm:px-10 2xl:px-[5%]">
           {translator("Leaderboard", language).toUpperCase()}
@@ -449,7 +458,12 @@ export default function Leaderboard() {
                   </div>
                 </div>
               ) : (
-                <div className="bg-[#5F4DFF] bg-opacity-50 rounded-[10px] text-center text-sm text-opacity-90 font-semibold w-full py-3">
+                <div
+                  className="bg-[#5F4DFF] bg-opacity-50 rounded-[10px] text-center text-sm text-opacity-90 font-semibold w-full py-3"
+                  onClick={() => {
+                    setIsModalOpen(!isModalOpen);
+                  }}
+                >
                   Claim your 1 USDC!
                 </div>
               )}
@@ -467,6 +481,88 @@ export default function Leaderboard() {
           />
         </div>
       </div>
+
+      {/* Modal */}
+      {isModalOpen && (
+        <AdaptiveModal open={isModalOpen} onOpenChange={handleCloseModal}>
+          <AdaptiveModalContent
+            className={`bg-[#121418] sm:overflow-y-auto min-h-[40dvh] max-h-[50dvh] w-full pb-6`}
+          >
+            <div className="flex flex-1 px-8 sm:p-0 justify-center overflow-y-auto">
+              <div className="flex flex-col w-full">
+                <>
+                  <div className="flex flex-col bg-white bg-opacity-20 font-semibold text-lg text-white text-opacity-75 text-center p-2 rounded-md mx-2 md:mt-8 font-changa">
+                    <p className="">Congrats! you've won</p>
+                    <p className="text-white font-bold text-4xl">
+                      <span>$1 USDC</span>
+                    </p>
+                  </div>
+                </>
+
+                <div className="flex flex-col gap-1 bg-[#1b1d2c] rounded-md mx-2 p-4 mt-2">
+                  <div className="flex justify-between items-center">
+                    <div className="font-semibold text-lg text-white text-opacity-75">
+                      <span>
+                        Claim $1 progress{" "}
+                        <span className="text-white">
+                          {" "}
+                          {formatNumber((tokenAmount * 100) / threshold, 2)}%
+                        </span>
+                      </span>
+                    </div>
+                    <div className="flex gap-1 justify-center items-center">
+                      <Image
+                        src={"/assets/headCoin.png"}
+                        width={13}
+                        height={13}
+                        alt={"User"}
+                        className="rounded-full overflow-hidden"
+                      />
+                      <span className="text-white text-sm font-semibold text-opacity-75">
+                        {tokenAmount.toLocaleString("en-US", {
+                          minimumFractionDigits: 2,
+                          maximumFractionDigits: 2,
+                        })}
+                        /500
+                      </span>
+                    </div>
+                  </div>
+                  <div
+                    className={`relative flex transition-width duration-1000 w-full rounded-full overflow-hidden h-1 bg-[#282E3D] mt-2 mb-2`}
+                  >
+                    <div className="absolute w-full bg-transparent flex items-center justify-evenly">
+                      {Array.from({ length: 4 }, (_, index) => index + 1).map(
+                        (_, index) => (
+                          <div key={index} className="bg-[#202138] w-1 h-1" />
+                        ),
+                      )}
+                    </div>
+                    <div
+                      style={{
+                        width: `${(tokenAmount * 100) / threshold}%`,
+                      }}
+                      className="h-full bg-[#5F4DFF]"
+                    />
+                  </div>
+                </div>
+
+                <>
+                  <div className="flex flex-col justify-center items-center font-changa mt-4">
+                    <div className="flex flex-col items-center justify-center">
+                      <p className="text-[#94A3B8] font-medium text-base sm:text-lg">
+                        Go to SuperBets booth to claim
+                      </p>
+                      <p className="text-[#94A3B8] font-medium text-base sm:text-lg">
+                        your 1 $USDC
+                      </p>
+                    </div>
+                  </div>
+                </>
+              </div>
+            </div>
+          </AdaptiveModalContent>
+        </AdaptiveModal>
+      )}
     </>
   );
 }
