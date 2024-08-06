@@ -2,6 +2,7 @@ import { use, useState } from "react";
 import { useGlobalContext } from "@/components/GlobalContext";
 import LeaderboardTable from "@/components/Leaderboard";
 import {
+  formatNumber,
   obfuscatePubKey,
   translator,
   truncateNumber,
@@ -199,8 +200,10 @@ export default function Leaderboard() {
 
   const TimeBox = ({ val, dimension }: { val: string; dimension: string }) => {
     return (
-      <div className="bg-black bg-opacity-25 flex flex-col items-center justify-center w-24 h-24">
-        <span className="text-white text-opacity-75 text-[2rem]">{val}</span>
+      <div className="bg-black bg-opacity-25 flex flex-col items-center justify-center w-16 h-16 xl:w-24 xl:h-24">
+        <span className="text-white text-opacity-75 text-[1.35rem] xl:text-[2rem]">
+          {val}
+        </span>
         <span className="text-white text-opacity-50 text-sm">{dimension}</span>
       </div>
     );
@@ -208,7 +211,9 @@ export default function Leaderboard() {
 
   return (
     <>
-      <FOMOHead title={"Leaderboard | SUPERBETS.GAMES - 0% House Edge, Pure Wins"} />
+      <FOMOHead
+        title={"Leaderboard | SUPERBETS.GAMES - 0% House Edge, Pure Wins"}
+      />
       <div className="flex flex-col items-start w-full overflow-hidden min-h-screen flex-1 relative p-2 md:pt-[2rem] md:px-[3rem]">
         {/* Navbar  */}
         {/* <span className="text-white text-opacity-90 font-semibold text-[1.5rem] sm:text-[2rem] mt-[1rem] font-chakra tracking-[.02em] flex items-center justify-center gap-x-2 px-5 sm:px-10 2xl:px-[5%]">
@@ -216,57 +221,66 @@ export default function Leaderboard() {
         </span> */}
 
         <div className="w-full flex flex-col lg:flex-row items-center lg:items-stretch gap-4">
-          <div className="w-full h-auto lg:w-[70%] max-w-[80rem] flex items-center justify-between relative">
-            <div className="hidden sm:block w-full h-full min-w-[18.5rem]">
+          <div className="w-full h-auto lg:w-[70%] min-h-] max-w-[80rem] flex items-center justify-between">
+            <div
+              className="relative w-full rounded-[10px] h-full min-h-[220px] sm:min-h-[260px] min-w-[18.5rem] overflow-hidden"
+              style={{
+                background:
+                  "linear-gradient(268.94deg, #5F4DFF -24.59%, rgba(57, 46, 153, 0.3) 59.68%)",
+              }}
+            >
               <Image
-                src={"/assets/leaderboard-bg.svg"}
-                alt="banners"
-                width="100"
-                height="100"
-                unoptimized
-                className="w-[100%]"
+                className="absolute bottom-0 -left-8"
+                src="/assets/leaderboard-banner-lower-rec.png"
+                alt="banner-aesthetic"
+                width={220}
+                height={150}
               />
-            </div>
-            <div className="sm:hidden w-full h-full min-w-[18.5rem]">
               <Image
-                src={"/assets/leaderboard-bg-mobile.svg"}
-                alt="banners"
-                width="100"
-                height="100"
-                unoptimized
-                className="w-[100%]"
+                className="absolute top-0 left-28"
+                src="/assets/leaderboard-banner-upper-rec.png"
+                alt="banner-aesthetic"
+                width={180}
+                height={130}
               />
-            </div>
-            <div className="absolute flex items-center justify-between gap-4 pl-6 pr-10 top-0 left-0 w-full h-full">
-              <div className="flex flex-col gap-8">
-                <div className="flex flex-col sm:flex-row sm:items-end gap-2">
-                  <Image
-                    src={"/assets/leaderboardTrophy.svg"}
-                    width={80}
-                    height={80}
-                    alt={"User"}
-                    className="rounded-full overflow-hidden"
-                  />
-                  <div>
-                    <h2 className="font-bold text-white text-3xl sm:text-5xl mb-1">
-                      Win $1 campaign
-                    </h2>
-                    <p className="text-[#94A3B8] font-medium text-sm sm:text-base">
-                      Get Rewarded 1 $USDC once you reach 500 Coins!
-                    </p>
+              <Image
+                className="absolute top-0 right-0"
+                src="/assets/leaderboard-banner-gift.svg"
+                alt="banner-aesthetic"
+                width={93}
+                height={96}
+              />
+              <div className="absolute flex items-center justify-between gap-8 pl-6 pr-10 top-0 left-0 w-full h-full">
+                <div className="flex flex-col gap-8">
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+                    <Image
+                      src={"/assets/leaderboardTrophy.svg"}
+                      width={80}
+                      height={80}
+                      alt={"User"}
+                      className="rounded-full overflow-hidden"
+                    />
+                    <div>
+                      <h2 className="font-bold text-white text-[2rem] lg:text-3xl xl:text-4xl 2xl:text-5xl mb-1">
+                        Win $1 campaign
+                      </h2>
+                      <p className="text-[#94A3B8] font-medium text-sm xl:text-base">
+                        Get Rewarded 1 $USDC once you reach 500 Coins!
+                      </p>
+                    </div>
+                  </div>
+                  <div className="hidden sm:block font-semibold text-sm text-white/90 bg-[#5F4DFF]/50 rounded-[10px] border-2 border-[#FFFFFF0D] p-2.5 w-max">
+                    How it Works
                   </div>
                 </div>
-                <div className="hidden sm:block font-semibold text-sm text-white/90 bg-[#5F4DFF]/50 rounded-[10px] border-2 border-[#FFFFFF0D] p-2.5 w-max">
-                  How it Works
-                </div>
-              </div>
 
-              <div className="hidden sm:flex flex-col items-start gap-4">
-                <span className="text-xl text-white text-opacity-50">
-                  Leaderboard Resets in
-                </span>
-                <div className="flex items-center gap-1 rounded-[0.625rem] overflow-hidden">
-                  <Countdown date={targetDate} renderer={renderer} />
+                <div className="hidden sm:flex flex-col items-start gap-2 xl:gap-4">
+                  <span className="text-lg xl:text-xl text-white text-opacity-50">
+                    Leaderboard Resets in
+                  </span>
+                  <div className="flex items-center gap-1 rounded-[0.625rem] overflow-hidden">
+                    <Countdown date={targetDate} renderer={renderer} />
+                  </div>
                 </div>
               </div>
             </div>
@@ -275,31 +289,55 @@ export default function Leaderboard() {
           <div className="w-full flex-1 h-auto flex flex-col justify-start bg-[#1B1C30] rounded-[0.625rem] p-4 gap-4">
             {/* user info  */}
             <div className="flex items-center gap-2">
-              <Image
-                src={session?.user?.image ?? ""}
-                width={45}
-                height={45}
-                alt={"User"}
-                className="rounded-full overflow-hidden"
-              />
+              {session?.user?.image ? (
+                <Image
+                  src={session?.user?.image ?? ""}
+                  width={45}
+                  height={45}
+                  alt={"User"}
+                  className="rounded-full overflow-hidden"
+                />
+              ) : (
+                <div className="bg-[#252740] rounded-full p-2.5">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke-width="1.5"
+                    stroke="currentColor"
+                    className="text-white size-6"
+                  >
+                    <path
+                      stroke-Linecap="round"
+                      stroke-Linejoin="round"
+                      d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z"
+                    />
+                  </svg>
+                </div>
+              )}
+
               <div className="flex flex-col items-start">
                 <span className="text-white font-semibold text-sm text-opacity-75">
                   {session?.user?.name ?? "Player"}
                 </span>
                 <span className="text-white text-xs font-medium text-opacity-50">
-                  {session?.user?.email ?? "player@superbets.com"}
+                  {session?.user?.email
+                    ? session.user.email
+                    : wallet.publicKey?.toString()
+                      ? wallet.publicKey?.toString()
+                      : "player@superbets.com"}
                 </span>
               </div>
             </div>
             {/* progress  */}
             <div className="bg-[#252740] bg-opacity-50 rounded-[0.625rem] p-4">
+              <div className="text-white text-xs font-medium text-opacity-50 mb-1">
+                Claim $1 progress
+              </div>
               <div className="flex items-center justify-between gap-8">
                 <div className="flex items-baseline gap-1">
-                  <span className="text-white text-xs font-medium text-opacity-50">
-                    Claim $1 progress
-                  </span>
                   <span className="text-white text-sm font-semibold text-opacity-75">
-                    {(tokenAmount * 100) / threshold}%
+                    {formatNumber((tokenAmount * 100) / threshold, 2)}%
                   </span>
                 </div>
                 <div className="flex items-center gap-1">
@@ -347,20 +385,26 @@ export default function Leaderboard() {
               {translator("Claim Now", language)}
             </button> */}
             <div className="flex gap-4 text-white">
-              <div className="flex flex-col items-center bg-[#252740] bg-opacity-50 rounded-[0.625rem] p-4 w-full">
+              {/* <div className="flex flex-col items-center bg-[#252740] bg-opacity-50 rounded-[0.625rem] p-4 w-full">
                 <div className="text-white/50 text-xs font-medium">
                   Activity
                 </div>
                 <div className="text-white/75 font-semibold">
                   {myData?.activity}
                 </div>
-              </div>
-              <div className="flex flex-col items-center bg-[#252740] bg-opacity-50 rounded-[0.625rem] p-4 w-full">
-                <div className="text-white/50 text-xs font-medium">
-                  Biggest Gain
+              </div> */}
+              {tokenAmount <= 500 ? (
+                <div className="flex flex-col items-center bg-[#252740] bg-opacity-50 rounded-[0.625rem] p-4 w-full">
+                  <div className="text-white/50 text-xs font-medium">
+                    Biggest Gain
+                  </div>
+                  <div className="text-white/75 font-semibold">+</div>
                 </div>
-                <div className="text-white/75 font-semibold">+</div>
-              </div>
+              ) : (
+                <div className="bg-[#5F4DFF] bg-opacity-50 rounded-[10px] text-center text-sm text-opacity-90 font-semibold w-full py-3">
+                  Claim your 1 USDC!
+                </div>
+              )}
             </div>
           </div>
         </div>

@@ -341,8 +341,9 @@ export const OpenSidebar = ({
   const [priceChange24h, setPriceChange24h] = useState(0);
   const { setFomoPrice } = useGlobalContext();
 
-  const fomoToken = SPL_TOKENS.find((token) => token.tokenName === "FOMO")
-    ?.tokenMint!;
+  const fomoToken = SPL_TOKENS.find(
+    (token) => token.tokenName === "FOMO",
+  )?.tokenMint!;
   const url = `https://api.dexscreener.com/latest/dex/tokens/${fomoToken}`;
   useEffect(() => {
     /// code added to fetch fomo price
@@ -421,8 +422,8 @@ export const OpenSidebar = ({
             onClick={() => {
               if (router.pathname === "/") {
                 setSidebar(false);
-                setMobileSidebar(false);
               }
+              setMobileSidebar(false);
             }}
           >
             <SidebarOpenElement
@@ -495,22 +496,42 @@ export const OpenSidebar = ({
               </ul>
             )}
           </div>
-          <SidebarOpenElement
-            text={"Challenges"}
-            Icon={Thunder}
-            link="/store"
-            className={
-              router.pathname === "/store" ? activeIconCss : closedIconCss
-            }
-          />
-          <SidebarOpenElement
-            text={"Leaderboard"}
-            Icon={Trophy}
-            link="/leaderboard"
-            className={
-              router.pathname === "/leaderboard" ? activeIconCss : closedIconCss
-            }
-          />
+          <div
+            onClick={() => {
+              if (router.pathname === "/store") {
+                setSidebar(false);
+              }
+              setMobileSidebar(false);
+            }}
+          >
+            <SidebarOpenElement
+              text={"Challenges"}
+              Icon={Thunder}
+              link="/store"
+              className={
+                router.pathname === "/store" ? activeIconCss : closedIconCss
+              }
+            />
+          </div>
+          <div
+            onClick={() => {
+              if (router.pathname === "/leaderboard") {
+                setSidebar(false);
+              }
+              setMobileSidebar(false);
+            }}
+          >
+            <SidebarOpenElement
+              text={"Leaderboard"}
+              Icon={Trophy}
+              link="/leaderboard"
+              className={
+                router.pathname === "/leaderboard"
+                  ? activeIconCss
+                  : closedIconCss
+              }
+            />
+          </div>
           {/* <SidebarOpenElement
             text={"Staking"}
             Icon={Staking}
@@ -538,12 +559,12 @@ export const OpenSidebar = ({
                   {language === "en"
                     ? "English"
                     : language === "ru"
-                    ? "Русский"
-                    : language === "ko"
-                    ? "한국인"
-                    : language === "ch"
-                    ? "中国人"
-                    : ""}
+                      ? "Русский"
+                      : language === "ko"
+                        ? "한국인"
+                        : language === "ch"
+                          ? "中国人"
+                          : ""}
                 </span>
               </div>
               <button
@@ -646,7 +667,11 @@ export const OpenSidebar = ({
           <Birdeye className="w-5 h-5 text-white" />
           Birdeye
         </Link> */}
-        <Link href="https://t.me/superbetgames " className={`${openLinkCss}`} target="_blank">
+        <Link
+          href="https://t.me/superbetgames "
+          className={`${openLinkCss}`}
+          target="_blank"
+        >
           <Telegram className="w-5 h-5" />
           {translator("Telegram", language)}
         </Link>

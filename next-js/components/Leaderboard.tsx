@@ -21,22 +21,22 @@ function Leaderboard({ data, page, setPage, maxPages, myData }: any) {
           <div className="flex w-full flex-col items-center">
             {/* header  */}
             {data.length > 0 && (
-              <div className="mb-[0.5rem] flex w-full flex-row items-center gap-2 pr-10 text-sm font-light font-changa">
-                <span className="w-[10%] text-left ml-10 text-[#F0F0F080]">
+              <div className="mb-[0.5rem] flex w-full flex-row items-center gap-2 text-sm font-light font-changa px-5 sm:px-20">
+                <span className="w-[10%] text-left text-[#F0F0F080]">
                   {translator(headers[0], language)}
                 </span>
-                <span className="w-[70%] text-left text-[#F0F0F080] pl-[16.5%]">
+                <span className="w-[70%] text-left pl-5 sm:pl-20 text-[#F0F0F080]">
                   {translator(headers[1], language)}
                 </span>
-                <span className="w-[15%] text-right text-[#F0F0F080]">
+                <span className="w-[20%] text-right text-[#F0F0F080]">
                   {translator(headers[2], language)}
                 </span>
               </div>
             )}
 
             {myData && (
-              <div className="mb-2.5 flex w-full flex-row items-center gap-2 rounded-[5px] border-2 border-[#5F4DFF] border-opacity-50 bg-[#121418] py-3 pr-10">
-                <span className="relative w-[10%] text-center ml-10 font-changa text-sm font-light text-[#F0F0F0] text-opacity-75">
+              <div className="mb-2.5 flex w-full flex-row items-center gap-2 rounded-[5px] border-2 border-[#5F4DFF] border-opacity-50 bg-[#121418] py-3 px-5 sm:px-20">
+                <span className="relative w-[10%] text-center  font-changa text-sm font-light text-[#F0F0F0] text-opacity-75">
                   <svg
                     width="30"
                     height="30"
@@ -55,7 +55,7 @@ function Leaderboard({ data, page, setPage, maxPages, myData }: any) {
                     {myData?.rank}
                   </p>
                 </span>
-                <span className="w-[70%] flex items-center gap-2 text-left font-changa text-sm font-light text-[#F0F0F0] text-opacity-75 pl-[16.5%]">
+                <span className="w-[70%] flex items-center text-left font-changa text-sm font-light text-[#F0F0F0] text-opacity-75 pl-5 sm:pl-20">
                   {/* <div className="relative w-8 h-8">
                     <Image
                       src={pointTier?.image}
@@ -68,7 +68,7 @@ function Leaderboard({ data, page, setPage, maxPages, myData }: any) {
                   {/* {obfuscatePubKey(myData.wallet ?? "")} */}
                   {myData?.name ?? obfuscatePubKey(myData.wallet)}
                 </span>
-                <span className="flex gap-2 items-center justify-end w-[15%] text-right font-chakra text-sm font-bold text-[#FFFFFF]">
+                <span className="flex gap-2 items-center justify-end w-[20%] text-right font-chakra text-sm font-bold text-[#FFFFFF]">
                   {/* {myData.points.toLocaleString("en-US", {
                     maximumFractionDigits: 2,
                     minimumFractionDigits: 0,
@@ -93,11 +93,11 @@ function Leaderboard({ data, page, setPage, maxPages, myData }: any) {
                 .map((data: any, index: number) => (
                   <div
                     key={index}
-                    className={`mb-2.5 flex w-full flex-row items-center gap-2 rounded-[5px] ${
+                    className={`mb-2.5 flex w-full flex-row items-center gap-2 rounded-[5px] px-5 sm:px-20 ${
                       index % 2 === 0 ? "bg-opacity-50" : ""
-                    } bg-[#121418]  py-3 pr-10`}
+                    } bg-[#121418]  py-3`}
                   >
-                    <span className="relative w-[10%] text-center ml-10 font-changa text-sm font-light text-[#F0F0F0] text-opacity-75">
+                    <span className="relative w-[10%] text-center font-changa text-sm font-light text-[#F0F0F0] text-opacity-75">
                       <svg
                         width="30"
                         height="30"
@@ -116,7 +116,7 @@ function Leaderboard({ data, page, setPage, maxPages, myData }: any) {
                         {data?.rank}
                       </p>
                     </span>
-                    <span className="w-[70%] flex items-center gap-2 text-left font-changa text-sm font-light text-[#FFFFFF] text-opacity-[0.78] pl-[16.5%]">
+                    <span className="w-[70%] flex items-center gap-2 text-left font-changa text-sm font-light text-[#FFFFFF] text-opacity-[0.78] pl-5 sm:pl-20">
                       {/* <div className="relative w-8 h-8">
                         <Image
                           src={`/assets/badges/T-${Object.entries(
@@ -135,7 +135,7 @@ function Leaderboard({ data, page, setPage, maxPages, myData }: any) {
                       {/* {obfuscatePubKey(data.wallet ?? "")} */}
                       {data?.name ?? obfuscatePubKey(data?.wallet)}
                     </span>
-                    <span className="flex gap-2 items-center justify-end w-[15%] text-right font-chakra text-sm font-bold text-[#ffffff]">
+                    <span className="flex gap-2 items-center justify-end w-[20%] text-right font-chakra text-sm font-bold text-[#ffffff]">
                       <Image src="/assets/coin.svg" width={13} height={13} />
                       {parseInt(data?.deposit?.amount ?? 0)}
                     </span>
