@@ -321,17 +321,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
       await connectDatabase();
 
-      //TODO: Amount type check and max payout check
-      const maxPayout = new Decimal(
-        maxPayouts[tokenMint as GameTokens].roulette,
-      );
-
-      // if (
-      //   !(maxPayout.toNumber() <= maxPayouts[tokenMint].roulette1)
-      // )
-      //   return res
-      //     .status(400)
-      //     .json({ success: false, message: "Max payout exceeded" });
+      const maxPayout = new Decimal(maxPayouts[tokenMint].roulette);
 
       let user = null;
       if (wallet) {
@@ -348,17 +338,18 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           .status(400)
           .json({ success: false, message: "User does not exist!" });
 
-      /*   if (
+      if (!user.isWeb2User && tokenMint === "SUPER")
+        return res
+          .status(400)
+          .json({ success: false, message: "You cannot bet with this token!" });
+
+      if (
         user.deposit.find((d: any) => d.tokenMint === tokenMint)?.amount <
         amount
       )
         return res
           .status(400)
-          .json({ success: false, message: "Insufficient balance !" }); */
-      if (!user.isWeb2User && tokenMint === "SUPER")
-        return res
-          .status(400)
-          .json({ success: false, message: "You cannot bet with this token!" });
+          .json({ success: false, message: "Insufficient balance !" });
 
       const account = user._id;
 
