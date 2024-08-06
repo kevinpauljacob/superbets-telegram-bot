@@ -84,8 +84,6 @@ import authenticateUser from "../../../../utils/authenticate";
  *                           tokenMint:
  *                             type: string
  *                             example: SUPER
- *                      reached500:
- *                        type: boolean
  *                 message:
  *                   type: string
  *                   example: User created successfully!
@@ -206,20 +204,6 @@ export default async function handler(
           .json({ success: false, message: "Missing parameters" });
     }
 
-    // Check if any deposit meets the criteria
-    const reached500 = user.deposit.some(
-      (d: { tokenMint: string; amount: number }) =>
-        d.tokenMint === "SUPER" && d.amount >= 500,
-    );
-
-    if (reached500) {
-      user = await User.findByIdAndUpdate(
-        user._id,
-        { $set: { reached500: true } },
-        { new: true },
-      );
-    }
-
     return res.status(201).json({
       success: true,
       user: {
@@ -230,7 +214,6 @@ export default async function handler(
         name: user?.name ?? null,
         isWeb2User: user?.isWeb2User ?? false,
         deposit: user?.deposit ?? [],
-        reached500: user?.reached500 ?? false,
       },
       message: "User created successfully!",
     });

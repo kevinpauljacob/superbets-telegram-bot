@@ -56,10 +56,6 @@ const gameUserSchema = new Schema(
       default: true,
       required: true,
     },
-    reached500: {
-      type: Boolean,
-      default: false
-    },
   },
   { timestamps: true },
 );
