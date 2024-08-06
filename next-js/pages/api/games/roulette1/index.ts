@@ -1,24 +1,21 @@
-import connectDatabase from "@/utils/database";
-import { getToken } from "next-auth/jwt";
-import { NextApiRequest, NextApiResponse } from "next";
-import { GameSeed, Roulette1, User } from "@/models/games";
-import {
-  generateGameResult,
-  GameType,
-  seedStatus,
-  GameTokens,
-  decryptServerSeed,
-} from "@/utils/provably-fair";
-import StakingUser from "@/models/staking/user";
 import {
   houseEdgeTiers,
+  launchPromoEdge,
   maintainance,
   maxPayouts,
-  pointTiers,
   stakingTiers,
+  wsEndpoint,
 } from "@/context/config";
-import { launchPromoEdge } from "@/context/config";
-import { wsEndpoint } from "@/context/config";
+import { GameSeed, Roulette1, User } from "@/models/games";
+import connectDatabase from "@/utils/database";
+import {
+  GameTokens,
+  GameType,
+  decryptServerSeed,
+  generateGameResult,
+  seedStatus,
+} from "@/utils/provably-fair";
+import { NextApiRequest, NextApiResponse } from "next";
 
 import { SPL_TOKENS, minGameAmount } from "@/context/config";
 import { Decimal } from "decimal.js";
@@ -501,25 +498,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         addGame,
         feeGenerated,
       );
-
-      // const pointsGained =
-      //   0 * user.numOfGamesPlayed + 1.4 * amount * userData.multiplier;
-
-      // const points = userData.points + pointsGained;
-      // const newTier = Object.entries(pointTiers).reduce((prev, next) => {
-      //   return points >= next[1]?.limit ? next : prev;
-      // })[0];
-
-      // await StakingUser.findOneAndUpdate(
-      //   {
-      //     wallet,
-      //   },
-      //   {
-      //     $inc: {
-      //       points: pointsGained,
-      //     },
-      //   },
-      // );
 
       const record = await Roulette1.populate(roulette1, "gameSeed");
       const { gameSeed, ...rest } = record.toObject();

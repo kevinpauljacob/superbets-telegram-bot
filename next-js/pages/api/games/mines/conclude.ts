@@ -1,4 +1,4 @@
-import { maintainance, pointTiers, wsEndpoint } from "@/context/config";
+import { maintainance, wsEndpoint } from "@/context/config";
 import { GameSeed, Mines, User } from "@/models/games";
 import StakingUser from "@/models/staking/user";
 import connectDatabase from "@/utils/database";
@@ -9,7 +9,6 @@ import {
 } from "@/utils/provably-fair";
 import { Decimal } from "decimal.js";
 import { NextApiRequest, NextApiResponse } from "next";
-import { getToken } from "next-auth/jwt";
 import updateGameStats from "../../../../utils/updateGameStats";
 Decimal.set({ precision: 9 });
 
@@ -253,25 +252,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         },
         { new: true },
       );
-
-      // const pointsGained =
-      //   0 * user.numOfGamesPlayed + 1.4 * amount * userData.multiplier;
-
-      // const points = userData.points + pointsGained;
-      // const newTier = Object.entries(pointTiers).reduce((prev, next) => {
-      //   return points >= next[1]?.limit ? next : prev;
-      // })[0];
-
-      // await StakingUser.findOneAndUpdate(
-      //   {
-      //     wallet,
-      //   },
-      //   {
-      //     $inc: {
-      //       points: pointsGained,
-      //     },
-      //   },
-      // );
 
       const { gameSeed: savedGS, ...rest } = record.toObject();
       rest.game = GameType.mines;

@@ -1,26 +1,24 @@
-import connectDatabase from "@/utils/database";
-import { getToken } from "next-auth/jwt";
-import { NextApiRequest, NextApiResponse } from "next";
-import { GameSeed, Limbo, User } from "@/models/games";
-import {
-  generateGameResult,
-  GameType,
-  seedStatus,
-  decryptServerSeed,
-  GameTokens,
-} from "@/utils/provably-fair";
-import StakingUser from "@/models/staking/user";
 import {
   houseEdgeTiers,
+  launchPromoEdge,
+  maintainance,
   maxPayouts,
   minAmtFactor,
-  pointTiers,
+  SPL_TOKENS,
   stakingTiers,
+  wsEndpoint,
 } from "@/context/config";
-import { launchPromoEdge } from "@/context/config";
-import { minGameAmount, wsEndpoint, maintainance } from "@/context/config";
+import { GameSeed, Limbo, User } from "@/models/games";
+import connectDatabase from "@/utils/database";
+import {
+  decryptServerSeed,
+  GameTokens,
+  GameType,
+  generateGameResult,
+  seedStatus,
+} from "@/utils/provably-fair";
 import { Decimal } from "decimal.js";
-import { SPL_TOKENS } from "@/context/config";
+import { NextApiRequest, NextApiResponse } from "next";
 import updateGameStats from "../../../../utils/updateGameStats";
 Decimal.set({ precision: 9 });
 
@@ -300,25 +298,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         addGame,
         feeGenerated,
       );
-
-      // const pointsGained =
-      //   0 * user.numOfGamesPlayed + 1.4 * amount * userData.multiplier;
-
-      // const points = userData.points + pointsGained;
-      // const newTier = Object.entries(pointTiers).reduce((prev, next) => {
-      //   return points >= next[1]?.limit ? next : prev;
-      // })[0];
-
-      // await StakingUser.findOneAndUpdate(
-      //   {
-      //     wallet,
-      //   },
-      //   {
-      //     $inc: {
-      //       points: pointsGained,
-      //     },
-      //   },
-      // );
 
       const record = await Limbo.populate(limbo, "gameSeed");
       const { gameSeed, ...rest } = record.toObject();

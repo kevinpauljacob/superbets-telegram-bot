@@ -1,7 +1,13 @@
-import connectDatabase from "../../../../utils/database";
-import { getToken } from "next-auth/jwt";
-import { NextApiRequest, NextApiResponse } from "next";
-import { wsEndpoint } from "@/context/config";
+import {
+  SPL_TOKENS,
+  houseEdgeTiers,
+  launchPromoEdge,
+  maintainance,
+  maxPayouts,
+  minAmtFactor,
+  stakingTiers,
+  wsEndpoint,
+} from "@/context/config";
 import { Coin, GameSeed, User } from "@/models/games";
 import {
   GameTokens,
@@ -10,17 +16,9 @@ import {
   generateGameResult,
   seedStatus,
 } from "@/utils/provably-fair";
-import StakingUser from "@/models/staking/user";
-import {
-  houseEdgeTiers,
-  maxPayouts,
-  minAmtFactor,
-  pointTiers,
-  stakingTiers,
-} from "@/context/config";
-import { launchPromoEdge, maintainance } from "@/context/config";
 import { Decimal } from "decimal.js";
-import { SPL_TOKENS } from "@/context/config";
+import { NextApiRequest, NextApiResponse } from "next";
+import connectDatabase from "../../../../utils/database";
 import updateGameStats from "../../../../utils/updateGameStats";
 Decimal.set({ precision: 9 });
 
@@ -317,25 +315,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         addGame,
         feeGenerated,
       );
-
-      // const pointsGained =
-      //   0 * user.numOfGamesPlayed + 1.4 * amount * userData.multiplier;
-
-      // const points = userData.points + pointsGained;
-      // const newTier = Object.entries(pointTiers).reduce((prev, next) => {
-      //   return points >= next[1]?.limit ? next : prev;
-      // })[0];
-
-      // await StakingUser.findOneAndUpdate(
-      //   {
-      //     wallet,
-      //   },
-      //   {
-      //     $inc: {
-      //       points: pointsGained,
-      //     },
-      //   },
-      // );
 
       const record = await Coin.populate(coin, "gameSeed");
       const { gameSeed, ...rest } = record.toObject();
