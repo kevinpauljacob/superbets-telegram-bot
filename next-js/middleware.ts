@@ -56,7 +56,8 @@ export async function middleware(request: NextRequest) {
   if (
     request.nextUrl.pathname === "/api/blocked" ||
     whiteListRoutes.some((route) => request.nextUrl.pathname.includes(route)) ||
-    isDynamicOrSpecificRoute(request.nextUrl.pathname)
+    isDynamicOrSpecificRoute(request.nextUrl.pathname) ||
+    request.method === "GET"
   ) {
     if (success) res = NextResponse.next();
     else res = NextResponse.rewrite(new URL("/api/blocked", request.url));
