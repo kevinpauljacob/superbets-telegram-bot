@@ -104,7 +104,7 @@ export default function Leaderboard() {
   console.log("liveBets", liveBets);
   useEffect(() => {
     getLeaderBoard();
-  }, []);
+  }, [session?.user]);
 
   useEffect(() => {
     let points = userData?.points ?? 0;
@@ -132,7 +132,7 @@ export default function Leaderboard() {
   };
 
   const calculateLastGameTime = (bets: Bet[]): string => {
-    if (bets.length === 0) return "No games played";
+    if (bets.length === 0) return "N/A";
 
     const lastGame = bets.reduce((latest, bet) => {
       return new Date(bet.createdAt) > new Date(latest.createdAt)
@@ -189,7 +189,7 @@ export default function Leaderboard() {
 
   useEffect(() => {
     userHistory();
-  }, []);
+  }, [session?.user]);
 
   const threshold = 500;
   const currentDate = new Date();
