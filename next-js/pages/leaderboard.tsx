@@ -14,10 +14,28 @@ import { useEffect, useMemo } from "react";
 import FOMOHead from "@/components/HeadElement";
 import dynamic from "next/dynamic";
 import { errorCustom } from "@/components/toasts/ToastGroup";
+import user from "@/models/staking/user";
 
 const Countdown = dynamic(() => import("react-countdown-now"), {
   ssr: false,
 });
+
+interface Bet {
+  _id: string;
+  account: string;
+  game: string;
+  amount: number;
+  amountWon: number;
+  amountLost: number;
+  result: "Pending" | "Won" | "Lost";
+  createdAt: string;
+  tokenMint: string;
+  chosenNumbers?: number[];
+  strikeNumber?: number;
+  strikeMultiplier?: number;
+  houseEdge: number;
+  nonce: number;
+}
 
 export default function Leaderboard() {
   const wallet = useWallet();
@@ -27,8 +45,9 @@ export default function Leaderboard() {
   const [page, setPage] = useState(1);
   const [data, setData] = useState<any[]>([]);
   const [myData, setMyData] = useState<any>();
-  const [activity, setActivity] = useState();
-  const [highestWin, setHighestWin] = useState<number | null>(null);
+  const [highestProfit, setHighestProfit] = useState<number | null>(null);
+  const [lastGameTime, setLastGameTime] = useState<string | null>(null);
+  const [myBets, setMyBets] = useState<any[]>([]);
 
   const { language, userData, pointTier, setPointTier, session, coinData } =
     useGlobalContext();
@@ -53,7 +72,6 @@ export default function Leaderboard() {
           return {
             ...user,
             rank: index + 1,
-            activity: timeSince(user.updatedAt),
           };
         });
 
@@ -88,20 +106,6 @@ export default function Leaderboard() {
     getLeaderBoard();
   }, []);
 
-  // useEffect(() => {
-  //   let maxWin: number | null = null;
-
-  //   liveBets.forEach((bet) => {
-  //     if (bet.gameSeed.account === session?.user?._id) {
-  //       if (maxWin === null || bet.amountWon > maxWin) {
-  //         maxWin = bet.amountWon;
-  //       }
-  //     }
-  //   });
-
-  //   setHighestWin(maxWin);
-  // }, [liveBets, userId]);
-
   useEffect(() => {
     let points = userData?.points ?? 0;
     const tier = Object.entries(pointTiers).reduce((prev, next) => {
@@ -116,6 +120,76 @@ export default function Leaderboard() {
       label: tier[1].label,
     });
   }, [userData]);
+
+  const calculateHighestProfit = (bets: Bet[]): number => {
+    return bets.reduce((maxProfit, bet) => {
+      if (bet.result === "Won") {
+        const profit = bet.amountWon - bet.amount;
+        return Math.max(maxProfit, profit);
+      }
+      return maxProfit;
+    }, 0);
+  };
+
+  const calculateLastGameTime = (bets: Bet[]): string => {
+    if (bets.length === 0) return "No games played";
+
+    const lastGame = bets.reduce((latest, bet) => {
+      return new Date(bet.createdAt) > new Date(latest.createdAt)
+        ? bet
+        : latest;
+    });
+
+    const timeDiff = Date.now() - new Date(lastGame.createdAt).getTime();
+    const days = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
+    const hours = Math.floor(
+      (timeDiff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60),
+    );
+    const minutes = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
+
+    if (days > 0) {
+      return `${days} days ago`;
+    } else if (hours > 0) {
+      return `${hours} hrs ago`;
+    } else {
+      return `${minutes} min ago`;
+    }
+  };
+
+  const userHistory = async () => {
+    try {
+      const res = await fetch(
+        `/api/games/global/getUserHistory?email=${session?.user?.email}`,
+      );
+      const history = await res.json();
+      if (history.success) {
+        const bets: Bet[] = history?.data ?? [];
+        setMyBets(bets);
+        console.log("history", bets);
+
+        // Calculate highest profit
+        const highestProfit = calculateHighestProfit(bets);
+        setHighestProfit(highestProfit);
+
+        // Calculate time since last game
+        const lastGameTimeInfo = calculateLastGameTime(bets);
+        setLastGameTime(lastGameTimeInfo);
+      } else {
+        setMyBets([]);
+        setHighestProfit(null);
+        setLastGameTime(null);
+      }
+    } catch (err) {
+      setMyBets([]);
+      setHighestProfit(null);
+      setLastGameTime(null);
+      console.error(err);
+    }
+  };
+
+  useEffect(() => {
+    userHistory();
+  }, []);
 
   const threshold = 500;
   const currentDate = new Date();
@@ -134,34 +208,6 @@ export default function Leaderboard() {
       Math.max(0, coinData?.find((c) => c.tokenMint === "SUPER")?.amount ?? 0),
     [coinData],
   );
-
-  const timeSince = (date: string | Date): string => {
-    const now = new Date();
-    const past = new Date(date);
-    const seconds = Math.floor((now.getTime() - past.getTime()) / 1000);
-
-    let interval = Math.floor(seconds / 31536000);
-    if (interval >= 1)
-      return interval + " yr" + (interval > 1 ? "s" : "") + " ago";
-
-    interval = Math.floor(seconds / 2592000);
-    if (interval >= 1)
-      return interval + " mo" + (interval > 1 ? "s" : "") + " ago";
-
-    interval = Math.floor(seconds / 86400);
-    if (interval >= 1)
-      return interval + " d" + (interval > 1 ? "s" : "") + " ago";
-
-    interval = Math.floor(seconds / 3600);
-    if (interval >= 1)
-      return interval + " hr" + (interval > 1 ? "s" : "") + " ago";
-
-    interval = Math.floor(seconds / 60);
-    if (interval >= 1)
-      return interval + " min" + (interval > 1 ? "s" : "") + " ago";
-
-    return Math.floor(seconds) + " s ago";
-  };
 
   const renderer = ({
     days,
@@ -385,20 +431,22 @@ export default function Leaderboard() {
               {translator("Claim Now", language)}
             </button> */}
             <div className="flex gap-4 text-white">
-              {/* <div className="flex flex-col items-center bg-[#252740] bg-opacity-50 rounded-[0.625rem] p-4 w-full">
+              <div className="flex flex-col items-center bg-[#252740] bg-opacity-50 rounded-[0.625rem] p-4 w-full">
                 <div className="text-white/50 text-xs font-medium">
                   Activity
                 </div>
-                <div className="text-white/75 font-semibold">
-                  {myData?.activity}
+                <div className="text-white/75 text-center text-sm xl:text-base font-semibold">
+                  {lastGameTime ?? "N/A"}
                 </div>
-              </div> */}
+              </div>
               {tokenAmount <= 500 ? (
                 <div className="flex flex-col items-center bg-[#252740] bg-opacity-50 rounded-[0.625rem] p-4 w-full">
-                  <div className="text-white/50 text-xs font-medium">
+                  <div className="text-white/50 text-xs text-center font-medium">
                     Biggest Gain
                   </div>
-                  <div className="text-white/75 font-semibold">+</div>
+                  <div className="text-white/75  text-center text-sm xl:text-base font-semibold">
+                    +{highestProfit?.toFixed(2)}
+                  </div>
                 </div>
               ) : (
                 <div className="bg-[#5F4DFF] bg-opacity-50 rounded-[10px] text-center text-sm text-opacity-90 font-semibold w-full py-3">
@@ -408,245 +456,6 @@ export default function Leaderboard() {
             </div>
           </div>
         </div>
-
-        {/* {topThreeUsers.length > 0 && 
-          <div className="flex flex-col md:flex-row gap-2.5 w-full mt-16 mb-8">
-            {[topThreeUsers[1], topThreeUsers[0], topThreeUsers[2]].map(
-              (user, index) => {
-                const actualRank = index === 0 ? 2 : index === 1 ? 1 : 3;
-                return (
-                  <div
-                    key={index}
-                    className={`p-[2.5px] w-full rounded-[10px] bg-gradient-to-b ${index === 1 ? "from-[#37475F]" : "from-[#FFC5331A]"} from-56.4% to-[#121418] to-100%`}
-                  >
-                    <div className="relative bg-[#121418] text-white rounded-[8px] p-8">
-                      <div className="flex items-center justify-center gap-2">
-                        <Image
-                          src={user?.image ?? "/assets/user.svg"}
-                          alt="user"
-                          width={26}
-                          height={26}
-                          className="rounded-full overflow-hidden"
-                        />
-                        <div className="font-semibold text-lg">
-                          {user?.name ?? obfuscatePubKey(user?.wallet)}
-                        </div>
-                      </div>
-                      <div className="bg-[#181E29] h-[2px] my-5"></div>
-                      <div>
-                        <div className="flex items-center justify-between text-xs text-white/50">
-                          <div>Activity</div>
-                          <div>Coins</div>
-                        </div>
-                        <div className="flex items-center justify-between text-white/75">
-                          <div>2s ago</div>
-                          <div className="flex items-center gap-2">
-                            <Image
-                              src="/assets/leaderboardCoin.svg"
-                              alt="coin"
-                              width={15}
-                              height={15}
-                            />
-                            <div>
-                              {parseInt(
-                                user?.deposit?.amount ?? 0,
-                              ).toLocaleString()}
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                      <Image
-                        className="absolute -top-5 left-1/2 transform -translate-x-1/2"
-                        src={`/assets/${index === 0 ? "first" : index === 1 ? "second" : "third"}.svg`}
-                        alt={`${index + 1}st`}
-                        width={40}
-                        height={40}
-                      />
-                    </div>
-                  </div>
-                );
-              },
-            )}
-          </div> */}
-
-        {/* <div className="flex gap-[12px] px-5 sm:px-10 2xl:px-[5%] mt-6 w-full h-full ">
-          <div className="flex flex-col lg:flex-row items-center w-full md:w-[55%] lg:w-[60%] h-full p-8 rounded-md gap-[3.4rem] bg-staking-bg">
-            <div className="flex flex-col w-full rounded-[5px] h-full ">
-              <div className="flex flex-row items-end justify-between">
-                <div className="flex flex-col justify-center sm:flex-row sm:items-center sm:justify-start gap-2 w-full">
-                  <div className="flex relative min-w-[4.5rem] h-[4.5rem]">
-                    <Image
-                      src={pointTier.image}
-                      alt={pointTier.label}
-                      layout="fill"
-                      objectFit="contain"
-                      objectPosition="center"
-                    />
-                  </div>
-                  <div className="flex flex-col gap-0.5 items-center sm:items-start font-chakra">
-                    <span className="text-white text-xl tracking-wider font-bold">
-                      {wallet.publicKey
-                        ? obfuscatePubKey(wallet.publicKey.toBase58())
-                        : "...."}
-                    </span>
-                    <span className="text-staking-secondary text-sm font-medium">
-                      {pointTier?.label
-                        ? translator(
-                            pointTier?.label.split(" ")?.[0],
-                            language,
-                          ) +
-                          " " +
-                          pointTier?.label.split(" ")?.[1]
-                        : ""}
-                    </span>
-                  </div>
-                </div>
-                {(pointTier?.index ?? 0) < 7 && (
-                  <div className="hidden sm:flex sm:flex-col sm:items-end">
-                    <span className="text-white text-base text-opacity-50">
-                      {translator("Next Tier", language)}
-                    </span>
-                    <span className="text-base font-semibold text-opacity-75 text-[#5F4DFF]">
-                      {pointTiers[pointTier?.index + 1]?.label ?? ""}
-                    </span>
-                  </div>
-                )}
-              </div>
-              next tier data - mob view
-              {(pointTier?.index ?? 0) < 7 && (
-                <div className="flex sm:hidden mt-5 items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <span className="flex text-white text-xs text-opacity-50">
-                      {translator("Next Tier", language)}
-                    </span>
-                    <span className="text-base font-semibold text-opacity-75 text-[#5F4DFF]">
-                      {pointTiers[pointTier?.index + 1]?.label ?? ""}
-                    </span>
-                  </div>
-
-                  <span className="flex items-center justify-start text-base -mt-1 text-white text-right text-opacity-50 font-semibold">
-                    {formatNumber(pointTiers[pointTier?.index + 1]?.limit ?? 0) +
-                    " Points"}
-                  </span>
-                </div>
-              )}
-              <div className="flex flex-row justify-between font-chakra mt-4">
-                <span className="text-sm text-white text-right text-opacity-75">
-                  {translator("Your level progress", language)}
-                </span>
-                {(pointTier?.index ?? 0) < 7 && (
-                  <div className="flex flex-col items-end">
-                    <span className="text-sm text-white text-right text-opacity-75">
-                      {truncateNumber(
-                        pointTiers[pointTier?.index + 1]?.limit ?? 0,
-                        0,
-                      ) + ` ${translator("Points", language)}`}
-                    </span>
-                  </div>
-                )}
-              </div>
-              <div
-                className={`${
-                  (Math.min(userData?.points ?? 0, 1_000_000) * 100) /
-                    pointTiers[pointTier?.index + 1]?.limit ?? 1
-                    ? "opacity-90"
-                    : ""
-                } relative flex transition-width duration-1000 w-full rounded-full overflow-hidden h-6 bg-[#282E3D] mt-2 mb-2`}
-              >
-                <div
-                  style={{
-                    width: `10%`,
-                  }}
-                  className="h-full bg-[linear-gradient(91.179deg,#C867F0_0%,#1FCDF0_50.501%,#19EF99_100%)]"
-                />
-                <span className="w-full h-full absolute top-0 left-0 flex items-center justify-center z-10 text-white font-semibold font-chakra text-xs">
-                  {truncateNumber(
-                    (Math.min(userData?.points ?? 0, 1_000_000) * 100) /
-                      (pointTiers[pointTier?.index + 1]?.limit ?? 1_000_000),
-                    2,
-                  )}{" "}
-                  %
-                </span>
-              </div>
-              <div className="flex flex-row justify-between font-chakra capitalize">
-                <span className="text-staking-secondary text-opacity-75 text-sm font-medium">
-                  {pointTier?.label
-                    ? pointTier?.label.includes(" ")
-                      ? translator(pointTier?.label.split(" ")[0], language) +
-                        " " +
-                        pointTier?.label.split(" ")[1]
-                      : translator(pointTier?.label, language)
-                    : ""}
-                </span>
-                <span className="flex items-center gap-1 text-staking-secondary text-opacity-75 text-sm font-medium">
-                  <div className="flex relative min-w-[1rem] h-[1rem]">
-                    <Image
-                      src={`/assets/badges/T-${pointTier?.index + 1}.png`}
-                      alt={pointTier.label}
-                      layout="fill"
-                      objectFit="contain"
-                      objectPosition="center"
-                    />
-                  </div>
-                  {pointTiers[pointTier?.index + 1]?.label
-                    ? pointTiers[pointTier?.index + 1]?.label.includes(" ")
-                      ? translator(
-                          pointTiers[pointTier?.index + 1]?.label.split(" ")[0],
-                          language,
-                        ) +
-                        " " +
-                        pointTiers[pointTier?.index + 1]?.label.split(" ")[1]
-                      : translator(
-                          pointTiers[pointTier?.index + 1]?.label,
-                          language,
-                        )
-                    : ""}
-                </span>
-              </div>
-            </div>
-          </div>
-          <div className="hidden md:flex flex-col justify-between gap-[12px] md:w-[45%] lg-w-[40%] h-[232px]">
-            <div className="flex items-center gap-[12px] bg-staking-bg rounded-[5px] p-4 h-[50%]">
-              <div className="flex justify-center items-center bg-[#202329] rounded-lg w-[73px] h-[68px]">
-                <Image
-                  src="/assets/boost.svg"
-                  alt="boost logo"
-                  height={36}
-                  width={36}
-                />
-              </div>
-              <div>
-                <p className="text-white font-semibold text-base text-opacity-75">
-                  {translator("Boost Your Tier by Staking!", language)}
-                </p>
-                <p className="text-[#94A3B8] font-semibold text-[11px] text-opacity-50 max-w-[290px]">
-                  {translator(
-                    "You can stake your $FOMO to obtain higher multiplier for your points!",
-                    language,
-                  )}
-                </p>
-              </div>
-            </div>
-            <div className="flex gap-[12px] w-full h-[50%]">
-              <div className="flex flex-col justify-between gap-[12px] bg-staking-bg rounded-[5px] p-4 w-full h-full">
-                <p className="text-xs font-medium text-opacity-50 text-white">
-                  {translator("Current Tier", language)}
-                </p>
-                <p className="font-chakra text-2xl font-semibold text-[#94A3B8] text-right">
-                  T{userData?.tier ?? 0}
-                </p>
-              </div>
-              <div className="flex flex-col justify-between gap-[12px] bg-staking-bg rounded-[5px] p-4 w-full h-full">
-                <p className="text-xs font-medium text-opacity-50 text-white">
-                  {translator("Current Multiplier", language)}
-                </p>
-                <p className="font-chakra text-2xl font-semibold text-[#94A3B8] text-right">
-                  {`${userData?.multiplier ?? 0.5}x`}
-                </p>
-              </div>
-            </div>
-          </div>
-        </div> */}
 
         <div className="w-full flex flex-1 flex-col items-start gap-5 pb-10">
           <LeaderboardTable
