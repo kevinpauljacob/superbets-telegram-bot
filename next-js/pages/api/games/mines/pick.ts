@@ -204,15 +204,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           message: "Max payout of 25 exceeded! Cashout to continue...",
         });
 
-      let userData;
-      if (wallet)
-        userData = await StakingUser.findOneAndUpdate(
-          { account },
-          {},
-          { upsert: true, new: true },
-        );
-
-      const stakeAmount = userData?.stakedAmount ?? 0;
+      const stakeAmount = 0;
       const stakingTier = Object.entries(stakingTiers).reduce((prev, next) => {
         return stakeAmount >= next[1]?.limit ? next : prev;
       })[0];
