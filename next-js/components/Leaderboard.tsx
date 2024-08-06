@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { useWallet } from "@solana/wallet-adapter-react";
-import { obfuscatePubKey, translator } from "@/context/transactions";
+import { obfuscatePubKey, translator, formatNumber } from "@/context/transactions";
 import { pointTiers } from "@/context/config";
 import { useGlobalContext } from "./GlobalContext";
 import Image from "next/legacy/image";
@@ -12,8 +12,6 @@ import { AdaptiveModal, AdaptiveModalContent } from "./AdaptiveModal";
 import { useRouter } from "next/navigation";
 
 interface LeaderboardProps {
-  isOpen: boolean;
-  onClose: () => void;
   data: any;
   page: any;
   setPage: any;
@@ -27,8 +25,6 @@ function Leaderboard({
   setPage,
   maxPages,
   myData,
-  isOpen,
-  onClose,
 }: LeaderboardProps) {
   const router = useRouter();
   const wallet = useWallet();
@@ -54,7 +50,7 @@ function Leaderboard({
   );
 
   useEffect(() => {
-    if (isFirstSignUp) {
+    if (isFirstSignUp && !isModalOpen) {
       setIsModalOpen(true);
     }
   }, [isFirstSignUp]);
@@ -266,126 +262,95 @@ function Leaderboard({
           >
             <div className="flex flex-1 px-8 sm:p-0 justify-center overflow-y-auto">
               <div className="flex flex-col w-full">
-                {isFirstSignUp && (
-                  <>
-                    <div className="flex justify-center items-center mt-2 mb-2">
-                      <ModalCoin className="" />
-                    </div>
+                <div className="flex justify-center items-center mt-2 mb-2">
+                  <ModalCoin className="" />
+                </div>
 
-                    <div className="flex flex-col bg-white bg-opacity-20 font-semibold text-lg text-white text-opacity-75 text-center p-2 rounded-md mx-2 mt-2">
-                      <p className="">Congrats! you've received</p>
-                      <div className="flex items-center justify-center gap-1">
-                      <p className="text-white font-bold text-4xl">
-                        <Image src={Coin} width={25} alt="Coin" />
-                        <span className="pb-2">100</span>
-                      </p>
-                      </div>
-                    </div>
-                  </>
-                )}
+                <div className="flex flex-col bg-white bg-opacity-20 font-semibold text-lg text-white text-opacity-75 text-center p-2 rounded-md mx-2 mt-2">
+                  <p className="">Congrats! you've received</p>
+                  <div className="flex items-center justify-center gap-1">
+                    <p className="text-white font-bold text-4xl">
+                      <Image src={Coin} width={25} alt="Coin" />
+                      <span className="pb-2">100</span>
+                    </p>
+                  </div>
+                </div>
 
-                {tokenAmount >= 500 && (
-                  <>
-                    <div className="flex flex-col bg-white bg-opacity-20 font-semibold text-lg text-white text-opacity-75 text-center p-2 rounded-md mx-2 md:mt-8 font-changa">
-                      <p className="">Congrats! you've won</p>
-                      <p className="text-white font-bold text-4xl">
-                        <span>$1 USDC</span>
-                      </p>
-                    </div>
-                  </>
-                )}
-
-                {(isFirstSignUp || tokenAmount >= 500) && (
-                  <div className="flex flex-col gap-1 bg-[#1b1d2c] rounded-md mx-2 p-4 mt-2">
-                    <div className="flex justify-between items-center">
-                      <div className="font-semibold text-lg text-white text-opacity-75">
-                        <span>
-                          Claim $1 progress{" "}
-                          <span className="text-white"> 10%</span>
+                <div className="flex flex-col gap-1 bg-[#1b1d2c] rounded-md mx-2 p-4 mt-2">
+                  <div className="flex justify-between items-center">
+                    <div className="font-semibold text-lg text-white text-opacity-75">
+                      <span>
+                        Claim $1 progress{" "}
+                        <span className="text-white">
+                          {" "}
+                          {formatNumber((tokenAmount * 100) / threshold, 2)}%
                         </span>
-                      </div>
-                      <div className="flex gap-1 justify-center items-center">
-                        <Image
-                          src={"/assets/headCoin.png"}
-                          width={13}
-                          height={13}
-                          alt={"User"}
-                          className="rounded-full overflow-hidden"
-                        />
-                        <span className="text-white text-sm font-semibold text-opacity-75">
-                          {tokenAmount.toLocaleString("en-US", {
-                            minimumFractionDigits: 2,
-                            maximumFractionDigits: 2,
-                          })}
-                          /500
-                        </span>
-                      </div>
+                      </span>
                     </div>
-                    <div
-                      className={`relative flex transition-width duration-1000 w-full rounded-full overflow-hidden h-1 bg-[#282E3D] mt-2 mb-2`}
-                    >
-                      <div className="absolute w-full bg-transparent flex items-center justify-evenly">
-                        {Array.from({ length: 4 }, (_, index) => index + 1).map(
-                          (_, index) => (
-                            <div key={index} className="bg-[#202138] w-1 h-1" />
-                          ),
-                        )}
-                      </div>
-                      <div
-                        style={{
-                          width: `${(tokenAmount * 100) / threshold}%`,
-                        }}
-                        className="h-full bg-[#5F4DFF]"
+                    <div className="flex gap-1 justify-center items-center">
+                      <Image
+                        src={"/assets/headCoin.png"}
+                        width={13}
+                        height={13}
+                        alt={"User"}
+                        className="rounded-full overflow-hidden"
                       />
+                      <span className="text-white text-sm font-semibold text-opacity-75">
+                        {tokenAmount.toLocaleString("en-US", {
+                          minimumFractionDigits: 2,
+                          maximumFractionDigits: 2,
+                        })}
+                        /500
+                      </span>
                     </div>
                   </div>
-                )}
-
-                {isFirstSignUp && (
-                  <div className="relative w-[97%] h-full bg-[#1b1d2c] rounded-md mt-2 mb-2 mx-2">
-                    <Image
-                      src="/assets/ModalBanner.png"
-                      alt="banners"
-                      width="100"
-                      height="100"
-                      layout="fill"
-                      className="rounded-md"
+                  <div
+                    className={`relative flex transition-width duration-1000 w-full rounded-full overflow-hidden h-1 bg-[#282E3D] mt-2 mb-2`}
+                  >
+                    <div className="absolute w-full bg-transparent flex items-center justify-evenly">
+                      {Array.from({ length: 4 }, (_, index) => index + 1).map(
+                        (_, index) => (
+                          <div key={index} className="bg-[#202138] w-1 h-1" />
+                        ),
+                      )}
+                    </div>
+                    <div
+                      style={{
+                        width: `${(tokenAmount * 100) / threshold}%`,
+                      }}
+                      className="h-full bg-[#5F4DFF]"
                     />
+                  </div>
+                </div>
 
-                    <div className="absolute inset-0 flex items-center justify-start text-white p-4">
-                      <div className="flex flex-col gap-8">
-                        <div className="flex flex-col sm:flex-row sm:items-end gap-2">
-                          <div>
-                            <h2 className="font-bold text-white text-2xl sm:text-xl mb-1">
-                              Win $1 campaign
-                            </h2>
-                            <p className="text-[#94A3B8] font-medium text-sm sm:text-base">
-                              Get Rewarded 1 $USDC once you
-                            </p>
-                            <p className="text-[#94A3B8] font-medium text-sm sm:text-base">
-                              reach 500 Coins!
-                            </p>
-                          </div>
+                <div className="relative w-[97%] h-full bg-[#1b1d2c] rounded-md mt-2 mb-2 mx-2">
+                  <Image
+                    src="/assets/ModalBanner.png"
+                    alt="banners"
+                    width="100"
+                    height="100"
+                    layout="fill"
+                    className="rounded-md"
+                  />
+
+                  <div className="absolute inset-0 flex items-center justify-start text-white p-4">
+                    <div className="flex flex-col gap-8">
+                      <div className="flex flex-col sm:flex-row sm:items-end gap-2">
+                        <div>
+                          <h2 className="font-bold text-white text-2xl sm:text-xl mb-1">
+                            Win $1 campaign
+                          </h2>
+                          <p className="text-[#94A3B8] font-medium text-sm sm:text-base">
+                            Get Rewarded 1 $USDC once you
+                          </p>
+                          <p className="text-[#94A3B8] font-medium text-sm sm:text-base">
+                            reach 500 Coins!
+                          </p>
                         </div>
                       </div>
                     </div>
                   </div>
-                )}
-
-                {tokenAmount >= 500 && (
-                  <>
-                    <div className="flex flex-col justify-center items-center font-changa mt-4">
-                      <div className="flex flex-col items-center justify-center">
-                        <p className="text-[#94A3B8] font-medium text-base sm:text-lg">
-                          Go to SuperBets booth to claim
-                        </p>
-                        <p className="text-[#94A3B8] font-medium text-base sm:text-lg">
-                          your 1 $USDC
-                        </p>
-                      </div>
-                    </div>
-                  </>
-                )}
+                </div>
               </div>
             </div>
           </AdaptiveModalContent>

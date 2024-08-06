@@ -1,5 +1,5 @@
 import { Inter } from "next/font/google";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/router";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { useWalletModal } from "@solana/wallet-adapter-react-ui";
@@ -20,7 +20,7 @@ export default function Home() {
   const router = useRouter();
   const { referralCode } = router.query;
 
-  const { session, setLanguage, setShowConnectModal } = useGlobalContext();
+  const { session, setLanguage, setShowConnectModal, coinData } = useGlobalContext();
   useEffect(() => {
     //@ts-ignore
     setLanguage(localStorage.getItem("language") ?? "en");

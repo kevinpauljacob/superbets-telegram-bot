@@ -82,6 +82,9 @@ interface GlobalContextProps {
   isFirstSignUp: boolean;
   setIsFirstSignUp: (isFirstSignUp: boolean) => void;
 
+  reached500: boolean;
+  setReached500: (reached500: boolean) => void;
+
   loading: boolean;
   setLoading: (stake: boolean) => void;
 
@@ -326,6 +329,7 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
   >("classic");
 
   const [isFirstSignUp, setIsFirstSignUp] = useState<boolean>(false);
+  const [reached500, setReached500] = useState<boolean>(false);
 
   const openVerifyModal = () => {
     setIsVerifyModalOpen(true);
@@ -644,6 +648,8 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
         liveTokenPrice,
         isFirstSignUp,
         setIsFirstSignUp,
+        reached500,
+        setReached500
       }}
     >
       {children}

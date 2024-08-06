@@ -23,6 +23,7 @@ export interface SessionUser {
     image: string;
     isWeb2User: boolean;
     wallet: string;
+    reached500: boolean;
   };
 }
 

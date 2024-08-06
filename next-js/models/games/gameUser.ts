@@ -56,10 +56,13 @@ const gameUserSchema = new Schema(
       default: true,
       required: true,
     },
+    reached500: {
+      type: Boolean,
+      default: false
+    },
   },
   { timestamps: true },
 );
-
 
 let GameUser =
   mongoose.models?.GameUser || mongoose.model("GameUser", gameUserSchema);
