@@ -26,18 +26,18 @@ function Footer() {
 
   return (
     <>
-      <div className="w-full h-full flex flex-col items-center justify-center px-5 lg2:px-[4rem] md:px-[3rem] pt-5">
-        <div className="w-full h-full flex lg2:flex-row flex-col lg2:items-center items-start lg2:pt-10 lg2:pb-16 pt-5 pb-5 gap-5">
+      <div className="w-full h-full flex flex-col px-5 lg2:px-[4rem] md:px-[3rem] pt-10">
+        <Image
+          src={"/logo/superbets.svg"}
+          width={150}
+          height={30}
+          alt={"SUPERBETS"}
+          className="ml-2"
+        />
+        <div className="w-full h-full flex lg2:flex-row flex-col lg2:items-center items-start lg2:pb-16 pb-5 gap-5">
           <div className="lg2:w-[30%] md:w-[60%] w-[90%]">
-            <Image
-              src={"/logo/superbets.svg"}
-              width={150}
-              height={30}
-              alt={"SUPERBETS"}
-              className="ml-2"
-            />
-            <p className="flex flex-col text-[#94A3B8] font-medium font-chakra text-sm leading-6 text-opacity-80 md:mx-0 md:mt-2 mb-2">
-              <span className="mt-2 mx-2">
+            <p className="flex flex-col text-[#94A3B8] font-medium font-chakra text-sm leading-6 text-opacity-80 md:mx-0 mt-6 mb-2">
+              <span className="mx-2">
                 {translator(
                   "SUPERBETS casino games are currently in beta and will be undergoing audit shortly.",
                   language,
@@ -55,14 +55,7 @@ function Footer() {
               </h3>
               <div className="text-[#94A3B8] font-chakra flex flex-col items-start justify-start gap-5 text-sm leading-[14px] font-medium text-opacity-80">
                 <Link
-                  href="https://x.com/superbetgames"
-                  target="_blank"
-                  className="hover:cursor-pointer hover:underline decoration-1"
-                >
-                  DCA
-                </Link>
-                <Link
-                  href="https://x.com/superbetgames"
+                  href="/api-doc"
                   target="_blank"
                   className="hover:cursor-pointer hover:underline decoration-1"
                 >
@@ -91,22 +84,10 @@ function Footer() {
                 >
                   {translator("Leaderboard", language)}
                 </span>
-                <span
-                  className="hover:cursor-pointer hover:underline decoration-1"
-                  onClick={() => router.push("/stake")}
-                >
-                  {translator("Staking", language)}
-                </span>
-                <span
-                  className="hover:cursor-pointer hover:underline decoration-1"
-                  onClick={() => router.push("/store")}
-                >
-                  {translator("Store", language)}
-                </span>
               </div>
             </div>
           </div>
-          <div className="lg2:pl-12 lg2:mb-12">
+          <div className="lg2:pl-12 lg2:mb-5">
             <div className="mx-2">
               <h3 className="font-semibold font-changa text-white text-base leading-[18px] text-opacity-90">
                 {translator("Community", language)}
