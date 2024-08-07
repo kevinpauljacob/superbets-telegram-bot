@@ -1,6 +1,5 @@
 import { maintainance, wsEndpoint } from "@/context/config";
 import { GameSeed, Mines, User } from "@/models/games";
-import StakingUser from "@/models/staking/user";
 import connectDatabase from "@/utils/database";
 import {
   GameType,
@@ -88,7 +87,6 @@ Decimal.set({ precision: 9 });
  *                   type: string
  */
 
-const secret = process.env.NEXTAUTH_SECRET;
 const encryptionKey = Buffer.from(process.env.ENCRYPTION_KEY!, "hex");
 
 export const config = {
@@ -164,14 +162,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         return res
           .status(400)
           .json({ success: false, message: "No bets placed" });
-
-      let userData;
-      if (wallet)
-        userData = await StakingUser.findOneAndUpdate(
-          { account },
-          {},
-          { upsert: true, new: true },
-        );
 
       const { serverSeed: encryptedServerSeed, clientSeed, iv } = gameSeed;
 

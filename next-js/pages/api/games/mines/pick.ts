@@ -6,9 +6,15 @@ import {
   generateGameResult,
   GameType,
   decryptServerSeed,
+  GameTokens,
 } from "@/utils/provably-fair";
 import StakingUser from "@/models/staking/user";
-import { houseEdgeTiers, pointTiers, stakingTiers } from "@/context/config";
+import {
+  houseEdgeTiers,
+  maxPayouts,
+  pointTiers,
+  stakingTiers,
+} from "@/context/config";
 import { launchPromoEdge } from "@/context/config";
 import { wsEndpoint } from "@/context/config";
 import Decimal from "decimal.js";
@@ -94,7 +100,6 @@ Decimal.set({ precision: 9 });
  *                   type: string
  */
 
-const secret = process.env.NEXTAUTH_SECRET;
 const encryptionKey = Buffer.from(process.env.ENCRYPTION_KEY!, "hex");
 
 export const config = {
@@ -192,6 +197,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         minesCount,
       );
 
+      const maxPayout = new Decimal(maxPayouts[tokenMint as GameTokens].mines);
+
       let result = "Pending";
       const numBets = userBets.length;
       strikeMultiplier = Decimal.div(25 - numBets, 25 - numBets - minesCount)
@@ -236,13 +243,19 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           },
         ).populate("gameSeed");
       } else {
-        amountWon = Decimal.mul(amount, strikeMultiplier)
+        amountWon = Decimal.min(
+          Decimal.mul(amount, strikeMultiplier),
+          maxPayout,
+        )
           .mul(Decimal.sub(1, houseEdge))
           .toNumber();
 
         if (numBets + 1 === 25 - minesCount) {
           result = "Won";
-          const feeGenerated = Decimal.mul(amount, strikeMultiplier)
+          const feeGenerated = Decimal.min(
+            Decimal.mul(amount, strikeMultiplier),
+            maxPayout,
+          )
             .mul(houseEdge)
             .toNumber();
 
@@ -320,28 +333,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
             },
           },
         );
-
-        // const pointsGained =
-        //   0 * user.numOfGamesPlayed + 1.4 * amount * userData.multiplier;
-
-        // const points = userData.points + pointsGained;
-        // const newTier = Object.entries(pointTiers).reduce((prev, next) => {
-        //   return points >= next[1]?.limit ? next : prev;
-        // })[0];
-
-        // await StakingUser.findOneAndUpdate(
-        //   {
-        //     wallet,
-        //   },
-        //   {
-        //     $inc: {
-        //       points: pointsGained,
-        //     },
-        //     $set: {
-        //       tier: newTier,
-        //     },
-        //   },
-        // );
 
         const { gameSeed, ...rest } = record.toObject();
         rest.game = GameType.mines;

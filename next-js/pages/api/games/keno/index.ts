@@ -92,7 +92,6 @@ Decimal.set({ precision: 9 });
  *         description: Internal server error
  */
 
-const secret = process.env.NEXTAUTH_SECRET;
 const encryptionKey = Buffer.from(process.env.ENCRYPTION_KEY!, "hex");
 
 export const config = {
@@ -103,7 +102,7 @@ type InputType = {
   wallet: string;
   email: string;
   amount: number;
-  tokenMint: string;
+  tokenMint: GameTokens;
   chosenNumbers: number[];
   risk: "classic" | "low" | "medium" | "high";
 };
@@ -114,8 +113,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       let { wallet, email, amount, tokenMint, chosenNumbers, risk }: InputType =
         req.body;
 
-      const minGameAmount =
-        maxPayouts[tokenMint as GameTokens]["keno" as GameType] * minAmtFactor;
+      const minGameAmount = maxPayouts[tokenMint][GameType.keno] * minAmtFactor;
 
       if (maintainance)
         return res.status(400).json({
@@ -163,14 +161,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         });
 
       const multiplier = riskToChance[risk][chosenNumbers.length];
-      const maxStrikeMultiplier = multiplier.at(-1)!;
 
-      const maxPayout = new Decimal(maxPayouts[tokenMint as GameTokens].keno);
+      const maxPayout = new Decimal(maxPayouts[tokenMint].keno);
 
-      // if (!(maxPayout.toNumber() <= maxPayouts[tokenMint as GameTokens].keno))
-      //   return res
-      //     .status(400)
-      //     .json({ success: false, message: "Max payout exceeded" });
       await connectDatabase();
 
       let user = null;
@@ -267,7 +260,10 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         0,
       );
 
-      const feeGenerated = Decimal.mul(amount, strikeMultiplier)
+      const feeGenerated = Decimal.min(
+        Decimal.mul(amount, strikeMultiplier),
+        maxPayout,
+      )
         .mul(houseEdge)
         .toNumber();
 

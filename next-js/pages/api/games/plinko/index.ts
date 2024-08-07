@@ -90,7 +90,6 @@ Decimal.set({ precision: 9 });
  *         description: Internal server error
  */
 
-const secret = process.env.NEXTAUTH_SECRET;
 const encryptionKey = Buffer.from(process.env.ENCRYPTION_KEY!, "hex");
 
 export const config = {
@@ -148,13 +147,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         });
 
       const multiplier = riskToChance[risk][rows];
-      const maxStrikeMultiplier = multiplier.at(-1)!;
-      const maxPayout = new Decimal(maxPayouts[tokenMint as GameTokens].plinko);
-
-      // if (!(maxPayout.toNumber() <= maxPayouts[tokenMint as GameTokens].plinko))
-      //   return res
-      //     .status(400)
-      //     .json({ success: false, message: "Max payout exceeded" });
+      const maxPayout = new Decimal(maxPayouts[tokenMint].plinko);
 
       await connectDatabase();
 
@@ -261,7 +254,10 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         new Decimal(amount).sub(amountWon).toNumber(),
         0,
       );
-      const feeGenerated = Decimal.mul(amount, strikeMultiplier)
+      const feeGenerated = Decimal.min(
+        Decimal.mul(amount, strikeMultiplier),
+        maxPayout,
+      )
         .mul(houseEdge)
         .toNumber();
 

@@ -166,7 +166,6 @@ Decimal.set({ precision: 9 });
  *                   example: Server hash not found!
  */
 
-const secret = process.env.NEXTAUTH_SECRET;
 const encryptionKey = Buffer.from(process.env.ENCRYPTION_KEY!, "hex");
 
 export const config = {
@@ -433,11 +432,13 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
       strikeMultiplier = Decimal.div(strikeMultiplier, amount);
 
-      const feeGenerated = Decimal.mul(amountWon, houseEdge).toNumber();
-
       amountWon = Decimal.min(amountWon, maxPayout).mul(
         Decimal.sub(1, houseEdge),
       );
+
+      const feeGenerated = Decimal.min(amountWon, maxPayout)
+        .mul(houseEdge)
+        .toNumber();
       const amountLost = Math.max(Decimal.sub(amount, amountWon).toNumber(), 0);
 
       const addGame = !user.gamesPlayed.includes(GameType.roulette1);

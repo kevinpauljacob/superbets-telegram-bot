@@ -113,7 +113,6 @@ import updateGameStats from "../../../../utils/updateGameStats";
  *                   type: string
  */
 
-const secret = process.env.NEXTAUTH_SECRET;
 const encryptionKey = Buffer.from(process.env.ENCRYPTION_KEY!, "hex");
 
 export const config = {
@@ -124,7 +123,7 @@ type InputType = {
   wallet: string;
   email: string;
   amount: number;
-  tokenMint: string;
+  tokenMint: GameTokens;
   minesCount: number;
   userBets: Array<number>;
 };
@@ -148,7 +147,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         });
 
       const minGameAmount =
-        maxPayouts[tokenMint as GameTokens]["mines" as GameType] * minAmtFactor;
+        maxPayouts[tokenMint][GameType.mines] * minAmtFactor;
 
       if (
         (!wallet && !email) ||
@@ -188,44 +187,34 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         });
 
       const maxStrikeMultiplier = 25;
-      const maxPayout = new Decimal(maxPayouts[tokenMint as GameTokens].mines);
-
-      // if (
-      //   !(
-      //     maxPayout.toNumber() <=
-      //     maxPayouts[splToken.tokenMint as GameTokens].mines
-      //   )
-      // )
-      //   return res
-      //     .status(400)
-      //     .json({ success: false, message: "Max payout exceeded" });
+      const maxPayout = new Decimal(maxPayouts[tokenMint].mines);
 
       await connectDatabase();
 
-      let users = null;
+      let user = null;
       if (wallet) {
-        users = await User.findOne({
+        user = await User.findOne({
           wallet: wallet,
         });
       } else if (email) {
-        users = await User.findOne({
+        user = await User.findOne({
           email: email,
         });
       }
 
-      if (!users)
+      if (!user)
         return res
           .status(400)
           .json({ success: false, message: "User does not exist!" });
 
-      if (!users.isWeb2User && tokenMint === "SUPER")
+      if (!user.isWeb2User && tokenMint === "SUPER")
         return res
           .status(400)
           .json({ success: false, message: "You cannot bet with this token!" });
 
-      const account = users._id;
+      const account = user._id;
 
-      const user = await User.findOneAndUpdate(
+      const userUpdate = await User.findOneAndUpdate(
         {
           account,
           deposit: {
@@ -246,7 +235,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         },
       );
 
-      if (!user) {
+      if (!userUpdate) {
         throw new Error("Insufficient balance for bet!");
       }
 
@@ -332,7 +321,10 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           .toNumber();
         amountLost = Math.max(Decimal.sub(amount, amountWon).toNumber(), 0);
 
-        feeGenerated = Decimal.mul(amount, strikeMultiplier)
+        feeGenerated = Decimal.min(
+          Decimal.mul(amount, strikeMultiplier),
+          maxPayout,
+        )
           .sub(amountWon)
           .toNumber();
 
@@ -353,6 +345,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
               "deposit.$.amount": amountWon,
             },
             ...(addGame ? { $addToSet: { gamesPlayed: GameType.mines } } : {}),
+            $set: {
+              isWeb2User: tokenMint === "SUPER",
+            },
           },
         );
       }
