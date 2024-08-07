@@ -419,7 +419,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       );
 
       let amountWon = new Decimal(0);
-      let result = "Lost";
 
       let strikeMultiplier = new Decimal(0);
 
@@ -435,7 +434,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
             amountWon = amountWon.add(winAmount);
 
-            result = "Won";
             strikeMultiplier = winAmount.mul(WagerPayout[key]);
           }
         } else if (
@@ -450,7 +448,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
           amountWon = amountWon.add(winAmount);
 
-          result = "Won";
           strikeMultiplier = winAmount.mul(WagerPayout[key as WagerType]);
         }
       });
@@ -499,6 +496,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         throw new Error("Insufficient balance for action!!");
       }
 
+      const result = amountWon.toNumber() > amount ? "Won" : "Lost";
       const roulette2 = new Roulette2({
         account,
         amount,
