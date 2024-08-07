@@ -576,6 +576,7 @@ export default function Roulette1() {
     USDC: 0.000138,
     SOL: 0.000001,
     FOMO: 0.002345,
+    SUPER: 0.00001,
   };
 
   const onSubmit = async (data: any) => {
@@ -624,9 +625,6 @@ export default function Roulette1() {
     }
   }, [wallet?.publicKey, session?.user, refresh]);
 
-  useEffect(() => {
-    setBetAmt(userInput);
-  }, [userInput]);
   useEffect(() => {
     const transformedBets = transformBetsToSingleNumbers(
       selectedBets,
@@ -1143,13 +1141,11 @@ export default function Roulette1() {
             )}
             <BetButton
               disabled={
-                !selectedToken ||
-                loading ||
-                !session?.user 
-                // (betAmt !== undefined &&
-                //   maxBetAmt !== undefined &&
-                //   betAmt > maxBetAmt)
-                  ? true
+                !selectedToken || loading || !session?.user
+                  ? // (betAmt !== undefined &&
+                    //   maxBetAmt !== undefined &&
+                    //   betAmt > maxBetAmt)
+                    true
                   : false
               }
               onClickFunction={onSubmit}
@@ -1201,6 +1197,7 @@ export default function Roulette1() {
                   game="roulette"
                   disabled={true}
                 />
+
                 {betSetting === "manual" ? (
                   <></>
                 ) : (
@@ -1230,13 +1227,11 @@ export default function Roulette1() {
                   )}
                   <BetButton
                     disabled={
-                      !betSetting ||
-                      loading ||
-                      !session?.user 
-                      // (betAmt !== undefined &&
-                      //   maxBetAmt !== undefined &&
-                      //   betAmt > maxBetAmt)
-                        ? true
+                      !betSetting || loading || !session?.user
+                        ? // (betAmt !== undefined &&
+                          //   maxBetAmt !== undefined &&
+                          //   betAmt > maxBetAmt)
+                          true
                         : false
                     }
                     // onClickFunction={onSubmit}

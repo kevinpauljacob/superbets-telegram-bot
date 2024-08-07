@@ -715,45 +715,109 @@ input[type="range"] {
   }
 
   70% {
-    margin-left: 4%;
+    margin-left: 2%;
   }
 
   75% {
-    margin-left: 18.5%;
+    margin-left: 14.5%;
   }
 
   80% {
-    margin-left: 4%;
+    margin-left: 2%;
   }
 
   85% {
-    margin-left: 18.5%;
+    margin-left: 14.5%;
   }
 
   90% {
-    margin-left: 4%;
+    margin-left: 2%;
   }
 
   95% {
-    margin-left: 18.5%;
+    margin-left: 14.5%;
   }
 
   100% {
-    margin-left: 55px;
+    margin-left: 32px;
   }
 }
 
+@keyframes bounceSmallScreen {
+  0%, 60% {
+    margin-left: 0%;
+  }
+  70% {
+    margin-left: 8%;
+  }
+  75% {
+    margin-left: 16%;
+  }
+  80% {
+    margin-left: 8%;
+  }
+  85% {
+    margin-left: 16%;
+  }
+  90% {
+    margin-left: 8%;
+  }
+  95% {
+    margin-left: 16%;
+  }
+  100% {
+    margin-left: 12%;
+  }
+}
 
+@keyframes overlayBounceSmallScreen {
+  0%, 60% {
+    margin-left: -1%;
+  }
+  70% {
+    margin-left: 3%;
+  }
+  75% {
+    margin-left: 16%;
+  }
+  80% {
+    margin-left: 3%;
+  }
+  85% {
+    margin-left: 16%;
+  }
+  90% {
+    margin-left: 3%;
+  }
+  95% {
+    margin-left: 16%;
+  }
+  100% {
+    margin-left: 45px;
+  }
+}
 .hole {
   margin-left: 14.5%;
   animation: bounce 4s cubic-bezier(0.25, 0.1, 0.25, 1);
 }
 
 .overlayHole {
-  margin-left: 55px;
+  margin-left: 32px;
   animation: overlayBounce 4s ease-out;
 }
 
+
+ @media (max-width: 468px) {
+  .hole {
+    margin-left: 12%;
+    animation: bounceSmallScreen 4s cubic-bezier(0.25, 0.1, 0.25, 1);
+  }
+ 
+  .overlayHole {
+    margin-left: 40px;
+    animation: overlayBounceSmallScreen 4s ease-out;
+  }
+}
 @keyframes spinAntiR {
   0% {
     transform: rotate(0deg);
