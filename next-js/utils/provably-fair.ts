@@ -93,11 +93,7 @@ function getFinalValues(seedData: SeedData): number[] {
     chunk.reduce((sum, byte, index) => sum + byte / 256 ** (index + 1), 0),
   );
 }
-function getRandomInt(min: number, max: number): number {
-  min = Math.ceil(min);
-  max = Math.floor(max);
-  return Math.floor(Math.random() * (max - min + 1)) + min;
-}
+
 // Helper function to chunk an array
 function chunk<T>(array: T[], size: number): T[][] {
   const chunks: T[][] = [];
@@ -116,8 +112,7 @@ export enum seedStatus {
 export enum GameTokens {
   SOL = "SOL",
   USDC = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
-  FOMO = "Cx9oLynYgC3RrgXzin7U417hNY9D6YB1eMGw4ZMbWJgw",
-  SUPER = 'SUPER'
+  SUPER = "SUPER",
 }
 
 export enum GameType {
@@ -251,7 +246,6 @@ export const generateGameResult = <T extends GameType>(
       return n[0] as GameResult<T>;
     }
 
-    //TODO: reverify these
     case GameType.roulette1: {
       let n = getFinalValues({
         serverSeed,
@@ -264,23 +258,17 @@ export const generateGameResult = <T extends GameType>(
       return n[0] as GameResult<T>;
     }
 
-      case GameType.roulette2: {
-        let n = getFinalValues({
-          serverSeed,
-          clientSeed,
-          nonce,
-          cursor: 0,
-          count: 1,
-        }).map((e) => Math.floor(37 * e) - 1);
-    
-       
-        if (getRandomInt(1, 100) <= 5) { 
-          n[0] = 99;
-        }
-    
-        return n[0] as GameResult<T>;
-      }
- 
+    case GameType.roulette2: {
+      let n = getFinalValues({
+        serverSeed,
+        clientSeed,
+        nonce,
+        cursor: 0,
+        count: 1,
+      }).map((e) => Math.floor(38 * e));
+
+      return n[0] as GameResult<T>;
+    }
 
     case GameType.mines: {
       let o = getFinalValues({

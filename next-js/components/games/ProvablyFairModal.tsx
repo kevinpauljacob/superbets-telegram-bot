@@ -29,7 +29,7 @@ export default function ProvablyFairModal({
   selectedGameType,
 }: Props) {
   const [strikeNumbers, setStrikeNumbers] = useState<number[]>([]);
-  const [rouletteNumer, setRouletteNumber] = useState<number | null>(null);
+  const [rouletteNumber, setRouletteNumber] = useState<number | null>(null);
   const [strikeNumber, setStrikeNumber] = useState<number>(0);
   const [wonDiceFace, setWonDiceFace] = useState<number>(1);
   const [multiplier, setMultiplier] = useState<string>("1.00");
@@ -479,7 +479,7 @@ export default function ProvablyFairModal({
           <div className="w-full flex items-start gap-1">
             <div
               className={`h-[125px] w-[27.3px] sm:w-[30.6px] sm:h-[207px] flex flex-col justify-center text-center cursor-pointer bg-[#149200] rounded-[5px]
-              text-white relative  ${rouletteNumer === 0 ? "border-[#3DD179]" : ""}
+              text-white relative  ${rouletteNumber === 0 ? "border-[#3DD179]" : ""}
               mb-1`}
             >
               <p className="-rotate-90">0</p>
@@ -500,7 +500,7 @@ export default function ProvablyFairModal({
                               ? "bg-[#F1323E]  "
                               : "bg-[#2A2E38]  "
                           }${
-                            rouletteNumer === number
+                            rouletteNumber === number
                               ? "border-[#3DD179] border-2"
                               : ""
                           } text-white rounded-[5px]  `}
@@ -566,14 +566,14 @@ export default function ProvablyFairModal({
             <div className="h-[130px] w-[27.3px] sm:w-[30.6px] sm:h-[213px] flex items-center justify-center flex-col ">
               <div
                 className={` h-1/2 w-[27.3px] sm:w-[30.6px]  flex flex-col justify-center text-center cursor-pointer bg-[#149200] rounded-[5px]
-            text-white relative  ${rouletteNumer === 0 ? "border-[#3DD179] border-2" : ""}
+            text-white relative  ${rouletteNumber === 0 ? "border-[#3DD179] border-2" : ""}
             mb-1`}
               >
                 <p className="-rotate-90">0</p>
               </div>
               <div
                 className={`h-1/2 w-[27.3px] sm:w-[30.6px] flex flex-col justify-center text-center cursor-pointer bg-[#149200] rounded-[5px]
-            text-white relative  ${rouletteNumer === 99 ? "border-[#3DD179] border-2" : ""}
+            text-white relative  ${rouletteNumber === 37 ? "border-[#3DD179] border-2" : ""}
             mb-1`}
               >
                 <p className="-rotate-90">00</p>
@@ -596,7 +596,7 @@ export default function ProvablyFairModal({
                               ? "bg-[#F1323E]  "
                               : "bg-[#2A2E38]  "
                           }${
-                            rouletteNumer === number
+                            rouletteNumber === number
                               ? "border-[#3DD179] border-2"
                               : ""
                           } text-white rounded-[5px]  `}

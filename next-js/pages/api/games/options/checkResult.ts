@@ -1,16 +1,19 @@
-import connectDatabase from "../../../../utils/database";
-import { Option, User } from "../../../../models/games";
-import { NextApiRequest, NextApiResponse } from "next";
-import { getToken } from "next-auth/jwt";
-import StakingUser from "@/models/staking/user";
-import { houseEdgeTiers, pointTiers, stakingTiers } from "@/context/config";
-import { launchPromoEdge } from "@/context/config";
-import { GameType } from "@/utils/provably-fair";
-import { optionsEdge, wsEndpoint } from "@/context/config";
-import { Decimal } from "decimal.js";
-import { SPL_TOKENS, maintainance } from "@/context/config";
-import updateGameStats from "../../../../utils/updateGameStats";
+import {
+  SPL_TOKENS,
+  houseEdgeTiers,
+  launchPromoEdge,
+  maintainance,
+  maxPayouts,
+  stakingTiers,
+  wsEndpoint,
+} from "@/context/config";
 import { getSolPrice } from "@/context/transactions";
+import { GameTokens, GameType } from "@/utils/provably-fair";
+import { Decimal } from "decimal.js";
+import { NextApiRequest, NextApiResponse } from "next";
+import { Option, User } from "../../../../models/games";
+import connectDatabase from "../../../../utils/database";
+import updateGameStats from "../../../../utils/updateGameStats";
 Decimal.set({ precision: 9 });
 
 /**
@@ -133,15 +136,11 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
       const { tokenMint, betEndTime, amount, betType, strikePrice } = bet;
 
-      let userData;
-      if (wallet)
-        userData = await StakingUser.findOneAndUpdate(
-          { account },
-          {},
-          { upsert: true, new: true },
-        );
+      const maxPayout = new Decimal(
+        maxPayouts[tokenMint as GameTokens].options,
+      );
 
-      const stakeAmount = userData?.stakedAmount ?? 0;
+      const stakeAmount = 0;
       const stakingTier = Object.entries(stakingTiers).reduce((prev, next) => {
         return stakeAmount >= next[1]?.limit ? next : prev;
       })[0];
@@ -165,10 +164,14 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         (betType === "betDown" && betEndPrice < strikePrice)
       ) {
         result = "Won";
-        amountWon = Decimal.mul(amount, 2).mul(Decimal.sub(1, houseEdge));
+        amountWon = Decimal.min(Decimal.mul(amount, 2), maxPayout).mul(
+          Decimal.sub(1, houseEdge),
+        );
         amountLost = 0;
 
-        feeGenerated = Decimal.mul(amount, 2).mul(houseEdge).toNumber();
+        feeGenerated = Decimal.min(Decimal.mul(amount, 2), maxPayout)
+          .mul(houseEdge)
+          .toNumber();
       }
 
       const status = await User.findOneAndUpdate(

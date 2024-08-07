@@ -255,7 +255,7 @@ export default function VerifyRoulette2Modal({
                       <div
                         className={`h-1/2 w-[27.3px] sm:w-[30.6px] flex flex-col justify-center text-center cursor-pointer bg-[#149200] rounded-[5px]
             text-white relative  ${
-              bet.strikeNumber === 99 ? "border-[#3DD179] border-2" : ""
+              bet.strikeNumber === 37 ? "border-[#3DD179] border-2" : ""
             }
             mb-1`}
                       >

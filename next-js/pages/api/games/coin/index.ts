@@ -1,7 +1,13 @@
-import connectDatabase from "../../../../utils/database";
-import { getToken } from "next-auth/jwt";
-import { NextApiRequest, NextApiResponse } from "next";
-import { wsEndpoint } from "@/context/config";
+import {
+  SPL_TOKENS,
+  houseEdgeTiers,
+  launchPromoEdge,
+  maintainance,
+  maxPayouts,
+  minAmtFactor,
+  stakingTiers,
+  wsEndpoint,
+} from "@/context/config";
 import { Coin, GameSeed, User } from "@/models/games";
 import {
   GameTokens,
@@ -10,17 +16,9 @@ import {
   generateGameResult,
   seedStatus,
 } from "@/utils/provably-fair";
-import StakingUser from "@/models/staking/user";
-import {
-  houseEdgeTiers,
-  maxPayouts,
-  minAmtFactor,
-  pointTiers,
-  stakingTiers,
-} from "@/context/config";
-import { launchPromoEdge, maintainance } from "@/context/config";
 import { Decimal } from "decimal.js";
-import { SPL_TOKENS } from "@/context/config";
+import { NextApiRequest, NextApiResponse } from "next";
+import connectDatabase from "../../../../utils/database";
 import updateGameStats from "../../../../utils/updateGameStats";
 Decimal.set({ precision: 9 });
 
@@ -93,7 +91,6 @@ Decimal.set({ precision: 9 });
  *         description: Internal server error
  */
 
-const secret = process.env.NEXTAUTH_SECRET;
 const encryptionKey = Buffer.from(process.env.ENCRYPTION_KEY!, "hex");
 
 export const config = {
@@ -104,7 +101,7 @@ type InputType = {
   wallet: string;
   email: string;
   amount: number;
-  tokenMint: string;
+  tokenMint: GameTokens;
   flipType: "heads" | "tails";
 };
 
@@ -113,9 +110,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     try {
       let { wallet, email, amount, tokenMint, flipType }: InputType = req.body;
 
-      const minGameAmount =
-        maxPayouts[tokenMint as GameTokens]["coinflip" as GameType] *
-        minAmtFactor;
+      const minGameAmount = maxPayouts[tokenMint][GameType.coin] * minAmtFactor;
 
       if (maintainance)
         return res.status(400).json({
@@ -148,16 +143,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       await connectDatabase();
 
       const strikeMultiplier = 2;
-      const maxPayout = new Decimal(
-        maxPayouts[tokenMint as GameTokens].coinflip,
-      );
-
-      // if (
-      //   !(maxPayout.toNumber() <= maxPayouts[tokenMint as GameTokens].coinflip)
-      // )
-      //   return res
-      //     .status(400)
-      //     .json({ success: false, message: "Max payout exceeded" });
+      const maxPayout = new Decimal(maxPayouts[tokenMint].coinflip);
 
       let user = null;
       if (wallet) {
@@ -190,15 +176,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
       const account = user._id;
 
-      let userData;
-      if (wallet)
-        userData = await StakingUser.findOneAndUpdate(
-          { account },
-          {},
-          { upsert: true, new: true },
-        );
-
-      const stakeAmount = userData?.stakedAmount ?? 0;
+      const stakeAmount = 0;
       const stakingTier = Object.entries(stakingTiers).reduce((prev, next) => {
         return stakeAmount >= next[1]?.limit ? next : prev;
       })[0];
@@ -258,7 +236,10 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         ).mul(Decimal.sub(1, houseEdge));
         amountLost = 0;
 
-        feeGenerated = Decimal.mul(amount, strikeMultiplier)
+        feeGenerated = Decimal.min(
+          Decimal.mul(amount, strikeMultiplier),
+          maxPayout,
+        )
           .mul(houseEdge)
           .toNumber();
       }
@@ -325,25 +306,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         addGame,
         feeGenerated,
       );
-
-      // const pointsGained =
-      //   0 * user.numOfGamesPlayed + 1.4 * amount * userData.multiplier;
-
-      // const points = userData.points + pointsGained;
-      // const newTier = Object.entries(pointTiers).reduce((prev, next) => {
-      //   return points >= next[1]?.limit ? next : prev;
-      // })[0];
-
-      // await StakingUser.findOneAndUpdate(
-      //   {
-      //     wallet,
-      //   },
-      //   {
-      //     $inc: {
-      //       points: pointsGained,
-      //     },
-      //   },
-      // );
 
       const record = await Coin.populate(coin, "gameSeed");
       const { gameSeed, ...rest } = record.toObject();

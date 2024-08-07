@@ -1,24 +1,21 @@
-import connectDatabase from "@/utils/database";
-import { getToken } from "next-auth/jwt";
-import { NextApiRequest, NextApiResponse } from "next";
-import { GameSeed, Roulette1, User } from "@/models/games";
-import {
-  generateGameResult,
-  GameType,
-  seedStatus,
-  GameTokens,
-  decryptServerSeed,
-} from "@/utils/provably-fair";
-import StakingUser from "@/models/staking/user";
 import {
   houseEdgeTiers,
+  launchPromoEdge,
   maintainance,
   maxPayouts,
-  pointTiers,
   stakingTiers,
+  wsEndpoint,
 } from "@/context/config";
-import { launchPromoEdge } from "@/context/config";
-import { wsEndpoint } from "@/context/config";
+import { GameSeed, Roulette1, User } from "@/models/games";
+import connectDatabase from "@/utils/database";
+import {
+  GameTokens,
+  GameType,
+  decryptServerSeed,
+  generateGameResult,
+  seedStatus,
+} from "@/utils/provably-fair";
+import { NextApiRequest, NextApiResponse } from "next";
 
 import { SPL_TOKENS, minGameAmount } from "@/context/config";
 import { Decimal } from "decimal.js";
@@ -169,7 +166,6 @@ Decimal.set({ precision: 9 });
  *                   example: Server hash not found!
  */
 
-const secret = process.env.NEXTAUTH_SECRET;
 const encryptionKey = Buffer.from(process.env.ENCRYPTION_KEY!, "hex");
 
 export const config = {
@@ -321,17 +317,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
       await connectDatabase();
 
-      //TODO: Amount type check and max payout check
-      const maxPayout = new Decimal(
-        maxPayouts[tokenMint as GameTokens].roulette,
-      );
-
-      // if (
-      //   !(maxPayout.toNumber() <= maxPayouts[tokenMint].roulette1)
-      // )
-      //   return res
-      //     .status(400)
-      //     .json({ success: false, message: "Max payout exceeded" });
+      const maxPayout = new Decimal(maxPayouts[tokenMint].roulette);
 
       let user = null;
       if (wallet) {
@@ -348,29 +334,22 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           .status(400)
           .json({ success: false, message: "User does not exist!" });
 
-      /*   if (
-        user.deposit.find((d: any) => d.tokenMint === tokenMint)?.amount <
-        amount
-      )
-        return res
-          .status(400)
-          .json({ success: false, message: "Insufficient balance !" }); */
       if (!user.isWeb2User && tokenMint === "SUPER")
         return res
           .status(400)
           .json({ success: false, message: "You cannot bet with this token!" });
 
+      if (
+        user.deposit.find((d: any) => d.tokenMint === tokenMint)?.amount <
+        amount
+      )
+        return res
+          .status(400)
+          .json({ success: false, message: "Insufficient balance !" });
+
       const account = user._id;
 
-      let userData;
-      if (wallet)
-        userData = await StakingUser.findOneAndUpdate(
-          { account },
-          {},
-          { upsert: true, new: true },
-        );
-
-      const stakeAmount = userData?.stakedAmount ?? 0;
+      const stakeAmount = 0;
       const stakingTier = Object.entries(stakingTiers).reduce((prev, next) => {
         return stakeAmount >= next[1]?.limit ? next : prev;
       })[0];
@@ -415,7 +394,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       );
 
       let amountWon = new Decimal(0);
-      let result = "Lost";
 
       let strikeMultiplier = new Decimal(0);
 
@@ -431,7 +409,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
             amountWon = amountWon.add(winAmount);
 
-            result = "Won";
             strikeMultiplier = winAmount.mul(WagerPayout[key]);
           }
         } else if (
@@ -446,18 +423,19 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
           amountWon = amountWon.add(winAmount);
 
-          result = "Won";
           strikeMultiplier = winAmount.mul(WagerPayout[key as WagerType]);
         }
       });
 
       strikeMultiplier = Decimal.div(strikeMultiplier, amount);
 
-      const feeGenerated = Decimal.mul(amountWon, houseEdge).toNumber();
-
       amountWon = Decimal.min(amountWon, maxPayout).mul(
         Decimal.sub(1, houseEdge),
       );
+
+      const feeGenerated = Decimal.min(amountWon, maxPayout)
+        .mul(houseEdge)
+        .toNumber();
       const amountLost = Math.max(Decimal.sub(amount, amountWon).toNumber(), 0);
 
       const addGame = !user.gamesPlayed.includes(GameType.roulette1);
@@ -493,6 +471,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         throw new Error("Insufficient balance for bet!");
       }
 
+      const result = amountWon.toNumber() > amount ? "Won" : "Lost";
       const roulette1 = new Roulette1({
         account,
         amount,
@@ -518,25 +497,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         addGame,
         feeGenerated,
       );
-
-      // const pointsGained =
-      //   0 * user.numOfGamesPlayed + 1.4 * amount * userData.multiplier;
-
-      // const points = userData.points + pointsGained;
-      // const newTier = Object.entries(pointTiers).reduce((prev, next) => {
-      //   return points >= next[1]?.limit ? next : prev;
-      // })[0];
-
-      // await StakingUser.findOneAndUpdate(
-      //   {
-      //     wallet,
-      //   },
-      //   {
-      //     $inc: {
-      //       points: pointsGained,
-      //     },
-      //   },
-      // );
 
       const record = await Roulette1.populate(roulette1, "gameSeed");
       const { gameSeed, ...rest } = record.toObject();

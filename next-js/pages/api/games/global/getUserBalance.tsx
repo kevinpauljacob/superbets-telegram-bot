@@ -78,6 +78,11 @@ Decimal.set({ precision: 9 });
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === "GET") {
     try {
+      return res.json({
+        success: false,
+        message: "This endpoint is disabled.",
+      });
+
       await connectDatabase();
 
       const wallet = req.query.wallet;

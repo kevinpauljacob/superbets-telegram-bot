@@ -1,26 +1,24 @@
-import connectDatabase from "@/utils/database";
-import { getToken } from "next-auth/jwt";
-import { NextApiRequest, NextApiResponse } from "next";
-import { GameSeed, Limbo, User } from "@/models/games";
-import {
-  generateGameResult,
-  GameType,
-  seedStatus,
-  decryptServerSeed,
-  GameTokens,
-} from "@/utils/provably-fair";
-import StakingUser from "@/models/staking/user";
 import {
   houseEdgeTiers,
+  launchPromoEdge,
+  maintainance,
   maxPayouts,
   minAmtFactor,
-  pointTiers,
+  SPL_TOKENS,
   stakingTiers,
+  wsEndpoint,
 } from "@/context/config";
-import { launchPromoEdge } from "@/context/config";
-import { minGameAmount, wsEndpoint, maintainance } from "@/context/config";
+import { GameSeed, Limbo, User } from "@/models/games";
+import connectDatabase from "@/utils/database";
+import {
+  decryptServerSeed,
+  GameTokens,
+  GameType,
+  generateGameResult,
+  seedStatus,
+} from "@/utils/provably-fair";
 import { Decimal } from "decimal.js";
-import { SPL_TOKENS } from "@/context/config";
+import { NextApiRequest, NextApiResponse } from "next";
 import updateGameStats from "../../../../utils/updateGameStats";
 Decimal.set({ precision: 9 });
 
@@ -85,7 +83,6 @@ Decimal.set({ precision: 9 });
  *         description: Internal server error
  */
 
-const secret = process.env.NEXTAUTH_SECRET;
 const encryptionKey = Buffer.from(process.env.ENCRYPTION_KEY!, "hex");
 
 export const config = {
@@ -96,7 +93,7 @@ type InputType = {
   wallet: string;
   email: string;
   amount: number;
-  tokenMint: string;
+  tokenMint: GameTokens;
   multiplier: number;
 };
 
@@ -113,7 +110,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         });
 
       const minGameAmount =
-        maxPayouts[tokenMint as GameTokens]["limbo" as GameType] * minAmtFactor;
+        maxPayouts[tokenMint][GameType.limbo] * minAmtFactor;
 
       if ((!wallet && !email) || !amount || !tokenMint || !multiplier)
         return res
@@ -138,12 +135,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         });
 
       const strikeMultiplier = multiplier;
-      const maxPayout = new Decimal(maxPayouts[tokenMint as GameTokens].limbo);
-
-      // if (!(maxPayout.toNumber() <= maxPayouts[tokenMint as GameTokens].limbo))
-      //   return res
-      //     .status(400)
-      //     .json({ success: false, message: "Max payout exceeded" });
+      const maxPayout = new Decimal(maxPayouts[tokenMint].limbo);
 
       await connectDatabase();
 
@@ -178,15 +170,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
       const account = user._id;
 
-      let userData;
-      if (wallet)
-        userData = await StakingUser.findOneAndUpdate(
-          { account },
-          {},
-          { upsert: true, new: true },
-        );
-
-      const stakeAmount = userData?.stakedAmount ?? 0;
+      const stakeAmount = 0;
       const stakingTier = Object.entries(stakingTiers).reduce((prev, next) => {
         return stakeAmount >= next[1]?.limit ? next : prev;
       })[0];
@@ -247,7 +231,10 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         ).mul(Decimal.sub(1, houseEdge));
         amountLost = Math.max(new Decimal(amount).sub(amountWon).toNumber(), 0);
 
-        feeGenerated = Decimal.mul(amount, strikeMultiplier)
+        feeGenerated = Decimal.min(
+          Decimal.mul(amount, strikeMultiplier),
+          maxPayout,
+        )
           .mul(houseEdge)
           .toNumber();
       }
@@ -308,25 +295,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         addGame,
         feeGenerated,
       );
-
-      // const pointsGained =
-      //   0 * user.numOfGamesPlayed + 1.4 * amount * userData.multiplier;
-
-      // const points = userData.points + pointsGained;
-      // const newTier = Object.entries(pointTiers).reduce((prev, next) => {
-      //   return points >= next[1]?.limit ? next : prev;
-      // })[0];
-
-      // await StakingUser.findOneAndUpdate(
-      //   {
-      //     wallet,
-      //   },
-      //   {
-      //     $inc: {
-      //       points: pointsGained,
-      //     },
-      //   },
-      // );
 
       const record = await Limbo.populate(limbo, "gameSeed");
       const { gameSeed, ...rest } = record.toObject();

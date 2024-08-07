@@ -271,7 +271,7 @@ export default function Roulette2() {
       setSpinComplete(false);
       const order = [
         0, 28, 9, 26, 30, 11, 7, 20, 32, 17, 5, 22, 34, 15, 3, 24, 36, 13, 1,
-        99, 27, 10, 25, 29, 12, 8, 19, 31, 18, 6, 21, 33, 16, 4, 23, 35, 14, 2,
+        37, 27, 10, 25, 29, 12, 8, 19, 31, 18, 6, 21, 33, 16, 4, 23, 35, 14, 2,
       ];
 
       if (
@@ -878,10 +878,10 @@ export default function Roulette2() {
       let areaId: string;
       if (number === 2) {
         // Special case for number 2
-        areaId = `corner-2-0-99`;
+        areaId = `corner-2-0-37`;
       } else if (number === 1) {
         // Special case for number 1
-        areaId = `split-1-99`;
+        areaId = `split-1-37`;
       } else {
         areaId = `split-${number}-0`;
       }
@@ -1023,7 +1023,7 @@ export default function Roulette2() {
       if (number === 2) {
         areaId = `corner-2-0-3`;
       } else if (number === 1) {
-        areaId = `corner-1-99-2`; // "00" and 2
+        areaId = `corner-1-37-2`; // "00" and 2
       } else {
         areaId = `corner-${number}`;
       }
@@ -1035,7 +1035,7 @@ export default function Roulette2() {
     token: Token | null,
   ) => {
     if (token) {
-      const areaId = `corner-2-0-99`;
+      const areaId = `corner-2-0-37`;
       handlePlaceBet(areaId, token);
     }
   };
@@ -1074,7 +1074,7 @@ export default function Roulette2() {
         );
       }
     } else if (number === 1) {
-      const areaId = `corner-1-99-2`;
+      const areaId = `corner-1-37-2`;
       const betsForArea = selectedBets.filter((bet) => bet.areaId === areaId);
 
       if (betsForArea.length > 0) {
@@ -1203,7 +1203,7 @@ export default function Roulette2() {
     setResultNumbers((prevNumbers) => [...prevNumbers, resultNumber]);
   };
 
-  return <></>
+  return <></>;
 
   // return (
   //   <GameLayout title="Roulette">
@@ -1455,18 +1455,18 @@ export default function Roulette2() {
   //                   className={` h-1/2 w-[27.3px]   sm:w-12    flex flex-col justify-center text-center cursor-pointer bg-[#149200] rounded-[5px]
   //              text-white relative border-4 border-transparent  hover:bg-[#55BA78]
   //               hover:border-[2px] hover:border-slate-300 mb-1 ${
-  //                 hoveredCorner && hoveredCorner.includes(99)
+  //                 hoveredCorner && hoveredCorner.includes(37)
   //                   ? "overlay border-[2px] border-white"
   //                   : ""
   //               }
   //               ${
-  //                 hoveredSplit && hoveredSplit.includes(99)
+  //                 hoveredSplit && hoveredSplit.includes(37)
   //                   ? "overlay border-[2px] border-white"
   //                   : ""
   //               }`}
   //                   onClick={() => {
   //                     if (selectedToken) {
-  //                       handlePlaceBet("num-99", selectedToken);
+  //                       handlePlaceBet("num-37", selectedToken);
   //                     }
   //                     soundAlert(
   //                       "/sounds/rouletteChipPlace.wav",
@@ -1476,7 +1476,7 @@ export default function Roulette2() {
   //                 >
   //                   {/* h-[27.3px] w-[125px] */}
   //                   <p className="-rotate-90 sm:rotate-0">00</p>
-  //                   {renderRegularToken("num-99")}
+  //                   {renderRegularToken("num-37")}
   //                 </div>
   //               </div>
   //               <div className="grid grid-cols-12 grid-rows-3 gap-[4px] sm:gap-1 sm:w-full sm:mb-[7px] ">
@@ -1615,7 +1615,7 @@ export default function Roulette2() {
   //                                 } else if (number === 1) {
   //                                   handlePlaceSplitBet(
   //                                     number,
-  //                                     99,
+  //                                     37,
   //                                     selectedToken,
   //                                   );
   //                                 } else if (number === 3) {
@@ -1638,11 +1638,11 @@ export default function Roulette2() {
   //                               }}
   //                               onMouseEnter={() => {
   //                                 if (number === 2) {
-  //                                   setHoveredSplit([2, 0, 99]);
+  //                                   setHoveredSplit([2, 0, 37]);
   //                                 } else if (number === 3) {
   //                                   setHoveredSplit([number, 0]);
   //                                 } else if (number === 1) {
-  //                                   setHoveredSplit([number, 99]);
+  //                                   setHoveredSplit([number, 37]);
   //                                 } else {
   //                                   setHoveredSplit([
   //                                     number,
@@ -1694,7 +1694,7 @@ export default function Roulette2() {
   //                                 if (number === 2) {
   //                                   setHoveredCorner([2, 0, 3]);
   //                                 } else if (number === 1) {
-  //                                   setHoveredCorner([1, 99, 2]);
+  //                                   setHoveredCorner([1, 37, 2]);
   //                                 } else {
   //                                   setHoveredCorner([
   //                                     number,
@@ -1823,7 +1823,7 @@ export default function Roulette2() {
   //                     {renderRegularToken("low")}
   //                   </button>
   //                   <button
-  //                     className="relative  flex items-center justify-center bg-[#0E0F14] border border-[#26272B] text-white cursor-pointer rounded-md 
+  //                     className="relative  flex items-center justify-center bg-[#0E0F14] border border-[#26272B] text-white cursor-pointer rounded-md
   //                 sm:h-[49.5px]  sm:w-[104px] w-[57px] h-[40px] hover:border hover:border-slate-200 hover:bg-[#4D5361]"
   //                     onMouseEnter={() => setHoveredButton("even")}
   //                     onMouseLeave={() => setHoveredButton(null)}
@@ -1888,7 +1888,7 @@ export default function Roulette2() {
   //                     {renderRegularToken("odd")}
   //                   </button>
   //                   <button
-  //                     className="relative  flex items-center justify-center bg-[#0E0F14] border border-[#26272B] text-white cursor-pointer rounded-md 
+  //                     className="relative  flex items-center justify-center bg-[#0E0F14] border border-[#26272B] text-white cursor-pointer rounded-md
   //                 sm:h-[49.5px]  sm:w-[104px] w-[57px] h-[40px] hover:border hover:border-slate-200 hover:bg-[#4D5361]"
   //                     onMouseEnter={() => setHoveredButton("high")}
   //                     onMouseLeave={() => setHoveredButton(null)}

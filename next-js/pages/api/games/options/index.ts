@@ -169,9 +169,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         });
 
       const strikeMultiplier = new Decimal(2);
-      const maxPayout = new Decimal(
-        maxPayouts[tokenMint as GameTokens].options,
-      );
 
       // if (
       //   !(maxPayout.toNumber() <= maxPayouts[tokenMint as GameTokens].options)

@@ -1,13 +1,14 @@
-import connectDatabase from "@/utils/database";
-import { getToken } from "next-auth/jwt";
-import { NextApiRequest, NextApiResponse } from "next";
+import {
+  maintainance,
+  maxPayouts,
+  minAmtFactor,
+  SPL_TOKENS,
+  wsEndpoint,
+} from "@/context/config";
 import { GameSeed, Mines, User } from "@/models/games";
+import connectDatabase from "@/utils/database";
 import { GameTokens, GameType, seedStatus } from "@/utils/provably-fair";
-import { wsEndpoint } from "@/context/config";
-import Decimal from "decimal.js";
-import { maxPayouts, minAmtFactor, maintainance } from "@/context/config";
-import StakingUser from "@/models/staking/user";
-import { SPL_TOKENS } from "@/context/config";
+import { NextApiRequest, NextApiResponse } from "next";
 import updateGameStats from "../../../../utils/updateGameStats";
 
 /**
@@ -84,8 +85,6 @@ import updateGameStats from "../../../../utils/updateGameStats";
  *                   type: string
  */
 
-const secret = process.env.NEXTAUTH_SECRET;
-
 export const config = {
   maxDuration: 60,
 };
@@ -94,7 +93,7 @@ type InputType = {
   wallet: string;
   email: string;
   amount: number;
-  tokenMint: string;
+  tokenMint: GameTokens;
   minesCount: number;
 };
 
@@ -111,7 +110,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         });
 
       const minGameAmount =
-        maxPayouts[tokenMint as GameTokens]["mines" as GameType] * minAmtFactor;
+        maxPayouts[tokenMint][GameType.mines] * minAmtFactor;
 
       if ((!wallet && !email) || !amount || !tokenMint || !minesCount)
         return res
@@ -134,15 +133,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           success: false,
           message: "Invalid bet amount",
         });
-
-      const maxStrikeMultiplier = 25;
-
-      const maxPayout = new Decimal(maxPayouts[tokenMint as GameTokens].mines);
-
-      // if (!(maxPayout.toNumber() <= maxPayouts[tokenMint as GameTokens].mines))
-      //   return res
-      //     .status(400)
-      //     .json({ success: false, message: "Max payout exceeded" });
 
       await connectDatabase();
 
@@ -223,7 +213,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         },
         { new: true },
       );
-      console.log(activeGameSeed);
+
       if (!activeGameSeed) {
         throw new Error("Server hash not found!");
       }
@@ -260,16 +250,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         addGame,
         0,
       );
-
-      let userData;
-      if (wallet)
-        userData = await StakingUser.findOneAndUpdate(
-          { account },
-          {},
-          { upsert: true, new: true },
-        );
-
-      const userTier = userData?.tier ?? 0;
 
       const rest = minesGame.toObject();
       rest.game = GameType.mines;

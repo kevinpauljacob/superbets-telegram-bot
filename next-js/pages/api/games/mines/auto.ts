@@ -1,7 +1,17 @@
-import connectDatabase from "@/utils/database";
-import { getToken } from "next-auth/jwt";
-import { NextApiRequest, NextApiResponse } from "next";
+import {
+  SPL_TOKENS,
+  houseEdgeTiers,
+  launchPromoEdge,
+  maintainance,
+  maxPayouts,
+  minAmtFactor,
+  stakingTiers,
+  wsEndpoint,
+} from "@/context/config";
+import { isArrayUnique } from "@/context/transactions";
 import { GameSeed, Mines, User } from "@/models/games";
+import StakingUser from "@/models/staking/user";
+import connectDatabase from "@/utils/database";
 import {
   GameTokens,
   GameType,
@@ -9,19 +19,8 @@ import {
   generateGameResult,
   seedStatus,
 } from "@/utils/provably-fair";
-import StakingUser from "@/models/staking/user";
-import { wsEndpoint, maintainance } from "@/context/config";
 import Decimal from "decimal.js";
-import { isArrayUnique } from "@/context/transactions";
-import {
-  houseEdgeTiers,
-  maxPayouts,
-  minAmtFactor,
-  pointTiers,
-  stakingTiers,
-} from "@/context/config";
-import { launchPromoEdge } from "@/context/config";
-import { SPL_TOKENS } from "@/context/config";
+import { NextApiRequest, NextApiResponse } from "next";
 import updateGameStats from "../../../../utils/updateGameStats";
 
 /**
@@ -114,7 +113,6 @@ import updateGameStats from "../../../../utils/updateGameStats";
  *                   type: string
  */
 
-const secret = process.env.NEXTAUTH_SECRET;
 const encryptionKey = Buffer.from(process.env.ENCRYPTION_KEY!, "hex");
 
 export const config = {
@@ -125,7 +123,7 @@ type InputType = {
   wallet: string;
   email: string;
   amount: number;
-  tokenMint: string;
+  tokenMint: GameTokens;
   minesCount: number;
   userBets: Array<number>;
 };
@@ -149,7 +147,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         });
 
       const minGameAmount =
-        maxPayouts[tokenMint as GameTokens]["mines" as GameType] * minAmtFactor;
+        maxPayouts[tokenMint][GameType.mines] * minAmtFactor;
 
       if (
         (!wallet && !email) ||
@@ -189,44 +187,34 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         });
 
       const maxStrikeMultiplier = 25;
-      const maxPayout = new Decimal(maxPayouts[tokenMint as GameTokens].mines);
-
-      // if (
-      //   !(
-      //     maxPayout.toNumber() <=
-      //     maxPayouts[splToken.tokenMint as GameTokens].mines
-      //   )
-      // )
-      //   return res
-      //     .status(400)
-      //     .json({ success: false, message: "Max payout exceeded" });
+      const maxPayout = new Decimal(maxPayouts[tokenMint].mines);
 
       await connectDatabase();
 
-      let users = null;
+      let user = null;
       if (wallet) {
-        users = await User.findOne({
+        user = await User.findOne({
           wallet: wallet,
         });
       } else if (email) {
-        users = await User.findOne({
+        user = await User.findOne({
           email: email,
         });
       }
 
-      if (!users)
+      if (!user)
         return res
           .status(400)
           .json({ success: false, message: "User does not exist!" });
 
-      if (!users.isWeb2User && tokenMint === "SUPER")
+      if (!user.isWeb2User && tokenMint === "SUPER")
         return res
           .status(400)
           .json({ success: false, message: "You cannot bet with this token!" });
 
-      const account = users._id;
+      const account = user._id;
 
-      const user = await User.findOneAndUpdate(
+      const userUpdate = await User.findOneAndUpdate(
         {
           account,
           deposit: {
@@ -247,7 +235,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         },
       );
 
-      if (!user) {
+      if (!userUpdate) {
         throw new Error("Insufficient balance for bet!");
       }
 
@@ -333,7 +321,10 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           .toNumber();
         amountLost = Math.max(Decimal.sub(amount, amountWon).toNumber(), 0);
 
-        feeGenerated = Decimal.mul(amount, strikeMultiplier)
+        feeGenerated = Decimal.min(
+          Decimal.mul(amount, strikeMultiplier),
+          maxPayout,
+        )
           .sub(amountWon)
           .toNumber();
 
@@ -354,6 +345,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
               "deposit.$.amount": amountWon,
             },
             ...(addGame ? { $addToSet: { gamesPlayed: GameType.mines } } : {}),
+            $set: {
+              isWeb2User: tokenMint === "SUPER",
+            },
           },
         );
       }
@@ -394,25 +388,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         addGame,
         feeGenerated,
       );
-
-      // const pointsGained =
-      //   0 * user.numOfGamesPlayed + 1.4 * amount * userData.multiplier;
-
-      // const points = userData.points + pointsGained;
-      // const newTier = Object.entries(pointTiers).reduce((prev, next) => {
-      //   return points >= next[1]?.limit ? next : prev;
-      // })[0];
-
-      // await StakingUser.findOneAndUpdate(
-      //   {
-      //     wallet,
-      //   },
-      //   {
-      //     $inc: {
-      //       points: pointsGained,
-      //     },
-      //   },
-      // );
 
       const { gameSeed, ...rest } = record.toObject();
       rest.game = GameType.mines;

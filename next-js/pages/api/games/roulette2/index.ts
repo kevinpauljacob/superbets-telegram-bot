@@ -1,24 +1,21 @@
-import connectDatabase from "@/utils/database";
-import { getToken } from "next-auth/jwt";
-import { NextApiRequest, NextApiResponse } from "next";
-import { GameSeed, Roulette2, User } from "@/models/games";
-import {
-  generateGameResult,
-  GameType,
-  seedStatus,
-  GameTokens,
-  decryptServerSeed,
-} from "@/utils/provably-fair";
-import StakingUser from "@/models/staking/user";
 import {
   houseEdgeTiers,
+  launchPromoEdge,
   maintainance,
   maxPayouts,
-  pointTiers,
   stakingTiers,
+  wsEndpoint,
 } from "@/context/config";
-import { launchPromoEdge } from "@/context/config";
-import { wsEndpoint } from "@/context/config";
+import { GameSeed, Roulette2, User } from "@/models/games";
+import connectDatabase from "@/utils/database";
+import {
+  GameTokens,
+  GameType,
+  decryptServerSeed,
+  generateGameResult,
+  seedStatus,
+} from "@/utils/provably-fair";
+import { NextApiRequest, NextApiResponse } from "next";
 
 import { SPL_TOKENS, minGameAmount } from "@/context/config";
 import { Decimal } from "decimal.js";
@@ -188,7 +185,6 @@ Decimal.set({ precision: 9 });
  *                   example: "Method not allowed"
  */
 
-const secret = process.env.NEXTAUTH_SECRET;
 const encryptionKey = Buffer.from(process.env.ENCRYPTION_KEY!, "hex");
 
 export const config = {
@@ -215,7 +211,7 @@ const WagerMapping: Record<WagerType, Array<number> | Record<string, number>> =
   {
     red: [1, 3, 5, 7, 12, 14, 16, 18, 19, 21, 23, 25, 27, 30, 32, 34, 36],
     black: [2, 4, 6, 8, 10, 11, 13, 15, 17, 20, 22, 24, 26, 28, 29, 31, 33, 35],
-    green: [0, 99],
+    green: [0, 37],
     odd: [1, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23, 25, 27, 29, 31, 33, 35],
     even: [2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 34, 36],
     low: [...Array(18).keys()].map((x) => x + 1),
@@ -228,7 +224,6 @@ const WagerMapping: Record<WagerType, Array<number> | Record<string, number>> =
     "3rd-column": [3, 6, 9, 12, 15, 18, 21, 24, 27, 30, 33, 36],
     straight: {
       "0": 0,
-      "99": 99,
       "1": 1,
       "2": 2,
       "3": 3,
@@ -265,6 +260,7 @@ const WagerMapping: Record<WagerType, Array<number> | Record<string, number>> =
       "34": 34,
       "35": 35,
       "36": 36,
+      "37": 37,
     },
   };
 
@@ -345,17 +341,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
       await connectDatabase();
 
-      //TODO: Amount type check and max payout check
-      const maxPayout = new Decimal(
-        maxPayouts[tokenMint as GameTokens].roulette2,
-      );
-
-      // if (
-      //   !(maxPayout.toNumber() <= maxPayouts[tokenMint].roulette1)
-      // )
-      //   return res
-      //     .status(400)
-      //     .json({ success: false, message: "Max payout exceeded" });
+      const maxPayout = new Decimal(maxPayouts[tokenMint].roulette2);
 
       let user = null;
       if (wallet) {
@@ -373,30 +359,22 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           .status(400)
           .json({ success: false, message: "User does not exist !" });
 
-      /*   if (
-        user.deposit.find((d: any) => d.tokenMint === tokenMint)?.amount <
-        amount
-      )
-        return res
-          .status(400)
-          .json({ success: false, message: "Insufficient balance !" }); */
-
       if (!user.isWeb2User && tokenMint === "SUPER")
         return res
           .status(400)
           .json({ success: false, message: "You cannot bet with this token!" });
 
+      if (
+        user.deposit.find((d: any) => d.tokenMint === tokenMint)?.amount <
+        amount
+      )
+        return res
+          .status(400)
+          .json({ success: false, message: "Insufficient balance !" });
+
       const account = user._id;
 
-      let userData;
-      if (wallet)
-        userData = await StakingUser.findOneAndUpdate(
-          { account },
-          {},
-          { upsert: true, new: true },
-        );
-
-      const stakeAmount = userData?.stakedAmount ?? 0;
+      const stakeAmount = 0;
       const stakingTier = Object.entries(stakingTiers).reduce((prev, next) => {
         return stakeAmount >= next[1]?.limit ? next : prev;
       })[0];
@@ -441,7 +419,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       );
 
       let amountWon = new Decimal(0);
-      let result = "Lost";
 
       let strikeMultiplier = new Decimal(0);
 
@@ -457,7 +434,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
             amountWon = amountWon.add(winAmount);
 
-            result = "Won";
             strikeMultiplier = winAmount.mul(WagerPayout[key]);
           }
         } else if (
@@ -472,18 +448,19 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
           amountWon = amountWon.add(winAmount);
 
-          result = "Won";
           strikeMultiplier = winAmount.mul(WagerPayout[key as WagerType]);
         }
       });
 
       strikeMultiplier = Decimal.div(strikeMultiplier, amount);
 
-      const feeGenerated = Decimal.mul(amountWon, houseEdge).toNumber();
-
       amountWon = Decimal.min(amountWon, maxPayout).mul(
         Decimal.sub(1, houseEdge),
       );
+
+      const feeGenerated = Decimal.min(amountWon, maxPayout)
+        .mul(houseEdge)
+        .toNumber();
       const amountLost = Math.max(Decimal.sub(amount, amountWon).toNumber(), 0);
 
       const addGame = !user.gamesPlayed.includes(GameType.roulette2);
@@ -519,6 +496,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         throw new Error("Insufficient balance for action!!");
       }
 
+      const result = amountWon.toNumber() > amount ? "Won" : "Lost";
       const roulette2 = new Roulette2({
         account,
         amount,
@@ -544,25 +522,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         addGame,
         feeGenerated,
       );
-
-      // const pointsGained =
-      //   0 * user.numOfGamesPlayed + 1.4 * amount * userData.multiplier;
-
-      // const points = userData.points + pointsGained;
-      // const newTier = Object.entries(pointTiers).reduce((prev, next) => {
-      //   return points >= next[1]?.limit ? next : prev;
-      // })[0];
-
-      // await StakingUser.findOneAndUpdate(
-      //   {
-      //     wallet,
-      //   },
-      //   {
-      //     $inc: {
-      //       points: pointsGained,
-      //     },
-      //   },
-      // );
 
       const record = await Roulette2.populate(roulette2, "gameSeed");
       const { gameSeed, ...rest } = record.toObject();
