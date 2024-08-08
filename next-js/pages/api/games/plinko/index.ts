@@ -149,6 +149,13 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       const multiplier = riskToChance[risk][rows];
       const maxPayout = new Decimal(maxPayouts[tokenMint].plinko);
 
+      const isSuperToken = tokenMint === "SUPER";
+      if (!isSuperToken && amount > maxPayout.toNumber())
+        return res.status(400).json({
+          success: false,
+          message: "Bet amount exceeds max payout!",
+        });
+
       await connectDatabase();
 
       let user = null;
@@ -167,7 +174,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           .status(400)
           .json({ success: false, message: "User does not exist!" });
 
-      if (!user.isWeb2User && tokenMint === "SUPER")
+      if (!user.isWeb2User && isSuperToken)
         return res
           .status(400)
           .json({ success: false, message: "You cannot bet with this token!" });
