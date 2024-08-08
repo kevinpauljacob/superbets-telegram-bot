@@ -10,7 +10,6 @@ import {
 } from "@/context/config";
 import { isArrayUnique } from "@/context/transactions";
 import { GameSeed, Mines, User } from "@/models/games";
-import StakingUser from "@/models/staking/user";
 import connectDatabase from "@/utils/database";
 import {
   GameTokens,
@@ -283,13 +282,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
       const numBets = userBets.length;
 
-      const userData = await StakingUser.findOneAndUpdate(
-        { account },
-        {},
-        { upsert: true, new: true },
-      );
-
-      const stakeAmount = userData?.stakedAmount ?? 0;
+      const stakeAmount = 0;
       const stakingTier = Object.entries(stakingTiers).reduce((prev, next) => {
         return stakeAmount >= next[1]?.limit ? next : prev;
       })[0];
@@ -380,8 +373,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           .json({ success: false, message: "Pending game found!" });
 
       await updateGameStats(
-        wallet,
-        email,
+        account,
         GameType.mines,
         tokenMint,
         amount,

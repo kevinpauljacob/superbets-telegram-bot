@@ -317,8 +317,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       await keno.save();
 
       await updateGameStats(
-        wallet,
-        email,
+        account,
         GameType.keno,
         tokenMint,
         amount,

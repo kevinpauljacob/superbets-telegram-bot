@@ -217,35 +217,13 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           .json({ success: false, message: "Game already concluded!" });
 
       await updateGameStats(
-        wallet,
-        email,
+        account,
         GameType.options,
         tokenMint,
         0,
         false,
         feeGenerated,
       );
-
-      // const pointsGained =
-      //   0 * user.numOfGamesPlayed + 1.4 * amount * userData.multiplier;
-
-      // const points = userData.points + pointsGained;
-      // const newTier = Object.entries(pointTiers).reduce((prev, next) => {
-      //   return points >= next[1]?.limit ? next : prev;
-      // })[0];
-
-      // if (wallet) {
-      //   await StakingUser.findOneAndUpdate(
-      //     {
-      //       wallet,
-      //     },
-      //     {
-      //       $inc: {
-      //         points: pointsGained,
-      //       },
-      //     },
-      //   );
-      // }
 
       const rest = record.toObject();
       rest.game = GameType.options;

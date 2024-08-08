@@ -242,8 +242,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       );
 
       await updateGameStats(
-        wallet,
-        email,
+        account,
         GameType.mines,
         tokenMint,
         amount,

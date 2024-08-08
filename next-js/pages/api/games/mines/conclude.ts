@@ -217,8 +217,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         .toNumber();
 
       await updateGameStats(
-        wallet,
-        email,
+        account,
         GameType.mines,
         tokenMint,
         0,

@@ -3,10 +3,10 @@ import { GameStats } from "@/models/games";
 import { Campaign, User } from "@/models/referral";
 import { GameType } from "@/utils/provably-fair";
 import Decimal from "decimal.js";
+import { Types } from "mongoose";
 
 async function updateGameStats(
-  wallet: string | null,
-  email: string | null,
+  account: Types.ObjectId,
   game: GameType,
   tokenMint: string,
   amount: number,
@@ -53,9 +53,8 @@ async function updateGameStats(
       );
   }
 
-  const query = wallet ? { wallet } : { email };
   const referralInfo = await User.findOneAndUpdate(
-    query,
+    { account },
     {
       $inc: {
         [`volume.${tokenMint}`]: amount,

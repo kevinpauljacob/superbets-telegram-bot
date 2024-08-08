@@ -1,24 +1,21 @@
-import connectDatabase from "@/utils/database";
-import { getToken } from "next-auth/jwt";
-import { NextApiRequest, NextApiResponse } from "next";
-import { GameSeed, Mines, User } from "@/models/games";
-import {
-  generateGameResult,
-  GameType,
-  decryptServerSeed,
-  GameTokens,
-} from "@/utils/provably-fair";
-import StakingUser from "@/models/staking/user";
 import {
   houseEdgeTiers,
+  launchPromoEdge,
+  maintainance,
   maxPayouts,
-  pointTiers,
   stakingTiers,
+  wsEndpoint,
 } from "@/context/config";
-import { launchPromoEdge } from "@/context/config";
-import { wsEndpoint } from "@/context/config";
+import { GameSeed, Mines, User } from "@/models/games";
+import connectDatabase from "@/utils/database";
+import {
+  GameTokens,
+  GameType,
+  decryptServerSeed,
+  generateGameResult,
+} from "@/utils/provably-fair";
 import Decimal from "decimal.js";
-import { SPL_TOKENS, maintainance } from "@/context/config";
+import { NextApiRequest, NextApiResponse } from "next";
 import updateGameStats from "../../../../utils/updateGameStats";
 Decimal.set({ precision: 9 });
 
@@ -296,8 +293,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           ).populate("gameSeed");
 
           await updateGameStats(
-            wallet,
-            email,
+            account,
             GameType.mines,
             tokenMint,
             0,

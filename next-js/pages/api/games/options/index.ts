@@ -1,15 +1,17 @@
-import connectDatabase from "../../../../utils/database";
-import { User, Option } from "../../../../models/games";
-import { getToken } from "next-auth/jwt";
-import { NextApiRequest, NextApiResponse } from "next";
-import { wsEndpoint } from "@/context/config";
-import { Decimal } from "decimal.js";
-import { maxPayouts, minAmtFactor, maintainance } from "@/context/config";
-import StakingUser from "@/models/staking/user";
-import { GameTokens, GameType } from "@/utils/provably-fair";
-import { SPL_TOKENS } from "@/context/config";
-import updateGameStats from "../../../../utils/updateGameStats";
+import {
+  maintainance,
+  maxPayouts,
+  minAmtFactor,
+  SPL_TOKENS,
+  wsEndpoint,
+} from "@/context/config";
 import { getSolPrice } from "@/context/transactions";
+import { GameTokens, GameType } from "@/utils/provably-fair";
+import { Decimal } from "decimal.js";
+import { NextApiRequest, NextApiResponse } from "next";
+import { Option, User } from "../../../../models/games";
+import connectDatabase from "../../../../utils/database";
+import updateGameStats from "../../../../utils/updateGameStats";
 Decimal.set({ precision: 9 });
 
 /**
@@ -279,24 +281,13 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       await record.save();
 
       await updateGameStats(
-        wallet,
-        email,
+        account,
         GameType.options,
         tokenMint,
         amount,
         addGame,
         0,
       );
-
-      let userData;
-      if (wallet)
-        userData = await StakingUser.findOneAndUpdate(
-          { account },
-          {},
-          { upsert: true, new: true },
-        );
-
-      const userTier = userData?.tier ?? 0;
 
       const rest = record.toObject();
       rest.game = GameType.options;

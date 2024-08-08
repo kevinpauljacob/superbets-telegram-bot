@@ -311,8 +311,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       await plinko.save();
 
       await updateGameStats(
-        wallet,
-        email,
+        account,
         GameType.plinko,
         tokenMint,
         amount,

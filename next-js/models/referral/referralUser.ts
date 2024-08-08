@@ -2,8 +2,9 @@ import mongoose, { Schema } from "mongoose";
 
 const ReferralUserSchema = new Schema(
   {
-    email: {
-      type: String,
+    account: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
       required: true,
       unique: true,
     },
