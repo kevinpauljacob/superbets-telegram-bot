@@ -96,6 +96,7 @@ export default function ({ children }: Props) {
     session,
     status,
     getGlobalInfo,
+    setIsFirstSignUp,
   } = useGlobalContext();
 
   const [modalData, setModalData] = useState({
@@ -168,7 +169,7 @@ export default function ({ children }: Props) {
       localStorage.setItem("connectedAccountKey", wallet.publicKey.toBase58());
 
     if (session?.user?.wallet && (!wallet.connected || !wallet.publicKey))
-      handleSignIn(wallet, walletModal);
+      handleSignIn(wallet, walletModal, setIsFirstSignUp);
   }, [wallet.publicKey, session?.user]);
 
   // useEffect(() => {
