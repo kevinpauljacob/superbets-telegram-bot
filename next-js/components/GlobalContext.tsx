@@ -486,7 +486,6 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
 
   const getBalance = async () => {
     setLoading(true);
-    console.log("User", session?.user);
     try {
       if (wallet?.publicKey || session?.user.email) {
         let query = session?.user?.wallet
@@ -507,14 +506,12 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
               );
               if (coin) setSelectedCoin({ ...coin, icon: prevCoin.icon });
             } else {
-              // console.log("Could not fetch balance.");
               setCoinData(null);
             }
             setLoading(false);
           });
       }
     } catch (e) {
-      // console.log("Could not fetch balance.");
       setLoading(false);
       setCoinData(null);
       console.error(e);
@@ -542,7 +539,6 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
       return null;
     }
   };
-  console.log(openPFModal);
 
   return (
     <GlobalContext.Provider

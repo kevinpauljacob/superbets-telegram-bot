@@ -45,7 +45,6 @@ export default function ConnectModal() {
     coinData,
     session,
     status,
-    setIsFirstSignUp,
   } = useGlobalContext();
 
   const [loading, setLoading] = useState<boolean>(false);
@@ -79,10 +78,10 @@ export default function ConnectModal() {
                     await wallet.disconnect();
                     await signOut();
                   } else {
-                    handleGoogle(setIsFirstSignUp);
+                    handleGoogle();
                   }
                 } catch (e) {
-                  console.log(e);
+                  console.error(e);
                 }
               }}
               className={`flex items-center justify-center text-white text-opacity-50 hover:text-opacity-90 focus:text-opacity-90 bg-white/5 hover:bg-[#555555] focus:bg-[#5F4DFF] transition-all font-medium text-sm p-3 rounded-[0.625rem] gap-1`}
@@ -114,10 +113,10 @@ export default function ConnectModal() {
                     await signOut();
                   } else {
                     setShowConnectModal(false);
-                    handleSignIn(wallet, walletModal, setIsFirstSignUp);
+                    handleSignIn(wallet, walletModal);
                   }
                 } catch (e) {
-                  console.log(e);
+                  console.error(e);
                 }
               }}
               className={`mt-4 flex items-center justify-center text-white text-opacity-50 hover:text-opacity-90 focus:text-opacity-90 bg-white/5 hover:bg-[#555555] focus:bg-[#5F4DFF] transition-all font-medium text-sm p-3 rounded-[0.625rem] gap-1`}

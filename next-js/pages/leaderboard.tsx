@@ -72,7 +72,6 @@ export default function Leaderboard() {
       });
 
       let { success, message, users } = await res.json();
-      console.log("users", users);
       if (success && Array.isArray(users)) {
         users = users.map((user, index) => {
           return {
@@ -97,7 +96,6 @@ export default function Leaderboard() {
           if (userInfo.numOfGamesPlayed === 0) setIsModalOpen(true);
 
           setMyData(userInfo);
-          console.log("userInfo", userInfo);
         }
       } else {
         setData([]);
@@ -110,7 +108,6 @@ export default function Leaderboard() {
     }
   };
 
-  console.log("liveBets", liveBets);
   useEffect(() => {
     getLeaderBoard();
   }, [session?.user]);
@@ -120,8 +117,6 @@ export default function Leaderboard() {
     const tier = Object.entries(pointTiers).reduce((prev, next) => {
       return points >= next[1]?.limit ? next : prev;
     });
-    // console.log(tier, pointTiers["2"]);
-    // console.log("pointTiers", pointTiers);
     setPointTier({
       index: parseInt(tier[0]),
       limit: tier[1]?.limit,
@@ -174,7 +169,6 @@ export default function Leaderboard() {
       if (history.success) {
         const bets: Bet[] = history?.data ?? [];
         setMyBets(bets);
-        console.log("history", bets);
 
         // Calculate highest profit
         const highestProfit = calculateHighestProfit(bets);

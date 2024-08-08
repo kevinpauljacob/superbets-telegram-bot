@@ -167,7 +167,6 @@ export default async function auth(req: NextApiRequest, res: NextApiResponse) {
       clientId: process.env.GOOGLE_CLIENT_ID!,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
       profile: async (profile: GoogleProfile) => {
-        console.log("Profile: ", profile);
         const token = await getToken({ req, secret });
 
         return {
@@ -219,13 +218,6 @@ export default async function auth(req: NextApiRequest, res: NextApiResponse) {
           const wallet = signedTx.feePayer?.toBase58();
 
           if (!wallet) throw new Error("No fee payer found in transaction");
-
-          console.log("returning", {
-            ...(token?.user || {}),
-            id: wallet,
-            wallet,
-            auth: "wallet",
-          });
 
           return {
             ...(token?.user || {}),
@@ -285,7 +277,6 @@ export default async function auth(req: NextApiRequest, res: NextApiResponse) {
         }
       },
       async session({ session, token }) {
-        console.log(token);
         //@ts-ignore
         session.user = { ...token?.user, id: null };
         return session;

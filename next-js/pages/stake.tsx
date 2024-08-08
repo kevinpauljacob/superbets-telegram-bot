@@ -54,7 +54,6 @@ export default function Stake() {
           "https://hermes.pyth.network/api/latest_price_feeds?ids%5B%5D=0xef0d8b6fda2ceba41da15d4095d1da392a0d2f8ed0c6c7bc0f4cfac8c280b56d",
         ).then((res) => res.json());
         let price = data[0].price.price * Math.pow(10, data[0].price.expo);
-        // console.log(price);
         setLivePrice(price);
       } catch (e) {
         // errorCustom("Could not fetch live price.");
@@ -76,7 +75,7 @@ export default function Stake() {
   //   getGlobalInfo();
   // }, [session?.user, wallet.publicKey]);
 
-  return <></>
+  return <></>;
 
   return (
     <>

@@ -13,8 +13,6 @@ import {
 } from "@/context/transactions";
 import { useGlobalContext } from "./GlobalContext";
 import Loader from "./games/Loader";
-import { Session } from "next-auth";
-import { useRouter } from "next/navigation";
 
 export interface SessionUser {
   user: {
@@ -30,13 +28,11 @@ export interface SessionUser {
 export const handleSignIn = async (
   wallet: WalletContextState,
   walletModal: WalletModalContextState,
-  setIsFirstSignUp: (value: boolean) => void,
 ) => {
   try {
     if (!wallet.connected) {
       walletModal.setVisible(true);
     }
-    console.log("going sign in");
     if (!wallet.publicKey || !wallet.signTransaction) return;
 
     let nonce = await getCsrfToken();
@@ -48,66 +44,36 @@ export const handleSignIn = async (
 
     // Encode and send tx to signer, decode and sign
     let signedTx = await wallet.signTransaction(tx);
-    console.log("calling sign in");
     // Encode, send back, decode and verify signedTx signature
-    const response = await signIn("credentials", {
+    await signIn("credentials", {
       redirect: false,
       nonce,
       txn: signedTx.serialize().toString("base64"),
     });
-
-    console.log(response);
-    if (response?.status === 201) {
-      console.log("New user signed in with Wallet");
-      setIsFirstSignUp(true);
-    }
   } catch (error) {
     wallet.disconnect();
-    console.log(error);
+    throw new Error(error as string);
   }
 };
 
-export const handleGoogle = async (
-  setIsFirstSignUp: (value: boolean) => void,
-) => {
-  const response = await signIn("google", { redirect: false });
-  console.log(response);
-  if (response?.status === 201) {
-    console.log("New user signed in with Email");
-    setIsFirstSignUp(true);
-  }
+export const handleGoogle = async () => {
+  await signIn("google", { redirect: false });
   return;
 };
 
 export default function ConnectWallet() {
   const wallet = useWallet();
   const walletModal = useWalletModal();
-  const router = useRouter();
 
-  const {
-    language,
-    setLanguage,
-    setShowConnectModal,
-    session,
-    status,
-    setIsFirstSignUp,
-    isFirstSignUp,
-  } = useGlobalContext();
+  const { language, setShowConnectModal, session, status } = useGlobalContext();
 
   useEffect(() => {
     if (wallet.connected && status == "unauthenticated") {
-      handleSignIn(wallet, walletModal, setIsFirstSignUp);
-    } 
+      handleSignIn(wallet, walletModal);
+    }
   }, [wallet.connected]);
 
   useEffect(() => {
-    if(isFirstSignUp && status == "authenticated") {
-      router.push("/leaderboard");
-    }
-  }, [isFirstSignUp, status])
-
-  useEffect(() => {
-    console.log(status);
     if (status === "unauthenticated") wallet.disconnect();
   }, [status]);
 

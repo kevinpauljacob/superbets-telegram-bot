@@ -9,7 +9,6 @@ const authenticateUser = async (req: NextApiRequest, res: NextApiResponse) => {
       .status(400)
       .json({ success: false, message: "Missing required parameters" });
   const token = await getToken({ req, secret });
-  console.log("In auth", token);
   if (
     !token ||
     !token.sub ||

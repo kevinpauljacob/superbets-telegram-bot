@@ -47,7 +47,6 @@ export default function Roulette2ProvablyFairModal({
   const [selectedGameType, setSelectedGameType] = useState<GameType>(
     GameType.roulette2,
   );
-  console.log("isOpen", isOpen);
   const [verificationState, setVerificationState] = useState<{
     clientSeed: string;
     serverSeed: string;

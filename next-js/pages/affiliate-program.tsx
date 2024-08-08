@@ -144,7 +144,6 @@ export default function AffiliateProgram() {
         return { userId: referredUser._id, level };
       });
       setReferralLevels(levels);
-      // console.log("referralLevels", levels);
     };
 
     calculateReferralLevels();
@@ -158,7 +157,6 @@ export default function AffiliateProgram() {
   const calculateWagerAmount = (
     volume: Record<string, number>,
   ): { amount: number; currency: string } => {
-    console.log("volume", volume);
     let totalAmountInDollars = 0;
     let superAmount = 0;
 
@@ -192,7 +190,6 @@ export default function AffiliateProgram() {
     feeGenerated: Record<string, any>,
     referralLevel: number,
   ): { amount: number; currency: string } => {
-    console.log("feeGenerated", feeGenerated);
     let totalAmountInDollars = 0;
     let superAmount = 0;
 
@@ -280,7 +277,6 @@ export default function AffiliateProgram() {
   };
 
   const referralData = () => {
-    console.log("Here 1");
     referredUsers.forEach((user) => {
       const referralLevel = getReferralLevel(user._id) ?? -1;
       if (referralLevel === -1) {
@@ -299,19 +295,15 @@ export default function AffiliateProgram() {
         }
       }
 
-      // console.log("referral level", referralLevel);
       if (referralLevel !== -1) {
         initialReferralLevelData[referralLevel].signUps += 1;
         initialReferralLevelData[referralLevel].totalEarnings += totalEarnings;
       }
     });
 
-    // console.log("Here 2");
-    // console.log("updatedReferralLevelData", initialReferralLevelData);
     setReferralLevelData(initialReferralLevelData);
   };
 
-  console.log("session", session);
   useEffect(() => {
     if (referredUsers.length > 0) referralData();
   }, [referredUsers, referralLevels]);
@@ -431,12 +423,9 @@ export default function AffiliateProgram() {
         setUserId(user._id);
         setUserCampaigns(user.campaigns);
         setReferredUsers(referredUsers);
-        console.log("referred users", referredUsers);
-        // console.log("user", user);
-        // console.log("referredUsers", referredUsers);
       }
     } catch (error: any) {
-      // console.error("Error fetching data:", error.message);
+      throw new Error("Error fetching data:", error.message);
     }
   };
 
@@ -449,7 +438,6 @@ export default function AffiliateProgram() {
 
   useEffect(() => {
     const claimEarnings = async (email: string, userCampaigns: Campaign[]) => {
-      console.log("Checking for claimable SUPER tokens");
       try {
         const campaignsWithSuperTokens = userCampaigns.filter((campaign) => {
           const unclaimedSuper = campaign.unclaimedEarnings["SUPER"];
@@ -457,7 +445,6 @@ export default function AffiliateProgram() {
         });
 
         if (campaignsWithSuperTokens.length === 0) {
-          console.log("No campaigns with claimable SUPER tokens found");
           return;
         }
 
@@ -478,11 +465,7 @@ export default function AffiliateProgram() {
             throw new Error(errorData.message || "Failed to claim earnings");
           }
 
-          const data = await response.json();
-          console.log(
-            `Claimed SUPER earnings for campaign ${campaign.campaignName}:`,
-            data,
-          );
+          await response.json();
         }
 
         await fetchData();
@@ -500,21 +483,7 @@ export default function AffiliateProgram() {
   useEffect(() => {
     const users = sortUsersByEarnings(referredUsers);
     setSortedUsers(users);
-    console.log("sorted users", users);
   }, [referredUsers]);
-
-  // useEffect(() => {
-  //   console.log("userData", user);
-  // }, [user]);
-
-  // useEffect(() => {
-  //   console.log("totalClaimed", totalClaimed);
-  //   console.log("totalClaimable", totalClaimable);
-  // }, [totalClaimed, totalClaimable]);
-
-  useEffect(() => {
-    console.log("referralLevelData", referralLevelData);
-  }, [referralLevelData]);
 
   return (
     <div className="px-5 lg2:px-[4rem] md:px-[3rem] pt-5">
@@ -908,8 +877,7 @@ export default function AffiliateProgram() {
                                 </span>
                                 <span className="w-full text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
                                   {formatNumber(
-                                    token.totalEarnings -
-                                      token.unclaimedEarnings ?? 0,
+                                    token.totalEarnings - token.unclaimedEarnings,
                                     2,
                                   )}
                                 </span>

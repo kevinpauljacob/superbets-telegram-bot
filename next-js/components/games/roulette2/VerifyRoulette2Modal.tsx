@@ -54,8 +54,6 @@ export default function VerifyRoulette2Modal({
 }: Props) {
   //handling dice
   const { bet } = modalData;
-  console.log("Bet", bet);
-  console.log(modalData);
   const { getProvablyFairData, language } = useGlobalContext();
   const wheelRef = useRef<HTMLDivElement>(null);
   const [rotationAngle, setRotationAngle] = useState(0);

@@ -48,7 +48,6 @@ export default function SubHeader() {
 
   const { sendJsonMessage } = useWebSocket(wsEndpoint, {
     onOpen: () => {
-      console.log("Connected to ws");
       sendJsonMessage({
         clientType: "listener-client",
         channel: "fomo-casino_games-channel",
@@ -76,7 +75,6 @@ export default function SubHeader() {
       setLiveBets((prev) => [payload, ...prev]);
     },
     shouldReconnect: () => {
-      console.log("Reconnecting to ws");
       return true;
     },
     retryOnError: true,

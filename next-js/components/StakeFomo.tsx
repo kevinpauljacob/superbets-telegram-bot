@@ -63,7 +63,6 @@ export default function StakeFomo() {
         }
         response = await unstakeFOMO(wallet, stakeAmount, fomoToken);
       }
-      // console.log(response);
       if (response && response.success)
         await getFOMOBalance(wallet, setFomoBalance);
 

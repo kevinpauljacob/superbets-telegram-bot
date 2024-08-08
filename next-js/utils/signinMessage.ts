@@ -28,8 +28,6 @@ export const validateAuthTx = (tx: Transaction, nonce: string): boolean => {
       (data) => data.programId.toBase58() == MEMO_PROGRAM_ID.toBase58(),
     )[0];
 
-    console.log(inx);
-
     if (!inx.programId.equals(MEMO_PROGRAM_ID)) return false;
     if (inx.data.toString() != nonce) return false;
     if (!tx.verifySignatures()) return false;
