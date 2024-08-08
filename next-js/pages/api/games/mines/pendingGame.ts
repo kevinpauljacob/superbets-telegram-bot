@@ -6,11 +6,11 @@ import { NextApiRequest, NextApiResponse } from "next";
  * @swagger
  * /api/games/mines/pendingGame:
  *   get:
- *     summary: Check if there is a pending Mines game
- *     description: Checks if the user has a pending Mines game by providing their wallet or email.
+ *     summary: Check if there is a pending mines game
+ *     description: Checks if the user has a pending mines game by providing their wallet or email.
  *     tags:
  *       - Games
-*     parameters:
+ *     parameters:
  *       - in: query
  *         name: wallet
  *         schema:

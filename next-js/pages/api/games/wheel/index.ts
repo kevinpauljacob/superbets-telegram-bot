@@ -27,8 +27,8 @@ Decimal.set({ precision: 9 });
  * @swagger
  * /api/games/wheel:
  *   post:
- *     summary: Place a bet in the roulette game.
- *     description: Processes a bet for the roulette game, evaluates the result, and updates the user's balance and game statistics.
+ *     summary: Play a wheel game.
+ *     description: This endpoint allows a user to play a wheel game by betting a certain amount of tokens and choosing a risk level.
  *     tags:
  *       - Games
  *     requestBody:

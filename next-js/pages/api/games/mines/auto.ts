@@ -26,8 +26,8 @@ import updateGameStats from "../../../../utils/updateGameStats";
  * @swagger
  * /api/games/mines/auto:
  *   post:
- *     summary: Automatically conclude a Mines game
- *     description: Concludes a Mines game automatically by providing wallet or email, bet amount, token mint, number of mines, and user bets.
+ *     summary: Play mines game in auto mode
+ *     description: Play mines game in auto mode by providing wallet or email, bet amount, token mint, number of mines, and user bets.
  *     tags:
  *       - Games
  *     requestBody:

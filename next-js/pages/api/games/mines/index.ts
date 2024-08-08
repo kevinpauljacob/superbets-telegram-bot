@@ -15,8 +15,8 @@ import updateGameStats from "../../../../utils/updateGameStats";
  * @swagger
  * /api/games/mines:
  *   post:
- *     summary: Create a new Mines game
- *     description: Creates a new Mines game for a user based on their wallet or email.
+ *     summary: Create a new mines game
+ *     description: Creates a new mines game for a user based on their wallet or email.
  *     tags:
  *       - Games
  *     requestBody:
