@@ -1,35 +1,28 @@
-import connectDatabase from "@/utils/database";
-import { getToken } from "next-auth/jwt";
-import { NextApiRequest, NextApiResponse } from "next";
 import { Mines, User } from "@/models/games";
-import { maintainance } from "@/context/config";
+import connectDatabase from "@/utils/database";
+import { NextApiRequest, NextApiResponse } from "next";
 
 /**
  * @swagger
  * /api/games/mines/pendingGame:
- *   post:
+ *   get:
  *     summary: Check if there is a pending Mines game
  *     description: Checks if the user has a pending Mines game by providing their wallet or email.
  *     tags:
  *       - Games
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               wallet:
- *                 type: string
- *                 description: The user's wallet address.
- *               email:
- *                 type: string
- *                 description: The user's email address.
- *             required:
- *               - wallet
- *               - email
+*     parameters:
+ *       - in: query
+ *         name: wallet
+ *         schema:
+ *           type: string
+ *         description: The user's wallet address.
+ *       - in: query
+ *         name: email
+ *         schema:
+ *           type: string
+ *         description: The user's email address.
  *     responses:
- *       201:
+ *       200:
  *         description: Pending game status retrieved successfully.
  *         content:
  *           application/json:
@@ -68,27 +61,11 @@ import { maintainance } from "@/context/config";
  *                   type: string
  */
 
-const secret = process.env.NEXTAUTH_SECRET;
-
-export const config = {
-  maxDuration: 60,
-};
-
-type InputType = {
-  wallet: string;
-  email: string;
-};
-
 async function handler(req: NextApiRequest, res: NextApiResponse) {
-  if (req.method === "POST") {
+  if (req.method === "GET") {
     try {
-      let { wallet, email }: InputType = req.body;
-
-      if (maintainance)
-        return res.status(400).json({
-          success: false,
-          message: "Under maintenance",
-        });
+      const wallet = req.query.wallet;
+      const email = req.query.email;
 
       if (!wallet && !email)
         return res
@@ -121,7 +98,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       });
       const result = pendingGame !== null ? true : false;
 
-      return res.status(201).json({
+      return res.json({
         success: true,
         pendingGame,
         result,

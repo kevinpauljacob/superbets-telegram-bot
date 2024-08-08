@@ -64,13 +64,15 @@ import { Option, User } from "../../../../models/games";
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === "GET") {
     try {
-      await connectDatabase();
-
-      // const { searchParams } = req.nextUrl;
-      // const wallet = searchParams.get("wallet");
-
       const wallet = req.query.wallet;
       const email = req.query.email;
+
+      if (!wallet && !email)
+        return res
+          .status(400)
+          .json({ success: false, message: "Missing parameters" });
+
+      await connectDatabase();
 
       let user = null;
       if (wallet) {
