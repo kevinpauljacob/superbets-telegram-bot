@@ -413,7 +413,10 @@ export default function Roulette1() {
       if (success !== true) {
         throw new Error(message);
       }
-
+      if (!response.ok && message === "Invalid parameters") {
+        errorCustom(translator("Invalid Parameter", language));
+        throw new Error(message);
+      }
       if (success) {
         await spin(parseInt(strikeNumber)); // Wait for the spin to complete
         setNum(parseInt(strikeNumber));
@@ -1246,9 +1249,9 @@ export default function Roulette1() {
       </GameOptions>
       <GameDisplay>
         <div
-          className={`fadeInUp absolute inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50 ${overlay ? "" : "hidden fadeOutDown"}`}
+          className={`fadeInUp absolute inset-0 bg-black sm:bg-opacity-90 flex items-center justify-center z-50 ${overlay ? "" : "hidden fadeOutDown"}`}
         >
-          <div className="roulette relative w-full h-full flex flex-col items-center justify-center rounded-full">
+          <div className="roulette relative w-full h-full flex flex-col items-center justify-center rounded-full m-6 sm:m-0">
             <img
               className="absolute w-[30rem] h-[30rem]"
               src="/bg.svg"
@@ -1265,14 +1268,14 @@ export default function Roulette1() {
             />
 
             <img
-              className="needle absolute w-[10rem] h-[10rem]"
+              className="needle absolute w-[7rem] h-[7rem] sm:w-[10rem] sm:h-[10rem]"
               src="/needle.svg"
               style={{ transform: "translate(-50%, -50%)" }}
             />
 
             <div
               ref={overlayBallContainer}
-              className="ball_container absolute w-[30rem] h-[22px] px-[50px] flex items-center"
+              className="ball_container absolute w-[21.75rem] sm:w-[30rem] h-[22px] px-[50px] flex items-center"
               style={{ transform: "translate(-50%, -50%)" }}
             >
               <div
@@ -1304,7 +1307,7 @@ export default function Roulette1() {
             </div>
           </div>
 
-          <div className=" rounded-lg flex flex-col items-center font-chakra font-semibold text-base rotate-90 sm:rotate-0 right-4 sm:right-0 relative">
+          <div className=" rounded-lg flex flex-col items-center font-chakra font-semibold text-base rotate-90 sm:rotate-0 right-12 sm:right-0 relative">
             <div className="flex justify-between w-full  text-white mb-1">
               <div
                 className="hidden sm:flex items-center cursor-pointer hover:opacity-90"

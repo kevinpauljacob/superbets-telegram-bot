@@ -12,6 +12,10 @@ import Loader from "../Loader";
 import { SPL_TOKENS } from "@/context/config";
 import Roulette1ProvablyFairModal from "./Roulette1ProvablyFairModal";
 import { PFModalData } from "../CoinFlip/CoinFlipProvablyFairModal";
+import {
+  AdaptiveModal,
+  AdaptiveModalContent,
+} from "@/components/AdaptiveModal";
 
 export interface Roulette1 {
   createdAt: string;
@@ -197,272 +201,266 @@ export default function VerifyRoulette1Modal({
   return (
     <>
       {isOpen && (
-        <div
-          onClick={() => {
-            handleClose();
-          }}
-          id="modal-bg"
-          className="absolute z-[150] left-0 top-0 flex h-full w-full items-center justify-center bg-[#33314680] backdrop-blur-[0px] transition-all"
-        >
-          <div className="relative bg-[#121418] max-h-[80vh] no-scrollbar overflow-y-scroll p-8 rounded-lg z-10 w-11/12 sm:w-[34rem]">
-            <div className="flex flex-wrap justify-between items-center mb-4 sm:mb-[1.4rem]">
-              <div className="font-changa text-2xl font-semibold text-white mr-4 text-opacity-90">
-                {translator("Roulette", language)}
-              </div>
-              <div className="text-[#F0F0F0] text-opacity-75 font-changa text-sm">
-                {formatDate(bet.createdAt)}
-              </div>
-            </div>
-            <div className="flex flex-row gap-3">
-              <button className="px-1 py-3 flex flex-col items-center justify-center w-full text-white rounded-md bg-[#202329]">
-                <div className="font-changa text-xs text-[#94A3B8] text-opacity-75">
-                  {translator("Bet", language)}
+        <AdaptiveModal open={isOpen} onOpenChange={() => onClose()}>
+          <AdaptiveModalContent className="bg-[#121418] sm:overflow-y-auto min-h-[50dvh] max-h-[80dvh] w-full pb-6">
+            <div className="flex flex-1 px-8 sm:p-0 justify-center overflow-y-auto">
+              <div className="flex flex-col w-full">
+                <div className="mx-auto h-1 w-10 rounded-full -translate-y-3 bg-gray-400 sm:hidden" />
+                <div className="flex flex-wrap sm:flex-col justify-between items-center sm:items-start mb-4 sm:mb-[1.4rem]">
+                  <div className="font-changa text-2xl font-semibold text-white mr-4 text-opacity-90">
+                    {translator("Roulette", language)}
+                  </div>
+                  <div className="text-[#F0F0F0] text-opacity-75 font-changa text-sm">
+                    {formatDate(bet.createdAt)}
+                  </div>
                 </div>
-                <div className="text-white font-chakra text-xs font-medium">
-                  {truncateNumber(bet.amount, 4)} $
-                  {SPL_TOKENS.find((token) => token.tokenMint === bet.tokenMint)
-                    ?.tokenName ?? ""}
+                <div className="flex flex-row gap-3">
+                  <button className="px-1 py-3 flex flex-col items-center justify-center w-full text-white rounded-md bg-[#202329]">
+                    <div className="font-changa text-xs text-[#94A3B8] text-opacity-75">
+                      {translator("Bet", language)}
+                    </div>
+                    <div className="text-white font-chakra text-xs font-medium">
+                      {bet.amount.toFixed(4)} $
+                      {SPL_TOKENS.find(
+                        (token) => token.tokenMint === bet.tokenMint,
+                      )?.tokenName ?? ""}
+                    </div>
+                  </button>
+                  <button className="px-1 py-3 flex flex-col items-center justify-center w-full text-white rounded-md bg-[#202329]">
+                    <div className="font-changa text-xs text-[#94A3B8] text-opacity-75">
+                      {translator("Multiplier", language)}
+                    </div>
+                    <div className="text-white font-chakra text-xs font-medium">
+                      {bet.strikeMultiplier?.toFixed(1)} x
+                    </div>
+                  </button>
+                  <button className="px-1 py-3 flex flex-col items-center justify-center w-full text-white rounded-md bg-[#202329]">
+                    <div className="font-changa text-xs text-[#94A3B8] text-opacity-75">
+                      {translator("Payout", language)}
+                    </div>
+                    <div className="text-white font-chakra text-xs font-medium">
+                      {bet.amountWon?.toFixed(4)} $
+                      {SPL_TOKENS.find(
+                        (token) => token.tokenMint === bet.tokenMint,
+                      )?.tokenName ?? ""}
+                    </div>
+                  </button>
                 </div>
-              </button>
-              <button className="px-1 py-3 flex flex-col items-center justify-center w-full text-white rounded-md bg-[#202329]">
-                <div className="font-changa text-xs text-[#94A3B8] text-opacity-75">
-                  {translator("Multiplier", language)}
-                </div>
-                {bet.strikeMultiplier}
-              </button>
-              <button className="px-1 py-3 flex flex-col items-center justify-center w-full text-white rounded-md bg-[#202329]">
-                <div className="font-changa text-xs text-[#94A3B8] text-opacity-75">
-                  {translator("Payout", language)}
-                </div>
-                <div className="text-white font-chakra text-xs font-medium">
-                  {truncateNumber(bet.amountWon, 4)} $
-                  {SPL_TOKENS.find((token) => token.tokenMint === bet.tokenMint)
-                    ?.tokenName ?? ""}
-                </div>
-              </button>
-            </div>
-            <div className="mt-6 px-4  pt-7 border-2 border-white border-opacity-5 rounded-md  w-full h-[480px] flex items-center ">
-              <div className="font-chakra font-semibold text-base rotate-90  sm:top-0 mb-7 mx-2">
-                <div className="flex flex-col w-full text-[12px] items-start gap-1 ">
-                  <div className="w-full flex items-start gap-1">
-                    <div
-                      className={`h-[125px] w-[27.3px] sm:w-[30.6px] sm:h-[207px] flex flex-col justify-center text-center cursor-pointer bg-[#149200] rounded-[5px]
+                <div className="md:px-8 py-2 mt-6 px-4  pt-7 border-2 border-white border-opacity-5 rounded-md w-full min-h-[420px] flex items-center ">
+                  <div className="font-chakra font-semibold text-base rotate-90  sm:top-0 mb-7 mx-2">
+                    <div className="flex flex-col w-full text-[12px] items-start gap-1 ">
+                      <div className="w-full flex items-start gap-1">
+                        <div
+                          className={`h-[125px] w-[27.3px] sm:w-[30.6px] sm:h-[207px] flex flex-col justify-center text-center cursor-pointer bg-[#149200] rounded-[5px]
             text-white relative  ${bet.strikeNumber === 0 ? "border-[#3DD179]" : ""}
             mb-1`}
+                        >
+                          <p className="-rotate-90">0</p>
+                        </div>
+                        <div className="grid grid-cols-12 grid-rows-3 gap-1">
+                          {rows.map((row, rowIndex) => (
+                            <>
+                              {row.map((number, colIndex) => {
+                                return (
+                                  <div
+                                    key={colIndex}
+                                    className="relative flex justify-center items-center"
+                                  >
+                                    <button
+                                      data-testid={`roulette-tile-${number}`}
+                                      className={`h-[40px] w-[27.3px] sm:w-[35px] sm:h-[67px] flex items-center justify-center relative text-center ${
+                                        predefinedBets.red.includes(number)
+                                          ? "bg-[#F1323E]  "
+                                          : "bg-[#2A2E38]  "
+                                      }${bet.strikeNumber === number ? "border-[#3DD179] border-2" : ""} text-white rounded-[5px]  `}
+                                    >
+                                      <p className="-rotate-90">{number}</p>
+                                    </button>
+                                  </div>
+                                );
+                              })}
+                            </>
+                          ))}
+                        </div>
+                        <div className="flex flex-col justify-between items-center gap-[5px] mt-0">
+                          {rows.map((_, rowIndex) => (
+                            <div
+                              key={`row-${rowIndex}`}
+                              className="h-[40px] w-[27px] sm:w-[30px] sm:h-[67px] flex items-center justify-center text-center bg-transparent border-2 border-[#26272B] text-white cursor-pointer relative rounded-[5px] "
+                            >
+                              <p className="-rotate-90">2:1</p>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                      <div className="flex w-full flex-col gap-[3px]">
+                        <div className="flex w-full justify-center gap-1">
+                          <button className="relative flex items-center justify-center bg-[#0E0F14] border border-[#26272B] text-white cursor-pointer rounded-[5px] w-[120px] h-[40px] sm:w-[128px] sm:h-[67px]  ">
+                            1 to 12
+                          </button>
+                          <button className="relative flex items-center justify-center bg-[#0E0F14] border border-[#26272B] text-white cursor-pointer rounded-[5px] w-[120px] h-[40px] sm:w-[128px] sm:h-[67px]  ">
+                            13 to 24
+                          </button>
+                          <button className="relative flex items-center justify-center bg-[#0E0F14] border border-[#26272B] text-white cursor-pointer rounded-[5px] w-[120px] h-[40px] sm:w-[128px] sm:h-[67px]  ">
+                            25 to 36
+                          </button>
+                        </div>
+                        <div className="flex w-full justify-center gap-1">
+                          <button className="relative flex items-center justify-center bg-[#0E0F14] border border-[#26272B] text-white cursor-pointer rounded-md w-[58px] h-[40px] sm:w-[62px] sm:h-[63px]  ">
+                            1 to 18
+                          </button>
+                          <button className="relative flex items-center justify-center bg-[#0E0F14] border border-[#26272B] text-white cursor-pointer rounded-md w-[58px] h-[40px] sm:w-[62px] sm:h-[63px]  ">
+                            Even
+                          </button>
+                          <button className="relative flex items-center justify-center bg-[#F1323E] cursor-pointer rounded-md w-[58px] h-[40px] sm:w-[62px] sm:h-[63px]  "></button>
+                          <button className="relative flex items-center justify-center bg-[#2A2E38] cursor-pointer rounded-md w-[58px] h-[40px] sm:w-[62px] sm:h-[63px]  "></button>
+                          <button className="relative flex items-center justify-center bg-[#0E0F14] border border-[#26272B] text-white cursor-pointer rounded-md w-[58px] h-[40px] sm:w-[62px] sm:h-[63px]  ">
+                            Odd
+                          </button>
+                          <button className="relative flex items-center justify-center bg-[#0E0F14] border border-[#26272B] text-white cursor-pointer rounded-md w-[58px] h-[40px] sm:w-[62px] sm:h-[63px]  ">
+                            19 to 36
+                          </button>
+                        </div>
+                      </div>
+                      <div className=" sm:w-12 bg-transparent hidden sm:block" />
+                    </div>
+                  </div>
+                </div>
+                <div className="mt-8 px-4 py-4 border-2 border-white border-opacity-5 rounded-md transition-all">
+                  <div className="flex items-center justify-between text-[#F0F0F0]">
+                    <div className="text-base font-changa font-medium text-[#F0F0F0] text-opacity-90">
+                      {translator("Provably Fair", language)}
+                    </div>
+                    <div
+                      className={`hover:cursor-pointer ${
+                        openDropDown ? "rotate-180" : ""
+                      }`}
+                      onClick={() => setOpenDropDown(!openDropDown)}
                     >
-                      <p className="-rotate-90">0</p>
+                      <IoIosArrowDown />
                     </div>
-                    <div className="grid grid-cols-12 grid-rows-3 gap-1">
-                      {rows.map((row, rowIndex) => (
-                        <>
-                          {row.map((number, colIndex) => {
-                            return (
-                              <div
-                                key={colIndex}
-                                className="relative flex justify-center items-center"
-                              >
-                                <button
-                                  data-testid={`roulette-tile-${number}`}
-                                  className={`h-[40px] w-[27.3px] sm:w-[35px] sm:h-[67px] flex items-center justify-center relative text-center ${
-                                    predefinedBets.red.includes(number)
-                                      ? "bg-[#F1323E]  "
-                                      : "bg-[#2A2E38]  "
-                                  }${bet.strikeNumber === number ? "border-[#3DD179] border-2" : ""} text-white rounded-[5px]  `}
-                                >
-                                  <p className="-rotate-90">{number}</p>
-                                </button>
-                              </div>
-                            );
-                          })}
-                        </>
-                      ))}
-                    </div>
-                    <div className="flex flex-col justify-between items-center gap-[5px] mt-0">
-                      {rows.map((_, rowIndex) => (
-                        <div
-                          key={`row-${rowIndex}`}
-                          className="h-[40px] w-[27px] sm:w-[30px] sm:h-[67px] flex items-center justify-center text-center bg-transparent border-2 border-[#26272B] text-white cursor-pointer relative rounded-[5px] "
-                        >
-                          <p className="-rotate-90">2:1</p>
+                  </div>
+                  {openDropDown && (
+                    <div className="fadeInDown">
+                      <div className="flex flex-col sm:flex-row gap-2 w-full sm:mb-4 mt-4">
+                        <div className="sm:w-1/2">
+                          <label className="text-xs font-changa text-opacity-90 text-[#F0F0F0]">
+                            {translator("Client Seed", language)}
+                          </label>
+                          <div className="bg-[#202329] mt-1 rounded-md px-4 py-3 w-full relative flex items-center justify-between">
+                            <span className="truncate text-[#B9B9BA] text-xs font-semibold">
+                              {bet.gameSeed?.clientSeed}
+                            </span>
+                            <FaRegCopy
+                              onClick={() =>
+                                copyToClipboard(bet.gameSeed?.clientSeed)
+                              }
+                              className="w-5 h-5 text-[#555555] cursor-pointer"
+                            />
+                          </div>
                         </div>
-                      ))}
-                    </div>
-                  </div>
-                  <div className="flex w-full flex-col gap-[3px]">
-                    <div className="flex w-full justify-center gap-1">
-                      <button className="relative flex items-center justify-center bg-[#0E0F14] border border-[#26272B] text-white cursor-pointer rounded-[5px] w-[120px] h-[40px] sm:w-[128px] sm:h-[67px]  ">
-                        1 to 12
-                      </button>
-                      <button className="relative flex items-center justify-center bg-[#0E0F14] border border-[#26272B] text-white cursor-pointer rounded-[5px] w-[120px] h-[40px] sm:w-[128px] sm:h-[67px]  ">
-                        13 to 24
-                      </button>
-                      <button className="relative flex items-center justify-center bg-[#0E0F14] border border-[#26272B] text-white cursor-pointer rounded-[5px] w-[120px] h-[40px] sm:w-[128px] sm:h-[67px]  ">
-                        25 to 36
-                      </button>
-                    </div>
-                    <div className="flex w-full justify-center gap-1">
-                      <button className="relative flex items-center justify-center bg-[#0E0F14] border border-[#26272B] text-white cursor-pointer rounded-md w-[58px] h-[40px] sm:w-[62px] sm:h-[63px]  ">
-                        1 to 18
-                      </button>
-                      <button className="relative flex items-center justify-center bg-[#0E0F14] border border-[#26272B] text-white cursor-pointer rounded-md w-[58px] h-[40px] sm:w-[62px] sm:h-[63px]  ">
-                        Even
-                      </button>
-                      <button className="relative flex items-center justify-center bg-[#F1323E] cursor-pointer rounded-md w-[58px] h-[40px] sm:w-[62px] sm:h-[63px]  "></button>
-                      <button className="relative flex items-center justify-center bg-[#2A2E38] cursor-pointer rounded-md w-[58px] h-[40px] sm:w-[62px] sm:h-[63px]  "></button>
-                      <button className="relative flex items-center justify-center bg-[#0E0F14] border border-[#26272B] text-white cursor-pointer rounded-md w-[58px] h-[40px] sm:w-[62px] sm:h-[63px]  ">
-                        Odd
-                      </button>
-                      <button className="relative flex items-center justify-center bg-[#0E0F14] border border-[#26272B] text-white cursor-pointer rounded-md w-[58px] h-[40px] sm:w-[62px] sm:h-[63px]  ">
-                        19 to 36
-                      </button>
-                    </div>
-                  </div>
-                  <div className=" sm:w-12 bg-transparent hidden sm:block" />
-                </div>
-              </div>
-            </div>
-
-            <div className="mt-8 px-4 py-4 border-2 border-white border-opacity-5 rounded-md transition-all">
-              <div className="flex items-center justify-between text-[#F0F0F0]">
-                <div className="text-base font-changa font-medium text-[#F0F0F0] text-opacity-90">
-                  {translator("Provably Fair", language)}
-                </div>
-                <div
-                  className={`hover:cursor-pointer ${
-                    openDropDown ? "rotate-180" : ""
-                  }`}
-                  onClick={() => setOpenDropDown(!openDropDown)}
-                >
-                  <IoIosArrowDown />
-                </div>
-              </div>
-              {openDropDown && (
-                <div className="fadeInDown">
-                  <div className="flex flex-col sm:flex-row gap-2 w-full sm:mb-4 mt-4">
-                    <div className="sm:w-1/2">
-                      <label className="text-xs font-changa text-opacity-90 text-[#F0F0F0]">
-                        {translator("Client Seed", language)}
-                      </label>
-                      <div className="bg-[#202329] mt-1 rounded-md px-4 py-3 w-full relative flex items-center justify-between">
-                        <span className="truncate text-[#B9B9BA] text-xs font-semibold">
-                          {bet.gameSeed?.clientSeed}
-                        </span>
-                        <FaRegCopy
-                          onClick={() =>
-                            copyToClipboard(bet.gameSeed?.clientSeed)
-                          }
-                          className="w-5 h-5 text-[#555555] cursor-pointer"
-                        />
-                      </div>
-                    </div>
-                    <div className="sm:w-1/2">
-                      <label className="text-xs font-changa text-opacity-90 text-[#F0F0F0]">
-                        {translator("Nonce", language)}
-                      </label>
-                      <div className="bg-[#202329] mt-1 rounded-md px-4 py-3 w-full relative flex items-center justify-between">
-                        <span className="truncate text-[#B9B9BA] text-xs font-semibold">
-                          {bet.nonce}
-                        </span>
-                        <FaRegCopy
-                          onClick={() => copyToClipboard(bet.nonce?.toString())}
-                          className="w-5 h-5 text-[#555555] cursor-pointer"
-                        />
-                      </div>
-                    </div>
-                  </div>
-                  <div className="flex gap-2 w-full">
-                    <div className="w-full">
-                      <label className="text-xs font-changa text-opacity-90 text-[#F0F0F0]">
-                        {translator("Server Seed", language)}{" "}
-                        {bet.gameSeed?.status !== seedStatus.EXPIRED
-                          ? translator("(Hashed)", language)
-                          : ""}
-                      </label>
-                      <div className="bg-[#202329] mt-1 rounded-md px-4 py-3 w-full relative flex items-center justify-between">
-                        <span className="truncate text-[#B9B9BA] text-xs font-semibold">
-                          {bet.gameSeed?.serverSeed ??
-                            bet.gameSeed?.serverSeedHash}
-                        </span>
-                        <FaRegCopy
-                          onClick={() =>
-                            copyToClipboard(
-                              bet.gameSeed?.serverSeedHash ??
-                                bet.gameSeed?.serverSeedHash,
-                            )
-                          }
-                          className="w-5 h-5 text-[#555555] cursor-pointer"
-                        />
-                      </div>
-                    </div>
-                  </div>
-                  <div className="footer grid gap-1 mt-10">
-                    {bet.wallet !== wallet ? (
-                      <>
-                        <div className="text-xs text-[#94A3B8] font-changa text-opacity-75 text-center">
-                          {translator(
-                            "The bettor must first rotate their seed pair to verify this bet.",
-                            language,
-                          )}
+                        <div className="sm:w-1/2">
+                          <label className="text-xs font-changa text-opacity-90 text-[#F0F0F0]">
+                            {translator("Nonce", language)}
+                          </label>
+                          <div className="bg-[#202329] mt-1 rounded-md px-4 py-3 w-full relative flex items-center justify-between">
+                            <span className="truncate text-[#B9B9BA] text-xs font-semibold">
+                              {bet.nonce}
+                            </span>
+                            <FaRegCopy
+                              onClick={() =>
+                                copyToClipboard(bet.nonce?.toString())
+                              }
+                              className="w-5 h-5 text-[#555555] cursor-pointer"
+                            />
+                          </div>
                         </div>
-                        <button
-                          className="bg-[#5F4DFF] rounded-md w-full text-sm text-white text-opacity-90 text-semibold py-3 disabled:opacity-70"
-                          disabled
-                        >
-                          {translator("Rotate", language)}
-                        </button>
-                      </>
-                    ) : bet.gameSeed?.status !== seedStatus.EXPIRED ? (
-                      <>
-                        <div className="text-xs text-[#94A3B8] font-changa text-opacity-75 text-center">
-                          {translator(
-                            "To verify this bet, you first need to rotate your seed pair.",
-                            language,
-                          )}
+                      </div>
+                      <div className="flex gap-2 w-full">
+                        <div className="w-full">
+                          <label className="text-xs font-changa text-opacity-90 text-[#F0F0F0]">
+                            {translator("Server Seed", language)}{" "}
+                            {bet.gameSeed?.status !== seedStatus.EXPIRED
+                              ? translator("(Hashed)", language)
+                              : ""}
+                          </label>
+                          <div className="bg-[#202329] mt-1 rounded-md px-4 py-3 w-full relative flex items-center justify-between">
+                            <span className="truncate text-[#B9B9BA] text-xs font-semibold">
+                              {bet.gameSeed?.serverSeed ??
+                                bet.gameSeed?.serverSeedHash}
+                            </span>
+                            <FaRegCopy
+                              onClick={() =>
+                                copyToClipboard(
+                                  bet.gameSeed?.serverSeedHash ??
+                                    bet.gameSeed?.serverSeedHash,
+                                )
+                              }
+                              className="w-5 h-5 text-[#555555] cursor-pointer"
+                            />
+                          </div>
                         </div>
-                        <button
-                          className="bg-[#5F4DFF] rounded-md w-full text-sm text-white text-opacity-90 text-semibold py-3"
-                          onClick={handleSeedClick}
-                        >
-                          {isLoading ? (
-                            <Loader />
-                          ) : (
-                            translator("Rotate", language)
-                          )}
-                        </button>
-                      </>
-                    ) : (
-                      <button
-                        className="bg-[#5F4DFF] rounded-md w-full text-sm text-white text-opacity-90 text-semibold py-3"
-                        onClick={handleVerifyClick}
-                      >
-                        {isLoading ? (
-                          <Loader />
+                      </div>
+                      <div className="footer grid gap-1 mt-10">
+                        {bet.wallet !== wallet ? (
+                          <>
+                            <div className="text-xs text-[#94A3B8] font-changa text-opacity-75 text-center">
+                              {translator(
+                                "The bettor must first rotate their seed pair to verify this bet.",
+                                language,
+                              )}
+                            </div>
+                            <button
+                              className="bg-[#5F4DFF] rounded-md w-full text-sm text-white text-opacity-90 text-semibold py-3 disabled:opacity-70"
+                              disabled
+                            >
+                              {translator("Rotate", language)}
+                            </button>
+                          </>
+                        ) : bet.gameSeed?.status !== seedStatus.EXPIRED ? (
+                          <>
+                            <div className="text-xs text-[#94A3B8] font-changa text-opacity-75 text-center">
+                              {translator(
+                                "To verify this bet, you first need to rotate your seed pair.",
+                                language,
+                              )}
+                            </div>
+                            <button
+                              className="bg-[#5F4DFF] rounded-md w-full text-sm text-white text-opacity-90 text-semibold py-3"
+                              disabled={isLoading}
+                              onClick={handleSeedClick}
+                            >
+                              {isLoading ? (
+                                <Loader />
+                              ) : (
+                                translator("Rotate", language)
+                              )}
+                            </button>
+                          </>
                         ) : (
-                          translator("Verify", language)
+                          <button
+                            className="bg-[#5F4DFF] rounded-md w-full text-sm text-white text-opacity-90 text-semibold py-3"
+                            disabled={isLoading}
+                            onClick={handleVerifyClick}
+                          >
+                            {translator("Verify", language)}
+                          </button>
                         )}
-                      </button>
-                    )}
-                  </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
-              )}
+              </div>
             </div>
-            <MdClose
-              onClick={() => {
-                onClose();
-              }}
-              size={22}
-              className="absolute top-3 right-3 hover:cursor-pointer hover:bg-[#26282c] transition-all rounded-full p-[2px]"
-              color="#F0F0F0"
+            <Roulette1ProvablyFairModal
+              isOpen={isPFModalOpen}
+              onClose={closePFModal}
+              modalData={PFModalData}
+              setModalData={setPFModalData}
+              bet={bet}
             />
-          </div>
-          <Roulette1ProvablyFairModal
-            isOpen={isPFModalOpen}
-            onClose={closePFModal}
-            modalData={PFModalData}
-            setModalData={setPFModalData}
-            bet={bet}
-          />
-        </div>
+          </AdaptiveModalContent>
+        </AdaptiveModal>
       )}
     </>
   );

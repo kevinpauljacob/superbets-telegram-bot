@@ -802,9 +802,10 @@ input[type="range"] {
 }
 
 .overlayHole {
-  margin-left: 32px;
+  margin-left: 55px;
   animation: overlayBounce 4s ease-out;
 }
+
 
 
  @media (max-width: 468px) {
