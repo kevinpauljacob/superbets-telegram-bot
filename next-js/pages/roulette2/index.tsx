@@ -624,11 +624,11 @@ export default function Roulette2() {
       rates,
       selectedCoin.tokenName,
     );
-    console.log("Transformed Bets", transformedBets);
+    // console.log("Transformed Bets", transformedBets);
 
     setTransformedBets(transformedBets);
   }, [selectedBets]);
-  console.log("Transformed Bets", transformedBets);
+  // console.log("Transformed Bets", transformedBets);
   const handlePlaceBet = (areaId: string, token: Token | null) => {
     if (!token) {
       errorCustom(

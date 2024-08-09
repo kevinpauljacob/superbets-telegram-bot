@@ -106,8 +106,8 @@ export default async function handler(
 
     // Get the unclaimed SUPER earnings
     const unclaimedSuperEarnings = campaign.unclaimedEarnings.get("SUPER") || 0;
-    console.log("unclaimed ", unclaimedSuperEarnings);
-    console.log("campaign", campaign);
+    // console.log("unclaimed ", unclaimedSuperEarnings);
+    // console.log("campaign", campaign);
 
     if (unclaimedSuperEarnings <= 0) {
       return res

@@ -370,7 +370,7 @@ export const deposit = async (
         tokenMint,
         casinoPublicKey,
       );
-    console.log("creatin txn with", amount, tokenMint);
+    // console.log("creatin txn with", amount, tokenMint);
 
     transaction = await wallet.signTransaction!(transaction);
     const transactionBase64 = transaction
@@ -525,7 +525,7 @@ export async function retryTxn(
       maxRetries: 0,
     });
     await new Promise((r) => setTimeout(r, 2000));
-    console.log("retry count: ", ++j);
+    // console.log("retry count: ", ++j);
     connection
       .confirmTransaction({
         lastValidBlockHeight,
@@ -534,7 +534,7 @@ export async function retryTxn(
       })
       .then((data) => {
         if ((data.value as any).confirmationStatus) {
-          console.log("confirmed txn", data.value, txn);
+          // console.log("confirmed txn", data.value, txn);
           finalTxn = txn;
           flag = false;
         }

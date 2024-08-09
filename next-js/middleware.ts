@@ -83,7 +83,6 @@ export async function middleware(request: NextRequest) {
         const wallet = body?.wallet || query.get("wallet");
         const email = body?.email || query.get("email");
         const account = body?.account || query.get("account");
-        console.log("email", email);
         if (
           (!wallet && !email && !account) ||
           //@ts-ignore
