@@ -207,7 +207,7 @@ export default function VerifyRoulette1Modal({
           <div className="relative bg-[#121418] max-h-[80vh] no-scrollbar overflow-y-scroll p-8 rounded-lg z-10 w-11/12 sm:w-[34rem]">
             <div className="flex flex-wrap justify-between items-center mb-4 sm:mb-[1.4rem]">
               <div className="font-changa text-2xl font-semibold text-white mr-4 text-opacity-90">
-                {translator("Wheel", language)}
+                {translator("Roulette", language)}
               </div>
               <div className="text-[#F0F0F0] text-opacity-75 font-changa text-sm">
                 {formatDate(bet.createdAt)}
