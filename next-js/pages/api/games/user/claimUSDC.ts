@@ -4,6 +4,7 @@ import Deposit from "@/models/games/deposit";
 import connectDatabase from "@/utils/database";
 import authenticateUser from "@/utils/authenticate";
 import { v4 as uuidv4 } from "uuid";
+import { SPL_TOKENS } from "@/context/config";
 
 /**
  * @swagger
@@ -126,9 +127,7 @@ async function getUSDCClaimInfo() {
 }
 
 async function claimUSDC(userId: string) {
-  console.log("here2");
   const user = await GameUser.findById(userId);
-  console.log("here3");
 
   if (!user) {
     return { success: false, message: "User not found" };
@@ -157,49 +156,48 @@ async function claimUSDC(userId: string) {
     };
   }
 
+  const claimCount = claimedCount + 1;
+  const tokenMint = SPL_TOKENS.find((t) => t.tokenName === "USDC")?.tokenMint!;
+
+  await GameUser.findOneAndUpdate(
+    {
+      _id: userId,
+      "deposit.tokenMint": { $ne: tokenMint },
+    },
+    {
+      $push: { deposit: { tokenMint, amount: 0 } },
+    },
+  );
+
   const updatedUser = await GameUser.findOneAndUpdate(
     {
       _id: userId,
-      "deposit.tokenMint": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+      "deposit.tokenMint": tokenMint,
+      $or: [{ isUSDCClaimed: { $exists: false } }, { isUSDCClaimed: false }],
     },
     {
-      $inc: { "deposit.$[elem].amount": 1.0 },
-      $set: { isUSDCClaimed: true },
+      $inc: { "deposit.$.amount": 1.0 },
+      $set: { isUSDCClaimed: true, claimCount },
     },
     {
-      arrayFilters: [
-        { "elem.tokenMint": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v" },
-      ],
       new: true,
     },
   );
-  console.log("here4");
+
   if (!updatedUser) {
-    await GameUser.findOneAndUpdate(
-      { _id: userId },
-      {
-        $push: {
-          deposit: {
-            amount: 1.0,
-            tokenMint: "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
-          },
-        },
-        $set: { isUSDCClaimed: true },
-      },
-      { new: true },
-    );
+    return { success: false, message: "Could not claim USDC" };
   }
-  console.log("here5");
+
   await Deposit.create({
     account: userId,
     type: true,
     amount: 1,
-    tokenMint: "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+    tokenMint,
     status: "completed",
     comments: "USDC reward claimed",
     txnSignature: uuidv4(),
   });
-  console.log("here6");
+
   return { success: true, message: "USDC claimed successfully" };
 }
 

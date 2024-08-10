@@ -60,6 +60,11 @@ const gameUserSchema = new Schema(
       type: Boolean,
       default: false,
     },
+    claimCount: {
+      type: Number,
+      unique: true,
+      sparse: true,
+    },
   },
   { timestamps: true },
 );
