@@ -13,7 +13,7 @@ import Image from "next/image";
 import { useEffect, useMemo } from "react";
 import FOMOHead from "@/components/HeadElement";
 import dynamic from "next/dynamic";
-import { errorCustom } from "@/components/toasts/ToastGroup";
+import { errorCustom, successCustom } from "@/components/toasts/ToastGroup";
 import user from "@/models/staking/user";
 import {
   AdaptiveModal,
@@ -43,163 +43,24 @@ interface Bet {
 
 export default function Leaderboard() {
   const wallet = useWallet();
-  const { liveBets } = useGlobalContext();
-  const [topThreeUsers, setTopThreeUsers] = useState<any[]>([]);
   const [maxPages, setMaxPages] = useState<number>(0);
   const [page, setPage] = useState(1);
   const [data, setData] = useState<any[]>([]);
   const [myData, setMyData] = useState<any>();
-  const [highestProfit, setHighestProfit] = useState<number | null>(null);
-  const [lastGameTime, setLastGameTime] = useState<string | null>(null);
-  const [myBets, setMyBets] = useState<any[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [reached500, setReached500] = useState(false);
+  const [claimInfo, setClaimInfo] = useState({
+    claimedCount: 0,
+    spotsLeft: 10,
+  });
 
-  const { language, userData, pointTier, setPointTier, session, coinData } =
-    useGlobalContext();
+  // const [highestProfit, setHighestProfit] = useState<number | null>(null);
+  // const [lastGameTime, setLastGameTime] = useState<string | null>(null);
+  // const [myBets, setMyBets] = useState<any[]>([]);
+
+  const { language, session, coinData } = useGlobalContext();
+
   const transactionsPerPage = 10;
-
-  const getLeaderBoard = async () => {
-    try {
-      const res = await fetch("/api/getInfo", {
-        method: "POST",
-        body: JSON.stringify({
-          option: 4,
-        }),
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-
-      let { success, message, users } = await res.json();
-      console.log("users", users);
-      if (success && Array.isArray(users)) {
-        users = users.map((user, index) => {
-          return {
-            ...user,
-            rank: index + 1,
-          };
-        });
-
-        setMaxPages(Math.ceil(users.length / transactionsPerPage));
-
-        setData(users);
-
-        setTopThreeUsers(users.slice(0, 3));
-
-        if (session?.user?.email) {
-          let userInfo = users.find(
-            (info: any) =>
-              (info?.email && info?.email === session?.user?.email) ||
-              (info?.wallet && info?.wallet === session?.user?.wallet),
-          );
-
-          if (userInfo.numOfGamesPlayed === 0) setIsModalOpen(true);
-
-          setMyData(userInfo);
-          console.log("userInfo", userInfo);
-        }
-      } else {
-        setData([]);
-        errorCustom(translator("Could not fetch leaderboard.", language));
-      }
-    } catch (e) {
-      setData([]);
-      errorCustom(translator("Could not fetch leaderboard.", language));
-      console.error(e);
-    }
-  };
-
-  console.log("liveBets", liveBets);
-  useEffect(() => {
-    getLeaderBoard();
-  }, [session?.user]);
-
-  useEffect(() => {
-    let points = userData?.points ?? 0;
-    const tier = Object.entries(pointTiers).reduce((prev, next) => {
-      return points >= next[1]?.limit ? next : prev;
-    });
-    // console.log(tier, pointTiers["2"]);
-    // console.log("pointTiers", pointTiers);
-    setPointTier({
-      index: parseInt(tier[0]),
-      limit: tier[1]?.limit,
-      image: `/assets/badges/T-${tier[0]}.png`,
-      label: tier[1].label,
-    });
-  }, [userData]);
-
-  const calculateHighestProfit = (bets: Bet[]): number => {
-    return bets.reduce((maxProfit, bet) => {
-      if (bet.result === "Won") {
-        const profit = bet.amountWon - bet.amount;
-        return Math.max(maxProfit, profit);
-      }
-      return maxProfit;
-    }, 0);
-  };
-
-  const calculateLastGameTime = (bets: Bet[]): string => {
-    if (bets.length === 0) return "N/A";
-
-    const lastGame = bets.reduce((latest, bet) => {
-      return new Date(bet.createdAt) > new Date(latest.createdAt)
-        ? bet
-        : latest;
-    });
-
-    const timeDiff = Date.now() - new Date(lastGame.createdAt).getTime();
-    const days = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
-    const hours = Math.floor(
-      (timeDiff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60),
-    );
-    const minutes = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
-
-    if (days > 0) {
-      return `${days} days ago`;
-    } else if (hours > 0) {
-      return `${hours} hrs ago`;
-    } else {
-      return `${minutes} min ago`;
-    }
-  };
-
-  const userHistory = async () => {
-    try {
-      const res = await fetch(
-        `/api/games/global/getUserHistory?email=${session?.user?.email}`,
-      );
-      const history = await res.json();
-      if (history.success) {
-        const bets: Bet[] = history?.data ?? [];
-        setMyBets(bets);
-        console.log("history", bets);
-
-        // Calculate highest profit
-        const highestProfit = calculateHighestProfit(bets);
-        setHighestProfit(highestProfit);
-
-        // Calculate time since last game
-        const lastGameTimeInfo = calculateLastGameTime(bets);
-        setLastGameTime(lastGameTimeInfo);
-      } else {
-        setMyBets([]);
-        setHighestProfit(null);
-        setLastGameTime(null);
-      }
-    } catch (err) {
-      setMyBets([]);
-      setHighestProfit(null);
-      setLastGameTime(null);
-      console.error(err);
-    }
-  };
-
-  useEffect(() => {
-    userHistory();
-  }, [session?.user]);
-
   const threshold = 500;
   const currentDate = new Date();
   const targetDate = new Date(
@@ -218,12 +79,9 @@ export default function Leaderboard() {
     [coinData],
   );
 
-  useEffect(() => {
-    if (tokenAmount >= 500) {
-      setReached500(true);
-      setIsModalOpen(true);
-    }
-  }, [tokenAmount]);
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+  };
 
   const renderer = ({
     days,
@@ -271,9 +129,179 @@ export default function Leaderboard() {
     );
   };
 
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
+  const getLeaderBoard = async () => {
+    try {
+      const res = await fetch("/api/getInfo", {
+        method: "POST",
+        body: JSON.stringify({
+          option: 4,
+        }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      let { success, message, users } = await res.json();
+      console.log("users", users);
+      if (success && Array.isArray(users)) {
+        users = users.map((user, index) => {
+          return {
+            ...user,
+            rank: index + 1,
+          };
+        });
+
+        setMaxPages(Math.ceil(users.length / transactionsPerPage));
+
+        setData(users);
+
+        if (session?.user?.email) {
+          let userInfo = users.find(
+            (info: any) =>
+              (info?.email && info?.email === session?.user?.email) ||
+              (info?.wallet && info?.wallet === session?.user?.wallet),
+          );
+
+          if (userInfo.numOfGamesPlayed === 0) setIsModalOpen(true);
+
+          setMyData(userInfo);
+          console.log("userInfo", userInfo);
+        }
+      } else {
+        setData([]);
+        errorCustom(translator("Could not fetch leaderboard.", language));
+      }
+    } catch (e) {
+      setData([]);
+      errorCustom(translator("Could not fetch leaderboard.", language));
+      console.error(e);
+    }
   };
+
+  const fetchClaimInfo = async () => {
+    try {
+      const response = await fetch("/api/games/user/claimUSDC");
+      const data = await response.json();
+      setClaimInfo(data);
+    } catch (error) {
+      console.error("Error fetching USDC claim information:", error);
+    }
+  };
+
+  console.log("myData", myData);
+  const claimUSDCReward = async () => {
+    try {
+      const response = await fetch("/api/games/user/claimUSDC", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          userId: myData._id,
+          email: session?.user?.email,
+        }),
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        fetchClaimInfo();
+        getLeaderBoard();
+        successCustom("USDC reward claimed successfully.");
+      } else {
+        errorCustom(translator(data.message, language));
+      }
+    } catch (error) {
+      console.error("Error claiming USDC reward:", error);
+      errorCustom(translator("Error claiming USDC reward.", language));
+    }
+  };
+
+  useEffect(() => {
+    getLeaderBoard();
+  }, [session?.user]);
+
+  useEffect(() => {
+    fetchClaimInfo();
+  }, []);
+
+  useEffect(() => {
+    if (tokenAmount >= 500) {
+      setReached500(true);
+      if (!myData.isUSDCClaimed) setIsModalOpen(true);
+    }
+  }, [tokenAmount]);
+
+  // const calculateHighestProfit = (bets: Bet[]): number => {
+  //   return bets.reduce((maxProfit, bet) => {
+  //     if (bet.result === "Won") {
+  //       const profit = bet.amountWon - bet.amount;
+  //       return Math.max(maxProfit, profit);
+  //     }
+  //     return maxProfit;
+  //   }, 0);
+  // };
+
+  // const calculateLastGameTime = (bets: Bet[]): string => {
+  //   if (bets.length === 0) return "N/A";
+
+  //   const lastGame = bets.reduce((latest, bet) => {
+  //     return new Date(bet.createdAt) > new Date(latest.createdAt)
+  //       ? bet
+  //       : latest;
+  //   });
+
+  //   const timeDiff = Date.now() - new Date(lastGame.createdAt).getTime();
+  //   const days = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
+  //   const hours = Math.floor(
+  //     (timeDiff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60),
+  //   );
+  //   const minutes = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
+
+  //   if (days > 0) {
+  //     if (days > 1) return `${days} days ago`;
+  //     else return `${days} day ago`;
+  //   } else if (hours > 0) {
+  //     if (hours > 1) return `${hours} hrs ago`;
+  //     else return `${hours} hr ago`;
+  //   } else {
+  //     return `${minutes} min ago`;
+  //   }
+  // };
+
+  // const userHistory = async () => {
+  //   try {
+  //     const res = await fetch(
+  //       `/api/games/global/getUserHistory?email=${session?.user?.email}`,
+  //     );
+  //     const history = await res.json();
+  //     if (history.success) {
+  //       const bets: Bet[] = history?.data ?? [];
+  //       setMyBets(bets);
+  //       console.log("history", bets);
+
+  //       // Calculate highest profit
+  //       const highestProfit = calculateHighestProfit(bets);
+  //       setHighestProfit(highestProfit);
+
+  //       // Calculate time since last game
+  //       const lastGameTimeInfo = calculateLastGameTime(bets);
+  //       setLastGameTime(lastGameTimeInfo);
+  //     } else {
+  //       setMyBets([]);
+  //       setHighestProfit(null);
+  //       setLastGameTime(null);
+  //     }
+  //   } catch (err) {
+  //     setMyBets([]);
+  //     setHighestProfit(null);
+  //     setLastGameTime(null);
+  //     console.error(err);
+  //   }
+  // };
+
+  // useEffect(() => {
+  //   userHistory();
+  // }, [session?.user]);
 
   return (
     <>
@@ -452,32 +480,74 @@ export default function Leaderboard() {
             </button> */}
 
             {!reached500 ? (
-              <div className="flex gap-4 text-white">
-                <div className="flex flex-col items-center bg-[#252740] bg-opacity-50 rounded-[0.625rem] p-4 w-full">
-                  <div className="text-white/50 text-xs font-medium">
-                    Activity
+              // <div className="flex gap-4 text-white">
+              //   <div className="flex flex-col items-center bg-[#252740] bg-opacity-50 rounded-[0.625rem] p-4 w-full">
+              //     <div className="text-white/50 text-xs font-medium">
+              //       Activity
+              //     </div>
+              //     <div className="text-white/75 text-center text-sm xl:text-base font-semibold">
+              //       {lastGameTime ?? "N/A"}
+              //     </div>
+              //   </div>
+              //   <div className="flex flex-col items-center bg-[#252740] bg-opacity-50 rounded-[0.625rem] p-4 w-full">
+              //     <div className="text-white/50 text-xs text-center font-medium">
+              //       Biggest Gain
+              //     </div>
+              //     <div className="text-white/75  text-center text-sm xl:text-base font-semibold">
+              //       +{highestProfit?.toFixed(2)}
+              //     </div>
+              //   </div>
+              // </div>
+              <div className="bg-[#252740] bg-opacity-50 rounded-[0.625rem] p-4">
+                <div className="text-white text-xs font-medium text-opacity-50 mb-1">
+                  Winners progress
+                </div>
+                <div className="flex items-center justify-between gap-8">
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-white text-sm font-semibold text-opacity-75">
+                      {formatNumber((claimInfo.claimedCount * 100) / 10, 2)}%
+                    </span>
                   </div>
-                  <div className="text-white/75 text-center text-sm xl:text-base font-semibold">
-                    {lastGameTime ?? "N/A"}
+                  <div className="flex items-center gap-1">
+                    <Image
+                      src={"/assets/leaderboardTrophy.svg"}
+                      width={13}
+                      height={13}
+                      alt={"User"}
+                      className="rounded-full overflow-hidden"
+                    />
+                    <span className="text-white text-sm font-semibold text-opacity-75">
+                      {claimInfo.claimedCount}/10
+                    </span>
                   </div>
                 </div>
-                <div className="flex flex-col items-center bg-[#252740] bg-opacity-50 rounded-[0.625rem] p-4 w-full">
-                  <div className="text-white/50 text-xs text-center font-medium">
-                    Biggest Gain
+                <div
+                  className={`relative flex transition-width duration-1000 w-full rounded-full overflow-hidden h-1 bg-[#282E3D] mt-2 mb-2`}
+                >
+                  <div className="absolute h-full w-full bg-transparent flex items-center justify-evenly">
+                    {Array.from({ length: 9 }, (_, index) => index + 1).map(
+                      (_, index) => (
+                        <div key={index} className="bg-[#202138] w-1 h-1" />
+                      ),
+                    )}
                   </div>
-                  <div className="text-white/75  text-center text-sm xl:text-base font-semibold">
-                    +{highestProfit?.toFixed(2)}
-                  </div>
+                  <div
+                    style={{
+                      width: `${claimInfo.claimedCount * 10}%`,
+                    }}
+                    // className="h-full bg-[linear-gradient(91.179deg,#C867F0_0%,#1FCDF0_50.501%,#19EF99_100%)]"
+                    className="h-full bg-[#5F4DFF]"
+                  />
                 </div>
               </div>
             ) : (
               <div
-                className="bg-[#5F4DFF] text-white bg-opacity-50 rounded-[10px] text-center text-sm text-opacity-90 font-semibold w-full py-3"
+                className={`bg-[#5F4DFF] hover:bg-[#5F4DFF]/50 transition-all duration-300 text-white ${myData.isUSDCClaimed ? "bg-opacity-50" : "bg-opacity-70"} rounded-[10px] text-center text-sm text-opacity-90 font-semibold w-full py-3`}
                 onClick={() => {
-                  setIsModalOpen(!isModalOpen);
+                  if (!myData.isUSDCClaimed) setIsModalOpen(!isModalOpen);
                 }}
               >
-                Claim your 1 USDC!
+                {myData.isUSDCClaimed ? "Reward Claimed" : "Claim your 1 USDC!"}
               </div>
             )}
           </div>
@@ -593,7 +663,10 @@ export default function Leaderboard() {
               )}
 
               {reached500 && (
-                <div className="bg-[#5F4DFF] text-white bg-opacity-50 rounded-[10px] text-center text-sm text-opacity-90 font-semibold w-full py-3">
+                <div
+                  onClick={() => claimUSDCReward()}
+                  className="bg-[#5F4DFF] text-white bg-opacity-50 rounded-[10px] text-center text-sm text-opacity-90 font-semibold w-full py-3"
+                >
                   Claim your 1 USDC!
                 </div>
               )}

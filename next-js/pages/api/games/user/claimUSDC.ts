@@ -1,7 +1,8 @@
 import { NextApiRequest, NextApiResponse } from "next";
-import GameUser from "../../../../models/games/gameUser";
-import connectDatabase from "../../../../utils/database";
-import authenticateUser from "../../../../utils/authenticate";
+import GameUser from "@/models/games/gameUser";
+import Deposit from "@/models/games/deposit";
+import connectDatabase from "@/utils/database";
+import authenticateUser from "@/utils/authenticate";
 
 /**
  * @swagger
@@ -114,12 +115,8 @@ import authenticateUser from "../../../../utils/authenticate";
  */
 
 async function getUSDCClaimInfo() {
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-
   const claimedCount = await GameUser.countDocuments({
-    dailyUSDCClaimed: true,
-    lastUSDCClaimDate: { $gte: today },
+    isUSDCClaimed: true,
   });
 
   const spotsLeft = 10 - claimedCount;
@@ -128,16 +125,29 @@ async function getUSDCClaimInfo() {
 }
 
 async function claimUSDC(userId: string) {
+  console.log("here2");
   const user = await GameUser.findById(userId);
+  console.log("here3");
 
-  if (
-    !user ||
-    !user.deposit.some((d: any) => d.amount >= 500 && d.tokenMint === "SUPER")
-  ) {
+  if (!user) {
+    return { success: false, message: "User not found" };
+  }
+
+  if (user.isUSDCClaimed) {
+    return { success: false, message: "USDC already claimed" };
+  }
+
+  const hasSuperDeposit = user.deposit.some(
+    (d: any) => d.amount >= 500 && d.tokenMint === "SUPER",
+  );
+
+  if (!hasSuperDeposit) {
     return { success: false, message: "Not eligible for USDC claim" };
   }
 
-  const { claimedCount } = await getUSDCClaimInfo();
+  const claimedCount = await GameUser.countDocuments({
+    isUSDCClaimed: true,
+  });
 
   if (claimedCount >= 10) {
     return {
@@ -146,20 +156,48 @@ async function claimUSDC(userId: string) {
     };
   }
 
-  user.dailyUSDCClaimed = true;
-  user.lastUSDCClaimDate = new Date();
-
-  const usdcDepositIndex = user.deposit.findIndex(
-    (d: any) => d.tokenMint === "USDC",
+  const updatedUser = await GameUser.findOneAndUpdate(
+    {
+      _id: userId,
+      "deposit.tokenMint": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+    },
+    {
+      $inc: { "deposit.$[elem].amount": 1.0 },
+      $set: { isUSDCClaimed: true },
+    },
+    {
+      arrayFilters: [
+        { "elem.tokenMint": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v" },
+      ],
+      new: true,
+    },
   );
-  if (usdcDepositIndex !== -1) {
-    user.deposit[usdcDepositIndex].amount += 1;
-  } else {
-    user.deposit.push({ amount: 1, tokenMint: "USDC" });
+  console.log("here4");
+  if (!updatedUser) {
+    await GameUser.findOneAndUpdate(
+      { _id: userId },
+      {
+        $push: {
+          deposit: {
+            amount: 1.0,
+            tokenMint: "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+          },
+        },
+        $set: { isUSDCClaimed: true },
+      },
+      { new: true },
+    );
   }
-
-  await user.save();
-
+  console.log("here5");
+  await Deposit.create({
+    account: userId,
+    type: true,
+    amount: 1,
+    tokenMint: "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+    status: "completed",
+    comments: "USDC reward claimed",
+  });
+  console.log("here6");
   return { success: true, message: "USDC claimed successfully" };
 }
 
@@ -169,7 +207,6 @@ export default async function handler(
 ) {
   try {
     await connectDatabase();
-    await authenticateUser(req, res);
 
     if (req.method === "GET") {
       const { claimedCount, spotsLeft } = await getUSDCClaimInfo();
@@ -179,8 +216,9 @@ export default async function handler(
         spotsLeft,
       });
     } else if (req.method === "POST") {
+      await authenticateUser(req, res);
       const { userId } = req.body;
-
+      console.log("here");
       if (!userId) {
         return res
           .status(400)

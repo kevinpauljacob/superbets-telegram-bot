@@ -56,12 +56,9 @@ const gameUserSchema = new Schema(
       default: true,
       required: true,
     },
-    dailyUSDCClaimed: {
+    isUSDCClaimed: {
       type: Boolean,
       default: false,
-    },
-    lastUSDCClaimDate: {
-      type: Date,
     },
   },
   { timestamps: true },
