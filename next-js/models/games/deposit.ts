@@ -3,8 +3,9 @@ const Schema = mongoose.Schema;
 
 const DepositSchema = new Schema(
   {
-    wallet: {
-      type: String,
+    account: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "GameUser",
       required: true,
     },
     type: {

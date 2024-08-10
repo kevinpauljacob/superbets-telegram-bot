@@ -7,12 +7,11 @@ import { successCustom, errorCustom } from "../toasts/ToastGroup";
 import { AdaptiveModal, AdaptiveModalContent } from "../AdaptiveModal";
 
 export default function CreateCampaignModal() {
-  const wallet = useWallet();
   const {
     language,
     showCreateCampaignModal,
+    myData,
     setShowCreateCampaignModal,
-    session,
   } = useGlobalContext();
   const [campaignName, setCampaignName] = useState("");
   const [campaignCode, setCampaignCode] = useState("");
@@ -35,8 +34,7 @@ export default function CreateCampaignModal() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          wallet: wallet.publicKey,
-          email: session?.user?.email,
+          account: myData?._id,
           referralCode: campaignCode,
           campaignName: campaignName,
         }),

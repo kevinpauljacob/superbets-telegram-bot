@@ -4,7 +4,7 @@ const ReferralUserSchema = new Schema(
   {
     account: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      ref: "GameUser",
       required: true,
       unique: true,
     },

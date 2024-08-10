@@ -56,6 +56,15 @@ const gameUserSchema = new Schema(
       default: true,
       required: true,
     },
+    isUSDCClaimed: {
+      type: Boolean,
+      default: false,
+    },
+    claimCount: {
+      type: Number,
+      unique: true,
+      sparse: true,
+    },
   },
   { timestamps: true },
 );

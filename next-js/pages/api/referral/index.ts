@@ -121,12 +121,12 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
     await connectDatabase();
 
-    const { email } = req.body;
+    const { account, email, wallet } = req.body;
 
-    if (!email) {
+    if (!account || (!email && !wallet)) {
       return res.status(400).json({
         success: false,
-        message: "Email is required",
+        message: "account or email or wallet is required",
       });
     }
 
@@ -134,18 +134,17 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     let campaign = null;
     let message = "";
 
-    // Check if user exists with email
-    user = await User.findOne({ email });
-
+    user = await User.findOne({ account });
+    console.log("here");
     if (!user) {
       // Create new user if doesn't exist
-      user = new User({ email });
+      user = new User({ account, email, wallet });
       await user.save();
       message = "New user created. ";
 
       // Create default campaign
       campaign = new Campaign({
-        email: user.email,
+        account: user._id,
         campaignName: "Default Campaign",
         referralCode: uuidv4().slice(0, 8),
       });
@@ -159,13 +158,13 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
       // Check if default campaign exists
       const defaultCampaign = await Campaign.findOne({
-        email: user.email,
+        account: user._id,
         campaignName: "Default Campaign",
       });
 
       if (!defaultCampaign) {
         const newDefaultCampaign = new Campaign({
-          email: user.email,
+          account: user._id,
           campaignName: "Default Campaign",
           referralCode: uuidv4().slice(0, 8),
         });
