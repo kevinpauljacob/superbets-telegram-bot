@@ -78,9 +78,32 @@ interface LiveTokenPrice {
   price: number; // 1 Token Price in USD
 }
 
+interface Deposit {
+  amount: number;
+  tokenMint: string;
+}
+interface MyUser {
+  _id: string;
+  email: string;
+  __v: number;
+  createdAt: string;
+  deposit: Deposit;
+  gamesPlayed: any[]; // Assuming gamesPlayed is an array of any type. Adjust if you have more information.
+  image: string;
+  isOptionOngoing: boolean;
+  isUSDCClaimed: boolean;
+  isWeb2User: boolean;
+  name: string;
+  numOfGamesPlayed: number;
+  updatedAt: string;
+}
+
 interface GlobalContextProps {
   isFirstSignUp: boolean;
   setIsFirstSignUp: (isFirstSignUp: boolean) => void;
+
+  myData: MyUser | null;
+  setMyData: (myData: MyUser | null) => void;
 
   reached500: boolean;
   setReached500: (reached500: boolean) => void;
@@ -194,6 +217,7 @@ interface GlobalContextProps {
   closeVerifyModal: () => void;
 
   getUserDetails: () => Promise<void>;
+  getCurrentUserData: () => Promise<void>;
   getGlobalInfo: () => Promise<void>;
   getWalletBalance: () => Promise<void>;
   getBalance: () => Promise<void>;
@@ -246,6 +270,7 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
   const [language, setLanguage] = useState<"en" | "ru" | "ko" | "ch">("en");
   const [userTokens, setUserTokens] = useState<TokenAccount[]>([]);
   const [userData, setUserData] = useState<User | null>(null);
+  const [myData, setMyData] = useState<MyUser | null>(null);
   const [stake, setStake] = useState(true);
   const [stakeAmount, setStakeAmount] = useState<number>(0);
   const [fomoBalance, setFomoBalance] = useState<number>(0.0);
@@ -337,6 +362,46 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
 
   const closeVerifyModal = () => {
     setIsVerifyModalOpen(false);
+  };
+
+  const getCurrentUserData = async () => {
+    try {
+      const res = await fetch("/api/getInfo", {
+        method: "POST",
+        body: JSON.stringify({ option: 4 }),
+        headers: { "Content-Type": "application/json" },
+      });
+
+      const { success, users } = await res.json();
+
+      if (!success || !Array.isArray(users)) {
+        console.error("Failed to fetch users or users data is invalid.");
+        return null;
+      }
+
+      if (!session?.user?.email && !session?.user?.wallet) {
+        console.error("No session user information available.");
+        return null;
+      }
+
+      const userInfo = users.find(
+        (info: any) =>
+          (info?.email && info?.email === session?.user?.email) ||
+          (info?.wallet && info?.wallet === session?.user?.wallet),
+      );
+
+      if (!userInfo) {
+        console.error("User not found.");
+        return null;
+      }
+
+      setMyData(userInfo);
+      console.log("userInfo", userInfo);
+      return userInfo;
+    } catch (e) {
+      console.error("Error fetching user data:", e);
+      return null;
+    }
   };
 
   const getUserDetails = async () => {
@@ -524,7 +589,7 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
   const getProvablyFairData = async () => {
     let query = {};
     if (session?.user)
-      query = { wallet: session?.user?.wallet, email: session?.user?.email  };
+      query = { wallet: session?.user?.wallet, email: session?.user?.email };
     try {
       const res = await fetch(`/api/games/gameSeed`, {
         method: "POST",
@@ -555,6 +620,8 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
         setLanguage,
         userData,
         setUserData,
+        myData,
+        setMyData,
         stake,
         setStake,
         stakeAmount,
@@ -628,6 +695,7 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
         setShowCreateCampaignModal,
         setCoinData,
         getUserDetails,
+        getCurrentUserData,
         getGlobalInfo,
         getWalletBalance,
         getBalance,
@@ -649,7 +717,7 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
         isFirstSignUp,
         setIsFirstSignUp,
         reached500,
-        setReached500
+        setReached500,
       }}
     >
       {children}

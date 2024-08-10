@@ -20,7 +20,15 @@ export default function Home() {
   const router = useRouter();
   const { referralCode } = router.query;
 
-  const { session, setLanguage, setShowConnectModal, coinData } = useGlobalContext();
+  const {
+    session,
+    myData,
+    getCurrentUserData,
+    setLanguage,
+    setShowConnectModal,
+    coinData,
+  } = useGlobalContext();
+
   useEffect(() => {
     //@ts-ignore
     setLanguage(localStorage.getItem("language") ?? "en");
@@ -32,10 +40,11 @@ export default function Home() {
  */
 
   useEffect(() => {
-    if (referralCode && wallet.connected === false) {
-      setShowConnectModal(true);
+    if (referralCode && !session?.user) {
+      status !== "authenticated" && setShowConnectModal(true);
     }
-  }, [referralCode, wallet.connected]);
+    getCurrentUserData();
+  }, [referralCode, session?.user]);
 
   useEffect(() => {
     const applyReferralCode = async () => {
@@ -46,7 +55,7 @@ export default function Home() {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            email: session?.user?.email,
+            account: myData?._id,
             referralCode: referralCode,
           }),
         });
@@ -64,14 +73,14 @@ export default function Home() {
     };
 
     if (
-      ((wallet && wallet.connected) || session?.user?.email) &&
+      myData !== null &&
       status === "authenticated" &&
       referralCode !== undefined &&
       referralCode !== null &&
       referralCode !== ""
     )
       applyReferralCode();
-  }, [status, referralCode]);
+  }, [status, referralCode, myData]);
 
   return (
     <>

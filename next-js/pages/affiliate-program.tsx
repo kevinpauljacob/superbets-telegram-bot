@@ -82,9 +82,11 @@ export default function AffiliateProgram() {
     language,
     liveTokenPrice,
     showCreateCampaignModal,
+    myData,
+    session,
     setShowCreateCampaignModal,
     getBalance,
-    session,
+    getCurrentUserData,
   } = useGlobalContext();
   const transactionsPerPage = 10;
   const [page, setPage] = useState(1);
@@ -399,17 +401,21 @@ export default function AffiliateProgram() {
     if (userCampaigns.length > 0) calculateEarnings();
   }, [userCampaigns]);
 
+  useEffect(() => {
+    if (session?.user) {
+      getCurrentUserData();
+    }
+  }, [session?.user]);
+  console.log("myData", myData);
   const fetchData = async () => {
     try {
       const url = "/api/referral";
 
-      const payload: { email?: string } = {};
-
-      if (session?.user) {
-        if (session.user.email) {
-          payload.email = session.user.email;
-        }
-      }
+      const payload: { account?: string; email?: string; wallet?: string } = {
+        account: myData?._id,
+        email: session?.user?.email,
+        wallet: session?.user?.wallet,
+      };
 
       const response = await fetch(url, {
         method: "POST",
@@ -426,6 +432,7 @@ export default function AffiliateProgram() {
       }
       const { success, user, referredUsers, message } = await response.json();
 
+      console.log("session", session);
       if (success) {
         setUser(user);
         setUserId(user._id);
@@ -442,10 +449,8 @@ export default function AffiliateProgram() {
 
   // fetch user data
   useEffect(() => {
-    if ((wallet && wallet.connected && session?.user) || session?.user?.email) {
-      fetchData();
-    }
-  }, [wallet, session?.user?.email]);
+    if (myData) fetchData();
+  }, [myData, showCreateCampaignModal]);
 
   useEffect(() => {
     const claimEarnings = async (email: string, userCampaigns: Campaign[]) => {

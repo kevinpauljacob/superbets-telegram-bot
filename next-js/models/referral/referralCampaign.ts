@@ -2,8 +2,9 @@ import mongoose, { Schema } from "mongoose";
 
 const ReferralCampaignSchema = new Schema(
   {
-    email: {
-      type: String,
+    account: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "ReferralUser",
       required: true,
     },
     campaignName: {
@@ -34,19 +35,7 @@ const ReferralCampaignSchema = new Schema(
   { timestamps: true },
 );
 
-// ReferralCampaignSchema.pre("validate", function (next) {
-//   if (!this.wallet && !this.email) {
-//     next(new Error("Either wallet or email is required"));
-//   } else {
-//     next();
-//   }
-// });
-
-// ReferralCampaignSchema.path("wallet").validate(function (value) {
-//   return value || this.email;
-// }, "Either wallet or email is required");
-
-ReferralCampaignSchema.index({ email: 1, campaignName: 1 }, { unique: true });
+ReferralCampaignSchema.index({ account: 1, campaignName: 1 }, { unique: true });
 
 const ReferralCampaign =
   mongoose.models.ReferralCampaign ||
