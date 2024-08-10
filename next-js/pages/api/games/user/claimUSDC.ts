@@ -3,6 +3,7 @@ import GameUser from "@/models/games/gameUser";
 import Deposit from "@/models/games/deposit";
 import connectDatabase from "@/utils/database";
 import authenticateUser from "@/utils/authenticate";
+import { v4 as uuidv4 } from "uuid";
 
 /**
  * @swagger
@@ -196,6 +197,7 @@ async function claimUSDC(userId: string) {
     tokenMint: "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
     status: "completed",
     comments: "USDC reward claimed",
+    txnSignature: uuidv4(),
   });
   console.log("here6");
   return { success: true, message: "USDC claimed successfully" };
