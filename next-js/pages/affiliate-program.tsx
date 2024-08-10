@@ -473,7 +473,7 @@ export default function AffiliateProgram() {
               "Content-Type": "application/json",
             },
             body: JSON.stringify({
-              email: email,
+              account: myData?._id,
               campaignId: campaign._id,
             }),
           });
