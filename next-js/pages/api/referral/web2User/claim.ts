@@ -70,12 +70,12 @@ export default async function handler(
   try {
     await connectDatabase();
 
-    const { email, campaignId } = req.body;
+    const { account, campaignId } = req.body;
 
-    if (!email) {
+    if (!account) {
       return res
         .status(400)
-        .json({ success: false, message: "Email is required" });
+        .json({ success: false, message: "Account is required" });
     }
 
     if (!campaignId) {
@@ -86,7 +86,7 @@ export default async function handler(
 
     // Find the user
     const user = await User.findOne({
-      email,
+      account,
     });
 
     if (!user) {

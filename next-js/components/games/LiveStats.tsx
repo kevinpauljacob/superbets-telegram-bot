@@ -1,6 +1,6 @@
 import Draggable from "react-draggable";
 import { useGlobalContext } from "../GlobalContext";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { GameType } from "@/utils/provably-fair";
 import LiveGraph from "./LiveGraph";
 import { translator } from "@/context/transactions";
@@ -23,6 +23,7 @@ export default function LiveStats() {
     losses: 0,
   });
   const [hoverValue, setHoverValue] = useState<number | null>(null);
+  const nodeRef = useRef(null);
 
   const games = ["All", ...Object.values(GameType)].filter((x) => {
     let g = ["hilo", "roulette1", "roulette2"];
@@ -78,8 +79,9 @@ export default function LiveStats() {
   }, [liveCurrentStat, liveStats]);
 
   return (
-    <Draggable bounds="parent" handle=".handle">
+    <Draggable bounds="parent" handle=".handle" nodeRef={nodeRef}>
       <div
+        ref={nodeRef}
         className={`absolute m-4 w-[269px] h-[449px] bg-[#121418] border border-white/10 rounded-lg flex flex-col ${
           showLiveStats ? "" : "hidden"
         }`}

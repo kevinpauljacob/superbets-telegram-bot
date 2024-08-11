@@ -62,9 +62,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         .json({ success: false, message: "Method not allowed!" });
     }
 
-    const { email, referralCode, campaignName } = req.body;
+    const { account, referralCode, campaignName } = req.body;
 
-    if (!email || !referralCode || !campaignName) {
+    if (!account || !referralCode || !campaignName) {
       return res
         .status(400)
         .json({ success: false, message: "Missing parameters!" });
@@ -90,7 +90,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
     // Check for existing campaign with the same name for this user
     const existingUserCampaign = await Campaign.findOne({
-      email,
+      account,
       campaignName,
     });
     if (existingUserCampaign) {
@@ -103,7 +103,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
     // Create new campaign
     const campaign = new Campaign({
-      email,
+      account,
       campaignName,
       referralCode,
     });
@@ -111,7 +111,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
     // Update existing user
     const updatedUser = await User.findOneAndUpdate(
-      { email },
+      { account },
       { $addToSet: { campaigns: campaign._id } },
       { new: true },
     );
