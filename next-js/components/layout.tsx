@@ -169,7 +169,7 @@ export default function ({ children }: Props) {
       localStorage.setItem("connectedAccountKey", wallet.publicKey.toBase58());
 
     if (session?.user?.wallet && (!wallet.connected || !wallet.publicKey))
-      handleSignIn(wallet, walletModal, setIsFirstSignUp);
+      handleSignIn(wallet, walletModal);
   }, [wallet.publicKey, session?.user]);
 
   // useEffect(() => {
@@ -263,7 +263,7 @@ export default function ({ children }: Props) {
         <Sidebar sidebar={sidebar} setSidebar={setSidebar} />
         <section className="w-full relative overflow-hidden">
           <MobileSidebar />
-          <section className="relative w-full h-full pt-[4.4rem]">
+          <section className="relative w-full h-full pt-[4.4rem] md:pt-[0rem]">
             <SubHeader />
             <main
               className={`marker:w-full h-full max-h-[calc(100%-0rem)] pt-6`}

@@ -8,6 +8,7 @@ import { useSession } from "next-auth/react";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { useWalletModal } from "@solana/wallet-adapter-react-ui";
 import { handleSignIn } from "./ConnectWallet";
+import StatsSoundToggle from "./games/StatsSoundToggle";
 
 export default function CoinSelector() {
   const wallet = useWallet();
@@ -139,22 +140,9 @@ export default function CoinSelector() {
           </div> */}
         </div>
       )}
-
-      {/* <div
-        onClick={() => {
-          wallet.connected && wallet.publicKey && status === "authenticated"
-            ? setShowWalletModal(true)
-            : session?.user?.wallet
-            ? handleSignIn(wallet, walletModal)
-            : setShowConnectModal(true);
-        }}
-        className="flex items-center h-[2.3rem] md:h-10 px-5 md:px-4 py-0 md:py-2 gap-1 md:gap-1.5 bg-[#5F4DFF] hover:bg-[#7F71FF] focus:bg-[#4C3ECC] transition-all cursor-pointer rounded-[5px]"
-      >
-        <Image src={"/assets/wallet.png"} alt="" width={17} height={17} />
-        <span className="text-xs md:text-sm leading-3 mt-0.5 text-white text-opacity-90">
-          {translator("Wallet", language)}
-        </span>
-      </div> */}
+      <div className="hiddn md:flex">
+        <StatsSoundToggle />
+      </div>
     </div>
   );
 }

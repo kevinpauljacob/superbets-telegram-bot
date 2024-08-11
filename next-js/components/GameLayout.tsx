@@ -139,7 +139,7 @@ const GameLayout: React.FC<LayoutProps> = ({ children, title }) => {
         }SUPERBETS.GAMES - 0% House Edge, Pure Wins`}
       />
 
-      <div className="fadeInUp w-full min-h-fit lg:min-h-[calc(100vh-13.7rem)] items-stretch bg-[#121418] rounded-2xl flex flex-col-reverse lg:flex-row">
+      <div className="fadeInUp w-full min-h-fit lg:min-h-[calc(100vh-11.7rem)] items-stretch bg-[#121418] rounded-2xl flex flex-col-reverse lg:flex-row">
         <div className="fadeInUp flex w-full min-h-fit lg:w-[35%] flex-col items-center rounded-[1.15rem] px-3 py-5 lg:p-9 2xl:p-14">
           {React.Children.map(children, (child) => {
             if (React.isValidElement(child) && child.type === GameOptions) {
@@ -159,7 +159,7 @@ const GameLayout: React.FC<LayoutProps> = ({ children, title }) => {
       <div className="fadeInUp w-full flex flex-col min-h-[4rem] mt-4 rounded-[5px] overflow-hidden">
         <GameHeader />
       </div>
-      <div className="fadeInUp w-full flex flex-col min-h-[4rem] mt-8 rounded-[5px] overflow-hidden">
+      <div className="fadeInUp w-full flex flex-col min-h-[4rem] mt-8 rounded-[5px] overflow-hidden text-white">
         <FomoPlay />
       </div>
       {React.Children.map(children, (child) => {
