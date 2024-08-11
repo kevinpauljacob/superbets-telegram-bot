@@ -282,8 +282,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         console.error(e);
       }
 
-      console.log(userUpdate);
-
       if (!userUpdate) {
         throw new Error("Insufficient balance for bet!");
       }
@@ -345,7 +343,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
             : "Sorry, Better luck next time!",
       });
     } catch (e: any) {
-      console.log(e);
       return res.status(500).json({ success: false, message: e.message });
     }
   } else

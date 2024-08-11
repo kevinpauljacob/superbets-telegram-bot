@@ -165,7 +165,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
             .json({ success: false, message: "Invalid option" });
       }
     } catch (err: any) {
-      console.log(err);
       return res.status(500).json({ success: false, message: err.message });
     }
   } else {

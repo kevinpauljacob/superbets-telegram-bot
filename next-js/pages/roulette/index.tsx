@@ -634,7 +634,7 @@ export default function Roulette1() {
       rates,
       selectedCoin.tokenName,
     );
-    console.log("Transformed Bets", transformedBets);
+    // console.log("Transformed Bets", transformedBets);
 
     setTransformedBets(transformedBets);
   }, [selectedBets]);
@@ -694,7 +694,7 @@ export default function Roulette1() {
 
     bets.forEach((bet) => {
       const solEquivalent = getSolEquivalent(bet.token);
-      console.log("Sol:", solEquivalent);
+      // console.log("Sol:", solEquivalent);
       const tokenEquivalent = convertToSelectedToken(
         solEquivalent,
         rates,

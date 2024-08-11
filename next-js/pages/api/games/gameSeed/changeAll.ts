@@ -35,10 +35,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
       const wallets = result.map((item) => item.wallet);
 
-      console.log("wallets", wallets);
 
       for (let i = 0; i < wallets.length; i++) {
-        console.log("count", i);
         const clientSeed = generateClientSeed();
         const wallet = wallets[i];
 
@@ -94,7 +92,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
       return res.json({ success: true });
     } catch (e: any) {
-      console.log(e);
       return res.status(500).json({ success: false, message: e.message });
     }
   } else {

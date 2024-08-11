@@ -142,7 +142,6 @@ export default function Leaderboard() {
       });
 
       let { success, message, users } = await res.json();
-      console.log("users", users);
       if (success && Array.isArray(users)) {
         users = users.map((user, index) => {
           return {
@@ -165,7 +164,6 @@ export default function Leaderboard() {
           if (userInfo.numOfGamesPlayed === 0) setIsModalOpen(true);
 
           setMyData(userInfo);
-          console.log("userInfo", userInfo);
         }
       } else {
         setData([]);

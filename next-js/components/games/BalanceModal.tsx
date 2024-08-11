@@ -157,7 +157,6 @@ export default function BalanceModal() {
       const mintAddress = info.parsed.info.mint;
       const balance = info.parsed.info.tokenAmount.uiAmount || 0;
 
-      console.log(`Token Mint: ${mintAddress}, Balance: ${balance}`);
       return { mintAddress, balance };
     });
 
