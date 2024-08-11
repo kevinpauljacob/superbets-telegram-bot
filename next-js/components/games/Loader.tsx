@@ -7,7 +7,12 @@ interface LoaderProps {
   className?: string;
 }
 
-function Loader({ color, duration, loading, className = "" }: LoaderProps) {
+const Loader = ({
+  color = "white",
+  duration = 5,
+  loading = true,
+  className = "",
+}: LoaderProps) => {
   return (
     <div
       className={`w-full h-full relative flex items-center justify-center ${className}`}
@@ -19,12 +24,6 @@ function Loader({ color, duration, loading, className = "" }: LoaderProps) {
       </div>
     </div>
   );
-}
-
-Loader.defaultProps = {
-  color: "white",
-  duration: 5,
-  loading: true,
 };
 
 export default Loader;
