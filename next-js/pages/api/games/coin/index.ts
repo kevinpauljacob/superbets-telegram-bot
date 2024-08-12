@@ -240,7 +240,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           .mul(houseEdge)
           .toNumber();
       }
-      console.log("updating user");
       const addGame = !user.gamesPlayed.includes(GameType.coin);
       let userUpdate;
       try {
