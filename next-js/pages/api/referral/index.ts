@@ -112,14 +112,12 @@ import { v4 as uuidv4 } from "uuid";
  */
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
-  if (req.method !== "POST") {
-    return res
-      .status(405)
-      .json({ success: false, message: "Method not allowed!" });
-  }
-
   try {
-    await connectDatabase();
+    if (req.method !== "POST") {
+      return res
+        .status(405)
+        .json({ success: false, message: "Method not allowed!" });
+    }
 
     const { account, email, wallet } = req.body;
 
@@ -130,58 +128,44 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       });
     }
 
-    let user = null;
-    let campaign = null;
-    let message = "";
+    await connectDatabase();
 
-    user = await User.findOne({ account });
-    console.log("here");
+    let user = await User.findOne({ account }).populate("campaigns");
+
     if (!user) {
-      // Create new user if doesn't exist
-      user = new User({ account, email, wallet });
-      await user.save();
-      message = "New user created. ";
+      const defaultCampaign = "Default Campaign";
+      const campaign = await Campaign.findOneAndUpdate(
+        {
+          account,
+          campaignName: defaultCampaign,
+        },
+        {
+          $setOnInsert: {
+            referralCode: uuidv4().slice(0, 8),
+          },
+        },
+        {
+          upsert: true,
+          new: true,
+        },
+      );
 
-      // Create default campaign
-      campaign = new Campaign({
-        account: user._id,
-        campaignName: "Default Campaign",
-        referralCode: uuidv4().slice(0, 8),
-      });
-      await campaign.save();
+      await User.findOneAndUpdate(
+        {
+          account,
+        },
+        {
+          $addToSet: { campaigns: campaign._id },
+        },
+        {
+          upsert: true,
+        },
+      );
 
-      user.campaigns = [campaign._id];
-      await user.save();
-      message += "Default campaign created.";
-    } else {
-      message = "User already exists. ";
-
-      // Check if default campaign exists
-      const defaultCampaign = await Campaign.findOne({
-        account: user._id,
-        campaignName: "Default Campaign",
-      });
-
-      if (!defaultCampaign) {
-        const newDefaultCampaign = new Campaign({
-          account: user._id,
-          campaignName: "Default Campaign",
-          referralCode: uuidv4().slice(0, 8),
-        });
-        await newDefaultCampaign.save();
-
-        user.campaigns.push(newDefaultCampaign._id);
-        await user.save();
-        message += "Default campaign created.";
-      } else {
-        message += "No changes made.";
-      }
+      user = await User.findOne({ account }).populate("campaigns");
     }
 
-    user = await User.findById(user._id).populate("campaigns").lean();
-
-    //@ts-ignore
-    const campaignIds = user?.campaigns?.map((c: any) => c._id) || [];
+    const campaignIds = user?.campaigns.map((c: any) => c._id) || [];
 
     const referredUsers = await User.find({
       referredByChain: { $in: campaignIds },
@@ -191,7 +175,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       success: true,
       user,
       referredUsers,
-      message,
+      message: `Data fetch successful!`,
     });
   } catch (error: any) {
     console.error("Error in /api/referral:", error);

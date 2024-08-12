@@ -1,7 +1,7 @@
 import { formatNumber, translator } from "@/context/transactions";
 import { useState, useEffect } from "react";
 import { copyToClipboard } from "@/pages/affiliate-program";
-import { useGlobalContext } from "../GlobalContext"
+import { useGlobalContext } from "../GlobalContext";
 
 export default function ReferralLink({
   campaignName,
@@ -16,7 +16,7 @@ export default function ReferralLink({
 }) {
   const [earnings, setEarnings] = useState(0);
   const [buttonText, setButtonText] = useState("Copy");
-  const {language} = useGlobalContext()
+  const { language } = useGlobalContext();
 
   const calculatedTotalEarnings = () => {
     let total = 0;
@@ -43,7 +43,7 @@ export default function ReferralLink({
           <button
             onClick={() => {
               copyToClipboard(
-                `https://fomo-test.onrender.com?referralCode=${referralCode}`,
+                `https://superbets.games?referralCode=${referralCode}`,
               );
               setButtonText("Copied!");
               setTimeout(() => {

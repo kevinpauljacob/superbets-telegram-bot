@@ -109,20 +109,11 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     });
     await campaign.save();
 
-    // Update existing user
-    const updatedUser = await User.findOneAndUpdate(
+    await User.findOneAndUpdate(
       { account },
       { $addToSet: { campaigns: campaign._id } },
-      { new: true },
+      { upsert: true },
     );
-
-    if (!updatedUser) {
-      return res.status(404).json({
-        success: false,
-        message:
-          "User not found. Please ensure the user exists before creating a campaign.",
-      });
-    }
 
     return res.json({
       success: true,
