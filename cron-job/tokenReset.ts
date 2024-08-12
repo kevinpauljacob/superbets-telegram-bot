@@ -9,7 +9,10 @@ const main = async () => {
       {
         "deposit.tokenMint": "SUPER",
       },
-      { $set: { "deposit.$.amount": 100 } }
+      {
+        $set: { "deposit.$.amount": 100, isUSDCClaimed: false },
+        $unset: { claimCount: "" },
+      }
     );
     console.log(result);
   } catch (error: any) {
