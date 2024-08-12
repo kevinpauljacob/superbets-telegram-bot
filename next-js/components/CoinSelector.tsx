@@ -74,7 +74,19 @@ export default function CoinSelector() {
           />
         </div>
       </div>
-
+      <div
+        onClick={() => {
+          wallet.connected && status === "authenticated"
+            ? setShowWalletModal(true)
+            : handleSignIn(wallet, walletModal);
+        }}
+        className="flex items-center h-[2.3rem] md:h-[2.4rem] px-5 md:px-4 py-0 md:py-2 gap-1 md:gap-1.5 bg-[#5F4DFF] disabled:bg-[#555555] hover:bg-[#7F71FF] focus:bg-[#4C3ECC] transition-all cursor-pointer rounded-[5px]"
+      >
+        <Image src={"/assets/wallet.png"} alt="" width={17} height={17} />
+        <span className="text-xs md:text-sm leading-3 mt-0.5 text-white text-opacity-90">
+          {translator("Wallet", language)}
+        </span>
+      </div>
       {!startAuto && showSelectCoinModal && (
         <div className="absolute top-full left-1/2 -translate-x-1/2 mt-3 bg-[#202329] w-full min-w-fit rounded-[5px] border-2 border-white border-opacity-10">
           {SPL_TOKENS.map((coin, index) => (
@@ -140,7 +152,7 @@ export default function CoinSelector() {
           </div> */}
         </div>
       )}
-      <div className="hiddn md:flex">
+      <div className="hidden md:flex">
         <StatsSoundToggle />
       </div>
     </div>

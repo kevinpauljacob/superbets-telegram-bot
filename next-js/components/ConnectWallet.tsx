@@ -107,9 +107,7 @@ export default function ConnectWallet() {
           >
             {session?.user?.email
               ? session?.user?.name
-              : wallet?.publicKey
-                ? obfuscatePubKey(wallet.publicKey.toBase58())
-                : translator("Signing Out ...", language)}
+              : translator("Signing Out ...", language)}
           </button>
         </>
       )}

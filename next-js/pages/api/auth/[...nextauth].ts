@@ -247,7 +247,7 @@ export default async function auth(req: NextApiRequest, res: NextApiResponse) {
     },
     secret: process.env.NEXTAUTH_SECRET,
     callbacks: {
-      jwt: async ({ token, user }) => {
+      jwt: async ({ token, user, trigger }) => {
         user && (token.user = user);
         const rawToken = await encode({ token, secret });
         const response = await fetch(`${baseUrl}/api/games/user`, {

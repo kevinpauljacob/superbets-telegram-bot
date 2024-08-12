@@ -151,7 +151,6 @@ export default async function handler(
         {
           $set: {
             email,
-            name,
             image,
             wallet,
           },
