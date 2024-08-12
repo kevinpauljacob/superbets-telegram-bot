@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useMemo } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { useWallet } from "@solana/wallet-adapter-react";
 import BetSetting from "@/components/BetSetting";
 import { useGlobalContext } from "@/components/GlobalContext";
 import {
@@ -37,12 +36,10 @@ import { GameType } from "@/utils/provably-fair";
 Decimal.set({ precision: 9 });
 
 export default function Mines() {
-  const wallet = useWallet();
   const methods = useForm();
   const {
     coinData,
     getBalance,
-    getWalletBalance,
     setShowAutoModal,
     autoWinChange,
     autoLossChange,
@@ -156,7 +153,6 @@ export default function Mines() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          wallet: wallet.publicKey,
           email: session?.user?.email,
           gameId: gameId,
         }),
@@ -256,7 +252,6 @@ export default function Mines() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          wallet: wallet.publicKey,
           email: session?.user?.email,
           gameId: gameId,
           userBet: number - 1,
@@ -410,9 +405,6 @@ export default function Mines() {
           translator("You cannot bet with this token!", language),
         );
       }
-      if (session?.user?.wallet && (!wallet.connected || !wallet.publicKey)) {
-        throw new Error(translator("Wallet not connected", language));
-      }
       if (!betAmt || betAmt === 0) {
         throw new Error(translator("Set Amount.", language));
       }
@@ -440,7 +432,6 @@ export default function Mines() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          wallet: wallet.publicKey,
           email: session?.user?.email,
           amount: betAmt,
           tokenMint: selectedCoin.tokenMint,
@@ -553,9 +544,6 @@ export default function Mines() {
           translator("You cannot bet with this token!", language),
         );
       }
-      if (session?.user?.wallet && (!wallet.connected || !wallet.publicKey)) {
-        throw new Error(translator("Wallet not connected", language));
-      }
       if (!betAmt || betAmt === 0) {
         throw new Error(translator("Set Amount.", language));
       }
@@ -577,7 +565,6 @@ export default function Mines() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          wallet: wallet.publicKey,
           email: session?.user?.email,
           amount: betAmt,
           tokenMint: selectedCoin.tokenMint,
@@ -618,12 +605,9 @@ export default function Mines() {
   const handlePendingGame = async () => {
     const updatedUserBets = userBets;
     try {
-      if (!wallet.connected || !wallet.publicKey) {
-        throw new Error(translator("Wallet not connected", language));
-      }
       setUserBets(defaultUserBets);
 
-      const walletParam = wallet?.publicKey?.toBase58();
+      const walletParam = session?.user?.wallet;
       const emailParam = session?.user?.email;
       const response = await fetch(
         `/api/games/mines/pendingGame?wallet=${walletParam}&email=${emailParam}`,
@@ -704,9 +688,8 @@ export default function Mines() {
   };
 
   useEffect(() => {
-    if (wallet.connected && wallet?.publicKey && status === "authenticated")
-      handlePendingGame();
-  }, [wallet.connected, wallet.publicKey, status]);
+    if (session?.user && status === "authenticated") handlePendingGame();
+  }, [status]);
 
   const disableInput = useMemo(() => {
     return betType === "auto" && startAuto
@@ -717,10 +700,9 @@ export default function Mines() {
   useEffect(() => {
     if (refresh && session?.user) {
       getBalance();
-      getWalletBalance();
       setRefresh(false);
     }
-  }, [wallet?.publicKey, session?.user, refresh]);
+  }, [session?.user, refresh]);
 
   useEffect(() => {
     setBetAmt(userInput);
@@ -752,9 +734,9 @@ export default function Mines() {
             (autoWinChangeReset || autoLossChangeReset
               ? betAmt
               : autoBetCount === "inf"
-                ? Math.max(0, betAmt)
-                : betAmt *
-                  (autoLossChange !== null ? autoLossChange / 100.0 : 0));
+              ? Math.max(0, betAmt)
+              : betAmt *
+                (autoLossChange !== null ? autoLossChange / 100.0 : 0));
       }
       if (
         useAutoConfig &&
@@ -874,7 +856,6 @@ export default function Mines() {
             {!betActive && !startAuto && (
               <BetButton
                 disabled={
-                  !wallet ||
                   !session?.user ||
                   isRolling ||
                   (coinData && coinData[0].amount < minGameAmount) ||
@@ -1146,7 +1127,6 @@ export default function Mines() {
                   {!betActive && !startAuto && (
                     <BetButton
                       disabled={
-                        !wallet ||
                         !session?.user ||
                         isRolling ||
                         (coinData && coinData[0].amount < minGameAmount) ||
@@ -1251,26 +1231,26 @@ export default function Mines() {
                         userBets[index - 1].pick === true
                         ? "border-[#FCB10F] bg-[#FCB10F33]"
                         : userBets[index - 1].result === "Lost" &&
-                            userBets[index - 1].pick === true
-                          ? "border-[#FCB10F] bg-[#FCB10F33]"
-                          : userBets[index - 1].result === "Lost" &&
-                              userBets[index - 1].pick === true
-                            ? "border-[#F1323E] bg-[#F1323E33]"
-                            : gameStatus === "Completed"
-                              ? "bg-transparent border-white/10"
-                              : "bg-[#202329] border-[#202329] hover:border-white/30"
-                      : betType === "auto"
-                        ? userBets[index - 1].result === "" &&
                           userBets[index - 1].pick === true
-                          ? "border-[#FCB10F] bg-[#FCB10F33]"
-                          : userBets[index - 1].result === "Won" &&
-                              userBets[index - 1].pick === true
-                            ? "border-[#FCB10F] bg-[#FCB10F33]"
-                            : userBets[index - 1].result === "Lost" &&
-                                userBets[index - 1].pick === true
-                              ? "border-[#F1323E] bg-[#F1323E33]"
-                              : "bg-[#202329] border-[#202329] hover:border-white/30"
-                        : null
+                        ? "border-[#FCB10F] bg-[#FCB10F33]"
+                        : userBets[index - 1].result === "Lost" &&
+                          userBets[index - 1].pick === true
+                        ? "border-[#F1323E] bg-[#F1323E33]"
+                        : gameStatus === "Completed"
+                        ? "bg-transparent border-white/10"
+                        : "bg-[#202329] border-[#202329] hover:border-white/30"
+                      : betType === "auto"
+                      ? userBets[index - 1].result === "" &&
+                        userBets[index - 1].pick === true
+                        ? "border-[#FCB10F] bg-[#FCB10F33]"
+                        : userBets[index - 1].result === "Won" &&
+                          userBets[index - 1].pick === true
+                        ? "border-[#FCB10F] bg-[#FCB10F33]"
+                        : userBets[index - 1].result === "Lost" &&
+                          userBets[index - 1].pick === true
+                        ? "border-[#F1323E] bg-[#F1323E33]"
+                        : "bg-[#202329] border-[#202329] hover:border-white/30"
+                      : null
                   } ${
                     pendingRequests.includes(index) ? "blink_tile" : ""
                   } flex items-center active:scale-90 justify-center cursor-pointer rounded-md text-center transition duration-150 ease-in-out w-[50px] h-[50px] sm:w-[55px] sm:h-[55px] md:w-[80px] md:h-[80px] xl:w-[90px] xl:h-[90px]`}
@@ -1279,11 +1259,11 @@ export default function Mines() {
                     betType === "auto"
                       ? !startAuto && handleAutoPick(index)
                       : betActive && betType === "manual"
-                        ? setPendingRequests((prevRequests) => [
-                            ...prevRequests,
-                            index,
-                          ])
-                        : null
+                      ? setPendingRequests((prevRequests) => [
+                          ...prevRequests,
+                          index,
+                        ])
+                      : null
                   }
                 >
                   {betType === "manual" &&

@@ -3,6 +3,9 @@ import { v4 as uuidv4 } from "uuid";
 import User from "../../../../models/games/gameUser";
 import connectDatabase from "../../../../utils/database";
 import authenticateUser from "../../../../utils/authenticate";
+import { PublicKey, Keypair } from "@solana/web3.js";
+import { bs58 } from "@project-serum/anchor/dist/cjs/utils/bytes";
+import { encryptServerSeed, generateIV } from "@/utils/provably-fair";
 
 /**
  * @swagger
@@ -125,35 +128,36 @@ export default async function handler(
       .json({ success: false, message: "Method not allowed" });
   }
   try {
-    const { email, name, image, wallet } = req.body;
+    const { email, name, image } = req.body;
 
     await authenticateUser(req, res);
 
     await connectDatabase();
-
-    let user: any = null;
-
-    if (!email && !wallet)
-      return res
-        .status(400)
-        .json({ success: false, message: "Missing parameters" });
 
     const defaultDeposit = {
       amount: 100.0,
       tokenMint: "SUPER",
     };
 
-    if (email && wallet) {
+    if (!email)
+      return res
+        .status(400)
+        .json({ success: false, message: "Missing parameters" });
+
+    let user: any = null;
+    user = await User.findOne({
+      email: email,
+    });
+
+    if (user) {
       user = await User.findOneAndUpdate(
         {
-          $or: [{ email }, { wallet }],
+          $or: [{ email }],
         },
         {
           $set: {
             email,
-            name,
             image,
-            wallet,
           },
         },
         {
@@ -163,6 +167,16 @@ export default async function handler(
       );
     } else {
       if (email) {
+        const keyPair = Keypair.generate();
+        console.log("Public Key:", keyPair.publicKey.toString());
+        console.log("Secret Key:", keyPair.secretKey);
+
+        const secretKey =  bs58.encode(keyPair.secretKey)
+        console.log(secretKey)
+        const iv = generateIV();
+        const encryptionKey = Buffer.from(process.env.ENCRYPTION_KEY!, "hex");
+        const publicKey = keyPair.publicKey.toString()
+        const privateKey = encryptServerSeed(secretKey, encryptionKey, iv);
         user = await User.findOneAndUpdate(
           {
             email,
@@ -172,23 +186,8 @@ export default async function handler(
               email,
               name,
               image,
-              isWeb2User: true,
-              deposit: [defaultDeposit],
-            },
-          },
-          {
-            new: true,
-            upsert: true,
-          },
-        );
-      } else if (wallet) {
-        user = await User.findOneAndUpdate(
-          {
-            wallet,
-          },
-          {
-            $setOnInsert: {
-              wallet,
+              wallet: publicKey,
+              privateKey,
               isWeb2User: true,
               deposit: [defaultDeposit],
             },

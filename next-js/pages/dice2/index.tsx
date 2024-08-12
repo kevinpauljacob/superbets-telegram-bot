@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useMemo } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { useWallet } from "@solana/wallet-adapter-react";
 import BetSetting from "@/components/BetSetting";
 import DraggableBar from "@/components/games/Dice2/DraggableBar";
 import { useGlobalContext } from "@/components/GlobalContext";
@@ -29,16 +28,13 @@ import {
 import { formatNumber, translator } from "@/context/transactions";
 import { useSession } from "next-auth/react";
 import { GameType } from "@/utils/provably-fair";
-import { handleSignIn } from "@/components/ConnectWallet";
 import { useWalletModal } from "@solana/wallet-adapter-react-ui";
 
 export default function Dice2() {
-  const wallet = useWallet();
   const walletModal = useWalletModal();
   const methods = useForm();
   const {
     getBalance,
-    getWalletBalance,
     autoWinChange,
     autoLossChange,
     autoWinChangeReset,
@@ -160,9 +156,6 @@ export default function Dice2() {
           translator("You cannot bet with this token!", language),
         );
       }
-      if (session?.user?.wallet && (!wallet.connected || !wallet.publicKey)) {
-        throw new Error(translator("Wallet not connected", language));
-      }
       if (!betAmt || betAmt === 0) {
         throw new Error(translator("Set Amount.", language));
       }
@@ -176,7 +169,6 @@ export default function Dice2() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          wallet: wallet?.publicKey,
           email: session?.user?.email,
           amount: betAmt,
           tokenMint: selectedCoin?.tokenMint,
@@ -300,10 +292,9 @@ export default function Dice2() {
   useEffect(() => {
     if (refresh && session?.user) {
       getBalance();
-      getWalletBalance();
       setRefresh(false);
     }
-  }, [wallet?.publicKey, session?.user, refresh]);
+  }, [session?.user, refresh]);
 
   useEffect(() => {
     setBetAmt(userInput);
@@ -391,7 +382,7 @@ export default function Dice2() {
         // console.log("Auto betting. config: ", useAutoConfig);
         setStartAuto(true);
       }
-    } else if (wallet.connected || session?.user.isWeb2User) handleBet();
+    } else handleBet();
   };
 
   return (
@@ -540,7 +531,7 @@ export default function Dice2() {
         <div className="flex px-0 xl:px-4 mb-0 md:mb-[1.4rem] gap-4 flex-row w-full justify-between">
           {selectedCoin &&
             selectedCoin.amount > minGameAmount &&
-            (session?.user?.wallet ? wallet.connected : true) && (
+            session?.user?.wallet && (
               <>
                 <div className="flex flex-col w-full">
                   <span className="text-[#F0F0F0] font-changa font-semibold text-xs mb-1">
@@ -609,7 +600,7 @@ export default function Dice2() {
             )}
           {(!selectedCoin ||
             selectedCoin.amount < minGameAmount ||
-            (session?.user?.wallet && !wallet.connected)) && (
+            !session?.user?.wallet) && (
             <div className="w-full rounded-lg bg-[#d9d9d90d] bg-opacity-10 flex items-center px-3 py-3 text-white md:px-6">
               <div className="w-full text-center font-changa font-medium text-sm md:text-base text-[#F0F0F0] text-opacity-75">
                 {translator(
@@ -618,7 +609,7 @@ export default function Dice2() {
                 )}{" "}
                 <u
                   onClick={() => {
-                    wallet.connected && status === "authenticated"
+                    status === "authenticated"
                       ? setShowWalletModal(true)
                       : setShowConnectModal(true);
                   }}

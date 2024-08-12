@@ -11,7 +11,6 @@ import {
   Common,
 } from "matter-js";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useWallet } from "@solana/wallet-adapter-react";
 import toast from "react-hot-toast";
 import Image from "next/image";
 import Link from "next/link";
@@ -49,8 +48,6 @@ import {
 } from "@/components/games/Plinko/constants";
 import { GameType } from "@/utils/provably-fair";
 import { riskToChance } from "@/components/games/Plinko/RiskToChance";
-import { handleSignIn } from "@/components/ConnectWallet";
-import { useWalletModal } from "@solana/wallet-adapter-react-ui";
 
 export type LinesType = 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15 | 16;
 
@@ -126,13 +123,11 @@ export default function Plinko() {
     },
   };
 
-  const wallet = useWallet();
   const methods = useForm();
 
   const {
     coinData,
     getBalance,
-    getWalletBalance,
     setShowWalletModal,
     setShowConnectModal,
     setShowAutoModal,
@@ -510,9 +505,6 @@ export default function Plinko() {
           translator("You cannot bet with this token!", language),
         );
       }
-      if (session?.user?.wallet && (!wallet.connected || !wallet.publicKey)) {
-        throw new Error(translator("Wallet not connected", language));
-      }
       if (!betAmt || betAmt === 0) {
         throw new Error(translator("Set Amount.", language));
       }
@@ -526,7 +518,6 @@ export default function Plinko() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          wallet: wallet.publicKey,
           email: session?.user?.email,
           amount: betAmt,
           tokenMint: selectedCoin.tokenMint,
@@ -603,10 +594,9 @@ export default function Plinko() {
   useEffect(() => {
     if (refresh && session?.user) {
       getBalance();
-      getWalletBalance();
       setRefresh(false);
     }
-  }, [wallet?.publicKey, session?.user, refresh]);
+  }, [session?.user, refresh]);
 
   useEffect(() => {
     setBetAmt(userInput);
@@ -695,7 +685,7 @@ export default function Plinko() {
         // console.log("Auto betting. config: ", useAutoConfig);
         setStartAuto(true);
       }
-    } else if (wallet.connected || session?.user?.email) handleBet();
+    } else if (session?.user?.email) handleBet();
     // addBall(1, betAmt!);
   };
 
@@ -728,7 +718,6 @@ export default function Plinko() {
             )}
             <BetButton
               disabled={
-                !wallet ||
                 !session?.user ||
                 loading ||
                 (betSetting === "auto" &&
@@ -884,7 +873,6 @@ export default function Plinko() {
                   )}
                   <BetButton
                     disabled={
-                      !wallet ||
                       !session?.user ||
                       loading ||
                       (betSetting === "auto" &&
@@ -935,7 +923,7 @@ export default function Plinko() {
             >
               {!selectedCoin ||
               selectedCoin.amount < minGameAmount ||
-              (session?.user?.wallet && !wallet.connected) ||
+              !session?.user?.wallet ||
               !(status === "authenticated") ? (
                 <div className="absolute bottom-0 w-full rounded-lg bg-[#d9d9d90d] bg-opacity-10 flex items-center px-3 py-3 text-white md:px-6">
                   <div className="w-full text-center font-changa font-medium text-sm md:text-base text-[#F0F0F0] text-opacity-75">
@@ -945,7 +933,7 @@ export default function Plinko() {
                     )}{" "}
                     <u
                       onClick={() => {
-                        wallet.connected && status === "authenticated"
+                        status === "authenticated"
                           ? setShowWalletModal(true)
                           : setShowConnectModal(true);
                       }}

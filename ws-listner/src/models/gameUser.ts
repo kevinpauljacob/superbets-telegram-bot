@@ -80,7 +80,7 @@ const gameUserSchema = new Schema(
       sparse: true,
     },
   },
-  { timestamps: true },
+  { timestamps: true }
 );
 
 let GameUser =

@@ -1,6 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
-import { useWallet } from "@solana/wallet-adapter-react";
 import { useSession } from "next-auth/react";
 import Image from "next/image";
 import BetSetting from "@/components/BetSetting";
@@ -40,12 +39,10 @@ function debounce<T extends (...args: any[]) => void>(
 }
 
 export default function Roulette2() {
-  const wallet = useWallet();
   const methods = useForm();
   const {
     coinData,
     getBalance,
-    getWalletBalance,
     setShowAutoModal,
     autoWinChange,
     autoLossChange,
@@ -374,9 +371,6 @@ export default function Roulette2() {
           translator("You cannot bet with this token!", language),
         );
       }
-      if (session?.user?.wallet && (!wallet.connected || !wallet.publicKey)) {
-        throw new Error(translator("Wallet not Connected", language));
-      }
       if (!betAmt || betAmt === 0) {
         throw new Error(translator("Set Amount", language));
       }
@@ -394,7 +388,6 @@ export default function Roulette2() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          wallet: wallet.publicKey,
           email: session?.user?.email,
           tokenMint: selectedCoin.tokenMint,
           wager: transformedBets,
@@ -602,7 +595,7 @@ export default function Roulette2() {
       ) {
         setStartAuto(true);
       }
-    } else if (wallet.connected || session?.user?.email) {
+    } else if (session?.user?.email) {
       bet();
     }
   };
@@ -610,10 +603,9 @@ export default function Roulette2() {
   useEffect(() => {
     if (refresh && session?.user) {
       getBalance();
-      getWalletBalance();
       setRefresh(false);
     }
-  }, [wallet?.publicKey, session?.user, refresh]);
+  }, [session?.user, refresh]);
 
   useEffect(() => {
     setBetAmt(userInput);

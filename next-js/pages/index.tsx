@@ -1,8 +1,6 @@
 import { Inter } from "next/font/google";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/router";
-import { useWallet } from "@solana/wallet-adapter-react";
-import { useWalletModal } from "@solana/wallet-adapter-react-ui";
 import { useGlobalContext } from "@/components/GlobalContext";
 import { successCustom, errorCustom } from "@/components/toasts/ToastGroup";
 import { useSession } from "next-auth/react";
@@ -14,8 +12,6 @@ import Bets from "@/components/games/Bets";
 const inter = Inter({ subsets: ["latin"] });
 
 export default function Home() {
-  const wallet = useWallet();
-  const walletModal = useWalletModal();
   const { status } = useSession();
   const router = useRouter();
   const { referralCode } = router.query;
@@ -86,7 +82,7 @@ export default function Home() {
     <>
       <FOMOHead title={"Home | SUPERBETS.GAMES - 0% House Edge, Pure Wins"} />
       <div className="flex flex-col lg:flex-row text-white w-full overflow-hidden relative overflow-x-hidden px-4 xl:px-6">
-        <div className="flex flex-1 flex-col pt-12 md:pt-0 md:px-[2.5%]">
+        <div className="flex flex-1 flex-col pt-0 md:pt-0 md:px-[2.5%]">
           <div className="">
             <StoreBanner />
           </div>

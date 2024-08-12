@@ -1,7 +1,6 @@
 import { User, connection, translator } from "@/context/transactions";
 import { houseEdgeTiers, pointTiers, stakingTiers } from "@/context/config";
 import { launchPromoEdge } from "@/context/config";
-import { useWallet } from "@solana/wallet-adapter-react";
 import React, {
   createContext,
   useContext,
@@ -219,7 +218,7 @@ interface GlobalContextProps {
   getUserDetails: () => Promise<void>;
   getCurrentUserData: () => Promise<void>;
   getGlobalInfo: () => Promise<void>;
-  getWalletBalance: () => Promise<void>;
+  // getWalletBalance: () => Promise<void>;
   getBalance: () => Promise<void>;
   getProvablyFairData: () => Promise<ProvablyFairData | null>;
 
@@ -260,7 +259,6 @@ interface GlobalProviderProps {
 }
 
 export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
-  const wallet = useWallet();
   const { data: session, status } = useSession() as {
     data: SessionUser | null;
     status: "loading" | "authenticated" | "unauthenticated";
@@ -405,13 +403,13 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
   };
 
   const getUserDetails = async () => {
-    if (wallet && wallet.publicKey)
+    if (session?.user && session?.user?.email)
       try {
         const res = await fetch("/api/getInfo", {
           method: "POST",
           body: JSON.stringify({
             option: 1,
-            wallet: wallet.publicKey,
+            email: session?.user?.email,
           }),
           headers: {
             "Content-Type": "application/json",
@@ -448,7 +446,7 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
         method: "POST",
         body: JSON.stringify({
           option: 3,
-          wallet: wallet.publicKey,
+          email: session?.user?.email,
         }),
         headers: {
           "Content-Type": "application/json",
@@ -537,25 +535,23 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
     );
   }, []);
 
-  const getWalletBalance = async () => {
-    if (wallet && wallet.publicKey)
-      try {
-        setWalletBalance(
-          (await connection.getBalance(wallet.publicKey)) / LAMPORTS_PER_SOL,
-        );
-      } catch (e) {
-        // errorCustom("Unable to fetch balance.");
-        console.error(e);
-      }
-  };
+  // const getWalletBalance = async () => {
+  //   if (wallet && wallet.publicKey)
+  //     try {
+  //       setWalletBalance(
+  //         (await connection.getBalance(wallet.publicKey)) / LAMPORTS_PER_SOL,
+  //       );
+  //     } catch (e) {
+  //       // errorCustom("Unable to fetch balance.");
+  //       console.error(e);
+  //     }
+  // };
 
   const getBalance = async () => {
     setLoading(true);
     try {
-      if (wallet?.publicKey || session?.user.email) {
-        let query = session?.user?.wallet
-          ? `wallet=${wallet.publicKey?.toBase58()}`
-          : `email=${session?.user?.email}`;
+      if (session?.user.email) {
+        let query = `email=${session?.user?.email}`;
         fetch(`/api/games/user/getUser?${query}`)
           .then((res) => res.json())
           .then((balance) => {
@@ -693,7 +689,7 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
         getUserDetails,
         getCurrentUserData,
         getGlobalInfo,
-        getWalletBalance,
+        // getWalletBalance,
         getBalance,
         getProvablyFairData,
         selectedCoin,

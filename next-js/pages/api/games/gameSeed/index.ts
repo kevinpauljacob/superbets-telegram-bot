@@ -28,10 +28,6 @@ import {
  *           schema:
  *             type: object
  *             properties:
- *               wallet:
- *                 type: string
- *                 description: User's wallet address
- *                 example: "0x1234567890abcdef"
  *               email:
  *                 type: string
  *                 description: User's email address
@@ -130,25 +126,20 @@ type InputType = {
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === "POST") {
     try {
-      let { wallet, email }: InputType = req.body;
+      let { email }: InputType = req.body;
 
       await connectDatabase();
 
-      if (!wallet && !email)
+      if (!email)
         return res
           .status(400)
           .json({ success: false, message: "Missing parameters" });
 
       let user = null;
-      if (wallet) {
-        user = await User.findOne({
-          wallet: wallet,
-        });
-      } else if (email) {
-        user = await User.findOne({
-          email: email,
-        });
-      }
+
+      user = await User.findOne({
+        email: email,
+      });
 
       const account = user._id;
 

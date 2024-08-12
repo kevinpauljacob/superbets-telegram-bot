@@ -31,8 +31,6 @@ import { NextApiRequest, NextApiResponse } from "next";
  *               option:
  *                 type: number
  *                 enum: [1, 2, 3, 4]
- *               wallet:
- *                 type: string
  *               email:
  *                 type: string
  *     responses:

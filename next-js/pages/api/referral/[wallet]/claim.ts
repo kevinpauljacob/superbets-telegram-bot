@@ -1,7 +1,7 @@
 import {
   createClaimEarningsTxn,
   retryTxn,
-  verifyFrontendTransaction,
+  verifyTransaction,
 } from "@/context/transactions";
 import { Campaign } from "@/models/referral";
 import TxnSignature from "@/models/txnSignature";
@@ -168,7 +168,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       Buffer.from(transactionBase64 as string, "base64"),
     );
 
-    if (!verifyFrontendTransaction(txn, vTxn))
+    if (!verifyTransaction(txn, vTxn))
       return res
         .status(400)
         .json({ success: false, message: "Transaction verfication failed" });

@@ -2,7 +2,7 @@ import StakeFomo from "@/components/StakeFomo";
 import StakeStats from "@/components/StakeStats";
 import Image from "next/legacy/image";
 import { useEffect, useState } from "react";
-import { WalletContextState, useWallet } from "@solana/wallet-adapter-react";
+import { WalletContextState } from "@solana/wallet-adapter-react";
 import { useSession } from "next-auth/react";
 import { connection, translator, truncateNumber } from "@/context/transactions";
 import { PublicKey } from "@solana/web3.js";
@@ -35,7 +35,6 @@ export async function getFOMOBalance(
 
 export default function Stake() {
   const { data: session } = useSession();
-  const wallet = useWallet();
 
   const {
     setFomoBalance,

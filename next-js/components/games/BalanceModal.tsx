@@ -1,4 +1,3 @@
-import { useWallet } from "@solana/wallet-adapter-react";
 import React, { useEffect, useRef, useState } from "react";
 import { useForm, FormProvider } from "react-hook-form";
 import {
@@ -20,10 +19,11 @@ import { SPL_TOKENS, spl_token } from "@/context/config";
 import { Connection, ParsedAccountData, PublicKey } from "@solana/web3.js";
 import { TOKEN_PROGRAM_ID } from "@solana/spl-token";
 import { errorCustom } from "../toasts/ToastGroup";
+import { FaRegCopy } from "react-icons/fa6";
+import { copyToClipboard } from "@/pages/affiliate-program";
 
 export default function BalanceModal() {
   const methods = useForm();
-  const wallet = useWallet();
 
   const router = useRouter();
 
@@ -38,6 +38,7 @@ export default function BalanceModal() {
     setUserTokens,
     getBalance,
     coinData,
+    session,
   } = useGlobalContext();
 
   const [loading, setLoading] = useState<boolean>(false);
@@ -51,6 +52,7 @@ export default function BalanceModal() {
   const historyHeaders = ["Time", "Amount", "Type", "Status"];
   const mobileHistoryHeaders = ["Amount", "Status"];
   const [checked, setChecked] = useState(false);
+  const [depositWallet, setDepositWallet] = useState<string>("");
 
   const onSubmit = async (data: any) => {
     if (!loading) {
@@ -72,14 +74,8 @@ export default function BalanceModal() {
             return;
           }
 
-          response = await deposit(
-            wallet,
-            amount,
-            selectedToken.tokenMint,
-            campaignId,
-          );
-        } else
-          response = await withdraw(wallet, amount, selectedToken.tokenMint);
+          response = await deposit(amount, selectedToken.tokenMint, campaignId);
+        } else response = await withdraw(amount, selectedToken.tokenMint);
 
         if (response && response.success) {
           getBalance();
@@ -96,17 +92,23 @@ export default function BalanceModal() {
     }
   };
 
-  const handleChange = (
+  const handleAmountChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
     setAmount(Math.abs(parseFloat(e.target.value)));
   };
 
+  const handleWalletChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) => {
+    setDepositWallet(e.target.value);
+  };
+
   const handleGetHistory = async () => {
-    // console.log("Getting History");
+    console.log("Getting History");
     try {
       const res = await fetch(
-        `/api/games/wallet/getDeposits/?wallet=${wallet.publicKey}`,
+        `/api/games/wallet/getDeposits/?wallet=${session?.user?.wallet}`,
         {
           method: "GET",
           headers: {
@@ -166,20 +168,9 @@ export default function BalanceModal() {
   useEffect(() => {
     let intervalId: NodeJS.Timeout | null = null;
 
-    if (wallet && wallet.publicKey && showWalletModal) {
+    if (session?.user?.wallet && showWalletModal && actionType === "Deposit") {
       const fetchAndUpddateToken = () => {
-        getTokenAccounts(wallet.publicKey!, connection)
-          .then((tokens) => {
-            // console.log("gill", tokens);
-            setUserTokens([
-              {
-                mintAddress: "SOL",
-                balance: walletBalance,
-              },
-              ...tokens,
-            ]);
-          })
-          .catch(console.error);
+        handleGetHistory()
       };
       fetchAndUpddateToken();
       intervalId = setInterval(fetchAndUpddateToken, 5000);
@@ -190,7 +181,7 @@ export default function BalanceModal() {
         }
       };
     }
-  }, [wallet, showWalletModal]);
+  }, [session?.user?.wallet, showWalletModal]);
 
   return (
     <AdaptiveModal
@@ -265,33 +256,46 @@ export default function BalanceModal() {
                 autoComplete="off"
                 onSubmit={methods.handleSubmit(onSubmit)}
               >
-                {/* coin selector  */}
+                {/* warning  */}
                 {actionType !== "History" && (
-                  <div className="relative mb-0 flex w-full flex-col rounded-md">
-                    <label className="mb-1 font-changa font-medium text-xs text-white text-opacity-90 ">
-                      {translator("Coin", language)}
-                    </label>
-
-                    <span
-                      className="w-full rounded-md h-11 flex items-center bg-[#202329] px-4 py-2 text-[#94A3B8] text-base font-chakra gap-2 cursor-pointer"
-                      onClick={() => setIsSelectModalOpen(!isSelectModalOpen)}
-                    >
-                      <selectedToken.icon className="w-6 h-6" />
-                      <span>{selectedToken?.tokenName}</span>
-                      <div className="grow" />
-                      <img
-                        src="/assets/chevron.svg"
-                        alt=""
-                        className={`w-4 h-4 transform ${
-                          isSelectModalOpen ? "rotate-180" : ""
-                        }`}
-                      />
+                  <div className="flex items-center gap-1">
+                    <div className="w-2 h-2 rounded-full animate-pulse bg-[#DCA815]" />
+                    <span className={`text-xs text-[#DCA815]`}>
+                      We only support SOL and USDT transactions on the solana
+                      network!
                     </span>
+                  </div>
+                )}
 
-                    {isSelectModalOpen && (
-                      <div className="absolute z-[100] top-[calc(100%+10px)] left-0 w-full bg-[#202329] rounded-[5px] border-2 border-white border-opacity-10">
-                        {SPL_TOKENS.filter((t) => t.tokenMint !== "SUPER").map(
-                          (token, index) => (
+                {actionType === "Withdraw" && (
+                  <>
+                    {/* coin selector  */}
+                    <div className="relative mb-0 flex w-full flex-col rounded-md">
+                      <label className="mb-1 font-changa font-medium text-xs text-white text-opacity-90 ">
+                        {translator("Coin", language)}
+                      </label>
+
+                      <span
+                        className="w-full rounded-md h-11 flex items-center bg-[#202329] px-4 py-2 text-[#94A3B8] text-base font-chakra gap-2 cursor-pointer"
+                        onClick={() => setIsSelectModalOpen(!isSelectModalOpen)}
+                      >
+                        <selectedToken.icon className="w-6 h-6" />
+                        <span>{selectedToken?.tokenName}</span>
+                        <div className="grow" />
+                        <img
+                          src="/assets/chevron.svg"
+                          alt=""
+                          className={`w-4 h-4 transform ${
+                            isSelectModalOpen ? "rotate-180" : ""
+                          }`}
+                        />
+                      </span>
+
+                      {isSelectModalOpen && (
+                        <div className="absolute z-[100] top-[calc(100%+10px)] left-0 w-full bg-[#202329] rounded-[5px] border-2 border-white border-opacity-10">
+                          {SPL_TOKENS.filter(
+                            (t) => t.tokenMint !== "SUPER",
+                          ).map((token, index) => (
                             <div
                               key={index}
                               className="w-full h-11 flex flex-row items-center border-y  border-white border-opacity-10  bg-[#202329] px-4 py-2 text-[#94A3B8] text-base font-chakra gap-2 cursor-pointer hover:bg-[#292C32]"
@@ -304,14 +308,14 @@ export default function BalanceModal() {
                               <span>{token.tokenName}</span>
                               <div className="grow" />
                               <span className="text-gray-400">
-                                {actionType === "Deposit" &&
+                                {/* {actionType === "Deposit" &&
                                   truncateNumber(
                                     userTokens.find(
                                       (t) =>
                                         t?.mintAddress &&
                                         t?.mintAddress === token?.tokenMint,
                                     )?.balance ?? 0,
-                                  )}
+                                  )} */}
                                 {actionType === "Withdraw" &&
                                   truncateNumber(
                                     coinData
@@ -325,118 +329,153 @@ export default function BalanceModal() {
                                   )}
                               </span>
                             </div>
-                          ),
-                        )}
-                      </div>
-                    )}
-                  </div>
-                )}
-
-                {/* wallet box  */}
-                {actionType !== "History" && (
-                  <div className="mb-0 flex w-full flex-col">
-                    <label className="mb-1 font-changa font-medium text-xs text-white text-opacity-90">
-                      {translator("Current Wallet", language)}
-                    </label>
-
-                    <span className="w-full rounded-md h-11 flex items-center bg-[#202329] px-4 py-2 text-[#94A3B8] text-sm font-chakra">
-                      {obfuscatePubKey(wallet.publicKey?.toBase58() ?? "")}
-                    </span>
-                  </div>
-                )}
-
-                {actionType == "Withdraw" ? (
-                  <div className="mb-0 flex w-full flex-col">
-                    <div className="mb-1 flex w-full items-center justify-between">
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                    {/* wallet input box  */}
+                    <div className="mb-0 flex w-full flex-col">
                       <label className="mb-1 font-changa font-medium text-xs text-white text-opacity-90">
-                        {translator(actionType, language)}{" "}
-                        {translator("Amount", language)}
+                        {translator("Deposit Wallet", language)}
                       </label>
-                      <span className="font-changa font-medium text-sm text-[#94A3B8] text-opacity-90">
-                        {truncateNumber(
-                          coinData
-                            ? coinData.find(
+
+                      <div
+                        className={`group flex h-11 w-full cursor-pointer items-center rounded-[8px] bg-[#202329] pl-4 pr-2.5`}
+                      >
+                        <input
+                          id={"amount-input"}
+                          {...methods.register("deposit-wallet", {
+                            required: "Wallet is required",
+                          })}
+                          type={"text"}
+                          lang="en"
+                          step={"any"}
+                          autoComplete="off"
+                          onChange={handleWalletChange}
+                          placeholder={""}
+                          value={depositWallet}
+                          className={`flex w-full min-w-0 bg-transparent text-sm text-[#94A3B8] placeholder-[#94A3B8]  placeholder-opacity-40 outline-none`}
+                        />
+                      </div>
+
+                      <span
+                        className={`${
+                          methods.formState.errors["deposit-wallet"]
+                            ? "opacity-100"
+                            : "opacity-0"
+                        } mt-1.5 flex items-center gap-1 text-xs text-[#D92828]`}
+                      >
+                        {methods.formState.errors["deposit-wallet"]
+                          ? methods.formState.errors[
+                              "deposit-wallet"
+                            ]!.message!.toString()
+                          : "NONE"}
+                      </span>
+                    </div>
+                    {/* amount input box */}
+                    <div className="-mt-6 mb-0 flex w-full flex-col">
+                      <div className="mb-1 flex w-full items-center justify-between">
+                        <label className="mb-1 font-changa font-medium text-xs text-white text-opacity-90">
+                          {translator(actionType, language)}{" "}
+                          {translator("Amount", language)}
+                        </label>
+                        <span className="font-changa font-medium text-sm text-[#94A3B8] text-opacity-90">
+                          {truncateNumber(
+                            coinData
+                              ? coinData.find(
+                                  (coin) =>
+                                    coin?.tokenMint &&
+                                    coin?.tokenMint ===
+                                      selectedToken?.tokenMint,
+                                )?.amount ?? 0
+                              : 0,
+                          )}{" "}
+                          ${selectedToken?.tokenName}
+                        </span>
+                      </div>
+
+                      <div
+                        className={`group flex h-11 w-full cursor-pointer items-center rounded-[8px] bg-[#202329] pl-4 pr-2.5`}
+                      >
+                        <input
+                          id={"amount-input"}
+                          {...methods.register("amount", {
+                            required: "Amount is required",
+                          })}
+                          type={"number"}
+                          lang="en"
+                          step={"any"}
+                          autoComplete="off"
+                          onChange={handleAmountChange}
+                          placeholder={"00.00"}
+                          value={amount}
+                          className={`flex w-full min-w-0 bg-transparent text-sm text-[#94A3B8] placeholder-[#94A3B8]  placeholder-opacity-40 outline-none`}
+                        />
+                        <span
+                          className="text-xs font-medium text-white text-opacity-50 bg-[#292C32] hover:bg-[#47484A] focus:bg-[#47484A] transition-all rounded-[5px] mr-2 py-1.5 px-4"
+                          onClick={() => {
+                            let bal = 0;
+                            if (coinData) {
+                              let token = coinData.find(
                                 (coin) =>
                                   coin?.tokenMint &&
                                   coin?.tokenMint === selectedToken?.tokenMint,
-                              )?.amount ?? 0
-                            : 0,
-                        )}{" "}
-                        ${selectedToken?.tokenName}
+                              );
+                              if (token) bal = token?.amount;
+                            }
+
+                            if (!amount || amount === 0) setAmount(bal / 2);
+                            else setAmount(amount / 2);
+                          }}
+                        >
+                          {translator("Half", language)}
+                        </span>
+                        <span
+                          className="text-xs font-medium text-white text-opacity-50 bg-[#292C32] hover:bg-[#47484A] focus:bg-[#47484A] transition-all rounded-[5px] py-1.5 px-4"
+                          onClick={() => {
+                            let bal = 0;
+                            if (coinData) {
+                              let token = coinData.find(
+                                (coin) =>
+                                  coin?.tokenMint &&
+                                  coin?.tokenMint === selectedToken?.tokenMint,
+                              );
+                              if (token) bal = token?.amount;
+                            }
+
+                            setAmount(bal);
+                          }}
+                        >
+                          {translator("Max", language)}
+                        </span>
+                      </div>
+
+                      <span
+                        className={`${
+                          methods.formState.errors["amount"]
+                            ? "opacity-100"
+                            : "opacity-0"
+                        } mt-1.5 flex items-center gap-1 text-xs text-[#D92828]`}
+                      >
+                        {methods.formState.errors["amount"]
+                          ? methods.formState.errors[
+                              "amount"
+                            ]!.message!.toString()
+                          : "NONE"}
                       </span>
                     </div>
-
-                    <div
-                      className={`group flex h-11 w-full cursor-pointer items-center rounded-[8px] bg-[#202329] pl-4 pr-2.5`}
+                    {/* button  */}
+                    <button
+                      type="submit"
+                      className="rounded-[5px] -mt-1 mb-4 disabled:opacity-50 border border-[#F200F21A] bg-[#5F4DFF] hover:bg-[#7F71FF] focus:bg-[#4C3ECC] transition-all py-2.5 font-changa text-base font-medium text-[#F0F0F0] text-opacity-90"
+                      // disabled={actionType === "Deposit" && !checked}
                     >
-                      <input
-                        id={"amount-input"}
-                        {...methods.register("amount", {
-                          required: "Amount is required",
-                        })}
-                        type={"number"}
-                        lang="en"
-                        step={"any"}
-                        autoComplete="off"
-                        onChange={handleChange}
-                        placeholder={"00.00"}
-                        value={amount}
-                        className={`flex w-full min-w-0 bg-transparent text-sm text-[#94A3B8] placeholder-[#94A3B8]  placeholder-opacity-40 outline-none`}
-                      />
-                      <span
-                        className="text-xs font-medium text-white text-opacity-50 bg-[#292C32] hover:bg-[#47484A] focus:bg-[#47484A] transition-all rounded-[5px] mr-2 py-1.5 px-4"
-                        onClick={() => {
-                          let bal = 0;
-                          if (coinData) {
-                            let token = coinData.find(
-                              (coin) =>
-                                coin?.tokenMint &&
-                                coin?.tokenMint === selectedToken?.tokenMint,
-                            );
-                            if (token) bal = token?.amount;
-                          }
+                      {loading ? <Loader /> : translator(actionType, language)}
+                    </button>
+                  </>
+                )}
 
-                          if (!amount || amount === 0) setAmount(bal / 2);
-                          else setAmount(amount / 2);
-                        }}
-                      >
-                        {translator("Half", language)}
-                      </span>
-                      <span
-                        className="text-xs font-medium text-white text-opacity-50 bg-[#292C32] hover:bg-[#47484A] focus:bg-[#47484A] transition-all rounded-[5px] py-1.5 px-4"
-                        onClick={() => {
-                          let bal = 0;
-                          if (coinData) {
-                            let token = coinData.find(
-                              (coin) =>
-                                coin?.tokenMint &&
-                                coin?.tokenMint === selectedToken?.tokenMint,
-                            );
-                            if (token) bal = token?.amount;
-                          }
-
-                          setAmount(bal);
-                        }}
-                      >
-                        {translator("Max", language)}
-                      </span>
-                    </div>
-
-                    <span
-                      className={`${
-                        methods.formState.errors["amount"]
-                          ? "opacity-100"
-                          : "opacity-0"
-                      } mt-1.5 flex items-center gap-1 text-xs text-[#D92828]`}
-                    >
-                      {methods.formState.errors["amount"]
-                        ? methods.formState.errors[
-                            "amount"
-                          ]!.message!.toString()
-                        : "NONE"}
-                    </span>
-                  </div>
-                ) : actionType === "Deposit" ? (
+                {/* {actionType === "Deposit" && (
                   <div className="mb-0 flex w-full flex-col">
                     <div className="mb-1 flex w-full items-center justify-between">
                       <label className="mb-1 font-changa font-medium text-xs text-white text-opacity-90">
@@ -497,7 +536,75 @@ export default function BalanceModal() {
                         : "NONE"}
                     </span>
                   </div>
-                ) : (
+                )} */}
+                {/* wallet box  */}
+                {actionType === "Deposit" && (
+                  <>
+                    <div className="mb-0 flex w-full flex-col">
+                      <label className="mb-1 font-changa font-medium text-xs text-white text-opacity-90">
+                        {translator("Your Wallet", language)}
+                      </label>
+
+                      <div className="w-full rounded-md h-11 flex items-center justify-between bg-[#202329] px-4 py-2 text-[#94A3B8] text-sm font-chakra">
+                        <span className="text-[#94A3B8] text-sm font-chakra">
+                          {checked
+                            ? session?.user?.wallet ?? ""
+                            : "Please accept the terms."}
+                        </span>
+                        <FaRegCopy
+                          onClick={() => copyToClipboard(session?.user?.wallet)}
+                          className="w-5 h-5 text-[#555555] cursor-pointer"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="flex  gap-2">
+                      <div>
+                        <input
+                          type="checkbox"
+                          id="termsCheckbox"
+                          className="opacity-0 absolute h-[18px] w-[18px]"
+                          checked={checked}
+                          onChange={(e) => setChecked(e.target.checked)}
+                          style={{ zIndex: -1 }}
+                        />
+                        <div
+                          className="h-[18px] w-[18px] bg-[#202329] rounded-sm "
+                          onClick={() => setChecked(!checked)}
+                          style={{
+                            backgroundColor: checked ? "gray" : "#202329",
+                          }}
+                        >
+                          {checked && (
+                            <span className="flex items-center justify-center pt-1">
+                              <svg
+                                className="text-black h-3 w-3"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  fill="black"
+                                  d="M9 19l-7-7 1.41-1.41L9 16.17 20.59 4.59 22 6l-13 13z"
+                                />
+                              </svg>
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                      <label
+                        htmlFor="termsCheckbox"
+                        className="text-[10px] xs:text-[11px] sm2:text-[12px] text-[#94A3B8] font-chakra font-bold w-[397px] h-[47px]   text-justify"
+                        onClick={() => setChecked(!checked)}
+                      >
+                        {translator(
+                          "I agree with the Privacy Policy and with the Terms of Use, Gambling is not forbidden by my local authorities and I am at least 18 years old.",
+                          language,
+                        )}
+                      </label>
+                    </div>
+                  </>
+                )}
+
+                {actionType === "History" && (
                   <table className="flex w-full flex-col items-center">
                     <tr className="mb-2 flex w-full flex-row items-center gap-2 py-1 pr-[10px] text-sm font-light font-changa bg-table-secondary">
                       {historyHeaders.map((header, index) => (
@@ -561,61 +668,6 @@ export default function BalanceModal() {
                       )}
                     </div>
                   </table>
-                )}
-
-                {actionType !== "History" && (
-                  <button
-                    type="submit"
-                    className="rounded-[5px] -mt-1 mb-4 disabled:opacity-50 border border-[#F200F21A] bg-[#5F4DFF] hover:bg-[#7F71FF] focus:bg-[#4C3ECC] transition-all py-2.5 font-changa text-base font-medium text-[#F0F0F0] text-opacity-90"
-                    disabled={actionType === "Deposit" && !checked}
-                  >
-                    {loading ? <Loader /> : translator(actionType, language)}
-                  </button>
-                )}
-                {actionType === "Deposit" && (
-                  <div className="flex  gap-2">
-                    <div>
-                      <input
-                        type="checkbox"
-                        id="termsCheckbox"
-                        className="opacity-0 absolute h-[18px] w-[18px]"
-                        checked={checked}
-                        onChange={(e) => setChecked(e.target.checked)}
-                        style={{ zIndex: -1 }}
-                      />
-                      <div
-                        className="h-[18px] w-[18px] bg-[#202329] rounded-sm "
-                        onClick={() => setChecked(!checked)}
-                        style={{
-                          backgroundColor: checked ? "gray" : "#202329",
-                        }}
-                      >
-                        {checked && (
-                          <span className="flex items-center justify-center pt-1">
-                            <svg
-                              className="text-black h-3 w-3"
-                              viewBox="0 0 24 24"
-                            >
-                              <path
-                                fill="black"
-                                d="M9 19l-7-7 1.41-1.41L9 16.17 20.59 4.59 22 6l-13 13z"
-                              />
-                            </svg>
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                    <label
-                      htmlFor="termsCheckbox"
-                      className="text-[10px] xs:text-[11px] sm2:text-[12px] text-[#94A3B8] font-chakra font-bold w-[397px] h-[47px]   text-justify"
-                      onClick={() => setChecked(!checked)}
-                    >
-                      {translator(
-                        "I agree with the Privacy Policy and with the Terms of Use, Gambling is not forbidden by my local authorities and I am at least 18 years old.",
-                        language,
-                      )}
-                    </label>
-                  </div>
                 )}
               </form>
             </FormProvider>
