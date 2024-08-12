@@ -186,7 +186,13 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
     const referredUsers = await User.find({
       referredByChain: { $in: campaignIds },
-    }).lean();
+    })
+      .populate({
+        path: "account",
+        model: "GameUser",
+        select: "email wallet name image",
+      })
+      .lean();
 
     return res.status(200).json({
       success: true,

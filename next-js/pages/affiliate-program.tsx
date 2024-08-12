@@ -17,24 +17,30 @@ import {
 } from "@/context/transactions";
 import { SPL_TOKENS, commissionLevels } from "@/context/config";
 
-interface Referral {
+interface GameUser {
   _id: string;
   wallet: string;
   email: string;
-  __v: number;
+  name: string;
+  image: string;
+}
+
+interface Referral {
+  _id: string;
+  account: GameUser;
   campaigns: Campaign[];
   createdAt: string;
   feeGenerated: Record<string, any>;
   referredByChain: any[];
   updatedAt: string;
   volume: Record<string, any>;
+  __v: number;
 }
 
 type ReferralData = Referral[];
 
 interface Campaign {
   _id: string;
-  wallet: string;
   campaignName: string;
   referralCode: string;
   totalEarnings: Record<string, any>;
@@ -762,9 +768,10 @@ export default function AffiliateProgram() {
                               >
                                 <div className="w-full flex items-center justify-between cursor-pointer">
                                   <span className="w-full text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
-                                    {!user.wallet || user.wallet === null
-                                      ? user.email
-                                      : obfuscatePubKey(user.wallet)}
+                                    {!user.account.wallet ||
+                                    user.account.wallet === null
+                                      ? user.account.email
+                                      : obfuscatePubKey(user.account.wallet)}
                                   </span>
                                   <span className="w-full text-center font-changa text-sm text-opacity-75">
                                     <span
@@ -882,7 +889,8 @@ export default function AffiliateProgram() {
                                 </span>
                                 <span className="w-full text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
                                   {formatNumber(
-                                    token.totalEarnings - token.unclaimedEarnings,
+                                    token.totalEarnings -
+                                      token.unclaimedEarnings,
                                     2,
                                   )}
                                 </span>
