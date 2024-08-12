@@ -3,6 +3,9 @@ import { v4 as uuidv4 } from "uuid";
 import User from "../../../../models/games/gameUser";
 import connectDatabase from "../../../../utils/database";
 import authenticateUser from "../../../../utils/authenticate";
+import { PublicKey, Keypair } from "@solana/web3.js";
+import { bs58 } from "@project-serum/anchor/dist/cjs/utils/bytes";
+import { encryptServerSeed, generateIV } from "@/utils/provably-fair";
 
 /**
  * @swagger
@@ -164,6 +167,16 @@ export default async function handler(
       );
     } else {
       if (email) {
+        const keyPair = Keypair.generate();
+        console.log("Public Key:", keyPair.publicKey.toString());
+        console.log("Secret Key:", keyPair.secretKey);
+
+        const secretKey =  bs58.encode(keyPair.secretKey)
+        console.log(secretKey)
+        const iv = generateIV();
+        const encryptionKey = Buffer.from(process.env.ENCRYPTION_KEY!, "hex");
+        const publicKey = keyPair.publicKey.toString()
+        const privateKey = encryptServerSeed(secretKey, encryptionKey, iv);
         user = await User.findOneAndUpdate(
           {
             email,
@@ -173,7 +186,8 @@ export default async function handler(
               email,
               name,
               image,
-              wallet: 'abcdefghijklmonp',
+              wallet: publicKey,
+              privateKey,
               isWeb2User: true,
               deposit: [defaultDeposit],
             },

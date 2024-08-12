@@ -38,7 +38,7 @@ export default function ConnectWallet() {
           }}
           className="bg-[#192634] hover:bg-[#121D28] transition-all w-full sm:w-fit flex items-center rounded-md h-10 px-5"
         >
-          {status === "authenticated" ? (
+          {status === "unauthenticated" ? (
             <span className="connect-wallet text-white font-semibold rounded-md text-sm">
               {translator("Connect", language)}
             </span>

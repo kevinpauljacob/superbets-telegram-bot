@@ -1,6 +1,6 @@
 import { useGlobalContext } from "@/components/GlobalContext";
 import { TButton, TablePagination } from "@/components/table/Table";
-import { errorCustom } from "@/components/toasts/ToastGroup";
+import { errorCustom, successCustom } from "@/components/toasts/ToastGroup";
 import { formatNumber, translator } from "@/context/transactions";
 import Image from "next/image";
 import { useRouter } from "next/router";
@@ -69,6 +69,7 @@ export const copyToClipboard = (text?: string) => {
     navigator.clipboard
       .writeText(text)
       .catch((err) => console.error("Failed to copy text: ", err));
+    successCustom("Copied to clipboard!");
   } else {
     console.warn("No text provided to copy to clipboard.");
   }

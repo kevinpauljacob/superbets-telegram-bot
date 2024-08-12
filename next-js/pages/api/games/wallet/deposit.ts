@@ -17,7 +17,7 @@ import { SPL_TOKENS } from "@/context/config";
 import {
   createDepositTxn,
   retryTxn,
-  verifyFrontendTransaction,
+  verifyTransaction,
 } from "@/context/transactions";
 import { bs58 } from "@project-serum/anchor/dist/cjs/utils/bytes";
 
@@ -182,7 +182,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         Buffer.from(transactionBase64 as string, "base64"),
       );
 
-      if (!verifyFrontendTransaction(txn, vTxn))
+      if (!verifyTransaction(txn, vTxn))
         return res
           .status(400)
           .json({ success: false, message: "Transaction verfication failed" });

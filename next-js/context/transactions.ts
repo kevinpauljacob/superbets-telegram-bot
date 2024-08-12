@@ -1,23 +1,28 @@
-import {
-  PublicKey,
-  Connection,
-  Transaction,
-  SystemProgram,
-  ComputeBudgetProgram,
-  BlockhashWithExpiryBlockHeight,
-} from "@solana/web3.js";
-import {
-  getAssociatedTokenAddress,
-  createTransferInstruction,
-  createAssociatedTokenAccountIdempotentInstruction,
-} from "@solana/spl-token";
-import { WalletContextState } from "@solana/wallet-adapter-react";
 import { translationsMap } from "@/components/GlobalContext";
 import {
   errorCustom,
   successCustom,
   warningCustom,
 } from "@/components/toasts/ToastGroup";
+import { BN } from "@project-serum/anchor";
+import {
+  createAssociatedTokenAccountIdempotentInstruction,
+  createTransferInstruction,
+  getAssociatedTokenAddress,
+} from "@solana/spl-token";
+import { WalletContextState } from "@solana/wallet-adapter-react";
+import {
+  AddressLookupTableAccount,
+  BlockhashWithExpiryBlockHeight,
+  ComputeBudgetProgram,
+  Connection,
+  PublicKey,
+  SystemProgram,
+  Transaction,
+  TransactionInstruction,
+  TransactionMessage,
+  VersionedTransaction,
+} from "@solana/web3.js";
 import { SPL_TOKENS } from "./config";
 import { SessionUser } from "@/components/ConnectWallet";
 
@@ -81,148 +86,6 @@ export const translator = (text: string, language: string) => {
     }
   });
   return result;
-};
-
-export const stakeFOMO = async (
-  wallet: WalletContextState,
-  amount: number,
-  tokenMint: string,
-) => {
-  if (amount == 0) {
-    errorCustom("Please enter an amount greater than 0");
-    return { success: true, message: "Please enter an amount greater than 0" };
-  }
-
-  if (!wallet.publicKey) {
-    errorCustom("Wallet not connected");
-    return { success: true, message: "Wallet not connected" };
-  }
-  try {
-    let { transaction, blockhashWithExpiryBlockHeight } =
-      await createDepositTxn(
-        wallet.publicKey,
-        amount,
-        tokenMint,
-        stakingPublicKey,
-      );
-
-    transaction = await wallet.signTransaction!(transaction);
-
-    const transactionBase64 = transaction
-      .serialize({
-        requireAllSignatures: false,
-      })
-      .toString("base64");
-
-    const res = await fetch(`/api/staking/wallet/stake`, {
-      method: "POST",
-      body: JSON.stringify({
-        blockhashWithExpiryBlockHeight,
-        transactionBase64,
-        wallet: wallet.publicKey,
-        amount,
-        tokenMint,
-      }),
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-
-    const { success, message } = await res.json();
-
-    if (success === false) {
-      errorCustom(message);
-      throw new Error(message);
-    }
-
-    successCustom("Stake successfull!");
-
-    return { success: true, message };
-  } catch (error) {
-    errorCustom("Unexpected error!");
-    return { success: false, message: error };
-  }
-};
-
-export const unstakeFOMO = async (
-  wallet: WalletContextState,
-  amount: number,
-  tokenMint: string,
-) => {
-  if (amount == 0) {
-    errorCustom("Please enter an amount greater than 0");
-    return { success: true, message: "Please enter an amount greater than 0" };
-  }
-
-  if (!wallet.publicKey) {
-    errorCustom("Wallet not connected");
-    return { success: true, message: "Wallet not connected" };
-  }
-
-  try {
-    let { transaction, blockhashWithExpiryBlockHeight } =
-      await createWithdrawTxn(
-        wallet.publicKey!,
-        amount,
-        tokenMint,
-        stakingPublicKey,
-      );
-
-    transaction = await wallet.signTransaction!(transaction);
-    const transactionBase64 = transaction
-      .serialize({
-        requireAllSignatures: false,
-      })
-      .toString("base64");
-
-    const res = await fetch(`/api/staking/wallet/unstake`, {
-      method: "POST",
-      body: JSON.stringify({
-        transactionBase64,
-        wallet: wallet.publicKey,
-        amount,
-        tokenMint,
-        blockhashWithExpiryBlockHeight,
-      }),
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-
-    const { success, message } = await res.json();
-
-    if (success === false) {
-      errorCustom(message);
-      throw new Error(message);
-    }
-
-    successCustom("Unstake successfull!");
-
-    return { success: true, message };
-  } catch (error) {
-    errorCustom("Unexpected error!");
-
-    return { success: true, message: error };
-  }
-};
-
-export const verifyTransaction = (
-  transaction: Transaction,
-  vTransaction: Transaction,
-) => {
-  const transactionInstructions = JSON.stringify(
-    transaction.instructions.filter(
-      (i) => !i.programId.equals(ComputeBudgetProgram.programId),
-    ),
-  );
-
-  const vTransactionInstructions = JSON.stringify(
-    vTransaction.instructions.filter(
-      (i) => !i.programId.equals(ComputeBudgetProgram.programId),
-    ),
-  );
-
-  return transactionInstructions === vTransactionInstructions;
 };
 
 export const createDepositTxn = async (
@@ -468,9 +331,136 @@ export const withdraw = async (amount: number, tokenMint: string) => {
   // }
 };
 
-export const verifyFrontendTransaction = (
+export const depositLulo = async (
+  wallet: WalletContextState,
+  amount: number,
+  tokenMint: string,
+  campaignId: any = null,
+) => {
+  if (amount == 0) {
+    errorCustom("Please enter an amount greater than 0");
+    return { success: true, message: "Please enter an amount greater than 0" };
+  }
+
+  if (!wallet.publicKey) {
+    errorCustom("Wallet not connected");
+    return { success: true, message: "Wallet not connected" };
+  }
+
+  try {
+    let { transaction, blockhashWithExpiryBlockHeight } =
+      await createDepositLuloTxn(
+        wallet.publicKey,
+        amount,
+        tokenMint,
+        connection,
+      );
+
+    transaction = await wallet.signTransaction!(transaction);
+
+    const transactionBase64 = Buffer.from(transaction.serialize()).toString(
+      "base64",
+    );
+
+    const res = await fetch(`/api/games/wallet/depositLulo`, {
+      method: "POST",
+      body: JSON.stringify({
+        transactionBase64,
+        wallet: wallet.publicKey,
+        amount,
+        tokenMint,
+        blockhashWithExpiryBlockHeight,
+        campaignId,
+      }),
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    const { success, message } = await res.json();
+
+    if (success === false) {
+      if (message.includes("limit exceeded"))
+        warningCustom(message, "bottom-right", 8000);
+      else errorCustom(message);
+      throw new Error(message);
+    }
+
+    successCustom("Deposit successfull!");
+
+    return { success: true, message };
+  } catch (error) {
+    // errorCustom("Unexpected error!");
+    return { success: false, message: error };
+  }
+};
+
+export const withdrawLulo = async (
+  wallet: WalletContextState,
+  amount: number,
+  tokenMint: string,
+) => {
+  if (amount == 0) {
+    errorCustom("Please enter an amount greater than 0");
+    return { success: true, message: "Please enter an amount greater than 0" };
+  }
+
+  if (!wallet?.publicKey) {
+    errorCustom("Wallet not connected");
+    return { success: true, message: "Wallet not connected" };
+  }
+
+  try {
+    let { transaction, blockhashWithExpiryBlockHeight } =
+      await createWithdrawLuloTxn(
+        wallet.publicKey,
+        amount,
+        tokenMint,
+        connection,
+      );
+
+    transaction = await wallet.signTransaction!(transaction);
+
+    const transactionBase64 = Buffer.from(transaction.serialize()).toString(
+      "base64",
+    );
+
+    const res = await fetch(`/api/games/wallet/withdrawLulo`, {
+      method: "POST",
+      body: JSON.stringify({
+        transactionBase64,
+        wallet: wallet.publicKey,
+        amount,
+        tokenMint,
+        blockhashWithExpiryBlockHeight,
+      }),
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    const { success, message } = await res.json();
+
+    if (success === false) {
+      if (message.includes("limit exceeded"))
+        warningCustom(message, "bottom-right", 8000);
+      else errorCustom(message);
+      throw new Error(message);
+    }
+
+    successCustom("Withdrawal successfull!");
+
+    return { success: true, message };
+  } catch (error) {
+    // errorCustom("Unexpected error!");
+
+    return { success: true, message: error };
+  }
+};
+
+export const verifyTransaction = (
   transaction: Transaction,
-  verificationTransaction: Transaction,
+  vTransaction: Transaction,
 ) => {
   const transactionInstructions = JSON.stringify(
     transaction.instructions.filter(
@@ -478,21 +468,46 @@ export const verifyFrontendTransaction = (
     ),
   );
 
-  const verificationTransactionInstructions = JSON.stringify(
-    verificationTransaction.instructions.filter(
+  const vTransactionInstructions = JSON.stringify(
+    vTransaction.instructions.filter(
       (i) => !i.programId.equals(ComputeBudgetProgram.programId),
     ),
   );
 
   console.log(transactionInstructions);
-  console.log(verificationTransactionInstructions);
+  console.log(vTransactionInstructions);
 
-  return transactionInstructions === verificationTransactionInstructions;
+  return transactionInstructions !== vTransactionInstructions;
+};
+
+export const verifyVersionedTransaction = (
+  transactions: Array<VersionedTransaction>,
+  vTransactions: Array<VersionedTransaction>,
+) => {
+  if (transactions.length !== vTransactions.length) {
+    return false;
+  }
+
+  transactions.forEach((transaction, i) => {
+    const transactionInstructions = JSON.stringify(
+      transaction.message.compiledInstructions,
+    );
+
+    const vTransactionInstructions = JSON.stringify(
+      vTransactions[i].message.compiledInstructions,
+    );
+
+    if (transactionInstructions !== vTransactionInstructions) {
+      return false;
+    }
+  });
+
+  return true;
 };
 
 export async function retryTxn(
   connection: Connection,
-  transaction: Transaction,
+  transaction: Transaction | VersionedTransaction,
   blockhashContext: BlockhashWithExpiryBlockHeight,
 ) {
   const { blockhash, lastValidBlockHeight } = blockhashContext;
@@ -512,7 +527,7 @@ export async function retryTxn(
       maxRetries: 0,
     });
     await new Promise((r) => setTimeout(r, 2000));
-    // console.log("retry count: ", ++j);
+    console.log("retry count: ", ++j);
     connection
       .confirmTransaction({
         lastValidBlockHeight,
@@ -521,7 +536,7 @@ export async function retryTxn(
       })
       .then((data) => {
         if ((data.value as any).confirmationStatus) {
-          // console.log("confirmed txn", data.value, txn);
+          console.log("confirmed txn", data.value, txn);
           finalTxn = txn;
           flag = false;
         }
@@ -751,6 +766,212 @@ export const getSolPrice = async (timeInSec: number) => {
     });
 
   return betEndPrice;
+};
+
+export const createDepositLuloTxn = async (
+  wallet: PublicKey,
+  amount: number,
+  tokenMint: string,
+  connection: Connection,
+) => {
+  const { decimal } = SPL_TOKENS.find((t) => t.tokenMint === tokenMint)!;
+
+  const depositAmount = Math.floor(amount * 10 ** decimal);
+
+  const blockhashWithExpiryBlockHeight = await connection.getLatestBlockhash();
+
+  const instructions: Array<TransactionInstruction> = [
+    SystemProgram.transfer({
+      fromPubkey: wallet,
+      toPubkey: casinoPublicKey,
+      lamports: 200000,
+    }),
+  ];
+
+  if (tokenMint === "SOL") {
+    instructions.push(
+      SystemProgram.transfer({
+        fromPubkey: wallet,
+        toPubkey: casinoPublicKey,
+        lamports: depositAmount,
+      }),
+    );
+  } else {
+    const tokenId = new PublicKey(tokenMint);
+    const userAta = await getAssociatedTokenAddress(tokenId, wallet);
+    const casinoAta = await getAssociatedTokenAddress(tokenId, casinoPublicKey);
+
+    instructions.push(
+      createTransferInstruction(userAta, casinoAta, wallet, depositAmount),
+    );
+  }
+
+  const luloReqBody = {
+    owner: casinoPublicKey.toBase58(),
+    mintAddress:
+      tokenMint !== "SOL"
+        ? tokenMint
+        : "So11111111111111111111111111111111111111112",
+    depositAmount: amount,
+  };
+
+  const response = await fetch(
+    `https://api.flexlend.fi/generate/account/deposit?priorityFee=100000`,
+    {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+        "x-wallet-pubkey": casinoPublicKey.toBase58(),
+      },
+      body: JSON.stringify(luloReqBody),
+    },
+  ).then((res) => res.json());
+
+  const {
+    data: { transactionMeta },
+  } = response;
+
+  const luloTxn = VersionedTransaction.deserialize(
+    Buffer.from(transactionMeta[0].transaction, "base64"),
+  );
+
+  const addressLookupTableAccounts = await Promise.all(
+    luloTxn.message.addressTableLookups.map(async (lookup) => {
+      return new AddressLookupTableAccount({
+        key: lookup.accountKey,
+        state: AddressLookupTableAccount.deserialize(
+          await connection
+            .getAccountInfo(lookup.accountKey)
+            .then((res) => res!.data),
+        ),
+      });
+    }),
+  );
+  const message = TransactionMessage.decompile(luloTxn.message, {
+    addressLookupTableAccounts,
+  });
+
+  instructions.push(...message.instructions);
+
+  const messageV0 = new TransactionMessage({
+    payerKey: casinoPublicKey,
+    recentBlockhash: blockhashWithExpiryBlockHeight.blockhash,
+    instructions,
+  }).compileToV0Message(addressLookupTableAccounts);
+
+  const transaction = new VersionedTransaction(messageV0);
+
+  return { transaction, blockhashWithExpiryBlockHeight };
+};
+
+export const createWithdrawLuloTxn = async (
+  wallet: PublicKey,
+  amount: number,
+  tokenMint: string,
+  connection: Connection,
+) => {
+  const { decimal } = SPL_TOKENS.find((t) => t.tokenMint === tokenMint)!;
+
+  const withdrawAmount = Math.floor(amount * 10 ** decimal);
+
+  const blockhashWithExpiryBlockHeight = await connection.getLatestBlockhash();
+
+  const instructions: Array<TransactionInstruction> = [
+    SystemProgram.transfer({
+      fromPubkey: wallet,
+      toPubkey: casinoPublicKey,
+      lamports: 200000,
+    }),
+  ];
+
+  const luloReqBody = {
+    owner: casinoPublicKey.toBase58(),
+    mintAddress:
+      tokenMint !== "SOL"
+        ? tokenMint
+        : "So11111111111111111111111111111111111111112",
+    withdrawAmount: amount,
+    withdrawAll: false,
+  };
+
+  const response = await fetch(
+    `https://api.flexlend.fi/generate/account/withdraw?priorityFee=100000`,
+    {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+        "x-wallet-pubkey": casinoPublicKey.toBase58(),
+      },
+      body: JSON.stringify(luloReqBody),
+    },
+  ).then((res) => res.json());
+
+  const {
+    data: { transactionMeta },
+  } = response;
+
+  const luloTxn = VersionedTransaction.deserialize(
+    Buffer.from(transactionMeta[0].transaction, "base64"),
+  );
+
+  const addressLookupTableAccounts = await Promise.all(
+    luloTxn.message.addressTableLookups.map(async (lookup) => {
+      return new AddressLookupTableAccount({
+        key: lookup.accountKey,
+        state: AddressLookupTableAccount.deserialize(
+          await connection
+            .getAccountInfo(lookup.accountKey)
+            .then((res) => res!.data),
+        ),
+      });
+    }),
+  );
+  const message = TransactionMessage.decompile(luloTxn.message, {
+    addressLookupTableAccounts,
+  });
+
+  instructions.push(...message.instructions);
+
+  if (tokenMint === "SOL") {
+    instructions.push(
+      SystemProgram.transfer({
+        fromPubkey: casinoPublicKey,
+        toPubkey: wallet,
+        lamports: withdrawAmount,
+      }),
+    );
+  } else {
+    const tokenId = new PublicKey(tokenMint);
+    const userAta = await getAssociatedTokenAddress(tokenId, wallet);
+    const casinoAta = await getAssociatedTokenAddress(tokenId, casinoPublicKey);
+
+    instructions.push(
+      createAssociatedTokenAccountIdempotentInstruction(
+        casinoPublicKey,
+        userAta,
+        wallet,
+        tokenId,
+      ),
+      createTransferInstruction(
+        casinoAta,
+        userAta,
+        casinoPublicKey,
+        withdrawAmount,
+      ),
+    );
+  }
+
+  const messageV0 = new TransactionMessage({
+    payerKey: casinoPublicKey,
+    recentBlockhash: blockhashWithExpiryBlockHeight.blockhash,
+    instructions,
+  }).compileToV0Message(addressLookupTableAccounts);
+
+  const transaction = new VersionedTransaction(messageV0);
+
+  return { transaction, blockhashWithExpiryBlockHeight };
 };
 
 export const createClaimEarningsTxn = async (

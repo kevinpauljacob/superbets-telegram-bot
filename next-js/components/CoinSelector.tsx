@@ -73,7 +73,7 @@ export default function CoinSelector() {
         onClick={() => {
           session?.user?.wallet
             ? setShowWalletModal(true)
-            : errorCustom("User not connected!");
+            : setShowConnectModal(true)
         }}
         className="flex items-center h-[2.3rem] md:h-[2.4rem] px-5 md:px-4 py-0 md:py-2 gap-1 md:gap-1.5 bg-[#5F4DFF] disabled:bg-[#555555] hover:bg-[#7F71FF] focus:bg-[#4C3ECC] transition-all cursor-pointer rounded-[5px]"
       >

@@ -25,7 +25,7 @@ import { SPL_TOKENS } from "@/context/config";
 import {
   createWithdrawTxn,
   retryTxn,
-  verifyFrontendTransaction,
+  verifyTransaction,
 } from "@/context/transactions";
 
 /**
@@ -212,7 +212,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         Buffer.from(transactionBase64 as string, "base64"),
       );
 
-      if (!verifyFrontendTransaction(txn, vTxn))
+      if (!verifyTransaction(txn, vTxn))
         return res
           .status(400)
           .json({ success: false, message: "Transaction verfication failed" });
@@ -391,9 +391,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
       // netTransfer = 1000000000;
 
-      const tokenName = SPL_TOKENS.find(
-        (t) => t.tokenMint === tokenMint,
-      )?.tokenName!;
+      const tokenName = SPL_TOKENS.find((t) => t.tokenMint === tokenMint)
+        ?.tokenName!;
 
       if (netTransfer > timeWeightedAvgLimit[tokenName]) {
         await Deposit.create({
