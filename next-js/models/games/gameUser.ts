@@ -6,7 +6,6 @@ const gameUserSchema = new Schema(
     wallet: {
       type: String,
       unique: true,
-      sparse: true,
     },
     name: {
       type: String,
@@ -15,7 +14,6 @@ const gameUserSchema = new Schema(
     email: {
       type: String,
       unique: true,
-      sparse: true,
     },
     image: {
       type: String,

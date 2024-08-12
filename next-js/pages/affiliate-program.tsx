@@ -2,7 +2,6 @@ import { useGlobalContext } from "@/components/GlobalContext";
 import { TButton, TablePagination } from "@/components/table/Table";
 import { errorCustom } from "@/components/toasts/ToastGroup";
 import { formatNumber, translator } from "@/context/transactions";
-import { useWallet } from "@solana/wallet-adapter-react";
 import Image from "next/image";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
@@ -76,7 +75,6 @@ export const copyToClipboard = (text?: string) => {
 };
 
 export default function AffiliateProgram() {
-  const wallet = useWallet();
   const router = useRouter();
   const {
     language,
@@ -502,7 +500,7 @@ export default function AffiliateProgram() {
           <TButton
             active={referred}
             onClick={() => {
-              if (wallet.publicKey || session?.user?.email) {
+              if (session?.user?.email) {
                 setReferred(true);
                 setCampaigns(false);
                 setEarnings(false);
@@ -542,7 +540,9 @@ export default function AffiliateProgram() {
       </div>
 
       <div
-        className={`${campaigns || earnings ? "hidden sm:flex" : ""} flex flex-col gap-[11px] sm:gap-[14px] sm:mt-7 mb-[1.75rem] sm:mb-[3.25rem]`}
+        className={`${
+          campaigns || earnings ? "hidden sm:flex" : ""
+        } flex flex-col gap-[11px] sm:gap-[14px] sm:mt-7 mb-[1.75rem] sm:mb-[3.25rem]`}
       >
         <div className="flex gap-[14px] w-full">
           <div className="flex flex-col justify-between grow bg-staking-bg rounded-[5px] p-4 w-[30%]">
@@ -564,12 +564,15 @@ export default function AffiliateProgram() {
                 </p>
                 <div className="flex gap-3 mb-4">
                   <span className="text-ellipsis overflow-hidden bg-white/5 rounded-[5px] text-sm font-chakra text-[#94A3B8] font-normal px-4 py-1">
-                    {`referralCode=${userCampaigns[userCampaigns.length - 1]?.referralCode}`}
+                    {`referralCode=${userCampaigns[userCampaigns.length - 1]
+                      ?.referralCode}`}
                   </span>
                   <button
                     onClick={() => {
                       copyToClipboard(
-                        `https://superbets.games?referralCode=${userCampaigns[userCampaigns.length - 1]?.referralCode}`,
+                        `https://superbets.games?referralCode=${userCampaigns[
+                          userCampaigns.length - 1
+                        ]?.referralCode}`,
                       );
                       setButtonText("Copied!");
                       setTimeout(() => {
@@ -605,7 +608,7 @@ export default function AffiliateProgram() {
           <TButton
             active={referred}
             onClick={() => {
-              if (wallet.publicKey || session?.user?.email) {
+              if (session?.user?.email) {
                 setReferred(true);
                 setCampaigns(false);
                 setEarnings(false);
@@ -688,7 +691,7 @@ export default function AffiliateProgram() {
               <button
                 disabled={totalClaimable === 0}
                 className="disabled:cursor-default disabled:opacity-70 disabled:bg-[#555555] text-white text-xs lg:text-base font-semibold font-chakra bg-[#5F4DFF] hover:bg-[#7F71FF] focus:bg-[#4C3ECC] transition-all cursor-pointer rounded-[5px] py-2 px-7 lg:px-11"
-                onClick={() => claimEarnings(wallet, userCampaigns)}
+                onClick={() => claimEarnings(userCampaigns)}
               >
                 {translator("CLAIM", language)}
               </button>
@@ -711,15 +714,15 @@ export default function AffiliateProgram() {
                   </span>
                 ))
               : earnings
-                ? earningsTabHeaders.map((header, index) => (
-                    <span
-                      key={index}
-                      className="w-full text-center font-changa text-[#F0F0F080]"
-                    >
-                      {translator(header, language)}
-                    </span>
-                  ))
-                : null}
+              ? earningsTabHeaders.map((header, index) => (
+                  <span
+                    key={index}
+                    className="w-full text-center font-changa text-[#F0F0F080]"
+                  >
+                    {translator(header, language)}
+                  </span>
+                ))
+              : null}
           </div>
           <div className="mb-[1.4rem] flex md:hidden w-full flex-row items-center bg-[#121418] rounded-md py-1 gap-2">
             {smallScreenReferredTabHeaders.map((header, index) => (
@@ -770,7 +773,16 @@ export default function AffiliateProgram() {
                                     <span
                                       className="rounded-[5px] px-2.5"
                                       style={{
-                                        backgroundColor: `rgba(${parseInt(colors[level]?.slice(0, 2), 16)}, ${parseInt(colors[level]?.slice(2, 4), 16)}, ${parseInt(colors[level]?.slice(4, 6), 16)}, 0.1)`,
+                                        backgroundColor: `rgba(${parseInt(
+                                          colors[level]?.slice(0, 2),
+                                          16,
+                                        )}, ${parseInt(
+                                          colors[level]?.slice(2, 4),
+                                          16,
+                                        )}, ${parseInt(
+                                          colors[level]?.slice(4, 6),
+                                          16,
+                                        )}, 0.1)`,
                                         color: `#${colors[level]}`,
                                       }}
                                     >
@@ -785,7 +797,9 @@ export default function AffiliateProgram() {
                                       );
                                       return result.currency === "$"
                                         ? `$${formatNumber(result.amount, 2)}`
-                                        : `${formatNumber(result.amount, 2)} ${result.currency}`;
+                                        : `${formatNumber(result.amount, 2)} ${
+                                            result.currency
+                                          }`;
                                     })()}
                                   </span>
                                   <span className="w-full hidden md:block text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
@@ -803,7 +817,9 @@ export default function AffiliateProgram() {
                                       );
                                       return result.currency === "$"
                                         ? `$${formatNumber(result.amount, 2)}`
-                                        : `${formatNumber(result.amount, 2)} ${result.currency}`;
+                                        : `${formatNumber(result.amount, 2)} ${
+                                            result.currency
+                                          }`;
                                     })()}
                                   </span>
                                 </div>
@@ -882,7 +898,8 @@ export default function AffiliateProgram() {
                                 </span>
                                 <span className="w-full text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
                                   {formatNumber(
-                                    token.totalEarnings - token.unclaimedEarnings,
+                                    token.totalEarnings -
+                                      token.unclaimedEarnings,
                                     2,
                                   )}
                                 </span>

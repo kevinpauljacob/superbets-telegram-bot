@@ -1,6 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
-import { useWallet } from "@solana/wallet-adapter-react";
 import { useSession } from "next-auth/react";
 import Image from "next/image";
 import BetSetting from "@/components/BetSetting";
@@ -40,13 +39,11 @@ function debounce<T extends (...args: any[]) => void>(
 }
 
 export default function Roulette1() {
-  const wallet = useWallet();
   const methods = useForm();
 
   const {
     coinData,
     getBalance,
-    getWalletBalance,
     setShowAutoModal,
     autoWinChange,
     autoLossChange,
@@ -375,9 +372,6 @@ export default function Roulette1() {
           translator("You cannot bet with this token!", language),
         );
       }
-      if (session?.user?.wallet && (!wallet.connected || !wallet.publicKey)) {
-        throw new Error(translator("Wallet not Connected", language));
-      }
       if (!betAmt || betAmt === 0) {
         throw new Error(translator("Set Amount", language));
       }
@@ -395,7 +389,6 @@ export default function Roulette1() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          wallet: wallet.publicKey,
           email: session?.user?.email,
           tokenMint: selectedCoin.tokenMint,
           wager: transformedBets,
@@ -526,9 +519,9 @@ export default function Roulette1() {
             (autoWinChangeReset || autoLossChangeReset
               ? betAmt
               : autoBetCount === "inf"
-                ? Math.max(0, betAmt)
-                : betAmt *
-                  (autoLossChange !== null ? autoLossChange / 100.0 : 0));
+              ? Math.max(0, betAmt)
+              : betAmt *
+                (autoLossChange !== null ? autoLossChange / 100.0 : 0));
       }
       if (
         useAutoConfig &&
@@ -615,7 +608,7 @@ export default function Roulette1() {
       ) {
         setStartAuto(true);
       }
-    } else if (wallet.connected || session?.user?.email) {
+    } else if (session?.user?.email) {
       bet();
     }
   };
@@ -623,10 +616,9 @@ export default function Roulette1() {
   useEffect(() => {
     if (refresh && session?.user) {
       getBalance();
-      getWalletBalance();
       setRefresh(false);
     }
-  }, [wallet?.publicKey, session?.user, refresh]);
+  }, [session?.user, refresh]);
 
   useEffect(() => {
     const transformedBets = transformBetsToSingleNumbers(
@@ -1184,7 +1176,11 @@ export default function Roulette1() {
                     {tokens.map((chip) => (
                       <div
                         key={chip.id}
-                        className={`border rounded cursor-pointer bg-[#1e2024] flex justify-center items-center py-1 px-[-2px] ${selectedToken?.value === chip.value ? "border-gray-200" : "border-gray-600"}`}
+                        className={`border rounded cursor-pointer bg-[#1e2024] flex justify-center items-center py-1 px-[-2px] ${
+                          selectedToken?.value === chip.value
+                            ? "border-gray-200"
+                            : "border-gray-600"
+                        }`}
                         onClick={() => setSelectedToken(chip)}
                       >
                         <img src={chip.image} alt={chip.value} />
@@ -1249,7 +1245,9 @@ export default function Roulette1() {
       </GameOptions>
       <GameDisplay>
         <div
-          className={`fadeInUp absolute inset-0 bg-black sm:bg-opacity-90 flex items-center justify-center z-50 ${overlay ? "" : "hidden fadeOutDown"}`}
+          className={`fadeInUp absolute inset-0 bg-black sm:bg-opacity-90 flex items-center justify-center z-50 ${
+            overlay ? "" : "hidden fadeOutDown"
+          }`}
         >
           <div className="roulette relative w-full h-full flex flex-col items-center justify-center rounded-full m-6 sm:m-0">
             <img
@@ -1289,7 +1287,9 @@ export default function Roulette1() {
           <ResultDisplay numbers={resultNumbers} />
 
           <div
-            className={`hidden roulette relative min-w-[18rem] min-h-[18rem] sm:flex flex-col items-center justify-center ${overlay ? "hidden fadeOutDown" : ""}`}
+            className={`hidden roulette relative min-w-[18rem] min-h-[18rem] sm:flex flex-col items-center justify-center ${
+              overlay ? "hidden fadeOutDown" : ""
+            }`}
           >
             <img className="absolute w-[90%] h-[90%]" src="/bg.svg " />
             <img className="wheel absolute" src="/wheel.svg" />

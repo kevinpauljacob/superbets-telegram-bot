@@ -1,4 +1,3 @@
-import { useWallet } from "@solana/wallet-adapter-react";
 import React, { useEffect, useRef, useState } from "react";
 import { useForm, FormProvider } from "react-hook-form";
 import {
@@ -23,7 +22,6 @@ import { errorCustom } from "../toasts/ToastGroup";
 
 export default function BalanceModal() {
   const methods = useForm();
-  const wallet = useWallet();
 
   const router = useRouter();
 
@@ -38,6 +36,7 @@ export default function BalanceModal() {
     setUserTokens,
     getBalance,
     coinData,
+    session,
   } = useGlobalContext();
 
   const [loading, setLoading] = useState<boolean>(false);
@@ -72,14 +71,8 @@ export default function BalanceModal() {
             return;
           }
 
-          response = await deposit(
-            wallet,
-            amount,
-            selectedToken.tokenMint,
-            campaignId,
-          );
-        } else
-          response = await withdraw(wallet, amount, selectedToken.tokenMint);
+          response = await deposit(amount, selectedToken.tokenMint, campaignId);
+        } else response = await withdraw(amount, selectedToken.tokenMint);
 
         if (response && response.success) {
           getBalance();
@@ -106,7 +99,7 @@ export default function BalanceModal() {
     // console.log("Getting History");
     try {
       const res = await fetch(
-        `/api/games/wallet/getDeposits/?wallet=${wallet.publicKey}`,
+        `/api/games/wallet/getDeposits/?wallet=${session?.user?.wallet}`,
         {
           method: "GET",
           headers: {
@@ -163,34 +156,34 @@ export default function BalanceModal() {
     return results;
   }
 
-  useEffect(() => {
-    let intervalId: NodeJS.Timeout | null = null;
+  // useEffect(() => {
+  //   let intervalId: NodeJS.Timeout | null = null;
 
-    if (wallet && wallet.publicKey && showWalletModal) {
-      const fetchAndUpddateToken = () => {
-        getTokenAccounts(wallet.publicKey!, connection)
-          .then((tokens) => {
-            // console.log("gill", tokens);
-            setUserTokens([
-              {
-                mintAddress: "SOL",
-                balance: walletBalance,
-              },
-              ...tokens,
-            ]);
-          })
-          .catch(console.error);
-      };
-      fetchAndUpddateToken();
-      intervalId = setInterval(fetchAndUpddateToken, 5000);
+  //   if (session?.user?.wallet && showWalletModal) {
+  //     const fetchAndUpddateToken = () => {
+  //       getTokenAccounts(new PublicKey(session?.user?.wallet), connection)
+  //         .then((tokens) => {
+  //           // console.log("gill", tokens);
+  //           setUserTokens([
+  //             {
+  //               mintAddress: "SOL",
+  //               balance: walletBalance,
+  //             },
+  //             ...tokens,
+  //           ]);
+  //         })
+  //         .catch(console.error);
+  //     };
+  //     fetchAndUpddateToken();
+  //     intervalId = setInterval(fetchAndUpddateToken, 5000);
 
-      return () => {
-        if (intervalId) {
-          clearInterval(intervalId);
-        }
-      };
-    }
-  }, [wallet, showWalletModal]);
+  //     return () => {
+  //       if (intervalId) {
+  //         clearInterval(intervalId);
+  //       }
+  //     };
+  //   }
+  // }, [session?.user?.wallet, showWalletModal]);
 
   return (
     <AdaptiveModal
@@ -340,7 +333,7 @@ export default function BalanceModal() {
                     </label>
 
                     <span className="w-full rounded-md h-11 flex items-center bg-[#202329] px-4 py-2 text-[#94A3B8] text-sm font-chakra">
-                      {obfuscatePubKey(wallet.publicKey?.toBase58() ?? "")}
+                      {obfuscatePubKey(session?.user?.wallet ?? "")}
                     </span>
                   </div>
                 )}

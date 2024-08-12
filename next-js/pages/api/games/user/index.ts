@@ -125,34 +125,36 @@ export default async function handler(
       .json({ success: false, message: "Method not allowed" });
   }
   try {
-    const { email, name, image, wallet } = req.body;
+    const { email, name, image } = req.body;
 
     await authenticateUser(req, res);
 
     await connectDatabase();
-
-    let user: any = null;
-
-    if (!email && !wallet)
-      return res
-        .status(400)
-        .json({ success: false, message: "Missing parameters" });
 
     const defaultDeposit = {
       amount: 100.0,
       tokenMint: "SUPER",
     };
 
-    if (email && wallet) {
+    if (!email)
+      return res
+        .status(400)
+        .json({ success: false, message: "Missing parameters" });
+
+    let user: any = null;
+    user = await User.findOne({
+      email: email,
+    });
+
+    if (user) {
       user = await User.findOneAndUpdate(
         {
-          $or: [{ email }, { wallet }],
+          $or: [{ email }],
         },
         {
           $set: {
             email,
             image,
-            wallet,
           },
         },
         {
@@ -171,23 +173,7 @@ export default async function handler(
               email,
               name,
               image,
-              isWeb2User: true,
-              deposit: [defaultDeposit],
-            },
-          },
-          {
-            new: true,
-            upsert: true,
-          },
-        );
-      } else if (wallet) {
-        user = await User.findOneAndUpdate(
-          {
-            wallet,
-          },
-          {
-            $setOnInsert: {
-              wallet,
+              wallet: 'abcdefghijklmonp',
               isWeb2User: true,
               deposit: [defaultDeposit],
             },

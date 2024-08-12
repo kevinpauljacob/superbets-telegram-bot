@@ -1,4 +1,3 @@
-import { useWallet } from "@solana/wallet-adapter-react";
 import React, { useEffect, useRef, useState } from "react";
 import { useForm, FormProvider } from "react-hook-form";
 import {
@@ -21,15 +20,13 @@ import { Connection, ParsedAccountData, PublicKey } from "@solana/web3.js";
 import { TOKEN_PROGRAM_ID } from "@solana/spl-token";
 import { errorCustom, successCustom } from "../toasts/ToastGroup";
 import { useWalletModal } from "@solana/wallet-adapter-react-ui";
-import { handleGoogle, handleSignIn } from "../ConnectWallet";
+import { handleGoogle } from "../ConnectWallet";
 import { Google, Wallet } from "iconsax-react";
 import { signOut, useSession } from "next-auth/react";
 import { MdEdit } from "react-icons/md";
 import { FaCheck } from "react-icons/fa6";
 
 export default function ConnectModal() {
-  const wallet = useWallet();
-  const walletModal = useWalletModal();
   const { update } = useSession();
   const router = useRouter();
 
@@ -182,7 +179,6 @@ export default function ConnectModal() {
                 try {
                   if (session?.user?.email) {
                     e.preventDefault();
-                    await wallet.disconnect();
                     await signOut();
                   } else {
                     handleGoogle();
@@ -204,43 +200,6 @@ export default function ConnectModal() {
                 </>
               )}
             </button>
-
-            {session?.user && (
-              <button
-                onClick={async (e) => {
-                  try {
-                    if (session?.user?.wallet) {
-                      e.preventDefault();
-                      await wallet.disconnect();
-                      await signOut();
-                    } else {
-                      setShowConnectModal(false);
-                      handleSignIn(wallet, walletModal);
-                    }
-                  } catch (e) {
-                    console.error(e);
-                  }
-                }}
-                className={`mt-4 flex items-center justify-center text-white text-opacity-50 hover:text-opacity-90 focus:text-opacity-90 bg-white/5 hover:bg-[#555555] focus:bg-[#5F4DFF] transition-all font-medium text-sm p-3 rounded-[0.625rem] gap-1`}
-              >
-                {wallet.connected &&
-                wallet.publicKey?.toString() === session?.user?.wallet ? (
-                  `Connected with ${obfuscatePubKey(session?.user?.wallet)}`
-                ) : (
-                  <>
-                    <Image
-                      src={"/assets/wallet.png"}
-                      alt=""
-                      width={20}
-                      height={20}
-                    />
-                    <span className="text-sm font-medium tracking-wider font-sans">
-                      {translator("Connect Wallet", language)}
-                    </span>
-                  </>
-                )}
-              </button>
-            )}
           </div>
         </div>
       </AdaptiveModalContent>

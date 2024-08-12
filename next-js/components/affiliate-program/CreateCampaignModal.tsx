@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { MdClose } from "react-icons/md";
 import { translator } from "@/context/transactions";
 import { useGlobalContext } from "@/components/GlobalContext";
-import { useWallet } from "@solana/wallet-adapter-react";
 import { successCustom, errorCustom } from "../toasts/ToastGroup";
 import { AdaptiveModal, AdaptiveModalContent } from "../AdaptiveModal";
 

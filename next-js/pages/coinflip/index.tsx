@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
 import dynamic from "next/dynamic";
-import { useWallet } from "@solana/wallet-adapter-react";
 import Image from "next/image";
 import { FormProvider, useForm } from "react-hook-form";
 import { useGlobalContext } from "@/components/GlobalContext";
@@ -36,12 +35,10 @@ const Progress = dynamic(() => import("../../components/games/Progressbar"), {
 });
 
 export default function Flip() {
-  const wallet = useWallet();
   const methods = useForm();
 
   const {
     getBalance,
-    getWalletBalance,
     autoWinChange,
     autoLossChange,
     autoWinChangeReset,
@@ -87,9 +84,6 @@ export default function Flip() {
           translator("You cannot bet with this token!", language),
         );
       }
-      if (session?.user?.wallet && (!wallet.connected || !wallet.publicKey)) {
-        throw new Error(translator("Wallet not connected", language));
-      }
       if (!betAmt || betAmt === 0) {
         throw new Error(translator("Set Amount.", language));
       }
@@ -99,7 +93,6 @@ export default function Flip() {
 
       // console.log("Placing Flip");
       let response = await placeFlip(
-        wallet,
         session,
         betAmt,
         selectedCoin.tokenMint,
@@ -199,10 +192,9 @@ export default function Flip() {
   useEffect(() => {
     if (refresh && session?.user) {
       getBalance();
-      getWalletBalance();
       setRefresh(false);
     }
-  }, [wallet?.publicKey, session?.user, refresh]);
+  }, [session?.user, refresh]);
 
   useEffect(() => {
     setBetAmt(userInput);

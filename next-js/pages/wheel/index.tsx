@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef, useMemo } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { useWallet } from "@solana/wallet-adapter-react";
 import BetSetting from "@/components/BetSetting";
 import { useGlobalContext } from "@/components/GlobalContext";
 import {
@@ -33,16 +32,13 @@ import {
 } from "@/context/transactions";
 import { useSession } from "next-auth/react";
 import { GameType } from "@/utils/provably-fair";
-import { handleSignIn } from "@/components/ConnectWallet";
 import { useWalletModal } from "@solana/wallet-adapter-react-ui";
 
 export default function Wheel() {
-  const wallet = useWallet();
   const methods = useForm();
   const wheelRef = useRef<HTMLDivElement>(null);
   const {
     getBalance,
-    getWalletBalance,
     setShowAutoModal,
     autoWinChange,
     autoLossChange,
@@ -159,9 +155,6 @@ export default function Wheel() {
           translator("You cannot bet with this token!", language),
         );
       }
-      if (session?.user?.wallet && (!wallet.connected || !wallet.publicKey)) {
-        throw new Error(translator("Wallet not connected", language));
-      }
       if (!betAmt || betAmt === 0) {
         throw new Error(translator("Set Amount.", language));
       }
@@ -177,7 +170,6 @@ export default function Wheel() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          wallet: wallet.publicKey,
           email: session?.user?.email,
           amount: betAmt,
           tokenMint: selectedCoin?.tokenMint,
@@ -284,10 +276,9 @@ export default function Wheel() {
   useEffect(() => {
     if (refresh && session?.user) {
       getBalance();
-      getWalletBalance();
       setRefresh(false);
     }
-  }, [wallet?.publicKey, session?.user, refresh]);
+  }, [session?.user, refresh]);
 
   useEffect(() => {
     setBetAmt(userInput);
@@ -377,7 +368,7 @@ export default function Wheel() {
         // console.log("Auto betting. config: ", useAutoConfig);
         setStartAuto(true);
       }
-    } else if (wallet.connected || session?.user?.email) handleBet();
+    } else if (session?.user?.email) handleBet();
   };
 
   const disableInput = useMemo(() => {
@@ -407,7 +398,6 @@ export default function Wheel() {
             )}
             <BetButton
               disabled={
-                !wallet ||
                 !session?.user ||
                 isRolling ||
                 (startAuto &&
@@ -554,7 +544,6 @@ export default function Wheel() {
                   )}
                   <BetButton
                     disabled={
-                      !wallet ||
                       !session?.user ||
                       isRolling ||
                       (startAuto &&
@@ -636,7 +625,7 @@ export default function Wheel() {
         <div className="relative flex w-full justify-between px-0 xl:px-4 mb-0 px:mb-6 gap-4">
           {selectedCoin &&
             selectedCoin.amount > minGameAmount &&
-            (session?.user?.wallet ? wallet.connected : true) && (
+            session?.user?.wallet && (
               <>
                 {uniqueSegments.map((segment, index) => {
                   const backgroundColor = segment.color; // Store segment.color in a separate variable
@@ -702,7 +691,7 @@ export default function Wheel() {
             )}
           {(!selectedCoin ||
             selectedCoin.amount < minGameAmount ||
-            (session?.user?.wallet && !wallet.connected) ||
+            !session?.user?.wallet ||
             !(status === "authenticated")) && (
             <div className="w-full rounded-lg bg-[#d9d9d90d] bg-opacity-10 flex items-center px-3 py-3 text-white md:px-6">
               <div className="w-full text-center font-changa font-medium text-sm md:text-base text-[#F0F0F0] text-opacity-75">
@@ -712,7 +701,7 @@ export default function Wheel() {
                 )}{" "}
                 <u
                   onClick={() => {
-                    wallet.connected && status === "authenticated"
+                    status === "authenticated"
                       ? setShowWalletModal(true)
                       : setShowConnectModal(true);
                   }}

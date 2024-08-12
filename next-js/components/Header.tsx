@@ -9,7 +9,6 @@ import { useRouter } from "next/router";
 import Staking from "/public/assets/Stake1.svg";
 import Leaderboard from "/public/assets/Leaderboard1.svg";
 import Store from "/public/assets/store1.svg";
-import { useWallet } from "@solana/wallet-adapter-react";
 import HoverToolTip from "./ToolTipHover";
 import Thunder from "../public/assets/thunder.svg";
 import Trophy from "../public/assets/trophy.svg";
@@ -22,7 +21,6 @@ export function Header({
   sidebar: boolean;
   toggleSidebar: () => void;
 }) {
-  const wallet = useWallet();
   const router = useRouter();
   const {
     language,

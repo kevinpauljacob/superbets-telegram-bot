@@ -1,15 +1,10 @@
 import { useEffect } from "react";
-import { useWallet } from "@solana/wallet-adapter-react";
-import { useSession } from "next-auth/react";
 import { useGlobalContext } from "@/components/GlobalContext";
 import StoreCard from "@/components/StoreCard";
 import FOMOHead from "@/components/HeadElement";
 import { getFOMOBalance } from "./stake";
 
 export default function Store() {
-  const { data: session } = useSession();
-  const wallet = useWallet();
-
   const {
     setFomoBalance,
     getGlobalInfo,

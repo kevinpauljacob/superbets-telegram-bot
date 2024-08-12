@@ -7,7 +7,6 @@ import {
   truncateNumber,
   unstakeFOMO,
 } from "@/context/transactions";
-import { useWallet } from "@solana/wallet-adapter-react";
 //import toast from "react-hot-toast";
 import Spinner from "./Spinner";
 import { useSession } from "next-auth/react";
@@ -19,10 +18,10 @@ import { SPL_TOKENS } from "@/context/config";
 const MinAmount = 0.01;
 
 export default function StakeFomo() {
+  return <></>
   const { data: session, status } = useSession();
   const [inputString, setInputString] = useState("");
   const methods = useForm()
-  const wallet = useWallet();
   const {
     stake,
     setStake,
@@ -54,17 +53,17 @@ export default function StakeFomo() {
           setLoading(false);
           return;
         }
-        response = await stakeFOMO(wallet, stakeAmount, fomoToken);
+        // response = await stakeFOMO(wallet, stakeAmount, fomoToken);
       } else {
         if (stakeAmount > (userData?.stakedAmount ?? 0)) {
           errorCustom(translator("Insufficient FOMO", language));
           setLoading(false);
           return;
         }
-        response = await unstakeFOMO(wallet, stakeAmount, fomoToken);
+        // response = await unstakeFOMO(wallet, stakeAmount, fomoToken);
       }
-      if (response && response.success)
-        await getFOMOBalance(wallet, setFomoBalance);
+      // if (response && response.success)
+        // await getFOMOBalance(wallet, setFomoBalance);
 
       getUserDetails();
       getGlobalInfo();

@@ -1,4 +1,3 @@
-import { useWallet } from "@solana/wallet-adapter-react";
 import { ReactNode, useEffect } from "react";
 import toast from "react-hot-toast";
 import BetRow from "../games/BetRow";
@@ -205,7 +204,6 @@ export const TButton: React.FC<ButtonProps> = ({ active, onClick, label }) => {
 };
 
 export const TableButtons: React.FC<TableButtonProps> = ({ all, setAll }) => {
-  const wallet = useWallet();
   const router = useRouter();
   const { language, session } = useGlobalContext();
   const [highRollers, setHighRollers] = useState(false);

@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { useWallet } from "@solana/wallet-adapter-react";
 import { translator, truncateNumber } from "@/context/transactions";
 import { useGlobalContext } from "./GlobalContext";
 import Home from "@/public/assets/sidebar-icons/Home";
@@ -47,7 +46,6 @@ export default function Sidebar({
   sidebar: boolean;
   setSidebar: React.Dispatch<React.SetStateAction<boolean>>;
 }) {
-  const wallet = useWallet();
   const router = useRouter();
 
   const { language, setMobileSidebar, userTokens, setUserTokens } =
@@ -259,7 +257,6 @@ export const OpenSidebar = ({
   showPlayTokens: boolean;
   setShowPlayTokens: React.Dispatch<React.SetStateAction<boolean>>;
 }) => {
-  const wallet = useWallet();
   const router = useRouter();
   const { fomoPrice, setSidebar, setMobileSidebar, language, setLanguage } =
     useGlobalContext();

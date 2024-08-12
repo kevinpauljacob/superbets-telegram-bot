@@ -342,7 +342,6 @@ export const createWithdrawTxn = async (
 };
 
 export const deposit = async (
-  wallet: WalletContextState,
   amount: number,
   tokenMint: string,
   campaignId: any = null,
@@ -352,79 +351,65 @@ export const deposit = async (
     return { success: true, message: "Please enter an amount greater than 0" };
   }
 
-  if (!wallet.publicKey) {
-    errorCustom("Wallet not connected");
-    return { success: true, message: "Wallet not connected" };
-  }
-
   if (tokenMint === "SUPER") {
     errorCustom("Deposit not allowed for this token!");
     return { success: true, message: "Deposit not allowed for this token!" };
   }
+  return { success: false, message: "Not allowed" };
+  // try {
+  //   let { transaction, blockhashWithExpiryBlockHeight } =
+  //     await createDepositTxn(
+  //       wallet?.publicKey!,
+  //       amount,
+  //       tokenMint,
+  //       casinoPublicKey,
+  //     );
+  //   // console.log("creatin txn with", amount, tokenMint);
 
-  try {
-    let { transaction, blockhashWithExpiryBlockHeight } =
-      await createDepositTxn(
-        wallet?.publicKey!,
-        amount,
-        tokenMint,
-        casinoPublicKey,
-      );
-    // console.log("creatin txn with", amount, tokenMint);
+  //   transaction = await wallet.signTransaction!(transaction);
+  //   const transactionBase64 = transaction
+  //     .serialize({
+  //       requireAllSignatures: false,
+  //     })
+  //     .toString("base64");
 
-    transaction = await wallet.signTransaction!(transaction);
-    const transactionBase64 = transaction
-      .serialize({
-        requireAllSignatures: false,
-      })
-      .toString("base64");
+  //   const res = await fetch(`/api/games/wallet/deposit`, {
+  //     method: "POST",
+  //     body: JSON.stringify({
+  //       transactionBase64,
+  //       wallet: wallet.publicKey,
+  //       amount,
+  //       tokenMint,
+  //       blockhashWithExpiryBlockHeight,
+  //       campaignId,
+  //     }),
+  //     headers: {
+  //       "Content-Type": "application/json",
+  //     },
+  //   });
 
-    const res = await fetch(`/api/games/wallet/deposit`, {
-      method: "POST",
-      body: JSON.stringify({
-        transactionBase64,
-        wallet: wallet.publicKey,
-        amount,
-        tokenMint,
-        blockhashWithExpiryBlockHeight,
-        campaignId,
-      }),
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
+  //   const { success, message } = await res.json();
 
-    const { success, message } = await res.json();
+  //   if (success === false) {
+  //     if (message.includes("limit exceeded"))
+  //       warningCustom(message, "bottom-right", 8000);
+  //     else errorCustom(message);
+  //     throw new Error(message);
+  //   }
 
-    if (success === false) {
-      if (message.includes("limit exceeded"))
-        warningCustom(message, "bottom-right", 8000);
-      else errorCustom(message);
-      throw new Error(message);
-    }
+  //   successCustom("Deposit successfull!");
 
-    successCustom("Deposit successfull!");
-
-    return { success: true, message };
-  } catch (error) {
-    // errorCustom("Unexpected error!");
-    return { success: false, message: error };
-  }
+  //   return { success: true, message };
+  // } catch (error) {
+  //   // errorCustom("Unexpected error!");
+  //   return { success: false, message: error };
+  // }
 };
 
-export const withdraw = async (
-  wallet: WalletContextState,
-  amount: number,
-  tokenMint: string,
-) => {  
+export const withdraw = async (amount: number, tokenMint: string) => {
   if (amount == 0) {
     errorCustom("Please enter an amount greater than 0");
     return { success: true, message: "Please enter an amount greater than 0" };
-  }
-
-  if (!wallet.publicKey) {
-    errorCustom("Wallet not connected");
-    return { success: true, message: "Wallet not connected" };
   }
 
   if (tokenMint === "SUPER") {
@@ -432,53 +417,55 @@ export const withdraw = async (
     return { success: true, message: "Withdraw not allowed for this token!" };
   }
 
-  try {
-    let { transaction, blockhashWithExpiryBlockHeight } =
-      await createWithdrawTxn(
-        wallet.publicKey!,
-        amount,
-        tokenMint,
-        casinoPublicKey,
-      );
+  return { success: false, message: "Not allowed" };
 
-    transaction = await wallet.signTransaction!(transaction);
-    const transactionBase64 = transaction
-      .serialize({
-        requireAllSignatures: false,
-      })
-      .toString("base64");
+  // try {
+  //   let { transaction, blockhashWithExpiryBlockHeight } =
+  //     await createWithdrawTxn(
+  //       wallet.publicKey!,
+  //       amount,
+  //       tokenMint,
+  //       casinoPublicKey,
+  //     );
 
-    const res = await fetch(`/api/games/wallet/withdraw`, {
-      method: "POST",
-      body: JSON.stringify({
-        transactionBase64,
-        wallet: wallet.publicKey,
-        amount,
-        tokenMint,
-        blockhashWithExpiryBlockHeight,
-      }),
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
+  //   transaction = await wallet.signTransaction!(transaction);
+  //   const transactionBase64 = transaction
+  //     .serialize({
+  //       requireAllSignatures: false,
+  //     })
+  //     .toString("base64");
 
-    const { success, message } = await res.json();
+  //   const res = await fetch(`/api/games/wallet/withdraw`, {
+  //     method: "POST",
+  //     body: JSON.stringify({
+  //       transactionBase64,
+  //       wallet: wallet.publicKey,
+  //       amount,
+  //       tokenMint,
+  //       blockhashWithExpiryBlockHeight,
+  //     }),
+  //     headers: {
+  //       "Content-Type": "application/json",
+  //     },
+  //   });
 
-    if (success === false) {
-      if (message.includes("limit exceeded"))
-        warningCustom(message, "bottom-right", 8000);
-      else errorCustom(message);
-      throw new Error(message);
-    }
+  //   const { success, message } = await res.json();
 
-    successCustom("Withdrawal successfull!");
+  //   if (success === false) {
+  //     if (message.includes("limit exceeded"))
+  //       warningCustom(message, "bottom-right", 8000);
+  //     else errorCustom(message);
+  //     throw new Error(message);
+  //   }
 
-    return { success: true, message };
-  } catch (error) {
-    // errorCustom("Unexpected error!");
+  //   successCustom("Withdrawal successfull!");
 
-    return { success: true, message: error };
-  }
+  //   return { success: true, message };
+  // } catch (error) {
+  //   // errorCustom("Unexpected error!");
+
+  //   return { success: true, message: error };
+  // }
 };
 
 export const verifyFrontendTransaction = (
@@ -553,7 +540,6 @@ export async function retryTxn(
 }
 
 export const placeBet = async (
-  wallet: WalletContextState,
   session: SessionUser | null,
   amount: number,
   tokenMint: string,
@@ -561,9 +547,6 @@ export const placeBet = async (
   timeFrame: number,
 ) => {
   try {
-    if (session?.user?.wallet && !wallet.publicKey)
-      throw new Error("Wallet not connected");
-
     if (!session?.user?.isWeb2User && tokenMint === "SUPER")
       throw new Error("You cannot bet with this token!");
 
@@ -572,7 +555,6 @@ export const placeBet = async (
     const res = await fetch(`/api/games/options`, {
       method: "POST",
       body: JSON.stringify({
-        wallet: wallet.publicKey,
         email: session?.user?.email,
         amount: amount,
         tokenMint: tokenMint,
@@ -599,16 +581,12 @@ export const placeBet = async (
   }
 };
 export const placeFlip = async (
-  wallet: WalletContextState,
   session: SessionUser | null,
   amount: number,
   tokenMint: string,
   flipType: string, // heads / tails
 ) => {
   try {
-    if (session?.user?.wallet && !wallet.publicKey)
-      throw new Error("Wallet not connected");
-
     if (!session?.user?.isWeb2User && tokenMint === "SUPER")
       throw new Error("You cannot bet with this token!");
 
@@ -617,7 +595,6 @@ export const placeFlip = async (
     const res = await fetch(`/api/games/coin`, {
       method: "POST",
       body: JSON.stringify({
-        wallet: wallet?.publicKey,
         email: session?.user?.email,
         amount,
         flipType,
@@ -637,15 +614,11 @@ export const placeFlip = async (
   }
 };
 
-export const checkResult = async (
-  wallet: WalletContextState,
-  session: SessionUser | null,
-) => {
+export const checkResult = async (session: SessionUser | null) => {
   try {
     const res = await fetch(`/api/games/options/checkResult`, {
       method: "POST",
       body: JSON.stringify({
-        wallet: wallet.publicKey,
         email: session?.user?.email,
       }),
       headers: {
@@ -685,23 +658,18 @@ export const getDecimals = async (owner: any, tokenMint: any) => {
 };
 
 export const rollDice = async (
-  wallet: WalletContextState,
   session: SessionUser | null,
   amount: number,
   tokenMint: string,
   chosenNumbers: number[],
 ) => {
   try {
-    if (session?.user?.wallet && !wallet.publicKey)
-      throw new Error("Wallet not connected");
-
     if (!session?.user?.isWeb2User && tokenMint === "SUPER")
       throw new Error("You cannot bet with this token!");
 
     const res = await fetch(`/api/games/dice`, {
       method: "POST",
       body: JSON.stringify({
-        wallet: wallet?.publicKey,
         email: session?.user?.email,
         amount: amount,
         tokenMint: tokenMint,
@@ -721,23 +689,18 @@ export const rollDice = async (
 };
 
 export const limboBet = async (
-  wallet: WalletContextState,
   session: SessionUser | null,
   amount: number,
   multiplier: number,
   tokenMint: string,
 ) => {
   try {
-    if (session?.user?.wallet && !wallet.publicKey)
-      throw new Error("Wallet not connected");
-
     if (!session?.user?.isWeb2User && tokenMint === "SUPER")
       throw new Error("You cannot bet with this token!");
 
     const res = await fetch(`/api/games/limbo`, {
       method: "POST",
       body: JSON.stringify({
-        wallet: wallet?.publicKey,
         email: session?.user?.email,
         amount: amount,
         tokenMint: tokenMint,
@@ -859,51 +822,44 @@ export const createClaimEarningsTxn = async (
 };
 
 export const claimEarnings = async (
-  wallet: WalletContextState,
   campaigns: Array<{ unclaimedEarnings: Record<string, number> }>,
 ) => {
-  if (!wallet.publicKey) {
-    errorCustom("Wallet not connected");
-    return { success: true, message: "Wallet not connected" };
-  }
-
-  try {
-    const earnings: Record<string, number> = {};
-
-    campaigns.forEach((c: { unclaimedEarnings: Record<string, number> }) => {
-      Object.entries(c.unclaimedEarnings).forEach(
-        ([key, value]: [string, number]) => {
-          if (earnings.hasOwnProperty(key)) earnings[key] += value;
-          else earnings[key] = value;
-        },
-      );
-    });
-
-    let { transaction, blockhashWithExpiryBlockHeight } =
-      await createClaimEarningsTxn(wallet.publicKey, earnings);
-
-    transaction = await wallet.signTransaction!(transaction);
-    const transactionBase64 = transaction
-      .serialize({ requireAllSignatures: false })
-      .toString("base64");
-
-    const res = await fetch(`/api/referral/${wallet.publicKey}/claim`, {
-      method: "POST",
-      body: JSON.stringify({
-        transactionBase64,
-        blockhashWithExpiryBlockHeight,
-      }),
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-
-    const { success, message } = await res.json();
-    if (success) {
-      successCustom(message);
-    } else errorCustom(message);
-    return { success, message };
-  } catch (error: any) {
-    return { success: false, message: error.message };
-  }
+  // if (!wallet.publicKey) {
+  //   errorCustom("Wallet not connected");
+  //   return { success: true, message: "Wallet not connected" };
+  // }
+  // try {
+  //   const earnings: Record<string, number> = {};
+  //   campaigns.forEach((c: { unclaimedEarnings: Record<string, number> }) => {
+  //     Object.entries(c.unclaimedEarnings).forEach(
+  //       ([key, value]: [string, number]) => {
+  //         if (earnings.hasOwnProperty(key)) earnings[key] += value;
+  //         else earnings[key] = value;
+  //       },
+  //     );
+  //   });
+  //   let { transaction, blockhashWithExpiryBlockHeight } =
+  //     await createClaimEarningsTxn(wallet.publicKey, earnings);
+  //   transaction = await wallet.signTransaction!(transaction);
+  //   const transactionBase64 = transaction
+  //     .serialize({ requireAllSignatures: false })
+  //     .toString("base64");
+  //   const res = await fetch(`/api/referral/${wallet.publicKey}/claim`, {
+  //     method: "POST",
+  //     body: JSON.stringify({
+  //       transactionBase64,
+  //       blockhashWithExpiryBlockHeight,
+  //     }),
+  //     headers: {
+  //       "Content-Type": "application/json",
+  //     },
+  //   });
+  //   const { success, message } = await res.json();
+  //   if (success) {
+  //     successCustom(message);
+  //   } else errorCustom(message);
+  //   return { success, message };
+  // } catch (error: any) {
+  //   return { success: false, message: error.message };
+  // }
 };

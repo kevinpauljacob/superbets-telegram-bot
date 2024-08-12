@@ -1,8 +1,6 @@
 import { Inter } from "next/font/google";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/router";
-import { useWallet } from "@solana/wallet-adapter-react";
-import { useWalletModal } from "@solana/wallet-adapter-react-ui";
 import { useGlobalContext } from "@/components/GlobalContext";
 import { successCustom, errorCustom } from "@/components/toasts/ToastGroup";
 import { useSession } from "next-auth/react";
@@ -14,8 +12,6 @@ import Bets from "@/components/games/Bets";
 const inter = Inter({ subsets: ["latin"] });
 
 export default function Home() {
-  const wallet = useWallet();
-  const walletModal = useWalletModal();
   const { status } = useSession();
   const router = useRouter();
   const { referralCode } = router.query;

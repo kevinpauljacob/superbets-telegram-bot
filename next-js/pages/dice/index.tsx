@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef, useMemo } from "react";
-import { useWallet } from "@solana/wallet-adapter-react";
 import BetSetting from "@/components/BetSetting";
 import { useGlobalContext } from "@/components/GlobalContext";
 import {
@@ -35,13 +34,11 @@ import { useSession } from "next-auth/react";
 import { GameType } from "@/utils/provably-fair";
 
 export default function Dice() {
-  const wallet = useWallet();
   const methods = useForm();
 
   const {
     selectedCoin,
     getBalance,
-    getWalletBalance,
     setShowAutoModal,
     sidebar,
     autoWinChange,
@@ -169,9 +166,6 @@ export default function Dice() {
           translator("You cannot bet with this token!", language),
         );
       }
-      if (session?.user?.wallet && (!wallet.connected || !wallet.publicKey)) {
-        throw new Error(translator("Wallet not connected", language));
-      }
       if (!betAmt || betAmt === 0) {
         throw new Error(translator("Set Amount.", language));
       }
@@ -185,7 +179,6 @@ export default function Dice() {
       }
       setIsRolling(true);
       const res = await rollDice(
-        wallet,
         session,
         betAmt,
         selectedCoin.tokenMint,
@@ -278,10 +271,9 @@ export default function Dice() {
   useEffect(() => {
     if (refresh && session?.user) {
       getBalance();
-      getWalletBalance();
       setRefresh(false);
     }
-  }, [wallet?.publicKey, session?.user, refresh]);
+  }, [session?.user, refresh]);
 
   const topWinPointerRef = useRef<HTMLDivElement | null>(null);
   const ghostWinPointerRefs = useRef<(HTMLDivElement | null)[]>([]);

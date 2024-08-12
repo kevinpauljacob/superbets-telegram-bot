@@ -34,7 +34,6 @@ import KenoProvablyFairModal from "./games/Keno/KenoProvablyFairModal";
 import MinesProvablyFairModal from "./games/Mines/MinesProvablyFairModal";
 import CreateCampaignModal from "@/components/affiliate-program/CreateCampaignModal";
 import Footer from "./Footer";
-import { useWallet } from "@solana/wallet-adapter-react";
 import { soundAlert } from "@/utils/soundUtils";
 import VerifyRoulette1Modal, {
   Roulette1,
@@ -48,8 +47,6 @@ import { maxPayouts, minAmtFactor } from "@/context/config";
 import VerifyPlinkoModal, { Plinko } from "./games/Plinko/VerifyPlinkoModal";
 import PlinkoProvablyFairModal from "./games/Plinko/PlinkoProvablyFairModal";
 import ConnectModal from "./games/ConnectModal";
-import { handleSignIn } from "./ConnectWallet";
-import { useWalletModal } from "@solana/wallet-adapter-react-ui";
 
 interface Props {
   children: ReactNode;
@@ -57,8 +54,6 @@ interface Props {
 
 export default function ({ children }: Props) {
   const router = useRouter();
-  const wallet = useWallet();
-  const walletModal = useWalletModal();
   const game = router.pathname.split("/")[1];
 
   const {
@@ -67,7 +62,6 @@ export default function ({ children }: Props) {
     showCreateCampaignModal,
     setShowCreateCampaignModal,
     getBalance,
-    getWalletBalance,
     isVerifyModalOpen,
     closeVerifyModal,
     verifyModalData,
@@ -157,7 +151,6 @@ export default function ({ children }: Props) {
   useEffect(() => {
     (async () => {
       if (
-        (wallet?.publicKey && session?.user?.wallet) ||
         session?.user?.email
       ) {
         const pfData = await getProvablyFairData();
@@ -165,39 +158,7 @@ export default function ({ children }: Props) {
       }
     })();
 
-    if (wallet?.publicKey && session?.user)
-      localStorage.setItem("connectedAccountKey", wallet.publicKey.toBase58());
-
-    if (session?.user?.wallet && (!wallet.connected || !wallet.publicKey))
-      handleSignIn(wallet, walletModal);
-  }, [wallet.publicKey, session?.user]);
-
-  // useEffect(() => {
-  //   const interval = setInterval(() => {
-  //     const storedKey = localStorage.getItem("connectedAccountKey");
-
-  //     if ("solana" in window) {
-  //       const provider = window.solana;
-
-  //       //@ts-ignore
-  //       if (provider?.publicKey) {
-  //         //@ts-ignore
-  //         // console.log("checking", provider?.publicKey.toBase58());
-  //         //@ts-ignore
-  //         if (storedKey && storedKey !== provider.publicKey.toBase58()) {
-  //           (async () => {
-  //             // console.log("Account changed");
-  //             localStorage.removeItem("connectedAccountKey");
-  //             await wallet.disconnect();
-  //             await signOut();
-  //           })();
-  //         }
-  //       }
-  //     }
-  //   }, 5000);
-
-  //   return () => clearInterval(interval);
-  // }, []);
+  }, [session?.user]);
 
   const toggleSidebar = () => {
     setSidebar(!sidebar);
@@ -238,7 +199,6 @@ export default function ({ children }: Props) {
 
   useEffect(() => {
     if (session?.user && !showWalletModal) {
-      getWalletBalance();
       getUserDetails();
     }
     setCurrentGame(game);
@@ -246,14 +206,14 @@ export default function ({ children }: Props) {
       maxPayouts[selectedCoin.tokenMint as GameTokens][game as GameType] *
         minAmtFactor,
     );
-  }, [wallet?.publicKey, session?.user, game, showWalletModal, selectedCoin]);
+  }, [session?.user, game, showWalletModal, selectedCoin]);
 
   useEffect(() => {
     if (session?.user && !showWalletModal) {
       getBalance();
     }
     getGlobalInfo();
-  }, [wallet?.publicKey, session?.user, game, showWalletModal]);
+  }, [session?.user, game, showWalletModal]);
 
   return (
     <>
@@ -294,70 +254,70 @@ export default function ({ children }: Props) {
           isOpen={isVerifyModalOpen}
           onClose={closeVerifyModal}
           modalData={{ flip: (verifyModalData as Flip)! }}
-          wallet={wallet.publicKey?.toBase58()}
+          wallet={session?.user?.wallet}
         />
       ) : verifyModalData.game === GameType.dice ? (
         <VerifyDiceModal
           isOpen={isVerifyModalOpen}
           onClose={closeVerifyModal}
           modalData={{ bet: (verifyModalData as Dice)! }}
-          wallet={wallet.publicKey?.toBase58()}
+          wallet={session?.user?.wallet}
         />
       ) : verifyModalData.game === GameType.dice2 ? (
         <VerifyDice2Modal
           isOpen={isVerifyModalOpen}
           onClose={closeVerifyModal}
           modalData={{ bet: (verifyModalData as Dice2)! }}
-          wallet={wallet.publicKey?.toBase58()}
+          wallet={session?.user?.wallet}
         />
       ) : verifyModalData.game === GameType.limbo ? (
         <VerifyLimboModal
           isOpen={isVerifyModalOpen}
           onClose={closeVerifyModal}
           modalData={{ flip: (verifyModalData as Limbo)! }}
-          wallet={wallet.publicKey?.toBase58()}
+          wallet={session?.user?.wallet}
         />
       ) : verifyModalData.game === GameType.wheel ? (
         <VerifyWheelModal
           isOpen={isVerifyModalOpen}
           onClose={closeVerifyModal}
           modalData={{ bet: (verifyModalData as Wheel)! }}
-          wallet={wallet.publicKey?.toBase58()}
+          wallet={session?.user?.wallet}
         />
       ) : verifyModalData.game === GameType.keno ? (
         <VerifyKenoModal
           isOpen={isVerifyModalOpen}
           onClose={closeVerifyModal}
           modalData={{ bet: (verifyModalData as Keno)! }}
-          wallet={wallet.publicKey?.toBase58()}
+          wallet={session?.user?.wallet}
         />
       ) : verifyModalData.game === GameType.mines ? (
         <VerifyMinesModal
           isOpen={isVerifyModalOpen}
           onClose={closeVerifyModal}
           modalData={{ bet: (verifyModalData as Mines)! }}
-          wallet={wallet.publicKey?.toBase58()}
+          wallet={session?.user?.wallet}
         />
       ) : verifyModalData.game === GameType.roulette1 ? (
         <VerifyRoulette1Modal
           isOpen={isVerifyModalOpen}
           onClose={closeVerifyModal}
           modalData={{ bet: (verifyModalData as Roulette1)! }}
-          wallet={wallet.publicKey?.toBase58()}
+          wallet={session?.user?.wallet}
         />
       ) : verifyModalData.game === GameType.roulette2 ? (
         <VerifyRoulette2Modal
           isOpen={isVerifyModalOpen}
           onClose={closeVerifyModal}
           modalData={{ bet: (verifyModalData as Roulette2)! }}
-          wallet={wallet.publicKey?.toBase58()}
+          wallet={session?.user?.wallet}
         />
       ) : verifyModalData.game === GameType.plinko ? (
         <VerifyPlinkoModal
           isOpen={isVerifyModalOpen}
           onClose={closeVerifyModal}
           modalData={{ bet: (verifyModalData as Plinko)! }}
-          wallet={wallet.publicKey?.toBase58()}
+          wallet={session?.user?.wallet}
         />
       ) : null}
 

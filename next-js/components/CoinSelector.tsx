@@ -5,15 +5,10 @@ import { SPL_TOKENS } from "@/context/config";
 import { translator } from "@/context/transactions";
 import SOL from "@/public/assets/coins/SOL";
 import { useSession } from "next-auth/react";
-import { useWallet } from "@solana/wallet-adapter-react";
-import { useWalletModal } from "@solana/wallet-adapter-react-ui";
-import { handleSignIn } from "./ConnectWallet";
 import StatsSoundToggle from "./games/StatsSoundToggle";
+import { errorCustom } from "./toasts/ToastGroup";
 
 export default function CoinSelector() {
-  const wallet = useWallet();
-  const walletModal = useWalletModal();
-
   const {
     setShowWalletModal,
     setShowConnectModal,
@@ -76,9 +71,9 @@ export default function CoinSelector() {
       </div>
       <div
         onClick={() => {
-          wallet.connected && status === "authenticated"
+          session?.user?.wallet
             ? setShowWalletModal(true)
-            : handleSignIn(wallet, walletModal);
+            : errorCustom("User not connected!");
         }}
         className="flex items-center h-[2.3rem] md:h-[2.4rem] px-5 md:px-4 py-0 md:py-2 gap-1 md:gap-1.5 bg-[#5F4DFF] disabled:bg-[#555555] hover:bg-[#7F71FF] focus:bg-[#4C3ECC] transition-all cursor-pointer rounded-[5px]"
       >

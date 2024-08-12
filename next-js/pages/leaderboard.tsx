@@ -8,7 +8,6 @@ import {
   truncateNumber,
 } from "@/context/transactions";
 import { pointTiers } from "@/context/config";
-import { useWallet } from "@solana/wallet-adapter-react";
 import Image from "next/image";
 import { useEffect, useMemo } from "react";
 import FOMOHead from "@/components/HeadElement";
@@ -42,7 +41,6 @@ interface Bet {
 }
 
 export default function Leaderboard() {
-  const wallet = useWallet();
   const [maxPages, setMaxPages] = useState<number>(0);
   const [page, setPage] = useState(1);
   const [data, setData] = useState<any[]>([]);
@@ -415,9 +413,7 @@ export default function Leaderboard() {
                 <span className="text-white text-xs font-medium text-opacity-50">
                   {session?.user?.email
                     ? session.user.email
-                    : wallet.publicKey?.toString()
-                      ? wallet.publicKey?.toString()
-                      : "player@superbets.com"}
+                    : "player@superbets.com"}
                 </span>
               </div>
             </div>
@@ -540,7 +536,9 @@ export default function Leaderboard() {
               </div>
             ) : (
               <div
-                className={`bg-[#5F4DFF] hover:bg-[#5F4DFF]/50 transition-all duration-300 text-white ${myData.isUSDCClaimed ? "bg-opacity-50" : "bg-opacity-70"} rounded-[10px] text-center text-sm text-opacity-90 font-semibold w-full py-3`}
+                className={`bg-[#5F4DFF] hover:bg-[#5F4DFF]/50 transition-all duration-300 text-white ${
+                  myData.isUSDCClaimed ? "bg-opacity-50" : "bg-opacity-70"
+                } rounded-[10px] text-center text-sm text-opacity-90 font-semibold w-full py-3`}
                 onClick={() => {
                   if (!myData.isUSDCClaimed) setIsModalOpen(!isModalOpen);
                 }}

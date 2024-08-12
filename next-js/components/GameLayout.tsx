@@ -6,9 +6,6 @@ import { optionsEdge } from "@/context/config";
 import FomoPlay from "./FomoPlay";
 import FOMOHead from "./HeadElement";
 import { useSession } from "next-auth/react";
-import { useWallet } from "@solana/wallet-adapter-react";
-import { useWalletModal } from "@solana/wallet-adapter-react-ui";
-import { handleSignIn } from "./ConnectWallet";
 
 interface LayoutProps {
   children: ReactNode;
@@ -38,8 +35,6 @@ export const GameFooterInfo: React.FC<GameFooterProps> = ({
   amount,
   chance,
 }) => {
-  const wallet = useWallet();
-  const walletModal = useWalletModal();
   const {
     coinData,
     setShowWalletModal,
@@ -57,7 +52,7 @@ export const GameFooterInfo: React.FC<GameFooterProps> = ({
     <div className="flex px-0 xl:px-4 mb-0 md:mb-[1.4rem] gap-4 flex-row w-full justify-between">
       {selectedCoin &&
         selectedCoin.amount > minGameAmount &&
-        (session?.user?.wallet ? wallet.connected : true) && (
+        session?.user?.wallet && (
           <>
             {multiplier !== undefined ? (
               <div className="flex flex-col w-full">
@@ -105,7 +100,7 @@ export const GameFooterInfo: React.FC<GameFooterProps> = ({
 
       {(!selectedCoin ||
         selectedCoin.amount < minGameAmount ||
-        (session?.user?.wallet && !wallet.connected) ||
+        !session?.user?.wallet ||
         !(status === "authenticated")) && (
         <div className="w-full rounded-lg bg-[#d9d9d90d] bg-opacity-10 flex items-center px-3 py-3 text-white md:px-6">
           <div className="w-full text-center font-changa font-medium text-sm md:text-base text-[#F0F0F0] text-opacity-75">
@@ -115,7 +110,7 @@ export const GameFooterInfo: React.FC<GameFooterProps> = ({
             )}{" "}
             <u
               onClick={() => {
-                wallet.connected && status === "authenticated"
+                status === "authenticated"
                   ? setShowWalletModal(true)
                   : setShowConnectModal(true);
               }}
