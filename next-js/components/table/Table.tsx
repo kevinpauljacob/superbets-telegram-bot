@@ -276,7 +276,7 @@ interface TableNodeProps {
 
 export const TableHeader = ({ all, setAll }: TableButtonProps) => {
   const headers = ["Game", "Bet Amount", "Multiplier", "Payout"];
-  const allHeaders = ["Wallet", ...headers];
+  const allHeaders = ["Player", ...headers];
 
   const smallScreenHeaders = ["Game", "Payout"];
   const { language } = useGlobalContext();

@@ -61,14 +61,12 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse,
 ) {
-  if (req.method !== "POST") {
-    return res
-      .status(405)
-      .json({ success: false, message: "Method not allowed" });
-  }
-
   try {
-    await connectDatabase();
+    if (req.method !== "POST") {
+      return res
+        .status(405)
+        .json({ success: false, message: "Method not allowed" });
+    }
 
     const { account, campaignId } = req.body;
 
@@ -84,9 +82,11 @@ export default async function handler(
         .json({ success: false, message: "Campaign ID is required" });
     }
 
+    await connectDatabase();
+
     // Find the user
     const user = await User.findOne({
-      account,
+      _id: account,
     });
 
     if (!user) {

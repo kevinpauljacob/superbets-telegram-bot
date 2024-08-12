@@ -4,19 +4,12 @@ import { User, Campaign } from "@/models/referral";
 
 /**
  * @swagger
- * tags:
- *    name: Referral
- *    description: Referral related operations
- */
-
-/**
- * @swagger
  * /api/referral:
  *   post:
  *     summary: Create a referral campaign
- *     description: Creates a new referral campaign and associates it with a user
+ *     description: Creates a new referral campaign and associates it with a user.
  *     tags:
- *      - Referral
+ *       - Referral
  *     requestBody:
  *       required: true
  *       content:
@@ -24,19 +17,22 @@ import { User, Campaign } from "@/models/referral";
  *           schema:
  *             type: object
  *             required:
- *               - email
+ *               - account
  *               - referralCode
  *               - campaignName
  *             properties:
- *               email:
+ *               account:
  *                 type: string
+ *                 example: "user-account-id"
  *               referralCode:
  *                 type: string
+ *                 example: "ABC12345"
  *               campaignName:
  *                 type: string
+ *                 example: "Summer Campaign"
  *     responses:
  *       200:
- *         description: Campaign created successfully
+ *         description: Campaign created successfully.
  *         content:
  *           application/json:
  *             schema:
@@ -44,14 +40,49 @@ import { User, Campaign } from "@/models/referral";
  *               properties:
  *                 success:
  *                   type: boolean
+ *                   example: true
  *                 message:
  *                   type: string
+ *                   example: "Campaign created successfully!"
  *       400:
- *         description: Bad request
+ *         description: Bad request response, such as when required fields are missing or duplicate data is detected.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Missing parameters!"
  *       405:
- *         description: Method not allowed
+ *         description: Method not allowed response when using a method other than POST.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Method not allowed!"
  *       500:
- *         description: Internal server error
+ *         description: Internal server error response.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "An error occurred while processing your request."
  */
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -109,20 +140,11 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     });
     await campaign.save();
 
-    // Update existing user
-    const updatedUser = await User.findOneAndUpdate(
+    await User.findOneAndUpdate(
       { account },
       { $addToSet: { campaigns: campaign._id } },
-      { new: true },
+      { upsert: true },
     );
-
-    if (!updatedUser) {
-      return res.status(404).json({
-        success: false,
-        message:
-          "User not found. Please ensure the user exists before creating a campaign.",
-      });
-    }
 
     return res.json({
       success: true,
