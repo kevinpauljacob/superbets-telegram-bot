@@ -5,10 +5,17 @@ import { v4 as uuidv4 } from "uuid";
 
 /**
  * @swagger
+ * tags:
+ *    name: Referral
+ *    description: Referral related operations
+ */
+
+/**
+ * @swagger
  * /api/referral:
  *   post:
- *     summary: Create a new user and default campaign or find an existing user
- *     description: Creates a new user with the provided email and a default campaign if the user does not exist. If the user already exists, it checks for a default campaign and creates it if not present.
+ *     summary: Create or update a user and default campaign
+ *     description: Creates a new user with the provided account, email, or wallet, and a default campaign if the user does not exist. If the user already exists, it checks for a default campaign and creates it if not present. The response includes user details and referred users.
  *     tags:
  *       - Referral
  *     requestBody:
@@ -18,11 +25,17 @@ import { v4 as uuidv4 } from "uuid";
  *           schema:
  *             type: object
  *             required:
- *               - email
+ *               - account
  *             properties:
+ *               account:
+ *                 type: string
+ *                 example: "user-account-id"
  *               email:
  *                 type: string
  *                 example: "user@example.com"
+ *               wallet:
+ *                 type: string
+ *                 example: "user-wallet-address"
  *     responses:
  *       200:
  *         description: Success response with user and referred users information.
@@ -39,7 +52,11 @@ import { v4 as uuidv4 } from "uuid";
  *                   properties:
  *                     _id:
  *                       type: string
+ *                     account:
+ *                       type: string
  *                     email:
+ *                       type: string
+ *                     wallet:
  *                       type: string
  *                     campaigns:
  *                       type: array
@@ -47,8 +64,6 @@ import { v4 as uuidv4 } from "uuid";
  *                         type: object
  *                         properties:
  *                           _id:
- *                             type: string
- *                           email:
  *                             type: string
  *                           campaignName:
  *                             type: string
@@ -63,15 +78,17 @@ import { v4 as uuidv4 } from "uuid";
  *                         type: string
  *                       email:
  *                         type: string
+ *                       account:
+ *                         type: string
  *                       campaigns:
  *                         type: array
  *                         items:
  *                           type: string
  *                 message:
  *                   type: string
- *                   example: "User already exists. No changes made."
+ *                   example: "Data fetch successful!"
  *       400:
- *         description: Bad request response when email is not provided.
+ *         description: Bad request response when account, email, or wallet is not provided.
  *         content:
  *           application/json:
  *             schema:
@@ -82,7 +99,7 @@ import { v4 as uuidv4 } from "uuid";
  *                   example: false
  *                 message:
  *                   type: string
- *                   example: "Email is required"
+ *                   example: "account or email or wallet is required"
  *       405:
  *         description: Method not allowed response when using a method other than POST.
  *         content:

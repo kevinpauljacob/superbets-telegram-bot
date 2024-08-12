@@ -26,9 +26,11 @@ const secret = process.env.NEXTAUTH_SECRET;
  *               account:
  *                 type: string
  *                 description: The user's account identifier
+ *                 example: "user-account-id"
  *               referralCode:
  *                 type: string
  *                 description: The referral code to apply
+ *                 example: "ABC12345"
  *     responses:
  *       200:
  *         description: Referral code applied successfully
@@ -39,15 +41,51 @@ const secret = process.env.NEXTAUTH_SECRET;
  *               properties:
  *                 success:
  *                   type: boolean
+ *                   example: true
  *                 message:
  *                   type: string
+ *                   example: "Referral code applied successfully!"
  *       400:
- *         description: Bad request (e.g., invalid parameters, referral code already applied)
+ *         description: Bad request, such as invalid parameters or referral code already applied
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Missing parameters!"
  *       405:
- *         description: Method not allowed
+ *         description: Method not allowed response when using a method other than POST
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Method not allowed!"
  *       500:
- *         description: Internal server error
+ *         description: Internal server error response
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "An error occurred while processing your request."
  */
+
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
     if (req.method !== "POST")
