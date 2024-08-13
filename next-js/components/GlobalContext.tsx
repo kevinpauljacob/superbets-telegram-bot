@@ -10,7 +10,7 @@ import React, {
   useEffect,
 } from "react";
 import { LAMPORTS_PER_SOL, PublicKey } from "@solana/web3.js";
-import { errorCustom } from "./toasts/ToastGroup";
+import { successCustom, errorCustom } from "./toasts/ToastGroup";
 import SOL from "@/public/assets/coins/SOL";
 import { GameType } from "@/utils/provably-fair";
 import { SPL_TOKENS } from "@/context/config";
@@ -99,14 +99,37 @@ interface MyUser {
 }
 
 interface GlobalContextProps {
-  isFirstSignUp: boolean;
-  setIsFirstSignUp: (isFirstSignUp: boolean) => void;
-
+  // leaderboard
   myData: MyUser | null;
   setMyData: (myData: MyUser | null) => void;
 
   reached500: boolean;
   setReached500: (reached500: boolean) => void;
+
+  isModalOpen: boolean;
+  setIsModalOpen: (isModelOpen: boolean) => void;
+
+  data: any[];
+  setData: (data: any[]) => void;
+
+  maxPages: number;
+  setMaxPages: (maxPages: number) => void;
+
+  claimInfo: {
+    claimedCount: number;
+    spotsLeft: number;
+  };
+  setClaimInfo: (claimInfo: {
+    claimedCount: number;
+    spotsLeft: number;
+  }) => void;
+
+  threshold: number;
+  transactionsPerPage: number;
+
+  getLeaderBoard: () => void;
+  fetchClaimInfo: () => void;
+  claimUSDCReward: () => void;
 
   loading: boolean;
   setLoading: (stake: boolean) => void;
@@ -270,7 +293,6 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
   const [language, setLanguage] = useState<"en" | "ru" | "ko" | "ch">("en");
   const [userTokens, setUserTokens] = useState<TokenAccount[]>([]);
   const [userData, setUserData] = useState<User | null>(null);
-  const [myData, setMyData] = useState<MyUser | null>(null);
   const [stake, setStake] = useState(true);
   const [stakeAmount, setStakeAmount] = useState<number>(0);
   const [fomoBalance, setFomoBalance] = useState<number>(0.0);
@@ -353,8 +375,18 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
     "classic" | "low" | "medium" | "high"
   >("classic");
 
-  const [isFirstSignUp, setIsFirstSignUp] = useState<boolean>(false);
+  // leaderboard
+  const [myData, setMyData] = useState<MyUser | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [reached500, setReached500] = useState<boolean>(false);
+  const [claimInfo, setClaimInfo] = useState({
+    claimedCount: 0,
+    spotsLeft: 10,
+  });
+  const [data, setData] = useState<any[]>([]);
+  const [maxPages, setMaxPages] = useState<number>(0);
+  const transactionsPerPage = 10;
+  const threshold = 500;
 
   const openVerifyModal = () => {
     setIsVerifyModalOpen(true);
@@ -362,6 +394,92 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
 
   const closeVerifyModal = () => {
     setIsVerifyModalOpen(false);
+  };
+
+  const getLeaderBoard = async () => {
+    try {
+      const res = await fetch("/api/getInfo", {
+        method: "POST",
+        body: JSON.stringify({
+          option: 4,
+        }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      let { success, message, users } = await res.json();
+      if (success && Array.isArray(users)) {
+        users = users.map((user, index) => {
+          return {
+            ...user,
+            rank: index + 1,
+          };
+        });
+
+        setMaxPages(Math.ceil(users.length / transactionsPerPage));
+
+        setData(users);
+
+        if (session?.user?.email) {
+          let userInfo = users.find(
+            (info: any) =>
+              (info?.email && info?.email === session?.user?.email) ||
+              (info?.wallet && info?.wallet === session?.user?.wallet),
+          );
+
+          if (userInfo.numOfGamesPlayed === 0) setIsModalOpen(true);
+
+          setMyData(userInfo);
+        }
+      } else {
+        setData([]);
+        errorCustom(translator("Could not fetch leaderboard.", language));
+      }
+    } catch (e) {
+      setData([]);
+      errorCustom(translator("Could not fetch leaderboard.", language));
+      console.error(e);
+    }
+  };
+
+  const fetchClaimInfo = async () => {
+    try {
+      const response = await fetch("/api/games/user/claimUSDC");
+      const data = await response.json();
+      setClaimInfo(data);
+    } catch (error) {
+      console.error("Error fetching USDC claim information:", error);
+    }
+  };
+
+  const claimUSDCReward = async () => {
+    try {
+      const response = await fetch("/api/games/user/claimUSDC", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          userId: myData?._id,
+          email: session?.user?.email,
+        }),
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        fetchClaimInfo();
+        getLeaderBoard();
+        getBalance();
+        successCustom("USDC reward claimed successfully.");
+        setIsModalOpen(false);
+      } else {
+        errorCustom(translator(data.message, language));
+      }
+    } catch (error) {
+      console.error("Error claiming USDC reward:", error);
+      errorCustom(translator("Error claiming USDC reward.", language));
+    }
   };
 
   const getCurrentUserData = async () => {
@@ -618,6 +736,21 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
         setUserData,
         myData,
         setMyData,
+        isModalOpen,
+        setIsModalOpen,
+        data,
+        setData,
+        maxPages,
+        setMaxPages,
+        claimInfo,
+        setClaimInfo,
+        threshold,
+        transactionsPerPage,
+        reached500,
+        setReached500,
+        getLeaderBoard,
+        fetchClaimInfo,
+        claimUSDCReward,
         stake,
         setStake,
         stakeAmount,
@@ -710,10 +843,6 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
         setLiveCurrentStat,
         updatePNL,
         liveTokenPrice,
-        isFirstSignUp,
-        setIsFirstSignUp,
-        reached500,
-        setReached500,
       }}
     >
       {children}
