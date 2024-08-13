@@ -571,15 +571,16 @@ export default function AffiliateProgram() {
                 </p>
                 <div className="flex gap-3 mb-4">
                   <span className="text-ellipsis overflow-hidden bg-white/5 rounded-[5px] text-sm font-chakra text-[#94A3B8] font-normal px-4 py-1">
-                    {`referralCode=${userCampaigns[userCampaigns.length - 1]
-                      ?.referralCode}`}
+                    {`referralCode=${
+                      userCampaigns[userCampaigns.length - 1]?.referralCode
+                    }`}
                   </span>
                   <button
                     onClick={() => {
                       copyToClipboard(
-                        `https://superbets.games?referralCode=${userCampaigns[
-                          userCampaigns.length - 1
-                        ]?.referralCode}`,
+                        `https://superbets.games?referralCode=${
+                          userCampaigns[userCampaigns.length - 1]?.referralCode
+                        }`,
                       );
                       setButtonText("Copied!");
                       setTimeout(() => {
@@ -721,15 +722,15 @@ export default function AffiliateProgram() {
                   </span>
                 ))
               : earnings
-              ? earningsTabHeaders.map((header, index) => (
-                  <span
-                    key={index}
-                    className="w-full text-center font-changa text-[#F0F0F080]"
-                  >
-                    {translator(header, language)}
-                  </span>
-                ))
-              : null}
+                ? earningsTabHeaders.map((header, index) => (
+                    <span
+                      key={index}
+                      className="w-full text-center font-changa text-[#F0F0F080]"
+                    >
+                      {translator(header, language)}
+                    </span>
+                  ))
+                : null}
           </div>
           <div className="mb-[1.4rem] flex md:hidden w-full flex-row items-center bg-[#121418] rounded-md py-1 gap-2">
             {smallScreenReferredTabHeaders.map((header, index) => (
@@ -772,10 +773,7 @@ export default function AffiliateProgram() {
                               >
                                 <div className="w-full flex items-center justify-between cursor-pointer">
                                   <span className="w-full text-center font-changa text-sm text-[#F0F0F0] text-opacity-75">
-                                    {!user.account.wallet ||
-                                    user.account.wallet === null
-                                      ? user.account.email
-                                      : obfuscatePubKey(user.account.wallet)}
+                                    {user.account.name}
                                   </span>
                                   <span className="w-full text-center font-changa text-sm text-opacity-75">
                                     <span
