@@ -30,7 +30,7 @@ const DepositSchema = new Schema(
     status: {
       type: String,
       // review -> pending -> completed
-      enum: ["review", "pending", "completed"],
+      enum: ["review", "pending", "completed", "failed"],
       default: "completed",
       required: true,
     },

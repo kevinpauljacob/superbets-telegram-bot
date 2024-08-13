@@ -154,7 +154,7 @@ const handleQueuedDeposits = () => {
   Object.keys(deposits).forEach((deposit) => depositFunds(deposits[deposit]));
 
   // Continuously check for new deposits
-  setTimeout(handleQueuedDeposits, 10000);
+  // setTimeout(handleQueuedDeposits, 10000);
 };
 
-handleQueuedDeposits();
+// handleQueuedDeposits();

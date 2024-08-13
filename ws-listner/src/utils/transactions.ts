@@ -18,9 +18,10 @@ import {
 } from "@solana/web3.js";
 import connectDatabase from "./database";
 import crypto from "crypto";
-import { User } from "../models";
+import { Deposits, User } from "../models";
 import { bs58 } from "@project-serum/anchor/dist/cjs/utils/bytes";
 import dotenv from "dotenv";
+import { Deposit } from "./processTransaction";
 
 export type spl_token = {
   tokenName: string;
@@ -80,7 +81,8 @@ export const createDepositTxn = async (
     ComputeBudgetProgram.setComputeUnitLimit({ units: 100_000 }),
     ComputeBudgetProgram.setComputeUnitPrice({ microLamports: 150_000 })
   );
-
+  console.log("from: ", wallet);
+  console.log("to: ", devPublicKey);
   if (tokenName === "SOL")
     transaction.add(
       SystemProgram.transfer({
@@ -102,7 +104,7 @@ export const createDepositTxn = async (
       )
     );
   }
-  console.log("decrypting",encryptedKey, encryptionKey, iv);
+  console.log("decrypting", encryptedKey, encryptionKey, iv);
   const privateKey = decryptServerSeed(
     encryptedKey,
     encryptionKey,
@@ -112,16 +114,16 @@ export const createDepositTxn = async (
   const secretKey = bs58.decode(privateKey);
   console.log("secret", secretKey);
   const signer = Keypair.fromSecretKey(secretKey);
-  transaction.sign(signer);
+  transaction.partialSign(signer);
 
-  transaction.instructions.slice(2).forEach((i) => {
-    i.keys.forEach((k) => {
-      if (k.pubkey.equals(wallet)) {
-        k.isSigner = true;
-        k.isWritable = true;
-      }
-    });
-  });
+  // transaction.instructions.slice(2).forEach((i) => {
+  //   i.keys.forEach((k) => {
+  //     if (k.pubkey.equals(wallet)) {
+  //       k.isSigner = true;
+  //       k.isWritable = true;
+  //     }
+  //   });
+  // });
 
   return { transaction, blockhashWithExpiryBlockHeight };
 };
@@ -195,4 +197,28 @@ export async function retryTxn(
 
   if (finalTxn) return finalTxn;
   else throw new Error("Transaction could not be confirmed !");
+}
+
+export async function createDeposit(
+  token: string,
+  amount: number,
+  signature: string,
+  wallet: string,
+  comment: string,
+  status: string
+) {
+  await connectDatabase();
+  try {
+    await Deposits.create({
+      account: "",
+      wallet,
+      amount,
+      type: true,
+      tokenMint: "SOL",
+      txnSignature: signature,
+      status,
+    });
+  } catch (e) {
+    console.log("Failed to create deposit for ", signature);
+  }
 }

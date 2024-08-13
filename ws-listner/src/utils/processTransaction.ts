@@ -1,5 +1,8 @@
+import { PublicKey } from "@solana/web3.js";
 import { deposits, wallets } from "..";
 import { Deposits, User } from "../models";
+import depositFunds, { connection } from "./depositFunds";
+import { createDeposit } from "./transactions";
 
 interface AccountKey {
   pubkey: string;
@@ -96,7 +99,9 @@ const processTransaction = async (result: {
 
     // Check if the destination exists in the wallets object
     if (!Object.keys(wallets).includes(destination)) {
-      console.log("SOL deposit destination not found in wallets object");
+      let comment = "SOL deposit destination not found in wallets object";
+      console.log(comment);
+      await createDeposit("SOL", 0, signature, destination, comment, "failed");
       return;
     }
 
@@ -111,15 +116,18 @@ const processTransaction = async (result: {
 
     const preBalance = preBalances[destinationIndex];
     const postBalance = postBalances[destinationIndex];
-    const balanceDiff = postBalance - preBalance;
+    const balanceDiff = postBalance - preBalance - 900000;
 
     if (balanceDiff <= 0) {
-      console.log("No positive balance change for SOL deposit");
+      let comment = "No positive balance change for SOL deposit";
+      console.log(comment);
+      await createDeposit("SOL", 0, signature, destination, comment, "failed");
       return;
     }
 
-    const solAmount = lamports! / 1e9;
+    const solAmount = (postBalance! - 1000000) / 1e9;
 
+    console.log("balanceDiff", balanceDiff);
     console.log("SOL deposited:", solAmount);
     console.log("Destination address:", destination);
     console.log("Transaction signature:", signature);
@@ -145,6 +153,7 @@ const processTransaction = async (result: {
       wallet: destination,
       signature: signature,
     };
+    await depositFunds(deposits[signature]);
     return;
   }
 
@@ -174,12 +183,23 @@ const processTransaction = async (result: {
     }
 
     if (!walletAddress || !tokenMint) {
-      console.log("SPL token deposit destination not found in wallets object");
+      let comment = "SPL token deposit destination not found in wallets object";
+      console.log(comment);
+      await createDeposit("", 0, signature, "", comment, "failed");
       return;
     }
 
     if (!allowedTokens.includes(tokenMint)) {
-      console.log("SPL token not in the list of allowed tokens");
+      let comment = "SPL token not in the list of allowed tokens";
+      console.log(comment);
+      await createDeposit(
+        tokenMint,
+        0,
+        signature,
+        walletAddress,
+        comment,
+        "failed"
+      );
       return;
     }
 
@@ -190,7 +210,16 @@ const processTransaction = async (result: {
     );
 
     if (!postTokenBalance) {
-      console.log("Post token balance not found");
+      let comment = "Post token balance not found";
+      console.log(comment);
+      await createDeposit(
+        tokenMint,
+        0,
+        signature,
+        walletAddress,
+        comment,
+        "failed"
+      );
       return;
     }
 
@@ -209,7 +238,16 @@ const processTransaction = async (result: {
     }
 
     if (tokenAmountDeposited <= 0) {
-      console.log("No positive balance change for SPL token deposit");
+      let comment = "No positive balance change for SPL token deposit";
+      console.log(comment);
+      await createDeposit(
+        tokenMint,
+        0,
+        signature,
+        walletAddress,
+        comment,
+        "failed"
+      );
       return;
     }
 
@@ -220,7 +258,7 @@ const processTransaction = async (result: {
 
     let player = null;
     player = await User.findOne({
-      wallet: destination,
+      wallet: walletAddress,
     });
     if (player) {
       const account = player._id;
@@ -241,6 +279,7 @@ const processTransaction = async (result: {
       wallet: walletAddress,
       signature: signature,
     };
+    await depositFunds(deposits[signature]);
     return;
   }
 

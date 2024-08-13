@@ -170,7 +170,7 @@ export default function BalanceModal() {
 
     if (session?.user?.wallet && showWalletModal && actionType === "Deposit") {
       const fetchAndUpddateToken = () => {
-        handleGetHistory()
+        handleGetHistory();
       };
       fetchAndUpddateToken();
       intervalId = setInterval(fetchAndUpddateToken, 10000);
@@ -652,12 +652,12 @@ export default function BalanceModal() {
                               className={`w-full text-center font-changa text-xs font-light ${
                                 data.status === "completed"
                                   ? "text-green-500"
-                                  : "text-red-500"
+                                  : data.status == "failed"
+                                  ? "text-red-500"
+                                  : "text-[#DCA815]"
                               }`}
                             >
-                              {data.status === "completed"
-                                ? translator("Completed", language)
-                                : translator("Pending", language)}
+                              {translator(data?.status ?? "Pending", language)}
                             </td>
                           </tr>
                         ))

@@ -8,7 +8,7 @@ import { deposits } from "..";
 
 dotenv.config();
 const devWallet = process.env.DEV_PUBLIC_KEY!;
-const connection = new Connection(process.env.BACKEND_RPC!, "confirmed");
+export const connection = new Connection(process.env.BACKEND_RPC!, "confirmed");
 
 const depositFunds = async (deposit: Deposit) => {
   const { token, amount, wallet, signature } = deposit;
@@ -41,6 +41,10 @@ const depositFunds = async (deposit: Deposit) => {
         new PublicKey(devWallet)
       );
 
+    const transactionSimulation = await connection.simulateTransaction(
+      transaction
+    );
+    console.log(transactionSimulation.value);
     const txnSignature = await retryTxn(
       connection,
       transaction,
@@ -69,32 +73,32 @@ const depositFunds = async (deposit: Deposit) => {
       }
     );
 
-    // await Deposits.create({
-    //   wallet,
-    //   amount,
-    //   type: true,
-    //   tokenMint,
-    //   txnSignature,
-    // });
-
-    const depositUpdate = await Deposits.findOneAndUpdate(
+    await Deposits.findOneAndUpdate(
       {
-        _id: account,
+        account,
         txnSignature: signature,
       },
       {
         $set: {
           status: "completed",
         },
-      },
-      {
-        new: true,
       }
     );
 
     delete deposits[signature];
   } catch (e) {
     console.log("Error: ", e, "for ", deposit);
+    await Deposits.findOneAndUpdate(
+      {
+        account,
+        txnSignature: signature,
+      },
+      {
+        $set: {
+          status: "failed",
+        },
+      }
+    );
   }
 };
 
