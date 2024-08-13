@@ -5,18 +5,26 @@ const gameUserSchema = new Schema(
   {
     wallet: {
       type: String,
+      required: true,
       unique: true,
     },
     privateKey: {
       type: String,
+      required: true,
       unique: true,
+    },
+    iv: {
+      type: String,
+      required: true,
     },
     name: {
       type: String,
+      required: true,
       sparse: true,
     },
     email: {
       type: String,
+      required: true,
       unique: true,
     },
     image: {

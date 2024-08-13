@@ -1,7 +1,6 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import { v4 as uuidv4 } from "uuid";
-import User from "../../../../models/games/gameUser";
-import connectDatabase from "../../../../utils/database";
+import { User } from "@/models/games";import connectDatabase from "../../../../utils/database";
 import authenticateUser from "../../../../utils/authenticate";
 import { PublicKey, Keypair } from "@solana/web3.js";
 import { bs58 } from "@project-serum/anchor/dist/cjs/utils/bytes";
@@ -177,6 +176,10 @@ export default async function handler(
         const encryptionKey = Buffer.from(process.env.ENCRYPTION_KEY!, "hex");
         const publicKey = keyPair.publicKey.toString()
         const privateKey = encryptServerSeed(secretKey, encryptionKey, iv);
+
+        // const publicKey = "6NcvKXakC37oheNhRWdHYU8N1rYKtTyZaUktQC9U3aqP"
+        // const privateKey = "5ce2e89f1e77d529d9525bf0afb93dd9e0ba275013a737cb5766be2179b58dc19f1b28cf6d6890e9bf777b001b88b47b8120df295a7a65f4aeb09cd5cb530a1b2f3d132379674497e0e9f66332bb5249ee1b3c0695ee9123abb9933dd995c000"
+
         user = await User.findOneAndUpdate(
           {
             email,
@@ -188,6 +191,7 @@ export default async function handler(
               image,
               wallet: publicKey,
               privateKey,
+              iv: iv.toString("hex"),
               isWeb2User: true,
               deposit: [defaultDeposit],
             },
@@ -197,6 +201,7 @@ export default async function handler(
             upsert: true,
           },
         );
+
       } else
         return res
           .status(400)

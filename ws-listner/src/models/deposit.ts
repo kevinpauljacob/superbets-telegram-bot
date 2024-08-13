@@ -8,6 +8,10 @@ const DepositSchema = new Schema(
       ref: "GameUser",
       required: true,
     },
+    wallet: {
+      type: String,
+      required: true,
+    },
     type: {
       // true for deposits & false for withdrawal
       type: Boolean,
@@ -40,7 +44,7 @@ const DepositSchema = new Schema(
       unique: true,
     },
   },
-  { timestamps: true },
+  { timestamps: true }
 );
 
 let Deposit =

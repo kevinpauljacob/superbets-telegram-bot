@@ -1,8 +1,10 @@
 import mongoose from "mongoose";
+import dotenv from "dotenv";
 declare global {
   var mongoose: any; // This must be a `var` and not a `let / const`
 }
 
+dotenv.config();
 const MONGODB_URI = process.env.DB_URI!;
 
 if (!MONGODB_URI) {
