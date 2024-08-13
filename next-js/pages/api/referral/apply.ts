@@ -119,20 +119,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         .status(400)
         .json({ success: false, message: "You can't refer yourself!" });
 
-    const currentUser = await User.findOne({ account });
-    if (!currentUser)
-      return res
-        .status(400)
-        .json({ success: false, message: "User not found!" });
-
-    if (currentUser.referredByChain.length > 0) {
-      return res.status(400).json({
-        success: false,
-        message:
-          "You have already applied a referral code and cannot change it.",
-      });
-    }
-
     const referrer = await User.findOne({
       account: campaign.account,
     });
@@ -147,27 +133,41 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       5,
     );
 
-    const user = await User.findOneAndUpdate(
-      { account, referredByChain: [] },
-      {
-        $set: {
-          referredByChain,
-        },
-      },
-      { upsert: true, new: true },
-    ).catch((e) => {
-      return res.status(400).json({
-        success: false,
-        message: "Applied referralCode cannot be changed!",
-      });
-    });
+    // Try to find an existing user
+    let user = await User.findOne({ account });
 
+    if (user) {
+      // If user exists and already has a referral, prevent reapplying
+      if (user.referredByChain && user.referredByChain.length > 0) {
+        return res.status(400).json({
+          success: false,
+          message:
+            "You have already applied a referral code and cannot change it.",
+        });
+      }
+
+      // If user exists but doesn't have a referral, update their referral
+      user = await User.findOneAndUpdate(
+        { account },
+        { $set: { referredByChain } },
+        { new: true },
+      );
+    } else {
+      // If user doesn't exist, create a new user with the referral
+      user = await User.create({
+        account,
+        referredByChain,
+      });
+    }
+
+    // Increment signup count for the campaign
     campaign.signupCount += 1;
     await campaign.save();
 
+    // Create default campaign for the user if they don't have any
     if (user.campaigns.length === 0) {
       const defaultCampaign = "Default Campaign";
-      const campaign = await Campaign.findOneAndUpdate(
+      const newCampaign = await Campaign.findOneAndUpdate(
         {
           account,
           campaignName: defaultCampaign,
@@ -184,12 +184,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       );
 
       await User.findOneAndUpdate(
-        {
-          account,
-        },
-        {
-          $addToSet: { campaigns: campaign._id },
-        },
+        { account },
+        { $addToSet: { campaigns: newCampaign._id } },
       );
     }
 

@@ -35,48 +35,114 @@ export default function Home() {
   }, [language]); 
  */
 
-  useEffect(() => {
-    if (referralCode && !session?.user) {
-      status !== "authenticated" && setShowConnectModal(true);
-    }
-    getCurrentUserData();
-  }, [referralCode, session?.user]);
+  // useEffect(() => {
+  //   if (referralCode && !session?.user) {
+  //     status !== "authenticated" && setShowConnectModal(true);
+  //   }
+  //   getCurrentUserData();
+  //   console.log("here 1");
+  // }, [referralCode, session?.user]);
 
-  useEffect(() => {
-    const applyReferralCode = async () => {
-      try {
+  // useEffect(() => {
+  //   const applyReferralCode = async () => {
+  //     try {
+  //       const response = await fetch(`/api/referral/apply`, {
+  //         method: "POST",
+  //         headers: {
+  //           "Content-Type": "application/json",
+  //         },
+  //         body: JSON.stringify({
+  //           account: myData?._id,
+  //           referralCode: referralCode,
+  //         }),
+  //       });
+
+  //       const { success, message } = await response.json();
+
+  //       if (success) {
+  //         successCustom(message);
+  //       } else {
+  //         errorCustom(message);
+  //       }
+  //     } catch (error: any) {
+  //       throw new Error(error.message);
+  //     }
+  //   };
+
+  //   if (
+  //     myData !== null &&
+  //     status === "authenticated" &&
+  //     referralCode !== undefined &&
+  //     referralCode !== null &&
+  //     referralCode !== ""
+  //   )
+  //     applyReferralCode();
+  // }, [status, referralCode, myData]);
+
+  const applyReferralCode = async () => {
+    try {
+      const res = await fetch("/api/getInfo", {
+        method: "POST",
+        body: JSON.stringify({ option: 4 }),
+        headers: { "Content-Type": "application/json" },
+      });
+
+      const { success, users } = await res.json();
+
+      if (!success || !Array.isArray(users)) {
+        console.error("Failed to fetch users or users data is invalid.");
+        return;
+      }
+
+      if (!session?.user?.email && !session?.user?.wallet) {
+        console.error("No session user information available.");
+        return;
+      }
+
+      const userInfo = users.find(
+        (info: any) =>
+          (info?.email && info?.email === session?.user?.email) ||
+          (info?.wallet && info?.wallet === session?.user?.wallet),
+      );
+
+      if (!userInfo) {
+        console.error("User not found.");
+        return;
+      }
+
+      if (referralCode && userInfo._id) {
         const response = await fetch(`/api/referral/apply`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            account: myData?._id,
+            account: userInfo._id,
             referralCode: referralCode,
           }),
         });
 
-        const { success, message } = await response.json();
+        const { success: referralSuccess, message } = await response.json();
 
-        if (success) {
+        if (referralSuccess) {
           successCustom(message);
         } else {
           errorCustom(message);
         }
-      } catch (error: any) {
-        throw new Error(error.message);
       }
-    };
+    } catch (error: any) {
+      console.error("Error in applying referral code:", error);
+      errorCustom(error.message);
+    }
+  };
 
-    if (
-      myData !== null &&
-      status === "authenticated" &&
-      referralCode !== undefined &&
-      referralCode !== null &&
-      referralCode !== ""
-    )
-      applyReferralCode();
-  }, [status, referralCode, myData]);
+  useEffect(() => {
+    if (referralCode && !session?.user) {
+      status !== "authenticated" && setShowConnectModal(true);
+    }
+
+    applyReferralCode();
+  }, [referralCode, session?.user]);
 
   return (
     <>
