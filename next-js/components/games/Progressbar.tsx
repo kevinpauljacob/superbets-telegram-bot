@@ -8,7 +8,7 @@ export default function Progressbar({
   betTime: number;
 }) {
   const [timeLeft, setTimeLeft] = useState(
-    new Date(betTime).getTime() + minutes * 60000 - Date.now()
+    new Date(betTime).getTime() + minutes * 60000 - Date.now(),
   );
 
   useEffect(() => {
@@ -16,7 +16,6 @@ export default function Progressbar({
       const remaining = timeLeft - 1000;
       setTimeLeft((prev) => prev - 1000);
 
-      // console.log(remaining);
       if (remaining <= 0) {
         setTimeLeft(0);
         clearInterval(interval);
