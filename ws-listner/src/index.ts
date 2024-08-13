@@ -116,7 +116,7 @@ function initializeWebSocket() {
           trans.meta.postTokenBalances
         );
         await processTransaction(messageObj?.params?.result);
-        fs.writeFileSync("transfer.json", JSON.stringify(messageObj));
+        // fs.writeFileSync("transfer.json", JSON.stringify(messageObj));
       } else {
         console.log("Received message:", messageObj);
         if (messageObj?.params?.error) {
