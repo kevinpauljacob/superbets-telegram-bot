@@ -46,7 +46,7 @@ const SPL_TOKENS: Array<spl_token> = [
 ];
 
 dotenv.config();
-const connection = new Connection(process.env.NEXT_PUBLIC_RPC!);
+const connection = new Connection(process.env.BACKEND_RPC!);
 const encryptionKey = Buffer.from(process.env.ENCRYPTION_KEY!, "hex");
 
 export const decryptServerSeed = (

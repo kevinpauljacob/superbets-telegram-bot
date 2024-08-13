@@ -41,10 +41,6 @@ const depositFunds = async (deposit: Deposit) => {
         new PublicKey(devWallet)
       );
 
-    const transactionSimulation = await connection.simulateTransaction(
-      transaction
-    );
-    console.log(transactionSimulation.value);
     const txnSignature = await retryTxn(
       connection,
       transaction,
