@@ -44,7 +44,7 @@ const DepositSchema = new Schema(
       unique: true,
     },
   },
-  { timestamps: true },
+  { timestamps: true }
 );
 
 let Deposit =

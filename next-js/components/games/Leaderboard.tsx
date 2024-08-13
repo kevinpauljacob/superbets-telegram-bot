@@ -1,14 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { useWallet } from "@solana/wallet-adapter-react";
 import { obfuscatePubKey, translator } from "@/context/transactions";
 import { errorCustom } from "../toasts/ToastGroup";
 import FOMOHead from "../HeadElement";
 import { useGlobalContext } from "../GlobalContext";
 
 function Leaderboard() {
-  const wallet = useWallet();
-
-  const { language } = useGlobalContext();
+  const { language, session } = useGlobalContext();
 
   const [isWeekly, setIsWeekly] = useState<boolean>(false);
   const [maxPages, setMaxPages] = useState<number>(0);
@@ -79,16 +76,16 @@ function Leaderboard() {
   }, [isWeekly]);
 
   useEffect(() => {
-    if (!wallet.publicKey) return;
+    if (!session?.user?.wallet) return;
 
     let userInfo = data.find(
       (info: any) =>
         info.data.address ==
-        obfuscatePubKey(wallet.publicKey ? wallet.publicKey.toBase58() : ""),
+        obfuscatePubKey(session?.user?.wallet ?? ""),
     );
 
     setMyData(userInfo);
-  }, [wallet.publicKey, data]);
+  }, [data]);
 
   const headers = [
     "Rank",
@@ -191,7 +188,7 @@ function Leaderboard() {
                     (info) =>
                       info.data.address !=
                       obfuscatePubKey(
-                        wallet.publicKey ? wallet.publicKey.toBase58() : "",
+                        session?.user?.wallet ?? "",
                       ),
                   )
                   .map((data, index) => (

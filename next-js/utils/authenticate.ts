@@ -3,8 +3,8 @@ import { getToken } from "next-auth/jwt";
 
 const authenticateUser = async (req: NextApiRequest, res: NextApiResponse) => {
   const secret = process.env.NEXTAUTH_SECRET;
-  const { wallet, email } = req.body;
-  if (!email && !wallet)
+  const { email } = req.body;
+  if (!email)
     return res
       .status(400)
       .json({ success: false, message: "Missing required parameters" });
@@ -13,9 +13,7 @@ const authenticateUser = async (req: NextApiRequest, res: NextApiResponse) => {
     !token ||
     !token.sub ||
     //@ts-ignore
-    (email && token?.user?.email != email) ||
-    //@ts-ignore
-    (wallet && token?.user?.wallet != wallet)
+    (email && token?.user?.email != email)
   )
     return res.status(400).json({
       success: false,

@@ -1,7 +1,6 @@
 import Bets from "../../components/games/Bets";
 import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
-import { useWallet } from "@solana/wallet-adapter-react";
 import Loader from "../../components/games/Loader";
 import {
   checkResult as checkResultAPI,
@@ -35,7 +34,6 @@ const Progress = dynamic(() => import("../../components/games/Progressbar"), {
 });
 
 export default function Options() {
-  const wallet = useWallet();
   const methods = useForm();
   const router = useRouter();
 
@@ -44,7 +42,6 @@ export default function Options() {
   const {
     walletBalance,
     setWalletBalance,
-    getWalletBalance,
     getBalance,
     coinData,
     setShowWalletModal,
@@ -101,7 +98,7 @@ export default function Options() {
     setLoading(true);
     setCheckResult(true);
     try {
-      let res = await checkResultAPI(wallet, session);
+      let res = await checkResultAPI(session);
       if (res.success) {
         if (res?.data?.result == "Won") {
           successCustom(
@@ -170,7 +167,6 @@ export default function Options() {
         return;
       }
       let res = await placeBet(
-        wallet,
         session,
         betAmt,
         selectedCoin.tokenMint,
@@ -215,14 +211,14 @@ export default function Options() {
   };
 
   const getActiveBet = async () => {
-    if ((!wallet?.publicKey && !session?.user?.email) || loading) {
+    if (!session?.user?.email || loading) {
       return;
     }
 
     setLoading(true);
 
     try {
-      const walletParam = wallet?.publicKey?.toBase58() || null;
+      const walletParam = session?.user?.wallet || null;
       const emailParam = session?.user?.email || null;
       const response = await fetch(
         `/api/games/options/getActiveBet?wallet=${walletParam}&email=${emailParam}`,
@@ -272,19 +268,18 @@ export default function Options() {
   useEffect(() => {
     if (refresh && session?.user) {
       getBalance();
-      getWalletBalance();
       setRefresh(false);
     }
-  }, [wallet?.publicKey, session?.user, refresh]);
+  }, [session?.user, refresh]);
 
   useEffect(() => {
-    if (wallet?.publicKey && status === "authenticated") {
+    if (status === "authenticated") {
       getActiveBet();
       if (checkBet) {
         clearTimeout(checkBet);
       }
     }
-  }, [wallet.publicKey]);
+  }, [session?.user]);
 
   useEffect(() => {
     let intervalId = setInterval(async () => {

@@ -44,9 +44,6 @@ Decimal.set({ precision: 9 });
  *           schema:
  *             type: object
  *             properties:
- *               wallet:
- *                 type: string
- *                 description: The wallet address of the user.
  *               email:
  *                 type: string
  *                 description: The email of the user.
@@ -98,7 +95,6 @@ export const config = {
 };
 
 type InputType = {
-  wallet: string;
   email: string;
   amount: number;
   tokenMint: GameTokens;
@@ -108,7 +104,7 @@ type InputType = {
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === "POST") {
     try {
-      let { wallet, email, amount, tokenMint, flipType }: InputType = req.body;
+      let { email, amount, tokenMint, flipType }: InputType = req.body;
 
       const minGameAmount = maxPayouts[tokenMint][GameType.coin] * minAmtFactor;
 
@@ -118,7 +114,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           message: "Under maintenance",
         });
 
-      if ((!wallet && !email) || !amount || !flipType || !tokenMint)
+      if (!email || !amount || !flipType || !tokenMint)
         return res
           .status(400)
           .json({ success: false, message: "Missing parameters" });
@@ -153,15 +149,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         });
 
       let user = null;
-      if (wallet) {
-        user = await User.findOne({
-          wallet: wallet,
-        });
-      } else if (email) {
-        user = await User.findOne({
-          email: email,
-        });
-      }
+      user = await User.findOne({
+        email: email,
+      });
 
       if (!user)
         return res
@@ -250,7 +240,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           .mul(houseEdge)
           .toNumber();
       }
-
       const addGame = !user.gamesPlayed.includes(GameType.coin);
       let userUpdate;
       try {
@@ -281,7 +270,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       } catch (e) {
         console.error(e);
       }
-
+      console.log("update failed");
       if (!userUpdate) {
         throw new Error("Insufficient balance for bet!");
       }

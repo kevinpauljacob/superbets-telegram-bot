@@ -5,14 +5,10 @@ import { SPL_TOKENS } from "@/context/config";
 import { translator } from "@/context/transactions";
 import SOL from "@/public/assets/coins/SOL";
 import { useSession } from "next-auth/react";
-import { useWallet } from "@solana/wallet-adapter-react";
-import { useWalletModal } from "@solana/wallet-adapter-react-ui";
-import { handleSignIn } from "./ConnectWallet";
+import StatsSoundToggle from "./games/StatsSoundToggle";
+import { errorCustom } from "./toasts/ToastGroup";
 
 export default function CoinSelector() {
-  const wallet = useWallet();
-  const walletModal = useWalletModal();
-
   const {
     setShowWalletModal,
     setShowConnectModal,
@@ -73,7 +69,19 @@ export default function CoinSelector() {
           />
         </div>
       </div>
-
+      <div
+        onClick={() => {
+          session?.user?.wallet
+            ? setShowWalletModal(true)
+            : setShowConnectModal(true)
+        }}
+        className="flex items-center h-[2.3rem] md:h-[2.4rem] px-5 md:px-4 py-0 md:py-2 gap-1 md:gap-1.5 bg-[#5F4DFF] disabled:bg-[#555555] hover:bg-[#7F71FF] focus:bg-[#4C3ECC] transition-all cursor-pointer rounded-[5px]"
+      >
+        <Image src={"/assets/wallet.png"} alt="" width={17} height={17} />
+        <span className="text-xs md:text-sm leading-3 mt-0.5 text-white text-opacity-90">
+          {translator("Wallet", language)}
+        </span>
+      </div>
       {!startAuto && showSelectCoinModal && (
         <div className="absolute top-full left-1/2 -translate-x-1/2 mt-3 bg-[#202329] w-full min-w-fit rounded-[5px] border-2 border-white border-opacity-10">
           {SPL_TOKENS.map((coin, index) => (
@@ -139,22 +147,9 @@ export default function CoinSelector() {
           </div> */}
         </div>
       )}
-
-      {/* <div
-        onClick={() => {
-          wallet.connected && wallet.publicKey && status === "authenticated"
-            ? setShowWalletModal(true)
-            : session?.user?.wallet
-            ? handleSignIn(wallet, walletModal)
-            : setShowConnectModal(true);
-        }}
-        className="flex items-center h-[2.3rem] md:h-10 px-5 md:px-4 py-0 md:py-2 gap-1 md:gap-1.5 bg-[#5F4DFF] hover:bg-[#7F71FF] focus:bg-[#4C3ECC] transition-all cursor-pointer rounded-[5px]"
-      >
-        <Image src={"/assets/wallet.png"} alt="" width={17} height={17} />
-        <span className="text-xs md:text-sm leading-3 mt-0.5 text-white text-opacity-90">
-          {translator("Wallet", language)}
-        </span>
-      </div> */}
+      <div className="hidden md:flex">
+        <StatsSoundToggle />
+      </div>
     </div>
   );
 }

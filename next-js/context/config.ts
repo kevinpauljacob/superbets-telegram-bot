@@ -10,6 +10,7 @@ export type spl_token = {
   tokenMint: string;
   decimal: number;
   icon: any;
+  luloEnabled: boolean,
 };
 
 const SPL_TOKENS: Array<spl_token> = [
@@ -18,18 +19,21 @@ const SPL_TOKENS: Array<spl_token> = [
     tokenMint: "SOL", //So11111111111111111111111111111111111111112
     decimal: 9,
     icon: SOL,
+    luloEnabled: true,
   },
   {
     tokenName: "USDC",
     tokenMint: "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
     decimal: 6,
     icon: USDC,
+    luloEnabled: true,
   },
   {
     tokenName: "SUPER",
     tokenMint: "SUPER",
     decimal: 6,
     icon: SUPER,
+    luloEnabled: true,
   },
 ];
 

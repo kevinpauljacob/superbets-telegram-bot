@@ -1,17 +1,8 @@
 import "@/styles/globals.css";
 import Layout from "@/components/layout";
-import { WalletModalProvider } from "@solana/wallet-adapter-react-ui";
 import type { AppProps } from "next/app";
 import toast, { Toaster, useToasterStore } from "react-hot-toast";
-import {
-  ConnectionProvider,
-  WalletProvider,
-} from "@solana/wallet-adapter-react";
-import {
-  SolflareWalletAdapter,
-  LedgerWalletAdapter,
-  PhantomWalletAdapter,
-} from "@solana/wallet-adapter-wallets";
+import { ConnectionProvider } from "@solana/wallet-adapter-react";
 
 import { GlobalProvider } from "@/components/GlobalContext";
 import "@solana/wallet-adapter-react-ui/styles.css";
@@ -26,12 +17,6 @@ export default function App({
 }: AppProps) {
   const endpoint = process.env.NEXT_PUBLIC_RPC!;
   const router = useRouter();
-
-  const wallets = [
-    new PhantomWalletAdapter(),
-    new SolflareWalletAdapter(),
-    new LedgerWalletAdapter(),
-  ];
 
   const { toasts } = useToasterStore();
 
@@ -61,23 +46,19 @@ export default function App({
 
   return (
     <ConnectionProvider endpoint={endpoint}>
-      <WalletProvider wallets={wallets} autoConnect>
-        <WalletModalProvider>
-          <SessionProvider session={pageProps.session} refetchInterval={0}>
-            <GlobalProvider>{wrappedContent}</GlobalProvider>
+      <SessionProvider session={pageProps.session} refetchInterval={0}>
+        <GlobalProvider>{wrappedContent}</GlobalProvider>
 
-            <Toaster
-              position="top-right"
-              toastOptions={{
-                style: {
-                  background: "#333",
-                  color: "#fff",
-                },
-              }}
-            />
-          </SessionProvider>
-        </WalletModalProvider>
-      </WalletProvider>
+        <Toaster
+          position="top-right"
+          toastOptions={{
+            style: {
+              background: "#333",
+              color: "#fff",
+            },
+          }}
+        />
+      </SessionProvider>
     </ConnectionProvider>
   );
 }

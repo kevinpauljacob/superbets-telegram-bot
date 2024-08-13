@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { useWallet } from "@solana/wallet-adapter-react";
 import { obfuscatePubKey, translator, formatNumber } from "@/context/transactions";
 import { pointTiers } from "@/context/config";
 import { useGlobalContext } from "./GlobalContext";
@@ -27,7 +26,6 @@ function Leaderboard({
   myData,
 }: LeaderboardProps) {
   const router = useRouter();
-  const wallet = useWallet();
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const {

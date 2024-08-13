@@ -1,4 +1,3 @@
-import { useWallet } from "@solana/wallet-adapter-react";
 import { useState, useEffect } from "react";
 import { Table } from "../table/Table";
 import { useGlobalContext } from "../GlobalContext";
@@ -16,9 +15,9 @@ interface Bet {
 }
 
 export default function Bets({ refresh }: { refresh: boolean }) {
-  const wallet = useWallet();
+  const { liveBets, session } = useGlobalContext();
   const transactionsPerPage = 10;
-  const [all, setAll] = useState(wallet.publicKey ? false : true);
+  const [all, setAll] = useState(session?.user ? false : true);
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(false);
 
@@ -28,15 +27,13 @@ export default function Bets({ refresh }: { refresh: boolean }) {
   const [allBetMaxPages, setAllBetMaxPages] = useState(0);
   const [allBets, setAllBets] = useState<Bet[]>([]);
 
-  const { liveBets, session } = useGlobalContext();
-
   const router = useRouter();
   const home = router.pathname.split("/")[1] === "";
   useEffect(() => {
     if (!all) {
       setMyBets((prev) => {
         liveBets
-          .filter((bet) => bet.wallet === wallet.publicKey?.toBase58())
+          .filter((bet) => bet.wallet === session?.user?.wallet)
           .forEach((bet) => {
             const index = prev.findIndex((b) => b._id === bet._id);
             if (index !== -1) {

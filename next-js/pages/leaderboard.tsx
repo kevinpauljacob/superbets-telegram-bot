@@ -8,7 +8,6 @@ import {
   truncateNumber,
 } from "@/context/transactions";
 import { pointTiers } from "@/context/config";
-import { useWallet } from "@solana/wallet-adapter-react";
 import Image from "next/image";
 import { useEffect, useMemo } from "react";
 import FOMOHead from "@/components/HeadElement";
@@ -42,7 +41,6 @@ interface Bet {
 }
 
 export default function Leaderboard() {
-  const wallet = useWallet();
   const [page, setPage] = useState(1);
 
   // const [highestProfit, setHighestProfit] = useState<number | null>(null);
@@ -227,7 +225,7 @@ export default function Leaderboard() {
       <FOMOHead
         title={"Leaderboard | SUPERBETS.GAMES - 0% House Edge, Pure Wins"}
       />
-      <div className="flex flex-col items-start w-full overflow-hidden min-h-screen flex-1 relative p-2 md:pt-[2rem] md:px-[3rem] relative">
+      <div className="flex flex-col items-start w-full overflow-hidden min-h-screen flex-1 relative p-2 md:pt-[2rem] md:px-[3rem]">
         {/* Navbar  */}
         {/* <span className="text-white text-opacity-90 font-semibold text-[1.5rem] sm:text-[2rem] mt-[1rem] font-chakra tracking-[.02em] flex items-center justify-center gap-x-2 px-5 sm:px-10 2xl:px-[5%]">
           {translator("Leaderboard", language).toUpperCase()}
@@ -336,9 +334,7 @@ export default function Leaderboard() {
                 <span className="text-white text-xs font-medium text-opacity-50">
                   {session?.user?.email
                     ? session.user.email
-                    : wallet.publicKey?.toString()
-                      ? wallet.publicKey?.toString()
-                      : "player@superbets.com"}
+                    : "player@superbets.com"}
                 </span>
               </div>
             </div>

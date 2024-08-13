@@ -179,57 +179,6 @@ export default async function auth(req: NextApiRequest, res: NextApiResponse) {
         };
       },
     }),
-    CredentialsProvider({
-      name: "Solana",
-      credentials: {
-        nonce: {
-          label: "Nonce",
-          type: "text",
-        },
-        txn: {
-          label: "Transaction",
-          type: "text",
-        },
-      },
-      async authorize(credentials, authReq) {
-        try {
-          const token = await getToken({ req, secret });
-
-          const signedTx = Transaction.from(
-            Buffer.from(credentials?.txn as any, "base64"),
-          );
-
-          const csrfToken = await getCsrfToken({
-            req: { ...authReq, body: null },
-          });
-
-          if (credentials?.nonce !== csrfToken) {
-            return null;
-          }
-
-          const validationResult = validateAuthTx(
-            signedTx,
-            credentials?.nonce!,
-          );
-
-          if (!validationResult)
-            throw new Error("Could not validate the signed message");
-
-          const wallet = signedTx.feePayer?.toBase58();
-
-          if (!wallet) throw new Error("No fee payer found in transaction");
-
-          return {
-            ...(token?.user || {}),
-            id: wallet,
-            wallet,
-            auth: "wallet",
-          };
-        } catch (e) {
-          return null;
-        }
-      },
-    }),
   ];
 
   // const isDefaultSigninPage =
@@ -247,7 +196,7 @@ export default async function auth(req: NextApiRequest, res: NextApiResponse) {
     },
     secret: process.env.NEXTAUTH_SECRET,
     callbacks: {
-      jwt: async ({ token, user }) => {
+      jwt: async ({ token, user, trigger }) => {
         user && (token.user = user);
         const rawToken = await encode({ token, secret });
         const response = await fetch(`${baseUrl}/api/games/user`, {

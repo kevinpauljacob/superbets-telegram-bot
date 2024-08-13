@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
-import { useWallet } from "@solana/wallet-adapter-react";
 import BetSetting from "@/components/BetSetting";
 import { useGlobalContext } from "@/components/GlobalContext";
 import {
@@ -30,16 +29,11 @@ import {
 } from "@/context/transactions";
 import { useSession } from "next-auth/react";
 import { GameType } from "@/utils/provably-fair";
-import { handleSignIn } from "@/components/ConnectWallet";
-import { useWalletModal } from "@solana/wallet-adapter-react-ui";
 
 export default function Keno() {
-  const wallet = useWallet();
-  const walletModal = useWalletModal();
   const methods = useForm();
   const {
     getBalance,
-    getWalletBalance,
     setShowAutoModal,
     autoWinChange,
     autoLossChange,
@@ -196,9 +190,6 @@ export default function Keno() {
           translator("You cannot bet with this token!", language),
         );
       }
-      if (session?.user?.wallet && (!wallet.connected || !wallet.publicKey)) {
-        throw new Error(translator("Wallet not connected", language));
-      }
       if (!betAmt || betAmt === 0) {
         throw new Error(translator("Set Amount.", language));
       }
@@ -214,7 +205,6 @@ export default function Keno() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          wallet: wallet?.publicKey,
           email: session?.user?.email,
           amount: betAmt,
           tokenMint: selectedCoin?.tokenMint,
@@ -315,10 +305,9 @@ export default function Keno() {
   useEffect(() => {
     if (refresh && session?.user) {
       getBalance();
-      getWalletBalance();
       setRefresh(false);
     }
-  }, [wallet?.publicKey, session?.user, refresh]);
+  }, [session?.user, refresh]);
 
   useEffect(() => {
     setBetAmt(userInput);
@@ -408,7 +397,7 @@ export default function Keno() {
         // console.log("Auto betting. config: ", useAutoConfig);
         setStartAuto(true);
       }
-    } else if (wallet.connected || session?.user.isWeb2User) handleBet();
+    } else handleBet();
   };
 
   const Autopick = () => {
@@ -684,7 +673,7 @@ export default function Keno() {
           {selectedCoin &&
             selectedCoin.amount > minGameAmount &&
             chosenNumbers.length > 0 &&
-            (session?.user?.wallet ? wallet.connected : true) && (
+            session?.user?.wallet && (
               <div className="w-full">
                 <div className="flex justify-between gap-[3px] sm:gap-3.5 lg:gap-2 2xl:gap-3.5 text-white w-full">
                   {multipliers.map((multiplier, index) => (
@@ -765,7 +754,7 @@ export default function Keno() {
 
           {!selectedCoin ||
           selectedCoin.amount < minGameAmount ||
-          (session?.user?.wallet && !wallet.connected) ||
+          !session?.user?.wallet ||
           !(status === "authenticated") ? (
             <div className="w-full rounded-lg bg-[#d9d9d90d] bg-opacity-10 flex items-center px-3 py-3 text-white md:px-6">
               <div className="w-full text-center font-changa font-medium text-sm md:text-base text-[#F0F0F0] text-opacity-75">
@@ -775,7 +764,7 @@ export default function Keno() {
                 )}{" "}
                 <u
                   onClick={() => {
-                    wallet.connected && status === "authenticated"
+                    status === "authenticated"
                       ? setShowWalletModal(true)
                       : setShowConnectModal(true);
                   }}
