@@ -514,7 +514,7 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
       }
 
       setMyData(userInfo);
-      console.log("userInfo", userInfo);
+
       return userInfo;
     } catch (e) {
       console.error("Error fetching user data:", e);

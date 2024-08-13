@@ -404,7 +404,7 @@ export default function AffiliateProgram() {
       getCurrentUserData();
     }
   }, [session?.user]);
-  console.log("myData", myData);
+  // console.log("myData", myData);
   const fetchData = async () => {
     try {
       const url = "/api/referral";
@@ -430,7 +430,7 @@ export default function AffiliateProgram() {
       }
       const { success, user, referredUsers, message } = await response.json();
 
-      console.log("session", session);
+      // console.log("session", session);
       if (success) {
         setUser(user);
         setUserId(user._id);
