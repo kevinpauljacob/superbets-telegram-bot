@@ -1,10 +1,8 @@
 import {
-  createAssociatedTokenAccountIdempotentInstruction,
   createTransferInstruction,
   getAssociatedTokenAddress,
 } from "@solana/spl-token";
 import {
-  AddressLookupTableAccount,
   BlockhashWithExpiryBlockHeight,
   ComputeBudgetProgram,
   Connection,
@@ -12,16 +10,13 @@ import {
   PublicKey,
   SystemProgram,
   Transaction,
-  TransactionInstruction,
-  TransactionMessage,
   VersionedTransaction,
 } from "@solana/web3.js";
 import connectDatabase from "./database";
 import crypto from "crypto";
-import { Deposits, User } from "../models";
+import { Deposits } from "../models";
 import { bs58 } from "@project-serum/anchor/dist/cjs/utils/bytes";
 import dotenv from "dotenv";
-import { Deposit } from "./processTransaction";
 
 export type spl_token = {
   tokenName: string;
@@ -115,15 +110,6 @@ export const createDepositTxn = async (
   console.log("secret", secretKey);
   const signer = Keypair.fromSecretKey(secretKey);
   transaction.partialSign(signer);
-
-  // transaction.instructions.slice(2).forEach((i) => {
-  //   i.keys.forEach((k) => {
-  //     if (k.pubkey.equals(wallet)) {
-  //       k.isSigner = true;
-  //       k.isWritable = true;
-  //     }
-  //   });
-  // });
 
   return { transaction, blockhashWithExpiryBlockHeight };
 };

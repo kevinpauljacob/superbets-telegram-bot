@@ -1,7 +1,6 @@
-import { PublicKey } from "@solana/web3.js";
 import { deposits, wallets } from "..";
 import { Deposits, User } from "../models";
-import depositFunds, { connection } from "./depositFunds";
+import depositFunds from "./depositFunds";
 import { createDeposit } from "./transactions";
 
 interface AccountKey {

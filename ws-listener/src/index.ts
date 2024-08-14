@@ -1,19 +1,15 @@
-import mongoose from "mongoose";
-import dotenv from "dotenv";
-import connectDatabase from "./utils/database";
-import WebSocket from "ws";
-import fs from "fs";
-import { User } from "./models";
-import { PublicKey } from "@solana/web3.js";
 import { getAssociatedTokenAddress } from "@solana/spl-token";
+import { PublicKey } from "@solana/web3.js";
+import dotenv from "dotenv";
+import WebSocket from "ws";
+import { User } from "./models";
+import connectDatabase from "./utils/database";
 import processTransaction, {
   Deposit,
   Wallets,
 } from "./utils/processTransaction";
-import depositFunds from "./utils/depositFunds";
 
 dotenv.config();
-const PORT = process.env.PORT || 3001;
 const apiKey = process.env.HELIUS_API_KEY;
 
 export const wallets: Wallets = {};
@@ -21,19 +17,23 @@ export const deposits: { [key: string]: Deposit } = {};
 
 // Initialize WebSocket connection to Helius
 function initializeWebSocket() {
-  let lastMessageDate = new Date();
   let ws: WebSocket;
   let statusCheckInterval: any;
   let pingInterval: any;
   let pongTimeout: any;
 
-  console.log("Initializing WebSocket...", apiKey);
+  console.log("Initializing WebSocket...");
   ws = new WebSocket(`wss://atlas-mainnet.helius-rpc.com/?api-key=${apiKey}`);
 
   async function sendRequest() {
     await connectDatabase();
 
-    const users = await User.find({});
+    const users = await User.find({ 
+      "wallet": { $exists: true },
+      "iv": { $exists: true },
+    });
+    console.log("Users found:", users.length);
+    
     const userWallets: string[] = [];
     const usdc = new PublicKey("EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v");
 
@@ -53,8 +53,6 @@ function initializeWebSocket() {
         console.error(e);
       }
     }
-
-    console.log(userWallets, wallets);
 
     if (userWallets.length > 0) {
       const request = {
@@ -107,16 +105,7 @@ function initializeWebSocket() {
       const messageObj = JSON.parse(messageStr);
 
       if (messageObj?.params?.result?.transaction) {
-        lastMessageDate = new Date();
-        let trans = messageObj?.params?.result?.transaction;
-        console.log(
-          "Message is: ",
-          trans.transaction,
-          trans.meta.preTokenBalances,
-          trans.meta.postTokenBalances
-        );
         await processTransaction(messageObj?.params?.result);
-        // fs.writeFileSync("transfer.json", JSON.stringify(messageObj));
       } else {
         console.log("Received message:", messageObj);
         if (messageObj?.params?.error) {
@@ -148,13 +137,3 @@ function initializeWebSocket() {
 }
 
 initializeWebSocket();
-
-const handleQueuedDeposits = () => {
-  console.log(deposits);
-  Object.keys(deposits).forEach((deposit) => depositFunds(deposits[deposit]));
-
-  // Continuously check for new deposits
-  // setTimeout(handleQueuedDeposits, 10000);
-};
-
-// handleQueuedDeposits();
