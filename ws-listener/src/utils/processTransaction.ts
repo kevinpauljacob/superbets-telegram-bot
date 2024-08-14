@@ -1,5 +1,5 @@
 import { deposits, wallets } from "..";
-import { Deposits, User } from "../models";
+import { Deposits, User, WsSignature } from "../models";
 import depositFunds from "./depositFunds";
 import { createDeposit } from "./transactions";
 
@@ -80,6 +80,14 @@ const processTransaction = async (result: {
   signature: string;
 }) => {
   const { transaction, signature } = result;
+
+  try {
+    await WsSignature.create({ signature });
+  } catch (error: any) {
+    if (error.code !== 11000) console.log(signature, error.message);
+    return;
+  }
+
   const { message } = transaction.transaction;
   const { accountKeys, instructions } = message;
   const { preBalances, postBalances, preTokenBalances, postTokenBalances } =
@@ -153,7 +161,6 @@ const processTransaction = async (result: {
       signature: signature,
     };
     await depositFunds(deposits[signature]);
-    return;
   }
 
   // Check for SPL token deposit

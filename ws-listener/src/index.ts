@@ -82,7 +82,7 @@ function initializeWebSocket() {
 
     changeStream.on("change", async (data) => {
       if (data.operationType !== "insert") return;
-      
+
       console.log("New user added:", data);
 
       const wallet = data.fullDocument.wallet;
@@ -122,7 +122,6 @@ function initializeWebSocket() {
     pingInterval = setInterval(() => {
       if (ws.readyState === WebSocket.OPEN) {
         ws.ping();
-        console.log("Ping sent");
 
         pongTimeout = setTimeout(() => {
           console.log("Pong not received in time, closing connection");
@@ -144,6 +143,7 @@ function initializeWebSocket() {
       const messageObj = JSON.parse(messageStr);
 
       if (messageObj?.params?.result?.transaction) {
+        if (messageObj?.params?.result?.transaction?.meta?.err) return;
         await processTransaction(messageObj?.params?.result);
       } else {
         console.log("Received message:", messageObj);
@@ -157,7 +157,6 @@ function initializeWebSocket() {
   });
 
   ws.on("pong", function pong() {
-    console.log("Pong received");
     clearTimeout(pongTimeout);
   });
 
