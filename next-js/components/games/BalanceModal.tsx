@@ -32,7 +32,6 @@ export default function BalanceModal() {
   const {
     showWalletModal,
     setShowWalletModal,
-    walletBalance,
     language,
     userTokens,
     setUserTokens,
@@ -61,22 +60,28 @@ export default function BalanceModal() {
       let response: { success: boolean; message: string };
 
       try {
-        if (actionType === "Deposit") {
-          let token = userTokens.find(
-            (x) => x.mintAddress && x.mintAddress === selectedToken.tokenMint,
+        if (actionType === "Withdraw" && session?.user?.email) {
+          //   let token = userTokens.find(
+          //     (x) => x.mintAddress && x.mintAddress === selectedToken.tokenMint,
+          //   );
+          //   let balance = null;
+          //   if (token) balance = token?.balance;
+
+          //   if (!balance || balance < amount) {
+          //     setLoading(false);
+          //     errorCustom(translator("Insufficient balance", language));
+          //     return;
+          //   }
+
+          //   response = await deposit(amount, selectedToken.tokenMint, campaignId);
+          // } else
+          response = await withdraw(
+            session?.user?.email,
+            depositWallet,
+            amount,
+            selectedToken.tokenMint,
           );
-          let balance = null;
-          if (token) balance = token?.balance;
-
-          if (!balance || balance < amount) {
-            setLoading(false);
-            errorCustom(translator("Insufficient balance", language));
-            return;
-          }
-
-          response = await deposit(amount, selectedToken.tokenMint, campaignId);
-        } else response = await withdraw(amount, selectedToken.tokenMint);
-
+        } else response = { success: false, message: "Invalid Option" };
         if (response && response.success) {
           getBalance();
           setShowWalletModal(false);

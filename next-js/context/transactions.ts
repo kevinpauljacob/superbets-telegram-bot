@@ -16,6 +16,7 @@ import {
   BlockhashWithExpiryBlockHeight,
   ComputeBudgetProgram,
   Connection,
+  Keypair,
   PublicKey,
   SystemProgram,
   Transaction,
@@ -146,7 +147,7 @@ export const createWithdrawTxn = async (
   wallet: PublicKey,
   amount: number,
   tokenMint: string,
-  devPublicKey: PublicKey,
+  devWallet: PublicKey,
 ) => {
   let transaction = new Transaction();
 
@@ -154,7 +155,7 @@ export const createWithdrawTxn = async (
     (data) => data.tokenMint === tokenMint,
   )!;
 
-  transaction.feePayer = wallet;
+  transaction.feePayer = devWallet;
   const blockhashWithExpiryBlockHeight = await connection.getLatestBlockhash();
   transaction.recentBlockhash = blockhashWithExpiryBlockHeight.blockhash;
 
@@ -166,7 +167,7 @@ export const createWithdrawTxn = async (
   if (tokenName === "SOL") {
     transaction.add(
       SystemProgram.transfer({
-        fromPubkey: devPublicKey,
+        fromPubkey: devWallet,
         toPubkey: wallet,
         lamports: Math.floor(amount * Math.pow(10, 9)),
       }),
@@ -174,11 +175,11 @@ export const createWithdrawTxn = async (
   } else {
     const tokenId = new PublicKey(tokenMint);
     const userAta = await getAssociatedTokenAddress(tokenId, wallet);
-    const devAta = await getAssociatedTokenAddress(tokenId, devPublicKey);
+    const devAta = await getAssociatedTokenAddress(tokenId, devWallet);
 
     transaction.add(
       createAssociatedTokenAccountIdempotentInstruction(
-        wallet,
+        devWallet,
         userAta,
         wallet,
         tokenId,
@@ -186,20 +187,20 @@ export const createWithdrawTxn = async (
       createTransferInstruction(
         devAta,
         userAta,
-        devPublicKey,
+        devWallet,
         Math.floor(amount * Math.pow(10, decimal)),
       ),
     );
   }
 
-  transaction.instructions.slice(2).forEach((i) => {
-    i.keys.forEach((k) => {
-      if (k.pubkey.equals(wallet)) {
-        k.isSigner = true;
-        k.isWritable = true;
-      }
-    });
-  });
+  // transaction.instructions.slice(2).forEach((i) => {
+  //   i.keys.forEach((k) => {
+  //     if (k.pubkey.equals(wallet)) {
+  //       k.isSigner = true;
+  //       k.isWritable = true;
+  //     }
+  //   });
+  // });
 
   return { transaction, blockhashWithExpiryBlockHeight };
 };
@@ -209,15 +210,15 @@ export const deposit = async (
   tokenMint: string,
   campaignId: any = null,
 ) => {
-  if (amount == 0) {
-    errorCustom("Please enter an amount greater than 0");
-    return { success: true, message: "Please enter an amount greater than 0" };
-  }
+  // if (amount == 0) {
+  //   errorCustom("Please enter an amount greater than 0");
+  //   return { success: true, message: "Please enter an amount greater than 0" };
+  // }
 
-  if (tokenMint === "SUPER") {
-    errorCustom("Deposit not allowed for this token!");
-    return { success: true, message: "Deposit not allowed for this token!" };
-  }
+  // if (tokenMint === "SUPER") {
+  //   errorCustom("Deposit not allowed for this token!");
+  //   return { success: true, message: "Deposit not allowed for this token!" };
+  // }
   return { success: false, message: "Not allowed" };
   // try {
   //   let { transaction, blockhashWithExpiryBlockHeight } =
@@ -269,20 +270,18 @@ export const deposit = async (
   // }
 };
 
-export const withdraw = async (amount: number, tokenMint: string) => {
+export const withdraw = async (email:string, depositWallet:string, amount: number, tokenMint: string) => {
   if (amount == 0) {
     errorCustom("Please enter an amount greater than 0");
     return { success: true, message: "Please enter an amount greater than 0" };
   }
 
-  if (tokenMint === "SUPER") {
+  if (tokenMint === "SUPER" || !SPL_TOKENS.some((t) => t.tokenMint === tokenMint)) {
     errorCustom("Withdraw not allowed for this token!");
     return { success: true, message: "Withdraw not allowed for this token!" };
   }
 
-  return { success: false, message: "Not allowed" };
-
-  // try {
+  try {
   //   let { transaction, blockhashWithExpiryBlockHeight } =
   //     await createWithdrawTxn(
   //       wallet.publicKey!,
@@ -298,37 +297,34 @@ export const withdraw = async (amount: number, tokenMint: string) => {
   //     })
   //     .toString("base64");
 
-  //   const res = await fetch(`/api/games/wallet/withdraw`, {
-  //     method: "POST",
-  //     body: JSON.stringify({
-  //       transactionBase64,
-  //       wallet: wallet.publicKey,
-  //       amount,
-  //       tokenMint,
-  //       blockhashWithExpiryBlockHeight,
-  //     }),
-  //     headers: {
-  //       "Content-Type": "application/json",
-  //     },
-  //   });
+    const res = await fetch(`/api/games/wallet/withdraw`, {
+      method: "POST",
+      body: JSON.stringify({
+        email,
+        depositWallet,
+        amount,
+        tokenMint,
+      }),
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
 
-  //   const { success, message } = await res.json();
+    const { success, message } = await res.json();
 
-  //   if (success === false) {
-  //     if (message.includes("limit exceeded"))
-  //       warningCustom(message, "bottom-right", 8000);
-  //     else errorCustom(message);
-  //     throw new Error(message);
-  //   }
+    if (success === false) {
+      if (message.includes("limit exceeded"))
+        warningCustom(message, "bottom-right", 8000);
+      else errorCustom(message);
+      throw new Error(message);
+    }
 
-  //   successCustom("Withdrawal successfull!");
+    successCustom("Withdrawal successfull!");
 
-  //   return { success: true, message };
-  // } catch (error) {
-  //   // errorCustom("Unexpected error!");
-
-  //   return { success: true, message: error };
-  // }
+    return { success: true, message };
+  } catch (error) {
+    return { success: true, message: error };
+  }
 };
 
 export const depositLulo = async (

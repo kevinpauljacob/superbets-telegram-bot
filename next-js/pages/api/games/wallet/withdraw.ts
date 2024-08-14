@@ -115,7 +115,7 @@ const secret = process.env.NEXTAUTH_SECRET;
 
 const connection = new Connection(process.env.BACKEND_RPC!, "confirmed");
 
-const devWalletKey = Keypair.fromSecretKey(
+const devWallet = Keypair.fromSecretKey(
   bs58.decode(process.env.CASINO_KEYPAIR!),
 );
 
@@ -124,11 +124,10 @@ export const config = {
 };
 
 type InputType = {
-  transactionBase64: string;
-  wallet: string;
+  email: string;
+  depositWallet: string;
   amount: number;
   tokenMint: string;
-  blockhashWithExpiryBlockHeight: BlockhashWithExpiryBlockHeight;
 };
 
 type Totals = {
@@ -136,7 +135,7 @@ type Totals = {
   withdrawalTotal: number;
 };
 
-const blackListedWallet: any = {
+const blackListedAccounts: any = {
   EkBEqMcFqZeLCEpsyEP6xbE8Y2Fq3dBYxaqs3yJJW55w: {
     amount: 1000,
     date: new Date(1716554434000),
@@ -144,17 +143,13 @@ const blackListedWallet: any = {
 };
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
-  return res
-    .status(405)
-    .json({ success: false, message: "Method not allowed!" });
   if (req.method === "POST") {
     try {
       let {
-        transactionBase64,
-        wallet,
+        email,
+        depositWallet: wallet,
         amount,
         tokenMint,
-        blockhashWithExpiryBlockHeight,
       }: InputType = req.body;
 
       if (tokenMint === "SUPER")
@@ -163,13 +158,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           message: "Withdraw not allowed for this token!",
         });
 
-      if (
-        !wallet ||
-        !transactionBase64 ||
-        !amount ||
-        !tokenMint ||
-        !blockhashWithExpiryBlockHeight
-      )
+      if (!email || !wallet || !amount || !tokenMint)
         return res
           .status(400)
           .json({ success: false, message: "Missing parameters" });
@@ -186,12 +175,15 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
       await connectDatabase();
 
-      let user = await User.findOne({ wallet });
+      let user = await User.findOne({ email });
 
       if (!user)
         return res
           .status(400)
           .json({ success: false, message: "User does not exist !" });
+
+      const account = user._id;
+      const userWallet = user.wallet
 
       if (
         user.deposit.find((d: any) => d.tokenMint === tokenMint)?.amount <
@@ -201,24 +193,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           .status(400)
           .json({ success: false, message: "Insufficient balance !" });
 
-      let { transaction: vTxn } = await createWithdrawTxn(
-        new PublicKey(wallet),
-        amount,
-        tokenMint,
-        devWalletKey.publicKey,
-      );
-
-      const txn = Transaction.from(
-        Buffer.from(transactionBase64 as string, "base64"),
-      );
-
-      if (!verifyTransaction(txn, vTxn))
-        return res
-          .status(400)
-          .json({ success: false, message: "Transaction verfication failed" });
-
       let isPendingWithdraw = await Deposit.findOne({
-        wallet,
+        account,
         status: "review",
       });
 
@@ -228,6 +204,14 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           message:
             "You have a pending withdrawal. Please wait for it to be processed !",
         });
+
+      let { transaction, blockhashWithExpiryBlockHeight } =
+        await createWithdrawTxn(
+          new PublicKey(wallet),
+          amount,
+          tokenMint,
+          devWallet.publicKey,
+        );
 
       //Check if the time weighted average exceeds the limit
       const userAgg = await Deposit.aggregate([
@@ -241,7 +225,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         },
         {
           $group: {
-            _id: "$wallet",
+            _id: "$account",
             depositTotal: {
               $sum: {
                 $cond: [{ $eq: ["$type", true] }, "$amount", 0],
@@ -258,15 +242,15 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
       // if wallet is blacklisted restrict withdrawal till Vol condition met
 
-      if (Object.keys(blackListedWallet).includes(wallet)) {
-        const user = await User.findOne({ wallet });
+      if (Object.keys(blackListedAccounts).includes(email)) {
+        const user = await User.findOne({ email });
         if (!user)
           return res.json({
             success: true,
             data: [],
             message: "No data found",
           });
-
+        const account = user._id;
         let totalVolume = 0;
 
         for (const [_, value] of Object.entries(GameType)) {
@@ -276,9 +260,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           const res = await model.aggregate([
             {
               $match: {
-                wallet,
+                account,
                 tokenMint,
-                createdAt: { $gt: blackListedWallet[wallet].date },
+                createdAt: { $gt: blackListedAccounts[email].date },
               },
             },
             {
@@ -294,7 +278,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           }
         }
 
-        if (totalVolume < blackListedWallet[wallet].amount)
+        if (totalVolume < blackListedAccounts[email].amount)
           throw new Error(
             "Withdraw failed ! Insufficient volume for processing withdrawal",
           );
@@ -302,7 +286,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
       const result = await User.findOneAndUpdate(
         {
-          wallet,
+          email,
           deposit: {
             $elemMatch: {
               tokenMint,
@@ -331,7 +315,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         const res = await model.aggregate([
           {
             $match: {
-              wallet,
+              account,
               tokenMint,
             },
           },
@@ -347,9 +331,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           totalVolume += res[0].amount;
         }
       }
-
-      let userTransferAgg = userAgg.find((data) => data._id == wallet) ?? {
-        wallet: wallet,
+      let userTransferAgg = userAgg.find((data) => data._id == account) ?? {
+        account: account,
         withdrawalTotal: 0,
         depositTotal: 0,
       };
@@ -359,7 +342,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         userTransferAgg.withdrawalTotal + amount
       ) {
         await Deposit.create({
-          wallet,
+          account,
+          wallet: userWallet,
           amount,
           type: false,
           tokenMint,
@@ -373,7 +357,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           message: "Withdrawal limit exceeded, added to queue for review",
         });
       }
-
       const initialTotals: Totals = { depositTotal: 0, withdrawalTotal: 0 };
 
       const transferAgg = userAgg.reduce<Totals>((acc, current) => {
@@ -396,7 +379,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
       if (netTransfer > timeWeightedAvgLimit[tokenName]) {
         await Deposit.create({
-          wallet,
+          account,
+          wallet: userWallet,
           amount,
           type: false,
           comments: "global net transfer exceeded !",
@@ -410,15 +394,20 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           message: "Withdrawal limit exceeded, added to queue for review",
         });
       }
+      const signer = Keypair.fromSecretKey(devWallet.secretKey);
+      transaction.partialSign(signer);
 
-      txn.partialSign(devWalletKey);
+      const transactionSimulation = await connection.simulateTransaction(
+        transaction
+      );
+      console.log(transactionSimulation.value, transaction);
 
       let txnSignature;
 
       try {
         txnSignature = await retryTxn(
           connection,
-          txn,
+          transaction,
           blockhashWithExpiryBlockHeight,
         );
       } catch (e) {
@@ -436,16 +425,17 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         //   },
         //   { new: true },
         // );
+        console.log(e);
         return res.json({
           success: false,
           message: `Withdraw failed ! Please retry ... `,
         });
       }
-
       await TxnSignature.create({ txnSignature });
 
       await Deposit.create({
-        wallet,
+        account,
+        wallet: userWallet,
         amount,
         type: false,
         tokenMint,
