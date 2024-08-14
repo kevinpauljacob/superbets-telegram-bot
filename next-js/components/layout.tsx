@@ -271,7 +271,7 @@ export default function ({ children }: Props) {
             <main
               className={`marker:w-full h-full max-h-[calc(100%-0rem)] pt-6`}
             >
-              <section className="w-full h-full overflow-y-auto no-scrollbar">
+              <section className="w-full h-full overflow-x-hidden overflow-y-auto no-scrollbar">
                 <div
                   id="scroll-element"
                   className="w-full min-h-[1px] bg-transparent"
