@@ -32,7 +32,6 @@ export default function ConfigureAutoModal() {
     setUseAutoConfig,
     startAuto,
     setStartAuto,
-    walletBalance,
     language,
     autoConfigState,
     setAutoConfigState,

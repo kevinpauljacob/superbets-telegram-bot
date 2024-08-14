@@ -42,7 +42,6 @@ export default function ConnectModal() {
   const {
     showConnectModal,
     setShowConnectModal,
-    walletBalance,
     language,
     userTokens,
     setUserTokens,

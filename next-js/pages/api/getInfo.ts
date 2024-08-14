@@ -1,7 +1,6 @@
 import connectDatabase from "@/utils/database";
-import user from "@/models/staking/user";
-import GameUser from "@/models/games/gameUser";
 import { User } from "@/context/transactions";
+import { Coin, GameSeed, User as user } from "@/models/games";
 import { NextApiRequest, NextApiResponse } from "next";
 
 /**
@@ -73,22 +72,17 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       switch (option) {
         // 1 - get User details
         case 1: {
-          const { wallet, email } = req.body;
-          if (!wallet)
+          const { email } = req.body;
+          if (!email)
             return res
               .status(400)
               .json({ success: false, message: "Missing paramters" });
 
           let userInfo = null;
-          if (wallet) {
-            userInfo = await user.findOne({
-              wallet: wallet,
-            });
-          } else if (email) {
-            userInfo = await user.findOne({
-              email: email,
-            });
-          }
+
+          userInfo = await user.findOne({
+            email: email,
+          });
 
           if (!userInfo)
             return res.json({
@@ -141,7 +135,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         }
         // get web2 user leaderboard
         case 4: {
-          let usersInfo = await GameUser.aggregate([
+          let usersInfo = await user.aggregate([
             { $match: { isWeb2User: true } },
             { $unwind: "$deposit" },
             { $match: { "deposit.tokenMint": "SUPER" } },

@@ -40,8 +40,6 @@ export default function Options() {
   let checkBet: NodeJS.Timeout | null = null;
 
   const {
-    walletBalance,
-    setWalletBalance,
     getBalance,
     coinData,
     setShowWalletModal,

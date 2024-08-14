@@ -154,18 +154,8 @@ interface GlobalContextProps {
   fomoPrice: number;
   setFomoPrice: (amount: number) => void;
 
-  globalInfo: { users: number; stakedTotal: number; totalVolume: number };
-  setGlobalInfo: (amount: {
-    users: number;
-    stakedTotal: number;
-    totalVolume: number;
-  }) => void;
-
   pointTier: PointTier;
   setPointTier: (pointTier: PointTier) => void;
-
-  walletBalance: number;
-  setWalletBalance: (walletBalance: number) => void;
 
   coinData: CoinBalance[] | null;
   setCoinData: (coinData: CoinBalance[] | null) => void;
@@ -240,8 +230,6 @@ interface GlobalContextProps {
 
   getUserDetails: () => Promise<void>;
   getCurrentUserData: () => Promise<void>;
-  getGlobalInfo: () => Promise<void>;
-  // getWalletBalance: () => Promise<void>;
   getBalance: () => Promise<void>;
   getProvablyFairData: () => Promise<ProvablyFairData | null>;
 
@@ -295,11 +283,6 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
   const [stakeAmount, setStakeAmount] = useState<number>(0);
   const [fomoBalance, setFomoBalance] = useState<number>(0.0);
   const [livePrice, setLivePrice] = useState<number>(0.0);
-  const [globalInfo, setGlobalInfo] = useState<{
-    users: number;
-    stakedTotal: number;
-    totalVolume: number;
-  }>({ users: 0, stakedTotal: 0, totalVolume: 0 });
   const [pointTier, setPointTier] = useState<PointTier>({
     index: 0,
     limit: 0,
@@ -307,7 +290,6 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
     label: "BRONZE",
   });
 
-  const [walletBalance, setWalletBalance] = useState(0);
   const [coinData, setCoinData] = useState<CoinBalance[] | null>([
     {
       amount: 0,
@@ -558,27 +540,6 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
       }
   };
 
-  const getGlobalInfo = async () => {
-    try {
-      const res = await fetch("/api/getInfo", {
-        method: "POST",
-        body: JSON.stringify({
-          option: 3,
-          email: session?.user?.email,
-        }),
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-
-      const { success, message, data } = await res.json();
-
-      if (success) setGlobalInfo(data);
-    } catch (e) {
-      console.error(e);
-    }
-  };
-
   const updatePNL = async (
     game: GameType,
     win: boolean,
@@ -652,18 +613,6 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
       5 * 60 * 1000,
     );
   }, []);
-
-  // const getWalletBalance = async () => {
-  //   if (wallet && wallet.publicKey)
-  //     try {
-  //       setWalletBalance(
-  //         (await connection.getBalance(wallet.publicKey)) / LAMPORTS_PER_SOL,
-  //       );
-  //     } catch (e) {
-  //       // errorCustom("Unable to fetch balance.");
-  //       console.error(e);
-  //     }
-  // };
 
   const getBalance = async () => {
     setLoading(true);
@@ -757,12 +706,8 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
         setLivePrice,
         fomoPrice,
         setFomoPrice,
-        globalInfo,
-        setGlobalInfo,
         pointTier,
         setPointTier,
-        walletBalance,
-        setWalletBalance,
         coinData,
         showWalletModal,
         showCreateCampaignModal,
@@ -821,8 +766,6 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
         setCoinData,
         getUserDetails,
         getCurrentUserData,
-        getGlobalInfo,
-        // getWalletBalance,
         getBalance,
         getProvablyFairData,
         selectedCoin,

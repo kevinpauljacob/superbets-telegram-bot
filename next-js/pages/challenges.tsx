@@ -6,7 +6,6 @@ import FOMOHead from "@/components/HeadElement";
 export default function Store() {
   const {
     setFomoBalance,
-    getGlobalInfo,
     getUserDetails,
   } = useGlobalContext();
 
@@ -16,7 +15,6 @@ export default function Store() {
   //     getFOMOBalance(wallet, setFomoBalance);
   //     getUserDetails();
   //   }
-  //   getGlobalInfo();
   // }, [session?.user, wallet.publicKey]);
 
   const cardDetails = [

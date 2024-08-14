@@ -96,7 +96,6 @@ export default function ({ children }: Props) {
     setMinGameAmount,
     session,
     status,
-    getGlobalInfo,
     isModalOpen,
     myData,
     reached500,
@@ -238,7 +237,6 @@ export default function ({ children }: Props) {
     if (session?.user && !showWalletModal) {
       getBalance();
     }
-    getGlobalInfo();
   }, [session?.user, game, showWalletModal]);
 
   useEffect(() => {
