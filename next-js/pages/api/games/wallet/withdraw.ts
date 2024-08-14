@@ -183,7 +183,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           .json({ success: false, message: "User does not exist !" });
 
       const account = user._id;
-      const userWallet = user.wallet
 
       if (
         user.deposit.find((d: any) => d.tokenMint === tokenMint)?.amount <
@@ -343,7 +342,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       ) {
         await Deposit.create({
           account,
-          wallet: userWallet,
+          wallet,
           amount,
           type: false,
           tokenMint,
@@ -380,7 +379,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       if (netTransfer > timeWeightedAvgLimit[tokenName]) {
         await Deposit.create({
           account,
-          wallet: userWallet,
+          wallet,
           amount,
           type: false,
           comments: "global net transfer exceeded !",
@@ -435,7 +434,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
       await Deposit.create({
         account,
-        wallet: userWallet,
+        wallet,
         amount,
         type: false,
         tokenMint,
