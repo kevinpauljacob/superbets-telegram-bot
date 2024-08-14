@@ -28,26 +28,27 @@ function initializeWebSocket() {
   async function sendRequest() {
     await connectDatabase();
 
-    const users = await User.find({ 
-      "wallet": { $exists: true },
-      "iv": { $exists: true },
+    const users = await User.find({
+      wallet: { $exists: true },
+      iv: { $exists: true },
     });
     console.log("Users found:", users.length);
-    
+
     const userWallets: string[] = [];
     const usdc = new PublicKey("EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v");
 
     for (const user of users) {
       try {
         const wallet = user.wallet;
-        const usdcWallet = await getAssociatedTokenAddress(
+        const ata = await getAssociatedTokenAddress(
           usdc,
           new PublicKey(wallet)
         );
-        userWallets.push(wallet, usdcWallet.toString());
+        const usdcWallet = ata.toBase58();
+        userWallets.push(wallet, usdcWallet);
 
         wallets[wallet] = {
-          EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v: usdcWallet.toString(),
+          [usdc.toBase58()]: usdcWallet,
         };
       } catch (e) {
         console.error(e);
@@ -76,6 +77,44 @@ function initializeWebSocket() {
       };
       ws.send(JSON.stringify(request));
     }
+
+    const changeStream = User.watch();
+
+    changeStream.on("change", async (data) => {
+      if (data.operationType !== "insert") return;
+      
+      console.log("New user added:", data);
+
+      const wallet = data.fullDocument.wallet;
+      const ata = await getAssociatedTokenAddress(usdc, new PublicKey(wallet));
+      const usdcWallet = ata.toBase58();
+      userWallets.push(wallet, usdcWallet);
+
+      wallets[wallet] = {
+        [usdc.toBase58()]: usdcWallet,
+      };
+
+      const request = {
+        jsonrpc: "2.0",
+        id: 420,
+        method: "transactionSubscribe",
+        params: [
+          {
+            //Meteora Pools
+            accountInclude: userWallets,
+          },
+          {
+            vote: false,
+            failed: false,
+            commitment: "finalized",
+            encoding: "jsonParsed",
+            transactionDetails: "full",
+            maxSupportedTransactionVersion: 0,
+          },
+        ],
+      };
+      ws.send(JSON.stringify(request));
+    });
   }
 
   // Send a ping every 30 seconds to keep the connection alive
