@@ -19,7 +19,7 @@ import { faker } from "@faker-js/faker";
  * /games/user:
  *   post:
  *     summary: Create or update a game user
- *     description: This endpoint creates a new user or updates an existing user in the game database.
+ *     description: This endpoint creates a new user in the game database.
  *     tags:
  *       - Games/User
  *     requestBody:
@@ -31,7 +31,6 @@ import { faker } from "@faker-js/faker";
  *             required:
  *               - email
  *               - name
- *               - wallet
  *             properties:
  *               email:
  *                 type: string
@@ -42,9 +41,6 @@ import { faker } from "@faker-js/faker";
  *               image:
  *                 type: string
  *                 example: https://example.com/image.jpg
- *               wallet:
- *                 type: string
- *                 example: ABC1234XYZ5678
  *     responses:
  *       201:
  *         description: User created or updated successfully.
@@ -152,24 +148,10 @@ export default async function handler(
       email: email,
     });
 
-    if (user) {
-      user = await User.findOneAndUpdate(
-        {
-          email,
-        },
-        {
-          $set: {
-            email,
-            image,
-          },
-        },
-        {
-          new: true,
-          upsert: true,
-        },
-      );
-    } else {
-      if (email) {
+    console.log("found user", user);
+
+    if (!user) {
+      if (email && name) {
         const keyPair = Keypair.generate();
 
         const secretKey = bs58.encode(keyPair.secretKey);

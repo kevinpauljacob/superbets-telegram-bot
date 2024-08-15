@@ -8,153 +8,153 @@ import { getCsrfToken } from "next-auth/react";
 import { encode, getToken } from "next-auth/jwt";
 import { User } from "@/models/games";
 
-/**
- * @swagger
- * tags:
- *   name: Auth
- *   description: Authentication related endpoints
- */
+// /**
+//  * @swagger
+//  * tags:
+//  *   name: Auth
+//  *   description: Authentication related endpoints
+//  */
 
-/**
- * @swagger
- * /auth/{...nextauth}:
- *   get:
- *     summary: Handles authentication requests
- *     description: Handles authentication for users using NextAuth.js. Supports Google OAuth and Solana wallet authentication.
- *     tags:
- *      - Auth
- *     responses:
- *       200:
- *         description: Successful authentication
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: true
- *                 user:
- *                   type: object
- *                   properties:
- *                     id:
- *                       type: string
- *                     email:
- *                       type: string
- *                     name:
- *                       type: string
- *                     image:
- *                       type: string
- *       401:
- *         description: Unauthorized - Invalid credentials or authentication failure
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: false
- *                 message:
- *                   type: string
- *                   example: "Invalid credentials"
- *       500:
- *         description: Internal Server Error - Failed to process request
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: false
- *                 message:
- *                   type: string
- *                   example: "Error message details"
- */
+// /**
+//  * @swagger
+//  * /auth/{...nextauth}:
+//  *   get:
+//  *     summary: Handles authentication requests
+//  *     description: Handles authentication for users using NextAuth.js. Supports Google OAuth and Solana wallet authentication.
+//  *     tags:
+//  *      - Auth
+//  *     responses:
+//  *       200:
+//  *         description: Successful authentication
+//  *         content:
+//  *           application/json:
+//  *             schema:
+//  *               type: object
+//  *               properties:
+//  *                 success:
+//  *                   type: boolean
+//  *                   example: true
+//  *                 user:
+//  *                   type: object
+//  *                   properties:
+//  *                     id:
+//  *                       type: string
+//  *                     email:
+//  *                       type: string
+//  *                     name:
+//  *                       type: string
+//  *                     image:
+//  *                       type: string
+//  *       401:
+//  *         description: Unauthorized - Invalid credentials or authentication failure
+//  *         content:
+//  *           application/json:
+//  *             schema:
+//  *               type: object
+//  *               properties:
+//  *                 success:
+//  *                   type: boolean
+//  *                   example: false
+//  *                 message:
+//  *                   type: string
+//  *                   example: "Invalid credentials"
+//  *       500:
+//  *         description: Internal Server Error - Failed to process request
+//  *         content:
+//  *           application/json:
+//  *             schema:
+//  *               type: object
+//  *               properties:
+//  *                 success:
+//  *                   type: boolean
+//  *                   example: false
+//  *                 message:
+//  *                   type: string
+//  *                   example: "Error message details"
+//  */
 
-/**
- * @swagger
- * /auth/{...nextauth}:
- *   post:
- *     summary: Handles authentication requests
- *     description: Handles authentication for users using NextAuth.js. Supports Google OAuth and Solana wallet authentication.
- *     tags:
- *       - Auth
- *     requestBody:
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               nonce:
- *                 type: string
- *                 example: "random-nonce-value"
- *               txn:
- *                 type: string
- *                 example: "base64-encoded-transaction"
- *     responses:
- *       200:
- *         description: Successful authentication
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: true
- *                 user:
- *                   type: object
- *                   properties:
- *                     id:
- *                       type: string
- *                     email:
- *                       type: string
- *                     name:
- *                       type: string
- *                     image:
- *                       type: string
- *       400:
- *         description: Bad Request - Missing or invalid parameters
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: false
- *                 message:
- *                   type: string
- *                   example: "Missing or invalid parameters"
- *       401:
- *         description: Unauthorized - Invalid credentials or authentication failure
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: false
- *                 message:
- *                   type: string
- *                   example: "Invalid credentials"
- *       500:
- *         description: Internal Server Error - Failed to process request
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: false
- *                 message:
- *                   type: string
- *                   example: "Error message details"
- */
+// /**
+//  * @swagger
+//  * /auth/{...nextauth}:
+//  *   post:
+//  *     summary: Handles authentication requests
+//  *     description: Handles authentication for users using NextAuth.js. Supports Google OAuth and Solana wallet authentication.
+//  *     tags:
+//  *       - Auth
+//  *     requestBody:
+//  *       content:
+//  *         application/json:
+//  *           schema:
+//  *             type: object
+//  *             properties:
+//  *               nonce:
+//  *                 type: string
+//  *                 example: "random-nonce-value"
+//  *               txn:
+//  *                 type: string
+//  *                 example: "base64-encoded-transaction"
+//  *     responses:
+//  *       200:
+//  *         description: Successful authentication
+//  *         content:
+//  *           application/json:
+//  *             schema:
+//  *               type: object
+//  *               properties:
+//  *                 success:
+//  *                   type: boolean
+//  *                   example: true
+//  *                 user:
+//  *                   type: object
+//  *                   properties:
+//  *                     id:
+//  *                       type: string
+//  *                     email:
+//  *                       type: string
+//  *                     name:
+//  *                       type: string
+//  *                     image:
+//  *                       type: string
+//  *       400:
+//  *         description: Bad Request - Missing or invalid parameters
+//  *         content:
+//  *           application/json:
+//  *             schema:
+//  *               type: object
+//  *               properties:
+//  *                 success:
+//  *                   type: boolean
+//  *                   example: false
+//  *                 message:
+//  *                   type: string
+//  *                   example: "Missing or invalid parameters"
+//  *       401:
+//  *         description: Unauthorized - Invalid credentials or authentication failure
+//  *         content:
+//  *           application/json:
+//  *             schema:
+//  *               type: object
+//  *               properties:
+//  *                 success:
+//  *                   type: boolean
+//  *                   example: false
+//  *                 message:
+//  *                   type: string
+//  *                   example: "Invalid credentials"
+//  *       500:
+//  *         description: Internal Server Error - Failed to process request
+//  *         content:
+//  *           application/json:
+//  *             schema:
+//  *               type: object
+//  *               properties:
+//  *                 success:
+//  *                   type: boolean
+//  *                   example: false
+//  *                 message:
+//  *                   type: string
+//  *                   example: "Error message details"
+//  */
 
 export default async function auth(req: NextApiRequest, res: NextApiResponse) {
   const baseUrl = process.env.NEXTAUTH_URL || "http://localhost:3000";
@@ -218,6 +218,7 @@ export default async function auth(req: NextApiRequest, res: NextApiResponse) {
         });
 
         const data = await response.json();
+        console.log("Data", data)
         if (data?.success && data?.user) {
           token.user = data?.user;
           return token;
