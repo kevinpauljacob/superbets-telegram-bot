@@ -225,6 +225,9 @@ interface GlobalContextProps {
     React.SetStateAction<Map<string, AutoConfigOptions>>
   >;
 
+  isFirstSignUp: boolean;
+  setIsFirstSignUp: React.Dispatch<React.SetStateAction<boolean>>;
+
   openVerifyModal: () => void;
   closeVerifyModal: () => void;
 
@@ -372,6 +375,7 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
   const threshold = 500;
 
   const [betAmtError, setBetAmtError] = useState<boolean>(true);
+  const [isFirstSignUp, setIsFirstSignUp] = useState<boolean>(false);
 
   const openVerifyModal = () => {
     setIsVerifyModalOpen(true);
@@ -789,6 +793,8 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
         liveTokenPrice,
         betAmtError,
         setBetAmtError,
+        isFirstSignUp,
+        setIsFirstSignUp,
       }}
     >
       {children}
