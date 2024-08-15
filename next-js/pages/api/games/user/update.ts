@@ -89,6 +89,17 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           .status(400)
           .json({ success: false, message: "User does not exist!" });
 
+      const existingUserWithName = await User.findOne({
+        name: name,
+        _id: { $ne: user._id },
+      });
+      
+      if (existingUserWithName)
+        return res.status(400).json({
+          success: false,
+          message: "Username already taken!",
+        });
+
       const account = user._id;
 
       const userUpdate = await User.findOneAndUpdate(

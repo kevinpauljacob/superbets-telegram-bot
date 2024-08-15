@@ -55,6 +55,7 @@ export default function ConnectModal() {
 
   const onSubmit = async (data: any) => {
     if (editUser && data?.name) {
+      setLoading(true);
       try {
         const res = await fetch("/api/games/user/update", {
           method: "POST",
@@ -76,6 +77,7 @@ export default function ConnectModal() {
         errorCustom(translator(e?.message ?? "", language));
       }
       setEditUser(false);
+      setLoading(false);
     } else setEditUser(true);
   };
 
@@ -163,7 +165,9 @@ export default function ConnectModal() {
                     </div>
                   </div>
                   <button type={"submit"} className="group">
-                    {editUser ? (
+                    {loading ? (
+                      <Loader />
+                    ) : editUser ? (
                       <FaCheck className="text-white text-xl text-opacity-50 group-hover:text-opacity-90 cursor-pointer disabled:opacity-50 transition-all hover:duration-75" />
                     ) : (
                       <MdEdit className="text-white text-xl text-opacity-50 group-hover:text-opacity-90 cursor-pointer disabled:opacity-50 transition-all hover:duration-75" />
