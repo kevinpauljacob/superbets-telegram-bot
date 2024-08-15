@@ -557,8 +557,8 @@ export default function BalanceModal() {
                             : "Please accept the terms."}
                         </span>
                         <FaRegCopy
-                          onClick={() => copyToClipboard(session?.user?.wallet)}
-                          className="w-5 h-5 text-[#555555] cursor-pointer"
+                          onClick={() => checked && copyToClipboard(session?.user?.wallet)}
+                          className={`w-5 h-5 text-[#555555] cursor-pointer ${!checked && "hidden"}`}
                         />
                       </div>
                     </div>
