@@ -134,6 +134,13 @@ const processTransaction = async (result: {
 
     const solAmount = (postBalance! - 1000000) / 1e9;
 
+    if (solAmount <= 0) {
+      let comment = "No positive balance change for SOL deposit";
+      console.log(comment);
+      await createDeposit("SOL", 0, signature, destination, comment, "failed");
+      return;
+    }
+
     console.log("balanceDiff", balanceDiff);
     console.log("SOL deposited:", solAmount);
     console.log("Destination address:", destination);
@@ -262,10 +269,10 @@ const processTransaction = async (result: {
     console.log("Destination wallet:", walletAddress);
     console.log("Transaction signature:", signature);
 
-    let player = null;
-    player = await User.findOne({
+    let player = await User.findOne({
       wallet: walletAddress,
     });
+
     if (player) {
       const account = player._id;
       await Deposits.create({

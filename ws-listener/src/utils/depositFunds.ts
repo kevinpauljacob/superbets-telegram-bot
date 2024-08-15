@@ -55,7 +55,7 @@ const depositFunds = async (deposit: Deposit) => {
         "deposit.tokenMint": { $ne: token },
       },
       {
-        $push: { deposit: { token, amount: 0 } },
+        $push: { deposit: { tokenMint: token, amount: 0 } },
       }
     );
 

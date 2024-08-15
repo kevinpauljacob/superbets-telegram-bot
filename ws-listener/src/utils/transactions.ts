@@ -186,7 +186,7 @@ export async function retryTxn(
 }
 
 export async function createDeposit(
-  token: string,
+  tokenMint: string,
   amount: number,
   signature: string,
   wallet: string,
@@ -200,7 +200,7 @@ export async function createDeposit(
       wallet,
       amount,
       type: true,
-      tokenMint: "SOL",
+      tokenMint,
       txnSignature: signature,
       status,
     });

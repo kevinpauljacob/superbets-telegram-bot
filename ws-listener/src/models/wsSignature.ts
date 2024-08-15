@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 
 const wsSignaturesSchema = new mongoose.Schema(
   {
-    signatures: {
+    signature: {
       type: String,
       required: true,
       unique: true,
