@@ -13,6 +13,11 @@ import { GameType, decryptServerSeed, seedStatus } from "@/utils/provably-fair";
  *      - Games/Global
  *     parameters:
  *       - in: query
+ *         name: slug
+ *         schema:
+ *           type: string
+ *         description: The slug associated with your api key.
+ *       - in: query
  *         name: wallet
  *         required: false
  *         schema:

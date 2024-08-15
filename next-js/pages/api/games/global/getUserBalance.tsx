@@ -14,6 +14,11 @@ Decimal.set({ precision: 9 });
  *      - Games/Global
  *     parameters:
  *       - in: query
+ *         name: slug
+ *         schema:
+ *           type: string
+ *         description: The slug associated with your api key.
+ *       - in: query
  *         name: wallet
  *         required: true
  *         schema:

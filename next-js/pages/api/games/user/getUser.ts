@@ -14,6 +14,11 @@ import Deposit from "@/models/games/deposit";
  *       - Games/User
  *     parameters:
  *       - in: query
+ *         name: slug
+ *         schema:
+ *           type: string
+ *         description: The slug associated with your api key.
+ *       - in: query
  *         name: wallet
  *         schema:
  *           type: string

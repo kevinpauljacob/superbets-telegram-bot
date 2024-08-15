@@ -14,6 +14,12 @@ import { SPL_TOKENS } from "@/context/config";
  *     description: This endpoint retrieves information about USDC claims for the day.
  *     tags:
  *       - Games/USDCClaims
+ *     parameters:
+ *       - in: query
+ *         name: slug
+ *         schema:
+ *           type: string
+ *         description: The slug associated with your api key.
  *     responses:
  *       200:
  *         description: USDC claim information retrieved successfully.

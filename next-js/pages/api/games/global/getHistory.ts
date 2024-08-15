@@ -12,6 +12,12 @@ import { User, gameModelMap } from "@/models/games";
  *     description: Fetches the latest 20 game records for each game type, populates user names and tiers, and includes decrypted game seed details if applicable. Sorts the records by creation date in descending order.
  *     tags:
  *      - Games/Global
+ *     parameters:
+ *       - in: query
+ *         name: slug
+ *         schema:
+ *           type: string
+ *         description: The slug associated with your api key.
  *     responses:
  *       200:
  *         description: Successful data retrieval

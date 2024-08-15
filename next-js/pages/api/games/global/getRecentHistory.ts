@@ -12,6 +12,12 @@ import StakingUser from "@/models/staking/user";
  *     description: Fetches the most recent 10 game records with a "Won" result for each game type, including user names, amounts, and other details. Returns the top 15 most recent records sorted by creation date.
  *     tags:
  *      - Games/Global
+ *     parameters:
+ *       - in: query
+ *         name: slug
+ *         schema:
+ *           type: string
+ *         description: The slug associated with your api key.
  *     responses:
  *       200:
  *         description: Successful data retrieval
