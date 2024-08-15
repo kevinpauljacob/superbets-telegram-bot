@@ -76,6 +76,8 @@ import mongoose from "mongoose";
  *         description: Method not allowed
  *       500:
  *         description: Internal server error
+ *     security:
+ *       - API_KEY: []
  */
 
 const secret = process.env.NEXTAUTH_SECRET;

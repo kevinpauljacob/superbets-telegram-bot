@@ -110,6 +110,8 @@ import updateGameStats from "../../../../utils/updateGameStats";
  *                   type: boolean
  *                 message:
  *                   type: string
+ *     security:
+ *       - API_KEY: []
  */
 
 const encryptionKey = Buffer.from(process.env.ENCRYPTION_KEY!, "hex");

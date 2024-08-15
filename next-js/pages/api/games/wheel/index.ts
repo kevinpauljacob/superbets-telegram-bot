@@ -163,6 +163,8 @@ Decimal.set({ precision: 9 });
  *                   type: string
  *                   description: Message describing the error.
  *                   example: "Server error"
+ *     security:
+ *       - API_KEY: []
  */
 
 const encryptionKey = Buffer.from(process.env.ENCRYPTION_KEY!, "hex");

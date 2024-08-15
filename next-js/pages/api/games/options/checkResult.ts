@@ -83,6 +83,8 @@ Decimal.set({ precision: 9 });
  *                   type: boolean
  *                 message:
  *                   type: string
+ *     security:
+ *       - API_KEY: []
  */
 
 const secret = process.env.NEXTAUTH_SECRET;

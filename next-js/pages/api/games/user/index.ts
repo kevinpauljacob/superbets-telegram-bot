@@ -116,6 +116,8 @@ import { encryptServerSeed, generateIV } from "@/utils/provably-fair";
  *                 message:
  *                   type: string
  *                   example: Method not allowed
+ *     security:
+ *       - API_KEY: []
  */
 
 export default async function handler(

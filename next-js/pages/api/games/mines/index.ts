@@ -84,6 +84,8 @@ import Decimal from "decimal.js";
  *                   type: boolean
  *                 message:
  *                   type: string
+ *     security:
+ *       - API_KEY: []
  */
 
 export const config = {

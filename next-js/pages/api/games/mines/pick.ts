@@ -95,6 +95,8 @@ Decimal.set({ precision: 9 });
  *                   type: boolean
  *                 message:
  *                   type: string
+ *     security:
+ *       - API_KEY: []
  */
 
 const encryptionKey = Buffer.from(process.env.ENCRYPTION_KEY!, "hex");

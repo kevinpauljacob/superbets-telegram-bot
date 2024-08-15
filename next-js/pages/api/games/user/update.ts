@@ -42,6 +42,8 @@ import { NextApiRequest, NextApiResponse } from "next";
  *         description: Method not allowed
  *       500:
  *         description: Internal server error
+ *     security:
+ *       - API_KEY: []
  */
 
 export const config = {

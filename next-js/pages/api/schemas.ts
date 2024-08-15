@@ -1205,19 +1205,3 @@
  *         apiKey: "1234567890abcdef"
  *         access: "ADMIN"
  */
-
-/**
- * @swagger
- * components:
- *   schemas:
- *     TxnSignature:
- *       type: object
- *       required:
- *         - txnSignature
- *       properties:
- *         txnSignature:
- *           type: string
- *           description: The unique transaction signature.
- *       example:
- *         txnSignature: "5K4TtYPVJ9G65v2Xt6GhG2Q3Z5AErJ2DQ8FHp6kJYJxWnSjB6Fx"
- */

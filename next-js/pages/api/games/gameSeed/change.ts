@@ -100,8 +100,10 @@ import { generateServerSeed, seedStatus } from "@/utils/provably-fair";
  *                 message:
  *                   type: string
  *                   example: "Method not allowed"
+ *     security:
+ *       - API_KEY: []
  */
-const secret = process.env.NEXTAUTH_SECRET;
+
 const encryptionKey = Buffer.from(process.env.ENCRYPTION_KEY!, "hex");
 
 export const config = {

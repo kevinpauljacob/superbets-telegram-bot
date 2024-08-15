@@ -109,6 +109,8 @@ import {
  *                 message:
  *                   type: string
  *                   example: "Method not allowed"
+ *     security:
+ *       - API_KEY: []
  */
 
 const secret = process.env.NEXTAUTH_SECRET;

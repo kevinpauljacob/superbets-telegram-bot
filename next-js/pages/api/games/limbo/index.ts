@@ -81,6 +81,8 @@ Decimal.set({ precision: 9 });
  *         description: Method not allowed
  *       500:
  *         description: Internal server error
+ *     security:
+ *       - API_KEY: []
  */
 
 const encryptionKey = Buffer.from(process.env.ENCRYPTION_KEY!, "hex");

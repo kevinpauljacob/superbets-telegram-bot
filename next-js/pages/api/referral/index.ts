@@ -126,6 +126,8 @@ import { v4 as uuidv4 } from "uuid";
  *                 message:
  *                   type: string
  *                   example: "Internal server error"
+ *     security:
+ *       - API_KEY: []
  */
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {

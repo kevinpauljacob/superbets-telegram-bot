@@ -10,10 +10,7 @@ function ApiDoc({ spec }: InferGetStaticPropsType<typeof getStaticProps>) {
 }
 
 export const getStaticProps: GetStaticProps = async () => {
-  let url =
-    process.env.NODE_ENV === "production"
-      ? "https://superbets.games/api"
-      : "http://localhost:3000/api";
+  const url = (process.env.NEXTAUTH_URL || "http://localhost:3000") + "/api";
 
   const spec: Record<string, any> = createSwaggerSpec({
     definition: {
@@ -32,7 +29,7 @@ export const getStaticProps: GetStaticProps = async () => {
           API_KEY: {
             type: "apiKey",
             in: "header",
-            name: "Authorization",
+            name: "x-api-key",
           },
         },
       },
