@@ -14,7 +14,7 @@ const inter = Inter({ subsets: ["latin"] });
 export default function Home() {
   const { status } = useSession();
   const router = useRouter();
-  const { referralCode } = router.query;
+  const { referralCode, ...otherQueryParams } = router.query;
 
   const {
     session,
@@ -125,6 +125,14 @@ export default function Home() {
         const { success: referralSuccess, message } = await response.json();
 
         if (referralSuccess) {
+          router.replace(
+            {
+              pathname: "/",
+              query: otherQueryParams,
+            },
+            undefined,
+            { shallow: true },
+          );
           successCustom(message);
         } else {
           errorCustom(message);

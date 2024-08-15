@@ -113,6 +113,8 @@ export default function ({ children }: Props) {
     getLeaderBoard,
     fetchClaimInfo,
     claimUSDCReward,
+    setHasShownOnce,
+    hasShownOnce,
   } = useGlobalContext();
 
   const tokenAmount = useMemo(
@@ -246,11 +248,16 @@ export default function ({ children }: Props) {
   useEffect(() => {
     if (tokenAmount >= 500) {
       setReached500(true);
-      if (!myData?.isUSDCClaimed) setIsModalOpen(true);
+      const modalShown = localStorage.getItem("modalShown");
+      if (!myData?.isUSDCClaimed && !modalShown) {
+        setIsModalOpen(true);
+        localStorage.setItem("modalShown", "true");
+      }
     }
   }, [tokenAmount]);
 
   const handleCloseModal = () => {
+    localStorage.removeItem("modalShown");
     setIsModalOpen(false);
   };
 
@@ -267,7 +274,7 @@ export default function ({ children }: Props) {
             <main
               className={`marker:w-full h-full max-h-[calc(100%-0rem)] pt-6`}
             >
-              <section className="w-full h-full overflow-y-auto no-scrollbar">
+              <section className="w-full h-full overflow-x-hidden overflow-y-auto no-scrollbar">
                 <div
                   id="scroll-element"
                   className="w-full min-h-[1px] bg-transparent"

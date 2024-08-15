@@ -105,6 +105,9 @@ interface GlobalContextProps {
   reached500: boolean;
   setReached500: (reached500: boolean) => void;
 
+  hasShownOnce: boolean;
+  setHasShownOnce: (hasShownOnce: boolean) => void;
+
   isModalOpen: boolean;
   setIsModalOpen: (isModelOpen: boolean) => void;
 
@@ -371,6 +374,8 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
   });
   const [data, setData] = useState<any[]>([]);
   const [maxPages, setMaxPages] = useState<number>(0);
+  const [hasShownOnce, setHasShownOnce] = useState<boolean>(false);
+
   const transactionsPerPage = 10;
   const threshold = 500;
 
@@ -417,7 +422,10 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
               (info?.wallet && info?.wallet === session?.user?.wallet),
           );
 
-          if (userInfo.numOfGamesPlayed === 0) setIsModalOpen(true);
+          if (userInfo.numOfGamesPlayed === 0 && !hasShownOnce) {
+            setIsModalOpen(true);
+            setHasShownOnce(true);
+          }
 
           setMyData(userInfo);
         }
@@ -601,7 +609,7 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
 
       for (let token of SPL_TOKENS) {
         let price =
-          data?.data[token.tokenMint]?.price ?? token?.tokenMint === "SUPER"
+          (data?.data[token.tokenMint]?.price ?? token?.tokenMint === "SUPER")
             ? 1
             : 0;
         prices.push({ mintAddress: token.tokenMint, price: price });
@@ -676,6 +684,10 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
       return null;
     }
   };
+
+  useEffect(() => {
+    setHasShownOnce(false);
+  }, [session])
 
   return (
     <GlobalContext.Provider
@@ -791,6 +803,8 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
         setLiveCurrentStat,
         updatePNL,
         liveTokenPrice,
+        hasShownOnce,
+        setHasShownOnce,
         betAmtError,
         setBetAmtError,
         isFirstSignUp,

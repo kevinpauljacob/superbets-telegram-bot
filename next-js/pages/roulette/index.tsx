@@ -69,6 +69,7 @@ export default function Roulette1() {
     language,
     session,
     status,
+    minGameAmount,
     betAmtError,
   } = useGlobalContext();
 
@@ -1139,6 +1140,15 @@ export default function Roulette1() {
               </div>
             )}
             <BetButton
+              disabled={
+                !selectedToken || loading || !session?.user ||
+                (coinData && coinData[0].amount < minGameAmount)
+                  ? // (betAmt !== undefined &&
+                    //   maxBetAmt !== undefined &&
+                    //   betAmt > maxBetAmt)
+                    true
+                  : false
+              }
               betAmt={betAmt}
               disabled={loading}
               onClickFunction={onSubmit}
@@ -1275,7 +1285,7 @@ export default function Roulette1() {
             </div>
           </div>
         </div>
-        <div className=" my-4 flex sm:flex-col items-center ">
+        <div className="my-4 flex sm:flex-col items-center">
           <ResultDisplay numbers={resultNumbers} />
 
           <div

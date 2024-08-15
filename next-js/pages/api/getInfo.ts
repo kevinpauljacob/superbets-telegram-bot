@@ -133,10 +133,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
             data: globalInfo[0],
           });
         }
-        // get web2 user leaderboard
+        // get leaderboard
         case 4: {
           let usersInfo = await user.aggregate([
-            { $match: { isWeb2User: true } },
             { $unwind: "$deposit" },
             { $match: { "deposit.tokenMint": "SUPER" } },
             { $sort: { "deposit.amount": -1 } },
