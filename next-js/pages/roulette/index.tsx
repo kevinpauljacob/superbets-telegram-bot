@@ -1150,7 +1150,6 @@ export default function Roulette1() {
                   : false
               }
               betAmt={betAmt}
-              disabled={loading}
               onClickFunction={onSubmit}
             >
               {loading ? <Loader /> : "BET"}

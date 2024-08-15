@@ -211,7 +211,6 @@ export default function Roulette2() {
   });
 
   const [selectedToken, setSelectedToken] = useState<Token | null>(tokens[0]);
-  console.log(selectedToken);
   const [betActive, setBetActive] = useState(false);
   const [betSetting, setBetSetting] = useState<"manual" | "auto">("manual");
   const [userInput, setUserInput] = useState<number | undefined>();
