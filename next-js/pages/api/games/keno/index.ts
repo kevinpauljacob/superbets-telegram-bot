@@ -260,7 +260,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       const strikeMultiplier = multiplier[matches];
       const amountWon = Decimal.min(
         Decimal.mul(amount, strikeMultiplier),
-        maxPayout,
+        tokenMint === "SUPER"
+            ? Decimal.mul(amount, strikeMultiplier)
+            : maxPayout,
       ).mul(Decimal.sub(1, houseEdge));
       const amountLost = Math.max(
         new Decimal(amount).sub(amountWon).toNumber(),
@@ -269,7 +271,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
       const feeGenerated = Decimal.min(
         Decimal.mul(amount, strikeMultiplier),
-        maxPayout,
+        tokenMint === "SUPER"
+            ? Decimal.mul(amount, strikeMultiplier)
+            : maxPayout,
       )
         .mul(houseEdge)
         .toNumber();

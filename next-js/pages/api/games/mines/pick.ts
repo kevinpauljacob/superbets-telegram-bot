@@ -242,7 +242,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       } else {
         amountWon = Decimal.min(
           Decimal.mul(amount, strikeMultiplier),
-          maxPayout,
+          tokenMint === "SUPER"
+            ? Decimal.mul(amount, strikeMultiplier)
+            : maxPayout,
         )
           .mul(Decimal.sub(1, houseEdge))
           .toNumber();
@@ -251,7 +253,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           result = "Won";
           const feeGenerated = Decimal.min(
             Decimal.mul(amount, strikeMultiplier),
-            maxPayout,
+            tokenMint === "SUPER"
+              ? Decimal.mul(amount, strikeMultiplier)
+              : maxPayout,
           )
             .mul(houseEdge)
             .toNumber();
@@ -359,8 +363,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           result === "Won"
             ? "Congratulations! You won"
             : result === "Lost"
-              ? "Sorry, Better luck next time!"
-              : "Game in progress",
+            ? "Sorry, Better luck next time!"
+            : "Game in progress",
         result,
         ...(result === "Pending" ? {} : { strikeNumbers }),
         strikeMultiplier,

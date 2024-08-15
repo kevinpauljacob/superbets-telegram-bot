@@ -348,8 +348,8 @@ export default function BalanceModal() {
                         className={`group flex h-11 w-full cursor-pointer items-center rounded-[8px] bg-[#202329] pl-4 pr-2.5`}
                       >
                         <input
-                          id={"amount-input"}
-                          {...methods.register("deposit-wallet", {
+                          id={"withdraw-wallet"}
+                          {...methods.register("withdraw-wallet", {
                             required: "Wallet is required",
                           })}
                           type={"text"}
@@ -365,12 +365,12 @@ export default function BalanceModal() {
 
                       <span
                         className={`${
-                          methods.formState.errors["deposit-wallet"]
+                          methods.formState.errors["withdraw-wallet"]
                             ? "opacity-100"
                             : "opacity-0"
                         } mt-1.5 flex items-center gap-1 text-xs text-[#D92828]`}
                       >
-                        {methods.formState.errors["deposit-wallet"]
+                        {methods.formState.errors["withdraw-wallet"]
                           ? methods.formState.errors[
                               "deposit-wallet"
                             ]!.message!.toString()
@@ -403,8 +403,8 @@ export default function BalanceModal() {
                         className={`group flex h-11 w-full cursor-pointer items-center rounded-[8px] bg-[#202329] pl-4 pr-2.5`}
                       >
                         <input
-                          id={"amount-input"}
-                          {...methods.register("amount", {
+                          id={"withdraw-amount"}
+                          {...methods.register("withdraw-amount", {
                             required: "Amount is required",
                           })}
                           type={"number"}
@@ -457,14 +457,14 @@ export default function BalanceModal() {
 
                       <span
                         className={`${
-                          methods.formState.errors["amount"]
+                          methods.formState.errors["withdraw-amount"]
                             ? "opacity-100"
                             : "opacity-0"
                         } mt-1.5 flex items-center gap-1 text-xs text-[#D92828]`}
                       >
-                        {methods.formState.errors["amount"]
+                        {methods.formState.errors["withdraw-amount"]
                           ? methods.formState.errors[
-                              "amount"
+                              "withdraw-amount"
                             ]!.message!.toString()
                           : "NONE"}
                       </span>

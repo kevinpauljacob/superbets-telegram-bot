@@ -28,7 +28,7 @@ const MultiplierInput = ({
         {translator("Multiplier", language)}
       </span>
       <input
-        id={"amount-input"}
+        id={"multiplier-input"}
         className={`bg-[#202329] w-full min-w-0 font-chakra text-xs text-white rounded-md px-2 disabled:cursor-not-allowed disabled:opacity-50 md:px-5 py-3 placeholder-[#94A3B8] placeholder-opacity-40 outline-none`}
         value={inputMultiplier}
         type="number"

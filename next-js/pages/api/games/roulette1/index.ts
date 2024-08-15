@@ -436,11 +436,19 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
       strikeMultiplier = Decimal.div(strikeMultiplier, amount);
 
-      amountWon = Decimal.min(amountWon, maxPayout).mul(
-        Decimal.sub(1, houseEdge),
-      );
+      amountWon = Decimal.min(
+        amountWon,
+        tokenMint === "SUPER"
+          ? Decimal.mul(amount, strikeMultiplier)
+          : maxPayout,
+      ).mul(Decimal.sub(1, houseEdge));
 
-      const feeGenerated = Decimal.min(amountWon, maxPayout)
+      const feeGenerated = Decimal.min(
+        amountWon,
+        tokenMint === "SUPER"
+          ? Decimal.mul(amount, strikeMultiplier)
+          : maxPayout,
+      )
         .mul(houseEdge)
         .toNumber();
       const amountLost = Math.max(Decimal.sub(amount, amountWon).toNumber(), 0);

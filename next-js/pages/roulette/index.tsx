@@ -70,6 +70,7 @@ export default function Roulette1() {
     session,
     status,
     minGameAmount,
+    betAmtError,
   } = useGlobalContext();
 
   type Bet = {
@@ -368,6 +369,9 @@ export default function Roulette1() {
 
   const bet = async () => {
     try {
+      if (betAmtError) {
+        throw new Error(translator("Invalid amount!!", language));
+      }
       if (!session?.user?.isWeb2User && selectedCoin.tokenMint === "SUPER") {
         throw new Error(
           translator("You cannot bet with this token!", language),
@@ -1145,6 +1149,8 @@ export default function Roulette1() {
                     true
                   : false
               }
+              betAmt={betAmt}
+              disabled={loading}
               onClickFunction={onSubmit}
             >
               {loading ? <Loader /> : "BET"}
@@ -1227,14 +1233,8 @@ export default function Roulette1() {
                     </div>
                   )}
                   <BetButton
-                    disabled={
-                      !betSetting || loading || !session?.user
-                        ? // (betAmt !== undefined &&
-                          //   maxBetAmt !== undefined &&
-                          //   betAmt > maxBetAmt)
-                          true
-                        : false
-                    }
+                    betAmt={betAmt}
+                    disabled={loading}
                     // onClickFunction={onSubmit}
                   >
                     {loading ? <Loader /> : "BET"}

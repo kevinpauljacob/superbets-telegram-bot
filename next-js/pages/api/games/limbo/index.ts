@@ -234,13 +234,17 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         result = "Won";
         amountWon = Decimal.min(
           Decimal.mul(amount, strikeMultiplier),
-          maxPayout,
+          tokenMint === "SUPER"
+            ? Decimal.mul(amount, strikeMultiplier)
+            : maxPayout,
         ).mul(Decimal.sub(1, houseEdge));
         amountLost = Math.max(new Decimal(amount).sub(amountWon).toNumber(), 0);
 
         feeGenerated = Decimal.min(
           Decimal.mul(amount, strikeMultiplier),
-          maxPayout,
+          tokenMint === "SUPER"
+            ? Decimal.mul(amount, strikeMultiplier)
+            : maxPayout,
         )
           .mul(houseEdge)
           .toNumber();

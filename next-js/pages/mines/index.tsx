@@ -66,6 +66,7 @@ export default function Mines() {
     minGameAmount,
     session,
     status,
+    betAmtError,
   } = useGlobalContext();
   const [betAmt, setBetAmt] = useState<number | undefined>();
   const [userInput, setUserInput] = useState<number | undefined>();
@@ -400,6 +401,9 @@ export default function Mines() {
 
   const handleAutoBet = async () => {
     try {
+      if (betAmtError) {
+        throw new Error(translator("Invalid amount!!", language));
+      }
       if (!session?.user?.isWeb2User && selectedCoin.tokenMint === "SUPER") {
         throw new Error(
           translator("You cannot bet with this token!", language),
@@ -539,6 +543,9 @@ export default function Mines() {
     setGameStatus("Not Started");
     // setSelectTile(true);
     try {
+      if (betAmtError) {
+        throw new Error(translator("Invalid amount!!", language));
+      }
       if (!session?.user?.isWeb2User && selectedCoin.tokenMint === "SUPER") {
         throw new Error(
           translator("You cannot bet with this token!", language),
@@ -855,17 +862,11 @@ export default function Mines() {
             )}
             {!betActive && !startAuto && (
               <BetButton
+                betAmt={betAmt}
                 disabled={
-                  !session?.user ||
                   isRolling ||
-                  (coinData && coinData[0].amount < minGameAmount) ||
-                  (betType === "auto" && !userBets.some((bet) => bet.pick)) ||
-                  (startAuto &&
-                    (autoBetCount === 0 || Number.isNaN(autoBetCount)))
-                    ? // (betAmt !== undefined &&
-                      //   maxBetAmt !== undefined &&
-                      //   betAmt > maxBetAmt)
-                      true
+                  (betType === "auto" && !userBets.some((bet) => bet.pick))
+                    ? true
                     : false
                 }
                 onClickFunction={betType === "auto" ? onSubmit : handleBet}
@@ -1126,18 +1127,12 @@ export default function Mines() {
                   )}
                   {!betActive && !startAuto && (
                     <BetButton
+                      betAmt={betAmt}
                       disabled={
-                        !session?.user ||
                         isRolling ||
-                        (coinData && coinData[0].amount < minGameAmount) ||
                         (betType === "auto" &&
-                          !userBets.some((bet) => bet.pick)) ||
-                        (startAuto &&
-                          (autoBetCount === 0 || Number.isNaN(autoBetCount)))
-                          ? // (betAmt !== undefined &&
-                            //   maxBetAmt !== undefined &&
-                            //   betAmt > maxBetAmt)
-                            true
+                          !userBets.some((bet) => bet.pick))
+                          ? true
                           : false
                       }
                       onClickFunction={

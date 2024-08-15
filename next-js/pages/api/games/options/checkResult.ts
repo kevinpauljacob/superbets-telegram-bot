@@ -164,12 +164,16 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         (betType === "betDown" && betEndPrice < strikePrice)
       ) {
         result = "Won";
-        amountWon = Decimal.min(Decimal.mul(amount, 2), maxPayout).mul(
-          Decimal.sub(1, houseEdge),
-        );
+        amountWon = Decimal.min(
+          Decimal.mul(amount, 2),
+          tokenMint === "SUPER" ? Decimal.mul(amount, 2) : maxPayout,
+        ).mul(Decimal.sub(1, houseEdge));
         amountLost = 0;
 
-        feeGenerated = Decimal.min(Decimal.mul(amount, 2), maxPayout)
+        feeGenerated = Decimal.min(
+          Decimal.mul(amount, 2),
+          tokenMint === "SUPER" ? Decimal.mul(amount, 2) : maxPayout,
+        )
           .mul(houseEdge)
           .toNumber();
       }

@@ -59,6 +59,7 @@ export default function Dice2() {
     minGameAmount,
     session,
     status,
+    betAmtError,
   } = useGlobalContext();
   const [betAmt, setBetAmt] = useState<number | undefined>();
   const [userInput, setUserInput] = useState<number | undefined>();
@@ -151,6 +152,9 @@ export default function Dice2() {
     //   betAmt,
     // );
     try {
+      if (betAmtError) {
+        throw new Error(translator("Invalid amount!!", language));
+      }
       if (!session?.user?.isWeb2User && selectedCoin.tokenMint === "SUPER") {
         throw new Error(
           translator("You cannot bet with this token!", language),
@@ -407,17 +411,8 @@ export default function Dice2() {
               </div>
             )}
             <BetButton
-              disabled={
-                !session?.user ||
-                isRolling ||
-                (startAuto &&
-                  (autoBetCount === 0 || Number.isNaN(autoBetCount)))
-                  ? // (betAmt !== undefined &&
-                    //   maxBetAmt !== undefined &&
-                    //   betAmt > maxBetAmt)
-                    true
-                  : false
-              }
+              betAmt={betAmt}
+              disabled={isRolling}
               onClickFunction={onSubmit}
             >
               {isRolling ? <Loader /> : "BET"}
@@ -483,18 +478,9 @@ export default function Dice2() {
                     </div>
                   )}
                   <BetButton
-                    disabled={
-                      !session?.user ||
-                      isRolling ||
-                      (startAuto &&
-                        (autoBetCount === 0 || Number.isNaN(autoBetCount)))
-                        ? // (betAmt !== undefined &&
-                          //   maxBetAmt !== undefined &&
-                          //   betAmt > maxBetAmt)
-                          true
-                        : false
-                    }
-                    onClickFunction={onSubmit}
+                    betAmt={betAmt}
+                    disabled={isRolling}
+                    // onClickFunction={onSubmit}
                   >
                     {isRolling ? <Loader /> : "BET"}
                   </BetButton>
@@ -538,7 +524,7 @@ export default function Dice2() {
                     {translator("Multiplier", language)}
                   </span>
                   <input
-                    id={"amount-input"}
+                    id={"multiplier-input"}
                     className={`bg-[#202329] w-full min-w-0 font-chakra text-xs text-white rounded-md px-2 md:px-5 py-3 placeholder-[#94A3B8] placeholder-opacity-40 outline-none`}
                     value={multiplier}
                     type="number"

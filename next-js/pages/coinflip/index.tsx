@@ -12,7 +12,6 @@ import {
   GameTable,
 } from "@/components/GameLayout";
 import Loader from "@/components/games/Loader";
-import BetAmount from "@/components/games/BetAmountInput";
 import BetButton from "@/components/games/BetButton";
 import Bets from "../../components/games/Bets";
 import { soundAlert } from "@/utils/soundUtils";
@@ -26,6 +25,7 @@ import {
 import { placeFlip, translator } from "@/context/transactions";
 import { useSession } from "next-auth/react";
 import { GameType } from "@/utils/provably-fair";
+import BetAmount from "@/components/games/BetAmountInput";
 
 const Timer = dynamic(() => import("../../components/games/Timer"), {
   ssr: false,
@@ -61,6 +61,7 @@ export default function Flip() {
     enableSounds,
     session,
     status,
+    betAmtError,
   } = useGlobalContext();
 
   const [betAmt, setBetAmt] = useState<number | undefined>();
@@ -79,6 +80,9 @@ export default function Flip() {
 
   const bet = async () => {
     try {
+      if (betAmtError) {
+        throw new Error(translator("Invalid amount!!", language));
+      }
       if (!session?.user?.isWeb2User && selectedCoin.tokenMint === "SUPER") {
         throw new Error(
           translator("You cannot bet with this token!", language),
@@ -278,16 +282,8 @@ export default function Flip() {
   }, [startAuto, autoBetCount]);
 
   const onSubmit = async (data: any) => {
-    if (!betAmt || betAmt === 0) {
-      errorCustom(translator("Set Amount.", language));
-      return;
-    }
     if (betType) {
       if (betSetting === "auto") {
-        if (betAmt === 0) {
-          errorCustom(translator("Set Amount.", language));
-          return;
-        }
         if (typeof autoBetCount === "number" && autoBetCount <= 0) {
           errorCustom(translator("Set Bet Count.", language));
           return;
@@ -333,18 +329,8 @@ export default function Flip() {
               </div>
             )}
             <BetButton
-              disabled={
-                !betType ||
-                loading ||
-                !session?.user ||
-                (startAuto &&
-                  (autoBetCount === 0 || Number.isNaN(autoBetCount)))
-                  ? // (betAmt !== undefined &&
-                    //   maxBetAmt !== undefined &&
-                    //   betAmt > maxBetAmt)
-                    true
-                  : false
-              }
+              disabled={!betType || loading ? true : false}
+              betAmt={betAmt}
               onClickFunction={onSubmit}
             >
               {loading ? <Loader /> : "BET"}
@@ -459,18 +445,8 @@ export default function Flip() {
                     </div>
                   )}
                   <BetButton
-                    disabled={
-                      !betType ||
-                      loading ||
-                      !session?.user ||
-                      (startAuto &&
-                        (autoBetCount === 0 || Number.isNaN(autoBetCount)))
-                        ? // (betAmt !== undefined &&
-                          //   maxBetAmt !== undefined &&
-                          //   betAmt > maxBetAmt)
-                          true
-                        : false
-                    }
+                    disabled={!betType || loading ? true : false}
+                    betAmt={betAmt}
                     // onClickFunction={onSubmit}
                   >
                     {loading ? <Loader /> : "BET"}

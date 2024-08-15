@@ -68,6 +68,7 @@ export default function Roulette2() {
     language,
     session,
     status,
+    betAmtError,
   } = useGlobalContext();
 
   type Bet = {
@@ -366,6 +367,9 @@ export default function Roulette2() {
 
   const bet = async () => {
     try {
+      if (betAmtError) {
+        throw new Error(translator("Invalid amount!!", language));
+      }
       if (!session?.user?.isWeb2User && selectedCoin.tokenMint === "SUPER") {
         throw new Error(
           translator("You cannot bet with this token!", language),
@@ -515,9 +519,9 @@ export default function Roulette2() {
             (autoWinChangeReset || autoLossChangeReset
               ? betAmt
               : autoBetCount === "inf"
-                ? Math.max(0, betAmt)
-                : betAmt *
-                  (autoLossChange !== null ? autoLossChange / 100.0 : 0));
+              ? Math.max(0, betAmt)
+              : betAmt *
+                (autoLossChange !== null ? autoLossChange / 100.0 : 0));
       }
       if (
         useAutoConfig &&
@@ -1219,15 +1223,9 @@ export default function Roulette2() {
   //             </div>
   //           )}
   //           <BetButton
+  //             betAmt={betAmt}
   //             disabled={
-  //               !selectedToken ||
-  //               loading ||
-  //               !session?.user ||
-  //               (betAmt !== undefined &&
-  //                 maxBetAmt !== undefined &&
-  //                 betAmt > maxBetAmt)
-  //                 ? true
-  //                 : false
+  //               loading
   //             }
   //             onClickFunction={onSubmit}
   //           >
@@ -1304,15 +1302,10 @@ export default function Roulette2() {
   //                   </div>
   //                 )}
   //                 <BetButton
+  //                   betAmt={betAmt}
   //                   disabled={
   //                     !betSetting ||
-  //                     loading ||
-  //                     !session?.user ||
-  //                     (betAmt !== undefined &&
-  //                       maxBetAmt !== undefined &&
-  //                       betAmt > maxBetAmt)
-  //                       ? true
-  //                       : false
+  //                     loading
   //                   }
   //                   // onClickFunction={onSubmit}
   //                 >
