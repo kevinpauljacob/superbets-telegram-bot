@@ -113,6 +113,8 @@ export default function ({ children }: Props) {
     getLeaderBoard,
     fetchClaimInfo,
     claimUSDCReward,
+    setHasShownOnce,
+    hasShownOnce,
   } = useGlobalContext();
 
   const tokenAmount = useMemo(
@@ -250,11 +252,16 @@ export default function ({ children }: Props) {
   useEffect(() => {
     if (tokenAmount >= 500) {
       setReached500(true);
-      if (!myData?.isUSDCClaimed) setIsModalOpen(true);
+      const modalShown = localStorage.getItem("modalShown");
+      if (!myData?.isUSDCClaimed && !modalShown) {
+        setIsModalOpen(true);
+        localStorage.setItem("modalShown", "true");
+      }
     }
   }, [tokenAmount]);
 
   const handleCloseModal = () => {
+    localStorage.removeItem("modalShown");
     setIsModalOpen(false);
   };
 
