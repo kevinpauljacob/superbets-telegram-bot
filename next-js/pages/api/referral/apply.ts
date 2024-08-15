@@ -84,6 +84,8 @@ const secret = process.env.NEXTAUTH_SECRET;
  *                 message:
  *                   type: string
  *                   example: "An error occurred while processing your request."
+ *     security:
+ *       - API_KEY: []
  */
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {

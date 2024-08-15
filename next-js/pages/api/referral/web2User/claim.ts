@@ -55,6 +55,8 @@ import connectDatabase from "@/utils/database";
  *         description: Method not allowed
  *       500:
  *         description: Internal server error
+ *     security:
+ *       - API_KEY: []
  */
 
 export default async function handler(

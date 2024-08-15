@@ -104,6 +104,8 @@ import { bs58 } from "@project-serum/anchor/dist/cjs/utils/bytes";
  *                   type: boolean
  *                 message:
  *                   type: string
+ *     security:
+ *       - API_KEY: []
  */
 
 const secret = process.env.NEXTAUTH_SECRET;

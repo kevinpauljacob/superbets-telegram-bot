@@ -3,6 +3,8 @@ import type { NextRequest } from "next/server";
 // import { Ratelimit } from "@upstash/ratelimit";
 // import { Redis } from "@upstash/redis";
 import { getToken } from "next-auth/jwt";
+import ApiKey from "./models/apiKey";
+import connectDatabase from "./utils/database";
 
 // const rateLimit = new Ratelimit({
 //   redis: Redis.fromEnv(),
@@ -15,8 +17,14 @@ const API_KEY_HEADER = "x-api-key";
 const secret = process.env.NEXTAUTH_SECRET;
 
 const validateApiKey = async (apiKey: string): Promise<boolean> => {
-  const validApiKeys = ["valid-api-key-1", "valid-api-key-2"];
-  return validApiKeys.includes(apiKey);
+  try {
+    await connectDatabase();
+    const apiKeyFound = ApiKey.findOne({ apiKey });
+    return !!apiKeyFound;
+  } catch (error: any) {
+    console.log(error.message);
+    return false;
+  }
 };
 
 const whiteListRoutes = [

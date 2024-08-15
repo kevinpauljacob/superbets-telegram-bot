@@ -1183,25 +1183,3 @@
  *         multiplier: 1.5
  *         points: 1500
  */
-
-/**
- * @swagger
- * components:
- *   schemas:
- *     ApiKey:
- *       type: object
- *       required:
- *         - apiKey
- *         - access
- *       properties:
- *         apiKey:
- *           type: string
- *           description: The API key string.
- *         access:
- *           type: string
- *           enum: ["ADMIN", "PUBLIC"]
- *           description: The level of access associated with this API key.
- *       example:
- *         apiKey: "1234567890abcdef"
- *         access: "ADMIN"
- */

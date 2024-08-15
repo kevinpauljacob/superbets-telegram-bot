@@ -13,88 +13,90 @@ import TxnSignature from "../../../../models/txnSignature";
 import { NextApiRequest, NextApiResponse } from "next";
 import { SPL_TOKENS } from "@/context/config";
 
-/**
- * @swagger
- * /staking/wallet/unstake:
- *   post:
- *     summary: Unstake FOMO tokens
- *     description: Handles the unstaking of FOMO tokens from the user's wallet.
- *     tags:
- *       - Staking
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               transactionBase64:
- *                 type: string
- *                 description: The base64 encoded transaction.
- *               wallet:
- *                 type: string
- *                 description: The wallet address.
- *               amount:
- *                 type: number
- *                 description: The amount to unstake.
- *               tokenMint:
- *                 type: string
- *                 description: The mint address of the token.
- *               blockhashWithExpiryBlockHeight:
- *                 type: object
- *                 properties:
- *                   blockhash:
- *                     type: string
- *                     description: The blockhash for the transaction.
- *                   lastValidBlockHeight:
- *                     type: number
- *                     description: The last valid block height for the transaction.
- *     responses:
- *       200:
- *         description: Successfully unstaked FOMO tokens.
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                 message:
- *                   type: string
- *       400:
- *         description: Invalid request parameters or transaction failed.
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                 message:
- *                   type: string
- *       500:
- *         description: Internal server error.
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                 message:
- *                   type: string
- *       405:
- *         description: Method not allowed.
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                 message:
- *                   type: string
- */
+// /**
+//  * @swagger
+//  * /staking/wallet/unstake:
+//  *   post:
+//  *     summary: Unstake FOMO tokens
+//  *     description: Handles the unstaking of FOMO tokens from the user's wallet.
+//  *     tags:
+//  *       - Staking
+//  *     requestBody:
+//  *       required: true
+//  *       content:
+//  *         application/json:
+//  *           schema:
+//  *             type: object
+//  *             properties:
+//  *               transactionBase64:
+//  *                 type: string
+//  *                 description: The base64 encoded transaction.
+//  *               wallet:
+//  *                 type: string
+//  *                 description: The wallet address.
+//  *               amount:
+//  *                 type: number
+//  *                 description: The amount to unstake.
+//  *               tokenMint:
+//  *                 type: string
+//  *                 description: The mint address of the token.
+//  *               blockhashWithExpiryBlockHeight:
+//  *                 type: object
+//  *                 properties:
+//  *                   blockhash:
+//  *                     type: string
+//  *                     description: The blockhash for the transaction.
+//  *                   lastValidBlockHeight:
+//  *                     type: number
+//  *                     description: The last valid block height for the transaction.
+//  *     responses:
+//  *       200:
+//  *         description: Successfully unstaked FOMO tokens.
+//  *         content:
+//  *           application/json:
+//  *             schema:
+//  *               type: object
+//  *               properties:
+//  *                 success:
+//  *                   type: boolean
+//  *                 message:
+//  *                   type: string
+//  *       400:
+//  *         description: Invalid request parameters or transaction failed.
+//  *         content:
+//  *           application/json:
+//  *             schema:
+//  *               type: object
+//  *               properties:
+//  *                 success:
+//  *                   type: boolean
+//  *                 message:
+//  *                   type: string
+//  *       500:
+//  *         description: Internal server error.
+//  *         content:
+//  *           application/json:
+//  *             schema:
+//  *               type: object
+//  *               properties:
+//  *                 success:
+//  *                   type: boolean
+//  *                 message:
+//  *                   type: string
+//  *       405:
+//  *         description: Method not allowed.
+//  *         content:
+//  *           application/json:
+//  *             schema:
+//  *               type: object
+//  *               properties:
+//  *                 success:
+//  *                   type: boolean
+//  *                 message:
+//  *                   type: string
+//  *     security:
+//  *       - API_KEY: []
+//  */
 
 const secret = process.env.NEXTAUTH_SECRET;
 

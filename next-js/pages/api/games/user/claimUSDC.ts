@@ -114,6 +114,8 @@ import { SPL_TOKENS } from "@/context/config";
  *                 message:
  *                   type: string
  *                   example: Internal server error
+ *     security:
+ *       - API_KEY: []
  */
 
 async function getUSDCClaimInfo() {
