@@ -25,7 +25,7 @@ Decimal.set({ precision: 9 });
 /**
  * @swagger
  *
- * /api/games/roulette2:
+ * /games/roulette2:
  *   post:
  *     summary: Play a game of Roulette
  *     description: Allows users to place a bet on a roulette game and get the result.

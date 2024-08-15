@@ -4,7 +4,7 @@ import { Option, User } from "../../../../models/games";
 
 /**
  * @swagger
- * /api/games/options/getActiveBet:
+ * /games/options/getActiveBet:
  *   get:
  *     summary: Get active bets for a user
  *     description: Fetches all active (pending) bets for a user based on their wallet or email.

@@ -4,7 +4,7 @@ import { User, Campaign } from "@/models/referral";
 
 /**
  * @swagger
- * /api/referral:
+ * /referral:
  *   post:
  *     summary: Create a referral campaign
  *     description: Creates a new referral campaign and associates it with a user.

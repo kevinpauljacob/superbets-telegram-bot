@@ -6,7 +6,7 @@ import { generateServerSeed, seedStatus } from "@/utils/provably-fair";
 
 /**
  * @swagger
- * /api/games/gameSeed/change:
+ * /games/gameSeed/change:
  *   post:
  *     summary: Change the game seed for a user
  *     description: Changes the current game seed to a new one for a user based on their account and client seed, and generates a new game seed for the next round. Checks for pending games before changing the seed.

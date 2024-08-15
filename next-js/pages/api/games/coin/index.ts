@@ -31,7 +31,7 @@ Decimal.set({ precision: 9 });
 
 /**
  * @swagger
- * /api/games/coin:
+ * /games/coin:
  *   post:
  *     summary: Play a coin flip game
  *     description: This endpoint allows a user to play a coin flip game by betting a certain amount of tokens. The game result is determined in a provably fair manner.

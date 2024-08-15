@@ -6,7 +6,7 @@ Decimal.set({ precision: 9 });
 
 /**
  * @swagger
- * /api/games/global/getUserBalance:
+ * /games/global/getUserBalance:
  *   get:
  *     summary: Retrieves the net and total balance for a specified wallet
  *     description: Calculates the net balance by summing deposits and withdrawals. Fetches additional PnL data from another endpoint to compute the total balance.

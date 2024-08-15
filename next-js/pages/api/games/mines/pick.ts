@@ -21,7 +21,7 @@ Decimal.set({ precision: 9 });
 
 /**
  * @swagger
- * /api/games/mines/pick:
+ * /games/mines/pick:
  *   post:
  *     summary: Make a pick in an ongoing mines game
  *     description: Allows a user to make a pick in an ongoing mines game by providing their wallet/email, game ID, and the chosen bet.

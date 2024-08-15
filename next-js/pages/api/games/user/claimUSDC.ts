@@ -8,7 +8,7 @@ import { SPL_TOKENS } from "@/context/config";
 
 /**
  * @swagger
- * /api/games/usdcClaims:
+ * /games/usdcClaims:
  *   get:
  *     summary: Get USDC claim information
  *     description: This endpoint retrieves information about USDC claims for the day.

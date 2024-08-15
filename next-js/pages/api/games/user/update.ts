@@ -1,13 +1,11 @@
-import {
-  maintainance,
-} from "@/context/config";
+import { maintainance } from "@/context/config";
 import { User } from "@/models/games";
 import connectDatabase from "@/utils/database";
 import { NextApiRequest, NextApiResponse } from "next";
 
 /**
  * @swagger
- * /api/games/user/update:
+ * /games/user/update:
  *   post:
  *     summary: Update name for a user
  *     description: This endpoint allows to update the name of a user.

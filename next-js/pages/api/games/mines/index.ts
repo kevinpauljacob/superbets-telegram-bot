@@ -14,7 +14,7 @@ import Decimal from "decimal.js";
 
 /**
  * @swagger
- * /api/games/mines:
+ * /games/mines:
  *   post:
  *     summary: Create a new mines game
  *     description: Creates a new mines game for a user based on their wallet or email.

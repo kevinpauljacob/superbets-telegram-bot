@@ -16,7 +16,7 @@ import {
  */
 /**
  * @swagger
- * /api/games/gameSeed:
+ * /games/gameSeed:
  *   post:
  *     summary: Generate and retrieve game seeds for a user
  *     description: Generates client and server seeds for a user based on their wallet or email, and returns the current and next game seed information.

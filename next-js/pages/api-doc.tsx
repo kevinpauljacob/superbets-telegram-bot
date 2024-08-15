@@ -10,12 +10,31 @@ function ApiDoc({ spec }: InferGetStaticPropsType<typeof getStaticProps>) {
 }
 
 export const getStaticProps: GetStaticProps = async () => {
+  let url =
+    process.env.NODE_ENV === "production"
+      ? "https://superbets.games/api"
+      : "http://localhost:3000/api";
+
   const spec: Record<string, any> = createSwaggerSpec({
     definition: {
       openapi: "3.0.0",
       info: {
         title: "Superbets API Documentation",
         version: "1.0",
+      },
+      servers: [
+        {
+          url,
+        },
+      ],
+      components: {
+        securitySchemes: {
+          API_KEY: {
+            type: "apiKey",
+            in: "header",
+            name: "Authorization",
+          },
+        },
       },
     },
   });

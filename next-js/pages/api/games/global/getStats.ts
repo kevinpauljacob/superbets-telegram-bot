@@ -5,7 +5,7 @@ import { GameType } from "@/utils/provably-fair";
 
 /**
  * @swagger
- * /api/games/global/getStats:
+ * /games/global/getStats:
  *   get:
  *     summary: Retrieves statistics for a specific game type
  *     description: Fetches the statistics for a given game type. If the statistics do not exist, a new entry with default values is created.

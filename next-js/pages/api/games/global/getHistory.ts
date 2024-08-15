@@ -6,7 +6,7 @@ import { User, gameModelMap } from "@/models/games";
 
 /**
  * @swagger
- * /api/games/global/getHistory:
+ * /games/global/getHistory:
  *   get:
  *     summary: Retrieves recent game history with user information
  *     description: Fetches the latest 20 game records for each game type, populates user names and tiers, and includes decrypted game seed details if applicable. Sorts the records by creation date in descending order.

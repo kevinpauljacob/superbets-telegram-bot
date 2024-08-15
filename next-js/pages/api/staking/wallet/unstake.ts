@@ -15,7 +15,7 @@ import { SPL_TOKENS } from "@/context/config";
 
 /**
  * @swagger
- * /api/staking/wallet/unstake:
+ * /staking/wallet/unstake:
  *   post:
  *     summary: Unstake FOMO tokens
  *     description: Handles the unstaking of FOMO tokens from the user's wallet.

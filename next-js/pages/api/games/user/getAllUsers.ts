@@ -4,7 +4,7 @@ import { Option, Coin, Dice, User } from "../../../../models/games";
 
 /**
  * @swagger
- * /api/games/user/getAllUsers:
+ * /games/user/getAllUsers:
  *   get:
  *     summary: Get aggregated data for all users
  *     description: Retrieves aggregated data for users including bets, flips, and rolls with their respective totals, won amounts, lost amounts, and counts. Also includes user-specific information like SNS.

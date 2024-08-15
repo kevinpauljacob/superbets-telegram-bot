@@ -4,7 +4,7 @@ import { NextApiRequest, NextApiResponse } from "next";
 
 /**
  * @swagger
- * /api/games/user/getWeeklyUsers:
+ * /games/user/getWeeklyUsers:
  *   get:
  *     summary: Get weekly user activity data
  *     description: Retrieve aggregated data on user activity for the past week.

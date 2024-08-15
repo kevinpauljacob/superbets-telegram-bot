@@ -13,7 +13,7 @@ Decimal.set({ precision: 9 });
 
 /**
  * @swagger
- * /api/games/mines/conclude:
+ * /games/mines/conclude:
  *   post:
  *     summary: Conclude a mines game
  *     description: Concludes a mines game by providing the wallet or email and the game ID.

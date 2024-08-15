@@ -25,7 +25,7 @@ Decimal.set({ precision: 9 });
 
 /**
  * @swagger
- * /api/games/plinko:
+ * /games/plinko:
  *   post:
  *     summary: Play a Plinko game
  *     description: This endpoint allows a user to play a Plinko game by betting a certain amount of tokens and selecting the number of rows and risk level. The game result is determined in a provably fair manner.

@@ -15,7 +15,7 @@ import { SPL_TOKENS } from "@/context/config";
 
 /**
  * @swagger
- * /api/staking/wallet/stake:
+ * /staking/wallet/stake:
  *   post:
  *     summary: Stake FOMO tokens
  *     description: Handles the staking of FOMO tokens into the user's wallet.
