@@ -101,7 +101,9 @@ export default function Options() {
         if (res?.data?.result == "Won") {
           successCustom(
             translator(res?.message, language) +
-              ` ${formatNumber(res?.data?.amountWon)} ${selectedCoin.tokenName}`,
+              ` ${formatNumber(res?.data?.amountWon)} ${
+                selectedCoin.tokenName
+              }`,
           );
           soundAlert("/sounds/win.wav", !enableSounds);
         } else errorCustom(translator(res?.message, language));
@@ -358,14 +360,9 @@ export default function Options() {
             {/* mobile button  */}
             <div className="w-full flex lg:hidden mb-[1.4rem]">
               <BetButton
+                betAmt={betAmt}
                 disabled={
-                  !betType ||
-                  !session?.user ||
-                  // (betAmt !== undefined &&
-                  //   maxBetAmt !== undefined &&
-                  //   betAmt > maxBetAmt) ||
-                  loading ||
-                  (strikePrice > 0 && !result)
+                  !betType || loading || (strikePrice > 0 && !result)
                     ? true
                     : false
                 }
@@ -478,14 +475,9 @@ export default function Options() {
             {/* lap  button  */}
             <div className="w-full hidden lg:flex">
               <BetButton
+                betAmt={betAmt}
                 disabled={
-                  !betType ||
-                  !session?.user ||
-                  // (betAmt !== undefined &&
-                  //   maxBetAmt !== undefined &&
-                  //   betAmt > maxBetAmt) ||
-                  loading ||
-                  (strikePrice > 0 && !result)
+                  !betType || loading || (strikePrice > 0 && !result)
                     ? true
                     : false
                 }
@@ -516,12 +508,12 @@ export default function Options() {
                   ? translator("Placing bet", language) + "..."
                   : ""
                 : checkResult
-                  ? loading || !result
-                    ? translator("Checking result", language) + "..."
-                    : ""
-                  : (timeLeft * 50) / (betInterval * 60000) <= 0
-                    ? translator("Checking result", language) + "..."
-                    : ""}
+                ? loading || !result
+                  ? translator("Checking result", language) + "..."
+                  : ""
+                : (timeLeft * 50) / (betInterval * 60000) <= 0
+                ? translator("Checking result", language) + "..."
+                : ""}
             </div>
             <div className="flex flex-col items-end">
               <span className="font-chakra font-medium text-xs md:text-sm text-[#F0F0F0] text-opacity-75">
@@ -593,30 +585,28 @@ export default function Options() {
                           ? "blink_1_50 bg-white"
                           : "blink_3 bg-[#282E3D]"
                         : checkResult
-                          ? loading || !result
-                            ? "blink_1_50 bg-white"
-                            : result === "Won"
-                              ? "bg-[#72F238] bg-opacity-40 blink_3"
-                              : "bg-[#CF304A] bg-opacity-40 blink_3"
-                          : betEnd
-                            ? "blink_1_50 bg-white"
-                            : index >= (timeLeft * 50) / (betInterval * 60000)
-                              ? (timeLeft * 50) / (betInterval * 60000) <= 0
-                                ? "blink_1_50 bg-white"
-                                : "bg-[#282E3D]"
-                              : timeLeft / (betInterval * 60000) < 0.25
-                                ? `bg-[#CF304A] blink_1 ${
-                                    index >=
-                                    (timeLeft * 50) / (betInterval * 60000) - 1
-                                      ? "blink_1"
-                                      : ""
-                                  }`
-                                : `bg-[#D9D9D9] ${
-                                    index >=
-                                    (timeLeft * 50) / (betInterval * 60000) - 1
-                                      ? "blink_1"
-                                      : ""
-                                  }`
+                        ? loading || !result
+                          ? "blink_1_50 bg-white"
+                          : result === "Won"
+                          ? "bg-[#72F238] bg-opacity-40 blink_3"
+                          : "bg-[#CF304A] bg-opacity-40 blink_3"
+                        : betEnd
+                        ? "blink_1_50 bg-white"
+                        : index >= (timeLeft * 50) / (betInterval * 60000)
+                        ? (timeLeft * 50) / (betInterval * 60000) <= 0
+                          ? "blink_1_50 bg-white"
+                          : "bg-[#282E3D]"
+                        : timeLeft / (betInterval * 60000) < 0.25
+                        ? `bg-[#CF304A] blink_1 ${
+                            index >= (timeLeft * 50) / (betInterval * 60000) - 1
+                              ? "blink_1"
+                              : ""
+                          }`
+                        : `bg-[#D9D9D9] ${
+                            index >= (timeLeft * 50) / (betInterval * 60000) - 1
+                              ? "blink_1"
+                              : ""
+                          }`
                     }`}
                   />
                 </div>

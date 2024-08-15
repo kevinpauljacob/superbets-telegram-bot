@@ -1,9 +1,14 @@
 import { useState, useEffect } from "react";
-import { useForm } from "react-hook-form";
+import {
+  FieldValues,
+  UseFormReturn,
+  useForm,
+  useFormContext,
+} from "react-hook-form";
 import { useGlobalContext } from "../GlobalContext";
 import { GameTokens, GameType } from "@/utils/provably-fair";
 import { truncateNumber } from "@/context/transactions";
-import { maxPayouts } from "@/context/config";
+import { maxPayouts, minAmtFactor } from "@/context/config";
 import Image from "next/image";
 import { translator } from "@/context/transactions";
 import { riskToChance } from "./Keno/RiskToChance";
@@ -16,6 +21,7 @@ export default function BetAmount({
   leastMultiplier,
   game,
   disabled = false,
+  ...rest
 }: {
   betAmt: number | undefined;
   setBetAmt: React.Dispatch<React.SetStateAction<number | undefined>>;
@@ -23,9 +29,16 @@ export default function BetAmount({
   leastMultiplier: number;
   game: string;
   disabled?: boolean;
+  [key: string]: any;
 }) {
-  const methods = useForm();
   const {
+    register,
+    formState: { errors },
+    setError,
+    clearErrors,
+  } = useFormContext<FieldValues>();
+  const {
+    // methods,
     coinData,
     maxBetAmt,
     setMaxBetAmt,
@@ -33,6 +46,8 @@ export default function BetAmount({
     kenoRisk,
     selectedCoin,
     minGameAmount,
+    setMinGameAmount,
+    setBetAmtError,
   } = useGlobalContext();
 
   // Temperory max bet
@@ -43,23 +58,21 @@ export default function BetAmount({
 
   const [betAmountsModal, setBetAmountsModal] = useState(false);
   const [isHovered, setIsHovered] = useState<boolean>(false);
-  const [highestMaxBetAmt, setHighestMaxBetAmt] = useState<string>("0");
   const [currentMaxBetAmt, setCurrentMaxBetAmt] = useState(0);
   const [inputString, setInputString] = useState("");
 
   useEffect(() => {
-    if (leastMultiplier !== undefined) {
-      setHighestMaxBetAmt(
-        (
-          maxPayouts[selectedCoin.tokenMint as GameTokens][game as GameType] /
-          leastMultiplier
-        ).toFixed(2),
-      );
-    }
-  }, [leastMultiplier, game, kenoRisk]);
+    setMaxBetAmt(
+      maxPayouts[selectedCoin.tokenMint as GameTokens][game as GameType],
+    );
+    setMinGameAmount(
+      maxPayouts[selectedCoin.tokenMint as GameTokens][game as GameType] *
+        minAmtFactor,
+    );
+  }, [leastMultiplier, game, kenoRisk, selectedCoin]);
 
   useEffect(() => {
-    if (betAmt !== undefined && betAmt > 0) {
+    if (betAmt !== undefined && betAmt >= 0) {
       if (game === GameType.roulette1) {
         setInputString(betAmt.toFixed(9));
       } else {
@@ -82,79 +95,124 @@ export default function BetAmount({
       setCurrentMaxBetAmt(
         isFinite(calculatedMaxBetAmt) ? calculatedMaxBetAmt : 0,
       );
-
-      // if (betAmt > (isFinite(calculatedMaxBetAmt) ? calculatedMaxBetAmt : 0)) {
-      //   methods.setError("amount", {
-      //     type: "manual",
-      //     message: "Bet amount cannot exceed the maximum bet!",
-      //   });
-      // } else {
-      //   methods.clearErrors("amount");
-      // }
     }
   }, [betAmt, currentMultiplier, game, selectedCoin]);
 
-  useEffect(() => {
-    setMaxBetAmt(
-      Math.min(
-        truncateNumber(currentMaxBetAmt, 4),
-        selectedCoin && selectedCoin?.amount
-          ? truncateNumber(selectedCoin.amount, 4)
-          : truncateNumber(currentMaxBetAmt, 4),
-      ),
-    );
-    // console.log(selectedCoin);
-  }, [currentMaxBetAmt, coinData, selectedCoin]);
-
   const handleSetMaxBet = () => {
-    // setBetAmt(maxBetAmt);
-    // setInputString((maxBetAmt ?? 0).toString());
-
-    setBetAmt(selectedCoin?.amount ?? 0);
-    setInputString((selectedCoin?.amount ?? 0).toString());
+    const availableTokenAmt =
+      selectedCoin?.tokenMint === "SUPER"
+        ? selectedCoin?.amount ?? 0
+        : Math.min(selectedCoin?.amount ?? 0, maxBetAmt ?? 0);
+    setInputString(availableTokenAmt.toString());
   };
 
   const handleHalfBet = () => {
-    if (betAmt || coinData) {
-      let newBetAmt =
-        !betAmt || betAmt === 0
-          ? selectedCoin
-            ? selectedCoin.amount / 2
-            : 0
-          : betAmt! / 2;
+    const availableTokenAmt =
+      selectedCoin?.tokenMint === "SUPER"
+        ? selectedCoin?.amount ?? 0
+        : Math.min(selectedCoin?.amount ?? 0, maxBetAmt ?? 0);
+    let newBetAmt =
+      !betAmt || betAmt === 0 ? availableTokenAmt / 2 : betAmt! / 2;
 
-      newBetAmt = parseFloat(newBetAmt.toFixed(4));
+    newBetAmt = parseFloat(newBetAmt.toFixed(4));
 
-      if (newBetAmt < minGameAmount) {
-        newBetAmt = minGameAmount;
-      }
-
-      setBetAmt(newBetAmt);
-      setInputString(newBetAmt.toString());
+    if (newBetAmt < minGameAmount) {
+      newBetAmt = minGameAmount;
     }
+    setInputString(newBetAmt.toString());
   };
 
   const handleDoubleBet = () => {
-    if (betAmt !== undefined || selectedCoin) {
-      const newBetAmt =
-        betAmt === 0
-          ? selectedCoin
-            ? parseFloat((selectedCoin.amount * 2).toFixed(4))
-            : 0
-          : parseFloat(((betAmt ?? 0) * 2).toFixed(4));
+    const availableTokenAmt =
+      selectedCoin?.tokenMint === "SUPER"
+        ? selectedCoin?.amount ?? 0
+        : Math.min(selectedCoin?.amount ?? 0, maxBetAmt ?? 0);
+    const possibleBetAmt =
+      selectedCoin?.tokenMint === "SUPER"
+        ? Math.min((betAmt ?? 0) * 2, selectedCoin?.amount ?? 0)
+        : Math.min((betAmt ?? 0) * 2, maxBetAmt ?? 0);
+    const newBetAmt =
+      !betAmt || betAmt === 0
+        ? parseFloat(availableTokenAmt.toFixed(4))
+        : parseFloat(possibleBetAmt.toFixed(4));
 
-      // const finalBetAmt = maxBetAmt
-      //   ? newBetAmt > maxBetAmt
-      //     ? maxBetAmt
-      //     : newBetAmt
-      //   : newBetAmt;
-
-      const finalBetAmt = newBetAmt;
-
-      setBetAmt(finalBetAmt);
-      setInputString(finalBetAmt.toString());
-    }
+    setInputString(newBetAmt.toString());
   };
+
+  const handleBetChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setInputString(e.target.value);
+  };
+
+  useEffect(() => {
+    handleBetAmount();
+  }, [inputString, selectedCoin]);
+
+  const handleBetAmount = () => {
+    // console.log(
+    //   "before",
+    //   errors,
+    //   errors?.amount?.message,
+    //   inputString,
+    //   currentMaxBetAmt,
+    //   maxBetAmt,
+    //   selectedCoin?.amount,
+    //   minGameAmount,
+    // );
+    if (inputString === undefined || inputString === "" || inputString === "-") {
+      setBetAmt(undefined);
+      clearErrors(`${game}-amount`);
+      return;
+    }
+
+    const numValue = parseFloat(inputString);
+    if (isNaN(numValue) || numValue < 0) {
+      setError(`${game}-amount`, {
+        type: "manual",
+        message: "Please enter a valid positive number",
+      });
+      setBetAmtError(true);
+      return;
+    }
+
+    setBetAmtError(true);
+    if (numValue > (selectedCoin?.amount ?? 0)) {
+      setError(`${game}-amount`, {
+        type: "manual",
+        message: "Insufficient Balance",
+      });
+    } else if (numValue < minGameAmount) {
+      setError(`${game}-amount`, {
+        type: "manual",
+        message: "Amount less than the minimum bet for this token.",
+      });
+    } else if (
+      selectedCoin.tokenMint !== "SUPER" &&
+      numValue > (maxBetAmt ?? 0)
+    ) {
+      setError(`${game}-amount`, {
+        type: "manual",
+        message: "Amount exceeds maximum allowed bet for this token.",
+      });
+    } else {
+      clearErrors(`${game}-amount`);
+      setBetAmtError(false);
+    }
+    // console.log(
+    //   "after",
+    //   errors,
+    //   errors?.amount?.message,
+    //   inputString,
+    //   currentMaxBetAmt,
+    //   maxBetAmt,
+    //   selectedCoin?.amount,
+    //   minGameAmount,
+    // );
+    setBetAmt(numValue);
+  };
+
+  useEffect(() => {
+    console.log("betamt changed to ", betAmt);
+  }, [betAmt]);
 
   const handleBetAmountsModal = () => {
     setBetAmountsModal(!betAmountsModal);
@@ -166,192 +224,24 @@ export default function BetAmount({
         <label className="text-white/90 font-changa">
           {translator("Bet Amount", language)}
         </label>
-        {/* <span className="flex items-center text-[#94A3B8] text-opacity-90 font-changa text-xs gap-2">
-          <span className="cursor-pointer" onClick={handleSetMaxBet}>
-            {maxBetAmt} $
-            {SPL_TOKENS.find(
-              (token) => token.tokenMint === selectedCoin?.tokenMint,
-            )?.tokenName || "Unknown Token"}
-          </span>
-          <span
-            className={`group font-chakra font-medium cursor-pointer underline hover:text-opacity-100 transition-all duration-300 text-white ${
-              betAmountsModal ? "text-opacity-100" : "text-opacity-50"
-            }`}
-            onMouseEnter={() => setIsHovered(true)}
-            onMouseLeave={() => setIsHovered(false)}
-            onClick={() => {
-              if (game !== "keno" && game !== "wheel" && game !== "coinflip")
-                handleBetAmountsModal();
-            }}
-          >
-            {translator("Why", language)}?
-          </span>
-        </span> */}
       </div>
-      {/* {betAmountsModal &&
-      game !== "mines" &&
-      game !== "keno" &&
-      game !== "wheel" &&
-      game !== "coinflip" &&
-      game !== "options" &&
-      game !== "plinko" ? (
-        <div className="fadeInDown_04 relative flex flex-col items-center gap-3 bg-[#0C0F16] rounded-[5px] px-6 pt-7 pb-4 mt-2 mb-1.5">
-          <div className="flex items-center border-b border-white/10 h-full w-full px-3 pb-8 pt-3">
-            <div className="relative h-[4px] rounded-full bg-[#2A2E38] w-full mx-3">
-              <input
-                type="range"
-                min={minGameAmount}
-                max={maxBetAmt}
-                value={maxBetAmt}
-                disabled={disabled}
-                className="maxBetsSlider absolute top-[-8px] w-full bg-transparent appearance-none z-20 disabled:cursor-default disabled:opacity-50"
-              />
-              <div
-                className="absolute rounded-full h-[5px] bg-[#8795A8] z-10"
-                style={{
-                  width: `${
-                    (currentMaxBetAmt / Number(highestMaxBetAmt)) * 100
-                  }%`,
-                }}
-              >
-                <div className="relative">
-                  <div className="absolute text-[#94A3B8] text-[11px] font-semibold font-chakra -top-7 -right-[24px] w-max">
-                    <span className="text-white">
-                      {translator("Max", language)}{" "}
-                      {currentMaxBetAmt.toFixed(2)}
-                    </span>
-                    <svg
-                      width="6"
-                      height="4"
-                      viewBox="0 0 6 4"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="relative w-2 h-2 left-1/2 -translate-x-1/2 text-white"
-                    >
-                      <path
-                        opacity="0.5"
-                        d="M3.70711 3.2929C3.31658 3.68342 2.68342 3.68342 2.29289 3.29289L0.707116 1.7071C0.0771532 1.07714 0.523321 0 1.41422 0L4.5858 0C5.4767 0 5.92287 1.07714 5.2929 1.70711L3.70711 3.2929Z"
-                        fill="white"
-                      />
-                    </svg>
-                  </div>
-                </div>
-              </div>
-              <div className="absolute text-white text-opacity-50 text-[11px] font-medium font-chakra top-2.5 -left-2">
-                {minGameAmount.toFixed(3)}
-              </div>
-              <div className="absolute group cursor-pointer text-white text-opacity-50 text-[11px] font-medium font-chakra top-2.5 -right-3.5">
-                {highestMaxBetAmt}
-              </div>
-            </div>
-          </div>
-          <div className="flex justify-between gap-2.5 w-full">
-            <div className="flex flex-col items-center bg-[#202329]/50 text-white font-chakra font-semibold rounded-[5px] py-2 w-full">
-              <span className="text-[10px] text-white text-opacity-50 mb-1">
-                {translator("Multiplier", language)}
-              </span>
-              <span className="text-xs font-medium">
-                {isNaN(currentMultiplier)
-                  ? "0"
-                  : `${currentMultiplier.toFixed(2) ?? 0.0}x`}
-              </span>
-            </div>
-            <div className="flex flex-col items-center bg-[#202329]/50 text-white font-chakra font-semibold rounded-[5px] py-2 w-full">
-              <span className="cursor-pointer group relative text-[10px] text-white text-opacity-50 mb-1">
-                {translator("Max Bet", language)}
-              </span>
-              <span className="text-xs font-medium">
-                {isNaN(currentMaxBetAmt)
-                  ? "0"
-                  : `${currentMaxBetAmt.toFixed(2) ?? 0.0}`}
-              </span>
-            </div>
-            <div className="flex flex-col items-center bg-[#202329]/50 text-white font-chakra font-semibold rounded-[5px] py-2 w-full">
-              <span className="text-[10px] text-white text-opacity-50 mb-1">
-                {translator("Balance", language)}
-              </span>
-              <span className="text-xs font-medium">
-                {selectedCoin ? selectedCoin.amount.toFixed(2) : 0.0}
-              </span>
-            </div>
-          </div>
-        </div>
-      ) : null} */}
-      {/* {isHovered &&
-      (game === "mines" ||
-        game === "keno" ||
-        game === "wheel" ||
-        game === "roulette" ||
-        game === "coinflip" ||
-        game === "options" ||
-        game === "plinko") ? (
-        <div
-          className={`absolute z-[1000] ${
-            game === "options" ? "top-[1rem]" : "-top-[5.2rem]"
-          } min-w-full fadeIn flex items-center gap-3 bg-[#0C0F16] rounded-[5px] p-3 mt-2 mb-1.5 `}
-        >
-          <div className="flex items-center border-r lg:border-0 min-[1412px]:border-r border-white/10 text-[#94A3B8] text-chakra text-[11px] font-medium h-11 w-[80%] lg:w-full min-[1412px]:w-[80%]">
-            <span className="flex items-center justify-center bg-[#202329]/50 rounded-[8px] h-[49px] min-w-[49px]">
-              <Image
-                src="/assets/coins.svg"
-                alt="coins"
-                height="33"
-                width="33"
-              />
-            </span>
-
-            <span className="text-[11px] font-medium font-chakra mx-3 min-[1412px]:max-w-[200px]">
-              {translator(
-                "Maximum amount for a single bet in this game is",
-                language,
-              )}
-              <span className="text-white/90 font-semibold">
-                {" "}
-                {currentMaxBetAmt.toFixed(2)} {selectedCoin.tokenName}
-              </span>
-              .
-            </span>
-          </div>
-          <div className="flex flex-col items-center text-white font-chakra font-medium w-[20%] min-[1412px]:flex lg:hidden">
-            <span className="text-[11px] text-white text-center font-semibold text-opacity-50">
-              {translator("Max Bet", language)}
-            </span>
-            <span className="flex items-center justify-center gap-1">
-              {currentMaxBetAmt.toFixed(2)}
-              <selectedCoin.icon className="w-5 h-5 -mt-[1px]" />
-            </span>
-          </div>
-        </div>
-      ) : null} */}
       <div
         className={`relative group flex mt-1 h-11 w-full cursor-pointer items-center rounded-[8px] bg-[#202329] px-4`}
       >
         <input
-          id={"amount-input"}
-          {...methods.register("amount", {
-            required: "Amount is required",
-          })}
-          type={"number"}
-          step={"any"}
+          id={`${game}-amount`}
+          {...register(`${game}-amount`, { required: "Amount is required" })}
+          {...rest}
+          type="number"
+          step="any"
           autoComplete="off"
-          onChange={(e) => {
-            let enteredAmount = parseFloat(e.target.value);
-            // if (maxBetAmt !== undefined && enteredAmount > maxBetAmt) {
-            //   methods.setError("amount", {
-            //     type: "manual",
-            //     message: "Bet amount cannot exceed the maximum bet!",
-            //   });
-            // } else {
-            //   methods.clearErrors("amount");
-            // }
-            setBetAmt(enteredAmount);
-            setInputString(e.target.value);
-          }}
-          placeholder={"0.0"}
+          onChange={handleBetChange}
+          placeholder="0.0"
           disabled={disabled}
-          value={inputString}
+          value={betAmt === undefined ? "" : betAmt}
           lang="en"
-          className={`flex w-full min-w-0 bg-transparent text-base text-[#94A3B8] placeholder-[#94A3B8] font-chakra placeholder-opacity-40 outline-none disabled:cursor-default disabled:opacity-50`}
+          min={0}
+          className="flex w-full min-w-0 bg-transparent text-base text-[#94A3B8] placeholder-[#94A3B8] font-chakra placeholder-opacity-40 outline-none disabled:cursor-default disabled:opacity-50"
         />
         <button
           type="button"
@@ -381,22 +271,23 @@ export default function BetAmount({
 
       <span
         className={`${
-          methods.formState.errors["amount"]
+          errors?.[`${game}-amount`]?.message
             ? "opacity-100 mt-1.5"
             : "opacity-0 h-0"
         } flex items-center gap-1 text-xs text-[#D92828]`}
       >
-        {methods.formState.errors["amount"]
-          ? methods.formState.errors["amount"]!.message!.toString()
-          : "NONE"}
+        {errors?.[`${game}-amount`]?.message?.toString() ?? "NONE"}
       </span>
-      {betAmt && betAmt > 0 && betAmt > currentMaxBetAmt && (
-        <span
-          className={`opacity-100 mt-1.5 flex items-center gap-1 text-xs text-[#DCA815]`}
-        >
-          This bet can exceed the max payout for this game.
-        </span>
-      )}
+      {betAmt &&
+        betAmt > 0 &&
+        selectedCoin?.tokenMint !== "SUPER" &&
+        betAmt > currentMaxBetAmt && (
+          <span
+            className={`opacity-100 mt-1.5 flex items-center gap-1 text-xs text-[#DCA815]`}
+          >
+            This bet can exceed the max payout for this game.
+          </span>
+        )}
     </div>
   );
 }

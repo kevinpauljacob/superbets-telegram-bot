@@ -7,13 +7,25 @@ export default function BetButton({
   disabled,
   children,
   onClickFunction,
+  betAmt,
 }: {
   disabled: boolean;
   children: ReactNode;
   onClickFunction?: (data: any) => void;
+  betAmt: number | undefined;
 }) {
   const betButtonRef = useRef<HTMLButtonElement>(null);
-  const { language, coinData, selectedCoin, enableSounds, minGameAmount } = useGlobalContext();
+  const {
+    language,
+    coinData,
+    selectedCoin,
+    enableSounds,
+    minGameAmount,
+    session,
+    startAuto,
+    autoBetCount,
+    maxBetAmt,
+  } = useGlobalContext();
 
   useEffect(() => {
     const handleClick = () => {
@@ -38,8 +50,14 @@ export default function BetButton({
       disabled={
         disabled ||
         !coinData ||
+        !session?.user ||
         !selectedCoin ||
-        (selectedCoin && selectedCoin.amount < minGameAmount)
+        (selectedCoin && selectedCoin.amount < minGameAmount) ||
+        (startAuto && (autoBetCount === 0 || Number.isNaN(autoBetCount))) ||
+        (betAmt !== undefined &&
+          maxBetAmt !== undefined &&
+          selectedCoin.tokenMint !== "SUPER" &&
+          betAmt > maxBetAmt)
       }
       onClick={onClickFunction}
       ref={betButtonRef}
@@ -49,3 +67,4 @@ export default function BetButton({
     </button>
   );
 }
+

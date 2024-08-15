@@ -227,10 +227,6 @@ export default function ({ children }: Props) {
       getUserDetails();
     }
     setCurrentGame(game);
-    setMinGameAmount(
-      maxPayouts[selectedCoin.tokenMint as GameTokens][game as GameType] *
-        minAmtFactor,
-    );
   }, [session?.user, game, showWalletModal, selectedCoin]);
 
   useEffect(() => {

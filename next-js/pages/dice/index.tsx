@@ -61,6 +61,7 @@ export default function Dice() {
     updatePNL,
     enableSounds,
     session,
+    betAmtError,
   } = useGlobalContext();
 
   const [userInput, setUserInput] = useState<number | undefined>();
@@ -161,6 +162,10 @@ export default function Dice() {
     //   maxBetAmt,
     // );
     try {
+      if (betAmtError) {
+        throw new Error(translator("Invalid amount!!", language));
+      }
+
       if (!session?.user?.isWeb2User && selectedCoin.tokenMint === "SUPER") {
         throw new Error(
           translator("You cannot bet with this token!", language),
@@ -170,9 +175,7 @@ export default function Dice() {
         throw new Error(translator("Set Amount.", language));
       }
       if (selectedCoin && selectedCoin.amount < betAmt) {
-        throw new Error(
-          translator("Insufficient balance for bet 6t76t7676!", language),
-        );
+        throw new Error(translator("Insufficient balance for bet!", language));
       }
       if (selectedFace.length === 0) {
         throw new Error(translator("Choose at least 1 face.", language));
@@ -449,18 +452,8 @@ export default function Dice() {
               </div>
             )}
             <BetButton
-              disabled={
-                !session?.user ||
-                selectedFace.length === 0 ||
-                isRolling ||
-                (startAuto &&
-                  (autoBetCount === 0 || Number.isNaN(autoBetCount)))
-                  ? // (betAmt !== undefined &&
-                    //   maxBetAmt !== undefined &&
-                    //   betAmt > maxBetAmt)
-                    true
-                  : false
-              }
+              betAmt={betAmt}
+              disabled={selectedFace.length === 0 || isRolling ? true : false}
               onClickFunction={onSubmit}
             >
               {isRolling ? <Loader /> : "BET"}
@@ -528,19 +521,11 @@ export default function Dice() {
                     </div>
                   )}
                   <BetButton
+                    betAmt={betAmt}
                     disabled={
-                      !session?.user ||
-                      selectedFace.length === 0 ||
-                      isRolling ||
-                      (startAuto &&
-                        (autoBetCount === 0 || Number.isNaN(autoBetCount)))
-                        ? // (betAmt !== undefined &&
-                          //   maxBetAmt !== undefined &&
-                          //   betAmt > maxBetAmt)
-                          true
-                        : false
+                      selectedFace.length === 0 || isRolling ? true : false
                     }
-                    onClickFunction={onSubmit}
+                    // onClickFunction={onSubmit}
                   >
                     {isRolling ? <Loader /> : "BET"}
                   </BetButton>

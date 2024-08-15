@@ -154,6 +154,7 @@ export default function Plinko() {
     minGameAmount,
     session,
     status,
+    betAmtError,
   } = useGlobalContext();
 
   const muteRef = useRef<boolean>(false);
@@ -500,6 +501,9 @@ export default function Plinko() {
 
   const handleBet = async () => {
     try {
+      if (betAmtError) {
+        throw new Error(translator("Invalid amount!!", language));
+      }
       if (!session?.user?.isWeb2User && selectedCoin.tokenMint === "SUPER") {
         throw new Error(
           translator("You cannot bet with this token!", language),
@@ -717,18 +721,8 @@ export default function Plinko() {
               </div>
             )}
             <BetButton
-              disabled={
-                !session?.user ||
-                loading ||
-                (betSetting === "auto" &&
-                  startAuto &&
-                  (autoBetCount === 0 || Number.isNaN(autoBetCount)))
-                  ? // (betAmt !== undefined &&
-                    //   maxBetAmt !== undefined &&
-                    //   betAmt > maxBetAmt)
-                    true
-                  : false
-              }
+              betAmt={betAmt}
+              disabled={loading}
               onClickFunction={onSubmit}
             >
               {loading ? <Loader /> : "BET"}
@@ -871,20 +865,7 @@ export default function Plinko() {
                       {translator("STOP", language)}
                     </div>
                   )}
-                  <BetButton
-                    disabled={
-                      !session?.user ||
-                      loading ||
-                      (betSetting === "auto" &&
-                        startAuto &&
-                        (autoBetCount === 0 || Number.isNaN(autoBetCount)))
-                        ? // (betAmt !== undefined &&
-                          //   maxBetAmt !== undefined &&
-                          //   betAmt > maxBetAmt)
-                          true
-                        : false
-                    }
-                  >
+                  <BetButton betAmt={betAmt} disabled={loading}>
                     {loading ? <Loader /> : "BET"}
                   </BetButton>
                 </div>

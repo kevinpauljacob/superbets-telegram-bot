@@ -261,6 +261,9 @@ interface GlobalContextProps {
 
   session: SessionUser | null;
   status: "loading" | "authenticated" | "unauthenticated";
+
+  betAmtError: boolean;
+  setBetAmtError: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const GlobalContext = createContext<GlobalContextProps | undefined>(undefined);
@@ -367,6 +370,8 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
   const [maxPages, setMaxPages] = useState<number>(0);
   const transactionsPerPage = 10;
   const threshold = 500;
+
+  const [betAmtError, setBetAmtError] = useState<boolean>(true);
 
   const openVerifyModal = () => {
     setIsVerifyModalOpen(true);
@@ -782,6 +787,8 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
         setLiveCurrentStat,
         updatePNL,
         liveTokenPrice,
+        betAmtError,
+        setBetAmtError,
       }}
     >
       {children}

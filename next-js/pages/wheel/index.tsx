@@ -64,6 +64,7 @@ export default function Wheel() {
     minGameAmount,
     session,
     status,
+    betAmtError,
   } = useGlobalContext();
   const [betAmt, setBetAmt] = useState<number | undefined>();
   const [userInput, setUserInput] = useState<number | undefined>();
@@ -150,6 +151,9 @@ export default function Wheel() {
 
   const handleBet = async () => {
     try {
+      if (betAmtError) {
+        throw new Error(translator("Invalid amount!!", language));
+      }
       if (!session?.user?.isWeb2User && selectedCoin.tokenMint === "SUPER") {
         throw new Error(
           translator("You cannot bet with this token!", language),
@@ -397,17 +401,8 @@ export default function Wheel() {
               </div>
             )}
             <BetButton
-              disabled={
-                !session?.user ||
-                isRolling ||
-                (startAuto &&
-                  (autoBetCount === 0 || Number.isNaN(autoBetCount)))
-                  ? // (betAmt !== undefined &&
-                    //   maxBetAmt !== undefined &&
-                    //   betAmt > maxBetAmt)
-                    true
-                  : false
-              }
+              betAmt={betAmt}
+              disabled={isRolling}
               onClickFunction={onSubmit}
             >
               {isRolling ? <Loader /> : "BET"}
@@ -542,19 +537,7 @@ export default function Wheel() {
                       {translator("STOP", language)}
                     </div>
                   )}
-                  <BetButton
-                    disabled={
-                      !session?.user ||
-                      isRolling ||
-                      (startAuto &&
-                        (autoBetCount === 0 || Number.isNaN(autoBetCount)))
-                        ? // (betAmt !== undefined &&
-                          //   maxBetAmt !== undefined &&
-                          //   betAmt > maxBetAmt)
-                          true
-                        : false
-                    }
-                  >
+                  <BetButton betAmt={betAmt} disabled={isRolling}>
                     {isRolling ? <Loader /> : "BET"}
                   </BetButton>
                 </div>
