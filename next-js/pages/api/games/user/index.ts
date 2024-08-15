@@ -129,7 +129,7 @@ export default async function handler(
   try {
     const { email, name, image } = req.body;
 
-    await authenticateUser(req, res);
+    // await authenticateUser(req, res);
 
     await connectDatabase();
 
