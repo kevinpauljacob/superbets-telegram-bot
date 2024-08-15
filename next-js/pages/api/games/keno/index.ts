@@ -26,7 +26,7 @@ Decimal.set({ precision: 9 });
 
 /**
  * @swagger
- * /api/games/keno:
+ * /games/keno:
  *   post:
  *     summary: Play a keno game
  *     description: This endpoint allows a user to play a keno game by betting a certain amount of tokens, choosing numbers, and selecting a risk level. The game result is determined in a provably fair manner.
@@ -90,6 +90,8 @@ Decimal.set({ precision: 9 });
  *         description: Method not allowed
  *       500:
  *         description: Internal server error
+ *     security:
+ *       - API_KEY: []
  */
 
 const encryptionKey = Buffer.from(process.env.ENCRYPTION_KEY!, "hex");

@@ -17,7 +17,7 @@ import { User } from "@/models/games";
 
 /**
  * @swagger
- * /api/auth/{...nextauth}:
+ * /auth/{...nextauth}:
  *   get:
  *     summary: Handles authentication requests
  *     description: Handles authentication for users using NextAuth.js. Supports Google OAuth and Solana wallet authentication.
@@ -75,7 +75,7 @@ import { User } from "@/models/games";
 
 /**
  * @swagger
- * /api/auth/{...nextauth}:
+ * /auth/{...nextauth}:
  *   post:
  *     summary: Handles authentication requests
  *     description: Handles authentication for users using NextAuth.js. Supports Google OAuth and Solana wallet authentication.

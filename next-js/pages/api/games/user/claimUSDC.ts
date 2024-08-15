@@ -8,12 +8,18 @@ import { SPL_TOKENS } from "@/context/config";
 
 /**
  * @swagger
- * /api/games/usdcClaims:
+ * /games/usdcClaims:
  *   get:
  *     summary: Get USDC claim information
  *     description: This endpoint retrieves information about USDC claims for the day.
  *     tags:
  *       - Games/USDCClaims
+ *     parameters:
+ *       - in: query
+ *         name: slug
+ *         schema:
+ *           type: string
+ *         description: The slug associated with your api key.
  *     responses:
  *       200:
  *         description: USDC claim information retrieved successfully.
@@ -114,6 +120,8 @@ import { SPL_TOKENS } from "@/context/config";
  *                 message:
  *                   type: string
  *                   example: Internal server error
+ *     security:
+ *       - API_KEY: []
  */
 
 async function getUSDCClaimInfo() {

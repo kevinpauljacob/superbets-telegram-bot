@@ -12,7 +12,7 @@ import { v4 as uuidv4 } from "uuid";
 
 /**
  * @swagger
- * /api/referral:
+ * /referral:
  *   post:
  *     summary: Create or update a user and default campaign
  *     description: Creates a new user with the provided account, email, or wallet, and a default campaign if the user does not exist. If the user already exists, it checks for a default campaign and creates it if not present. The response includes user details and referred users.
@@ -126,6 +126,8 @@ import { v4 as uuidv4 } from "uuid";
  *                 message:
  *                   type: string
  *                   example: "Internal server error"
+ *     security:
+ *       - API_KEY: []
  */
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {

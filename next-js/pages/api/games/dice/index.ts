@@ -25,7 +25,7 @@ Decimal.set({ precision: 9 });
 
 /**
  * @swagger
- * /api/games/dice:
+ * /games/dice:
  *   post:
  *     summary: Play a dice game
  *     description: This endpoint allows a user to play a dice game by betting a certain amount of tokens and choosing numbers. The game result is determined in a provably fair manner.
@@ -86,6 +86,8 @@ Decimal.set({ precision: 9 });
  *         description: Method not allowed
  *       500:
  *         description: Internal server error
+ *     security:
+ *       - API_KEY: []
  */
 
 const encryptionKey = Buffer.from(process.env.ENCRYPTION_KEY!, "hex");

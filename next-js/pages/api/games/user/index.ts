@@ -1,6 +1,7 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import { v4 as uuidv4 } from "uuid";
-import { User } from "@/models/games";import connectDatabase from "../../../../utils/database";
+import { User } from "@/models/games";
+import connectDatabase from "../../../../utils/database";
 import authenticateUser from "../../../../utils/authenticate";
 import { PublicKey, Keypair } from "@solana/web3.js";
 import { bs58 } from "@project-serum/anchor/dist/cjs/utils/bytes";
@@ -14,7 +15,7 @@ import { encryptServerSeed, generateIV } from "@/utils/provably-fair";
  */
 /**
  * @swagger
- * /api/games/user:
+ * /games/user:
  *   post:
  *     summary: Create or update a game user
  *     description: This endpoint creates a new user or updates an existing user in the game database.
@@ -115,6 +116,8 @@ import { encryptServerSeed, generateIV } from "@/utils/provably-fair";
  *                 message:
  *                   type: string
  *                   example: Method not allowed
+ *     security:
+ *       - API_KEY: []
  */
 
 export default async function handler(
@@ -170,11 +173,11 @@ export default async function handler(
         console.log("Public Key:", keyPair.publicKey.toString());
         console.log("Secret Key:", keyPair.secretKey);
 
-        const secretKey =  bs58.encode(keyPair.secretKey)
-        console.log(secretKey)
+        const secretKey = bs58.encode(keyPair.secretKey);
+        console.log(secretKey);
         const iv = generateIV();
         const encryptionKey = Buffer.from(process.env.ENCRYPTION_KEY!, "hex");
-        const publicKey = keyPair.publicKey.toString()
+        const publicKey = keyPair.publicKey.toString();
         const privateKey = encryptServerSeed(secretKey, encryptionKey, iv);
 
         // const publicKey = "6NcvKXakC37oheNhRWdHYU8N1rYKtTyZaUktQC9U3aqP"
@@ -201,7 +204,6 @@ export default async function handler(
             upsert: true,
           },
         );
-
       } else
         return res
           .status(400)

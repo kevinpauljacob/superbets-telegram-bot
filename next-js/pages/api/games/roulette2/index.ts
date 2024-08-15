@@ -22,168 +22,170 @@ import { Decimal } from "decimal.js";
 import updateGameStats from "../../../../utils/updateGameStats";
 Decimal.set({ precision: 9 });
 
-/**
- * @swagger
- *
- * /api/games/roulette2:
- *   post:
- *     summary: Play a game of Roulette
- *     description: Allows users to place a bet on a roulette game and get the result.
- *     tags:
- *       - Games
- *     requestBody:
- *       description: User's game bet information
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               wallet:
- *                 type: string
- *                 description: User's wallet address.
- *                 example: "0x1234567890abcdef"
- *               email:
- *                 type: string
- *                 description: User's email address.
- *                 example: "user@example.com"
- *               tokenMint:
- *                 type: string
- *                 description: The token mint associated with the wager.
- *                 example: "TOKEN_MINT"
- *               wager:
- *                 type: object
- *                 properties:
- *                   red:
- *                     type: number
- *                     description: Bet amount on red.
- *                     example: 10
- *                   black:
- *                     type: number
- *                     description: Bet amount on black.
- *                     example: 5
- *                   green:
- *                     type: number
- *                     description: Bet amount on green.
- *                     example: 2
- *                   odd:
- *                     type: number
- *                     description: Bet amount on odd numbers.
- *                     example: 8
- *                   even:
- *                     type: number
- *                     description: Bet amount on even numbers.
- *                     example: 4
- *                   low:
- *                     type: number
- *                     description: Bet amount on numbers 1-18.
- *                     example: 3
- *                   high:
- *                     type: number
- *                     description: Bet amount on numbers 19-36.
- *                     example: 6
- *                   1st-12:
- *                     type: number
- *                     description: Bet amount on the first dozen.
- *                     example: 7
- *                   2nd-12:
- *                     type: number
- *                     description: Bet amount on the second dozen.
- *                     example: 5
- *                   3rd-12:
- *                     type: number
- *                     description: Bet amount on the third dozen.
- *                     example: 9
- *                   1st-column:
- *                     type: number
- *                     description: Bet amount on the first column.
- *                     example: 11
- *                   2nd-column:
- *                     type: number
- *                     description: Bet amount on the second column.
- *                     example: 12
- *                   3rd-column:
- *                     type: number
- *                     description: Bet amount on the third column.
- *                     example: 10
- *                   straight:
- *                     type: object
- *                     description: Bet amount on specific numbers.
- *                     additionalProperties:
- *                       type: number
- *                       example: 1
- *     responses:
- *       201:
- *         description: Successful response with game result.
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: true
- *                 message:
- *                   type: string
- *                   example: "Congratulations! You Won 20"
- *                 strikeNumber:
- *                   type: integer
- *                   example: 17
- *                 result:
- *                   type: string
- *                   example: "Won"
- *                 strikeMultiplier:
- *                   type: number
- *                   format: float
- *                   example: 2.0
- *                 amountWon:
- *                   type: number
- *                   format: float
- *                   example: 20
- *                 amountLost:
- *                   type: number
- *                   format: float
- *                   example: 0
- *       400:
- *         description: Bad request due to invalid parameters.
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: false
- *                 message:
- *                   type: string
- *                   example: "Invalid parameters"
- *       500:
- *         description: Internal server error.
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: false
- *                 message:
- *                   type: string
- *                   example: "An error occurred"
- *       405:
- *         description: Method not allowed.
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: false
- *                 message:
- *                   type: string
- *                   example: "Method not allowed"
- */
+// /**
+//  * @swagger
+//  *
+//  * /games/roulette2:
+//  *   post:
+//  *     summary: Play a game of Roulette
+//  *     description: Allows users to place a bet on a roulette game and get the result.
+//  *     tags:
+//  *       - Games
+//  *     requestBody:
+//  *       description: User's game bet information
+//  *       required: true
+//  *       content:
+//  *         application/json:
+//  *           schema:
+//  *             type: object
+//  *             properties:
+//  *               wallet:
+//  *                 type: string
+//  *                 description: User's wallet address.
+//  *                 example: "0x1234567890abcdef"
+//  *               email:
+//  *                 type: string
+//  *                 description: User's email address.
+//  *                 example: "user@example.com"
+//  *               tokenMint:
+//  *                 type: string
+//  *                 description: The token mint associated with the wager.
+//  *                 example: "TOKEN_MINT"
+//  *               wager:
+//  *                 type: object
+//  *                 properties:
+//  *                   red:
+//  *                     type: number
+//  *                     description: Bet amount on red.
+//  *                     example: 10
+//  *                   black:
+//  *                     type: number
+//  *                     description: Bet amount on black.
+//  *                     example: 5
+//  *                   green:
+//  *                     type: number
+//  *                     description: Bet amount on green.
+//  *                     example: 2
+//  *                   odd:
+//  *                     type: number
+//  *                     description: Bet amount on odd numbers.
+//  *                     example: 8
+//  *                   even:
+//  *                     type: number
+//  *                     description: Bet amount on even numbers.
+//  *                     example: 4
+//  *                   low:
+//  *                     type: number
+//  *                     description: Bet amount on numbers 1-18.
+//  *                     example: 3
+//  *                   high:
+//  *                     type: number
+//  *                     description: Bet amount on numbers 19-36.
+//  *                     example: 6
+//  *                   1st-12:
+//  *                     type: number
+//  *                     description: Bet amount on the first dozen.
+//  *                     example: 7
+//  *                   2nd-12:
+//  *                     type: number
+//  *                     description: Bet amount on the second dozen.
+//  *                     example: 5
+//  *                   3rd-12:
+//  *                     type: number
+//  *                     description: Bet amount on the third dozen.
+//  *                     example: 9
+//  *                   1st-column:
+//  *                     type: number
+//  *                     description: Bet amount on the first column.
+//  *                     example: 11
+//  *                   2nd-column:
+//  *                     type: number
+//  *                     description: Bet amount on the second column.
+//  *                     example: 12
+//  *                   3rd-column:
+//  *                     type: number
+//  *                     description: Bet amount on the third column.
+//  *                     example: 10
+//  *                   straight:
+//  *                     type: object
+//  *                     description: Bet amount on specific numbers.
+//  *                     additionalProperties:
+//  *                       type: number
+//  *                       example: 1
+//  *     responses:
+//  *       201:
+//  *         description: Successful response with game result.
+//  *         content:
+//  *           application/json:
+//  *             schema:
+//  *               type: object
+//  *               properties:
+//  *                 success:
+//  *                   type: boolean
+//  *                   example: true
+//  *                 message:
+//  *                   type: string
+//  *                   example: "Congratulations! You Won 20"
+//  *                 strikeNumber:
+//  *                   type: integer
+//  *                   example: 17
+//  *                 result:
+//  *                   type: string
+//  *                   example: "Won"
+//  *                 strikeMultiplier:
+//  *                   type: number
+//  *                   format: float
+//  *                   example: 2.0
+//  *                 amountWon:
+//  *                   type: number
+//  *                   format: float
+//  *                   example: 20
+//  *                 amountLost:
+//  *                   type: number
+//  *                   format: float
+//  *                   example: 0
+//  *       400:
+//  *         description: Bad request due to invalid parameters.
+//  *         content:
+//  *           application/json:
+//  *             schema:
+//  *               type: object
+//  *               properties:
+//  *                 success:
+//  *                   type: boolean
+//  *                   example: false
+//  *                 message:
+//  *                   type: string
+//  *                   example: "Invalid parameters"
+//  *       500:
+//  *         description: Internal server error.
+//  *         content:
+//  *           application/json:
+//  *             schema:
+//  *               type: object
+//  *               properties:
+//  *                 success:
+//  *                   type: boolean
+//  *                   example: false
+//  *                 message:
+//  *                   type: string
+//  *                   example: "An error occurred"
+//  *       405:
+//  *         description: Method not allowed.
+//  *         content:
+//  *           application/json:
+//  *             schema:
+//  *               type: object
+//  *               properties:
+//  *                 success:
+//  *                   type: boolean
+//  *                   example: false
+//  *                 message:
+//  *                   type: string
+//  *                   example: "Method not allowed"
+//  *     security:
+//  *       - API_KEY: []
+//  */
 
 const encryptionKey = Buffer.from(process.env.ENCRYPTION_KEY!, "hex");
 

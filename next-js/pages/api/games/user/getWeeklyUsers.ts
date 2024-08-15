@@ -4,12 +4,18 @@ import { NextApiRequest, NextApiResponse } from "next";
 
 /**
  * @swagger
- * /api/games/user/getWeeklyUsers:
+ * /games/user/getWeeklyUsers:
  *   get:
  *     summary: Get weekly user activity data
  *     description: Retrieve aggregated data on user activity for the past week.
  *     tags:
  *       - Games/User
+ *     parameters:
+ *       - in: query
+ *         name: slug
+ *         schema:
+ *           type: string
+ *         description: The slug associated with your api key.
  *     responses:
  *       200:
  *         description: Data fetch successful.

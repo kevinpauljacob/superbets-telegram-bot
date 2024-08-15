@@ -2,7 +2,7 @@ import type { NextApiRequest, NextApiResponse } from "next";
 
 /**
  * @swagger
- * /api/blocked:
+ * /blocked:
  *   get:
  *     summary: Rate limit response
  *     description: Responds with a message indicating that the request has been rate limited.

@@ -6,13 +6,18 @@ import Deposit from "@/models/games/deposit";
 
 /**
  * @swagger
- * /api/games/user/getUser:
+ * /games/user/getUser:
  *   get:
  *     summary: Get user data
  *     description: Retrieve user data based on wallet or email.
  *     tags:
  *       - Games/User
  *     parameters:
+ *       - in: query
+ *         name: slug
+ *         schema:
+ *           type: string
+ *         description: The slug associated with your api key.
  *       - in: query
  *         name: wallet
  *         schema:

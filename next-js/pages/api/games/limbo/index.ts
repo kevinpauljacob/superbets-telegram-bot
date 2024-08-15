@@ -24,7 +24,7 @@ Decimal.set({ precision: 9 });
 
 /**
  * @swagger
- * /api/games/limbo:
+ * /games/limbo:
  *   post:
  *     summary: Play a limbo game
  *     description: This endpoint allows a user to play a limbo game by betting a certain amount of tokens and choosing a multiplier. The game result is determined in a provably fair manner.
@@ -81,6 +81,8 @@ Decimal.set({ precision: 9 });
  *         description: Method not allowed
  *       500:
  *         description: Internal server error
+ *     security:
+ *       - API_KEY: []
  */
 
 const encryptionKey = Buffer.from(process.env.ENCRYPTION_KEY!, "hex");
@@ -143,7 +145,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           success: false,
           message: "Bet amount exceeds max payout!",
         });
-        
+
       await connectDatabase();
 
       let user = null;

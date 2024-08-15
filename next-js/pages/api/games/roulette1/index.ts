@@ -24,7 +24,7 @@ Decimal.set({ precision: 9 });
 
 /**
  * @swagger
- * /api/games/roulette1:
+ * /games/roulette:
  *   post:
  *     summary: Play a game of Roulette
  *     description: Allows users to place a bet on the roulette game and receive the result.
@@ -164,6 +164,8 @@ Decimal.set({ precision: 9 });
  *                 message:
  *                   type: string
  *                   example: Server hash not found!
+ *     security:
+ *       - API_KEY: []
  */
 
 const encryptionKey = Buffer.from(process.env.ENCRYPTION_KEY!, "hex");

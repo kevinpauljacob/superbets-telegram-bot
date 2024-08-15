@@ -4,12 +4,18 @@ import { Option, Coin, Dice, User } from "../../../../models/games";
 
 /**
  * @swagger
- * /api/games/user/getAllUsers:
+ * /games/user/getAllUsers:
  *   get:
  *     summary: Get aggregated data for all users
  *     description: Retrieves aggregated data for users including bets, flips, and rolls with their respective totals, won amounts, lost amounts, and counts. Also includes user-specific information like SNS.
  *     tags:
  *       - Games/User
+ *     parameters:
+ *       - in: query
+ *         name: slug
+ *         schema:
+ *           type: string
+ *         description: The slug associated with your api key.
  *     responses:
  *       200:
  *         description: Data fetch successful

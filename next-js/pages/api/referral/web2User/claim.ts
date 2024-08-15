@@ -5,7 +5,7 @@ import connectDatabase from "@/utils/database";
 
 /**
  * @swagger
- * /api/referral/web2User/claim:
+ * /referral/web2User/claim:
  *   post:
  *     summary: Claim SUPER earnings for a user from a referral campaign
  *     description: This endpoint allows a user to claim their unclaimed SUPER earnings from a referral campaign. The earnings are added to the user's deposit.
@@ -55,6 +55,8 @@ import connectDatabase from "@/utils/database";
  *         description: Method not allowed
  *       500:
  *         description: Internal server error
+ *     security:
+ *       - API_KEY: []
  */
 
 export default async function handler(

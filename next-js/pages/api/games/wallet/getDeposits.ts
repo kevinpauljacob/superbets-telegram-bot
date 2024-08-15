@@ -5,13 +5,18 @@ import { SPL_TOKENS } from "@/context/config";
 
 /**
  * @swagger
- * /api/games/wallet/getDeposit:
+ * /games/wallet/getDeposit:
  *   get:
  *     summary: Get deposit history for a wallet
  *     description: Fetches the deposit history for a given wallet address.
  *     tags:
  *       - Game/Wallet
  *     parameters:
+ *       - in: query
+ *         name: slug
+ *         schema:
+ *           type: string
+ *         description: The slug associated with your api key.
  *       - in: query
  *         name: wallet
  *         schema:

@@ -24,7 +24,7 @@ import updateGameStats from "../../../../utils/updateGameStats";
 
 /**
  * @swagger
- * /api/games/mines/auto:
+ * /games/mines/auto:
  *   post:
  *     summary: Play mines game in auto mode
  *     description: Play mines game in auto mode by providing wallet or email, bet amount, token mint, number of mines, and user bets.
@@ -110,6 +110,8 @@ import updateGameStats from "../../../../utils/updateGameStats";
  *                   type: boolean
  *                 message:
  *                   type: string
+ *     security:
+ *       - API_KEY: []
  */
 
 const encryptionKey = Buffer.from(process.env.ENCRYPTION_KEY!, "hex");
@@ -194,7 +196,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           success: false,
           message: "Bet amount exceeds max payout!",
         });
-        
+
       await connectDatabase();
 
       let user = null;

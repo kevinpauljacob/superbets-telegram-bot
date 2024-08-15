@@ -30,7 +30,7 @@ import {
 
 /**
  * @swagger
- * /api/games/wallet/withdraw:
+ * /games/wallet/withdraw:
  *   post:
  *     summary: Withdraw funds from a wallet
  *     description: Handles the withdrawal of funds from a specified wallet.
@@ -109,6 +109,8 @@ import {
  *                   type: boolean
  *                 message:
  *                   type: string
+ *     security:
+ *       - API_KEY: []
  */
 
 const secret = process.env.NEXTAUTH_SECRET;
@@ -373,8 +375,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
       // netTransfer = 1000000000;
 
-      const tokenName = SPL_TOKENS.find((t) => t.tokenMint === tokenMint)
-        ?.tokenName!;
+      const tokenName = SPL_TOKENS.find(
+        (t) => t.tokenMint === tokenMint,
+      )?.tokenName!;
 
       if (netTransfer > timeWeightedAvgLimit[tokenName]) {
         await Deposit.create({

@@ -25,7 +25,7 @@ Decimal.set({ precision: 9 });
 
 /**
  * @swagger
- * /api/games/wheel:
+ * /games/wheel:
  *   post:
  *     summary: Play a wheel game.
  *     description: This endpoint allows a user to play a wheel game by betting a certain amount of tokens and choosing a risk level.
@@ -163,6 +163,8 @@ Decimal.set({ precision: 9 });
  *                   type: string
  *                   description: Message describing the error.
  *                   example: "Server error"
+ *     security:
+ *       - API_KEY: []
  */
 
 const encryptionKey = Buffer.from(process.env.ENCRYPTION_KEY!, "hex");

@@ -12,7 +12,7 @@ import { NextApiRequest, NextApiResponse } from "next";
 
 /**
  * @swagger
- * /api/getInfo:
+ * /getInfo:
  *   post:
  *     summary: User operations
  *     description: Perform various user-related operations based on the provided option

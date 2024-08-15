@@ -29,7 +29,7 @@ import { bs58 } from "@project-serum/anchor/dist/cjs/utils/bytes";
  */
 /**
  * @swagger
- * /api/games/wallet/deposit:
+ * /games/wallet/deposit:
  *   post:
  *     summary: Deposit tokens into a user's wallet
  *     description: Handles depositing tokens into a user's wallet. This endpoint is currently disabled.
@@ -104,6 +104,8 @@ import { bs58 } from "@project-serum/anchor/dist/cjs/utils/bytes";
  *                   type: boolean
  *                 message:
  *                   type: string
+ *     security:
+ *       - API_KEY: []
  */
 
 const secret = process.env.NEXTAUTH_SECRET;

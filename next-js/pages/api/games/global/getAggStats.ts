@@ -10,12 +10,18 @@ import { GameStats, User } from "@/models/games";
  */
 /**
  * @swagger
- * /api/games/global/getAggStats:
+ * /games/global/getAggStats:
  *   get:
  *     summary: Retrieves aggregated game statistics and total player count
  *     description: Fetches aggregated statistics from the `GameStats` collection and calculates the total volume for each game type. Also retrieves the total number of unique players from the `User` collection.
  *     tags:
  *      - Games/Global
+ *     parameters:
+ *       - in: query
+ *         name: slug
+ *         schema:
+ *           type: string
+ *         description: The slug associated with your api key.
  *     responses:
  *       200:
  *         description: Successful data retrieval

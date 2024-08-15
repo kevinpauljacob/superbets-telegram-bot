@@ -5,13 +5,18 @@ import { GameType, decryptServerSeed, seedStatus } from "@/utils/provably-fair";
 
 /**
  * @swagger
- * /api/games/global/getUserHistory:
+ * /games/global/getUserHistory:
  *   get:
  *     summary: Retrieves historical game records for a specific user
  *     description: Fetches game records for a user based on either their wallet address or email. Includes game data and decrypts server seeds if necessary.
  *     tags:
  *      - Games/Global
  *     parameters:
+ *       - in: query
+ *         name: slug
+ *         schema:
+ *           type: string
+ *         description: The slug associated with your api key.
  *       - in: query
  *         name: wallet
  *         required: false

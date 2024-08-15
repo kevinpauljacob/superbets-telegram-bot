@@ -10,12 +10,28 @@ function ApiDoc({ spec }: InferGetStaticPropsType<typeof getStaticProps>) {
 }
 
 export const getStaticProps: GetStaticProps = async () => {
+  const url = (process.env.NEXTAUTH_URL || "http://localhost:3000") + "/api";
+
   const spec: Record<string, any> = createSwaggerSpec({
     definition: {
       openapi: "3.0.0",
       info: {
         title: "Superbets API Documentation",
         version: "1.0",
+      },
+      servers: [
+        {
+          url,
+        },
+      ],
+      components: {
+        securitySchemes: {
+          API_KEY: {
+            type: "apiKey",
+            in: "header",
+            name: "x-api-key",
+          },
+        },
       },
     },
   });

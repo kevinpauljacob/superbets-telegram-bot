@@ -21,7 +21,7 @@ import mongoose from "mongoose";
 
 /**
  * @swagger
- * /api/referral/{wallet}/claim:
+ * /referral/{wallet}/claim:
  *   post:
  *     summary: Claim referral earnings
  *     description: Claim unclaimed referral earnings and create transaction
@@ -76,6 +76,8 @@ import mongoose from "mongoose";
  *         description: Method not allowed
  *       500:
  *         description: Internal server error
+ *     security:
+ *       - API_KEY: []
  */
 
 const secret = process.env.NEXTAUTH_SECRET;

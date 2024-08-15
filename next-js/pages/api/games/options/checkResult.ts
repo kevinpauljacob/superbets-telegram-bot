@@ -18,7 +18,7 @@ Decimal.set({ precision: 9 });
 
 /**
  * @swagger
- * /api/games/options/checkResult:
+ * /games/options/checkResult:
  *   post:
  *     summary: Check the result of an active bet
  *     description: Checks the result of an active (pending) bet for a user based on their wallet or email and updates the result accordingly.
@@ -83,6 +83,8 @@ Decimal.set({ precision: 9 });
  *                   type: boolean
  *                 message:
  *                   type: string
+ *     security:
+ *       - API_KEY: []
  */
 
 const secret = process.env.NEXTAUTH_SECRET;

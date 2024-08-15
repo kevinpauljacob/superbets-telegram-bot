@@ -7,7 +7,7 @@ const secret = process.env.NEXTAUTH_SECRET;
 
 /**
  * @swagger
- * /api/referral/apply:
+ * /referral/apply:
  *   post:
  *     summary: Apply a referral code
  *     description: Apply a referral code to a user. Once applied, the referral code cannot be changed.
@@ -84,6 +84,8 @@ const secret = process.env.NEXTAUTH_SECRET;
  *                 message:
  *                   type: string
  *                   example: "An error occurred while processing your request."
+ *     security:
+ *       - API_KEY: []
  */
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {

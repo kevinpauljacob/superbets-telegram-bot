@@ -16,7 +16,7 @@ Decimal.set({ precision: 9 });
 
 /**
  * @swagger
- * /api/games/options:
+ * /games/options:
  *   post:
  *     summary: Create a new bet on options game
  *     description: Create a new bet on the options game where users can bet up or down on the price within a given time frame.
@@ -109,9 +109,9 @@ Decimal.set({ precision: 9 });
  *                   type: boolean
  *                 message:
  *                   type: string
+ *     security:
+ *       - API_KEY: []
  */
-
-const secret = process.env.NEXTAUTH_SECRET;
 
 export const config = {
   maxDuration: 60,
