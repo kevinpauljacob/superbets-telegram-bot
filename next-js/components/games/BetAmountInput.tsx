@@ -281,13 +281,13 @@ export default function BetAmount({
       {betAmt &&
         betAmt > 0 &&
         selectedCoin?.tokenMint !== "SUPER" &&
-        betAmt > currentMaxBetAmt && (
+        betAmt > currentMaxBetAmt ? (
           <span
             className={`opacity-100 mt-1.5 flex items-center gap-1 text-xs text-[#DCA815]`}
           >
             This bet can exceed the max payout for this game.
           </span>
-        )}
+        ) : <></>}
     </div>
   );
 }

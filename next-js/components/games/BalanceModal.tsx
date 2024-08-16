@@ -193,7 +193,7 @@ export default function BalanceModal() {
       open={showWalletModal}
       onOpenChange={() => setShowWalletModal(false)}
     >
-      <AdaptiveModalContent className="bg-[#121418] sm:overflow-y-auto min-h-[50dvh] max-h-[80dvh] w-full pb-6">
+      <AdaptiveModalContent className="bg-[#121418] sm:overflow-y-auto min-h-[60dvh] sm:min-h-[55dvh] max-h-[80dvh] w-full pb-6">
         <div className="flex flex-1 px-6 sm:p-0 justify-center overflow-y-auto nobar">
           <div className="flex flex-col w-full">
             {/* header and logo  */}
