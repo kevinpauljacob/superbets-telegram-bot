@@ -96,7 +96,7 @@ export const config = {
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === "POST") {
     try {
-      let { wallet, email } = req.body;
+      let { email } = req.body;
 
       if (maintainance)
         return res.status(400).json({
@@ -104,7 +104,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           message: "Under maintenance",
         });
 
-      if (!wallet && !email)
+      if (!email)
         return res
           .status(400)
           .json({ success: false, message: "Missing parameters" });
@@ -112,15 +112,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       await connectDatabase();
 
       let user = null;
-      if (wallet) {
-        user = await User.findOne({
-          wallet: wallet,
-        });
-      } else if (email) {
-        user = await User.findOne({
-          email: email,
-        });
-      }
+      user = await User.findOne({
+        email: email,
+      });
 
       if (!user)
         return res
@@ -182,7 +176,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
       const status = await User.findOneAndUpdate(
         {
-          account,
+          _id: account,
           deposit: {
             $elemMatch: {
               tokenMint,

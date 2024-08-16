@@ -229,7 +229,7 @@ export default function Options() {
       }
 
       const bets = await response.json();
-      let bet = bets.data;
+      let bet = bets?.data[0];
 
       if (bets.success && bet && bet.result === "Pending") {
         setBetType(bet?.betType === "betUp" ? "up" : "down");
