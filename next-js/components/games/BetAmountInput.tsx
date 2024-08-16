@@ -223,10 +223,6 @@ export default function BetAmount({
     setBetAmt(numValue);
   };
 
-  useEffect(() => {
-    console.log("betamt changed to ", betAmt);
-  }, [betAmt]);
-
   const handleBetAmountsModal = () => {
     setBetAmountsModal(!betAmountsModal);
   };
