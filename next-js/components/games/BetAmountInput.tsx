@@ -36,6 +36,7 @@ export default function BetAmount({
     formState: { errors },
     setError,
     clearErrors,
+    setValue,
   } = useFormContext<FieldValues>();
   const {
     // methods,
@@ -103,7 +104,11 @@ export default function BetAmount({
       selectedCoin?.tokenMint === "SUPER"
         ? selectedCoin?.amount ?? 0
         : Math.min(selectedCoin?.amount ?? 0, maxBetAmt ?? 0);
+
     setInputString(availableTokenAmt.toString());
+    //@ts-ignore
+    document.getElementById(`${game}-amount`).value =
+      availableTokenAmt.toString();
   };
 
   const handleHalfBet = () => {
@@ -120,6 +125,8 @@ export default function BetAmount({
       newBetAmt = minGameAmount;
     }
     setInputString(newBetAmt.toString());
+    //@ts-ignore
+    document.getElementById(`${game}-amount`).value = newBetAmt.toString();
   };
 
   const handleDoubleBet = () => {
@@ -137,6 +144,8 @@ export default function BetAmount({
         : parseFloat(possibleBetAmt.toFixed(4));
 
     setInputString(newBetAmt.toString());
+    //@ts-ignore
+    document.getElementById(`${game}-amount`).value = newBetAmt.toString();
   };
 
   const handleBetChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -158,7 +167,11 @@ export default function BetAmount({
     //   selectedCoin?.amount,
     //   minGameAmount,
     // );
-    if (inputString === undefined || inputString === "" || inputString === "-") {
+    if (
+      inputString === undefined ||
+      inputString === "" ||
+      inputString === "-"
+    ) {
       setBetAmt(undefined);
       clearErrors(`${game}-amount`);
       return;
@@ -279,15 +292,17 @@ export default function BetAmount({
         {errors?.[`${game}-amount`]?.message?.toString() ?? "NONE"}
       </span>
       {betAmt &&
-        betAmt > 0 &&
-        selectedCoin?.tokenMint !== "SUPER" &&
-        betAmt > currentMaxBetAmt ? (
-          <span
-            className={`opacity-100 mt-1.5 flex items-center gap-1 text-xs text-[#DCA815]`}
-          >
-            This bet can exceed the max payout for this game.
-          </span>
-        ) : <></>}
+      betAmt > 0 &&
+      selectedCoin?.tokenMint !== "SUPER" &&
+      betAmt > currentMaxBetAmt ? (
+        <span
+          className={`opacity-100 mt-1.5 flex items-center gap-1 text-xs text-[#DCA815]`}
+        >
+          This bet can exceed the max payout for this game.
+        </span>
+      ) : (
+        <></>
+      )}
     </div>
   );
 }
