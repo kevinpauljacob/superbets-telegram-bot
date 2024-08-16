@@ -264,7 +264,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
           await User.findOneAndUpdate(
             {
-              account,
+              _id: account,
               deposit: {
                 $elemMatch: {
                   tokenMint,
