@@ -106,9 +106,9 @@ export default function BetAmount({
         : Math.min(selectedCoin?.amount ?? 0, maxBetAmt ?? 0);
 
     setInputString(availableTokenAmt.toString());
-    //@ts-ignore
-    document.getElementById(`${game}-amount`).value =
-      availableTokenAmt.toString();
+    setValue(`${game}-amount`, availableTokenAmt.toString(), {
+      shouldValidate: true,
+    });
   };
 
   const handleHalfBet = () => {
@@ -125,8 +125,9 @@ export default function BetAmount({
       newBetAmt = minGameAmount;
     }
     setInputString(newBetAmt.toString());
-    //@ts-ignore
-    document.getElementById(`${game}-amount`).value = newBetAmt.toString();
+    setValue(`${game}-amount`, newBetAmt.toString(), {
+      shouldValidate: true,
+    });
   };
 
   const handleDoubleBet = () => {
@@ -144,8 +145,9 @@ export default function BetAmount({
         : parseFloat(possibleBetAmt.toFixed(4));
 
     setInputString(newBetAmt.toString());
-    //@ts-ignore
-    document.getElementById(`${game}-amount`).value = newBetAmt.toString();
+    setValue(`${game}-amount`, newBetAmt.toString(), {
+      shouldValidate: true,
+    });
   };
 
   const handleBetChange = (e: React.ChangeEvent<HTMLInputElement>) => {
