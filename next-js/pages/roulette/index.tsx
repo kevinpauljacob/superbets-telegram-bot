@@ -524,9 +524,9 @@ export default function Roulette1() {
             (autoWinChangeReset || autoLossChangeReset
               ? betAmt
               : autoBetCount === "inf"
-              ? Math.max(0, betAmt)
-              : betAmt *
-                (autoLossChange !== null ? autoLossChange / 100.0 : 0));
+                ? Math.max(0, betAmt)
+                : betAmt *
+                  (autoLossChange !== null ? autoLossChange / 100.0 : 0));
       }
       if (
         useAutoConfig &&
@@ -1118,6 +1118,7 @@ export default function Roulette1() {
   const handleNewResult = (resultNumber: number) => {
     setResultNumbers((prevNumbers) => [...prevNumbers, resultNumber]);
   };
+
   return (
     <GameLayout title="Roulette">
       <GameOptions>
@@ -1141,7 +1142,9 @@ export default function Roulette1() {
             )}
             <BetButton
               disabled={
-                !selectedToken || loading || !session?.user ||
+                !selectedToken ||
+                loading ||
+                !session?.user ||
                 (coinData && coinData[0].amount < minGameAmount)
                   ? // (betAmt !== undefined &&
                     //   maxBetAmt !== undefined &&
@@ -1234,7 +1237,7 @@ export default function Roulette1() {
                   <BetButton
                     betAmt={betAmt}
                     disabled={loading}
-                    // onClickFunction={onSubmit}
+                    onClickFunction={onSubmit}
                   >
                     {loading ? <Loader /> : "BET"}
                   </BetButton>
