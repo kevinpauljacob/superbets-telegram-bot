@@ -73,14 +73,13 @@ export default function BetAmount({
   }, [leastMultiplier, game, kenoRisk, selectedCoin]);
 
   useEffect(() => {
-    if (betAmt !== undefined && betAmt >= 0) {
-      if (game === GameType.roulette1) {
-        setInputString(betAmt.toFixed(9));
-      } else {
-        setInputString(betAmt.toString());
-      }
-    } else {
-      setInputString("");
+    if (betAmt !== undefined && betAmt >= 0 && game === GameType.roulette1) {
+      setInputString(betAmt.toFixed(9));
+      //@ts-ignore
+      document.getElementById(`${game}-amount`).value = betAmt.toString();
+      setValue(`${game}-amount`, betAmt.toFixed(6), {
+        shouldValidate: true,
+      });
     }
 
     const effectiveMultiplier = currentMultiplier || highestMultiplierForRisk;
@@ -102,7 +101,7 @@ export default function BetAmount({
   const handleSetMaxBet = () => {
     const availableTokenAmt =
       selectedCoin?.tokenMint === "SUPER"
-        ? (selectedCoin?.amount ?? 0)
+        ? selectedCoin?.amount ?? 0
         : Math.min(selectedCoin?.amount ?? 0, maxBetAmt ?? 0);
 
     //@ts-ignore
@@ -117,7 +116,7 @@ export default function BetAmount({
   const handleHalfBet = () => {
     const availableTokenAmt =
       selectedCoin?.tokenMint === "SUPER"
-        ? (selectedCoin?.amount ?? 0)
+        ? selectedCoin?.amount ?? 0
         : Math.min(selectedCoin?.amount ?? 0, maxBetAmt ?? 0);
     let newBetAmt =
       !betAmt || betAmt === 0 ? availableTokenAmt / 2 : betAmt! / 2;
@@ -138,7 +137,7 @@ export default function BetAmount({
   const handleDoubleBet = () => {
     const availableTokenAmt =
       selectedCoin?.tokenMint === "SUPER"
-        ? (selectedCoin?.amount ?? 0)
+        ? selectedCoin?.amount ?? 0
         : Math.min(selectedCoin?.amount ?? 0, maxBetAmt ?? 0);
     const possibleBetAmt =
       selectedCoin?.tokenMint === "SUPER"
@@ -158,26 +157,13 @@ export default function BetAmount({
     });
   };
 
-  useEffect(() => {
-    if (betAmt !== undefined) {
-      setInputString(betAmt.toString());
-      setValue(`${game}-amount`, betAmt.toString(), {
-        shouldValidate: true,
-      });
-    }
-  }, [betAmt, setValue, game]);
-
   const handleBetChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setInputString(value);
-    const numValue = parseFloat(value);
-    if (!isNaN(numValue)) {
-      setBetAmt(numValue);
-    }
+    setInputString(e?.target?.value);
   };
+
   useEffect(() => {
     handleBetAmount();
-  }, [inputString, selectedCoin]);
+  }, [inputString, selectedCoin, game]);
 
   const handleBetAmount = () => {
     const maxBetAmt =
@@ -210,6 +196,7 @@ export default function BetAmount({
         type: "manual",
         message: "Please enter a valid positive number",
       });
+      setBetAmt(undefined);
       setBetAmtError(true);
       return;
     }

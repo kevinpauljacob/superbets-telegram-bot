@@ -1,15 +1,19 @@
 import "@/styles/globals.css";
 import Layout from "@/components/layout";
 import type { AppProps } from "next/app";
-import toast, { Toaster, useToasterStore } from "react-hot-toast";
+import toast, { useToasterStore } from "react-hot-toast";
 import { ConnectionProvider } from "@solana/wallet-adapter-react";
-
 import { GlobalProvider } from "@/components/GlobalContext";
 import "@solana/wallet-adapter-react-ui/styles.css";
 import { SessionProvider } from "next-auth/react";
 import { useEffect } from "react";
 import LiveStats from "@/components/games/LiveStats";
 import { useRouter } from "next/router";
+import dynamic from "next/dynamic";
+
+const Toaster = dynamic(() => import("../components/toasts/RenderToasts"), {
+  ssr: false,
+});
 
 export default function App({
   Component,
@@ -48,16 +52,7 @@ export default function App({
     <ConnectionProvider endpoint={endpoint}>
       <SessionProvider session={pageProps.session} refetchInterval={0}>
         <GlobalProvider>{wrappedContent}</GlobalProvider>
-
-        <Toaster
-          position="top-right"
-          toastOptions={{
-            style: {
-              background: "#333",
-              color: "#fff",
-            },
-          }}
-        />
+        <Toaster />
       </SessionProvider>
     </ConnectionProvider>
   );
