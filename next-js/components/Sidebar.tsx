@@ -284,12 +284,12 @@ export const OpenSidebar = ({
       link: "/coinflip",
       active: false,
     },
-    {
-      src: "",
-      token: "Options",
-      link: "/options",
-      active: false,
-    },
+    // {
+    //   src: "",
+    //   token: "Options",
+    //   link: "/options",
+    //   active: false,
+    // },
     {
       src: "",
       token: "Limbo",
