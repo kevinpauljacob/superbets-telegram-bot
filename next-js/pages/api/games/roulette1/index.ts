@@ -3,6 +3,7 @@ import {
   launchPromoEdge,
   maintainance,
   maxPayouts,
+  minAmtFactor,
   stakingTiers,
   wsEndpoint,
 } from "@/context/config";
@@ -17,7 +18,7 @@ import {
 } from "@/utils/provably-fair";
 import { NextApiRequest, NextApiResponse } from "next";
 
-import { SPL_TOKENS, minGameAmount } from "@/context/config";
+import { SPL_TOKENS } from "@/context/config";
 import { Decimal } from "decimal.js";
 import updateGameStats from "../../../../utils/updateGameStats";
 Decimal.set({ precision: 9 });
@@ -289,6 +290,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           .json({ success: false, message: "Missing parameters" });
 
       const splToken = SPL_TOKENS.find((t) => t.tokenMint === tokenMint);
+      const minGameAmount = maxPayouts[tokenMint][GameType.coin] * minAmtFactor;
       if (
         !splToken ||
         !Object.keys(wager).every((key) => WagerMapping[key as WagerType])

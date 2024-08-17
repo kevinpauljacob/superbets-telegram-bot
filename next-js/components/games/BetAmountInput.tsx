@@ -105,8 +105,11 @@ export default function BetAmount({
         ? selectedCoin?.amount ?? 0
         : Math.min(selectedCoin?.amount ?? 0, maxBetAmt ?? 0);
 
-    setInputString(availableTokenAmt.toString());
-    setValue(`${game}-amount`, availableTokenAmt.toString(), {
+    //@ts-ignore
+    document.getElementById(`${game}-amount`).value =
+      availableTokenAmt.toFixed(6);
+    setInputString(availableTokenAmt.toFixed(6));
+    setValue(`${game}-amount`, availableTokenAmt.toFixed(6), {
       shouldValidate: true,
     });
   };
@@ -119,11 +122,13 @@ export default function BetAmount({
     let newBetAmt =
       !betAmt || betAmt === 0 ? availableTokenAmt / 2 : betAmt! / 2;
 
-    newBetAmt = parseFloat(newBetAmt.toFixed(4));
-
+    newBetAmt = parseFloat(newBetAmt.toFixed(6));
     if (newBetAmt < minGameAmount) {
       newBetAmt = minGameAmount;
     }
+
+    //@ts-ignore
+    document.getElementById(`${game}-amount`).value = newBetAmt.toString();
     setInputString(newBetAmt.toString());
     setValue(`${game}-amount`, newBetAmt.toString(), {
       shouldValidate: true,
@@ -139,11 +144,14 @@ export default function BetAmount({
       selectedCoin?.tokenMint === "SUPER"
         ? Math.min((betAmt ?? 0) * 2, selectedCoin?.amount ?? 0)
         : Math.min((betAmt ?? 0) * 2, maxBetAmt ?? 0);
+
     const newBetAmt =
       !betAmt || betAmt === 0
-        ? parseFloat(availableTokenAmt.toFixed(4))
-        : parseFloat(possibleBetAmt.toFixed(4));
+        ? parseFloat(availableTokenAmt.toFixed(6))
+        : parseFloat(possibleBetAmt.toFixed(6));
 
+    //@ts-ignore
+    document.getElementById(`${game}-amount`).value = newBetAmt.toString();
     setInputString(newBetAmt.toString());
     setValue(`${game}-amount`, newBetAmt.toString(), {
       shouldValidate: true,
@@ -159,6 +167,11 @@ export default function BetAmount({
   }, [inputString, selectedCoin]);
 
   const handleBetAmount = () => {
+    const maxBetAmt =
+      maxPayouts[selectedCoin.tokenMint as GameTokens][game as GameType];
+    const minGameAmount =
+      maxPayouts[selectedCoin.tokenMint as GameTokens][game as GameType] *
+      minAmtFactor;
     // console.log(
     //   "before",
     //   errors,
@@ -178,7 +191,6 @@ export default function BetAmount({
       clearErrors(`${game}-amount`);
       return;
     }
-
     const numValue = parseFloat(inputString);
     if (isNaN(numValue) || numValue < 0) {
       setError(`${game}-amount`, {
@@ -249,7 +261,7 @@ export default function BetAmount({
           onChange={handleBetChange}
           placeholder="0.0"
           disabled={disabled}
-          value={betAmt === undefined ? "" : betAmt}
+          // value={betAmt === undefined ? "" : betAmt}
           lang="en"
           min={0}
           className="flex w-full min-w-0 bg-transparent text-base text-[#94A3B8] placeholder-[#94A3B8] font-chakra placeholder-opacity-40 outline-none disabled:cursor-default disabled:opacity-50"
