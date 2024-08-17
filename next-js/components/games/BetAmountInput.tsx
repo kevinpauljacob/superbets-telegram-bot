@@ -102,7 +102,7 @@ export default function BetAmount({
   const handleSetMaxBet = () => {
     const availableTokenAmt =
       selectedCoin?.tokenMint === "SUPER"
-        ? selectedCoin?.amount ?? 0
+        ? (selectedCoin?.amount ?? 0)
         : Math.min(selectedCoin?.amount ?? 0, maxBetAmt ?? 0);
 
     //@ts-ignore
@@ -117,7 +117,7 @@ export default function BetAmount({
   const handleHalfBet = () => {
     const availableTokenAmt =
       selectedCoin?.tokenMint === "SUPER"
-        ? selectedCoin?.amount ?? 0
+        ? (selectedCoin?.amount ?? 0)
         : Math.min(selectedCoin?.amount ?? 0, maxBetAmt ?? 0);
     let newBetAmt =
       !betAmt || betAmt === 0 ? availableTokenAmt / 2 : betAmt! / 2;
@@ -138,7 +138,7 @@ export default function BetAmount({
   const handleDoubleBet = () => {
     const availableTokenAmt =
       selectedCoin?.tokenMint === "SUPER"
-        ? selectedCoin?.amount ?? 0
+        ? (selectedCoin?.amount ?? 0)
         : Math.min(selectedCoin?.amount ?? 0, maxBetAmt ?? 0);
     const possibleBetAmt =
       selectedCoin?.tokenMint === "SUPER"
@@ -158,10 +158,23 @@ export default function BetAmount({
     });
   };
 
-  const handleBetChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setInputString(e.target.value);
-  };
+  useEffect(() => {
+    if (betAmt !== undefined) {
+      setInputString(betAmt.toString());
+      setValue(`${game}-amount`, betAmt.toString(), {
+        shouldValidate: true,
+      });
+    }
+  }, [betAmt, setValue, game]);
 
+  const handleBetChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setInputString(value);
+    const numValue = parseFloat(value);
+    if (!isNaN(numValue)) {
+      setBetAmt(numValue);
+    }
+  };
   useEffect(() => {
     handleBetAmount();
   }, [inputString, selectedCoin]);
