@@ -457,7 +457,7 @@ export default function Leaderboard() {
               </div>
             ) : (
               <div
-                className={`bg-[#5F4DFF] hover:bg-[#5F4DFF]/50 transition-all duration-300 text-white ${myData?.isUSDCClaimed ? "bg-opacity-50" : "bg-opacity-70"} rounded-[10px] text-center text-sm text-opacity-90 font-semibold w-full py-3`}
+                className={`bg-[#5F4DFF] hover:bg-[#5F4DFF]/50 transition-all duration-300 text-white ${myData?.isUSDCClaimed ? "bg-opacity-50" : "bg-opacity-70"} rounded-[10px] text-center text-sm text-opacity-90 font-semibold w-full py-3 cursor-pointer`}
                 onClick={() => {
                   if (!myData?.isUSDCClaimed) setIsModalOpen(!isModalOpen);
                 }}

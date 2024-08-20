@@ -442,7 +442,7 @@ export default function ({ children }: Props) {
 
       <ConfigureAutoModal />
       {/* Modal */}
-      {isModalOpen && (
+      {isModalOpen && !myData?.isUSDCClaimed && (
         <AdaptiveModal open={isModalOpen} onOpenChange={handleCloseModal}>
           <AdaptiveModalContent
             className={`bg-[#121418] sm:overflow-y-auto min-h-[40dvh] max-h-[85dvh] w-full pb-6`}
@@ -543,7 +543,7 @@ export default function ({ children }: Props) {
               {reached500 && (
                 <div
                   onClick={() => claimUSDCReward()}
-                  className="bg-[#5F4DFF] text-white bg-opacity-50 rounded-[10px] text-center text-sm text-opacity-90 font-semibold w-full py-3"
+                  className="bg-[#5F4DFF] text-white bg-opacity-50 rounded-[10px] text-center text-sm text-opacity-90 font-semibold w-full py-3 cursor-pointer"
                 >
                   Claim your 1 USDC!
                 </div>
