@@ -609,7 +609,7 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
 
       for (let token of SPL_TOKENS) {
         let price =
-          (data?.data[token.tokenMint]?.price ?? token?.tokenMint === "SUPER")
+          data?.data[token.tokenMint]?.price ?? token?.tokenMint === "SUPER"
             ? 1
             : 0;
         prices.push({ mintAddress: token.tokenMint, price: price });
@@ -687,7 +687,7 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
 
   useEffect(() => {
     setHasShownOnce(false);
-  }, [session])
+  }, [session]);
 
   return (
     <GlobalContext.Provider
