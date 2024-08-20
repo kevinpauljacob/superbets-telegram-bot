@@ -483,7 +483,7 @@ export default function Roulette1() {
       setBetInProgress(false);
     }
   };
-
+  console.log(`Selected Number: ${selectedBets}`);
   useEffect(() => {
     if (spinComplete && result !== null) {
       if (win) {
@@ -862,6 +862,30 @@ export default function Roulette1() {
               alt={`token-${index}`}
               className="absolute drop-shadow-3xl"
               style={{ bottom: `${index * 3}px` }}
+            />
+          ))}
+        </div>
+      );
+    }
+    return null;
+  };
+  const renderRegularZeroToken = (areaId: string) => {
+    const betsForArea = selectedBets.filter((bet) => bet.areaId === areaId);
+    if (betsForArea.length > 0) {
+      return (
+        <div className="absolute inset-0 flex flex-col items-center justify-end sm:justify-center space-y-1 z-10 w-7 sm:w-12 -left-1">
+          {betsForArea.slice(0, 3).map((bet, index) => (
+            <Image
+              key={index}
+              width={35}
+              height={35}
+              src={bet.token.image}
+              alt={`token-${index}`}
+              className={`absolute drop-shadow-3xl -rotate-90 sm:rotate-0`}
+              style={{
+                [window.innerWidth < 640 ? "right" : "bottom"]:
+                  `${index * 3}px`,
+              }}
             />
           ))}
         </div>
@@ -1368,7 +1392,7 @@ export default function Roulette1() {
                 >
                   {/* h-[27.3px] w-[125px] */}
                   <p className="-rotate-90 sm:rotate-0">0</p>
-                  {renderRegularToken("num-0")}
+                  {renderRegularZeroToken("num-0")}
                 </div>
                 <div className="grid grid-cols-12 grid-rows-3 gap-[4px] sm:gap-1 sm:w-full sm:mb-[7px] ">
                   {/* grid-cols-3 grid-rows-12 */}

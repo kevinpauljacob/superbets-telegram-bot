@@ -135,78 +135,118 @@ async function getUSDCClaimInfo() {
 }
 
 async function claimUSDC(userId: string) {
-  const user = await GameUser.findById(userId);
+  try {
+    console.log(`Starting USDC claim process for user: ${userId}`);
 
-  if (!user) {
-    return { success: false, message: "User not found" };
+    const user = await GameUser.findById(userId);
+    if (!user) {
+      console.log("User not found");
+      return { success: false, message: "User not found" };
+    }
+
+    if (user.isUSDCClaimed) {
+      console.log("USDC already claimed");
+      return { success: false, message: "USDC already claimed" };
+    }
+
+    const hasSuperDeposit = user.deposit.some(
+      (d: any) => d.amount >= 500 && d.tokenMint === "SUPER",
+    );
+
+    if (!hasSuperDeposit) {
+      console.log("Not eligible for USDC claim");
+      return { success: false, message: "Not eligible for USDC claim" };
+    }
+
+    const claimedCount = await GameUser.countDocuments({
+      isUSDCClaimed: true,
+    });
+
+    if (claimedCount >= 10) {
+      console.log("All USDC spots for today have been claimed");
+      return {
+        success: false,
+        message: "All USDC spots for today have been claimed",
+      };
+    }
+
+    const claimCount = claimedCount + 1;
+    const tokenMint = SPL_TOKENS.find((t) => t.tokenName === "USDC")?.tokenMint;
+
+    if (!tokenMint) {
+      console.log("USDC token mint not found");
+      return { success: false, message: "USDC token mint not found" };
+    }
+
+    // Ensure the user has a deposit entry for the USDC token
+    await GameUser.findOneAndUpdate(
+      {
+        _id: userId,
+        "deposit.tokenMint": { $ne: tokenMint },
+      },
+      {
+        $push: { deposit: { tokenMint, amount: 0 } },
+      },
+    );
+
+    let updatedUser = await GameUser.findOneAndUpdate(
+      {
+        _id: userId,
+        "deposit.tokenMint": tokenMint,
+        $or: [{ isUSDCClaimed: { $exists: false } }, { isUSDCClaimed: false }],
+      },
+      {
+        $inc: { "deposit.$.amount": 1.0 },
+        $set: { isUSDCClaimed: true, claimCount },
+      },
+      {
+        new: true,
+      },
+    );
+
+    if (!updatedUser) {
+      console.log("No matching deposit found, creating new deposit entry.");
+
+      updatedUser = await GameUser.findOneAndUpdate(
+        { _id: userId },
+        {
+          $push: {
+            deposit: {
+              tokenMint,
+              amount: 1.0, // Start with the claimed amount
+            },
+          },
+          $set: { isUSDCClaimed: true, claimCount },
+        },
+        {
+          new: true,
+        },
+      );
+
+      if (!updatedUser) {
+        console.log("Failed to create and update the new deposit entry.");
+        return { success: false, message: "Could not claim USDC" };
+      }
+    }
+
+    console.log("Update successful, creating deposit record");
+
+    await Deposit.create({
+      account: userId,
+      type: true,
+      amount: 1,
+      tokenMint,
+      status: "completed",
+      comments: "USDC reward claimed",
+      txnSignature: uuidv4(),
+      wallet: user.wallet,
+    });
+
+    return { success: true, message: "USDC claimed successfully" };
+  } catch (error) {
+    console.error("Error in claimUSDC:", error);
+    throw new Error("Internal Server Error");
   }
-
-  if (user.isUSDCClaimed) {
-    return { success: false, message: "USDC already claimed" };
-  }
-
-  const hasSuperDeposit = user.deposit.some(
-    (d: any) => d.amount >= 500 && d.tokenMint === "SUPER",
-  );
-
-  if (!hasSuperDeposit) {
-    return { success: false, message: "Not eligible for USDC claim" };
-  }
-
-  const claimedCount = await GameUser.countDocuments({
-    isUSDCClaimed: true,
-  });
-
-  if (claimedCount >= 10) {
-    return {
-      success: false,
-      message: "All USDC spots for today have been claimed",
-    };
-  }
-
-  const claimCount = claimedCount + 1;
-  const tokenMint = SPL_TOKENS.find((t) => t.tokenName === "USDC")?.tokenMint!;
-
-  await GameUser.findOneAndUpdate(
-    {
-      _id: userId,
-      "deposit.tokenMint": { $ne: tokenMint },
-    },
-    {
-      $push: { deposit: { tokenMint, amount: 0 } },
-    },
-  );
-
-  const updatedUser = await GameUser.findOneAndUpdate(
-    {
-      _id: userId,
-      "deposit.tokenMint": tokenMint,
-      $or: [{ isUSDCClaimed: { $exists: false } }, { isUSDCClaimed: false }],
-    },
-    {
-      $inc: { "deposit.$.amount": 1.0 },
-      $set: { isUSDCClaimed: true, claimCount },
-    },
-    {
-      new: true,
-    },
-  );
-
-  if (!updatedUser) {
-    return { success: false, message: "Could not claim USDC" };
-  }
-
-  await Deposit.create({
-    account: userId,
-    type: true,
-    amount: 1,
-    tokenMint,
-    status: "completed",
-    comments: "USDC reward claimed",
-    txnSignature: uuidv4(),
-  });
-
-  return { success: true, message: "USDC claimed successfully" };
 }
 
 export default async function handler(
