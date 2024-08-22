@@ -73,7 +73,11 @@ export default function BetAmount({
   }, [leastMultiplier, game, kenoRisk, selectedCoin]);
 
   useEffect(() => {
-    if (betAmt !== undefined && betAmt >= 0 && game === GameType.roulette1) {
+    if (
+      betAmt !== undefined &&
+      betAmt >= 0 &&
+      (game === GameType.roulette1 || game === GameType.options)
+    ) {
       setInputString(betAmt.toFixed(9));
       //@ts-ignore
       document.getElementById(`${game}-amount`).value = betAmt.toString();

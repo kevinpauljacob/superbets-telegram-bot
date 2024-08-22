@@ -21,10 +21,10 @@ export default function FomoPlay() {
       href: "/coinflip",
       src: "/assets/game-cards/coinflip.png",
     },
-    // {
-    //   href: "/options",
-    //   src: "/assets/game-cards/options.png",
-    // },
+    {
+      href: "/options",
+      src: "/assets/game-cards/options.png",
+    },
     {
       href: "/limbo",
       src: "/assets/game-cards/limbo.png",

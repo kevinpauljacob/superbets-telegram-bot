@@ -24,7 +24,7 @@ export default function App({
 
   const { toasts } = useToasterStore();
 
-  const TOAST_LIMIT = 8;
+  const TOAST_LIMIT = 3;
 
   useEffect(() => {
     toasts
