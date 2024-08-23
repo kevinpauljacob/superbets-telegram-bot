@@ -113,7 +113,7 @@ export default function BalanceModal() {
     console.log("Getting History");
     try {
       const res = await fetch(
-        `/api/games/wallet/getDeposits?wallet=${session?.user?.wallet}`,
+        `/api/games/wallet/getDeposits?user=${session?.user?.id}`,
         {
           method: "GET",
           headers: {
