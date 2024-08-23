@@ -51,7 +51,7 @@ export default function Leaderboard() {
     language,
     session,
     coinData,
-    isModalOpen,
+    isClaimModalOpen,
     myData,
     reached500,
     claimInfo,
@@ -59,7 +59,7 @@ export default function Leaderboard() {
     transactionsPerPage,
     threshold,
     data,
-    setIsModalOpen,
+    setIsClaimModalOpen,
     setMyData,
     setReached500,
     setClaimInfo,
@@ -67,7 +67,6 @@ export default function Leaderboard() {
     setData,
     getLeaderBoard,
     fetchClaimInfo,
-    claimUSDCReward,
   } = useGlobalContext();
 
   const currentDate = new Date();
@@ -144,7 +143,7 @@ export default function Leaderboard() {
   // useEffect(() => {
   //   if (tokenAmount >= 500) {
   //     setReached500(true);
-  //     if (!myData?.isUSDCClaimed) setIsModalOpen(true);
+  //     if (!myData?.isUSDCClaimed) setIsClaimModalOpen(true);
   //   }
   // }, [tokenAmount]);
 
@@ -459,7 +458,7 @@ export default function Leaderboard() {
               <div
                 className={`bg-[#5F4DFF] hover:bg-[#5F4DFF]/50 transition-all duration-300 text-white ${myData?.isUSDCClaimed ? "bg-opacity-50" : "bg-opacity-70"} rounded-[10px] text-center text-sm text-opacity-90 font-semibold w-full py-3 cursor-pointer`}
                 onClick={() => {
-                  if (!myData?.isUSDCClaimed) setIsModalOpen(!isModalOpen);
+                  if (!myData?.isUSDCClaimed) setIsClaimModalOpen(!isClaimModalOpen);
                 }}
               >
                 {myData?.isUSDCClaimed

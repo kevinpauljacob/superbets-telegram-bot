@@ -5,6 +5,30 @@ import connectDatabase from "@/utils/database";
 import authenticateUser from "@/utils/authenticate";
 import { v4 as uuidv4 } from "uuid";
 import { SPL_TOKENS } from "@/context/config";
+import {
+  BlockhashWithExpiryBlockHeight,
+  Connection,
+  Keypair,
+  PublicKey,
+  Transaction,
+} from "@solana/web3.js";
+import {
+  timeWeightedAvgInterval,
+  timeWeightedAvgLimit,
+  userLimitMultiplier,
+} from "@/context/config";
+import User from "../../../../models/games/gameUser";
+
+import { getToken } from "next-auth/jwt";
+import { bs58 } from "@project-serum/anchor/dist/cjs/utils/bytes";
+import TxnSignature from "../../../../models/txnSignature";
+import { GameType } from "@/utils/provably-fair";
+import { gameModelMap } from "@/models/games";
+import {
+  createWithdrawTxn,
+  retryTxn,
+  verifyTransaction,
+} from "@/context/transactions";
 
 /**
  * @swagger
@@ -134,7 +158,7 @@ async function getUSDCClaimInfo() {
   return { claimedCount, spotsLeft };
 }
 
-async function claimUSDC(userId: string) {
+async function gambleUSDC(userId: string) {
   try {
     console.log(`Starting USDC claim process for user: ${userId}`);
 
@@ -249,6 +273,181 @@ async function claimUSDC(userId: string) {
   }
 }
 
+const secret = process.env.NEXTAUTH_SECRET;
+
+const connection = new Connection(process.env.BACKEND_RPC!, "confirmed");
+
+const devWallet = Keypair.fromSecretKey(
+  bs58.decode(process.env.CASINO_KEYPAIR!),
+);
+
+export const config = {
+  maxDuration: 60,
+};
+
+type Totals = {
+  depositTotal: number;
+  withdrawalTotal: number;
+};
+
+async function withdrawUSDC(userId: string, wallet: string) {
+  try {
+    if (!userId || !wallet) throw new Error("Missing parameters!");
+
+    await connectDatabase();
+
+    let user = await User.findById(userId);
+
+    if (!user) throw new Error("User does not exist !");
+
+    const account = user._id;
+
+    if (user.isUSDCClaimed) {
+      console.log("USDC already claimed");
+      return { success: false, message: "USDC already claimed" };
+    }
+
+    const hasSuperDeposit = user.deposit.some(
+      (d: any) => d.amount >= 500 && d.tokenMint === "SUPER",
+    );
+
+    if (!hasSuperDeposit) {
+      console.log("Not eligible for USDC claim");
+      throw new Error("Not eligible for USDC claim");
+    }
+
+    const claimedCount = await GameUser.countDocuments({
+      isUSDCClaimed: true,
+    });
+
+    if (claimedCount >= 10) {
+      console.log("All USDC spots for today have been claimed");
+      throw new Error("All USDC spots for today have been claimed");
+    }
+
+    const tokenMint = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v";
+    const amount = 1;
+
+    let { transaction, blockhashWithExpiryBlockHeight } =
+      await createWithdrawTxn(
+        new PublicKey(wallet),
+        amount,
+        tokenMint,
+        devWallet.publicKey,
+      );
+
+    let result = await User.findOneAndUpdate(
+      {
+        _id: account,
+        $or: [{ isUSDCClaimed: { $exists: false } }, { isUSDCClaimed: false }],
+      },
+      {
+        $set: { isUSDCClaimed: true },
+      },
+      {
+        new: true,
+      },
+    );
+
+    if (!result) {
+      throw new Error(
+        "Withdraw failed: Reward already claimed or user not found",
+      );
+    }
+
+    const initialTotals: Totals = { depositTotal: 0, withdrawalTotal: 0 };
+
+    const userAgg = await Deposit.aggregate([
+      {
+        $match: {
+          tokenMint,
+          createdAt: {
+            $gte: new Date(Date.now() - timeWeightedAvgInterval),
+          },
+        },
+      },
+      {
+        $group: {
+          _id: "$account",
+          depositTotal: {
+            $sum: {
+              $cond: [{ $eq: ["$type", true] }, "$amount", 0],
+            },
+          },
+          withdrawalTotal: {
+            $sum: {
+              $cond: [{ $eq: ["$type", false] }, "$amount", 0],
+            },
+          },
+        },
+      },
+    ]);
+
+    const transferAgg = userAgg.reduce<Totals>((acc, current) => {
+      acc.depositTotal += current.depositTotal;
+      acc.withdrawalTotal += current.withdrawalTotal;
+      return acc;
+    }, initialTotals);
+
+    const netTransfer =
+      (transferAgg.withdrawalTotal ?? 0) -
+      (transferAgg.depositTotal ?? 0) +
+      amount;
+
+    const tokenName = SPL_TOKENS.find((t) => t.tokenMint === tokenMint)
+      ?.tokenName!;
+
+    if (netTransfer > timeWeightedAvgLimit[tokenName]) {
+      await Deposit.create({
+        account,
+        wallet,
+        amount,
+        type: false,
+        comments: "global net transfer exceeded !",
+        txnSignature: uuidv4().toString(),
+        tokenMint,
+        status: "review",
+      });
+
+      throw new Error("Withdrawal limit exceeded, added to queue for review");
+    }
+
+    const signer = Keypair.fromSecretKey(devWallet.secretKey);
+    transaction.partialSign(signer);
+
+    let txnSignature;
+
+    try {
+      txnSignature = await retryTxn(
+        connection,
+        transaction,
+        blockhashWithExpiryBlockHeight,
+      );
+    } catch (e) {
+      console.log(e);
+      throw new Error(`Withdraw failed! Please retry ... `);
+    }
+    await TxnSignature.create({ txnSignature });
+
+    await Deposit.create({
+      account,
+      wallet,
+      amount,
+      type: false,
+      tokenMint,
+      txnSignature,
+    });
+
+    return {
+      success: true,
+      message: `${amount} ${tokenName ?? ""} successfully withdrawn!`,
+    };
+  } catch (e: any) {
+    console.log(e);
+    return { success: false, message: `Could not withdraw USDC. ${e.message}` };
+  }
+}
+
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse,
@@ -265,15 +464,23 @@ export default async function handler(
       });
     } else if (req.method === "POST") {
       await authenticateUser(req, res);
-      const { userId } = req.body;
-      console.log("here");
-      if (!userId) {
+      const { userId, option, wallet } = req.body;
+      console.log(userId, option, wallet);
+      if (!userId || !option) {
         return res
           .status(400)
-          .json({ success: false, message: "Missing userId parameter" });
+          .json({ success: false, message: "Missing parameters" });
       }
-
-      const result = await claimUSDC(userId);
+      let result;
+      if (option === 1) result = await gambleUSDC(userId);
+      else if (option === 2) {
+        if (!wallet) {
+          return res
+            .status(400)
+            .json({ success: false, message: "Missing parameters!" });
+        }
+        result = await withdrawUSDC(userId, wallet);
+      } else result = { success: false, message: "Invalid option!" };
       return res.status(result.success ? 200 : 400).json(result);
     } else {
       return res

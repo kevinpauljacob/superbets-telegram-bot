@@ -53,6 +53,7 @@ import {
   AdaptiveModalContent,
 } from "@/components/AdaptiveModal";
 import { formatNumber } from "@/context/transactions";
+import ClaimModal from "./ClaimModal";
 
 interface Props {
   children: ReactNode;
@@ -96,7 +97,7 @@ export default function ({ children }: Props) {
     setMinGameAmount,
     session,
     status,
-    isModalOpen,
+    isClaimModalOpen,
     myData,
     reached500,
     claimInfo,
@@ -104,7 +105,7 @@ export default function ({ children }: Props) {
     transactionsPerPage,
     threshold,
     data,
-    setIsModalOpen,
+    setIsClaimModalOpen,
     setMyData,
     setReached500,
     setClaimInfo,
@@ -112,7 +113,6 @@ export default function ({ children }: Props) {
     setData,
     getLeaderBoard,
     fetchClaimInfo,
-    claimUSDCReward,
     setHasShownOnce,
     hasShownOnce,
   } = useGlobalContext();
@@ -250,16 +250,11 @@ export default function ({ children }: Props) {
       setReached500(true);
       const modalShown = localStorage.getItem("modalShown");
       if (!myData?.isUSDCClaimed && !modalShown) {
-        setIsModalOpen(true);
+        setIsClaimModalOpen(true);
         localStorage.setItem("modalShown", "true");
       }
     }
   }, [tokenAmount]);
-
-  const handleCloseModal = () => {
-    localStorage.removeItem("modalShown");
-    setIsModalOpen(false);
-  };
 
   return (
     <>
@@ -442,115 +437,8 @@ export default function ({ children }: Props) {
 
       <ConfigureAutoModal />
       {/* Modal */}
-      {isModalOpen && !myData?.isUSDCClaimed && (
-        <AdaptiveModal open={isModalOpen} onOpenChange={handleCloseModal}>
-          <AdaptiveModalContent
-            className={`bg-[#121418] sm:overflow-y-auto min-h-[40dvh] max-h-[85dvh] w-full pb-6`}
-          >
-            <div className="flex flex-col w-full gap-3.5 px-4 sm:p-0 pt-6 justify-center overflow-y-auto">
-              {!reached500 && (
-                <div className="mx-auto mb-4">
-                  <Image
-                    src={"/assets/supertoken.png"}
-                    width={180}
-                    height={150}
-                    alt={"Coin"}
-                  />
-                </div>
-              )}
-              {!reached500 ? (
-                <div className="flex flex-col bg-[#FFFFFF05] font-semibold text-lg text-white text-opacity-75 text-center p-3.5 rounded-md md:mt-8 font-changa">
-                  <p className="pb-3">Congrats! you’ve received</p>
-                  <p className="flex items-center justify-center gap-2 text-white font-bold text-[2.5rem]">
-                    <Image
-                      src={"/assets/headCoin.png"}
-                      width={30}
-                      height={30}
-                      alt={"User"}
-                      className="rounded-full overflow-hidden"
-                    />
-                    <span>100</span>
-                  </p>
-                </div>
-              ) : (
-                <div className="flex flex-col bg-[#FFFFFF05] font-semibold text-lg text-white text-opacity-75 text-center p-3.5 rounded-md md:mt-8 font-changa">
-                  <p className="pb-3">Congrats! you've won</p>
-                  <p className="text-white font-bold text-[2.5rem]">
-                    <span>$1 USDC</span>
-                  </p>
-                </div>
-              )}
-
-              <div className="bg-[#252740] bg-opacity-50 rounded-[0.625rem] p-4">
-                <div className="text-white text-xs font-medium text-opacity-50 mb-1">
-                  Claim $1 progress
-                </div>
-                <div className="flex items-center justify-between gap-8">
-                  <div className="flex items-baseline gap-1">
-                    <span className="text-white text-sm font-semibold text-opacity-75">
-                      {formatNumber((tokenAmount * 100) / threshold, 2)}%
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <Image
-                      src={"/assets/headCoin.png"}
-                      width={13}
-                      height={13}
-                      alt={"User"}
-                      className="rounded-full overflow-hidden"
-                    />
-                    <span className="text-white text-sm font-semibold text-opacity-75">
-                      {tokenAmount.toLocaleString("en-US", {
-                        minimumFractionDigits: 2,
-                        maximumFractionDigits: 2,
-                      })}
-                      /500
-                    </span>
-                  </div>
-                </div>
-                <div
-                  className={`relative flex transition-width duration-1000 w-full rounded-full overflow-hidden h-1 bg-[#282E3D] mt-2 mb-2`}
-                >
-                  <div className="absolute h-full w-full bg-transparent flex items-center justify-evenly">
-                    {Array.from({ length: 4 }, (_, index) => index + 1).map(
-                      (_, index) => (
-                        <div key={index} className="bg-[#202138] w-1 h-1" />
-                      ),
-                    )}
-                  </div>
-                  <div
-                    style={{
-                      width: `${(tokenAmount * 100) / threshold}%`,
-                    }}
-                    // className="h-full bg-[linear-gradient(91.179deg,#C867F0_0%,#1FCDF0_50.501%,#19EF99_100%)]"
-                    className="h-full bg-[#5F4DFF]"
-                  />
-                </div>
-              </div>
-
-              {!reached500 && (
-                <div className="mx-auto w-full">
-                  <Image
-                    src={"/assets/campaign-banner.png"}
-                    width={350}
-                    height={300}
-                    alt={"Banner"}
-                    className="w-full"
-                  />
-                </div>
-              )}
-
-              {reached500 && (
-                <div
-                  onClick={() => claimUSDCReward()}
-                  className="bg-[#5F4DFF] text-white bg-opacity-50 rounded-[10px] text-center text-sm text-opacity-90 font-semibold w-full py-3 cursor-pointer"
-                >
-                  Claim your 1 USDC!
-                </div>
-              )}
-            </div>
-          </AdaptiveModalContent>
-        </AdaptiveModal>
+      {isClaimModalOpen && !myData?.isUSDCClaimed && (
+        <ClaimModal reached500={reached500} tokenAmount={tokenAmount} />
       )}
     </>
   );

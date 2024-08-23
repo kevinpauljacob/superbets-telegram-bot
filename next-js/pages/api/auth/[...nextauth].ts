@@ -228,7 +228,7 @@ export default async function auth(req: NextApiRequest, res: NextApiResponse) {
       },
       async session({ session, token }) {
         //@ts-ignore
-        session.user = { ...token?.user, id: null };
+        session.user = { ...token?.user };
         return session;
       },
     },
