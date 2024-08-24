@@ -42,7 +42,8 @@ interface Bet {
 
 export default function Leaderboard() {
   const [page, setPage] = useState(1);
-
+  const [showTooltip, setShowTooltip] = useState(false);
+  const [modal, setModal] = useState(false);
   // const [highestProfit, setHighestProfit] = useState<number | null>(null);
   // const [lastGameTime, setLastGameTime] = useState<string | null>(null);
   // const [myBets, setMyBets] = useState<any[]>([]);
@@ -132,92 +133,9 @@ export default function Leaderboard() {
     );
   };
 
-  // useEffect(() => {
-  //   getLeaderBoard();
-  // }, [session?.user]);
-
-  // useEffect(() => {
-  //   fetchClaimInfo();
-  // }, []);
-
-  // useEffect(() => {
-  //   if (tokenAmount >= 500) {
-  //     setReached500(true);
-  //     if (!myData?.isUSDCClaimed) setIsClaimModalOpen(true);
-  //   }
-  // }, [tokenAmount]);
-
-  // const calculateHighestProfit = (bets: Bet[]): number => {
-  //   return bets.reduce((maxProfit, bet) => {
-  //     if (bet.result === "Won") {
-  //       const profit = bet.amountWon - bet.amount;
-  //       return Math.max(maxProfit, profit);
-  //     }
-  //     return maxProfit;
-  //   }, 0);
-  // };
-
-  // const calculateLastGameTime = (bets: Bet[]): string => {
-  //   if (bets.length === 0) return "N/A";
-
-  //   const lastGame = bets.reduce((latest, bet) => {
-  //     return new Date(bet.createdAt) > new Date(latest.createdAt)
-  //       ? bet
-  //       : latest;
-  //   });
-
-  //   const timeDiff = Date.now() - new Date(lastGame.createdAt).getTime();
-  //   const days = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
-  //   const hours = Math.floor(
-  //     (timeDiff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60),
-  //   );
-  //   const minutes = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
-
-  //   if (days > 0) {
-  //     if (days > 1) return `${days} days ago`;
-  //     else return `${days} day ago`;
-  //   } else if (hours > 0) {
-  //     if (hours > 1) return `${hours} hrs ago`;
-  //     else return `${hours} hr ago`;
-  //   } else {
-  //     return `${minutes} min ago`;
-  //   }
-  // };
-
-  // const userHistory = async () => {
-  //   try {
-  //     const res = await fetch(
-  //       `/api/games/global/getUserHistory?email=${session?.user?.email}`,
-  //     );
-  //     const history = await res.json();
-  //     if (history.success) {
-  //       const bets: Bet[] = history?.data ?? [];
-  //       setMyBets(bets);
-  //       console.log("history", bets);
-
-  //       // Calculate highest profit
-  //       const highestProfit = calculateHighestProfit(bets);
-  //       setHighestProfit(highestProfit);
-
-  //       // Calculate time since last game
-  //       const lastGameTimeInfo = calculateLastGameTime(bets);
-  //       setLastGameTime(lastGameTimeInfo);
-  //     } else {
-  //       setMyBets([]);
-  //       setHighestProfit(null);
-  //       setLastGameTime(null);
-  //     }
-  //   } catch (err) {
-  //     setMyBets([]);
-  //     setHighestProfit(null);
-  //     setLastGameTime(null);
-  //     console.error(err);
-  //   }
-  // };
-
-  // useEffect(() => {
-  //   userHistory();
-  // }, [session?.user]);
+  const handleCloseModal = () => {
+    setModal(false);
+  };
 
   return (
     <>
@@ -225,11 +143,6 @@ export default function Leaderboard() {
         title={"Leaderboard | SUPERBETS.GAMES - 0% House Edge, Pure Wins"}
       />
       <div className="flex flex-col items-start w-full overflow-hidden min-h-screen flex-1 relative p-2 md:pt-[2rem] md:px-[3rem]">
-        {/* Navbar  */}
-        {/* <span className="text-white text-opacity-90 font-semibold text-[1.5rem] sm:text-[2rem] mt-[1rem] font-chakra tracking-[.02em] flex items-center justify-center gap-x-2 px-5 sm:px-10 2xl:px-[5%]">
-          {translator("Leaderboard", language).toUpperCase()}
-        </span> */}
-
         <div className="w-full flex flex-col lg:flex-row items-center lg:items-stretch gap-4">
           <div className="w-full h-auto lg:w-[70%] min-h-] max-w-[80rem] flex items-center justify-between">
             <div
@@ -261,7 +174,7 @@ export default function Leaderboard() {
                 height={96}
               />
               <div className="absolute flex items-center justify-between gap-8 pl-6 pr-10 top-0 left-0 w-full h-full">
-                <div className="flex flex-col gap-8">
+                <div className="flex flex-col justify-between gap-8">
                   <div className="flex flex-col sm:flex-row sm:items-center gap-2">
                     <Image
                       src={"/assets/leaderboardTrophy.svg"}
@@ -272,14 +185,17 @@ export default function Leaderboard() {
                     />
                     <div>
                       <h2 className="font-bold text-white text-[2rem] lg:text-3xl xl:text-4xl 2xl:text-5xl mb-1">
-                        Win $1 campaign
+                        Win $1
                       </h2>
                       <p className="text-[#94A3B8] font-medium text-sm xl:text-base">
                         Get Rewarded 1 $USDC once you reach 500 Coins!
                       </p>
                     </div>
                   </div>
-                  <div className="hidden sm:block font-semibold text-sm text-white/90 bg-[#5F4DFF]/50 rounded-[10px] border-2 border-[#FFFFFF0D] p-2.5 w-max">
+                  <div
+                    className="hidden sm:block font-semibold text-sm text-white/90 bg-[#5F4DFF]/50 rounded-[10px] border-2 border-[#FFFFFF0D] py-2.5 px-3.5 w-max"
+                    onClick={() => setModal(true)}
+                  >
                     How it Works
                   </div>
                 </div>
@@ -339,15 +255,45 @@ export default function Leaderboard() {
             </div>
             {/* progress  */}
             <div className="bg-[#252740] bg-opacity-50 rounded-[0.625rem] p-4">
-              <div className="text-white text-xs font-medium text-opacity-50 mb-1">
-                Claim $1 progress
-              </div>
-              <div className="flex items-center justify-between gap-8">
-                <div className="flex items-baseline gap-1">
-                  <span className="text-white text-sm font-semibold text-opacity-75">
-                    {formatNumber((tokenAmount * 100) / threshold, 2)}%
-                  </span>
+              {myData?.isWeb2User ? (
+                <div className="text-white text-xs font-medium text-opacity-50 mb-1">
+                  Claim $1 progress
                 </div>
+              ) : (
+                <div className="text-white text-xs font-medium text-opacity-50 mb-1 relative">
+                  Not Eligible{" "}
+                  <span
+                    className="text-white text-opacity-35 underline cursor-pointer"
+                    onMouseEnter={() => setShowTooltip(true)}
+                    onMouseLeave={() => setShowTooltip(false)}
+                  >
+                    Why?
+                  </span>
+                  {showTooltip && (
+                    <>
+                      <div className="absolute left-5 -top-[70px] mt-2 p-2 bg-[#D9D9D9] text-[#1A1A1A] text-xs rounded shadow-lg z-10 w-60">
+                        Users who have deposited/withdrawn crypto from wallet
+                        are not eligible!
+                      </div>
+                      <div className="absolute z-10 left-[76px] -top-[24px] bg-[#D9D9D9] rotate-45 p-2"></div>
+                    </>
+                  )}
+                </div>
+              )}
+              <div className="flex items-center justify-between gap-8">
+                {myData?.isWeb2User ? (
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-white text-sm font-semibold text-opacity-75">
+                      {formatNumber((tokenAmount * 100) / threshold, 2)}%
+                    </span>
+                  </div>
+                ) : (
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-white text-sm font-semibold text-opacity-75">
+                      0.00%
+                    </span>
+                  </div>
+                )}
                 <div className="flex items-center gap-1">
                   <Image
                     src={"/assets/headCoin.png"}
@@ -369,49 +315,23 @@ export default function Leaderboard() {
                 className={`relative flex transition-width duration-1000 w-full rounded-full overflow-hidden h-1 bg-[#282E3D] mt-2 mb-2`}
               >
                 <div className="absolute h-full w-full bg-transparent flex items-center justify-evenly">
-                  {Array.from({ length: 4 }, (_, index) => index + 1).map(
+                  {Array.from({ length: 0 }, (_, index) => index + 1).map(
                     (_, index) => (
                       <div key={index} className="bg-[#202138] w-1 h-1" />
                     ),
                   )}
                 </div>
-                <div
-                  style={{
-                    width: `${(tokenAmount * 100) / threshold}%`,
-                  }}
-                  // className="h-full bg-[linear-gradient(91.179deg,#C867F0_0%,#1FCDF0_50.501%,#19EF99_100%)]"
-                  className="h-full bg-[#5F4DFF]"
-                />
+                {myData?.isWeb2User && (
+                  <div
+                    style={{
+                      width: `${(tokenAmount * 100) / threshold}%`,
+                    }}
+                    className="h-full bg-[#5F4DFF]"
+                  />
+                )}
               </div>
             </div>
-            {/* claim button  */}
-            {/* <button
-              type="submit"
-              disabled={false}
-              className={`disabled:cursor-default disabled:opacity-70 hover:duration-75 hover:opacity-90 w-full p-2 rounded-lg transition-all bg-[#5F4DFF] disabled:bg-[#555555] hover:bg-[#7F71FF] focus:bg-[#4C3ECC] flex items-center justify-center font-chakra font-semibold text-sm text-opacity-90 tracking-wider text-white`}
-            >
-              {translator("Claim Now", language)}
-            </button> */}
-
             {!reached500 ? (
-              // <div className="flex gap-4 text-white">
-              //   <div className="flex flex-col items-center bg-[#252740] bg-opacity-50 rounded-[0.625rem] p-4 w-full">
-              //     <div className="text-white/50 text-xs font-medium">
-              //       Activity
-              //     </div>
-              //     <div className="text-white/75 text-center text-sm xl:text-base font-semibold">
-              //       {lastGameTime ?? "N/A"}
-              //     </div>
-              //   </div>
-              //   <div className="flex flex-col items-center bg-[#252740] bg-opacity-50 rounded-[0.625rem] p-4 w-full">
-              //     <div className="text-white/50 text-xs text-center font-medium">
-              //       Biggest Gain
-              //     </div>
-              //     <div className="text-white/75  text-center text-sm xl:text-base font-semibold">
-              //       +{highestProfit?.toFixed(2)}
-              //     </div>
-              //   </div>
-              // </div>
               <div className="bg-[#252740] bg-opacity-50 rounded-[0.625rem] p-4">
                 <div className="text-white text-xs font-medium text-opacity-50 mb-1">
                   Winners progress
@@ -449,7 +369,6 @@ export default function Leaderboard() {
                     style={{
                       width: `${claimInfo.claimedCount * 10}%`,
                     }}
-                    // className="h-full bg-[linear-gradient(91.179deg,#C867F0_0%,#1FCDF0_50.501%,#19EF99_100%)]"
                     className="h-full bg-[#5F4DFF]"
                   />
                 </div>
@@ -478,6 +397,96 @@ export default function Leaderboard() {
             myData={myData}
           />
         </div>
+        {/* Modal */}
+        {modal && (
+          <AdaptiveModal open={modal} onOpenChange={handleCloseModal}>
+            <AdaptiveModalContent
+              className={`bg-[#121418] sm:overflow-y-auto min-h-[40dvh] max-h-[85dvh] w-full px-8 pb-6`}
+            >
+              <div className="pt-6 sm:pt-0">
+                <h1 className="text-white text-opacity-90 font-bold text-2xl">
+                  How It Works?
+                </h1>
+                <div className="flex flex-col items-center py-8 w-full">
+                  <div className="bg-[#FFFFFF05] text-[#FFFFFFBF] text-sm text-center rounded-[10px] p-5 w-full">
+                    Get 100 coins when you sign up.
+                  </div>
+                  <svg
+                    width="2"
+                    height="25"
+                    viewBox="0 0 2 25"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <line
+                      x1="1"
+                      y1="4.8822e-08"
+                      x2="0.999999"
+                      y2="25"
+                      stroke="white"
+                      stroke-opacity="0.2"
+                      stroke-width="2"
+                      stroke-dasharray="2 2"
+                    />
+                  </svg>
+                  <div className="bg-[#FFFFFF05] text-[#FFFFFFBF] text-sm text-center rounded-[10px] p-5 w-full">
+                    Use your coins to bet on any casino games.
+                  </div>
+                  <svg
+                    width="2"
+                    height="25"
+                    viewBox="0 0 2 25"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <line
+                      x1="1"
+                      y1="4.8822e-08"
+                      x2="0.999999"
+                      y2="25"
+                      stroke="white"
+                      stroke-opacity="0.2"
+                      stroke-width="2"
+                      stroke-dasharray="2 2"
+                    />
+                  </svg>
+                  <div className="bg-[#FFFFFF05] text-[#FFFFFFBF] text-sm text-center rounded-[10px] p-5 w-full">
+                    The first 10 players to reach 500 coins on the leaderboard
+                    win 1 $USDC each
+                  </div>
+                  <svg
+                    width="2"
+                    height="25"
+                    viewBox="0 0 2 25"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <line
+                      x1="1"
+                      y1="4.8822e-08"
+                      x2="0.999999"
+                      y2="25"
+                      stroke="white"
+                      stroke-opacity="0.2"
+                      stroke-width="2"
+                      stroke-dasharray="2 2"
+                    />
+                  </svg>
+                  <div className="bg-[#FFFFFF05] text-[#FFFFFFBF] text-sm text-center rounded-[10px] p-5 w-full">
+                    Every 24 hours, the leaderboard resets. All coins are
+                    burned, and everyone starts fresh with 100 coins.
+                  </div>
+                </div>
+                <div
+                  className="bg-[#5F4DFF]/50 hover:bg-[#5F4DFF]/50 transition-all duration-300 text-white  rounded-[10px] text-center text-sm text-opacity-90 font-semibold w-full py-3 cursor-pointer"
+                  onClick={() => setModal(false)}
+                >
+                  Close
+                </div>
+              </div>
+            </AdaptiveModalContent>
+          </AdaptiveModal>
+        )}
       </div>
     </>
   );
