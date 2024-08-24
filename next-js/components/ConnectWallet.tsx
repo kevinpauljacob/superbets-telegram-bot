@@ -11,6 +11,7 @@ import Loader from "./games/Loader";
 
 export interface SessionUser {
   user: {
+    id: string;
     name: string;
     email: string;
     image: string;

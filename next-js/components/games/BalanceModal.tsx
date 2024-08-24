@@ -51,7 +51,7 @@ export default function BalanceModal() {
   const historyHeaders = ["Time", "Amount", "Type", "Status"];
   const mobileHistoryHeaders = ["Amount", "Status"];
   const [checked, setChecked] = useState(false);
-  const [depositWallet, setDepositWallet] = useState<string>("");
+  const [withdrawWallet, setWithdrawWallet] = useState<string>("");
 
   const onSubmit = async (data: any) => {
     if (!loading) {
@@ -77,7 +77,7 @@ export default function BalanceModal() {
           // } else
           response = await withdraw(
             session?.user?.email,
-            depositWallet,
+            withdrawWallet,
             amount,
             selectedToken.tokenMint,
           );
@@ -106,14 +106,14 @@ export default function BalanceModal() {
   const handleWalletChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
-    setDepositWallet(e.target.value);
+    setWithdrawWallet(e.target.value);
   };
 
   const handleGetHistory = async () => {
     console.log("Getting History");
     try {
       const res = await fetch(
-        `/api/games/wallet/getDeposits?wallet=${session?.user?.wallet}`,
+        `/api/games/wallet/getDeposits?user=${session?.user?.id}`,
         {
           method: "GET",
           headers: {
@@ -247,7 +247,8 @@ export default function BalanceModal() {
                         (history) =>
                           !history?.type &&
                           history?.status &&
-                          history?.status == "review",
+                          (history?.status == "review" ||
+                            history?.status == "pending"),
                       ).length
                     }
                   </div>
@@ -341,7 +342,7 @@ export default function BalanceModal() {
                     {/* wallet input box  */}
                     <div className="mb-0 flex w-full flex-col">
                       <label className="mb-1 font-changa font-medium text-xs text-white text-opacity-90">
-                        {translator("Deposit Wallet", language)}
+                        {translator("Withdraw Wallet", language)}
                       </label>
 
                       <div
@@ -358,7 +359,7 @@ export default function BalanceModal() {
                           autoComplete="off"
                           onChange={handleWalletChange}
                           placeholder={""}
-                          value={depositWallet}
+                          value={withdrawWallet}
                           className={`flex w-full min-w-0 bg-transparent text-sm text-[#94A3B8] placeholder-[#94A3B8]  placeholder-opacity-40 outline-none`}
                         />
                       </div>
@@ -372,7 +373,7 @@ export default function BalanceModal() {
                       >
                         {methods.formState.errors["withdraw-wallet"]
                           ? methods.formState.errors[
-                              "deposit-wallet"
+                              "withdraw-wallet"
                             ]!.message!.toString()
                           : "NONE"}
                       </span>
@@ -473,75 +474,17 @@ export default function BalanceModal() {
                     <button
                       type="submit"
                       className="rounded-[5px] -mt-1 mb-4 disabled:opacity-50 border border-[#F200F21A] bg-[#5F4DFF] hover:bg-[#7F71FF] focus:bg-[#4C3ECC] transition-all py-2.5 font-changa text-base font-medium text-[#F0F0F0] text-opacity-90"
-                      // disabled={actionType === "Deposit" && !checked}
+                      disabled={
+                        loading ||
+                        !withdrawWallet ||
+                        !(withdrawWallet?.length > 0)
+                      }
                     >
                       {loading ? <Loader /> : translator(actionType, language)}
                     </button>
                   </>
                 )}
 
-                {/* {actionType === "Deposit" && (
-                  <div className="mb-0 flex w-full flex-col">
-                    <div className="mb-1 flex w-full items-center justify-between">
-                      <label className="mb-1 font-changa font-medium text-xs text-white text-opacity-90">
-                        {translator(actionType, language)}{" "}
-                        {translator("Amount", language)}
-                      </label>
-                      <span className="font-changa font-medium text-sm text-[#94A3B8] text-opacity-90">
-                        {truncateNumber(
-                          userTokens.find(
-                            (token) =>
-                              token?.mintAddress &&
-                              token?.mintAddress === selectedToken?.tokenMint,
-                          )?.balance ?? 0,
-                          3,
-                        )}{" "}
-                        ${selectedToken?.tokenName}
-                      </span>
-                    </div>
-                    <div
-                      className={`group flex h-11 w-full cursor-pointer items-center rounded-[8px] bg-[#202329] pl-4 pr-2.5`}
-                    >
-                      <input
-                        id={"amount-input"}
-                        {...methods.register("amount", {
-                          required: "Amount is required",
-                        })}
-                        type={"number"}
-                        step={"any"}
-                        autoComplete="off"
-                        onChange={handleChange}
-                        placeholder={"Amount"}
-                        value={amount}
-                        className={`flex w-full min-w-0 bg-transparent text-sm text-[#94A3B8] placeholder-[#94A3B8]  placeholder-opacity-40 outline-none`}
-                      />
-                      <span
-                        className="text-xs font-medium text-white text-opacity-50 bg-[#292C32] hover:bg-[#47484A] focus:bg-[#47484A] transition-all rounded-[5px] py-1.5 px-4"
-                        onClick={() => {
-                          let token = userTokens.find(
-                            (t) => t?.mintAddress === selectedToken?.tokenMint,
-                          );
-                          setAmount(token?.balance ?? 0);
-                        }}
-                      >
-                        {translator("Max", language)}
-                      </span>
-                    </div>
-                    <span
-                      className={`${
-                        methods.formState.errors["amount"]
-                          ? "opacity-100"
-                          : "opacity-0"
-                      } mt-1.5 flex items-center gap-1 text-xs text-[#D92828]`}
-                    >
-                      {methods.formState.errors["amount"]
-                        ? methods.formState.errors[
-                            "amount"
-                          ]!.message!.toString()
-                        : "NONE"}
-                    </span>
-                  </div>
-                )} */}
                 {/* wallet box  */}
                 {actionType === "Deposit" && (
                   <>
@@ -557,8 +500,12 @@ export default function BalanceModal() {
                             : "Please accept the terms."}
                         </span>
                         <FaRegCopy
-                          onClick={() => checked && copyToClipboard(session?.user?.wallet)}
-                          className={`w-5 h-5 text-[#555555] cursor-pointer ${!checked && "hidden"}`}
+                          onClick={() =>
+                            checked && copyToClipboard(session?.user?.wallet)
+                          }
+                          className={`w-5 h-5 text-[#555555] cursor-pointer ${
+                            !checked && "hidden"
+                          }`}
                         />
                       </div>
                     </div>
