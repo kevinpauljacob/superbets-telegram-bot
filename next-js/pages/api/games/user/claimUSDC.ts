@@ -162,45 +162,14 @@ async function gambleUSDC(userId: string) {
   try {
     console.log(`Starting USDC claim process for user: ${userId}`);
 
-    const user = await GameUser.findById(userId);
-    if (!user) {
-      console.log("User not found");
-      return { success: false, message: "User not found" };
-    }
-
-    if (user.isUSDCClaimed) {
-      console.log("USDC already claimed");
-      return { success: false, message: "USDC already claimed" };
-    }
-
-    const hasSuperDeposit = user.deposit.some(
-      (d: any) => d.amount >= 500 && d.tokenMint === "SUPER",
-    );
-
-    if (!hasSuperDeposit) {
-      console.log("Not eligible for USDC claim");
-      return { success: false, message: "Not eligible for USDC claim" };
-    }
+    let user = await User.findById(userId);
 
     const claimedCount = await GameUser.countDocuments({
       isUSDCClaimed: true,
     });
 
-    if (claimedCount >= 10) {
-      console.log("All USDC spots for today have been claimed");
-      return {
-        success: false,
-        message: "All USDC spots for today have been claimed",
-      };
-    }
-
     const claimCount = claimedCount + 1;
-    const tokenMint = SPL_TOKENS.find((t) => t.tokenName === "USDC")?.tokenMint;
-
-    if (!tokenMint) {
-      console.log("USDC token mint not found");
-      return { success: false, message: "USDC token mint not found" };
-    }
+    const tokenMint = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v";
 
     // Ensure the user has a deposit entry for the USDC token
     await GameUser.findOneAndUpdate(
@@ -262,7 +231,7 @@ async function gambleUSDC(userId: string) {
       tokenMint,
       status: "completed",
       comments: "USDC reward claimed",
-      txnSignature: uuidv4(),
+      txnSignature: uuidv4().toString(),
       wallet: user.wallet,
     });
 
@@ -292,39 +261,15 @@ type Totals = {
 
 async function withdrawUSDC(userId: string, wallet: string) {
   try {
-    if (!userId || !wallet) throw new Error("Missing parameters!");
-
-    await connectDatabase();
-
     let user = await User.findById(userId);
 
-    if (!user) throw new Error("User does not exist !");
-
     const account = user._id;
-
-    if (user.isUSDCClaimed) {
-      console.log("USDC already claimed");
-      return { success: false, message: "USDC already claimed" };
-    }
-
-    const hasSuperDeposit = user.deposit.some(
-      (d: any) => d.amount >= 500 && d.tokenMint === "SUPER",
-    );
-
-    if (!hasSuperDeposit) {
-      console.log("Not eligible for USDC claim");
-      throw new Error("Not eligible for USDC claim");
-    }
 
     const claimedCount = await GameUser.countDocuments({
       isUSDCClaimed: true,
     });
 
-    if (claimedCount >= 10) {
-      console.log("All USDC spots for today have been claimed");
-      throw new Error("All USDC spots for today have been claimed");
-    }
-
+    const claimCount = claimedCount + 1;
     const tokenMint = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v";
     const amount = 1;
 
@@ -342,7 +287,7 @@ async function withdrawUSDC(userId: string, wallet: string) {
         $or: [{ isUSDCClaimed: { $exists: false } }, { isUSDCClaimed: false }],
       },
       {
-        $set: { isUSDCClaimed: true },
+        $set: { isUSDCClaimed: true, claimCount },
       },
       {
         new: true,
@@ -424,7 +369,16 @@ async function withdrawUSDC(userId: string, wallet: string) {
         blockhashWithExpiryBlockHeight,
       );
     } catch (e) {
-      console.log(e);
+      await Deposit.create({
+        account,
+        wallet,
+        amount,
+        type: false,
+        comments: "Retry Transaction failed!",
+        txnSignature: uuidv4().toString(),
+        tokenMint,
+        status: "failed",
+      });
       throw new Error(`Withdraw failed! Please retry ... `);
     }
     await TxnSignature.create({ txnSignature });
@@ -464,13 +418,53 @@ export default async function handler(
       });
     } else if (req.method === "POST") {
       await authenticateUser(req, res);
+
       const { userId, option, wallet } = req.body;
-      console.log(userId, option, wallet);
+
       if (!userId || !option) {
         return res
           .status(400)
           .json({ success: false, message: "Missing parameters" });
       }
+
+      const user = await GameUser.findById(userId);
+      if (!user) {
+        console.log("User not found!");
+        return res
+          .status(400)
+          .json({ success: false, message: "User not found!" });
+      }
+
+      if (user.isUSDCClaimed) {
+        console.log("USDC already claimed!");
+        return res
+          .status(400)
+          .json({ success: false, message: "USDC already claimed!" });
+      }
+
+      const hasSuperDeposit = user.deposit.some(
+        (d: any) => d.amount >= 500 && d.tokenMint === "SUPER",
+      );
+
+      if (!hasSuperDeposit) {
+        console.log("Not eligible for USDC claim!");
+        return res
+          .status(400)
+          .json({ success: false, message: "Not eligible for USDC claim!" });
+      }
+
+      const claimedCount = await GameUser.countDocuments({
+        isUSDCClaimed: true,
+      });
+
+      if (claimedCount >= 10) {
+        console.log("All USDC spots for today have been claimed|");
+        return res.status(400).json({
+          success: false,
+          message: "All USDC spots for today have been claimed!",
+        });
+      }
+
       let result;
       if (option === 1) result = await gambleUSDC(userId);
       else if (option === 2) {
