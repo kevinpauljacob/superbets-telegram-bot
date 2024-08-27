@@ -392,7 +392,7 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
 
   const getLeaderBoard = async () => {
     try {
-      const res = await fetch("/api/getInfo?option=4");
+      const res = await fetch("/api/getInfo?option=2");
 
       let { success, message, users } = await res.json();
       if (success && Array.isArray(users)) {

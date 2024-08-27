@@ -78,7 +78,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     switch (parseInt(option)) {
       // 1 - get User details
 
-      //TODO: Add auth to this option
+      //TODO: Change to POST method and add authentication
       case 1: {
         if (!email && !wallet)
           return res
@@ -101,12 +101,14 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         });
       }
 
-      // 4 - get leaderboard with specific tokenMint
-      case 4: {
+      // 2 - get leaderboard with specific tokenMint
+      case 2: {
         let usersInfo = await User.aggregate([
           { $unwind: "$deposit" },
           { $match: { "deposit.tokenMint": "SUPER" } },
           { $sort: { "deposit.amount": -1 } },
+          //TODO: Project only required fields
+          // { $project: { name: 1, deposit: 1, image: 1 } },
         ]);
 
         if (!usersInfo || usersInfo.length === 0) {
