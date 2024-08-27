@@ -81,13 +81,9 @@ export default function Home() {
 
   const applyReferralCode = async () => {
     try {
-      const res = await fetch("/api/getInfo", {
-        method: "POST",
-        body: JSON.stringify({ option: 4 }),
-        headers: { "Content-Type": "application/json" },
-      });
+      const res = await fetch("/api/getInfo?option=4");
 
-      const { success, users } = await res.json();
+      let { success, message, users } = await res.json();
 
       if (!success || !Array.isArray(users)) {
         console.error("Failed to fetch users or users data is invalid.");

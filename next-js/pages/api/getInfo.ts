@@ -1,6 +1,6 @@
 import connectDatabase from "@/utils/database";
 import { User } from "@/context/transactions";
-import { Coin, GameSeed, User as user } from "@/models/games";
+import { User as user } from "@/models/games";
 import { NextApiRequest, NextApiResponse } from "next";
 
 /**
@@ -13,25 +13,22 @@ import { NextApiRequest, NextApiResponse } from "next";
 /**
  * @swagger
  * /getInfo:
- *   post:
+ *   get:
  *     summary: User operations
  *     description: Perform various user-related operations based on the provided option
  *     tags:
  *      - User
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required:
- *               - option
- *             properties:
- *               option:
- *                 type: number
- *                 enum: [1, 2, 3, 4]
- *               email:
- *                 type: string
+ *     parameters:
+ *       - in: query
+ *         name: option
+ *         required: true
+ *         schema:
+ *           type: number
+ *           enum: [1, 2, 3, 4]
+ *       - in: query
+ *         name: email
+ *         schema:
+ *           type: string
  *     responses:
  *       200:
  *         description: Successful operation
@@ -59,29 +56,27 @@ import { NextApiRequest, NextApiResponse } from "next";
  */
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
-  if (req.method === "POST") {
+  if (req.method === "GET") {
     try {
-      const { option } = req.body;
+      const { option, email } = req.query;
+
       if (!option)
         return res
           .status(400)
-          .json({ success: false, message: "Missing paramters" });
+          .json({ success: false, message: "Missing parameters" });
 
       await connectDatabase();
 
-      switch (option) {
+      switch (parseInt(option as string, 10)) {
         // 1 - get User details
         case 1: {
-          const { email } = req.body;
           if (!email)
             return res
               .status(400)
-              .json({ success: false, message: "Missing paramters" });
+              .json({ success: false, message: "Missing parameters" });
 
-          let userInfo = null;
-
-          userInfo = await user.findOne({
-            email: email,
+          let userInfo = await user.findOne({
+            email: email as string,
           });
 
           if (!userInfo)
@@ -109,7 +104,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
           return res.json({ success: true, users: usersInfo });
         }
-        //global info
+        // 3 - global info
         case 3: {
           let globalInfo = await user.aggregate([
             {
@@ -133,7 +128,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
             data: globalInfo[0],
           });
         }
-        // get leaderboard
+        // 4 - get leaderboard with specific tokenMint
         case 4: {
           let usersInfo = await user.aggregate([
             { $unwind: "$deposit" },

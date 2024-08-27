@@ -392,15 +392,7 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
 
   const getLeaderBoard = async () => {
     try {
-      const res = await fetch("/api/getInfo", {
-        method: "POST",
-        body: JSON.stringify({
-          option: 4,
-        }),
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
+      const res = await fetch("/api/getInfo?option=4");
 
       let { success, message, users } = await res.json();
       if (success && Array.isArray(users)) {
@@ -481,11 +473,7 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
 
   const getCurrentUserData = async () => {
     try {
-      const res = await fetch("/api/getInfo", {
-        method: "POST",
-        body: JSON.stringify({ option: 4 }),
-        headers: { "Content-Type": "application/json" },
-      });
+      const res = await fetch("/api/getInfo?option=4");
 
       const { success, users } = await res.json();
 
@@ -522,16 +510,9 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
   const getUserDetails = async () => {
     if (session?.user && session?.user?.email)
       try {
-        const res = await fetch("/api/getInfo", {
-          method: "POST",
-          body: JSON.stringify({
-            option: 1,
-            email: session?.user?.email,
-          }),
-          headers: {
-            "Content-Type": "application/json",
-          },
-        });
+        const res = await fetch(
+          `/api/getInfo?option=1&email=${encodeURIComponent(session?.user?.email)}`,
+        );
 
         const { success, message, user } = await res.json();
 
