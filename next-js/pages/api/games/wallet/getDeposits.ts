@@ -94,17 +94,17 @@ import { SPL_TOKENS } from "@/context/config";
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === "GET") {
     try {
-      const wallet = req.query.wallet;
+      const user = req.query.user;
 
-      if (!wallet)
+      if (!user)
         return res
           .status(400)
-          .json({ success: false, message: "Wallet is required !" });
+          .json({ success: false, message: "User is required !" });
 
       await connectDatabase();
 
       let deposits = await Deposit.find(
-        { wallet },
+        { account: user },
         {},
         { sort: { createdAt: -1 } },
       ).then((deposits) => {

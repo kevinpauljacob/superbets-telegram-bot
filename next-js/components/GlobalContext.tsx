@@ -108,8 +108,8 @@ interface GlobalContextProps {
   hasShownOnce: boolean;
   setHasShownOnce: (hasShownOnce: boolean) => void;
 
-  isModalOpen: boolean;
-  setIsModalOpen: (isModelOpen: boolean) => void;
+  isClaimModalOpen: boolean;
+  setIsClaimModalOpen: (isModelOpen: boolean) => void;
 
   data: any[];
   setData: (data: any[]) => void;
@@ -131,7 +131,7 @@ interface GlobalContextProps {
 
   getLeaderBoard: () => void;
   fetchClaimInfo: () => void;
-  claimUSDCReward: () => void;
+  gambleUSDCReward: () => void;
 
   loading: boolean;
   setLoading: (stake: boolean) => void;
@@ -366,7 +366,7 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
 
   // leaderboard
   const [myData, setMyData] = useState<MyUser | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isClaimModalOpen, setIsClaimModalOpen] = useState(false);
   const [reached500, setReached500] = useState<boolean>(false);
   const [claimInfo, setClaimInfo] = useState({
     claimedCount: 0,
@@ -415,7 +415,7 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
           );
 
           if (userInfo.numOfGamesPlayed === 0 && !hasShownOnce) {
-            setIsModalOpen(true);
+            setIsClaimModalOpen(true);
             setHasShownOnce(true);
           }
 
@@ -442,7 +442,7 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
     }
   };
 
-  const claimUSDCReward = async () => {
+  const gambleUSDCReward = async () => {
     try {
       const response = await fetch("/api/games/user/claimUSDC", {
         method: "POST",
@@ -451,6 +451,7 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
         },
         body: JSON.stringify({
           userId: myData?._id,
+          option: 1,
           email: session?.user?.email,
         }),
       });
@@ -461,7 +462,7 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
         getLeaderBoard();
         getBalance();
         successCustom("USDC reward claimed successfully.");
-        setIsModalOpen(false);
+        setIsClaimModalOpen(false);
       } else {
         errorCustom(translator(data.message, language));
       }
@@ -674,8 +675,8 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
         setUserData,
         myData,
         setMyData,
-        isModalOpen,
-        setIsModalOpen,
+        isClaimModalOpen,
+        setIsClaimModalOpen,
         data,
         setData,
         maxPages,
@@ -688,7 +689,7 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
         setReached500,
         getLeaderBoard,
         fetchClaimInfo,
-        claimUSDCReward,
+        gambleUSDCReward,
         stake,
         setStake,
         stakeAmount,
