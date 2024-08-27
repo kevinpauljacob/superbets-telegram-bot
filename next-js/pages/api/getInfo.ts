@@ -1,6 +1,5 @@
 import connectDatabase from "@/utils/database";
-import { User } from "@/context/transactions";
-import { User as user } from "@/models/games";
+import { User } from "@/models/games";
 import { NextApiRequest, NextApiResponse } from "next";
 
 /**
@@ -56,107 +55,76 @@ import { NextApiRequest, NextApiResponse } from "next";
  */
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
-  if (req.method === "GET") {
-    try {
-      const { option, email } = req.query;
+  try {
+    if (req.method !== "GET") {
+      return res
+        .status(405)
+        .json({ success: false, message: "Method not allowed" });
+    }
 
-      if (!option)
-        return res
-          .status(400)
-          .json({ success: false, message: "Missing parameters" });
+    const { option, email, wallet } = req.query as {
+      option: string;
+      email: string;
+      wallet: string;
+    };
 
-      await connectDatabase();
+    if (!option)
+      return res
+        .status(400)
+        .json({ success: false, message: "Missing parameters" });
 
-      switch (parseInt(option as string, 10)) {
-        // 1 - get User details
-        case 1: {
-          if (!email)
-            return res
-              .status(400)
-              .json({ success: false, message: "Missing parameters" });
+    await connectDatabase();
 
-          let userInfo = await user.findOne({
-            email: email as string,
-          });
+    switch (parseInt(option)) {
+      // 1 - get User details
 
-          if (!userInfo)
-            return res.json({
-              success: true,
-              user: null,
-              message: "User not found",
-            });
-
-          return res.json({
-            success: true,
-            user: userInfo,
-            message: "User found",
-          });
-        }
-        // 2 - get leaderboard
-        case 2: {
-          let usersInfo: User[] | null = await user.find().sort({ points: -1 });
-
-          if (!usersInfo)
-            return res.status(400).json({
-              success: false,
-              message: "Unable to fetch data.",
-            });
-
-          return res.json({ success: true, users: usersInfo });
-        }
-        // 3 - global info
-        case 3: {
-          let globalInfo = await user.aggregate([
-            {
-              $group: {
-                _id: null,
-                totalVolume: { $sum: "$solAmount" },
-                users: { $sum: 1 },
-                stakedTotal: { $sum: "$stakedAmount" },
-              },
-            },
-          ]);
-
-          if (!globalInfo)
-            return res.status(400).json({
-              success: false,
-              message: "Unable to fetch data.",
-            });
-
-          return res.json({
-            success: true,
-            data: globalInfo[0],
-          });
-        }
-        // 4 - get leaderboard with specific tokenMint
-        case 4: {
-          let usersInfo = await user.aggregate([
-            { $unwind: "$deposit" },
-            { $match: { "deposit.tokenMint": "SUPER" } },
-            { $sort: { "deposit.amount": -1 } },
-          ]);
-
-          if (!usersInfo || usersInfo.length === 0) {
-            return res.status(400).json({
-              success: false,
-              message: "Unable to fetch data.",
-            });
-          }
-
-          return res.json({ success: true, users: usersInfo });
-        }
-        default:
+      //TODO: Add auth to this option
+      case 1: {
+        if (!email && !wallet)
           return res
             .status(400)
-            .json({ success: false, message: "Invalid option" });
+            .json({ success: false, message: "Missing parameters" });
+
+        let user = await User.findOne({
+          $or: [{ email }, { wallet }],
+        });
+
+        if (!user)
+          return res.json({
+            success: false,
+            user: null,
+          });
+
+        return res.json({
+          success: true,
+          user,
+        });
       }
-    } catch (err: any) {
-      return res.status(500).json({ success: false, message: err.message });
+
+      // 4 - get leaderboard with specific tokenMint
+      case 4: {
+        let usersInfo = await User.aggregate([
+          { $unwind: "$deposit" },
+          { $match: { "deposit.tokenMint": "SUPER" } },
+          { $sort: { "deposit.amount": -1 } },
+        ]);
+
+        if (!usersInfo || usersInfo.length === 0) {
+          return res.status(400).json({
+            success: false,
+            message: "Unable to fetch data.",
+          });
+        }
+
+        return res.json({ success: true, users: usersInfo });
+      }
+      default:
+        return res
+          .status(400)
+          .json({ success: false, message: "Invalid option" });
     }
-  } else {
-    return res
-      .status(405)
-      .json({ success: false, message: "Method not allowed" });
+  } catch (err: any) {
+    return res.status(500).json({ success: false, message: err.message });
   }
 }
 

@@ -81,39 +81,30 @@ export default function Home() {
 
   const applyReferralCode = async () => {
     try {
-      const res = await fetch("/api/getInfo?option=4");
-
-      let { success, message, users } = await res.json();
-
-      if (!success || !Array.isArray(users)) {
-        console.error("Failed to fetch users or users data is invalid.");
-        return;
-      }
-
       if (!session?.user?.email && !session?.user?.wallet) {
         console.error("No session user information available.");
         return;
       }
 
-      const userInfo = users.find(
-        (info: any) =>
-          (info?.email && info?.email === session?.user?.email) ||
-          (info?.wallet && info?.wallet === session?.user?.wallet),
+      const res = await fetch(
+        `/api/getInfo?option=1&email=${session?.user?.email}&wallet=${session?.user?.wallet}`,
       );
 
-      if (!userInfo) {
-        console.error("User not found.");
+      let { success, user } = await res.json();
+
+      if (!success) {
+        console.error("Failed to fetch users or users data is invalid.");
         return;
       }
 
-      if (referralCode && userInfo._id) {
+      if (referralCode && user._id) {
         const response = await fetch(`/api/referral/apply`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            account: userInfo._id,
+            account: user._id,
             referralCode: referralCode,
           }),
         });

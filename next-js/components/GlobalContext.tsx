@@ -473,34 +473,25 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
 
   const getCurrentUserData = async () => {
     try {
-      const res = await fetch("/api/getInfo?option=4");
-
-      const { success, users } = await res.json();
-
-      if (!success || !Array.isArray(users)) {
-        console.error("Failed to fetch users or users data is invalid.");
-        return null;
-      }
-
       if (!session?.user?.email && !session?.user?.wallet) {
         console.error("No session user information available.");
         return null;
       }
 
-      const userInfo = users.find(
-        (info: any) =>
-          (info?.email && info?.email === session?.user?.email) ||
-          (info?.wallet && info?.wallet === session?.user?.wallet),
+      const res = await fetch(
+        `/api/getInfo?option=1&email=${session?.user?.email}&wallet=${session?.user?.wallet}`,
       );
 
-      if (!userInfo) {
-        console.error("User not found.");
+      const { success, user } = await res.json();
+
+      if (!success) {
+        console.error("Failed to fetch users or users data is invalid.");
         return null;
       }
 
-      setMyData(userInfo);
+      setMyData(user);
 
-      return userInfo;
+      return user;
     } catch (e) {
       console.error("Error fetching user data:", e);
       return null;

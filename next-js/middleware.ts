@@ -28,12 +28,7 @@ const validateApiKey = async (apiKey: string): Promise<boolean> => {
   }
 };
 
-const whiteListRoutes = [
-  "/api/auth",
-  "/api/games/global",
-  "/api/games/user",
-  "/api/getInfo",
-];
+const whiteListRoutes = ["/api/auth", "/api/games/global", "/api/games/user"];
 
 const specificRoutes = [
   "/api/referral/web2User",
