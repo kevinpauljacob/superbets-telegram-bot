@@ -25,17 +25,11 @@ export function Header({
   const {
     language,
     setLanguage,
-    userData,
-    getUserDetails,
     mobileSidebar,
     setMobileSidebar,
     setShowConnectModal,
   } = useGlobalContext();
   const [langSelect, setLangSelect] = useState(false);
-
-  // useEffect(() => {
-  //   if (!userData && wallet && wallet.publicKey) getUserDetails();
-  // }, [wallet.publicKey]);
 
   return (
     <div

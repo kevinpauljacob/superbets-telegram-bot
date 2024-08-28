@@ -86,9 +86,16 @@ export default function Home() {
         return;
       }
 
-      const res = await fetch(
-        `/api/getInfo?option=1&email=${session?.user?.email}&wallet=${session?.user?.wallet}`,
-      );
+      const res = await fetch(`/api/getInfo`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          account: session?.user?.id,
+          option: 1,
+        }),
+      });
 
       let { success, user } = await res.json();
 

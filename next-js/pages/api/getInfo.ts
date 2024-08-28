@@ -1,6 +1,7 @@
 import connectDatabase from "@/utils/database";
 import { User } from "@/models/games";
 import { NextApiRequest, NextApiResponse } from "next";
+import authenticateUser from "@/utils/authenticate";
 
 /**
  * @swagger
@@ -56,16 +57,21 @@ import { NextApiRequest, NextApiResponse } from "next";
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
-    if (req.method !== "GET") {
+    let query = {};
+
+    if (req.method === "GET") {
+      query = req.query;
+    } else if (req.method === "POST") {
+      query = req.body;
+    } else {
       return res
         .status(405)
         .json({ success: false, message: "Method not allowed" });
     }
 
-    const { option, email, wallet } = req.query as {
+    const { option, account } = query as {
       option: string;
-      email: string;
-      wallet: string;
+      account: string;
     };
 
     if (!option)
@@ -80,14 +86,20 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
       //TODO: Change to POST method and add authentication
       case 1: {
-        if (!email && !wallet)
+        if (req.method !== "POST") {
+          return res
+            .status(405)
+            .json({ success: false, message: "Method not allowed" });
+        }
+
+        if (!account)
           return res
             .status(400)
             .json({ success: false, message: "Missing parameters" });
 
-        let user = await User.findOne({
-          $or: [{ email }, { wallet }],
-        });
+        await authenticateUser(req, res);
+
+        let user = await User.findById(account, { iv: 0, privateKey: 0 });
 
         if (!user)
           return res.json({
@@ -103,12 +115,24 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
       // 2 - get leaderboard with specific tokenMint
       case 2: {
+        if (req.method !== "GET") {
+          return res
+            .status(405)
+            .json({ success: false, message: "Method not allowed" });
+        }
+
         let usersInfo = await User.aggregate([
           { $unwind: "$deposit" },
           { $match: { "deposit.tokenMint": "SUPER" } },
           { $sort: { "deposit.amount": -1 } },
-          //TODO: Project only required fields
-          // { $project: { name: 1, deposit: 1, image: 1 } },
+          {
+            $project: {
+              _id: 0,
+              name: 1,
+              image: 1,
+              amount: "$deposit.amount",
+            },
+          },
         ]);
 
         if (!usersInfo || usersInfo.length === 0) {
