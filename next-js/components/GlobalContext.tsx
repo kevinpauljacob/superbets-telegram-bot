@@ -422,9 +422,11 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
               (info?.wallet && info?.wallet === session?.user?.wallet),
           );
 
-          if (userInfo.numOfGamesPlayed === 0 && !hasShownOnce) {
+          const claimModalShown = localStorage.getItem("claimModalShown");
+          console.log("Claim Modal Shown:", claimModalShown);
+          if (userInfo.numOfGamesPlayed === 0 && !claimModalShown) {
             setIsClaimModalOpen(true);
-            setHasShownOnce(true);
+            localStorage.setItem("claimModalShown", "true");
           }
 
           setMyData(userInfo);

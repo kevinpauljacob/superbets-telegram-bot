@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useGlobalContext } from "./GlobalContext";
 import Image from "next/image";
 import { SPL_TOKENS } from "@/context/config";
@@ -19,9 +19,11 @@ export default function CoinSelector() {
     coinData,
     startAuto,
     session,
+    myData,
     status,
   } = useGlobalContext();
   const [showSelectCoinModal, setShowSelectCoinModal] = useState(false);
+  const [showTooltip, setShowTooltip] = useState(false);
   const [fiat, setFiat] = useState(false);
 
   function formatAmount(amount: number) {
@@ -39,6 +41,22 @@ export default function CoinSelector() {
       maximumFractionDigits: maximumFractionDigits,
     });
   }
+
+  useEffect(() => {
+    if (myData?.isWeb2User === false) {
+      const usdcCoin = SPL_TOKENS.find((coin) => coin.tokenName === "USDC");
+      if (usdcCoin) {
+        setSelectedCoin({
+          amount:
+            coinData?.find((c) => c.tokenMint === usdcCoin.tokenMint)?.amount ||
+            0,
+          tokenMint: usdcCoin.tokenMint,
+          tokenName: usdcCoin.tokenName,
+          icon: usdcCoin.icon,
+        });
+      }
+    }
+  }, [myData?.isWeb2User]);
 
   return (
     <div className="relative flex items-center gap-2">
@@ -73,7 +91,7 @@ export default function CoinSelector() {
         onClick={() => {
           session?.user?.wallet
             ? setShowWalletModal(true)
-            : setShowConnectModal(true)
+            : setShowConnectModal(true);
         }}
         className="flex items-center h-[2.3rem] md:h-[2.4rem] px-5 md:px-4 py-0 md:py-2 gap-1 md:gap-1.5 bg-[#5F4DFF] disabled:bg-[#555555] hover:bg-[#7F71FF] focus:bg-[#4C3ECC] transition-all cursor-pointer rounded-[5px]"
       >
@@ -93,31 +111,58 @@ export default function CoinSelector() {
                   : "bg-[#2A2E381A] text-opacity-75"
               } hover:text-opacity-100  hover:bg-[#2A2E38] border-b border-white border-opacity-10 transition-all cursor-pointer`}
               onClick={() => {
-                setSelectedCoin({
-                  amount:
-                    coinData?.find((c) => c.tokenMint === coin.tokenMint)
-                      ?.amount || 0,
-                  tokenMint: coin.tokenMint,
-                  tokenName: coin.tokenName,
-                  icon: coin.icon,
-                });
-                setShowSelectCoinModal(false);
+                if (
+                  !(myData?.isWeb2User === false && coin.tokenName === "SUPER")
+                ) {
+                  setSelectedCoin({
+                    amount:
+                      coinData?.find((c) => c.tokenMint === coin.tokenMint)
+                        ?.amount || 0,
+                    tokenMint: coin.tokenMint,
+                    tokenName: coin.tokenName,
+                    icon: coin.icon,
+                  });
+                  setShowSelectCoinModal(false);
+                }
               }}
             >
               <div className="flex items-center gap-1.5">
                 <coin.icon className="w-4 h-4" />
-                <span className="text-sm font-chakra font-semibold leading-3 mt-0.5">
+
+                <span
+                  className={`${!myData?.isWeb2User && coin.tokenName === "SUPER" ? "text-[#F0F0F0] text-opacity-25" : ""} text-sm font-chakra font-semibold leading-3 mt-0.5`}
+                >
                   {coin.tokenName}
                 </span>
               </div>
-              <span className="text-sm font-chakra font-semibold leading-3 mt-0.5">
-                {(
-                  coinData?.find((c) => c.tokenMint === coin.tokenMint)
-                    ?.amount ?? 0
-                ).toLocaleString("en-US", {
-                  minimumFractionDigits: 4,
-                  maximumFractionDigits: 4,
-                })}
+              <span className="relative text-sm font-chakra font-semibold leading-3 mt-0.5">
+                {!myData?.isWeb2User && coin.tokenName === "SUPER" ? (
+                  <>
+                    <span
+                      className="text-white text-opacity-35 underline cursor-pointer"
+                      onMouseEnter={() => setShowTooltip(true)}
+                      onMouseLeave={() => setShowTooltip(false)}
+                    >
+                      Why?
+                    </span>
+                    {showTooltip && (
+                      <>
+                        <div className="absolute right-0 -top-[70px] mt-2 p-2 bg-[#D9D9D9] text-[#1A1A1A] text-xs rounded shadow-lg z-10 w-60">
+                          Users who have deposited/withdrawn crypto from wallet
+                          are not eligible!
+                        </div>
+                        <div className="absolute z-10 right-5 -top-[24px] bg-[#D9D9D9] rotate-45 p-2"></div>
+                      </>
+                    )}
+                  </>
+                ) : (
+                  coinData
+                    ?.find((c) => c.tokenMint === coin.tokenMint)
+                    ?.amount?.toLocaleString("en-US", {
+                      minimumFractionDigits: 4,
+                      maximumFractionDigits: 4,
+                    }) ?? "0.0000"
+                )}
               </span>
             </div>
           ))}
