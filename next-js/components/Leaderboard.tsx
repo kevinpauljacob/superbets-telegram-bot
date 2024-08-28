@@ -1,5 +1,9 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { obfuscatePubKey, translator, formatNumber } from "@/context/transactions";
+import {
+  obfuscatePubKey,
+  translator,
+  formatNumber,
+} from "@/context/transactions";
 import { pointTiers } from "@/context/config";
 import { useGlobalContext } from "./GlobalContext";
 import Image from "next/legacy/image";
@@ -101,14 +105,17 @@ function Leaderboard({
                   {/* {obfuscatePubKey(myData.wallet ?? "")} */}
                   {myData?.name ?? obfuscatePubKey(myData.wallet)}
                 </span>
-                <span className="flex gap-2 items-center justify-end w-[15%] text-right font-chakra text-sm font-bold text-[#FFFFFF]">
-                  {/* {myData.points.toLocaleString("en-US", {
-                    maximumFractionDigits: 2,
-                    minimumFractionDigits: 0,
-                  })} */}
-                  <Image src="/assets/coin.svg" width={13} height={13} />
-                  {parseInt(myData?.deposit?.amount ?? 0)}
-                </span>
+                <div className="flex gap-2 items-center justify-end w-[15%] text-right font-chakra text-sm font-bold text-[#ffffff]">
+                  <div className="flex-shrink-0 w-[13px] h-[13px] mb-1">
+                    <Image
+                      src="/assets/coin.svg"
+                      width={13}
+                      height={13}
+                      alt="Coin"
+                    />
+                  </div>
+                  <div>{parseInt(myData?.deposit?.amount ?? 0)}</div>
+                </div>
               </div>
             )}
 
@@ -168,10 +175,17 @@ function Leaderboard({
                       {/* {obfuscatePubKey(data.wallet ?? "")} */}
                       {data?.name ?? obfuscatePubKey(data?.wallet)}
                     </span>
-                    <span className="flex gap-2 items-center justify-end w-[15%] text-right font-chakra text-sm font-bold text-[#ffffff]">
-                      <Image src="/assets/coin.svg" width={13} height={13} />
-                      {parseInt(data?.deposit?.amount ?? 0)}
-                    </span>
+                    <div className="flex gap-2 items-center justify-end w-[15%] text-right font-chakra text-sm font-bold text-[#ffffff]">
+                      <div className="flex-shrink-0 w-[13px] h-[13px] mb-1">
+                        <Image
+                          src="/assets/coin.svg"
+                          width={13}
+                          height={13}
+                          alt="Coin"
+                        />
+                      </div>
+                      <div>{parseInt(data?.deposit?.amount ?? 0)}</div>
+                    </div>
                   </div>
                 ))
             ) : (
@@ -239,7 +253,6 @@ function Leaderboard({
           &gt;
         </span>
       </div>
-
     </div>
   );
 }
