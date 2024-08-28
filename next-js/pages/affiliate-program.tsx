@@ -293,7 +293,10 @@ export default function AffiliateProgram() {
       let totalEarnings = 0;
 
       for (const [token, amount] of Object.entries(feeGenerated)) {
-        // Assuming liveTokenPrice is available
+        if (!myData?.isWeb2User && token === "SUPER") {
+          continue;
+        }
+
         const tokenPriceObj = liveTokenPrice.find(
           (priceObj) => priceObj.mintAddress === token,
         );

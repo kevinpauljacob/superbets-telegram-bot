@@ -28,6 +28,7 @@ export default function Levels({
     );
   };
 
+  console.log("referralLevelData", referralLevelData);
   return (
     <div className="relative flex gap-[14px] overflow-hidden w-full">
       {referralLevelData.map((data, index) => (
@@ -76,7 +77,7 @@ function LevelsCard({
   level: number;
   data: ReferralLevelData;
 }) {
-  const { language } = useGlobalContext();
+  const { language, myData } = useGlobalContext();
   const colors = ["4594FF", "E17AFF", "00C278", "4594FF", "00C278"];
   const commission = commissionLevels[level] || 0;
   const commissionText = commission
@@ -133,7 +134,10 @@ function LevelsCard({
             fill="#94A3B8"
           />
         </svg>
-        <p className="text-[#00C278]">${truncateNumber(data.totalEarnings)}</p>
+        <p className="text-[#00C278]">
+          {`${myData?.isWeb2User ? "" : "$"}${truncateNumber(data.totalEarnings)}`}
+          {myData?.isWeb2User ? " SUPER" : ""}
+        </p>
       </div>
     </div>
   );
