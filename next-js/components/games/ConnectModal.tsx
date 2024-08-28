@@ -183,6 +183,8 @@ export default function ConnectModal() {
                   if (session?.user?.email) {
                     e.preventDefault();
                     await signOut();
+                    localStorage.removeItem("claimModalShown");
+                    localStorage.removeItem("modalShown");
                   } else {
                     handleGoogle();
                   }
