@@ -29,7 +29,6 @@ export default function ClaimModal({
   } = useGlobalContext();
 
   const handleCloseModal = () => {
-    localStorage.removeItem("modalShown");
     setIsClaimModalOpen(false);
   };
 
@@ -58,7 +57,7 @@ export default function ClaimModal({
             userId: session?.user?.id,
             option: 2,
             wallet: withdrawWallet,
-            email: session?.user?.email
+            email: session?.user?.email,
           }),
         });
 
