@@ -91,7 +91,7 @@ export default function ({ children }: Props) {
     setAutoStopLoss,
     setAutoWinChangeReset,
     setAutoLossChangeReset,
-    getUserDetails,
+    getCurrentUserData,
     selectedCoin,
     minGameAmount,
     setMinGameAmount,
@@ -226,7 +226,7 @@ export default function ({ children }: Props) {
 
   useEffect(() => {
     if (session?.user && !showWalletModal) {
-      getUserDetails();
+      getCurrentUserData();
     }
     setCurrentGame(game);
   }, [session?.user, game, showWalletModal, selectedCoin]);

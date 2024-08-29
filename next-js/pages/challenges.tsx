@@ -6,16 +6,7 @@ import FOMOHead from "@/components/HeadElement";
 export default function Store() {
   const {
     setFomoBalance,
-    getUserDetails,
   } = useGlobalContext();
-
-
-  // useEffect(() => {
-  //   if (session?.user && wallet && wallet.publicKey) {
-  //     getFOMOBalance(wallet, setFomoBalance);
-  //     getUserDetails();
-  //   }
-  // }, [session?.user, wallet.publicKey]);
 
   const cardDetails = [
     { src: "image1.jpg", name: "Product 1", points: "500,000" },

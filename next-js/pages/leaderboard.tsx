@@ -394,7 +394,6 @@ export default function Leaderboard() {
             page={page}
             setPage={setPage}
             maxPages={maxPages}
-            myData={myData}
           />
         </div>
         {/* Modal */}

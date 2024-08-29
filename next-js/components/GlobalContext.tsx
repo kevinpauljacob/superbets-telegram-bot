@@ -84,17 +84,18 @@ interface Deposit {
 interface MyUser {
   _id: string;
   email: string;
-  __v: number;
-  createdAt: string;
-  deposit: Deposit;
-  gamesPlayed: any[]; // Assuming gamesPlayed is an array of any type. Adjust if you have more information.
   image: string;
-  isOptionOngoing: boolean;
   isUSDCClaimed: boolean;
+  numOfGamesPlayed: number;
   isWeb2User: boolean;
   name: string;
-  numOfGamesPlayed: number;
-  updatedAt: string;
+}
+
+export interface LeaderboardUser {
+  rank: number;
+  name: string;
+  image: string;
+  amount: number;
 }
 
 interface GlobalContextProps {
@@ -111,8 +112,8 @@ interface GlobalContextProps {
   isClaimModalOpen: boolean;
   setIsClaimModalOpen: (isModelOpen: boolean) => void;
 
-  data: any[];
-  setData: (data: any[]) => void;
+  data: LeaderboardUser[];
+  setData: (data: LeaderboardUser[]) => void;
 
   maxPages: number;
   setMaxPages: (maxPages: number) => void;
@@ -234,7 +235,6 @@ interface GlobalContextProps {
   openVerifyModal: () => void;
   closeVerifyModal: () => void;
 
-  getUserDetails: () => Promise<void>;
   getCurrentUserData: () => Promise<void>;
   getBalance: () => Promise<void>;
   getProvablyFairData: () => Promise<ProvablyFairData | null>;
@@ -372,7 +372,7 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
     claimedCount: 0,
     spotsLeft: 10,
   });
-  const [data, setData] = useState<any[]>([]);
+  const [data, setData] = useState<LeaderboardUser[]>([]);
   const [maxPages, setMaxPages] = useState<number>(0);
   const [hasShownOnce, setHasShownOnce] = useState<boolean>(false);
 
@@ -392,19 +392,11 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
 
   const getLeaderBoard = async () => {
     try {
-      const res = await fetch("/api/getInfo", {
-        method: "POST",
-        body: JSON.stringify({
-          option: 4,
-        }),
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
+      const res = await fetch("/api/getInfo?option=2");
 
       let { success, message, users } = await res.json();
-      if (success && Array.isArray(users)) {
-        users = users.map((user, index) => {
+      if (success) {
+        users = users.map((user: any, index: number) => {
           return {
             ...user,
             rank: index + 1,
@@ -415,22 +407,7 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
 
         setData(users);
 
-        if (session?.user?.email) {
-          let userInfo = users.find(
-            (info: any) =>
-              (info?.email && info?.email === session?.user?.email) ||
-              (info?.wallet && info?.wallet === session?.user?.wallet),
-          );
-
-          const claimModalShown = localStorage.getItem("claimModalShown");
-          console.log("Claim Modal Shown:", claimModalShown);
-          if (userInfo.numOfGamesPlayed === 0 && !claimModalShown) {
-            setIsClaimModalOpen(true);
-            localStorage.setItem("claimModalShown", "true");
-          }
-
-          setMyData(userInfo);
-        }
+        if (session?.user?.email) getCurrentUserData();
       } else {
         setData([]);
         errorCustom(translator("Could not fetch leaderboard.", language));
@@ -484,80 +461,53 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
 
   const getCurrentUserData = async () => {
     try {
-      const res = await fetch("/api/getInfo", {
-        method: "POST",
-        body: JSON.stringify({ option: 4 }),
-        headers: { "Content-Type": "application/json" },
-      });
-
-      const { success, users } = await res.json();
-
-      if (!success || !Array.isArray(users)) {
-        console.error("Failed to fetch users or users data is invalid.");
-        return null;
-      }
-
       if (!session?.user?.email && !session?.user?.wallet) {
         console.error("No session user information available.");
         return null;
       }
 
-      const userInfo = users.find(
-        (info: any) =>
-          (info?.email && info?.email === session?.user?.email) ||
-          (info?.wallet && info?.wallet === session?.user?.wallet),
-      );
+      const res = await fetch(`/api/getInfo`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          account: session?.user?.id,
+          option: 1,
+        }),
+      });
 
-      if (!userInfo) {
-        console.error("User not found.");
+      const { success, user } = await res.json();
+
+      if (!success) {
+        console.error("Failed to fetch users or users data is invalid.");
         return null;
       }
 
-      setMyData(userInfo);
+      const claimModalShown = localStorage.getItem("claimModalShown");
+      if (user.numOfGamesPlayed === 0 && !claimModalShown) {
+        setIsClaimModalOpen(true);
+        localStorage.setItem("claimModalShown", "true");
+      }
 
-      return userInfo;
+      setMyData(user);
+
+      const stakeAmount = user?.stakedAmount ?? 0;
+      const stakingTier = Object.entries(stakingTiers).reduce((prev, next) => {
+        return stakeAmount >= next[1]?.limit ? next : prev;
+      })[0];
+
+      setHouseEdge(
+        launchPromoEdge || selectedCoin.tokenName === "FOMO"
+          ? 0
+          : houseEdgeTiers[parseInt(stakingTier)],
+      );
+
+      return user;
     } catch (e) {
       console.error("Error fetching user data:", e);
       return null;
     }
-  };
-
-  const getUserDetails = async () => {
-    if (session?.user && session?.user?.email)
-      try {
-        const res = await fetch("/api/getInfo", {
-          method: "POST",
-          body: JSON.stringify({
-            option: 1,
-            email: session?.user?.email,
-          }),
-          headers: {
-            "Content-Type": "application/json",
-          },
-        });
-
-        const { success, message, user } = await res.json();
-
-        if (success) {
-          setUserData(user);
-        } else console.error(message);
-
-        const stakeAmount = user?.stakedAmount ?? 0;
-        const stakingTier = Object.entries(stakingTiers).reduce(
-          (prev, next) => {
-            return stakeAmount >= next[1]?.limit ? next : prev;
-          },
-        )[0];
-
-        setHouseEdge(
-          launchPromoEdge || selectedCoin.tokenName === "FOMO"
-            ? 0
-            : houseEdgeTiers[parseInt(stakingTier)],
-        );
-      } catch (e) {
-        // errorCustom("Unable to fetch balance.");
-        console.error(e);
-      }
   };
 
   const updatePNL = async (
@@ -788,7 +738,6 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
         setShowWalletModal,
         setShowCreateCampaignModal,
         setCoinData,
-        getUserDetails,
         getCurrentUserData,
         getBalance,
         getProvablyFairData,

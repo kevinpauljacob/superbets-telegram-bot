@@ -5,7 +5,7 @@ import {
   formatNumber,
 } from "@/context/transactions";
 import { pointTiers } from "@/context/config";
-import { useGlobalContext } from "./GlobalContext";
+import { LeaderboardUser, useGlobalContext } from "./GlobalContext";
 import Image from "next/legacy/image";
 import { errorCustom } from "./toasts/ToastGroup";
 import ModalCoin from "@/public/assets/ModelCoin";
@@ -15,39 +15,27 @@ import { AdaptiveModal, AdaptiveModalContent } from "./AdaptiveModal";
 import { useRouter } from "next/navigation";
 
 interface LeaderboardProps {
-  data: any;
+  data: LeaderboardUser[];
   page: any;
   setPage: any;
   maxPages: any;
-  myData: any;
 }
 
-function Leaderboard({
-  data,
-  page,
-  setPage,
-  maxPages,
-  myData,
-}: LeaderboardProps) {
+function Leaderboard({ data, page, setPage, maxPages }: LeaderboardProps) {
   const router = useRouter();
 
-  const {
-    getUserDetails,
-    language,
-    session,
-    coinData,
-    isFirstSignUp,
-    setIsFirstSignUp,
-  } = useGlobalContext();
+  const { language, session, coinData, isFirstSignUp, setIsFirstSignUp } =
+    useGlobalContext();
   const transactionsPerPage = 10;
   const headers = ["Rank", "Player", "Coins"];
 
   const threshold = 500;
 
-  const tokenAmount = useMemo(
+  const myData = useMemo(
     () =>
-      Math.max(0, coinData?.find((c) => c.tokenMint === "SUPER")?.amount ?? 0),
-    [coinData],
+      data?.find((user) => user?.name && user?.name === session?.user?.name) ??
+      null,
+    [data],
   );
 
   return (
@@ -93,17 +81,16 @@ function Leaderboard({
                   </p>
                 </span>
                 <span className="w-[70%] flex items-center gap-2 text-left font-changa text-sm font-light text-[#F0F0F0] text-opacity-75 pl-[16.5%]">
-                  {/* <div className="relative w-8 h-8">
+                  <div className="relative w-8 h-8 rounded-full overflow-hidden">
                     <Image
-                      src={pointTier?.image}
-                      alt={pointTier?.label}
+                      src={myData?.image}
+                      alt={myData?.name}
                       layout="fill"
                       objectFit="contain"
                       objectPosition="center"
                     />
-                  </div> */}
-                  {/* {obfuscatePubKey(myData.wallet ?? "")} */}
-                  {myData?.name ?? obfuscatePubKey(myData.wallet)}
+                  </div>
+                  {myData?.name}
                 </span>
                 <div className="flex gap-2 items-center justify-end w-[15%] text-right font-chakra text-sm font-bold text-[#ffffff]">
                   <div className="flex-shrink-0 w-[13px] h-[13px] mb-1">
@@ -114,7 +101,7 @@ function Leaderboard({
                       alt="Coin"
                     />
                   </div>
-                  <div>{parseInt(myData?.deposit?.amount ?? 0)}</div>
+                  <div>{parseInt(myData?.amount.toFixed(0) ?? 0)}</div>
                 </div>
               </div>
             )}
@@ -126,11 +113,9 @@ function Leaderboard({
                   page * transactionsPerPage,
                 )
                 .filter(
-                  (data: any) =>
-                    (data?.email && data?.email !== session?.user?.email) ||
-                    (data?.wallet && data?.wallet !== session?.user?.wallet),
+                  (data) => data?.name && data?.name !== session?.user?.name,
                 )
-                .map((data: any, index: number) => (
+                .map((data, index: number) => (
                   <div
                     key={index}
                     className={`mb-2.5 flex w-full flex-row items-center gap-2 rounded-[5px] ${
@@ -157,23 +142,16 @@ function Leaderboard({
                       </p>
                     </span>
                     <span className="w-[70%] flex items-center gap-2 text-left font-changa text-sm font-light text-[#FFFFFF] text-opacity-[0.78] pl-[16.5%]">
-                      {/* <div className="relative w-8 h-8">
+                      <div className="relative w-8 h-8 rounded-full overflow-hidden">
                         <Image
-                          src={`/assets/badges/T-${Object.entries(
-                            pointTiers,
-                          ).reduce((acc: number, [key, value]) => {
-                            return data?.points >= value?.limit
-                              ? parseInt(key)
-                              : acc;
-                          }, 0)}.png`}
-                          alt="Tier"
+                          src={data?.image}
+                          alt={data?.name}
                           layout="fill"
                           objectFit="contain"
                           objectPosition="center"
                         />
-                      </div> */}
-                      {/* {obfuscatePubKey(data.wallet ?? "")} */}
-                      {data?.name ?? obfuscatePubKey(data?.wallet)}
+                      </div>
+                      {data?.name}
                     </span>
                     <div className="flex gap-2 items-center justify-end w-[15%] text-right font-chakra text-sm font-bold text-[#ffffff]">
                       <div className="flex-shrink-0 w-[13px] h-[13px] mb-1">
@@ -184,7 +162,7 @@ function Leaderboard({
                           alt="Coin"
                         />
                       </div>
-                      <div>{parseInt(data?.deposit?.amount ?? 0)}</div>
+                      <div>{parseInt(data?.amount.toFixed(0) ?? 0)}</div>
                     </div>
                   </div>
                 ))
