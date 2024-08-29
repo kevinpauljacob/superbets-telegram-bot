@@ -248,10 +248,10 @@ export default function ({ children }: Props) {
   useEffect(() => {
     if (tokenAmount >= 500) {
       setReached500(true);
-      const modalShown = localStorage.getItem("modalShown");
-      if (!myData?.isUSDCClaimed && !modalShown) {
+      const claimModalShown = localStorage.getItem("claimModalShown");
+      if (!myData?.isUSDCClaimed && !claimModalShown) {
         setIsClaimModalOpen(true);
-        localStorage.setItem("modalShown", "true");
+        localStorage.setItem("claimModalShown", "true");
       }
     }
   }, [tokenAmount]);

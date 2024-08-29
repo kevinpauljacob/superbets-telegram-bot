@@ -484,10 +484,10 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
         return null;
       }
 
-      const claimModalShown = localStorage.getItem("claimModalShown");
-      if (user.numOfGamesPlayed === 0 && !claimModalShown) {
+      const campaignModalShown = localStorage.getItem("campaignModalShown");
+      if (user.numOfGamesPlayed === 0 && !campaignModalShown) {
         setIsClaimModalOpen(true);
-        localStorage.setItem("claimModalShown", "true");
+        localStorage.setItem("campaignModalShown", "true");
       }
 
       setMyData(user);
