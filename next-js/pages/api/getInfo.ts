@@ -24,9 +24,9 @@ import authenticateUser from "@/utils/authenticate";
  *         required: true
  *         schema:
  *           type: number
- *           enum: [1, 2, 3, 4]
+ *           enum: [2]
  *       - in: query
- *         name: email
+ *         name: account
  *         schema:
  *           type: string
  *     responses:
@@ -53,97 +53,63 @@ import authenticateUser from "@/utils/authenticate";
  *         description: Method not allowed
  *       500:
  *         description: Internal server error
+ *   post:
+ *     summary: Get user details
+ *     description: Retrieve user details based on the provided account ID
+ *     tags:
+ *      - User
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               option:
+ *                 type: number
+ *                 enum: [1]
+ *               account:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Successful operation
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *                 user:
+ *                   type: object
+ *       400:
+ *         description: Bad request
+ *       405:
+ *         description: Method not allowed
+ *       500:
+ *         description: Internal server error
  */
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
-    let query = {};
+    const query = req.method === "GET" ? req.query : req.body;
+    const { option, account } = query as { option: string; account: string };
 
-    if (req.method === "GET") {
-      query = req.query;
-    } else if (req.method === "POST") {
-      query = req.body;
-    } else {
-      return res
-        .status(405)
-        .json({ success: false, message: "Method not allowed" });
-    }
-
-    const { option, account } = query as {
-      option: string;
-      account: string;
-    };
-
-    if (!option)
+    if (!option) {
       return res
         .status(400)
         .json({ success: false, message: "Missing parameters" });
+    }
 
     await connectDatabase();
 
     switch (parseInt(option)) {
-      // 1 - get User details
-
-      //TODO: Change to POST method and add authentication
-      case 1: {
-        if (req.method !== "POST") {
-          return res
-            .status(405)
-            .json({ success: false, message: "Method not allowed" });
-        }
-
-        if (!account)
-          return res
-            .status(400)
-            .json({ success: false, message: "Missing parameters" });
-
-        await authenticateUser(req, res);
-
-        let user = await User.findById(account, { iv: 0, privateKey: 0 });
-
-        if (!user)
-          return res.json({
-            success: false,
-            user: null,
-          });
-
-        return res.json({
-          success: true,
-          user,
-        });
-      }
-
-      // 2 - get leaderboard with specific tokenMint
-      case 2: {
-        if (req.method !== "GET") {
-          return res
-            .status(405)
-            .json({ success: false, message: "Method not allowed" });
-        }
-
-        let usersInfo = await User.aggregate([
-          { $unwind: "$deposit" },
-          { $match: { "deposit.tokenMint": "SUPER" } },
-          { $sort: { "deposit.amount": -1 } },
-          {
-            $project: {
-              _id: 0,
-              name: 1,
-              image: 1,
-              amount: "$deposit.amount",
-            },
-          },
-        ]);
-
-        if (!usersInfo || usersInfo.length === 0) {
-          return res.status(400).json({
-            success: false,
-            message: "Unable to fetch data.",
-          });
-        }
-
-        return res.json({ success: true, users: usersInfo });
-      }
+      case 1:
+        return handleGetUserDetails(req, res, account);
+      case 2:
+        return handleGetLeaderboard(req, res);
       default:
         return res
           .status(400)
@@ -152,6 +118,64 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
   } catch (err: any) {
     return res.status(500).json({ success: false, message: err.message });
   }
+}
+
+async function handleGetUserDetails(
+  req: NextApiRequest,
+  res: NextApiResponse,
+  account: string,
+) {
+  if (req.method !== "POST") {
+    return res
+      .status(405)
+      .json({ success: false, message: "Method not allowed" });
+  }
+
+  if (!account) {
+    return res
+      .status(400)
+      .json({ success: false, message: "Missing parameters" });
+  }
+
+  await authenticateUser(req, res);
+
+  const user = await User.findById(account, { iv: 0, privateKey: 0 });
+
+  if (!user) {
+    return res.status(400).json({ success: false, user: null });
+  }
+
+  return res.json({ success: true, user });
+}
+
+async function handleGetLeaderboard(req: NextApiRequest, res: NextApiResponse) {
+  if (req.method !== "GET") {
+    return res
+      .status(405)
+      .json({ success: false, message: "Method not allowed" });
+  }
+
+  const usersInfo = await User.aggregate([
+    { $unwind: "$deposit" },
+    { $match: { "deposit.tokenMint": "SUPER" } },
+    { $sort: { "deposit.amount": -1 } },
+    {
+      $project: {
+        _id: 0,
+        name: 1,
+        image: 1,
+        amount: "$deposit.amount",
+      },
+    },
+  ]);
+
+  if (!usersInfo) {
+    return res
+      .status(400)
+      .json({ success: false, message: "Unable to fetch data." });
+  }
+
+  return res.json({ success: true, users: usersInfo });
 }
 
 export default handler;
