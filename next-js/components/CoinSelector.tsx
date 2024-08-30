@@ -148,8 +148,7 @@ export default function CoinSelector() {
                     {showTooltip && (
                       <>
                         <div className="absolute right-0 -top-[70px] mt-2 p-2 bg-[#D9D9D9] text-[#1A1A1A] text-xs rounded shadow-lg z-10 w-60">
-                          Users who have deposited/withdrawn crypto from wallet
-                          are not eligible!
+                          Users who have bet with SOL or USDC are not eligible!
                         </div>
                         <div className="absolute z-10 right-5 -top-[24px] bg-[#D9D9D9] rotate-45 p-2"></div>
                       </>

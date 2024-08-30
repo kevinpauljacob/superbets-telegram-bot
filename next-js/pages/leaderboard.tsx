@@ -272,8 +272,7 @@ export default function Leaderboard() {
                   {showTooltip && (
                     <>
                       <div className="absolute left-5 -top-[70px] mt-2 p-2 bg-[#D9D9D9] text-[#1A1A1A] text-xs rounded shadow-lg z-10 w-60">
-                        Users who have deposited/withdrawn crypto from wallet
-                        are not eligible!
+                        Users who have bet with SOL or USDC are not eligible!
                       </div>
                       <div className="absolute z-10 left-[76px] -top-[24px] bg-[#D9D9D9] rotate-45 p-2"></div>
                     </>
@@ -377,7 +376,8 @@ export default function Leaderboard() {
               <div
                 className={`bg-[#5F4DFF] hover:bg-[#5F4DFF]/50 transition-all duration-300 text-white ${myData?.isUSDCClaimed ? "bg-opacity-50" : "bg-opacity-70"} rounded-[10px] text-center text-sm text-opacity-90 font-semibold w-full py-3 cursor-pointer`}
                 onClick={() => {
-                  if (!myData?.isUSDCClaimed) setIsClaimModalOpen(!isClaimModalOpen);
+                  if (!myData?.isUSDCClaimed)
+                    setIsClaimModalOpen(!isClaimModalOpen);
                 }}
               >
                 {myData?.isUSDCClaimed
