@@ -16,12 +16,13 @@ import connectDatabase from "./utils/database";
 const API_KEY_HEADER = "x-api-key";
 const secret = process.env.NEXTAUTH_SECRET;
 
+//TODO: Implement apiKey validation
 const validateApiKey = async (apiKey: string): Promise<boolean> => {
   try {
     // await connectDatabase();
     // const apiKeyFound = ApiKey.findOne({ apiKey });
     // return !!apiKeyFound;
-    return true;
+    return false;
   } catch (error: any) {
     console.log(error.message);
     return false;
