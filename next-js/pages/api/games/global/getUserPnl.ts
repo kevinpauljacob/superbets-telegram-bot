@@ -57,14 +57,32 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
             rest.game = game;
 
             if (gameSeed.status !== seedStatus.EXPIRED) {
-              rest.gameSeed = { ...gameSeed, serverSeed: undefined };
+              rest.gameSeed = {
+                ...gameSeed,
+                serverSeed: undefined,
+                _id: undefined,
+                iv: undefined,
+                pendingMines: undefined,
+                __v: undefined,
+                createdAt: undefined,
+                updatedAt: undefined,
+              };
             } else {
               const serverSeed = decryptServerSeed(
                 gameSeed.serverSeed,
                 encryptionKey,
                 Buffer.from(gameSeed.iv, "hex"),
               );
-              rest.gameSeed = { ...gameSeed, serverSeed };
+              rest.gameSeed = {
+                ...gameSeed,
+                serverSeed,
+                _id: undefined,
+                iv: undefined,
+                pendingMines: undefined,
+                __v: undefined,
+                createdAt: undefined,
+                updatedAt: undefined,
+              };
             }
 
             return rest;

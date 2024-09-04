@@ -20,7 +20,7 @@ import { PFModalData } from "../CoinFlip/CoinFlipProvablyFairModal";
 
 export interface Plinko {
   createdAt: string;
-  wallet: string;
+  account: string;
   amount: number;
   risk: string;
   segments: number;
@@ -31,7 +31,7 @@ export interface Plinko {
   amountWon: number;
   nonce?: number;
   tokenMint: string;
-  rows?:number;
+  rows?: number;
   gameSeed?: {
     status: seedStatus;
     clientSeed: string;
@@ -49,21 +49,18 @@ interface Props {
   isOpen: boolean;
   onClose: () => void;
   modalData: ModalData;
-  wallet?: string;
+  account?: string;
 }
 
 export default function VerifyPlinkoModal({
   isOpen,
   onClose,
   modalData,
-  wallet,
+  account,
 }: Props) {
-  //handling dice
+  //handling plinko
   const { bet } = modalData;
   const { getProvablyFairData, language } = useGlobalContext();
-  const wheelRef = useRef<HTMLDivElement>(null);
-  const [rotationAngle, setRotationAngle] = useState(0);
-  // console.log(modalData)
   //Provably Fair Modal handling
   const [isPFModalOpen, setIsPFModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -97,7 +94,7 @@ export default function VerifyPlinkoModal({
   type RiskToChance = Record<string, Record<number, Array<number>>>;
   //to handle dropodown
   const [openDropDown, setOpenDropDown] = useState<boolean>(false);
-  const [color, setColor] = useState('#ffffff');
+  const [color, setColor] = useState("#ffffff");
   // console.log(color)
   const copyToClipboard = (text?: string) => {
     if (text) navigator.clipboard.writeText(text);
@@ -119,13 +116,18 @@ export default function VerifyPlinkoModal({
   }
 
   useEffect(() => {
-  
-    const currentRisk = bet?.risk;  
-    const currentLine = bet?.rows;    
-    const currentMultiplier = bet?.strikeMultiplier; 
-    const color = getColorForMultiplier(riskToChance, multiplierColorMap, currentRisk, currentLine||0, currentMultiplier);
-    setColor(color|| '#ffffff');
-}, [isOpen]);
+    const currentRisk = bet?.risk;
+    const currentLine = bet?.rows;
+    const currentMultiplier = bet?.strikeMultiplier;
+    const color = getColorForMultiplier(
+      riskToChance,
+      multiplierColorMap,
+      currentRisk,
+      currentLine || 0,
+      currentMultiplier,
+    );
+    setColor(color || "#ffffff");
+  }, [isOpen]);
 
   const handleSeedClick = async () => {
     setIsLoading(true);
@@ -152,16 +154,21 @@ export default function VerifyPlinkoModal({
     }
   };
 
-  
-  function getColorForMultiplier(riskToChance: RiskToChance, multiplierColorMap: {[key: number]: string[]}, risk: keyof RiskToChance, line: number , multiplier: number): string | undefined {
+  function getColorForMultiplier(
+    riskToChance: RiskToChance,
+    multiplierColorMap: { [key: number]: string[] },
+    risk: keyof RiskToChance,
+    line: number,
+    multiplier: number,
+  ): string | undefined {
     const multipliers = riskToChance[risk][line];
     const multiplierIndex = multipliers.indexOf(multiplier);
-  
+
     if (multiplierIndex === -1) {
-        console.error("Multiplier not found in the array");
-        return undefined;
+      console.error("Multiplier not found in the array");
+      return undefined;
     } else {
-        return multiplierColorMap[line][multiplierIndex];
+      return multiplierColorMap[line][multiplierIndex];
     }
   }
   return (
@@ -211,15 +218,17 @@ export default function VerifyPlinkoModal({
                   </button>
                 </div>
                 <div className="mt-6 px-4 md:px-12 pt-7 border-2 border-white border-opacity-5 rounded-md flex flex-col items-center ">
-                  <div className="relative w-1/4 h-10 flex items-center justify-center font-semibold"
-                  style={{
-                    background:"#202329",
-                    borderTop:"0.2rem solid",
-                    borderColor:color,
-                    color:color,
-                    fontSize:"18px",
-                    borderRadius:"0.32rem"
-                  }}>
+                  <div
+                    className="relative w-1/4 h-10 flex items-center justify-center font-semibold"
+                    style={{
+                      background: "#202329",
+                      borderTop: "0.2rem solid",
+                      borderColor: color,
+                      color: color,
+                      fontSize: "18px",
+                      borderRadius: "0.32rem",
+                    }}
+                  >
                     {bet?.strikeMultiplier}
                   </div>
                   <div className="flex gap-4 pt-2 mb-8">
@@ -325,7 +334,7 @@ export default function VerifyPlinkoModal({
                         </div>
                       </div>
                       <div className="footer grid gap-1 mt-10">
-                        {bet.wallet !== wallet ? (
+                        {bet?.account !== account ? (
                           <>
                             <div className="text-xs text-[#94A3B8] font-changa text-opacity-75 text-center">
                               {translator(

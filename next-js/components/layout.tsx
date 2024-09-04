@@ -295,70 +295,70 @@ export default function ({ children }: Props) {
           isOpen={isVerifyModalOpen}
           onClose={closeVerifyModal}
           modalData={{ flip: (verifyModalData as Flip)! }}
-          wallet={session?.user?.wallet}
+          account={session?.user?.name}
         />
       ) : verifyModalData.game === GameType.dice ? (
         <VerifyDiceModal
           isOpen={isVerifyModalOpen}
           onClose={closeVerifyModal}
           modalData={{ bet: (verifyModalData as Dice)! }}
-          wallet={session?.user?.wallet}
+          account={session?.user?.name}
         />
       ) : verifyModalData.game === GameType.dice2 ? (
         <VerifyDice2Modal
           isOpen={isVerifyModalOpen}
           onClose={closeVerifyModal}
           modalData={{ bet: (verifyModalData as Dice2)! }}
-          wallet={session?.user?.wallet}
+          account={session?.user?.name}
         />
       ) : verifyModalData.game === GameType.limbo ? (
         <VerifyLimboModal
           isOpen={isVerifyModalOpen}
           onClose={closeVerifyModal}
           modalData={{ flip: (verifyModalData as Limbo)! }}
-          wallet={session?.user?.wallet}
+          account={session?.user?.name}
         />
       ) : verifyModalData.game === GameType.wheel ? (
         <VerifyWheelModal
           isOpen={isVerifyModalOpen}
           onClose={closeVerifyModal}
           modalData={{ bet: (verifyModalData as Wheel)! }}
-          wallet={session?.user?.wallet}
+          account={session?.user?.name}
         />
       ) : verifyModalData.game === GameType.keno ? (
         <VerifyKenoModal
           isOpen={isVerifyModalOpen}
           onClose={closeVerifyModal}
           modalData={{ bet: (verifyModalData as Keno)! }}
-          wallet={session?.user?.wallet}
+          account={session?.user?.name}
         />
       ) : verifyModalData.game === GameType.mines ? (
         <VerifyMinesModal
           isOpen={isVerifyModalOpen}
           onClose={closeVerifyModal}
           modalData={{ bet: (verifyModalData as Mines)! }}
-          wallet={session?.user?.wallet}
+          account={session?.user?.name}
         />
       ) : verifyModalData.game === GameType.roulette1 ? (
         <VerifyRoulette1Modal
           isOpen={isVerifyModalOpen}
           onClose={closeVerifyModal}
           modalData={{ bet: (verifyModalData as Roulette1)! }}
-          wallet={session?.user?.wallet}
+          account={session?.user?.name}
         />
       ) : verifyModalData.game === GameType.roulette2 ? (
         <VerifyRoulette2Modal
           isOpen={isVerifyModalOpen}
           onClose={closeVerifyModal}
           modalData={{ bet: (verifyModalData as Roulette2)! }}
-          wallet={session?.user?.wallet}
+          account={session?.user?.name}
         />
       ) : verifyModalData.game === GameType.plinko ? (
         <VerifyPlinkoModal
           isOpen={isVerifyModalOpen}
           onClose={closeVerifyModal}
           modalData={{ bet: (verifyModalData as Plinko)! }}
-          wallet={session?.user?.wallet}
+          account={session?.user?.name}
         />
       ) : null}
 

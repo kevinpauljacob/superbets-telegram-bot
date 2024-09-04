@@ -18,7 +18,7 @@ import { SPL_TOKENS } from "@/context/config";
 export interface Flip {
   flipType: "heads" | "tails";
   createdAt: string;
-  wallet: string;
+  account: string;
   amount: number;
   result: "Won" | "Lost";
   risk?: string;
@@ -43,14 +43,14 @@ interface Props {
   isOpen: boolean;
   onClose: () => void;
   modalData: ModalData;
-  wallet?: string;
+  account?: string;
 }
 
 export default function VerifyFlipModal({
   isOpen,
   onClose,
   modalData,
-  wallet,
+  account,
 }: Props) {
   const { flip } = modalData;
   const { getProvablyFairData, language } = useGlobalContext();
@@ -302,7 +302,7 @@ export default function VerifyFlipModal({
                         </div>
                       </div>
                       <div className="footer grid gap-1 mt-10">
-                        {flip.wallet !== wallet ? (
+                        {flip?.account !== account ? (
                           <>
                             <div className="text-xs text-[#94A3B8] font-changa text-opacity-75 text-center">
                               {translator(

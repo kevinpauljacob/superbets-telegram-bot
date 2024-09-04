@@ -312,7 +312,16 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       const { gameSeed, ...rest } = record.toObject();
       rest.game = GameType.limbo;
       rest.userTier = 0;
-      rest.gameSeed = { ...gameSeed, serverSeed: undefined };
+      rest.gameSeed = {
+        ...gameSeed,
+        serverSeed: undefined,
+        _id: undefined,
+        iv: undefined,
+        pendingMines: undefined,
+        __v: undefined,
+        createdAt: undefined,
+        updatedAt: undefined,
+      };
 
       const payload = rest;
 

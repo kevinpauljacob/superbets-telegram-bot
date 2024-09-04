@@ -15,7 +15,7 @@ import { PFModalData } from "../CoinFlip/CoinFlipProvablyFairModal";
 
 export interface Roulette2 {
   createdAt: string;
-  wallet: string;
+  account: string;
   amount: number;
   risk: string;
   segments: number;
@@ -43,14 +43,14 @@ interface Props {
   isOpen: boolean;
   onClose: () => void;
   modalData: ModalData;
-  wallet?: string;
+  account?: string;
 }
 
 export default function VerifyRoulette2Modal({
   isOpen,
   onClose,
   modalData,
-  wallet,
+  account,
 }: Props) {
   //handling dice
   const { bet } = modalData;
@@ -408,7 +408,7 @@ export default function VerifyRoulette2Modal({
                     </div>
                   </div>
                   <div className="footer grid gap-1 mt-10">
-                    {bet.wallet !== wallet ? (
+                    {bet?.account !== account ? (
                       <>
                         <div className="text-xs text-[#94A3B8] font-changa text-opacity-75 text-center">
                           {translator(

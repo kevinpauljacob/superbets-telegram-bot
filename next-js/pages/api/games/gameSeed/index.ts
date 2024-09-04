@@ -168,7 +168,15 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           },
         },
         {
-          projection: { serverSeed: 0 },
+          projection: {
+            serverSeed: 0,
+            _id: 0,
+            iv: 0,
+            pendingMines: 0,
+            __v: 0,
+            createdAt: 0,
+            updatedAt: 0,
+          },
           upsert: true,
           new: true,
         },
@@ -192,7 +200,15 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           },
         },
         {
-          projection: { serverSeed: 0 },
+          projection: {
+            serverSeed: 0,
+            _id: 0,
+            iv: 0,
+            pendingMines: 0,
+            __v: 0,
+            createdAt: 0,
+            updatedAt: 0,
+          },
           upsert: true,
           new: true,
         },

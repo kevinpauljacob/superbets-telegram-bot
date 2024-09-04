@@ -19,7 +19,7 @@ import { PFModalData } from "../CoinFlip/CoinFlipProvablyFairModal";
 export interface Mines {
   createdAt: string;
   minesCount: number;
-  wallet: string;
+  account: string;
   userBets: number[];
   amount: number;
   result: string;
@@ -48,14 +48,14 @@ interface Props {
   isOpen: boolean;
   onClose: () => void;
   modalData: ModalData;
-  wallet?: string;
+  account?: string;
 }
 
-export default function VerifyDice2Modal({
+export default function VerifyMinesModal({
   isOpen,
   onClose,
   modalData,
-  wallet,
+  account,
 }: Props) {
   const { bet } = modalData;
   const { getProvablyFairData, language } = useGlobalContext();
@@ -323,7 +323,7 @@ export default function VerifyDice2Modal({
                         </div>
                       </div>
                       <div className="footer grid gap-1 mt-10">
-                        {bet.wallet !== wallet ? (
+                        {bet?.account !== account ? (
                           <>
                             <div className="text-xs text-[#94A3B8] font-changa text-opacity-75 text-center">
                               {translator(

@@ -247,7 +247,16 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       const { gameSeed: savedGS, ...rest } = record.toObject();
       rest.game = GameType.mines;
       rest.userTier = 0;
-      rest.gameSeed = { ...savedGS, serverSeed: undefined };
+      rest.gameSeed = {
+        ...savedGS,
+        serverSeed: undefined,
+        _id: undefined,
+        iv: undefined,
+        pendingMines: undefined,
+        __v: undefined,
+        createdAt: undefined,
+        updatedAt: undefined,
+      };
 
       const payload = rest;
 

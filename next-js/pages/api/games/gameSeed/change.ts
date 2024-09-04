@@ -191,7 +191,18 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           status: seedStatus.ACTIVE,
         },
       },
-      { projection: { serverSeed: 0 }, new: true },
+      {
+        projection: {
+          serverSeed: 0,
+          _id: 0,
+          iv: 0,
+          pendingMines: 0,
+          __v: 0,
+          createdAt: 0,
+          updatedAt: 0,
+        },
+        new: true,
+      },
     );
 
     const { encryptedServerSeed, serverSeedHash, iv } =
@@ -206,12 +217,13 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       },
     ]).then((res) => res.at(0));
 
-    let { serverSeed, ...rest } = nextGameSeed.toObject();
+    let { serverSeed, _id, __v, createdAt, updatedAt, ...rest } =
+      nextGameSeed.toObject();
 
     return res.status(201).json({
       success: true,
       activeGameSeed,
-      nextGameSeed: rest,
+      nextGameSeed: { ...rest, iv: undefined, pendingMines: undefined },
     });
   } catch (e: any) {
     return res.status(500).json({ success: false, message: e.message });
