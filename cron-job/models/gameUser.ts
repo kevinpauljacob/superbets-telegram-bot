@@ -5,17 +5,27 @@ const gameUserSchema = new Schema(
   {
     wallet: {
       type: String,
+      required: true,
       unique: true,
-      sparse: true,
+    },
+    privateKey: {
+      type: String,
+      required: true,
+      unique: true,
+    },
+    iv: {
+      type: String,
+      required: true,
     },
     name: {
       type: String,
+      required: true,
       sparse: true,
     },
     email: {
       type: String,
+      required: true,
       unique: true,
-      sparse: true,
     },
     image: {
       type: String,
@@ -33,6 +43,18 @@ const gameUserSchema = new Schema(
           type: String,
           required: true,
           default: "SOL",
+        },
+        depositAmount: {
+          type: Number,
+          required: true,
+          default: 0,
+          min: 0,
+        },
+        interestEarned: {
+          type: Number,
+          required: true,
+          default: 0,
+          min: 0,
         },
       },
     ],
