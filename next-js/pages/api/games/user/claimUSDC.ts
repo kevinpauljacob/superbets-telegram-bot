@@ -287,13 +287,6 @@ async function withdrawUSDC(userId: string, wallet: string) {
       .then((res) => res.value.err);
 
     if (simulationErr) {
-      if (
-        typeof simulationErr === "object" &&
-        "InstructionError" in simulationErr &&
-        (simulationErr as any).InstructionError[0] === 3
-      )
-        throw new Error("Insufficient USDC house balance");
-
       throw new Error("Simulation failed");
     }
 
