@@ -280,6 +280,22 @@ async function withdrawUSDC(userId: string, wallet: string) {
         tokenMint,
         devWallet.publicKey,
       );
+    transaction.partialSign(devWallet);
+
+    const simulationErr = await connection
+      .simulateTransaction(transaction)
+      .then((res) => res.value.err);
+
+    if (simulationErr) {
+      if (
+        typeof simulationErr === "object" &&
+        "InstructionError" in simulationErr &&
+        (simulationErr as any).InstructionError[0] === 3
+      )
+        throw new Error("Insufficient USDC house balance");
+
+      throw new Error("Simulation failed");
+    }
 
     let result = await User.findOneAndUpdate(
       {
@@ -339,8 +355,9 @@ async function withdrawUSDC(userId: string, wallet: string) {
       (transferAgg.depositTotal ?? 0) +
       amount;
 
-    const tokenName = SPL_TOKENS.find((t) => t.tokenMint === tokenMint)
-      ?.tokenName!;
+    const tokenName = SPL_TOKENS.find(
+      (t) => t.tokenMint === tokenMint,
+    )?.tokenName!;
 
     if (netTransfer > timeWeightedAvgLimit[tokenName]) {
       await Deposit.create({
@@ -356,9 +373,6 @@ async function withdrawUSDC(userId: string, wallet: string) {
 
       throw new Error("Withdrawal limit exceeded, added to queue for review");
     }
-
-    const signer = Keypair.fromSecretKey(devWallet.secretKey);
-    transaction.partialSign(signer);
 
     let txnSignature;
 
@@ -389,7 +403,7 @@ async function withdrawUSDC(userId: string, wallet: string) {
       amount,
       type: false,
       tokenMint,
-      comment: 'USDC reward claim',
+      comment: "USDC reward claim",
       txnSignature,
     });
 
