@@ -106,9 +106,9 @@ const processTransaction = async (result: {
 
     // Check if the destination exists in the wallets object
     if (!Object.keys(wallets).includes(destination)) {
-      let comment = "SOL deposit destination not found in wallets object";
-      console.log(comment);
-      await createDeposit("SOL", 0, signature, destination, comment, "failed");
+      let comments = "SOL deposit destination not found in wallets object";
+      console.log(comments);
+      await createDeposit("SOL", 0, signature, destination, comments, "failed");
       return;
     }
 
@@ -126,18 +126,18 @@ const processTransaction = async (result: {
     const balanceDiff = postBalance - preBalance - 900000;
 
     if (balanceDiff <= 0) {
-      let comment = "No positive balance change for SOL deposit";
-      console.log(comment);
-      await createDeposit("SOL", 0, signature, destination, comment, "failed");
+      let comments = "No positive balance change for SOL deposit";
+      console.log(comments);
+      await createDeposit("SOL", 0, signature, destination, comments, "failed");
       return;
     }
 
     const solAmount = (postBalance! - 1000000) / 1e9;
 
     if (solAmount <= 0) {
-      let comment = "No positive balance change for SOL deposit";
-      console.log(comment);
-      await createDeposit("SOL", 0, signature, destination, comment, "failed");
+      let comments = "No positive balance change for SOL deposit";
+      console.log(comments);
+      await createDeposit("SOL", 0, signature, destination, comments, "failed");
       return;
     }
 
@@ -196,21 +196,22 @@ const processTransaction = async (result: {
     }
 
     if (!walletAddress || !tokenMint) {
-      let comment = "SPL token deposit destination not found in wallets object";
-      console.log(comment);
-      await createDeposit("", 0, signature, "", comment, "failed");
+      let comments =
+        "SPL token deposit destination not found in wallets object";
+      console.log(comments);
+      await createDeposit("", 0, signature, "", comments, "failed");
       return;
     }
 
     if (!allowedTokens.includes(tokenMint)) {
-      let comment = "SPL token not in the list of allowed tokens";
-      console.log(comment);
+      let comments = "SPL token not in the list of allowed tokens";
+      console.log(comments);
       await createDeposit(
         tokenMint,
         0,
         signature,
         walletAddress,
-        comment,
+        comments,
         "failed"
       );
       return;
@@ -223,14 +224,14 @@ const processTransaction = async (result: {
     );
 
     if (!postTokenBalance) {
-      let comment = "Post token balance not found";
-      console.log(comment);
+      let comments = "Post token balance not found";
+      console.log(comments);
       await createDeposit(
         tokenMint,
         0,
         signature,
         walletAddress,
-        comment,
+        comments,
         "failed"
       );
       return;
@@ -251,14 +252,14 @@ const processTransaction = async (result: {
     }
 
     if (tokenAmountDeposited <= 0) {
-      let comment = "No positive balance change for SPL token deposit";
-      console.log(comment);
+      let comments = "No positive balance change for SPL token deposit";
+      console.log(comments);
       await createDeposit(
         tokenMint,
         0,
         signature,
         walletAddress,
-        comment,
+        comments,
         "failed"
       );
       return;

@@ -396,7 +396,7 @@ async function withdrawUSDC(userId: string, wallet: string) {
       amount,
       type: false,
       tokenMint,
-      comment: "USDC reward claim",
+      comments: "USDC reward claim",
       txnSignature,
     });
 

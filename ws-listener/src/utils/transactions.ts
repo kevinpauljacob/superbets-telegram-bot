@@ -190,7 +190,7 @@ export async function createDeposit(
   amount: number,
   signature: string,
   wallet: string,
-  comment: string,
+  comments: string,
   status: string
 ) {
   await connectDatabase();
@@ -201,6 +201,7 @@ export async function createDeposit(
       amount,
       type: true,
       tokenMint,
+      comments,
       txnSignature: signature,
       status,
     });

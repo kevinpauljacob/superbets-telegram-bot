@@ -213,7 +213,6 @@ export default function Roulette1() {
   });
 
   const [selectedToken, setSelectedToken] = useState<Token | null>(tokens[0]);
-  console.log(selectedToken);
   const [betActive, setBetActive] = useState(false);
   const [betSetting, setBetSetting] = useState<"manual" | "auto">("manual");
   const [userInput, setUserInput] = useState<number | undefined>();
@@ -483,7 +482,7 @@ export default function Roulette1() {
       setBetInProgress(false);
     }
   };
-  console.log(`Selected Number: ${selectedBets}`);
+
   useEffect(() => {
     if (spinComplete && result !== null) {
       if (win) {
