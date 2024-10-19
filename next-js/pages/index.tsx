@@ -8,14 +8,23 @@ import StoreBanner from "@/components/Banner";
 import FomoPlay from "@/components/FomoPlay";
 import FOMOHead from "@/components/HeadElement";
 import Bets from "@/components/games/Bets";
+import WebApp from "@twa-dev/sdk";
 
 const inter = Inter({ subsets: ["latin"] });
+
+interface UserData {
+  id: number;
+  first_name: string;
+  last_name?: string;
+  username?: string;
+  language_code: string;
+  is_premium?: boolean;
+}
 
 export default function Home() {
   const { status } = useSession();
   const router = useRouter();
   const { referralCode, ...otherQueryParams } = router.query;
-
   const {
     session,
     myData,
@@ -24,6 +33,14 @@ export default function Home() {
     setShowConnectModal,
     coinData,
   } = useGlobalContext();
+
+  const [userData, setUserData] = useState<UserData | null>(null);
+
+  useEffect(() => {
+    if (WebApp.initDataUnsafe.user) {
+      setUserData(WebApp.initDataUnsafe.user as UserData);
+    }
+  }, []);
 
   useEffect(() => {
     //@ts-ignore
@@ -162,6 +179,20 @@ export default function Home() {
           </div> */}
           <div className="mb-5">
             <Bets refresh={true} />
+          </div>
+          <div>
+            {userData ? (
+              <div>
+                <p>{userData.id}</p>
+                <p>{userData.first_name}</p>
+                <p>{userData.last_name}</p>
+                <p>{userData.username}</p>
+                <p>{userData.language_code}</p>
+                <p>{userData.is_premium ? "Yes" : "No"}</p>
+              </div>
+            ) : (
+              <div>Loading...</div>
+            )}
           </div>
         </div>
       </div>
