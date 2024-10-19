@@ -1,6 +1,11 @@
 import { Html, Head, Main, NextScript } from "next/document";
 import Script from "next/script";
-
+import { Telegram } from "@twa-dev/types";
+declare global {
+  interface Window {
+    Telegram: Telegram;
+  }
+}
 export default function Document() {
   return (
     <Html lang="en">

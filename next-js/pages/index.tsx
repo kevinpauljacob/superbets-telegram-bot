@@ -8,7 +8,6 @@ import StoreBanner from "@/components/Banner";
 import FomoPlay from "@/components/FomoPlay";
 import FOMOHead from "@/components/HeadElement";
 import Bets from "@/components/games/Bets";
-import WebApp from "@twa-dev/sdk";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -37,8 +36,8 @@ export default function Home() {
   const [userData, setUserData] = useState<UserData | null>(null);
 
   useEffect(() => {
-    if (WebApp.initDataUnsafe.user) {
-      setUserData(WebApp.initDataUnsafe.user as UserData);
+    if (window.Telegram.WebApp.initDataUnsafe.user) {
+      setUserData(window.Telegram.WebApp.initDataUnsafe.user as UserData);
     }
   }, []);
 
