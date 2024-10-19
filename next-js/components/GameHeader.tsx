@@ -162,7 +162,7 @@ export default function GameHeader() {
               {selectedGame.stats?.players}
             </p>
           </div>
-          {!router.pathname.includes("options") && (
+          {/* {!router.pathname.includes("options") && (
             <div className="flex items-center gap-2 mx-1.5 my-1 ">
               <p
                 className="underline text-[#94A3B8] decoration-[#94A3B8] underline-offset-2 hover:cursor-pointer text-xs font-medium"
@@ -177,7 +177,7 @@ export default function GameHeader() {
                 height={20}
               />
             </div>
-          )}
+          )} */}
         </div>
       </div>
     </div>

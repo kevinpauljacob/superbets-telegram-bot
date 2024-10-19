@@ -105,14 +105,14 @@ export default function Wheel() {
     segments === 10
       ? 0
       : segments === 20
-      ? 25
-      : segments === 30
-      ? 50
-      : segments === 40
-      ? 75
-      : segments === 50
-      ? 100
-      : null;
+        ? 25
+        : segments === 30
+          ? 50
+          : segments === 40
+            ? 75
+            : segments === 50
+              ? 100
+              : null;
 
   useEffect(() => {
     if (!wheelRef.current) return;
@@ -273,7 +273,7 @@ export default function Wheel() {
       setIsRolling(false);
       setAutoBetCount(0);
       setStartAuto(false);
-      console.error("Error occurred while betting:", error);
+      console.error("Error occurred while spinning:", error);
     }
   };
 
@@ -304,9 +304,9 @@ export default function Wheel() {
             (autoWinChangeReset || autoLossChangeReset
               ? betAmt
               : autoBetCount === "inf"
-              ? Math.max(0, betAmt)
-              : betAmt *
-                (autoLossChange !== null ? autoLossChange / 100.0 : 0));
+                ? Math.max(0, betAmt)
+                : betAmt *
+                  (autoLossChange !== null ? autoLossChange / 100.0 : 0));
 
         // console.log("Current bet amount:", betAmt);
         // console.log("Auto loss change:", autoLossChange);
@@ -405,7 +405,7 @@ export default function Wheel() {
               disabled={isRolling}
               onClickFunction={onSubmit}
             >
-              {isRolling ? <Loader /> : "BET"}
+              {isRolling ? <Loader /> : "SPIN"}
             </BetButton>
           </div>
           {betType === "auto" && (
@@ -413,13 +413,13 @@ export default function Wheel() {
               <ConfigureAutoButton disabled={disableInput} />
             </div>
           )}
-          <div className="w-full hidden lg:flex">
+          {/* <div className="w-full hidden lg:flex">
             <BetSetting
               betSetting={betType}
               setBetSetting={setBetType}
               disabled={disableInput}
             />
-          </div>
+          </div> */}
           <div className="w-full flex flex-col nobar">
             <FormProvider {...methods}>
               <form
@@ -538,14 +538,14 @@ export default function Wheel() {
                     </div>
                   )}
                   <BetButton betAmt={betAmt} disabled={isRolling}>
-                    {isRolling ? <Loader /> : "BET"}
+                    {isRolling ? <Loader /> : "SPIN"}
                   </BetButton>
                 </div>
               </form>
             </FormProvider>
-            <div className="w-full flex lg:hidden">
+            {/* <div className="w-full flex lg:hidden">
               <BetSetting betSetting={betType} setBetSetting={setBetType} />
-            </div>
+            </div> */}
           </div>
         </>
       </GameOptions>
@@ -553,7 +553,7 @@ export default function Wheel() {
         <div className="w-full flex justify-between items-center h-4">
           {isRolling ? (
             <div className="font-chakra text-sm font-medium text-white text-opacity-75">
-              {translator("Betting", language)}...
+              {translator("Spinning", language)}...
             </div>
           ) : null}
         </div>

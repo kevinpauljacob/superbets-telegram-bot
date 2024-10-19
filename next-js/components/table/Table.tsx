@@ -219,7 +219,7 @@ export const TableButtons: React.FC<TableButtonProps> = ({ all, setAll }) => {
       <div className="hidden md:flex items-center ">
         <Image src={Dollar} alt="" width={26} height={26} />
         <span className="font-semibold font-changa text-xl text-white text-opacity-90 pl-3">
-          {translator("Bets", language)}
+          {translator("History", language)}
         </span>
       </div>
       <div className="flex w-full md:w-auto items-center gap-2 justify-center md:justify-end border-2 p-1.5 rounded-lg border-white border-opacity-[5%]">
@@ -235,10 +235,10 @@ export const TableButtons: React.FC<TableButtonProps> = ({ all, setAll }) => {
               setAll(false);
               setHighRollers(false);
             } else {
-              errorCustom(translator("Wallet not connected", language));
+              errorCustom(translator("Not Authenticated", language));
             }
           }}
-          label={translator("My Bets", language)}
+          label={translator("My History", language)}
         />
         <TButton
           active={all}
@@ -251,9 +251,9 @@ export const TableButtons: React.FC<TableButtonProps> = ({ all, setAll }) => {
               query: { ...rest },
             });
           }}
-          label={translator("All Bets", language)}
+          label={translator("All History", language)}
         />
-        <TButton
+        {/* <TButton
           active={highRollers}
           onClick={() => {
             setAll(false);
@@ -264,7 +264,7 @@ export const TableButtons: React.FC<TableButtonProps> = ({ all, setAll }) => {
             });
           }}
           label={translator("High Rollers", language)}
-        />
+        /> */}
       </div>
     </div>
   );
@@ -275,10 +275,10 @@ interface TableNodeProps {
 }
 
 export const TableHeader = ({ all, setAll }: TableButtonProps) => {
-  const headers = ["Game", "Bet Amount", "Multiplier", "Payout"];
+  const headers = ["Game", "Bet Amount", "Multiplier", "Reward"];
   const allHeaders = ["Player", ...headers];
 
-  const smallScreenHeaders = ["Game", "Payout"];
+  const smallScreenHeaders = ["Game", "Reward"];
   const { language } = useGlobalContext();
   return (
     <>

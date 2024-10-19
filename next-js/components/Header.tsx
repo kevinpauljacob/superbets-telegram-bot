@@ -81,9 +81,9 @@ export function Header({
               />
             </div>
           </div>
-          <div className="w-full justify-center absolute hidden md:flex">
+          {/* <div className="w-full justify-center absolute hidden md:flex">
             <CoinSelector />
-          </div>
+          </div> */}
           {/* left  */}
           <div className="flex ml-2 lg:mr-2 sm:items-center items-end sm:flex-row z-10">
             <div className="flex gap-8 mr-6 items-end">

@@ -9,11 +9,13 @@ export default function StoreBanner() {
     // },
     {
       href: "/leaderboard",
-      src: "/assets/banners/banner_1.png",
+      // src: "/assets/banners/banner_1.png",
+      src: "/assets/banners/leaderboard.png",
     },
     {
       href: "/leaderboard",
-      src: "/assets/banners/banner_2.png",
+      // src: "/assets/banners/banner_2.png",
+      src: "/assets/banners/leaderboard.png",
     },
     {
       href: "/leaderboard",

@@ -228,9 +228,9 @@ export default function Flip() {
             (autoWinChangeReset || autoLossChangeReset
               ? betAmt
               : autoBetCount === "inf"
-              ? Math.max(0, betAmt)
-              : betAmt *
-                (autoLossChange !== null ? autoLossChange / 100.0 : 0));
+                ? Math.max(0, betAmt)
+                : betAmt *
+                  (autoLossChange !== null ? autoLossChange / 100.0 : 0));
 
         // console.log("Current bet amount:", betAmt);
         // console.log("Auto loss change:", autoLossChange);
@@ -333,7 +333,7 @@ export default function Flip() {
               betAmt={betAmt}
               onClickFunction={onSubmit}
             >
-              {loading ? <Loader /> : "BET"}
+              {loading ? <Loader /> : "FLIP"}
             </BetButton>
           </div>
           {betSetting === "auto" && (
@@ -341,13 +341,13 @@ export default function Flip() {
               <ConfigureAutoButton disabled={disableInput} />
             </div>
           )}
-          <div className="w-full hidden lg:flex">
+          {/* <div className="w-full hidden lg:flex">
             <BetSetting
               betSetting={betSetting}
               setBetSetting={setBetSetting}
               disabled={disableInput}
             />
-          </div>
+          </div> */}
 
           <div className="w-full flex flex-col nobar">
             <FormProvider {...methods}>
@@ -449,17 +449,17 @@ export default function Flip() {
                     betAmt={betAmt}
                     // onClickFunction={onSubmit}
                   >
-                    {loading ? <Loader /> : "BET"}
+                    {loading ? <Loader /> : "FLIP"}
                   </BetButton>
                 </div>
               </form>
             </FormProvider>
-            <div className="w-full flex lg:hidden">
+            {/* <div className="w-full flex lg:hidden">
               <BetSetting
                 betSetting={betSetting}
                 setBetSetting={setBetSetting}
               />
-            </div>
+            </div> */}
           </div>
         </>
       </GameOptions>
@@ -470,10 +470,10 @@ export default function Flip() {
               {flipping
                 ? `${translator("Flipping", language)}...`
                 : result
-                ? result === "Won"
-                  ? translator("You Won!", language)
-                  : translator("You Lost!", language)
-                : ""}
+                  ? result === "Won"
+                    ? translator("You Won!", language)
+                    : translator("You Lost!", language)
+                  : ""}
             </span>
             <div className="flex items-center gap-2">
               {betResults.map((result, index) => (
@@ -521,16 +521,16 @@ export default function Flip() {
                 betType && loading
                   ? "translateZ1"
                   : result
-                  ? result === "Won"
-                    ? betType === "Tails"
+                    ? result === "Won"
+                      ? betType === "Tails"
+                        ? "z-[100]"
+                        : "z-[10]"
+                      : betType === "Tails"
+                        ? "z-[10]"
+                        : "z-[100]"
+                    : betType === "Tails"
                       ? "z-[100]"
                       : "z-[10]"
-                    : betType === "Tails"
-                    ? "z-[10]"
-                    : "z-[100]"
-                  : betType === "Tails"
-                  ? "z-[100]"
-                  : "z-[10]"
               }`}
             />
             <Image
@@ -543,16 +543,16 @@ export default function Flip() {
                 betType && loading
                   ? "z-[10]"
                   : result
-                  ? result === "Won"
-                    ? betType === "Heads"
-                      ? "z-[100]"
-                      : "z-[1]"
+                    ? result === "Won"
+                      ? betType === "Heads"
+                        ? "z-[100]"
+                        : "z-[1]"
+                      : betType === "Heads"
+                        ? "z-[1]"
+                        : "z-[100]"
                     : betType === "Heads"
-                    ? "z-[1]"
-                    : "z-[100]"
-                  : betType === "Heads"
-                  ? "z-[100]"
-                  : "z-[10]"
+                      ? "z-[100]"
+                      : "z-[10]"
               }`}
             />
           </div>

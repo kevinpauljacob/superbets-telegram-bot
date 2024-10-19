@@ -266,42 +266,42 @@ export const OpenSidebar = ({
   }, [language]);
 
   const [casinoGames, setCasinoGames] = useState<Game[]>([
-    {
-      src: "",
-      token: "Dice",
-      link: "/dice",
-      active: false,
-    },
-    {
-      src: "",
-      token: "Dice 2",
-      link: "/dice2",
-      active: false,
-    },
+    // {
+    //   src: "",
+    //   token: "Dice",
+    //   link: "/dice",
+    //   active: false,
+    // },
+    // {
+    //   src: "",
+    //   token: "Dice 2",
+    //   link: "/dice2",
+    //   active: false,
+    // },
     {
       src: "",
       token: "Coin Flip",
       link: "/coinflip",
       active: false,
     },
-    {
-      src: "",
-      token: "Options",
-      link: "/options",
-      active: false,
-    },
-    {
-      src: "",
-      token: "Limbo",
-      link: "/limbo",
-      active: false,
-    },
-    {
-      src: "",
-      token: "Keno",
-      link: "/keno",
-      active: false,
-    },
+    // {
+    //   src: "",
+    //   token: "Options",
+    //   link: "/options",
+    //   active: false,
+    // },
+    // {
+    //   src: "",
+    //   token: "Limbo",
+    //   link: "/limbo",
+    //   active: false,
+    // },
+    // {
+    //   src: "",
+    //   token: "Keno",
+    //   link: "/keno",
+    //   active: false,
+    // },
     {
       src: "",
       token: "Wheel",
@@ -314,18 +314,18 @@ export const OpenSidebar = ({
       link: "/mines",
       active: false,
     },
-    {
-      src: "",
-      token: "Plinko",
-      link: "/plinko",
-      active: false,
-    },
-    {
-      src: "",
-      token: "Roulette",
-      link: "/roulette",
-      active: false,
-    },
+    // {
+    //   src: "",
+    //   token: "Plinko",
+    //   link: "/plinko",
+    //   active: false,
+    // },
+    // {
+    //   src: "",
+    //   token: "Roulette",
+    //   link: "/roulette",
+    //   active: false,
+    // },
   ]);
   const [langSelect, setLangSelect] = useState(false);
   const toggleCasinoToken: ToggleGameToken = (index) => {

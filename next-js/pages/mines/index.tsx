@@ -210,7 +210,7 @@ export default function Mines() {
         setPendingRequests([]);
       }
     } catch (error) {
-      console.error("Error occurred while betting:", error);
+      console.error("Error occurred while revealing the tile:", error);
     } finally {
       setBetActive(false);
     }
@@ -361,7 +361,7 @@ export default function Mines() {
         setIsRolling(false);
       }
       errorCustom(translator(error.message, language));
-      console.error("Error occurred while betting:", error);
+      console.error("Error occurred while revealing the tile:", error);
     }
   };
 
@@ -532,7 +532,7 @@ export default function Mines() {
       );
       setIsRolling(false);
       setStartAuto(false);
-      console.error("Error occurred while betting:", error);
+      console.error("Error occurred while revealing the tile:", error);
     } finally {
       setIsRolling(false);
       setBetActive(false);
@@ -603,7 +603,7 @@ export default function Mines() {
       setIsRolling(false);
       setAutoBetCount(0);
       setStartAuto(false);
-      console.error("Error occurred while betting:", error);
+      console.error("Error occurred while revealing the tile:", error);
     } finally {
       setIsRolling(false);
     }
@@ -741,9 +741,9 @@ export default function Mines() {
             (autoWinChangeReset || autoLossChangeReset
               ? betAmt
               : autoBetCount === "inf"
-              ? Math.max(0, betAmt)
-              : betAmt *
-                (autoLossChange !== null ? autoLossChange / 100.0 : 0));
+                ? Math.max(0, betAmt)
+                : betAmt *
+                  (autoLossChange !== null ? autoLossChange / 100.0 : 0));
       }
       if (
         useAutoConfig &&
@@ -871,7 +871,7 @@ export default function Mines() {
                 }
                 onClickFunction={betType === "auto" ? onSubmit : handleBet}
               >
-                {isRolling ? <Loader /> : "BET"}
+                {isRolling ? <Loader /> : "REVEAL"}
               </BetButton>
             )}
             {betActive && betType === "manual" && (
@@ -895,13 +895,13 @@ export default function Mines() {
               <ConfigureAutoButton disabled={disableInput} />
             </div>
           )}
-          <div className="w-full hidden lg:flex">
+          {/* <div className="w-full hidden lg:flex">
             <BetSetting
               betSetting={betType}
               setBetSetting={setBetType}
               disabled={disableInput}
             />
-          </div>
+          </div> */}
           <div className="w-full flex flex-col nobar">
             <FormProvider {...methods}>
               <form
@@ -1139,7 +1139,7 @@ export default function Mines() {
                         betType === "auto" ? onSubmit : handleBet
                       }
                     >
-                      {isRolling ? <Loader /> : "BET"}
+                      {isRolling ? <Loader /> : "REVEAL"}
                     </BetButton>
                   )}
                   {betActive && betType === "manual" && (
@@ -1160,13 +1160,13 @@ export default function Mines() {
                 </div>
               </form>
             </FormProvider>
-            <div className="w-full flex lg:hidden">
+            {/* <div className="w-full flex lg:hidden">
               <BetSetting
                 betSetting={betType}
                 setBetSetting={setBetType}
                 disabled={disableInput}
               />
-            </div>
+            </div> */}
           </div>
         </>
       </GameOptions>
@@ -1175,7 +1175,7 @@ export default function Mines() {
           <div>
             {isRolling ? (
               <div className="font-chakra text-xs sm:text-sm font-medium text-white text-opacity-75">
-                {translator("Betting", language)}...
+                {translator("Revealing", language)}...
               </div>
             ) : null}
           </div>
@@ -1226,26 +1226,26 @@ export default function Mines() {
                         userBets[index - 1].pick === true
                         ? "border-[#FCB10F] bg-[#FCB10F33]"
                         : userBets[index - 1].result === "Lost" &&
-                          userBets[index - 1].pick === true
-                        ? "border-[#FCB10F] bg-[#FCB10F33]"
-                        : userBets[index - 1].result === "Lost" &&
-                          userBets[index - 1].pick === true
-                        ? "border-[#F1323E] bg-[#F1323E33]"
-                        : gameStatus === "Completed"
-                        ? "bg-transparent border-white/10"
-                        : "bg-[#202329] border-[#202329] hover:border-white/30"
+                            userBets[index - 1].pick === true
+                          ? "border-[#FCB10F] bg-[#FCB10F33]"
+                          : userBets[index - 1].result === "Lost" &&
+                              userBets[index - 1].pick === true
+                            ? "border-[#F1323E] bg-[#F1323E33]"
+                            : gameStatus === "Completed"
+                              ? "bg-transparent border-white/10"
+                              : "bg-[#202329] border-[#202329] hover:border-white/30"
                       : betType === "auto"
-                      ? userBets[index - 1].result === "" &&
-                        userBets[index - 1].pick === true
-                        ? "border-[#FCB10F] bg-[#FCB10F33]"
-                        : userBets[index - 1].result === "Won" &&
+                        ? userBets[index - 1].result === "" &&
                           userBets[index - 1].pick === true
-                        ? "border-[#FCB10F] bg-[#FCB10F33]"
-                        : userBets[index - 1].result === "Lost" &&
-                          userBets[index - 1].pick === true
-                        ? "border-[#F1323E] bg-[#F1323E33]"
-                        : "bg-[#202329] border-[#202329] hover:border-white/30"
-                      : null
+                          ? "border-[#FCB10F] bg-[#FCB10F33]"
+                          : userBets[index - 1].result === "Won" &&
+                              userBets[index - 1].pick === true
+                            ? "border-[#FCB10F] bg-[#FCB10F33]"
+                            : userBets[index - 1].result === "Lost" &&
+                                userBets[index - 1].pick === true
+                              ? "border-[#F1323E] bg-[#F1323E33]"
+                              : "bg-[#202329] border-[#202329] hover:border-white/30"
+                        : null
                   } ${
                     pendingRequests.includes(index) ? "blink_tile" : ""
                   } flex items-center active:scale-90 justify-center cursor-pointer rounded-md text-center transition duration-150 ease-in-out w-[50px] h-[50px] sm:w-[55px] sm:h-[55px] md:w-[80px] md:h-[80px] xl:w-[90px] xl:h-[90px]`}
@@ -1254,11 +1254,11 @@ export default function Mines() {
                     betType === "auto"
                       ? !startAuto && handleAutoPick(index)
                       : betActive && betType === "manual"
-                      ? setPendingRequests((prevRequests) => [
-                          ...prevRequests,
-                          index,
-                        ])
-                      : null
+                        ? setPendingRequests((prevRequests) => [
+                            ...prevRequests,
+                            index,
+                          ])
+                        : null
                   }
                 >
                   {betType === "manual" &&

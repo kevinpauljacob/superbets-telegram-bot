@@ -21,6 +21,7 @@
     "@solana/wallet-adapter-react-ui": "^0.9.34",
     "@solana/wallet-adapter-wallets": "^0.19.23",
     "@solana/web3.js": "^1.87.6",
+    "@twa-dev/sdk": "^7.10.1",
     "@types/matter-js": "^0.19.6",
     "@types/uuid": "^9.0.8",
     "@upstash/ratelimit": "^2.0.1",

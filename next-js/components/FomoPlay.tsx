@@ -9,30 +9,30 @@ import Store from "@/public/assets/sidebar-icons/Store";
 
 export default function FomoPlay() {
   const games = [
-    {
-      href: "/dice",
-      src: "/assets/game-cards/dice.png",
-    },
-    {
-      href: "/dice2",
-      src: "/assets/game-cards/dice2.png",
-    },
+    // {
+    //   href: "/dice",
+    //   src: "/assets/game-cards/dice.png",
+    // },
+    // {
+    //   href: "/dice2",
+    //   src: "/assets/game-cards/dice2.png",
+    // },
     {
       href: "/coinflip",
       src: "/assets/game-cards/coinflip.png",
     },
-    {
-      href: "/options",
-      src: "/assets/game-cards/options.png",
-    },
-    {
-      href: "/limbo",
-      src: "/assets/game-cards/limbo.png",
-    },
-    {
-      href: "/keno",
-      src: "/assets/game-cards/keno.png",
-    },
+    // {
+    //   href: "/options",
+    //   src: "/assets/game-cards/options.png",
+    // },
+    // {
+    //   href: "/limbo",
+    //   src: "/assets/game-cards/limbo.png",
+    // },
+    // {
+    //   href: "/keno",
+    //   src: "/assets/game-cards/keno.png",
+    // },
     {
       href: "/wheel",
       src: "/assets/game-cards/wheel.png",
@@ -41,14 +41,14 @@ export default function FomoPlay() {
       href: "/mines",
       src: "/assets/game-cards/mines.png",
     },
-    {
-      href: "/plinko",
-      src: "/assets/game-cards/plinko.png",
-    },
-    {
-      href: "/roulette",
-      src: "/assets/game-cards/roulette.png",
-    },
+    // {
+    //   href: "/plinko",
+    //   src: "/assets/game-cards/plinko.png",
+    // },
+    // {
+    //   href: "/roulette",
+    //   src: "/assets/game-cards/roulette.png",
+    // },
     // {
     //   href: "/roulette2",
     //   src: "/assets/game-cards/roulette.png",
@@ -79,9 +79,7 @@ export default function FomoPlay() {
         <div className="flex items-center">
           <Store className="w-5 h-5" />
           <span className="font-medium font-changa text-xl text-opacity-90 pl-3">
-            <span className="inline text-white">
-              SuperBets Games
-            </span>
+            <span className="inline text-white">SuperBets Games</span>
           </span>
         </div>
         <div className="">
